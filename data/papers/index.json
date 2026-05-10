@@ -1,0 +1,15 @@
+[
+  {
+    "id": "example_momentum_2015",
+    "title": "Momentum Strategies in Futures Markets",
+    "authors": ["A. Researcher", "B. Coauthor"],
+    "abstract": "We study time-series momentum across 58 futures contracts...",
+    "published_date": "2015-06-15",
+    "status": "unread",
+    "key_ideas": [],
+    "extracted_factor_ids": [],
+    "file_path": "pdfs/example_momentum_2015.pdf",
+    "url": null,
+    "metadata": {}
+  }
+]

@@ -1,0 +1,9 @@
+# .gitignore
+*.csv
+ticker_data/
+binSamples/
+fillSamples/
+AAPL_2025-10-01_2025-10-01_1/
+__pycache__/
+*.pyc
+.env
