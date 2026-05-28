@@ -11,5 +11,83 @@
     "file_path": "pdfs/example_momentum_2015.pdf",
     "url": null,
     "metadata": {}
+  },
+  {
+    "id": "twenty_for_twenty",
+    "title": "20 for Twenty",
+    "authors": ["AQR Capital Management"],
+    "abstract": "Twenty essays surveying systematic investment ideas across factor investing, asset pricing anomalies, market efficiency, and portfolio construction.",
+    "published_date": "2020-01-01",
+    "status": "unread",
+    "key_ideas": [],
+    "extracted_factor_ids": [],
+    "file_path": "pdfs/20 for Twenty.pdf",
+    "url": null,
+    "metadata": {"topic": "factor_investing_survey"}
+  },
+  {
+    "id": "order_book_price_impact",
+    "title": "Order Book Price Impact",
+    "authors": [],
+    "abstract": "Empirical study of how trades and order-flow imbalance move limit-order-book mid-prices, with implications for short-horizon predictive signals.",
+    "published_date": "2014-01-01",
+    "status": "unread",
+    "key_ideas": [],
+    "extracted_factor_ids": [],
+    "file_path": "pdfs/Order Book Price Impact.pdf",
+    "url": null,
+    "metadata": {"topic": "microstructure"}
+  },
+  {
+    "id": "stochastic_order_book_modelling",
+    "title": "A Stochastic Model for Order Book Dynamics",
+    "authors": [],
+    "abstract": "Continuous-time stochastic model of the limit order book; derives mid-price dynamics from queue sizes and order arrival intensities.",
+    "published_date": "2010-01-01",
+    "status": "unread",
+    "key_ideas": [],
+    "extracted_factor_ids": [],
+    "file_path": "pdfs/Stochstic Model for order book modelling.pdf",
+    "url": null,
+    "metadata": {"topic": "microstructure"}
+  },
+  {
+    "id": "volatility_is_rough",
+    "title": "Volatility is Rough",
+    "authors": ["Jim Gatheral", "Thibault Jaisson", "Mathieu Rosenbaum"],
+    "abstract": "Empirical evidence that log-volatility behaves like fractional Brownian motion with Hurst exponent H well below 1/2, motivating rough volatility models.",
+    "published_date": "2014-10-30",
+    "status": "unread",
+    "key_ideas": [],
+    "extracted_factor_ids": [],
+    "file_path": "pdfs/Volatility is Rough.pdf",
+    "url": null,
+    "metadata": {"topic": "volatility"}
+  },
+  {
+    "id": "jump_process_modelling",
+    "title": "Jump Process Modelling in Finance",
+    "authors": [],
+    "abstract": "Survey of jump-diffusion and pure-jump models for asset prices, including estimation and signal extraction from jump arrivals.",
+    "published_date": "2012-01-01",
+    "status": "unread",
+    "key_ideas": [],
+    "extracted_factor_ids": [],
+    "file_path": "pdfs/jump process modelling.pdf",
+    "url": null,
+    "metadata": {"topic": "jump_processes"}
+  },
+  {
+    "id": "rough_paths_finance",
+    "title": "Rough Paths in Finance",
+    "authors": [],
+    "abstract": "Application of rough path theory and signature methods to financial time-series modelling and feature engineering.",
+    "published_date": "2018-01-01",
+    "status": "unread",
+    "key_ideas": [],
+    "extracted_factor_ids": [],
+    "file_path": "pdfs/rough_paths_finance.pdf",
+    "url": null,
+    "metadata": {"topic": "rough_paths_signatures"}
   }
 ]

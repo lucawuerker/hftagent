@@ -6,6 +6,7 @@
       "class_name": "Alpha001",
       "description": "Ts_ArgMax of signed-power transformed input: uses trailing 20-day return volatility when returns are negative, close price otherwise.  Mean-reversion signal betting on extremes reverting.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "mean_reversion",
       "status": "backtested",
@@ -53,6 +54,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:29:54.161679",
       "metadata": {}
     },
@@ -62,6 +66,7 @@
       "class_name": "Alpha002",
       "description": "Negative 6-day rolling correlation between ranked 2-day log-volume change and ranked intraday return.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "statistical_arbitrage",
       "status": "backtested",
@@ -109,6 +114,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:29:54.920300",
       "metadata": {}
     },
@@ -118,6 +126,7 @@
       "class_name": "Alpha003",
       "description": "Negative 10-day rolling correlation between cross-sectionally ranked open price and ranked volume.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "statistical_arbitrage",
       "status": "backtested",
@@ -165,6 +174,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:29:55.777075",
       "metadata": {}
     },
@@ -174,6 +186,7 @@
       "class_name": "Alpha004",
       "description": "Negative time-series rank of cross-sectionally ranked lows over 9 days.  Bets that stocks at persistent relative lows will revert upward.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "mean_reversion",
       "status": "backtested",
@@ -221,6 +234,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:30:49.759553",
       "metadata": {}
     },
@@ -230,6 +246,7 @@
       "class_name": "Alpha005",
       "description": "Interaction between open-price deviation from 10-day VWAP mean and close-to-VWAP rank.  Captures mean-reversion around the volume-weighted fair value.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "mean_reversion",
       "status": "backtested",
@@ -277,6 +294,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:30:50.561705",
       "metadata": {}
     },
@@ -286,6 +306,7 @@
       "class_name": "Alpha006",
       "description": "Negative 10-day rolling correlation between raw open price and raw volume.  Exploits breakdown of the open-volume relationship.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "statistical_arbitrage",
       "status": "backtested",
@@ -333,6 +354,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:30:51.367990",
       "metadata": {}
     },
@@ -342,6 +366,7 @@
       "class_name": "Alpha007",
       "description": "On high-volume days (volume > 20-day ADV), returns the signed 60-day time-series rank of the 7-day close delta magnitude.  Momentum signal conditioned on unusual activity.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "momentum",
       "status": "backtested",
@@ -389,6 +414,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:31:19.766998",
       "metadata": {}
     },
@@ -398,6 +426,7 @@
       "class_name": "Alpha008",
       "description": "Negative rank of the 10-day change in the product of 5-day cumulative open and 5-day cumulative returns.  Captures momentum shocks in the open-return interaction.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "momentum",
       "status": "backtested",
@@ -445,6 +474,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:31:20.507930",
       "metadata": {}
     },
@@ -454,6 +486,7 @@
       "class_name": "Alpha009",
       "description": "If the 5-day minimum of daily close changes is positive (sustained uptrend) or the 5-day maximum is negative (sustained downtrend), follow the trend; otherwise, fade it.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "momentum",
       "status": "backtested",
@@ -501,6 +534,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:31:21.265997",
       "metadata": {}
     },
@@ -510,6 +546,7 @@
       "class_name": "Alpha010",
       "description": "Cross-sectional rank of a regime-conditioned 1-day close delta using a 4-day min/max filter.  Ranked variant of Alpha#9 with a shorter lookback.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "momentum",
       "status": "backtested",
@@ -557,6 +594,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:31:22.082619",
       "metadata": {}
     },
@@ -566,6 +606,7 @@
       "class_name": "Alpha011",
       "description": "Interaction of the 3-day max and min of (VWAP \u2212 close) with ranked 3-day volume change.  Captures mean-reversion around VWAP amplified by volume acceleration.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "mean_reversion",
       "status": "backtested",
@@ -613,6 +654,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:31:23.011696",
       "metadata": {}
     },
@@ -622,6 +666,7 @@
       "class_name": "Alpha012",
       "description": "Contrarian signal: fades the 1-day close change when volume rises, follows it when volume drops.  Volume-confirmed short-term reversal / continuation filter.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "momentum",
       "status": "backtested",
@@ -669,6 +714,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:31:23.691606",
       "metadata": {}
     },
@@ -678,6 +726,7 @@
       "class_name": "Alpha013",
       "description": "Negative ranked 5-day covariance of cross-sectionally ranked close and ranked volume.  Exploits breakdown in the price-volume co-movement structure.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "statistical_arbitrage",
       "status": "backtested",
@@ -725,6 +774,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:31:24.581241",
       "metadata": {}
     },
@@ -734,6 +786,7 @@
       "class_name": "Alpha014",
       "description": "Negative ranked 3-day return acceleration scaled by the 10-day open-volume correlation.  Momentum signal weighted by the strength of the open-volume relationship.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "momentum",
       "status": "backtested",
@@ -781,6 +834,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:31:25.790357",
       "metadata": {}
     },
@@ -790,6 +846,7 @@
       "class_name": "Alpha015",
       "description": "Negative 3-day sum of ranked 3-day correlation between ranked highs and ranked volume.  Smoothed measure of high-volume co-movement breakdown.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "statistical_arbitrage",
       "status": "backtested",
@@ -837,6 +894,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:31:26.790733",
       "metadata": {}
     },
@@ -846,6 +906,7 @@
       "class_name": "Alpha016",
       "description": "Negative ranked 5-day covariance of cross-sectionally ranked highs and ranked volume.  Similar structure to Alpha#13 but uses high instead of close.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "statistical_arbitrage",
       "status": "backtested",
@@ -893,6 +954,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:31:27.689496",
       "metadata": {}
     },
@@ -902,6 +966,7 @@
       "class_name": "Alpha017",
       "description": "Three-way interaction: negative ranked 10-day close ts-rank, ranked 1-day close acceleration, and ranked relative volume ts-rank.  Captures momentum reversals amplified by unusual volume.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "momentum",
       "status": "backtested",
@@ -949,6 +1014,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:32:59.808205",
       "metadata": {}
     },
@@ -958,6 +1026,7 @@
       "class_name": "Alpha018",
       "description": "Negative ranked composite of 5-day intraday-range volatility, current intraday return, and 10-day close-open correlation.  Fades stocks with elevated intraday dislocations.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "mean_reversion",
       "status": "backtested",
@@ -1005,6 +1074,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:33:00.696757",
       "metadata": {}
     },
@@ -1014,6 +1086,7 @@
       "class_name": "Alpha019",
       "description": "Contrarian 7-day price direction scaled by ranked 250-day cumulative return.  Fades the weekly move, but more aggressively for stocks with strong annual momentum.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "momentum",
       "status": "backtested",
@@ -1061,6 +1134,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:33:01.286321",
       "metadata": {}
     },
@@ -1070,6 +1146,7 @@
       "class_name": "Alpha020",
       "description": "Three-way interaction of ranked gap components: open vs prior high, close, and low.  Captures overnight gap mean-reversion pressure.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "mean_reversion",
       "status": "backtested",
@@ -1117,6 +1194,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:33:02.128630",
       "metadata": {}
     },
@@ -1126,6 +1206,7 @@
       "class_name": "Alpha021",
       "description": "Bollinger-band regime switch: short when 2-day close mean exceeds the 8-day upper band, long when below the lower band, else follow relative volume direction.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "volatility",
       "status": "backtested",
@@ -1173,6 +1254,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:33:02.874857",
       "metadata": {}
     },
@@ -1182,6 +1266,7 @@
       "class_name": "Alpha022",
       "description": "Negative product of the 5-day change in high-volume correlation and ranked 20-day close volatility.  Captures shifts in the high-volume relationship weighted by volatility.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "statistical_arbitrage",
       "status": "backtested",
@@ -1229,6 +1314,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:33:03.713379",
       "metadata": {}
     },
@@ -1238,6 +1326,7 @@
       "class_name": "Alpha023",
       "description": "When the current high exceeds the 20-day average high (breakout), fade by returning the negative 2-day high change.  Zero otherwise.  Pure breakout mean-reversion.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "mean_reversion",
       "status": "backtested",
@@ -1285,6 +1374,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:33:04.315231",
       "metadata": {}
     },
@@ -1294,6 +1386,7 @@
       "class_name": "Alpha024",
       "description": "Long-horizon regime switch: when the 100-day moving-average drift is small (<=5%% of lagged close), short the gap from 100-day low; otherwise short the 3-day close delta.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "momentum",
       "status": "backtested",
@@ -1341,6 +1434,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:33:05.044282",
       "metadata": {}
     },
@@ -1350,6 +1446,7 @@
       "class_name": "Alpha025",
       "description": "Cross-sectional rank of the product of negative returns, 20-day average volume, VWAP, and the high-close spread.  Captures momentum weighted by liquidity and intraday range.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "momentum",
       "status": "backtested",
@@ -1397,6 +1494,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:33:05.740304",
       "metadata": {}
     },
@@ -1406,6 +1506,7 @@
       "class_name": "Alpha026",
       "description": "Negative 3-day max of the 5-day correlation between time-series ranked volume and time-series ranked high.  Fades peak volume-high co-movement.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "statistical_arbitrage",
       "status": "backtested",
@@ -1453,6 +1554,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:35:09.185045",
       "metadata": {}
     },
@@ -1462,6 +1566,7 @@
       "class_name": "Alpha027",
       "description": "Binary signal based on the ranked 2-day average of the 6-day correlation between ranked volume and ranked VWAP.  Short when the correlation rank is high, long otherwise.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "microstructure",
       "status": "backtested",
@@ -1509,6 +1614,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:35:10.121743",
       "metadata": {}
     },
@@ -1518,6 +1626,7 @@
       "class_name": "Alpha028",
       "description": "Row-normalised composite of ADV20-low correlation, midprice, and close.  Captures deviations of the close from the liquidity-adjusted midprice.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "microstructure",
       "status": "backtested",
@@ -1565,6 +1674,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:35:10.861551",
       "metadata": {}
     },
@@ -1574,6 +1686,7 @@
       "class_name": "Alpha029",
       "description": "Complex nested signal combining a scaled log-transform of deeply ranked close-level changes with a 5-day time-series rank of 6-day-lagged negative returns.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "momentum",
       "status": "backtested",
@@ -1621,6 +1734,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:36:10.687512",
       "metadata": {}
     },
@@ -1630,6 +1746,7 @@
       "class_name": "Alpha030",
       "description": "Contrarian 3-day consecutive-direction score (ranked and inverted), scaled by the 5-day vs 20-day volume ratio.  Fades sustained directional moves when recent volume is elevated relative to the longer window.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "momentum",
       "status": "backtested",
@@ -1677,6 +1794,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:36:11.466677",
       "metadata": {}
     },
@@ -1686,6 +1806,7 @@
       "class_name": "Alpha031",
       "description": "Three-term composite: triply-ranked decay-linear of the 10-day close delta, ranked 3-day close reversal, and the sign of scaled ADV20-low correlation.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "momentum",
       "status": "backtested",
@@ -1733,6 +1854,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:36:13.219262",
       "metadata": {}
     },
@@ -1742,6 +1866,7 @@
       "class_name": "Alpha032",
       "description": "Scaled 7-day MA deviation from close (short-term reversion) plus 20x-scaled 230-day correlation of VWAP with the 5-day lagged close (long-horizon fair-value anchor).",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "mean_reversion",
       "status": "backtested",
@@ -1789,6 +1914,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:36:13.937410",
       "metadata": {}
     },
@@ -1798,6 +1926,7 @@
       "class_name": "Alpha033",
       "description": "Cross-sectional rank of the intraday return (open/close - 1). Simplifies to rank((open/close) - 1).  Bets on reversion of the intraday gap.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "mean_reversion",
       "status": "backtested",
@@ -1845,6 +1974,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:36:14.640529",
       "metadata": {}
     },
@@ -1854,6 +1986,7 @@
       "class_name": "Alpha034",
       "description": "Composite of inverted short-to-medium volatility ratio (2-day vs 5-day return stddev) and inverted ranked 1-day close change.  Favours stocks where short-term vol is low relative to medium-term vol and recent price change is small.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "volatility",
       "status": "backtested",
@@ -1901,6 +2034,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:36:15.546622",
       "metadata": {}
     },
@@ -1910,6 +2046,7 @@
       "class_name": "Alpha035",
       "description": "Three-way interaction of time-series ranks: volume rank (32-day), inverted range rank (16-day), and inverted return rank (32-day).  Favours high-volume, low-range, low-return regimes.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "statistical_arbitrage",
       "status": "backtested",
@@ -1957,6 +2094,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:38:12.904921",
       "metadata": {}
     },
@@ -1966,6 +2106,7 @@
       "class_name": "Alpha036",
       "description": "Five-term weighted composite: 15-day gap-volume correlation, ranked intraday gap, lagged-return ts-rank, absolute VWAP-ADV20 correlation, and long-term MA deviation \u00d7 gap.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "statistical_arbitrage",
       "status": "backtested",
@@ -2013,6 +2154,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:39:14.055619",
       "metadata": {}
     },
@@ -2022,6 +2166,7 @@
       "class_name": "Alpha037",
       "description": "Ranked 200-day correlation between the lagged intraday gap and close, plus ranked current gap.  Long-horizon structural relationship between overnight gap persistence and price.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "statistical_arbitrage",
       "status": "backtested",
@@ -2069,6 +2214,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:39:14.824627",
       "metadata": {}
     },
@@ -2078,6 +2226,7 @@
       "class_name": "Alpha038",
       "description": "Negative ranked 10-day time-series rank of close multiplied by ranked intraday return (close/open).  Fades stocks that are both at local highs and had a strong intraday move.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "momentum",
       "status": "backtested",
@@ -2125,6 +2274,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:40:07.510337",
       "metadata": {}
     },
@@ -2134,6 +2286,7 @@
       "class_name": "Alpha039",
       "description": "Negative ranked 7-day close delta adjusted by decay-linear-smoothed relative volume, scaled by ranked 250-day cumulative return.  Contrarian short-term signal amplified by long-term momentum.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "momentum",
       "status": "backtested",
@@ -2181,6 +2334,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:40:08.803152",
       "metadata": {}
     },
@@ -2190,6 +2346,7 @@
       "class_name": "Alpha040",
       "description": "Negative ranked 10-day high volatility multiplied by the 10-day high-volume correlation.  Short stocks with high volatility in highs when that volatility co-moves with volume.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "volatility",
       "status": "backtested",
@@ -2237,6 +2394,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:40:09.665382",
       "metadata": {}
     },
@@ -2246,6 +2406,7 @@
       "class_name": "Alpha041",
       "description": "Geometric midprice (sqrt(high*low)) minus VWAP.  Captures deviation between the range-based fair value and the volume-weighted fair value.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "mean_reversion",
       "status": "backtested",
@@ -2293,6 +2454,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:40:10.285773",
       "metadata": {}
     },
@@ -2302,6 +2466,7 @@
       "class_name": "Alpha042",
       "description": "Ratio of ranked VWAP-close spread to ranked VWAP+close sum.  Positive when close is cheap relative to VWAP in cross-section.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "mean_reversion",
       "status": "backtested",
@@ -2349,6 +2514,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:40:11.002677",
       "metadata": {}
     },
@@ -2358,6 +2526,7 @@
       "class_name": "Alpha043",
       "description": "Product of 20-day relative-volume ts-rank and 8-day ts-rank of negative 7-day close change.  Favours high-relative-volume stocks with recent price declines (contrarian with volume confirmation).",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "momentum",
       "status": "backtested",
@@ -2405,6 +2574,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:41:31.960061",
       "metadata": {}
     },
@@ -2414,6 +2586,7 @@
       "class_name": "Alpha044",
       "description": "Negative 5-day correlation between high price and cross-sectionally ranked volume.  Fades stocks where highs and relative volume are tightly co-moving.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "statistical_arbitrage",
       "status": "backtested",
@@ -2461,6 +2634,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:41:32.803255",
       "metadata": {}
     },
@@ -2470,6 +2646,7 @@
       "class_name": "Alpha045",
       "description": "Negative product of ranked 20-day mean of 5-day-lagged close, 2-day close-volume correlation, and ranked 2-day correlation between short (5-day) and medium (20-day) close sums.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "statistical_arbitrage",
       "status": "backtested",
@@ -2517,6 +2694,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:41:33.871985",
       "metadata": {}
     },
@@ -2526,6 +2706,7 @@
       "class_name": "Alpha046",
       "description": "Price-acceleration regime switch: short when 10-day acceleration exceeds 0.25 (strong deceleration), long when negative (accelerating), otherwise short the daily close change.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "momentum",
       "status": "backtested",
@@ -2573,6 +2754,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:41:34.521779",
       "metadata": {}
     },
@@ -2582,6 +2766,7 @@
       "class_name": "Alpha047",
       "description": "Composite of inverse-price-weighted relative volume times the high-close deviation normalised by 5-day average high, minus ranked 5-day VWAP change.  Microstructure signal combining liquidity, range, and fair-value momentum.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "microstructure",
       "status": "backtested",
@@ -2629,6 +2814,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:41:35.351091",
       "metadata": {}
     },
@@ -2638,6 +2826,7 @@
       "class_name": "Alpha048",
       "description": "Industry-neutralized 250-day return-autocorrelation signal scaled by close, divided by 250-day sum of squared daily returns.  Requires subindustry classification in data['subindustry'].",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "statistical_arbitrage",
       "status": "backtested",
@@ -2685,6 +2874,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:41:36.102974",
       "metadata": {}
     },
@@ -2694,6 +2886,7 @@
       "class_name": "Alpha049",
       "description": "Price-acceleration regime: long when the 10-day acceleration is strongly negative (< -0.1, implying recent speed-up), otherwise short the 1-day close change.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "momentum",
       "status": "backtested",
@@ -2741,6 +2934,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:41:36.761259",
       "metadata": {}
     },
@@ -2750,6 +2946,7 @@
       "class_name": "Alpha050",
       "description": "Negative 5-day max of the ranked 5-day correlation between ranked volume and ranked VWAP.  Fades peak volume-VWAP co-movement.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "statistical_arbitrage",
       "status": "backtested",
@@ -2797,6 +2994,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:41:37.715015",
       "metadata": {}
     },
@@ -2806,6 +3006,7 @@
       "class_name": "Alpha051",
       "description": "Price-acceleration regime: long when 10-day acceleration is below -0.05 (recent speed-up), otherwise short the 1-day close change.  Tighter threshold variant of #49.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "momentum",
       "status": "backtested",
@@ -2853,6 +3054,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:41:38.374837",
       "metadata": {}
     },
@@ -2862,6 +3066,7 @@
       "class_name": "Alpha052",
       "description": "5-day low support change times ranked long-vs-short return differential (240-day minus 20-day) times 5-day volume ts-rank.  Momentum signal combining support-level shifts, trend, and volume.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "momentum",
       "status": "backtested",
@@ -2909,6 +3114,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:42:40.303195",
       "metadata": {}
     },
@@ -2918,6 +3126,7 @@
       "class_name": "Alpha053",
       "description": "Negative 9-day change in the Williams %R-style close location within the daily range.  Fades shifts in where the close sits inside the high-low range.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "mean_reversion",
       "status": "backtested",
@@ -2965,6 +3174,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:42:40.877186",
       "metadata": {}
     },
@@ -2974,6 +3186,7 @@
       "class_name": "Alpha054",
       "description": "Ratio of (close-low)*open^5 to (high-low)*close^5.  Nonlinear intraday range location signal weighted by the open/close price ratio to the 5th power.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "mean_reversion",
       "status": "backtested",
@@ -3021,6 +3234,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:42:41.600871",
       "metadata": {}
     },
@@ -3030,6 +3246,7 @@
       "class_name": "Alpha055",
       "description": "Negative 6-day correlation between ranked 12-day stochastic oscillator and ranked volume.  Fades stocks where the stochastic-volume relationship is strong.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "statistical_arbitrage",
       "status": "backtested",
@@ -3077,6 +3294,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:42:42.520549",
       "metadata": {}
     },
@@ -3086,6 +3306,7 @@
       "class_name": "Alpha056",
       "description": "Negative product of ranked smoothed-return ratio and ranked cap-weighted returns.  Requires data['cap'] (market cap); falls back to volume if absent.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "momentum",
       "status": "backtested",
@@ -3133,6 +3354,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:42:43.317771",
       "metadata": {}
     },
@@ -3142,6 +3366,7 @@
       "class_name": "Alpha057",
       "description": "Negative close-VWAP deviation scaled by decay-linear smoothed rank of the 30-day argmax of close.  Fades close-VWAP spread, more aggressively near recent highs.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "mean_reversion",
       "status": "backtested",
@@ -3189,6 +3414,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:42:45.345556",
       "metadata": {}
     },
@@ -3198,6 +3426,7 @@
       "class_name": "Alpha058",
       "description": "Negative ts-rank of decay-linear-smoothed correlation between sector-neutralized VWAP and volume.  Requires data['sector'].",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "statistical_arbitrage",
       "status": "backtested",
@@ -3245,6 +3474,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:43:17.484138",
       "metadata": {}
     },
@@ -3254,6 +3486,7 @@
       "class_name": "Alpha059",
       "description": "Negative ts-rank of decay-linear-smoothed correlation between industry-neutralized VWAP and volume.  Variant of Alpha#58 with industry-level neutralisation and longer smoothing.  Requires data['industry'].",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "statistical_arbitrage",
       "status": "backtested",
@@ -3301,6 +3534,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:43:42.654581",
       "metadata": {}
     },
@@ -3310,6 +3546,7 @@
       "class_name": "Alpha060",
       "description": "Negative composite of scaled ranked Chaikin-style money-flow volume and scaled ranked 10-day close argmax.  Captures volume-weighted close-location imbalance relative to the position of the recent high.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "microstructure",
       "status": "backtested",
@@ -3357,6 +3594,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:43:44.650764",
       "metadata": {}
     },
@@ -3366,6 +3606,7 @@
       "class_name": "Alpha061",
       "description": "Binary signal: 1 when ranked VWAP distance from 16-day low is less than ranked 18-day VWAP-ADV180 correlation, else 0.  Long when VWAP is near its floor relative to its volume co-movement.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "mean_reversion",
       "status": "backtested",
@@ -3413,6 +3654,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:43:45.434317",
       "metadata": {}
     },
@@ -3422,6 +3666,7 @@
       "class_name": "Alpha062",
       "description": "Negative binary signal comparing ranked VWAP-cumulative-ADV20 correlation with a ranked open vs midprice/high composite inequality.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "statistical_arbitrage",
       "status": "backtested",
@@ -3469,6 +3714,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:43:46.392577",
       "metadata": {}
     },
@@ -3478,6 +3726,7 @@
       "class_name": "Alpha064",
       "description": "Negative binary signal: ranked 17-day correlation of blended open-low sum with cumulative ADV120, compared against ranked 4-day change of a VWAP-midprice blend.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "microstructure",
       "status": "backtested",
@@ -3525,6 +3774,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:43:47.210463",
       "metadata": {}
     },
@@ -3534,6 +3786,7 @@
       "class_name": "Alpha065",
       "description": "Negative binary signal: ranked 6-day correlation of near-VWAP blend with cumulative ADV60, compared against ranked open distance from 14-day low.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "microstructure",
       "status": "backtested",
@@ -3581,6 +3834,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:43:48.040401",
       "metadata": {}
     },
@@ -3590,6 +3846,7 @@
       "class_name": "Alpha066",
       "description": "Negative sum of ranked decay-linear 4-day VWAP delta and ts-ranked decay-linear of low-VWAP deviation normalised by open-midprice spread.  Captures VWAP trend and low-side pressure.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "mean_reversion",
       "status": "backtested",
@@ -3637,6 +3894,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:43:49.653227",
       "metadata": {}
     },
@@ -3646,6 +3906,7 @@
       "class_name": "Alpha068",
       "description": "Negative binary signal: ts-ranked 9-day high-ADV15 correlation (14-day window) compared against ranked 1-day change of a close-low blend.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "momentum",
       "status": "backtested",
@@ -3693,6 +3954,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:44:20.632563",
       "metadata": {}
     },
@@ -3702,6 +3966,7 @@
       "class_name": "Alpha071",
       "description": "Max of two ts-ranked decay-linear signals: (1) correlation of close ts-rank with ADV180 ts-rank, and (2) squared ranked deviation of (low+open) from 2\u00d7VWAP.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "statistical_arbitrage",
       "status": "backtested",
@@ -3749,6 +4014,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:46:46.292519",
       "metadata": {}
     },
@@ -3758,6 +4026,7 @@
       "class_name": "Alpha072",
       "description": "Ratio of ranked decay-linear midprice-ADV40 correlation to ranked decay-linear VWAP-ts-rank / volume-ts-rank correlation.  Captures relative strength of midprice-liquidity vs VWAP-volume co-movement.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "statistical_arbitrage",
       "status": "backtested",
@@ -3805,6 +4074,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:48:34.233524",
       "metadata": {}
     },
@@ -3814,6 +4086,7 @@
       "class_name": "Alpha073",
       "description": "Negative max of ranked decay-linear 5-day VWAP delta and ts-ranked decay-linear of negative 2-day return on a low-weighted open-low blend.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "momentum",
       "status": "backtested",
@@ -3861,6 +4134,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:49:18.573433",
       "metadata": {}
     },
@@ -3870,6 +4146,7 @@
       "class_name": "Alpha074",
       "description": "Negative binary signal: ranked close vs cumulative-ADV30 correlation compared against ranked near-VWAP-blend vs volume-rank correlation.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "statistical_arbitrage",
       "status": "backtested",
@@ -3917,6 +4194,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:49:19.651924",
       "metadata": {}
     },
@@ -3926,6 +4206,7 @@
       "class_name": "Alpha075",
       "description": "Binary signal: 1 when ranked 4-day VWAP-volume correlation is below ranked 12-day low-rank vs ADV50-rank correlation.  Long when VWAP-volume linkage weakens relative to low-liquidity co-movement.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "statistical_arbitrage",
       "status": "backtested",
@@ -3973,6 +4254,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:49:20.664404",
       "metadata": {}
     },
@@ -3982,6 +4266,7 @@
       "class_name": "Alpha077",
       "description": "Min of ranked decay-linear midprice-VWAP deviation (simplifies to (low/2 - vwap/2)) and ranked decay-linear midprice-ADV40 correlation.  Captures the weaker of two fair-value reversion signals.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "mean_reversion",
       "status": "backtested",
@@ -4029,6 +4314,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:49:22.511457",
       "metadata": {}
     },
@@ -4038,6 +4326,7 @@
       "class_name": "Alpha078",
       "description": "Ranked 7-day correlation of 20-day cumulative low-VWAP blend with cumulative ADV40, raised to the power of ranked 6-day VWAP-rank vs volume-rank correlation.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "statistical_arbitrage",
       "status": "backtested",
@@ -4085,6 +4374,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:49:23.596817",
       "metadata": {}
     },
@@ -4094,6 +4386,7 @@
       "class_name": "Alpha081",
       "description": "Negative binary signal: ranked log of rolling product of 4th-power ranked VWAP-cumADV10 correlation, compared against ranked VWAP-rank vs volume-rank correlation.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "statistical_arbitrage",
       "status": "backtested",
@@ -4141,6 +4434,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:49:25.673327",
       "metadata": {}
     },
@@ -4150,6 +4446,7 @@
       "class_name": "Alpha083",
       "description": "Ranked 2-day lagged normalised range times doubly-ranked volume, divided by the current normalised range over the VWAP-close spread.  Captures range-volume dynamics relative to fair-value deviation.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "microstructure",
       "status": "backtested",
@@ -4197,6 +4494,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:49:26.524571",
       "metadata": {}
     },
@@ -4206,6 +4506,7 @@
       "class_name": "Alpha084",
       "description": "Signed power of 21-day ts-rank of VWAP distance from its 15-day max, with exponent equal to the 5-day close delta.  Nonlinear mean-reversion around the VWAP ceiling.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "mean_reversion",
       "status": "backtested",
@@ -4253,6 +4554,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:50:01.493772",
       "metadata": {}
     },
@@ -4262,6 +4566,7 @@
       "class_name": "Alpha085",
       "description": "Ranked 10-day high-close-blend vs ADV30 correlation, raised to the power of ranked midprice-ts-rank vs volume-ts-rank correlation.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "statistical_arbitrage",
       "status": "backtested",
@@ -4309,6 +4614,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:51:57.760833",
       "metadata": {}
     },
@@ -4318,6 +4626,7 @@
       "class_name": "Alpha086",
       "description": "Negative binary signal: ts-ranked close vs cumulative-ADV20 correlation (20-day) compared against ranked close-VWAP deviation.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "statistical_arbitrage",
       "status": "backtested",
@@ -4365,6 +4674,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:52:25.841685",
       "metadata": {}
     },
@@ -4374,6 +4686,7 @@
       "class_name": "Alpha088",
       "description": "Min of ranked decay-linear OHLC rank-balance (open+low ranks vs high+close ranks) and ts-ranked decay-linear close-ADV60 ts-rank correlation.  Picks the weaker of two reversion signals.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "mean_reversion",
       "status": "backtested",
@@ -4421,6 +4734,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:54:10.034796",
       "metadata": {}
     },
@@ -4430,6 +4746,7 @@
       "class_name": "Alpha092",
       "description": "Min of two ts-ranked decay-linear signals: (1) boolean midprice+close < low+open condition, and (2) ranked-low vs ranked-ADV30 correlation.  Picks the weaker reversion signal.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "mean_reversion",
       "status": "backtested",
@@ -4477,6 +4794,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:55:59.476187",
       "metadata": {}
     },
@@ -4486,6 +4806,7 @@
       "class_name": "Alpha094",
       "description": "Negative ranked VWAP distance from 12-day low raised to the power of ts-ranked VWAP-ts-rank vs ADV60-ts-rank correlation.  Mean-reversion around the VWAP floor.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "mean_reversion",
       "status": "backtested",
@@ -4533,6 +4854,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:57:33.500714",
       "metadata": {}
     },
@@ -4542,6 +4866,7 @@
       "class_name": "Alpha095",
       "description": "Binary signal: ranked open distance from 12-day low compared against ts-ranked 5th-power of ranked midprice-ADV40 cumulative correlation.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "momentum",
       "status": "backtested",
@@ -4589,6 +4914,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T14:57:58.950769",
       "metadata": {}
     },
@@ -4598,6 +4926,7 @@
       "class_name": "Alpha096",
       "description": "Negative max of two ts-ranked decay-linear signals: (1) VWAP-rank vs volume-rank correlation, and (2) argmax of close-ts-rank vs ADV60-ts-rank correlation.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "statistical_arbitrage",
       "status": "backtested",
@@ -4645,6 +4974,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T15:00:09.636205",
       "metadata": {}
     },
@@ -4654,6 +4986,7 @@
       "class_name": "Alpha098",
       "description": "Ranked decay-linear VWAP vs cumulative-ADV5 correlation minus ranked decay-linear of ts-ranked argmin of open-rank vs ADV15-rank correlation.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "statistical_arbitrage",
       "status": "backtested",
@@ -4701,6 +5034,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T15:00:40.631011",
       "metadata": {}
     },
@@ -4710,6 +5046,7 @@
       "class_name": "Alpha099",
       "description": "Negative binary signal: ranked 9-day correlation of cumulative midprice with cumulative ADV60, compared against ranked 6-day low-volume correlation.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "statistical_arbitrage",
       "status": "backtested",
@@ -4757,6 +5094,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T15:00:41.636976",
       "metadata": {}
     },
@@ -4766,6 +5106,7 @@
       "class_name": "Alpha101",
       "description": "Intraday return normalised by the daily range.  Measures where the close sits relative to the open as a fraction of the full high-low range.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "microstructure",
       "status": "backtested",
@@ -4813,6 +5154,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T15:00:42.271828",
       "metadata": {}
     },
@@ -4822,6 +5166,7 @@
       "class_name": "RSIMeanReversionSignal",
       "description": "Computes the 14-period RSI and maps it to a contrarian signal: +1 when RSI < oversold threshold (expect bounce), -1 when RSI > overbought threshold (expect pullback), 0 otherwise.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "mean_reversion",
       "status": "backtested",
@@ -4869,6 +5214,9 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T15:00:42.914084",
       "metadata": {}
     },
@@ -4878,6 +5226,7 @@
       "class_name": "ThreeSoldiersSignal",
       "description": "Detects the bullish three-white-soldiers candlestick pattern: three consecutive days where each candle opens within the prior body and closes at a new high.",
       "formula": "",
+      "trading_idea": "",
       "trading_idea_ids": [],
       "category": "momentum",
       "status": "backtested",
@@ -4925,8 +5274,77 @@
         }
       },
       "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
       "created_at": "2026-03-24T15:02:52.897303",
       "metadata": {}
+    },
+    {
+      "id": "midprice_momentum",
+      "name": "Midprice Momentum",
+      "class_name": "",
+      "description": "This factor computes the direction and strength of midprice momentum by calculating the percentage change in the midprice over a specified lookback period, providing a cross-sectional view of stock momentum.",
+      "formula": "",
+      "trading_idea": "Momentum strategies often capitalize on the tendency of assets to continue moving in the same direction. By analyzing the midprice movements over the last few bars, we can glean insights about the underlying momentum of a stock, as price changes tend to persist due to behavioral biases and market trends.",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.018463,
+        "ic_std": 0.292208,
+        "ic_ir": -0.063183,
+        "ic_hit_rate": 0.4746,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.017027,
+            "ic_std": 0.296122,
+            "ic_ir": -0.057498,
+            "ic_hit_rate": 0.4758,
+            "n_timestamps": 46830
+          },
+          "6": {
+            "ic": -0.018463,
+            "ic_std": 0.292208,
+            "ic_ir": -0.063183,
+            "ic_hit_rate": 0.4746,
+            "n_timestamps": 46825
+          },
+          "60": {
+            "ic": -0.006196,
+            "ic_std": 0.288411,
+            "ic_ir": -0.021484,
+            "ic_hit_rate": 0.4908,
+            "n_timestamps": 46771
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46825,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "twenty_for_twenty"
+      ],
+      "source": "researcher",
+      "research_session_id": "2026-05-12",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/midprice_momentum.py",
+      "created_at": "2026-05-12T15:03:02.594690",
+      "metadata": {
+        "ic_threshold": 0.01,
+        "ic_target_horizon": 6,
+        "ic_at_target": -0.018463
+      }
     }
   ],
   "trading_ideas": []

@@ -5,6 +5,11 @@ correlation matrix across all factors.  The ``class_name`` field on each
 record links to the concrete ``BaseFactor`` subclass in the factor
 registry, so the backtesting engine can instantiate the right
 implementation on demand.
+
+Factors carry a ``source`` tag (``SEED`` vs ``RESEARCHER``) so the
+simulation can start from a clean, deterministic baseline (seed factors
+only) and so factors invented by the Factor Researcher Agent can be
+filtered, audited, or purged in bulk.
 """
 
 from __future__ import annotations
@@ -14,7 +19,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from quant_fund_agent.schemas import FactorRecord, TradingIdea
+from quant_fund_agent.schemas import FactorRecord, FactorSource, TradingIdea
 
 
 class FactorDatabase:
@@ -33,11 +38,48 @@ class FactorDatabase:
     def get_factor(self, factor_id: str) -> FactorRecord | None:
         return self._factors.get(factor_id)
 
-    def list_factors(self) -> list[FactorRecord]:
-        return list(self._factors.values())
+    def list_factors(
+        self,
+        source: FactorSource | None = None,
+        research_session_id: str | None = None,
+    ) -> list[FactorRecord]:
+        """Return factors, optionally filtered by source and/or session.
+
+        - ``source=FactorSource.SEED`` returns just the hard-coded baseline.
+        - ``source=FactorSource.RESEARCHER`` returns just agent-generated
+          factors (optionally narrowed to a single ``research_session_id``).
+        - ``source=None`` returns everything.
+        """
+        factors = list(self._factors.values())
+        if source is not None:
+            factors = [f for f in factors if f.source == source]
+        if research_session_id is not None:
+            factors = [f for f in factors if f.research_session_id == research_session_id]
+        return factors
 
     def remove_factor(self, factor_id: str) -> None:
         self._factors.pop(factor_id, None)
+
+    def purge_researcher_factors(
+        self,
+        research_session_id: str | None = None,
+    ) -> list[str]:
+        """Remove all researcher-generated factors (or a single session).
+
+        Use this between simulation runs so the next 1-year backtest
+        starts from the seed ensemble only, with no memory of factors
+        invented in previous runs.
+
+        Returns the list of removed factor IDs.
+        """
+        to_remove = [
+            fid for fid, f in self._factors.items()
+            if f.source == FactorSource.RESEARCHER
+            and (research_session_id is None or f.research_session_id == research_session_id)
+        ]
+        for fid in to_remove:
+            self._factors.pop(fid, None)
+        return to_remove
 
     # ----- trading ideas -----
 

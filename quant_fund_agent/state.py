@@ -2,12 +2,27 @@
 
 from __future__ import annotations
 
-from typing import Annotated, Any
+from typing import Any
 
 from langgraph.graph import MessagesState
-from pydantic import BaseModel, Field
+from pydantic import Field
 
-from quant_fund_agent.databases import FactorDatabase, PaperDatabase, StrategyDatabase
+from quant_fund_agent.agents.portfolio_manager.state import (
+    PortfolioManagerState,
+)
+from quant_fund_agent.databases import (
+    FactorDatabase,
+    PaperDatabase,
+    PortfolioDatabase,
+    StrategyDatabase,
+)
+
+__all__ = [
+    "FundState",
+    "FactorResearchState",
+    "StrategyState",
+    "PortfolioManagerState",
+]
 
 
 # ---------------------------------------------------------------------------
@@ -26,6 +41,7 @@ class FundState(MessagesState):
     factor_db: FactorDatabase = Field(default_factory=FactorDatabase)
     paper_db: PaperDatabase = Field(default_factory=PaperDatabase)
     strategy_db: StrategyDatabase = Field(default_factory=StrategyDatabase)
+    portfolio_db: PortfolioDatabase = Field(default_factory=PortfolioDatabase)
 
     current_task: str = ""
     current_agent: str = ""
@@ -61,12 +77,6 @@ class StrategyState(MessagesState):
         arbitrary_types_allowed = True
 
 
-class PortfolioManagerState(MessagesState):
-    """State for the portfolio manager agent subgraph."""
-    strategy_db: StrategyDatabase = Field(default_factory=StrategyDatabase)
-    live_strategy_ids: list[str] = Field(default_factory=list)
-    portfolio_allocation: dict[str, float] = Field(default_factory=dict)
-    review_notes: str = ""
-
-    class Config:
-        arbitrary_types_allowed = True
+# ``PortfolioManagerState`` is defined in
+# ``quant_fund_agent.agents.portfolio_manager.state`` (re-exported above) so
+# the orchestrator and the PM subgraph share the same definition.

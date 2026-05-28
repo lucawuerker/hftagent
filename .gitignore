@@ -7,3 +7,9 @@ AAPL_2025-10-01_2025-10-01_1/
 __pycache__/
 *.pyc
 .env
+
+# Factor Researcher Agent emits Python files into this directory at
+# runtime; they are ephemeral and must not be tracked.  Only the
+# package marker stays.
+quant_fund_agent/factors/researcher/*
+!quant_fund_agent/factors/researcher/__init__.py

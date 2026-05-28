@@ -68,14 +68,21 @@ def run_strategy(state: FundState) -> dict:
 
 
 def run_portfolio_manager(state: FundState) -> dict:
-    """Invoke the portfolio-manager subgraph."""
+    """Invoke the portfolio-manager subgraph.
+
+    The PM agent reads from the strategy DB (universe + per-strategy
+    metrics + correlations) and writes a ``PortfolioRecord`` into the
+    portfolio DB.  Both databases live on the root ``FundState``.
+    """
     result = portfolio_manager_graph.invoke(
         {
-            "messages": state.messages,
             "strategy_db": state.strategy_db,
+            "portfolio_db": state.portfolio_db,
         }
     )
-    return {"messages": result["messages"]}
+    # We don't currently surface portfolio details back into messages —
+    # downstream agents (or callers) inspect ``state.portfolio_db.latest()``.
+    return {}
 
 
 # ---------------------------------------------------------------------------

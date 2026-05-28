@@ -17,6 +17,7 @@ Recommended storage layout::
 from __future__ import annotations
 
 import json
+import re
 from datetime import date
 from pathlib import Path
 
@@ -81,3 +82,64 @@ class PaperDatabase:
         for raw in json.loads(path.read_text()):
             paper = Paper.model_validate(raw)
             self._papers[paper.id] = paper
+
+    # ----- auto-discovery -----
+
+    @staticmethod
+    def _slugify(name: str) -> str:
+        """Filename → slug used as a default paper id."""
+        stem = Path(name).stem.lower()
+        stem = re.sub(r"[^a-z0-9]+", "_", stem).strip("_")
+        return stem or "paper"
+
+    def auto_discover_pdfs(
+        self,
+        pdf_dir: str | Path,
+        index_path: str | Path | None = None,
+        default_published_date: date | None = None,
+    ) -> list[Paper]:
+        """Scan ``pdf_dir`` for PDFs and register any that aren't tracked.
+
+        Filenames are used as a default ``title`` and slugged to produce
+        the paper ``id``.  Metadata is intentionally minimal — the
+        Factor Researcher Agent fills in the abstract / key ideas the
+        first time it actually reads the paper.
+
+        If ``index_path`` is provided the updated index is persisted.
+
+        Returns the list of newly-added ``Paper`` objects.
+        """
+        pdf_dir = Path(pdf_dir)
+        if not pdf_dir.exists():
+            return []
+
+        # Build a lookup of already-tracked file_paths so we don't double-add.
+        tracked = {
+            (Path(p.file_path).name if p.file_path else "")
+            for p in self._papers.values()
+        }
+
+        new_papers: list[Paper] = []
+        for pdf in sorted(pdf_dir.glob("*.pdf")):
+            if pdf.name in tracked:
+                continue
+            paper_id = self._slugify(pdf.name)
+            # Avoid collision with an existing id (e.g. two files slug
+            # to the same thing).
+            suffix = 1
+            candidate = paper_id
+            while candidate in self._papers:
+                suffix += 1
+                candidate = f"{paper_id}_{suffix}"
+            paper = Paper(
+                id=candidate,
+                title=pdf.stem,
+                file_path=f"pdfs/{pdf.name}",
+                published_date=default_published_date,
+            )
+            self._papers[paper.id] = paper
+            new_papers.append(paper)
+
+        if index_path is not None and new_papers:
+            self.save_to_json(index_path)
+        return new_papers
