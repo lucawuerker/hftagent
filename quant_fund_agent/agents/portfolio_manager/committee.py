@@ -52,10 +52,8 @@ import numpy as np
 from quant_fund_agent.agents.portfolio_manager.graph import portfolio_manager_graph
 from quant_fund_agent.agents.portfolio_manager.state import PortfolioManagerState
 from quant_fund_agent.databases import PortfolioDatabase, StrategyDatabase
-from quant_fund_agent.portfolio import (
-    expected_portfolio_metrics,
-    get_personality_profile,
-)
+from quant_fund_agent.mcp import portfolio_client
+from quant_fund_agent.portfolio import get_personality_profile
 from quant_fund_agent.schemas import (
     ConstructionMethod,
     PMMode,
@@ -197,6 +195,11 @@ def run_pm_committee(
         else:
             consensus_weights = kept  # all excluded — nothing left to size
 
+    # Every PM shares the same return units; use the first PM's annualisation
+    # factor so the committee's ex-ante metrics match the per-PM ones (and
+    # don't mix annualised returns with a per-bar covariance).
+    annualisation_factor = pm_states[0].annualisation_factor
+
     record = _materialise(
         consensus_weights=consensus_weights,
         proposals=proposals,
@@ -207,6 +210,7 @@ def run_pm_committee(
         config=config,
         strategy_db=strategy_db,
         portfolio_db=portfolio_db,
+        annualisation_factor=annualisation_factor,
     )
     log.info("[%s] Committee finalised %d allocations.",
              config.pm_name, len(record.allocations))
@@ -426,6 +430,7 @@ def _materialise(
     config: CommitteeConfig,
     strategy_db: StrategyDatabase,
     portfolio_db: PortfolioDatabase,
+    annualisation_factor: float = 1.0,
 ) -> PortfolioRecord:
     """Apply the consensus to the live DBs and write a PortfolioRecord."""
     # Build the allocation list.
@@ -471,9 +476,9 @@ def _materialise(
         rec = strategy_db.get_strategy(sid)
         if rec and rec.backtest_metrics:
             expected_returns[sid] = float(rec.backtest_metrics.annualised_return or 0.0)
-    cov = strategy_db.covariance_matrix()
+    cov = strategy_db.covariance_matrix(annualisation_factor=annualisation_factor)
     metrics = (
-        expected_portfolio_metrics(
+        portfolio_client.expected_portfolio_metrics(
             {a.strategy_id: a.weight for a in allocations},
             expected_returns=expected_returns,
             cov=cov,

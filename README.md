@@ -92,6 +92,10 @@ QuantFundAgent/
 │   │   ├── engine.py               # Single-factor IC / ICIR backtest
 │   │   └── strategy_backtester.py  # Strategy-level backtest
 │   │
+│   ├── pipeline.py                 # NEW — reusable stage functions (research /
+│   │                               # strategy pipeline / persist / PM rebalance)
+│   │                               # shared by the script, notebook & backtest
+│   │
 │   └── utils/
 │       └── pdf.py                  # NEW — robust PDF text extraction (pypdf, char-capped)
 │
@@ -107,7 +111,9 @@ QuantFundAgent/
 │   └── portfolio/
 │       └── portfolio_db.json       # PM audit trail: every PortfolioRecord ever produced
 │
-├── run_pipeline.py                 # Selector → Architect → Statistician end-to-end
+├── run_fund.py                     # NEW — whole fund, one command: research →
+│                                   # strategy pipeline → persist → PM rebalance
+├── run_pipeline.py                 # Selector → Architect → Statistician (no persist)
 ├── run_factor_research.py          # Invoke a single Factor Researcher session
 ├── run_portfolio_manager.py        # NEW — invoke a PM agent over the current strategy book
 ├── run_all_factors.py              # Regenerate factor_db.json from registered SEED factors
@@ -688,6 +694,47 @@ print(record.construction_method, record.allocations, record.expected_metrics)
   The statistician's approval doesn't mean "deploy"; the PM's "retire"
   doesn't mean "throw away the research record".
 
+## MCP tooling — every agent's toolbox is an MCP server
+
+Following Anthropic's Model Context Protocol convention, **every agent calls its
+deterministic toolbox over MCP**.  The agents themselves stay synchronous
+LangGraph nodes whose *reasoning* is still a plain `llm.invoke()`; what moved
+behind MCP is the heavy / deterministic work each agent does (data loading,
+backtests, code materialisation, statistical tests, portfolio maths).  Each MCP
+server owns its heavy data server-side (e.g. the factor panel is loaded once and
+cached) and only small JSON crosses the boundary.
+
+| Server (`quant_fund_agent/mcp/…`) | Used by        | Tools                                                            |
+| --------------------------------- | -------------- | ---------------------------------------------------------------- |
+| `modeling_server`                 | Architect      | `list_models`, `fit_and_backtest`                                |
+| `catalog_server`                  | Selector       | `load_factor_catalog`                                            |
+| `research_server`                 | Factor Researcher | `load_papers`, `existing_factor_ids`, `materialise_factor`, `backtest_factors`, `persist_results` |
+| `statistics_server`               | Statistician   | `list_tests`, `run_tests`                                        |
+| `portfolio_server`                | Portfolio Mgr  | `screen_strategies`, `construct_portfolio`, `expected_portfolio_metrics` |
+
+Each server has a sibling `*_client.py` (the synchronous facade the agent calls)
+and a `*_service.py` (the shared implementation).  A single
+`quant_fund_agent/mcp/_bridge.py` runs one persistent stdio session per server on
+a shared background event loop.
+
+**In-process fallback.**  Every client falls back to calling the same
+`*_service` functions in-process — identical results, no subprocess.  This is
+used by the test suite and as an escape hatch.  Toggle MCP off globally with
+`QF_USE_MCP=0`, or per server:
+
+```bash
+MODELING_USE_MCP=0  CATALOG_USE_MCP=0  RESEARCH_USE_MCP=0  \
+STATISTICS_USE_MCP=0  PORTFOLIO_USE_MCP=0
+```
+
+Parity tests in `tests/test_mcp_*.py` assert the MCP path and the in-process path
+return identical results for each server.
+
+Database reads/writes (the in-memory `StrategyDatabase` / `PortfolioDatabase`
+handles that flow through graph state and the PM committee) stay in the agent
+graphs — they hold live Python objects that cannot cross a stateless MCP
+boundary; only the pure computations are exposed as tools.
+
 ## Getting Started
 
 ```bash
@@ -698,15 +745,27 @@ cp .env.example .env   # add your API keys
 # 1. (One-off) backtest every seed factor and persist factor_db.json
 python run_all_factors.py
 
-# 2. Run a single factor-research session
-python run_factor_research.py --n-papers 2 --n-ideas 3 --ic-threshold 0.01
+# 2. Whole fund in one command: (optional research) → strategy pipeline →
+#    PERSIST approved strategies to strategy_db.json → Portfolio Manager.
+#    This is the end-to-end path and the basis for the upcoming backtest.
+python run_fund.py --n-strategies 3
 
-# 3. Selector → Architect → Statistician pipeline (populates strategy_db.json)
-python run_pipeline.py
-
-# 4. Portfolio Manager Agent: pick strategies + allocate capital
-python run_portfolio_manager.py
-
-# 5. End-to-end orchestrator (uses whatever is in the DBs)
-python -m quant_fund_agent.main
+# ── or drive the stages individually ──
+python run_factor_research.py --n-papers 2 --n-ideas 3   # Factor Researcher
+python run_pipeline.py                                   # Selector→Architect→Statistician (no persist)
+python run_portfolio_manager.py                          # PM over the persisted book
+python -m quant_fund_agent.main                          # single-task orchestrator router
 ```
+
+### How a strategy reaches the Portfolio Manager
+
+The statistician *judges* a strategy; it does not persist it.
+`quant_fund_agent.pipeline.persist_approved_strategy` turns an accepted
+candidate into a `StrategyRecord` (in-sample + out-of-sample metrics) and
+registers it **with its per-bar PnL series** via
+`StrategyDatabase.register_strategy`.  That returns series is what the
+cross-strategy correlation matrix and PM allocation are built on — without
+this step the Strategy DB stays empty and the PM has nothing to allocate.
+`run_fund.py` and `demo_pipeline.ipynb` both go through this path; the same
+functions are designed to be called on a weekly schedule inside the
+two-month backtest.

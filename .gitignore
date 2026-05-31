@@ -13,3 +13,4 @@ __pycache__/
 # package marker stays.
 quant_fund_agent/factors/researcher/*
 !quant_fund_agent/factors/researcher/__init__.py
+claude.md

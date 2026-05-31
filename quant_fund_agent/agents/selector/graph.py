@@ -17,15 +17,12 @@ from __future__ import annotations
 
 import json
 import os
-from pathlib import Path
 
 from langchain_openai import ChatOpenAI
 from langgraph.graph import END, START, StateGraph
 
 from quant_fund_agent.agents.selector.state import FactorSummary, SelectorState
 
-
-FACTOR_DB_PATH = Path("data/factors/factor_db.json")
 
 LLM_MODEL = os.getenv("SELECTOR_LLM_MODEL", "gpt-4o-mini")
 
@@ -37,33 +34,16 @@ def _get_llm() -> ChatOpenAI:
 # ── node 1: load factor catalog ───────────────────────────────────────
 
 def load_factor_catalog(state: SelectorState) -> dict:
-    """Read the persisted factor database and build a compact catalog."""
-    path = FACTOR_DB_PATH
-    if not path.exists():
-        raise FileNotFoundError(
-            f"Factor DB not found at {path}. Run `python run_all_factors.py` first."
-        )
+    """Read the persisted factor database and build a compact catalog.
 
-    raw = json.loads(path.read_text())
-    catalog: list[FactorSummary] = []
+    The catalog is loaded through the quant-catalog MCP server (with an
+    in-process fallback); the returned JSON rows are hydrated into
+    ``FactorSummary`` models for the downstream LLM nodes.
+    """
+    from quant_fund_agent.mcp import catalog_client
 
-    for f in raw.get("factors", []):
-        bm = f.get("backtest_metrics") or {}
-        by_h = bm.get("ic_by_horizon", {})
-
-        catalog.append(FactorSummary(
-            factor_id=f["id"],
-            name=f["name"],
-            category=f.get("category", ""),
-            description=f.get("description", ""),
-            ic_1=(by_h.get("1") or {}).get("ic"),
-            ic_6=(by_h.get("6") or {}).get("ic"),
-            ic_60=(by_h.get("60") or {}).get("ic"),
-            icir_1=(by_h.get("1") or {}).get("ic_ir"),
-            icir_6=(by_h.get("6") or {}).get("ic_ir"),
-            icir_60=(by_h.get("60") or {}).get("ic_ir"),
-        ))
-
+    rows = catalog_client.load_factor_catalog()
+    catalog = [FactorSummary(**row) for row in rows]
     return {"factor_catalog": catalog}
 
 

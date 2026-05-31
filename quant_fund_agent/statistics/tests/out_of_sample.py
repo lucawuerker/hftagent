@@ -57,17 +57,41 @@ class OutOfSampleTest(BaseStatTest):
                 details={"oos_len": len(next(iter(data_oos.values())))},
             )
 
-        strategy = DynamicStrategy(
-            strategy_id=f"stat_oos_{uuid.uuid4().hex[:8]}",
-            name=spec.strategy_name + " [OOS]",
-            description=ctx.hypothesis,
-            factor_ids=list(spec.weights.keys()),
-            weights=spec.weights,
-            holding_period=spec.holding_period,
-            max_positions=spec.max_positions,
-            equal_weight=spec.equal_weight,
-            min_conviction=spec.min_conviction,
-        )
+        # Rebuild the *exact same* strategy on OOS.  For a fitted ML model we
+        # reload the persisted estimator (never refit on OOS data); for the
+        # static baseline we reconstruct the DynamicStrategy from its weights.
+        if spec.model_type and spec.model_type != "static_weights":
+            from quant_fund_agent.strategies.model_strategy import ModelStrategy
+
+            if not spec.model_artifact_path:
+                return StatTestResult(
+                    test_id=self.test_id,
+                    test_name=self.name,
+                    verdict=StatTestVerdict.FAIL,
+                    summary="ML strategy has no persisted model artifact for the OOS test.",
+                )
+            strategy = ModelStrategy.from_artifact(
+                spec.model_artifact_path,
+                strategy_id=f"stat_oos_{uuid.uuid4().hex[:8]}",
+                name=spec.strategy_name + " [OOS]",
+                description=ctx.hypothesis,
+                holding_period=spec.holding_period,
+                max_positions=spec.max_positions,
+                equal_weight=spec.equal_weight,
+                min_conviction=spec.min_conviction,
+            )
+        else:
+            strategy = DynamicStrategy(
+                strategy_id=f"stat_oos_{uuid.uuid4().hex[:8]}",
+                name=spec.strategy_name + " [OOS]",
+                description=ctx.hypothesis,
+                factor_ids=list(spec.weights.keys()),
+                weights=spec.weights,
+                holding_period=spec.holding_period,
+                max_positions=spec.max_positions,
+                equal_weight=spec.equal_weight,
+                min_conviction=spec.min_conviction,
+            )
         oos_result = backtest_strategy(strategy, signals_oos, data_oos)
 
         is_sharpe = float(ctx.is_metrics.get("sharpe_ratio") or 0.0)

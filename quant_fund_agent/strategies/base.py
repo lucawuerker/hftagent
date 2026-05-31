@@ -33,8 +33,11 @@ class ModelType(str, Enum):
     LINEAR_REGRESSION = "linear_regression"
     RIDGE = "ridge"
     LASSO = "lasso"
+    ELASTIC_NET = "elastic_net"
     RANDOM_FOREST = "random_forest"
+    GRADIENT_BOOSTING = "gradient_boosting"
     XGBOOST = "xgboost"
+    LIGHTGBM = "lightgbm"
     NEURAL_NETWORK = "neural_network"
     CUSTOM = "custom"
 

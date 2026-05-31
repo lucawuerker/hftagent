@@ -36,7 +36,6 @@ import os
 import uuid
 from typing import Any
 
-import numpy as np
 import pandas as pd
 from langgraph.graph import END, START, StateGraph
 
@@ -46,11 +45,8 @@ from quant_fund_agent.agents.portfolio_manager.prompts import (
     SCREEN_PROMPT,
 )
 from quant_fund_agent.agents.portfolio_manager.state import PortfolioManagerState
-from quant_fund_agent.portfolio import (
-    construct_portfolio,
-    expected_portfolio_metrics,
-    get_personality_profile,
-)
+from quant_fund_agent.mcp import portfolio_client
+from quant_fund_agent.portfolio import get_personality_profile
 from quant_fund_agent.portfolio.personalities import PersonalityProfile
 from quant_fund_agent.schemas import (
     ConstructionMethod,
@@ -281,49 +277,14 @@ def monitor_performance(state: PortfolioManagerState) -> dict:
 # Node 3 — screen strategies (eligible candidates for the new portfolio)
 # ---------------------------------------------------------------------------
 
-def _passes_personality_filters(
-    row: dict[str, Any],
-    profile: PersonalityProfile,
-) -> bool:
-    sharpe = row.get("is_sharpe")
-    if sharpe is None or sharpe < profile.min_sharpe:
-        return False
-    dd = row.get("is_max_dd")
-    if dd is not None and dd < profile.max_drawdown:
-        return False
-    hit = row.get("is_hit_rate")
-    if profile.min_hit_rate is not None and hit is not None and hit < profile.min_hit_rate:
-        return False
-    return True
-
-
-def _greedy_diversified_pick(
-    candidates: list[str],
-    sharpes: dict[str, float],
-    corr: pd.DataFrame,
-    max_pairwise_corr: float,
-    target_n: int,
-) -> list[str]:
-    """Greedy correlation-aware pick: highest Sharpe first, skip if too
-    correlated with anything already chosen."""
-    ranked = sorted(candidates, key=lambda s: sharpes.get(s, -np.inf), reverse=True)
-    chosen: list[str] = []
-    for sid in ranked:
-        if len(chosen) >= target_n:
-            break
-        too_correlated = False
-        if not corr.empty and sid in corr.index:
-            for picked in chosen:
-                if picked not in corr.columns:
-                    continue
-                rho = corr.loc[sid, picked]
-                if pd.notna(rho) and abs(float(rho)) > max_pairwise_corr:
-                    too_correlated = True
-                    break
-        if too_correlated:
-            continue
-        chosen.append(sid)
-    return chosen
+def _screen_profile_dict(profile: PersonalityProfile) -> dict[str, Any]:
+    """Personality params the quant-portfolio screen tool needs."""
+    return {
+        "min_sharpe": profile.min_sharpe,
+        "max_drawdown": profile.max_drawdown,
+        "min_hit_rate": profile.min_hit_rate,
+        "max_pairwise_correlation": profile.max_pairwise_correlation,
+    }
 
 
 def _llm_screen(
@@ -361,7 +322,12 @@ def _llm_screen(
 
 
 def screen_strategies(state: PortfolioManagerState) -> dict:
-    """Pick the roster of strategies for the new portfolio."""
+    """Pick the roster of strategies for the new portfolio.
+
+    The personality hard-filter + greedy correlation-aware pick run on the
+    quant-portfolio MCP server; ACTIVE mode lets the LLM override, falling back
+    to the server's greedy pick when the LLM produces nothing usable.
+    """
     profile = state.profile or _resolve_profile(state)
     target_n = _target_n(state, profile)
 
@@ -371,13 +337,20 @@ def screen_strategies(state: PortfolioManagerState) -> dict:
         r for r in rows
         if r["pm_status"] not in (PMStatus.RETIRED.value, PMStatus.FLAGGED_FOR_REVIEW.value)
     ]
-    eligible_rows = [r for r in rows if _passes_personality_filters(r, profile)]
 
-    if not eligible_rows:
+    screen = portfolio_client.screen_strategies(
+        rows, _screen_profile_dict(profile), target_n, state.correlation_matrix,
+    )
+    eligible_ids = set(screen["eligible_strategy_ids"])
+
+    if not eligible_ids:
         log.warning("[%s] No strategies passed personality filters.", state.pm_name)
         return {"selected_strategy_ids": [], "screen_rationale": "no eligible strategies"}
 
+    greedy_selected = screen["selected_strategy_ids"]
+
     if state.mode == PMMode.ACTIVE:
+        eligible_rows = [r for r in rows if r["strategy_id"] in eligible_ids]
         try:
             selected, rationale = _llm_screen(
                 eligible_rows, profile, target_n, state.correlation_matrix,
@@ -388,25 +361,13 @@ def screen_strategies(state: PortfolioManagerState) -> dict:
         except Exception as e:
             log.warning("[%s] LLM screen failed (%s); falling back to greedy.",
                         state.pm_name, e)
-            selected = _greedy_diversified_pick(
-                [r["strategy_id"] for r in eligible_rows],
-                {r["strategy_id"]: r["is_sharpe"] or 0.0 for r in eligible_rows},
-                state.correlation_matrix,
-                profile.max_pairwise_correlation,
-                target_n,
-            )
+            selected = greedy_selected
             rationale = (
                 f"Greedy correlation-aware pick (Sharpe-ranked, capped at "
                 f"|ρ| <= {profile.max_pairwise_correlation})."
             )
     else:
-        selected = _greedy_diversified_pick(
-            [r["strategy_id"] for r in eligible_rows],
-            {r["strategy_id"]: r["is_sharpe"] or 0.0 for r in eligible_rows},
-            state.correlation_matrix,
-            profile.max_pairwise_correlation,
-            target_n,
-        )
+        selected = greedy_selected
         rationale = (
             f"SELECTOR mode: top-{target_n} by IS Sharpe with diversification cap "
             f"|ρ| <= {profile.max_pairwise_correlation} and personality filters "
@@ -511,25 +472,19 @@ def construct_portfolio_node(state: PortfolioManagerState) -> dict:
     if method == ConstructionMethod.CUSTOM_LLM and llm_weights:
         weights = llm_weights
     else:
-        try:
-            expected = _expected_returns_from_records(state.selected_strategy_ids, state.strategy_db)
-            weights = construct_portfolio(
-                method=method,
-                strategy_ids=state.selected_strategy_ids,
-                cov=state.covariance_matrix,
-                expected_returns=expected,
-                risk_aversion=profile.risk_aversion,
-                risk_free_rate=profile.risk_free_rate,
-                allow_short=profile.allow_short,
-                max_weight=profile.max_weight_per_strategy,
-            )
-        except Exception as e:
-            log.warning("[%s] %s solver failed (%s); falling back to equal weight.",
-                        state.pm_name, method.value, e)
-            method = ConstructionMethod.EQUAL_WEIGHT
-            weights = construct_portfolio(
-                method=method, strategy_ids=state.selected_strategy_ids,
-            )
+        expected = _expected_returns_from_records(state.selected_strategy_ids, state.strategy_db)
+        result = portfolio_client.construct_portfolio(
+            method=method.value,
+            strategy_ids=state.selected_strategy_ids,
+            cov=state.covariance_matrix,
+            expected_returns=expected,
+            risk_aversion=profile.risk_aversion,
+            risk_free_rate=profile.risk_free_rate,
+            allow_short=profile.allow_short,
+            max_weight=profile.max_weight_per_strategy,
+        )
+        weights = result["weights"]
+        method = ConstructionMethod(result["method"])
 
     log.info("[%s] Constructed portfolio with method=%s (%d strategies).",
              state.pm_name, method.value, len(weights))
@@ -565,7 +520,7 @@ def finalise(state: PortfolioManagerState) -> dict:
     expected = _expected_returns_from_records(
         [a.strategy_id for a in allocations], db,
     )
-    metrics = expected_portfolio_metrics(
+    metrics = portfolio_client.expected_portfolio_metrics(
         {a.strategy_id: a.weight for a in allocations},
         expected_returns=expected,
         cov=state.covariance_matrix,

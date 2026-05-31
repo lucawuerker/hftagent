@@ -31,26 +31,16 @@ import json
 import logging
 import os
 
-import pandas as pd
 from langchain_openai import ChatOpenAI
 from langgraph.graph import END, START, StateGraph
 
 from quant_fund_agent.agents.statistician.state import StatisticianState
-from quant_fund_agent.statistics import (
-    StatTestContext,
-    StatTestResult,
-    StatTestVerdict,
-    discover_tests,
-    get_all_test_classes,
-    get_mandatory_test_ids,
-    get_optional_test_ids,
-    instantiate_test,
-)
+from quant_fund_agent.mcp import statistics_client
+from quant_fund_agent.statistics import StatTestResult, StatTestVerdict
 
 log = logging.getLogger("statistician")
 
 LLM_MODEL = os.getenv("STATISTICIAN_LLM_MODEL", "gpt-4o-mini")
-DATA_DIR = os.getenv("DATA_DIR", "ticker_data")
 
 
 def _get_llm() -> ChatOpenAI:
@@ -66,13 +56,6 @@ def _parse_json(content: str) -> dict:
         return json.loads(content[start:end])
 
 
-def _deserialise_series(payload: dict | None) -> pd.Series | None:
-    if not payload or "timestamps" not in payload:
-        return None
-    idx = pd.to_datetime(payload["timestamps"])
-    return pd.Series(payload["values"], index=idx)
-
-
 def _test_result_to_text(r: StatTestResult) -> str:
     return (
         f"- [{r.verdict.value.upper()}] {r.test_name} "
@@ -81,74 +64,34 @@ def _test_result_to_text(r: StatTestResult) -> str:
     )
 
 
-# ── node 1: build the test context (heavy work: load data, compute signals) ──
+# ── test-running helper (delegates to the quant-statistics MCP server) ──
 
-# Reuse the architect's cached panel / signal helpers so we don't load twice.
-from quant_fund_agent.agents.architect.graph import (  # noqa: E402
-    _factor_signal_cached,
-    _load_panel_cached,
-)
+def _run_tests(state: StatisticianState, test_ids: list[str]) -> list[StatTestResult]:
+    """Run ``test_ids`` via the quant-statistics MCP server.
 
-
-def _build_context(state: StatisticianState) -> StatTestContext:
-    from quant_fund_agent.factors import discover_factors
-
-    discover_factors()
-
-    data_full = _load_panel_cached()
-    factor_signals_full = {
-        fid: _factor_signal_cached(fid, data_full)
-        for fid in state.strategy_spec.weights
-    }
-
-    is_portfolio_returns = _deserialise_series(
-        state.backtest_metrics.get("portfolio_returns")
-    )
-    is_equity_curve = _deserialise_series(
-        state.backtest_metrics.get("equity_curve")
-    )
-
-    return StatTestContext(
-        strategy_spec=state.strategy_spec,
-        hypothesis=state.hypothesis,
-        initial_reasoning=state.initial_reasoning,
-        final_reasoning=state.final_reasoning,
-        is_portfolio_returns=is_portfolio_returns,
-        is_equity_curve=is_equity_curve,
+    The full test context (panel load, factor signals, deserialised IS returns)
+    is rebuilt server-side from the JSON spec / metrics / trial history.
+    """
+    if not test_ids:
+        return []
+    raw = statistics_client.run_tests(
+        test_ids=test_ids,
+        spec=state.strategy_spec.model_dump(mode="json"),
         is_metrics=state.backtest_metrics,
-        data_full=data_full,
-        factor_signals_full=factor_signals_full,
+        trial_history=[t.model_dump(mode="json") for t in state.trial_history],
+        hypothesis=state.hypothesis,
         oos_split_ratio=state.oos_split_ratio,
-        trial_history=state.trial_history,
         bars_per_day=state.bars_per_day,
     )
+    return [StatTestResult.model_validate(r) for r in raw]
 
 
-# ── node 2: run mandatory tests ──────────────────────────────────────
+# ── node 1: run mandatory tests ──────────────────────────────────────
 
 def run_mandatory_tests(state: StatisticianState) -> dict:
-    discover_tests()
-
-    mandatory = state.mandatory_test_ids or get_mandatory_test_ids()
+    mandatory = state.mandatory_test_ids or statistics_client.list_tests()["mandatory"]
     log.info("Running %d mandatory test(s): %s", len(mandatory), mandatory)
-
-    ctx = _build_context(state)
-    results: list[StatTestResult] = []
-    for test_id in mandatory:
-        test = instantiate_test(test_id)
-        log.info("  … %s", test.name)
-        try:
-            results.append(test.run(ctx))
-        except Exception as e:  # pragma: no cover — don't crash the agent
-            log.exception("Test %s raised: %s", test_id, e)
-            results.append(StatTestResult(
-                test_id=test_id,
-                test_name=test.name,
-                verdict=StatTestVerdict.FAIL,
-                summary=f"Test raised an exception: {e}",
-            ))
-
-    return {"test_results": results}
+    return {"test_results": _run_tests(state, mandatory)}
 
 
 # ── node 3: LLM picks optional tests based on perceived risk ─────────
@@ -195,6 +138,10 @@ def _spec_json(state: StatisticianState) -> str:
     s = state.strategy_spec
     return json.dumps({
         "strategy_name": s.strategy_name,
+        "model_type": s.model_type,
+        "model_params": s.model_params,
+        "factor_ids": s.factor_ids,
+        "target_horizon": s.target_horizon,
         "weights": s.weights,
         "holding_period": s.holding_period,
         "max_positions": s.max_positions,
@@ -215,12 +162,10 @@ def _metrics_summary(state: StatisticianState) -> str:
     return "\n".join(f"  {k}: {m.get(k)}" for k in keys)
 
 
-def _optional_catalog() -> str:
-    opts = get_optional_test_ids()
-    if not opts:
+def _optional_catalog(optional: list[dict]) -> str:
+    if not optional:
         return "(none registered yet)"
-    classes = get_all_test_classes()
-    return "\n".join(f"- {tid}: {classes[tid].description}" for tid in opts)
+    return "\n".join(f"- {o['id']}: {o['description']}" for o in optional)
 
 
 def _mandatory_results_text(results: list[StatTestResult]) -> str:
@@ -230,8 +175,9 @@ def _mandatory_results_text(results: list[StatTestResult]) -> str:
 
 
 def assess_risk_and_pick_optional(state: StatisticianState) -> dict:
-    optional = get_optional_test_ids()
-    if not optional and not state.forced_optional_test_ids:
+    optional_info = statistics_client.list_tests()["optional"]
+    optional_ids = [o["id"] for o in optional_info]
+    if not optional_ids and not state.forced_optional_test_ids:
         log.info("No optional tests registered — skipping risk assessment.")
         return {
             "risk_assessment": "No optional tests registered yet.",
@@ -244,11 +190,11 @@ def assess_risk_and_pick_optional(state: StatisticianState) -> dict:
         spec_json=_spec_json(state),
         metrics_summary=_metrics_summary(state),
         mandatory_results=_mandatory_results_text(state.test_results),
-        optional_catalog=_optional_catalog(),
+        optional_catalog=_optional_catalog(optional_info),
     ))
     parsed = _parse_json(resp.content)
 
-    selected = [t for t in parsed.get("selected_test_ids", []) if t in optional]
+    selected = [t for t in parsed.get("selected_test_ids", []) if t in optional_ids]
     # caller can force extra tests regardless of the LLM's choice
     selected = list(dict.fromkeys(selected + state.forced_optional_test_ids))
 
@@ -267,22 +213,8 @@ def run_optional_tests(state: StatisticianState) -> dict:
     if not state.selected_optional_test_ids:
         return {}
 
-    ctx = _build_context(state)
-    new_results: list[StatTestResult] = list(state.test_results)
-    for test_id in state.selected_optional_test_ids:
-        test = instantiate_test(test_id)
-        log.info("Optional test: %s", test.name)
-        try:
-            new_results.append(test.run(ctx))
-        except Exception as e:  # pragma: no cover
-            log.exception("Test %s raised: %s", test_id, e)
-            new_results.append(StatTestResult(
-                test_id=test_id,
-                test_name=test.name,
-                verdict=StatTestVerdict.FAIL,
-                summary=f"Test raised an exception: {e}",
-            ))
-
+    new_results = list(state.test_results)
+    new_results.extend(_run_tests(state, state.selected_optional_test_ids))
     return {"test_results": new_results}
 
 

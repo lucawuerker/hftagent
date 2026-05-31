@@ -1,22 +1,33 @@
 """Top-level orchestrator graph.
 
-Routes work to the correct agent subgraph based on the current task:
-  - "factor_research"    → Factor Research Agent
-  - "strategy"           → Strategy Agent
-  - "portfolio_manager"  → Portfolio Manager Agent
+Routes a single task to the correct *real* agent pipeline:
 
-The router can be replaced with an LLM-based dispatcher that reads the
-conversation and autonomously decides which agent to invoke next.
+  - ``"factor_research"``    → Factor Researcher session
+  - ``"strategy"``           → Selector → Architect → Statistician → persist
+  - ``"portfolio_manager"``  → Portfolio Manager rebalance
+
+Each node delegates to :mod:`quant_fund_agent.pipeline`, so the
+orchestrator, the ``run_fund.py`` script, the notebook, and the future
+backtest all drive the agents through the same code path.
+
+The ``"strategy"`` route used to invoke a stub subgraph (every node was a
+``# TODO`` no-op).  It now runs the genuine Selector → Architect →
+Statistician pipeline and — crucially — persists an approved strategy
+into ``state.strategy_db`` so the Portfolio Manager has something to
+allocate.  For a full sequential run of every stage, use ``run_fund.py``.
 """
 
 from __future__ import annotations
 
+import logging
+
+from langchain_core.messages import AIMessage
 from langgraph.graph import END, START, StateGraph
 
-from quant_fund_agent.agents.factor_research.graph import factor_research_graph
-from quant_fund_agent.agents.portfolio_manager.graph import portfolio_manager_graph
-from quant_fund_agent.agents.strategy.graph import strategy_graph
+from quant_fund_agent import pipeline
 from quant_fund_agent.state import FundState
+
+log = logging.getLogger("orchestrator")
 
 
 # ---------------------------------------------------------------------------
@@ -24,7 +35,7 @@ from quant_fund_agent.state import FundState
 # ---------------------------------------------------------------------------
 
 def route_task(state: FundState) -> str:
-    """Decide which agent subgraph to invoke.
+    """Decide which agent pipeline to invoke from ``state.current_task``.
 
     TODO: replace with LLM-based routing that examines messages and
     database state to decide autonomously.
@@ -40,49 +51,52 @@ def route_task(state: FundState) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Wrapper nodes that invoke the compiled subgraphs
+# Nodes — each delegates to the reusable pipeline functions
 # ---------------------------------------------------------------------------
 
 def run_factor_research(state: FundState) -> dict:
-    """Invoke the factor-research subgraph."""
-    result = factor_research_graph.invoke(
-        {
-            "messages": state.messages,
-            "factor_db": state.factor_db,
-            "paper_db": state.paper_db,
-        }
-    )
-    return {"messages": result["messages"]}
+    """Invoke one Factor Researcher session (persists kept factors to disk)."""
+    result = pipeline.run_research_session()
+    kept = result.get("kept_factor_ids", [])
+    return {"messages": [AIMessage(
+        content=f"Factor research session kept {len(kept)} new factor(s): {kept}"
+    )]}
 
 
 def run_strategy(state: FundState) -> dict:
-    """Invoke the strategy subgraph."""
-    result = strategy_graph.invoke(
-        {
-            "messages": state.messages,
-            "factor_db": state.factor_db,
-            "strategy_db": state.strategy_db,
-        }
-    )
-    return {"messages": result["messages"]}
+    """Run the real Selector → Architect → Statistician pipeline.
+
+    An approved strategy is registered into ``state.strategy_db`` (record
+    + per-bar returns) so the Portfolio Manager can deploy it.
+    """
+    res = pipeline.run_strategy_pipeline()
+    record = pipeline.persist_approved_strategy(state.strategy_db, res)
+    if record is None:
+        msg = f"Strategy pipeline produced no approved strategy (rejected at {res.reject_stage})."
+    else:
+        sharpe = getattr(record.backtest_metrics, "sharpe_ratio", None)
+        msg = (f"Approved + persisted strategy '{record.name}' "
+               f"({record.id}, IS Sharpe={sharpe}).")
+    log.info(msg)
+    return {"messages": [AIMessage(content=msg)]}
 
 
 def run_portfolio_manager(state: FundState) -> dict:
-    """Invoke the portfolio-manager subgraph.
+    """Run the Portfolio Manager over the current strategy book.
 
-    The PM agent reads from the strategy DB (universe + per-strategy
-    metrics + correlations) and writes a ``PortfolioRecord`` into the
-    portfolio DB.  Both databases live on the root ``FundState``.
+    Reads ``state.strategy_db`` and writes a ``PortfolioRecord`` into
+    ``state.portfolio_db``.  The decision is surfaced back into the
+    message stream (it used to be silently dropped).
     """
-    result = portfolio_manager_graph.invoke(
-        {
-            "strategy_db": state.strategy_db,
-            "portfolio_db": state.portfolio_db,
-        }
-    )
-    # We don't currently surface portfolio details back into messages —
-    # downstream agents (or callers) inspect ``state.portfolio_db.latest()``.
-    return {}
+    record = pipeline.run_pm_rebalance(state.strategy_db, state.portfolio_db)
+    if record is None:
+        msg = "Portfolio Manager: strategy book is empty — no allocation produced."
+    else:
+        live = [a for a in record.allocations if a.enabled]
+        msg = (f"Portfolio Manager '{record.pm_name}' allocated {len(live)} "
+               f"strategies via {record.construction_method.value}.")
+    log.info(msg)
+    return {"messages": [AIMessage(content=msg)]}
 
 
 # ---------------------------------------------------------------------------

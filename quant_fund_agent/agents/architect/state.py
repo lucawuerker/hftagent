@@ -10,13 +10,35 @@ from quant_fund_agent.agents.selector.state import FactorSummary
 
 
 class StrategySpec(BaseModel):
-    """The model specification the LLM produces."""
+    """The strategy specification the LLM produces.
+
+    Supports two strategy families:
+
+    - ``static_weights`` (legacy): a hand-chosen weighted sum of factor
+      signals, configured via ``weights``.
+    - a fitted ML model (``ridge``, ``random_forest``, ``xgboost``, …): the
+      model maps the ``factor_ids`` features to forward returns; the fitted
+      estimator is persisted at ``model_artifact_path`` so the OOS test and the
+      live backtest can reload it.
+    """
     strategy_name: str = ""
+
+    # ── model selection ──
+    model_type: str = "static_weights"
+    model_params: dict[str, Any] = Field(default_factory=dict)
+    factor_ids: list[str] = Field(default_factory=list)   # ML features
+    target_horizon: int = 6                               # bars ahead to predict
+    model_artifact_path: str = ""                         # persisted fitted model
+
+    # ── static-weights path ──
     weights: dict[str, float] = Field(default_factory=dict)
+
+    # ── position construction ──
     holding_period: int = 6
     max_positions: int = 20
     equal_weight: bool = False
     min_conviction: float = 0.0
+
     reasoning: str = ""
 
 

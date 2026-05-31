@@ -36,20 +36,12 @@ from __future__ import annotations
 import json
 import logging
 import os
-import random
 import time
-from datetime import date, datetime
-from pathlib import Path
-from typing import Any
 
 from langchain_openai import ChatOpenAI
 from langgraph.graph import END, START, StateGraph
 
-from quant_fund_agent.agents.factor_research.codegen import (
-    CodeValidationError,
-    materialise,
-    purge_researcher_code,
-)
+from quant_fund_agent.agents.factor_research.codegen import purge_researcher_code
 from quant_fund_agent.agents.factor_research.prompts import (
     BRAINSTORM_PROMPT,
     CODEGEN_PROMPT,
@@ -64,14 +56,7 @@ from quant_fund_agent.agents.factor_research.state import (
     FactorResearcherState,
     PaperSnippet,
 )
-from quant_fund_agent.backtesting.engine import backtest_factor
-from quant_fund_agent.databases import FactorDatabase, PaperDatabase
-from quant_fund_agent.factors import (
-    discover_factors,
-    get_all_factor_classes,
-    instantiate_factor,
-)
-from quant_fund_agent.factors.registry import _FACTOR_REGISTRY
+from quant_fund_agent.mcp import research_client
 from quant_fund_agent.schemas import (
     BacktestMetrics,
     FactorRecord,
@@ -79,14 +64,11 @@ from quant_fund_agent.schemas import (
     FactorStatus,
     TradingIdeaCategory,
 )
-from quant_fund_agent.utils.pdf import extract_text
 
 log = logging.getLogger("factor_research")
 
 LLM_MODEL = os.getenv("FACTOR_RESEARCH_LLM_MODEL", "gpt-4o-mini")
-PAPER_INDEX_PATH = Path("data/papers/index.json")
-PAPER_PDF_DIR = Path("data/papers/pdfs")
-FACTOR_DB_PATH = Path("data/factors/factor_db.json")
+FACTOR_DB_PATH = "data/factors/factor_db.json"
 
 
 def _get_llm(temperature: float = 0.6) -> ChatOpenAI:
@@ -119,63 +101,19 @@ def _parse_json(content: str) -> dict:
 # Node 1: load_papers
 # ---------------------------------------------------------------------------
 
-def _select_paper_ids(
-    paper_db: PaperDatabase,
-    n: int,
-    cutoff: date | None,
-    strategy: str,
-) -> list[str]:
-    """Pick N papers without violating the lookahead-bias guard."""
-    if cutoff is not None:
-        papers = paper_db.list_papers_before(cutoff)
-    else:
-        papers = paper_db.list_papers()
-
-    if not papers:
-        return []
-
-    if strategy == "random":
-        random.shuffle(papers)
-    else:  # "unread_first"
-        papers.sort(key=lambda p: (p.status.value != "unread", p.title))
-
-    return [p.id for p in papers[:n]]
-
-
 def load_papers(state: FactorResearcherState) -> dict:
-    """Choose papers for this session and extract their text."""
-    paper_db = PaperDatabase()
-    paper_db.load_from_json(PAPER_INDEX_PATH)
-    # Self-heal: if PDFs were dropped in without index entries, register them.
-    paper_db.auto_discover_pdfs(PAPER_PDF_DIR, index_path=PAPER_INDEX_PATH)
-
-    paper_ids = _select_paper_ids(
-        paper_db,
+    """Choose papers for this session and extract their text (via MCP)."""
+    rows = research_client.load_papers(
         n=state.n_papers,
-        cutoff=state.cutoff_date,
+        cutoff_date=state.cutoff_date.isoformat() if state.cutoff_date else None,
         strategy=state.paper_sample_strategy,
+        max_chars=state.max_chars_per_paper,
     )
     log.info("[session %s] selected %d/%d papers: %s",
-             state.session_id, len(paper_ids), state.n_papers, paper_ids)
+             state.session_id, len(rows), state.n_papers,
+             [r["paper_id"] for r in rows])
 
-    snippets: list[PaperSnippet] = []
-    for pid in paper_ids:
-        p = paper_db.get_paper(pid)
-        if p is None:
-            continue
-        path = PAPER_PDF_DIR.parent / (p.file_path or "")
-        text = extract_text(path, max_chars=state.max_chars_per_paper)
-        if not text:
-            log.warning("[session %s] no text extracted from %s",
-                        state.session_id, p.file_path)
-        snippets.append(PaperSnippet(
-            paper_id=p.id,
-            title=p.title,
-            published_date=p.published_date,
-            text=text,
-            file_path=p.file_path or "",
-        ))
-
+    snippets = [PaperSnippet(**row) for row in rows]
     return {"selected_papers": snippets}
 
 
@@ -186,18 +124,10 @@ def load_papers(state: FactorResearcherState) -> dict:
 def _existing_factor_ids() -> list[str]:
     """Union of (1) registered factor classes and (2) factor_db.json IDs.
 
-    We have to dedupe across both because a previous session may have
-    persisted records whose code has since been purged from the
-    registry.
+    Computed by the quant-research MCP server so the registry it queries is the
+    same process that materialises and backtests new factors.
     """
-    ids: set[str] = set(get_all_factor_classes().keys())
-    if FACTOR_DB_PATH.exists():
-        try:
-            payload = json.loads(FACTOR_DB_PATH.read_text())
-            ids.update(f["id"] for f in payload.get("factors", []))
-        except Exception:
-            pass
-    return sorted(ids)
+    return research_client.existing_factor_ids()
 
 
 def _papers_block(snippets: list[PaperSnippet]) -> str:
@@ -299,13 +229,10 @@ def _try_codegen_once(
         return None, f"codegen LLM call failed: {e}"
 
     idea.code = code  # keep for audit even if materialise fails
-    try:
-        path = materialise(idea.factor_id, code)
-    except CodeValidationError as e:
-        return None, f"validation failed: {e}"
-    except Exception as e:
-        return None, f"materialisation failed: {e}"
-    return str(path), ""
+    result = research_client.materialise_factor(idea.factor_id, code)
+    if not result.get("ok"):
+        return None, result.get("error", "materialisation failed")
+    return result["code_path"], ""
 
 
 def generate_code(state: FactorResearcherState) -> dict:
@@ -351,115 +278,40 @@ def generate_code(state: FactorResearcherState) -> dict:
 # Node 4: backtest_factors
 # ---------------------------------------------------------------------------
 
-# Cache the panel at module level keyed by the SET of fields requested.
-# A weekly research session that only needs (close, orderFlow, nbTrades)
-# would otherwise pay the full 19-field load cost on every invocation.
-# Memory matters here: a 500-ticker × 19-field intraday panel is several
-# GB, vs. a handful of hundred MB for the few fields a candidate
-# actually needs.
-_PANEL_CACHE: dict[frozenset[str], dict[str, Any]] = {}
-
-
-def _required_fields(state: FactorResearcherState) -> list[str]:
-    """Union of (1) ``close`` (always needed for forward returns) and
-    (2) the ``inputs`` declared by every materialised candidate factor.
-
-    Falling back to the OHLCV view if no candidate declares inputs
-    keeps the agent runnable even for ad-hoc tests, but in normal
-    operation we only load what we'll actually look at.
-    """
-    needed: set[str] = {"close"}
-    for cand in state.candidates:
-        if not cand.code_path:
-            continue
-        try:
-            factor = instantiate_factor(cand.idea.factor_id)
-        except Exception:
-            continue
-        needed.update(getattr(factor, "inputs", []) or [])
-    if needed == {"close"}:
-        needed.update({"open", "high", "low", "volume"})
-    return sorted(needed)
-
-
-def _load_panel_cached(
-    data_dir: str,
-    fields: list[str],
-    n_tickers: int | None = None,
-) -> dict[str, Any]:
-    """Memoise the panel keyed by the requested field set and universe size.
-
-    Memory is the binding constraint on a laptop, so we expose two
-    knobs through the cache key: the field subset (what *columns* we
-    keep) and the ticker cap (how *wide* the panel is).  Each unique
-    ``(fields, n_tickers)`` pair gets its own panel, so a research
-    session running a narrow IC backtest never has to materialise the
-    full universe in RAM.
-    """
-    key = (frozenset(fields), n_tickers)
-    if key not in _PANEL_CACHE:
-        from quant_fund_agent.backtesting.data_loader import load_panel
-        log.info(
-            "Loading panel from %s  (fields: %s, n_tickers: %s) …",
-            data_dir,
-            fields,
-            n_tickers if n_tickers is not None else "all",
-        )
-        t0 = time.time()
-        _PANEL_CACHE[key] = load_panel(
-            data_dir, fields=fields, n_tickers=n_tickers
-        )
-        log.info("Panel loaded in %.1fs (%d tickers, %d fields)",
-                 time.time() - t0,
-                 _PANEL_CACHE[key]["close"].shape[1],
-                 len(_PANEL_CACHE[key]))
-    return _PANEL_CACHE[key]
-
-
-def _slice_panel_to_cutoff(
-    panel: dict[str, Any],
-    cutoff: date | None,
-) -> dict[str, Any]:
-    if cutoff is None:
-        return panel
-    cutoff_ts = datetime.combine(cutoff, datetime.min.time())
-    return {k: df.loc[df.index < cutoff_ts] for k, df in panel.items()}
-
-
 def backtest_factors(state: FactorResearcherState) -> dict:
-    """Run the standard IC backtest on every materialised candidate."""
-    if not any(c.code_path for c in state.candidates):
+    """Run the standard IC backtest on every materialised candidate (via MCP).
+
+    The quant-research server owns the (cached) panel, selects the required
+    fields from each factor's declared ``inputs``, slices to the cutoff date and
+    runs the IC backtest; here we just map its JSON results back onto the
+    candidates.
+    """
+    materialised = [c.idea.factor_id for c in state.candidates if c.code_path]
+    if not materialised:
         log.info("[session %s] no materialised candidates to backtest",
                  state.session_id)
         return {"candidates": state.candidates}
 
-    discover_factors()  # make sure the new modules are picked up
-    fields = _required_fields(state)
-    panel_full = _load_panel_cached(
-        state.data_dir, fields, n_tickers=state.n_tickers
+    results = research_client.backtest_factors(
+        factor_ids=materialised,
+        horizon=state.ic_target_horizon,
+        cutoff_date=state.cutoff_date.isoformat() if state.cutoff_date else None,
+        data_dir=state.data_dir,
+        n_tickers=state.n_tickers,
     )
-    panel = _slice_panel_to_cutoff(panel_full, state.cutoff_date)
 
     updated: list[FactorCandidate] = []
     for cand in state.candidates:
         if not cand.code_path:
             updated.append(cand)
             continue
-        try:
-            factor = instantiate_factor(cand.idea.factor_id)
-            t0 = time.time()
-            metrics = backtest_factor(
-                factor, panel,
-                horizon=state.ic_target_horizon,
-            )
-            log.info("[%s] backtest %.1fs, IC@%d=%s ICIR@%d=%s",
-                     cand.idea.factor_id, time.time() - t0,
-                     state.ic_target_horizon, metrics.information_coefficient,
-                     state.ic_target_horizon, metrics.ic_ir)
-            cand.backtest_metrics = metrics
-        except Exception as e:
-            log.warning("[%s] backtest failed: %s", cand.idea.factor_id, e)
-            cand.rejected_reason = f"backtest failed: {e}"
+        res = results.get(cand.idea.factor_id)
+        if res and res.get("ok"):
+            cand.backtest_metrics = BacktestMetrics.model_validate(res["metrics"])
+        else:
+            reason = (res or {}).get("error", "backtest failed")
+            log.warning("[%s] %s", cand.idea.factor_id, reason)
+            cand.rejected_reason = reason
         updated.append(cand)
     return {"candidates": updated}
 
@@ -489,13 +341,11 @@ def filter_and_persist(state: FactorResearcherState) -> dict:
     Survivors are added to the factor DB tagged as
     ``FactorSource.RESEARCHER`` with the current ``research_session_id``.
     Rejects are removed from the registry AND from the filesystem so
-    nothing lingers to mislead the next session.
+    nothing lingers to mislead the next session.  The actual DB write and
+    filesystem purge happen on the quant-research MCP server.
     """
-    factor_db = FactorDatabase()
-    factor_db.load_from_json(FACTOR_DB_PATH)
-
-    kept: list[str] = []
-    rejected: list[str] = []
+    kept_records: list[dict] = []
+    rejected: list[dict] = []
 
     for cand in state.candidates:
         fid = cand.idea.factor_id
@@ -526,15 +376,11 @@ def filter_and_persist(state: FactorResearcherState) -> dict:
                     "ic_at_target": ic,
                 },
             )
-            factor_db.add_factor(record)
-            kept.append(fid)
+            kept_records.append(record.model_dump(mode="json"))
             log.info("[%s] KEPT  (|IC@%d|=%.4f ≥ %.4f)",
                      fid, state.ic_target_horizon, abs(ic), state.ic_threshold)
         else:
-            rejected.append(fid)
-            # Pull the file and registry entry so subsequent sessions
-            # don't see a stale, low-IC factor.
-            _drop_researcher_factor(fid, cand.code_path)
+            rejected.append({"factor_id": fid, "code_path": cand.code_path})
             reason = (
                 f"|IC@{state.ic_target_horizon}|="
                 f"{abs(ic) if ic is not None else 'NA'} < {state.ic_threshold}"
@@ -543,22 +389,15 @@ def filter_and_persist(state: FactorResearcherState) -> dict:
             )
             log.info("[%s] REJECTED (%s)", fid, reason)
 
-    # Persist the updated DB
-    factor_db.save_to_json(FACTOR_DB_PATH)
+    result = research_client.persist_results(kept_records, rejected)
     log.info("[session %s] research session complete: %d kept, %d rejected",
-             state.session_id, len(kept), len(rejected))
+             state.session_id, len(result["kept_factor_ids"]),
+             len(result["rejected_factor_ids"]))
 
-    return {"kept_factor_ids": kept, "rejected_factor_ids": rejected}
-
-
-def _drop_researcher_factor(factor_id: str, code_path: str) -> None:
-    """Remove a rejected factor from the registry AND the filesystem."""
-    _FACTOR_REGISTRY.pop(factor_id, None)
-    if code_path:
-        try:
-            Path(code_path).unlink(missing_ok=True)
-        except Exception as e:
-            log.debug("could not delete %s: %s", code_path, e)
+    return {
+        "kept_factor_ids": result["kept_factor_ids"],
+        "rejected_factor_ids": result["rejected_factor_ids"],
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -627,6 +466,9 @@ def reset_researcher_state() -> None:
     Call this at the start of a fresh simulation so the 1-year backtest
     starts from the deterministic seed ensemble only.
     """
+    from quant_fund_agent.databases import FactorDatabase
+    from quant_fund_agent.factors.registry import _FACTOR_REGISTRY
+
     n_files = purge_researcher_code()
     factor_db = FactorDatabase()
     factor_db.load_from_json(FACTOR_DB_PATH)
