@@ -8,6 +8,8 @@ The notebook demo_pipeline.ipynb demonstrates the different agents and there out
 
 run_fund.py is the analogue part to demp_pipeline.ipynb that runs the whole pipeline as a python script with the same caveats regarding LLM and data availability.
 
+Master_Thesis_Outline.pdf is a pdf document that describes the current stage of the project as well as further directions and things to work on. 
+
 
 
 --------------- (mainly) AI generated README --------------------------
