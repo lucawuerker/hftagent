@@ -186,6 +186,7 @@ class StrategyPipelineResult:
 def run_strategy_pipeline(
     max_iterations: int = 3,
     oos_ratio: float = 0.2,
+    target_horizon: int = 6,
     run_statistician: bool = True,
 ) -> StrategyPipelineResult:
     """Selector → Architect → (optionally) Statistician, in one call.
@@ -208,6 +209,7 @@ def run_strategy_pipeline(
         "factor_catalog": selector_result["factor_catalog"],
         "max_iterations": max_iterations,
         "oos_split_ratio": oos_ratio,
+        "target_horizon": target_horizon,
     })
 
 

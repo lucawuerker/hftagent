@@ -13,6 +13,23 @@ the model maps cross-sectionally-normalised factor signals → forward returns.
 The prediction becomes the strategy's composite alpha signal, which then runs
 through the *same* position-construction logic as every other strategy.
 
+Scale-correct regularisation (important)
+----------------------------------------
+The regression target is the *forward return* (~1e-4 in magnitude on 10-second
+bars).  With such a tiny target, a fixed regularisation strength is mis-scaled —
+empirically an under-regularised linear model **overfits in-sample and inverts
+out-of-sample** (large compensating +/- factor weights that flip sign OOS),
+while a strongly-regularised one generalises.  Two safeguards make every model
+scale-correct and robust:
+
+* every estimator is wrapped so that **features and target are standardised**
+  (zero mean, unit variance) before fitting — so regularisation strength means
+  the same thing regardless of the raw return scale; and
+* the linear models **self-tune their regularisation by cross-validation**
+  (``RidgeCV`` / ``LassoCV`` / ``ElasticNetCV``) instead of trusting a single
+  LLM-chosen ``alpha``.  This is what turns a catastrophic −7 OOS Sharpe into a
+  generalising +3 to +5 on this data.
+
 Heavy / optional imports (xgboost, lightgbm) are done lazily inside the
 builders so that merely importing this module — e.g. to render the menu — never
 requires those packages to be installed.
@@ -27,6 +44,46 @@ from typing import Any, Callable
 
 # Fixed knobs we always inject (not exposed to the LLM as tunables).
 RANDOM_STATE = 42
+
+# Cross-validation folds for the self-tuning linear models.
+_CV_FOLDS = 4
+
+
+# ---------------------------------------------------------------------------
+# Standardisation wrapper — makes regularisation scale-correct
+# ---------------------------------------------------------------------------
+
+def _wrap(model):
+    """Standardise X (and the tiny return target y) around any estimator.
+
+    Returns a ``TransformedTargetRegressor`` whose inner pipeline z-scores the
+    features and whose target transformer z-scores y, so the persisted artifact
+    is fully self-contained (``.predict`` needs no external scalers).  Cross-
+    sectional ranking of predictions — all the backtester uses — is unaffected
+    by the invertible y scaling.
+    """
+    from sklearn.compose import TransformedTargetRegressor
+    from sklearn.pipeline import Pipeline
+    from sklearn.preprocessing import StandardScaler
+
+    pipe = Pipeline([("scaler", StandardScaler()), ("model", model)])
+    return TransformedTargetRegressor(regressor=pipe, transformer=StandardScaler())
+
+
+def unwrap_estimator(estimator):
+    """Return the inner fitted model from a ``_wrap``-ed estimator (best effort).
+
+    Used to pull ``coef_`` / ``feature_importances_`` for diagnostics.  Returns
+    the object unchanged if it isn't wrapped.
+    """
+    inner = estimator
+    regressor = getattr(inner, "regressor_", None) or getattr(inner, "regressor", None)
+    if regressor is not None:
+        inner = regressor
+    named = getattr(inner, "named_steps", None)
+    if named is not None and "model" in named:
+        inner = named["model"]
+    return inner
 
 
 # ---------------------------------------------------------------------------
@@ -109,7 +166,8 @@ class ModelSpec:
         return {p.name: p.coerce(raw.get(p.name, p.default)) for p in self.params}
 
     def build(self, raw: dict[str, Any] | None):
-        return self.builder(self.prepare_params(raw))
+        """Construct the estimator, standardised + self-regularising via ``_wrap``."""
+        return _wrap(self.builder(self.prepare_params(raw)))
 
     def to_menu(self) -> dict[str, Any]:
         return {
@@ -122,7 +180,15 @@ class ModelSpec:
 
 # ---------------------------------------------------------------------------
 # Builders (lazy imports so optional deps stay optional)
+#
+# Features and target are standardised by ``_wrap`` around every estimator, so
+# the linear CV models below see unit-variance data and their alpha grids are
+# scale-correct.
 # ---------------------------------------------------------------------------
+
+# Geometric alpha grid spanning weak→strong shrinkage (on standardised data).
+_RIDGE_ALPHAS = (0.1, 1.0, 10.0, 100.0, 1000.0, 10000.0)
+
 
 def _build_linear(p: dict[str, Any]):
     from sklearn.linear_model import LinearRegression
@@ -130,20 +196,23 @@ def _build_linear(p: dict[str, Any]):
 
 
 def _build_ridge(p: dict[str, Any]):
-    from sklearn.linear_model import Ridge
-    return Ridge(alpha=p["alpha"], random_state=RANDOM_STATE)
+    # RidgeCV self-tunes alpha by efficient leave-one-out CV.
+    from sklearn.linear_model import RidgeCV
+    return RidgeCV(alphas=_RIDGE_ALPHAS)
 
 
 def _build_lasso(p: dict[str, Any]):
-    from sklearn.linear_model import Lasso
-    return Lasso(alpha=p["alpha"], random_state=RANDOM_STATE, max_iter=5000)
+    from sklearn.linear_model import LassoCV
+    return LassoCV(n_alphas=20, cv=_CV_FOLDS, max_iter=5000,
+                   random_state=RANDOM_STATE, n_jobs=-1)
 
 
 def _build_elastic_net(p: dict[str, Any]):
-    from sklearn.linear_model import ElasticNet
-    return ElasticNet(
-        alpha=p["alpha"], l1_ratio=p["l1_ratio"],
-        random_state=RANDOM_STATE, max_iter=5000,
+    from sklearn.linear_model import ElasticNetCV
+    return ElasticNetCV(
+        l1_ratio=[0.1, 0.5, 0.7, 0.9, 0.95, 0.99, 1.0],
+        n_alphas=20, cv=_CV_FOLDS, max_iter=5000,
+        random_state=RANDOM_STATE, n_jobs=-1,
     )
 
 
@@ -208,7 +277,10 @@ MODEL_SPECS: dict[str, ModelSpec] = {
     "linear_regression": ModelSpec(
         model_type="linear_regression",
         family="linear",
-        description="Ordinary least squares — the linear baseline above static weights.",
+        description=(
+            "Ordinary least squares (no regularisation) — the linear baseline; "
+            "useful to contrast against the regularised models."
+        ),
         builder=_build_linear,
         params=(
             ParamSpec("fit_intercept", "bool", True,
@@ -218,34 +290,33 @@ MODEL_SPECS: dict[str, ModelSpec] = {
     "ridge": ModelSpec(
         model_type="ridge",
         family="linear",
-        description="L2-regularised linear regression; robust to collinear factors.",
-        builder=_build_ridge,
-        params=(
-            ParamSpec("alpha", "float", 1.0, min=1e-4, max=1000.0,
-                      description="L2 penalty strength; higher = more shrinkage."),
+        description=(
+            "L2-regularised linear regression with the penalty auto-tuned by "
+            "cross-validation; robust to collinear/noisy factors and the "
+            "recommended default."
         ),
+        builder=_build_ridge,
+        params=(),  # alpha is self-tuned by CV
     ),
     "lasso": ModelSpec(
         model_type="lasso",
         family="linear",
-        description="L1-regularised linear regression; performs factor selection.",
-        builder=_build_lasso,
-        params=(
-            ParamSpec("alpha", "float", 1e-3, min=1e-5, max=1.0,
-                      description="L1 penalty strength; higher = sparser model."),
+        description=(
+            "L1-regularised linear regression (CV-tuned); performs automatic "
+            "factor selection by driving weak factors' weights to zero."
         ),
+        builder=_build_lasso,
+        params=(),  # alpha is self-tuned by CV
     ),
     "elastic_net": ModelSpec(
         model_type="elastic_net",
         family="linear",
-        description="Mix of L1 and L2 regularisation (selection + shrinkage).",
-        builder=_build_elastic_net,
-        params=(
-            ParamSpec("alpha", "float", 1e-3, min=1e-5, max=1.0,
-                      description="Overall penalty strength."),
-            ParamSpec("l1_ratio", "float", 0.5, min=0.0, max=1.0,
-                      description="0 = pure ridge, 1 = pure lasso."),
+        description=(
+            "Mix of L1 and L2 regularisation (CV-tuned alpha and l1_ratio): "
+            "factor selection plus shrinkage."
         ),
+        builder=_build_elastic_net,
+        params=(),  # alpha + l1_ratio self-tuned by CV
     ),
     "random_forest": ModelSpec(
         model_type="random_forest",
@@ -253,11 +324,11 @@ MODEL_SPECS: dict[str, ModelSpec] = {
         description="Bagged decision trees; captures non-linear factor interactions.",
         builder=_build_random_forest,
         params=(
-            ParamSpec("n_estimators", "int", 200, min=10, max=1000,
+            ParamSpec("n_estimators", "int", 300, min=10, max=1000,
                       description="Number of trees."),
-            ParamSpec("max_depth", "int", 6, min=0, max=40,
-                      description="Max tree depth (0 = unlimited)."),
-            ParamSpec("min_samples_leaf", "int", 50, min=1, max=5000,
+            ParamSpec("max_depth", "int", 4, min=0, max=40,
+                      description="Max tree depth (0 = unlimited); keep shallow on noisy data."),
+            ParamSpec("min_samples_leaf", "int", 200, min=1, max=5000,
                       description="Min samples per leaf; higher = more regularised."),
             ParamSpec("max_features", "float", 0.5, min=0.1, max=1.0,
                       description="Fraction of features considered per split."),
@@ -271,9 +342,9 @@ MODEL_SPECS: dict[str, ModelSpec] = {
         params=(
             ParamSpec("n_estimators", "int", 200, min=10, max=2000,
                       description="Number of boosting stages."),
-            ParamSpec("max_depth", "int", 3, min=1, max=12,
-                      description="Depth of each tree."),
-            ParamSpec("learning_rate", "float", 0.05, min=1e-3, max=0.5,
+            ParamSpec("max_depth", "int", 2, min=1, max=12,
+                      description="Depth of each tree; keep shallow on noisy data."),
+            ParamSpec("learning_rate", "float", 0.03, min=1e-3, max=0.5,
                       description="Shrinkage applied to each tree."),
             ParamSpec("subsample", "float", 0.8, min=0.3, max=1.0,
                       description="Row subsampling fraction per stage."),
@@ -285,18 +356,18 @@ MODEL_SPECS: dict[str, ModelSpec] = {
         description="XGBoost gradient boosting — a quant-ML workhorse.",
         builder=_build_xgboost,
         params=(
-            ParamSpec("n_estimators", "int", 300, min=10, max=2000,
+            ParamSpec("n_estimators", "int", 200, min=10, max=2000,
                       description="Number of boosting rounds."),
-            ParamSpec("max_depth", "int", 4, min=1, max=12,
-                      description="Depth of each tree."),
-            ParamSpec("learning_rate", "float", 0.05, min=1e-3, max=0.5,
+            ParamSpec("max_depth", "int", 3, min=1, max=12,
+                      description="Depth of each tree; keep shallow on noisy data."),
+            ParamSpec("learning_rate", "float", 0.03, min=1e-3, max=0.5,
                       description="Step-size shrinkage."),
             ParamSpec("subsample", "float", 0.8, min=0.3, max=1.0,
                       description="Row subsampling fraction."),
             ParamSpec("colsample_bytree", "float", 0.8, min=0.3, max=1.0,
                       description="Feature subsampling fraction per tree."),
-            ParamSpec("reg_lambda", "float", 1.0, min=0.0, max=100.0,
-                      description="L2 regularisation on leaf weights."),
+            ParamSpec("reg_lambda", "float", 5.0, min=0.0, max=100.0,
+                      description="L2 regularisation on leaf weights; higher = safer."),
         ),
     ),
     "lightgbm": ModelSpec(
@@ -305,13 +376,13 @@ MODEL_SPECS: dict[str, ModelSpec] = {
         description="LightGBM gradient boosting — fast, leaf-wise trees.",
         builder=_build_lightgbm,
         params=(
-            ParamSpec("n_estimators", "int", 300, min=10, max=2000,
+            ParamSpec("n_estimators", "int", 200, min=10, max=2000,
                       description="Number of boosting rounds."),
-            ParamSpec("num_leaves", "int", 31, min=7, max=255,
+            ParamSpec("num_leaves", "int", 15, min=7, max=255,
                       description="Max leaves per tree; the main capacity knob."),
             ParamSpec("max_depth", "int", -1, min=-1, max=20,
                       description="Max tree depth (-1 = unlimited)."),
-            ParamSpec("learning_rate", "float", 0.05, min=1e-3, max=0.5,
+            ParamSpec("learning_rate", "float", 0.03, min=1e-3, max=0.5,
                       description="Step-size shrinkage."),
             ParamSpec("subsample", "float", 0.8, min=0.3, max=1.0,
                       description="Row subsampling fraction."),

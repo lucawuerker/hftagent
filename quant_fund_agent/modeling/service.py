@@ -121,3 +121,88 @@ def run_fit_and_backtest(
         valid_ratio=valid_ratio,
         strategy_id=strategy_id,
     )
+
+
+def evaluate_config(
+    *,
+    factor_ids: list[str],
+    model_type: str = "ridge",
+    model_params: dict[str, Any] | None = None,
+    target_horizon: int = 6,
+    holding_period: int | None = None,
+    max_positions: int = 20,
+    equal_weight: bool = False,
+    min_conviction: float = 0.0,
+    oos_split_ratio: float = 0.2,
+    strategy_id: str | None = None,
+) -> dict[str, Any]:
+    """Fit one (model, horizon) config on IS and evaluate IS **and** OOS.
+
+    Deterministic and LLM-free — used by the notebook's horizon sweep.  Holds the
+    position over the forecast horizon (``holding_period`` defaults to
+    ``target_horizon``) and reloads the persisted full-IS model for the OOS leg
+    (never refits on OOS).
+    """
+    from quant_fund_agent.backtesting.strategy_backtester import backtest_strategy
+    from quant_fund_agent.factors import discover_factors
+    from quant_fund_agent.strategies.model_strategy import ModelStrategy
+
+    discover_factors()
+    data_full = _load_panel()
+    signals_full = {fid: _factor_signal(fid, data_full) for fid in factor_ids}
+    data_is, data_oos = split_panel(data_full, oos_split_ratio)
+    signals_is, signals_oos = split_signals(signals_full, oos_split_ratio)
+
+    hp = holding_period or target_horizon
+    fit = fit_and_backtest(
+        factor_signals_is=signals_is, data_is=data_is,
+        model_type=model_type, model_params=model_params, factor_ids=factor_ids,
+        target_horizon=target_horizon, holding_period=hp,
+        max_positions=max_positions, equal_weight=equal_weight,
+        min_conviction=min_conviction,
+        strategy_id=strategy_id or f"sweep_{model_type}_h{target_horizon}",
+    )
+
+    strat = ModelStrategy.from_artifact(
+        fit["artifact_path"],
+        strategy_id=f"{strategy_id or model_type}_h{target_horizon}_oos",
+        holding_period=hp, max_positions=max_positions,
+        equal_weight=equal_weight, min_conviction=min_conviction,
+    )
+    oos = backtest_strategy(strat, signals_oos, data_oos).metrics
+    m, diag = fit["metrics"], fit["diagnostics"]
+    return {
+        "target_horizon": target_horizon,
+        "model_type": model_type,
+        "valid_ic": diag.get("valid_ic"),
+        "is_ic": m.get("ic_mean"),
+        "oos_ic": oos.ic_mean,
+        "is_sharpe": m.get("sharpe_ratio"),
+        "oos_sharpe": oos.sharpe_ratio,
+        "is_ann_return": m.get("annualised_return"),
+        "oos_ann_return": oos.annualised_return,
+        "oos_max_drawdown": oos.max_drawdown,
+        "artifact_path": fit["artifact_path"],
+    }
+
+
+def sweep_horizons(
+    *,
+    factor_ids: list[str],
+    model_type: str = "ridge",
+    model_params: dict[str, Any] | None = None,
+    horizons: tuple[int, ...] = (1, 6, 60),
+    oos_split_ratio: float = 0.2,
+) -> list[dict[str, Any]]:
+    """Evaluate a fixed model/feature set across forecast horizons (10s/1m/10m).
+
+    Returns one KPI row per horizon — the input to the notebook's regime
+    comparison that shows the IC-vs-Sharpe tradeoff.
+    """
+    return [
+        evaluate_config(
+            factor_ids=factor_ids, model_type=model_type,
+            model_params=model_params, target_horizon=h, oos_split_ratio=oos_split_ratio,
+        )
+        for h in horizons
+    ]

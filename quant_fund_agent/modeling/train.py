@@ -69,10 +69,17 @@ def _slice_panel(data: dict[str, pd.DataFrame], lo: int, hi: int) -> dict[str, p
 
 
 def _feature_importances(estimator, factor_ids: list[str]) -> dict[str, float] | None:
-    """Best-effort feature importances / coefficients, keyed by factor id."""
-    vec = getattr(estimator, "feature_importances_", None)
+    """Best-effort feature importances / coefficients, keyed by factor id.
+
+    Estimators are wrapped (target/feature standardisation) by the catalog, so
+    dig out the inner fitted model before reading ``coef_`` / importances.
+    """
+    from quant_fund_agent.modeling.catalog import unwrap_estimator
+
+    inner = unwrap_estimator(estimator)
+    vec = getattr(inner, "feature_importances_", None)
     if vec is None:
-        coef = getattr(estimator, "coef_", None)
+        coef = getattr(inner, "coef_", None)
         if coef is not None:
             vec = np.abs(np.ravel(coef))
     if vec is None or len(vec) != len(factor_ids):
@@ -139,7 +146,18 @@ def fit_and_backtest(
             "diagnostics": {},
         }
 
-    # ── ML model: fit on IS-train, evaluate on held-out IS-valid ──
+    # ── ML model: select on held-out IS-valid, then refit on the FULL IS ──
+    #
+    # 1. fit on the IS-train sub-window and score predictions on the held-out
+    #    IS-valid sub-window (rank-IC = the trial *selection* signal; train/valid
+    #    R^2 = the overfitting diagnostic);
+    # 2. refit a fresh model on the FULL in-sample window, persist it, and report
+    #    its FULL-IS backtest — so the metrics handed to the Statistician are a
+    #    stable in-sample estimate directly comparable to OOS, with no
+    #    selection-bias inflation from a short validation slice.
+    from quant_fund_agent.backtesting.data_loader import forward_returns
+    from quant_fund_agent.backtesting.engine import _ic_series
+    from quant_fund_agent.modeling.features import predict_to_signal
     from quant_fund_agent.strategies.model_strategy import ModelStrategy
 
     fids = list(factor_ids or [])
@@ -154,8 +172,9 @@ def fit_and_backtest(
             f"IS window too short to split (n={n_rows}, cut={cut}); "
             "lower valid_ratio or widen the in-sample window."
         )
-
     close = data_is["close"]
+
+    # (1) train/valid split — selection score + overfitting diagnostics
     X_tr, y_tr = build_training_matrix(
         _slice_signals(normed_is, 0, cut), fids, close.iloc[:cut], target_horizon,
     )
@@ -163,23 +182,39 @@ def fit_and_backtest(
         raise ValueError(
             f"Not enough non-NaN training samples ({len(y_tr)}) for {model_type}."
         )
-
-    estimator = build_estimator(model_type, model_params)
-    estimator.fit(X_tr, y_tr)
-
-    # Diagnostics: train vs valid R^2 (overfitting signal) + importances.
     X_va, y_va = build_training_matrix(
         _slice_signals(normed_is, cut, n_rows), fids, close.iloc[cut:], target_horizon,
     )
+
+    trial_estimator = build_estimator(model_type, model_params)
+    trial_estimator.fit(X_tr, y_tr)
+
+    # Held-out validation rank-IC: the robust, leakage-free trial selection score.
+    close_va = close.iloc[cut:]
+    valid_pred = predict_to_signal(
+        trial_estimator, _slice_signals(normed_is, cut, n_rows), fids,
+        close_va.index, close_va.columns,
+    )
+    ic_va = _ic_series(
+        valid_pred, forward_returns(close_va, horizon=target_horizon).shift(-1)
+    )
+    validation_score = float(ic_va.mean()) if len(ic_va) else 0.0
+
+    # (2) refit on the FULL in-sample window — this is the model we keep.
+    X_full, y_full = build_training_matrix(normed_is, fids, close, target_horizon)
+    estimator = build_estimator(model_type, model_params)
+    estimator.fit(X_full, y_full)
+
     diagnostics = {
-        "train_r2": _r2(estimator, X_tr, y_tr),
-        "valid_r2": _r2(estimator, X_va, y_va),
+        "train_r2": _r2(trial_estimator, X_tr, y_tr),
+        "valid_r2": _r2(trial_estimator, X_va, y_va),
+        "valid_ic": round(validation_score, 6),
         "n_train_samples": int(len(y_tr)),
         "n_valid_samples": int(len(y_va)),
         "feature_importances": _feature_importances(estimator, fids),
     }
 
-    # Persist the fitted model so OOS / live can reload (never refit) it.
+    # Persist the full-IS model so OOS / live reload (never refit) it.
     artifact_dir = Path(artifact_dir)
     artifact_dir.mkdir(parents=True, exist_ok=True)
     artifact_path = artifact_dir / f"{sid}.joblib"
@@ -194,9 +229,8 @@ def fit_and_backtest(
         artifact_path,
     )
 
-    # Backtest the fitted model on the held-out IS-valid sub-window.  Pass the
-    # RAW valid signals; backtest_strategy normalises them once, exactly as the
-    # training path normalised the train sub-window.
+    # Report the FULL-IS backtest.  Pass RAW signals; backtest_strategy
+    # normalises them once, exactly as the training path normalised.
     strategy = ModelStrategy(
         strategy_id=sid, name=sid, description="",
         factor_ids=fids, model_type=model_type, estimator=estimator,
@@ -204,14 +238,15 @@ def fit_and_backtest(
         holding_period=holding_period, max_positions=max_positions,
         equal_weight=equal_weight, min_conviction=min_conviction,
     )
-    result = backtest_strategy(
-        strategy, _slice_signals(factor_signals_is, cut, n_rows), _slice_panel(data_is, cut, n_rows),
-    )
+    result = backtest_strategy(strategy, factor_signals_is, data_is)
 
+    metrics = _metrics_dict(result, time.time() - t0)
+    metrics["validation_score"] = round(validation_score, 6)
     return {
         "model_type": model_type,
         "factor_ids": fids,
-        "metrics": _metrics_dict(result, time.time() - t0),
+        "metrics": metrics,
         "artifact_path": str(artifact_path),
         "diagnostics": diagnostics,
+        "validation_score": round(validation_score, 6),
     }

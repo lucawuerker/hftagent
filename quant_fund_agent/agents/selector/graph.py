@@ -31,6 +31,15 @@ def _get_llm() -> ChatOpenAI:
     return ChatOpenAI(model=LLM_MODEL, temperature=0.7)
 
 
+def _coerce_llm_text(val) -> str:
+    """Normalise LLM JSON fields that should be prose but sometimes arrive as dicts."""
+    if isinstance(val, str):
+        return val
+    if isinstance(val, dict):
+        return "\n".join(f"{k}: {v}" for k, v in val.items())
+    return str(val) if val is not None else ""
+
+
 # ── node 1: load factor catalog ───────────────────────────────────────
 
 def load_factor_catalog(state: SelectorState) -> dict:
@@ -52,16 +61,18 @@ def load_factor_catalog(state: SelectorState) -> dict:
 HYPOTHESIS_PROMPT = """\
 You are a senior quantitative researcher at a systematic trading firm.
 
-Below is a catalog of alpha factors that have been backtested on 10-second
-intraday US equity data (50 large-cap stocks, 1 month).  Each factor has
-IC and ICIR at three horizons: 1 bar (10 s), 6 bars (1 min), 60 bars (10 min).
+Below is a catalog of alpha factors available on 10-second intraday US equity
+data (50 large-cap stocks, 1 month).  You are given each factor's name,
+category, and a description of the economic effect it captures.  You are
+deliberately NOT shown predictive-power (IC) numbers — reason about the
+economics, not about which factor scored highest in isolation.
 
 FACTOR CATALOG
 --------------
 {catalog}
 
 Your task:
-1. Study the factors, their categories, descriptions, and IC/ICIR values.
+1. Study the factors, their categories, and the effects their descriptions imply.
 2. Formulate ONE clear, specific trading hypothesis that could be
    implemented by combining several of these factors.
 3. The hypothesis should be grounded in quantitative finance theory
@@ -77,10 +88,7 @@ Respond in JSON with exactly two keys:
 def formulate_hypothesis(state: SelectorState) -> dict:
     """Use the LLM to propose a trading hypothesis."""
     catalog_text = "\n".join(
-        f"- {f.factor_id} | {f.name} | cat={f.category} | "
-        f"IC(10s)={f.ic_1} ICIR(10s)={f.icir_1} | "
-        f"IC(1m)={f.ic_6} ICIR(1m)={f.icir_6} | "
-        f"IC(10m)={f.ic_60} ICIR(10m)={f.icir_60}\n"
+        f"- {f.factor_id} | {f.name} | cat={f.category}\n"
         f"  desc: {f.description}"
         for f in state.factor_catalog
     )
@@ -97,8 +105,8 @@ def formulate_hypothesis(state: SelectorState) -> dict:
         parsed = json.loads(content[start:end])
 
     return {
-        "hypothesis": parsed.get("hypothesis", ""),
-        "reasoning": parsed.get("reasoning", ""),
+        "hypothesis": _coerce_llm_text(parsed.get("hypothesis", "")),
+        "reasoning": _coerce_llm_text(parsed.get("reasoning", "")),
     }
 
 
@@ -120,12 +128,17 @@ FACTOR CATALOG
 {catalog}
 
 Your task:
-Select between as many factors as you see fit from the catalog that best serve the
-hypothesis above.  Consider:
-- IC and ICIR values (higher absolute values are better)
-- Category alignment with the hypothesis
-- Diversity (don't pick 5 factors that are essentially the same signal)
-- Coverage across horizons if the hypothesis involves multiple time scales
+Select as many factors as you see fit from the catalog that best serve the
+hypothesis above.  You are deliberately NOT given predictive-power (IC) numbers:
+choose factors on their economic role, not on standalone strength.  Consider:
+- Category alignment with the hypothesis.
+- Diversity & complementarity: prefer factors that capture *different* effects
+  (momentum, mean-reversion, volatility, microstructure, liquidity, ...) so the
+  downstream model can exploit their interactions.
+- A factor with weak standalone signal (e.g. a volatility or liquidity measure)
+  can be very valuable in combination with momentum / mean-reversion factors —
+  include such complementary features rather than only the obvious ones.
+- Avoid picking several factors that are essentially the same signal.
 
 Respond in JSON with exactly two keys:
   "selected_factor_ids": a list of factor_id strings,
@@ -136,10 +149,7 @@ Respond in JSON with exactly two keys:
 def select_factors(state: SelectorState) -> dict:
     """Use the LLM to pick factors that fit the hypothesis."""
     catalog_text = "\n".join(
-        f"- {f.factor_id} | {f.name} | cat={f.category} | "
-        f"IC(10s)={f.ic_1} ICIR(10s)={f.icir_1} | "
-        f"IC(1m)={f.ic_6} ICIR(1m)={f.icir_6} | "
-        f"IC(10m)={f.ic_60} ICIR(10m)={f.icir_60}\n"
+        f"- {f.factor_id} | {f.name} | cat={f.category}\n"
         f"  desc: {f.description}"
         for f in state.factor_catalog
     )
@@ -164,7 +174,7 @@ def select_factors(state: SelectorState) -> dict:
 
     return {
         "selected_factor_ids": selected,
-        "selection_rationale": parsed.get("rationale", ""),
+        "selection_rationale": _coerce_llm_text(parsed.get("rationale", "")),
     }
 
 

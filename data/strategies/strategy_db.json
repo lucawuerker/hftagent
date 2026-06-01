@@ -1,1 +1,90 @@
-[]
+[
+  {
+    "id": "momentum_mean_reversion_f39da4f4",
+    "name": "Momentum Mean Reversion",
+    "class_name": "ModelStrategy",
+    "description": "Combine momentum factors (e.g., Alpha#7, Alpha#12, and Alpha#14) with mean-reversion factors (e.g., Alpha#11 and Alpha#23) to create a trading strategy that capitalizes on both short-term price continuations and reversals around key technical levels like VWAP. The strategy goes long on stocks exhibiting strong momentum while also showing signs of overextension or divergence from their mean reversion levels.",
+    "factor_ids": [
+      "alpha_007",
+      "alpha_011",
+      "alpha_057",
+      "rsi_mean_reversion"
+    ],
+    "trading_idea_ids": [],
+    "status": "approved",
+    "backtest_metrics": {
+      "annualised_return": 0.760076,
+      "annualised_volatility": 0.169477,
+      "sharpe_ratio": 4.4848,
+      "sortino_ratio": 7.8423,
+      "calmar_ratio": 27.6405,
+      "max_drawdown": -0.027499,
+      "max_drawdown_duration_bars": 11745,
+      "hit_rate": 0.4955,
+      "profit_factor": 1.0247,
+      "avg_win": 0.00010805,
+      "avg_loss": -0.00010463,
+      "avg_daily_turnover": 231.235,
+      "avg_positions_held": 5.78,
+      "ic_mean": 0.001928,
+      "ic_ir": 0.004201,
+      "extra": {
+        "n_bars": 37488,
+        "bars_per_day": 2340
+      }
+    },
+    "oos_backtest_metrics": {
+      "annualised_return": 0.133015,
+      "annualised_volatility": 0.112017,
+      "sharpe_ratio": 1.1875,
+      "sortino_ratio": 1.5729,
+      "calmar_ratio": 7.9745,
+      "max_drawdown": -0.01668,
+      "max_drawdown_duration_bars": 7068,
+      "hit_rate": 0.4964,
+      "profit_factor": 1.0048,
+      "avg_win": 9.575e-05,
+      "avg_loss": -9.501e-05,
+      "avg_daily_turnover": 275.9076,
+      "avg_positions_held": 5.55,
+      "ic_mean": -0.006104,
+      "ic_ir": -0.013412,
+      "extra": {
+        "n_bars": 9372,
+        "bars_per_day": 2340
+      }
+    },
+    "live_metrics": null,
+    "model_type": "ridge",
+    "model_params": {
+      "model_type": "ridge",
+      "model_hyperparams": {},
+      "factor_ids": [
+        "alpha_007",
+        "alpha_011",
+        "alpha_057",
+        "rsi_mean_reversion"
+      ],
+      "target_horizon": 6,
+      "model_artifact_path": "data/strategies/models/arch_f3cc67c1.joblib",
+      "weights": {},
+      "holding_period": 6,
+      "max_positions": 20,
+      "equal_weight": true,
+      "min_conviction": 0.5
+    },
+    "holding_period": 6,
+    "pm_status": "live",
+    "pm_notes": "",
+    "flagged_reason": "",
+    "correlations": {},
+    "returns_path": "data/strategies/returns/momentum_mean_reversion_f39da4f4.csv",
+    "created_at": "2026-06-01T08:28:48.475089",
+    "metadata": {
+      "n_trials": 3,
+      "deflated_sharpe_ratio": 0.774299,
+      "architect_reasoning": "The chosen strategy combines momentum and mean-reversion factors to capture both short-term price continuations and reversals. The ridge regression model is selected for its ability to handle potential multicollinearity among the factors while still providing a linear approach to predict returns. The features include Alpha#7 for momentum, Alpha#11 and Alpha#57 for mean-reversion around VWAP, and the RSI Mean Reversion to identify overbought/oversold conditions. This combination is expected to effectively identify stocks that are both trending strongly and showing signs of overextension.",
+      "statistician_reasoning": "The strategy demonstrates strong in-sample metrics with a high Sharpe ratio of 4.48 and a solid out-of-sample Sharpe ratio of 1.19, indicating that the edge persists beyond the training data. Additionally, the deflated Sharpe ratio of 0.7743 exceeds the threshold of 0.75, suggesting that the strategy is robust. Given the positive test results and the absence of any failing metrics, the strategy is deemed acceptable."
+    }
+  }
+]

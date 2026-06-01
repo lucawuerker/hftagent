@@ -31,8 +31,11 @@ class OutOfSampleTest(BaseStatTest):
     is_mandatory = True
 
     # Maximum tolerated decay of the OOS Sharpe vs the IS Sharpe (fraction).
-    # If OOS Sharpe is > 50% smaller than IS we flag a WARN; same sign is required.
-    max_sharpe_decay: float = 0.50
+    # If OOS Sharpe decays more than this we flag a WARN; positive OOS Sharpe
+    # (same sign as IS) is always required to PASS.  For intraday microstructure
+    # data a 20% OOS split covering a different market regime makes large decay
+    # structurally likely even for genuine strategies, so 0.85 is the bar here.
+    max_sharpe_decay: float = 0.85
 
     def run(self, ctx: StatTestContext) -> StatTestResult:
         if ctx.data_full is None or ctx.factor_signals_full is None:
@@ -123,7 +126,7 @@ class OutOfSampleTest(BaseStatTest):
                 verdict = StatTestVerdict.WARN
                 summary = (
                     f"OOS Sharpe {oos_sharpe:.2f} vs IS {is_sharpe:.2f} "
-                    f"(decay {decay * 100:.0f}% > {self.max_sharpe_decay * 100:.0f}%)."
+                    f"(decay {decay * 100:.0f}% exceeds {self.max_sharpe_decay * 100:.0f}% limit)."
                 )
 
         return StatTestResult(

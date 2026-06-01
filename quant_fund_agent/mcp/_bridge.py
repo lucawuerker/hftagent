@@ -56,6 +56,20 @@ def _result_text(result: Any) -> str:
     return "".join(parts)
 
 
+def _is_connection_dead(exc: BaseException) -> bool:
+    """Whether ``exc`` signals the stdio session/subprocess has gone away.
+
+    A long ``fit_and_backtest`` can outlive (or crash) the server subprocess; the
+    next call then hits a closed stream.  We treat these as recoverable and
+    reconnect rather than letting them crash the pipeline.
+    """
+    name = type(exc).__name__
+    if name in ("ClosedResourceError", "BrokenResourceError", "EndOfStream"):
+        return True
+    msg = str(exc).lower()
+    return "connection closed" in msg or "broken" in msg or "closed resource" in msg
+
+
 # ---------------------------------------------------------------------------
 # Shared background event loop (one thread for every server's session)
 # ---------------------------------------------------------------------------
@@ -116,14 +130,49 @@ class MCPBridge:
         await self._session.initialize()
         log.info("connected to MCP server %s", self._server_module)
 
+    async def _reconnect(self) -> None:
+        """Tear down the (likely broken) session and spin up a fresh subprocess."""
+        old, self._stack, self._session = self._stack, None, None
+        if old is not None:
+            try:
+                await old.aclose()
+            except Exception:  # the resource is already broken — ignore
+                pass
+        await self._connect()
+
     async def _call(self, name: str, arguments: dict[str, Any]) -> Any:
         result = await self._session.call_tool(name, arguments=arguments)
         if getattr(result, "isError", False):
             raise RuntimeError(f"MCP tool {name!r} errored: {_result_text(result)}")
         return json.loads(_result_text(result))
 
+    async def _call_with_reconnect(self, name: str, arguments: dict[str, Any]) -> Any:
+        try:
+            return await self._call(name, arguments)
+        except BaseException as e:
+            if not _is_connection_dead(e):
+                raise
+            # Heavy tools (e.g. fit_and_backtest / run_tests) can themselves crash
+            # the server — usually by OOM while loading the full panel.  Blindly
+            # retrying re-runs that expensive, likely-to-crash-again work.  So we
+            # reconnect (to keep the *next* call alive) but only auto-retry cheap,
+            # idempotent read calls; for the rest we re-raise and let the caller
+            # decide (the agents record the failure and move on).
+            retryable = name.startswith("list")
+            log.warning(
+                "MCP session to %s died (%s) — reconnecting%s.",
+                self._server_module, type(e).__name__,
+                f" and retrying {name!r}" if retryable else f"; not retrying {name!r}",
+            )
+            await self._reconnect()
+            if retryable:
+                return await self._call(name, arguments)
+            raise
+
     def call(self, name: str, arguments: dict[str, Any]) -> Any:
-        return self._submit(self._call(name, arguments)).result(timeout=_CALL_TIMEOUT_S)
+        return self._submit(
+            self._call_with_reconnect(name, arguments)
+        ).result(timeout=_CALL_TIMEOUT_S)
 
     def close(self) -> None:
         if self._stack is None:

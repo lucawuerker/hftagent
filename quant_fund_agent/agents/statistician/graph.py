@@ -71,19 +71,37 @@ def _run_tests(state: StatisticianState, test_ids: list[str]) -> list[StatTestRe
 
     The full test context (panel load, factor signals, deserialised IS returns)
     is rebuilt server-side from the JSON spec / metrics / trial history.
+
+    Infrastructure failures (e.g. the stats MCP server being OOM-killed while it
+    loads the full panel) are turned into ``FAIL`` results rather than crashing
+    the whole pipeline — mirroring the Architect's ``fit_and_backtest`` so one
+    dead subprocess rejects a single candidate instead of aborting the run.
     """
     if not test_ids:
         return []
-    raw = statistics_client.run_tests(
-        test_ids=test_ids,
-        spec=state.strategy_spec.model_dump(mode="json"),
-        is_metrics=state.backtest_metrics,
-        trial_history=[t.model_dump(mode="json") for t in state.trial_history],
-        hypothesis=state.hypothesis,
-        oos_split_ratio=state.oos_split_ratio,
-        bars_per_day=state.bars_per_day,
-    )
-    return [StatTestResult.model_validate(r) for r in raw]
+    try:
+        raw = statistics_client.run_tests(
+            test_ids=test_ids,
+            spec=state.strategy_spec.model_dump(mode="json"),
+            is_metrics=state.backtest_metrics,
+            trial_history=[t.model_dump(mode="json") for t in state.trial_history],
+            hypothesis=state.hypothesis,
+            oos_split_ratio=state.oos_split_ratio,
+            bars_per_day=state.bars_per_day,
+        )
+        return [StatTestResult.model_validate(r) for r in raw]
+    except Exception as e:  # noqa: BLE001 — never crash the agent on infra failure
+        log.warning("Statistical tests failed to run (%s): %s — recording FAIL.",
+                    type(e).__name__, e)
+        return [
+            StatTestResult(
+                test_id=tid,
+                test_name=tid,
+                verdict=StatTestVerdict.FAIL,
+                summary=f"Test could not be run (infrastructure error: {e}).",
+            )
+            for tid in test_ids
+        ]
 
 
 # ── node 1: run mandatory tests ──────────────────────────────────────

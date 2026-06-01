@@ -215,9 +215,10 @@ def _parse_spec(parsed: dict, state: ArchitectState, fallback_name: str) -> Stra
         model_type=model_type,
         model_params=model_params,
         factor_ids=factor_ids,
-        target_horizon=_as_int(parsed.get("target_horizon", 6), 6),
+        target_horizon=state.target_horizon,  # config-driven, not LLM-chosen
         weights=weights,
-        holding_period=_as_int(parsed.get("holding_period", 6), 6),
+        holding_period=_as_int(parsed.get("holding_period", state.target_horizon),
+                               state.target_horizon),
         max_positions=_as_int(parsed.get("max_positions", 20), 20),
         equal_weight=bool(parsed.get("equal_weight", False)),
         min_conviction=_as_float(parsed.get("min_conviction", 0.0), 0.0),
@@ -242,6 +243,12 @@ MODEL TOOLBOX (choose exactly one model_type)
 ---------------------------------------------
 {model_menu}
 
+FORECAST HORIZON
+----------------
+Fixed at {target_horizon} bars: the model predicts {target_horizon}-bar-ahead
+returns and positions are held ~{target_horizon} bars.  Choose the model and
+features for THIS horizon.
+
 Your task:
 Design a strategy that predicts forward returns from the factors using ONE model
 from the toolbox, then trades that prediction.  Prefer the simplest model that
@@ -257,9 +264,8 @@ Decide:
    Omit for static_weights.
 5. weights: ONLY for static_weights — {{"factor_id": weight, ...}} (a negative
    weight reverses that factor).
-6. target_horizon: how many 10-second bars ahead the model predicts returns
-   (e.g. 1, 6, 60).
-7. holding_period: bars to hold before re-scoring (1, 6, 60).
+6. holding_period: bars to hold before re-scoring.  Default to the forecast
+   horizon ({target_horizon} bars) unless you have a clear reason to differ.
 8. max_positions: how many stocks to trade at once (default 20, max 50).
 9. equal_weight: true to give every selected position equal size.
 10. min_conviction: minimum absolute z-score of the combined signal to take a
@@ -271,7 +277,6 @@ Respond in JSON:
   "model_params": object,
   "factor_ids": [string, ...],
   "weights": object,
-  "target_horizon": int,
   "holding_period": int,
   "max_positions": int,
   "equal_weight": bool,
@@ -287,6 +292,7 @@ def design_model(state: ArchitectState) -> dict:
         hypothesis=state.hypothesis,
         factor_details=_factor_details_text(state),
         model_menu=_model_menu_text(),
+        target_horizon=state.target_horizon,
     ))
     spec = _parse_spec(_parse_json(resp.content), state, fallback_name="unnamed")
     log.info("[design] model_type=%s features=%s", spec.model_type,
@@ -382,7 +388,7 @@ Review the results.  Consider:
 Decide:
 - "approve" if results are acceptable or you've exhausted useful changes.
 - "revise" if a specific change (different model_type, hyper-parameters, feature
-  set, target_horizon, or position settings) would plausibly improve results.
+  set, or position settings) would plausibly improve results.
 
 Respond in JSON:
   "decision": "approve" or "revise",
@@ -390,19 +396,29 @@ Respond in JSON:
 """
 
 
-def _trial_sharpe(t: TrialRecord) -> float | None:
-    s = t.metrics.get("sharpe_ratio")
-    if s is None or t.metrics.get("error"):
+def _trial_score(t: TrialRecord) -> float | None:
+    """Leakage-free selection score for a trial.
+
+    Prefer the held-out **validation rank-IC** (computed inside the IS window on
+    data the model wasn't fitted on); fall back to in-sample Sharpe for the
+    static-weights baseline, which has no fitted model / validation score.
+    """
+    if t.metrics.get("error"):
         return None
+    vs = t.metrics.get("validation_score")
+    if vs is None:
+        vs = (t.metrics.get("diagnostics") or {}).get("valid_ic")
+    if vs is None:
+        vs = t.metrics.get("sharpe_ratio")
     try:
-        return float(s)
+        return float(vs) if vs is not None else None
     except (TypeError, ValueError):
         return None
 
 
 def _best_trial(state: ArchitectState) -> TrialRecord | None:
-    """The successful trial with the highest Sharpe (for forced approval)."""
-    scored = [(s, t) for t in state.trial_history if (s := _trial_sharpe(t)) is not None]
+    """The successful trial with the best selection score (for forced approval)."""
+    scored = [(s, t) for t in state.trial_history if (s := _trial_score(t)) is not None]
     if not scored:
         return None
     return max(scored, key=lambda x: x[0])[1]
@@ -484,8 +500,8 @@ YOUR PREVIOUS REVIEW
 {decision_reasoning}
 
 Revise the strategy based on what the trials show.  You may change the
-model_type, model_params, factor_ids (features), target_horizon, or the position
-settings.  Use ONLY the factors listed above.  Make a targeted change that
+model_type, model_params, factor_ids (features), or the position settings (the
+forecast horizon is fixed).  Use ONLY the factors listed above.  Make a targeted change that
 addresses the weakness you identified (e.g. if train_r2 >> valid_r2, regularise
 more or use fewer features / a simpler model).  Avoid repeating a configuration
 you've already tried.
@@ -496,7 +512,6 @@ Respond in JSON (same schema as the design step):
   "model_params": object,
   "factor_ids": [string, ...],
   "weights": object,
-  "target_horizon": int,
   "holding_period": int,
   "max_positions": int,
   "equal_weight": bool,

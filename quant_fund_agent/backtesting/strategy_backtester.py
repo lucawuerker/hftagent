@@ -165,6 +165,7 @@ def _compute_metrics(
     signal: pd.DataFrame,
     close: pd.DataFrame,
     bars_per_day: int = BARS_PER_DAY,
+    ic_horizon: int = 6,
 ) -> StrategyBacktestMetrics:
     """Derive all summary statistics from the portfolio return series."""
     n = len(port_ret)
@@ -215,11 +216,11 @@ def _compute_metrics(
     # average number of non-zero positions held
     avg_positions = float((positions.abs() > 1e-9).sum(axis=1).mean())
 
-    # IC of the composite signal
-    fwd_ret_6 = forward_returns(close, horizon=6)
+    # IC of the composite signal at the strategy's prediction horizon.
+    fwd_ret_h = forward_returns(close, horizon=ic_horizon)
     # Align IC to the same "tradeable next bar" convention:
     # signal at t is evaluated against returns starting at t+1.
-    ic = _ic_series(signal, fwd_ret_6.shift(-1))
+    ic = _ic_series(signal, fwd_ret_h.shift(-1))
     ic_mean = float(ic.mean()) if len(ic) > 0 else None
     ic_std = float(ic.std()) if len(ic) > 0 else None
     ic_ir = float(ic_mean / ic_std) if ic_std and ic_std > 0 else None
@@ -279,6 +280,7 @@ def backtest_strategy(
 
     metrics = _compute_metrics(
         port_ret, positions, signal, data["close"],
+        ic_horizon=getattr(strategy, "target_horizon", 6),
     )
 
     return BacktestResult(

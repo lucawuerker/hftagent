@@ -62,6 +62,11 @@ class ArchitectState(BaseModel):
     # out-of-sample test.  The architect only ever sees the in-sample slice.
     oos_split_ratio: float = 0.2
 
+    # ── prediction horizon (bars ahead the model forecasts; also the default
+    #    holding period and the IC evaluation horizon).  Config-driven, not
+    #    chosen by the LLM, so the showcase can sweep horizons cleanly. ──
+    target_horizon: int = 6
+
     # ── current iteration ──
     strategy_spec: StrategySpec = Field(default_factory=StrategySpec)
     backtest_metrics: dict[str, Any] = Field(default_factory=dict)

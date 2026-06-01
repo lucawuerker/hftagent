@@ -117,6 +117,9 @@ def test_fit_and_backtest_each_model(panel, tmp_path, model_type):
     diag = result["diagnostics"]
     assert diag["n_train_samples"] > 0 and diag["n_valid_samples"] > 0
     assert "train_r2" in diag and "valid_r2" in diag
+    # held-out validation rank-IC drives trial selection
+    assert "valid_ic" in diag
+    assert "validation_score" in result and "validation_score" in metrics
 
     # A loadable artifact must exist for OOS / live reuse.
     artifact = result["artifact_path"]
