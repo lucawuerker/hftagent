@@ -37,6 +37,7 @@ def run_tests(
     hypothesis: str = "",
     oos_split_ratio: float = 0.2,
     bars_per_day: int = 2340,
+    as_of: str | None = None,
 ) -> list[dict[str, Any]]:
     """Run the requested statistical tests; returns StatTestResult dumps."""
     args: dict[str, Any] = dict(
@@ -47,6 +48,7 @@ def run_tests(
         hypothesis=hypothesis,
         oos_split_ratio=oos_split_ratio,
         bars_per_day=bars_per_day,
+        as_of=as_of,
     )
     if not _use_mcp():
         from quant_fund_agent.mcp import statistics_service as svc

@@ -30,6 +30,28 @@ _PANEL_CACHE: dict[str, Any] | None = None
 _SIGNAL_CACHE: dict[str, Any] = {}
 
 
+def _truncate_as_of(
+    frames: dict[str, Any],
+    as_of: str | None,
+) -> dict[str, Any]:
+    """Keep only rows strictly **before** ``as_of`` (exclusive upper bound).
+
+    Used by the walk-forward backtest so the Architect / Statistician only see
+    data available at a given point in time.  ``as_of`` is an ISO date/datetime
+    string; ``None`` is a no-op (the full panel, current production behaviour).
+
+    Slicing the (full) cached frames per call is cheap and keeps the heavy panel
+    + factor signals computed once on the *whole* history — so warm-up bars at
+    the start are correct and nothing after the cutoff can leak in.
+    """
+    if as_of is None:
+        return frames
+    import pandas as pd
+
+    cut = pd.Timestamp(as_of)
+    return {k: df.loc[df.index < cut] for k, df in frames.items()}
+
+
 def _resolve_n_tickers() -> int | None:
     """Universe cap from ``ARCHITECT_N_TICKERS`` (shared with the architect)."""
     raw = os.getenv("ARCHITECT_N_TICKERS")
@@ -82,11 +104,16 @@ def run_fit_and_backtest(
     oos_split_ratio: float = 0.2,
     valid_ratio: float = 0.3,
     strategy_id: str | None = None,
+    as_of: str | None = None,
 ) -> dict[str, Any]:
     """Compute IS signals for the requested factors and fit + backtest one model.
 
     The held-out OOS slice (``oos_split_ratio``) is never passed to the model —
     it is reserved for the Statistician.
+
+    ``as_of`` (walk-forward backtest only): an ISO date/datetime string.  When
+    set, the panel + factor signals are truncated to rows strictly before it
+    *before* the IS/OOS split, so the Architect never sees future data.
     """
     from quant_fund_agent.factors import discover_factors
 
@@ -102,6 +129,10 @@ def run_fit_and_backtest(
         raise ValueError(f"No factors supplied for model_type={model_type!r}.")
 
     signals_full = {fid: _factor_signal(fid, data_full) for fid in needed}
+
+    # Walk-forward cutoff: hide everything from the cutoff date onward.
+    data_full = _truncate_as_of(data_full, as_of)
+    signals_full = _truncate_as_of(signals_full, as_of)
 
     data_is, _ = split_panel(data_full, oos_split_ratio)
     signals_is, _ = split_signals(signals_full, oos_split_ratio)

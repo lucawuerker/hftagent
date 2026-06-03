@@ -26,6 +26,10 @@ class StatisticianState(BaseModel):
     # OOS split the architect used (statistician reuses the same split)
     oos_split_ratio: float = 0.2
 
+    # Walk-forward cutoff (backtest only): ISO date string limiting visible
+    # data so the OOS test never sees post-cutoff bars.  None → full history.
+    as_of: str | None = None
+
     # ── config ──
     bars_per_day: int = 2340
     # Test IDs that must always be run.  If empty the statistician uses

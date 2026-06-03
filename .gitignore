@@ -14,3 +14,13 @@ __pycache__/
 quant_fund_agent/factors/researcher/*
 !quant_fund_agent/factors/researcher/__init__.py
 claude.md
+
+# showcase_pipeline/ writes generated factors/strategies into separate
+# showcase database copies at runtime; these are regenerated locally and
+# must not be tracked.
+data/factors/showcase_factor_db.json
+data/strategies/showcase_strategy_db.json
+
+# Full text of papers fetched from their links is cached locally (one .txt
+# per paper); regenerated on demand, so not tracked.
+data/papers/fulltext_cache/

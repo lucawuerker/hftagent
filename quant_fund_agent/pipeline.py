@@ -188,16 +188,24 @@ def run_strategy_pipeline(
     oos_ratio: float = 0.2,
     target_horizon: int = 6,
     run_statistician: bool = True,
+    cutoff_date: date | None = None,
 ) -> StrategyPipelineResult:
     """Selector → Architect → (optionally) Statistician, in one call.
 
     The ``approved`` flag is True only when the architect approved *and*
     the statistician accepted (or the statistician was skipped on an
     architect approval).
+
+    ``cutoff_date`` (walk-forward backtest only): when set, the Architect and
+    Statistician only see panel data strictly **before** it — so a strategy
+    designed at week *t* is never contaminated by the data it will be traded on.
+    ``None`` → full history (the default / production behaviour).
     """
     from quant_fund_agent.agents.architect.graph import architect_graph
     from quant_fund_agent.agents.selector.graph import selector_graph
     from quant_fund_agent.agents.statistician.graph import statistician_graph
+
+    as_of = cutoff_date.isoformat() if cutoff_date else None
 
     selector_result = selector_graph.invoke({})
     log.info("Selector hypothesis: %s", selector_result.get("hypothesis", "")[:120])
@@ -210,6 +218,7 @@ def run_strategy_pipeline(
         "max_iterations": max_iterations,
         "oos_split_ratio": oos_ratio,
         "target_horizon": target_horizon,
+        "as_of": as_of,
     })
 
 
@@ -233,6 +242,7 @@ def run_strategy_pipeline(
         "initial_reasoning": architect_result.get("initial_reasoning", ""),
         "final_reasoning": architect_result["strategy_spec"].reasoning,
         "oos_split_ratio": oos_ratio,
+        "as_of": as_of,
     })
     for r in stat_result["test_results"]:
         v = r.verdict.value.upper()

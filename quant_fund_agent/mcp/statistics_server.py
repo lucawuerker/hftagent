@@ -50,11 +50,13 @@ def run_tests(
     hypothesis: str = "",
     oos_split_ratio: float = 0.2,
     bars_per_day: int = 2340,
+    as_of: str | None = None,
 ) -> str:
     """Run the requested statistical tests on the candidate strategy.
 
     The full test context (panel, factor signals, deserialised IS returns) is
     rebuilt server-side from ``spec`` / ``is_metrics`` / ``trial_history``.
+    ``as_of`` (walk-forward backtest): ISO date string limiting visible data.
     Returns a JSON array of ``StatTestResult`` objects.
     """
     return json.dumps(svc.run_tests(
@@ -65,6 +67,7 @@ def run_tests(
         hypothesis=hypothesis,
         oos_split_ratio=oos_split_ratio,
         bars_per_day=bars_per_day,
+        as_of=as_of,
     ))
 
 

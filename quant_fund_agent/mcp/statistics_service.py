@@ -54,10 +54,15 @@ def _build_context(
     hypothesis: str,
     oos_split_ratio: float,
     bars_per_day: int,
+    as_of: str | None = None,
 ):
     from quant_fund_agent.agents.architect.state import StrategySpec, TrialRecord
     from quant_fund_agent.factors import discover_factors
-    from quant_fund_agent.modeling.service import _factor_signal, _load_panel
+    from quant_fund_agent.modeling.service import (
+        _factor_signal,
+        _load_panel,
+        _truncate_as_of,
+    )
     from quant_fund_agent.statistics import StatTestContext
 
     discover_factors()
@@ -66,6 +71,12 @@ def _build_context(
 
     data_full = _load_panel()
     factor_signals_full = {fid: _factor_signal(fid, data_full) for fid in feature_ids}
+
+    # Walk-forward cutoff: the OOS test must run on the tail of the pre-cutoff
+    # window (genuinely held out from the architect AND strictly before the
+    # simulator's live trading window), never on post-cutoff data.
+    data_full = _truncate_as_of(data_full, as_of)
+    factor_signals_full = _truncate_as_of(factor_signals_full, as_of)
 
     return StatTestContext(
         strategy_spec=spec_obj,
@@ -89,11 +100,15 @@ def run_tests(
     hypothesis: str = "",
     oos_split_ratio: float = 0.2,
     bars_per_day: int = 2340,
+    as_of: str | None = None,
 ) -> list[dict[str, Any]]:
     """Build the test context server-side and run each requested test.
 
     Returns a list of ``StatTestResult`` model dumps (one per ``test_id``).  A
     test that raises is reported as a ``FAIL`` result rather than aborting.
+
+    ``as_of`` (walk-forward backtest): ISO date string; when set the OOS test
+    only sees data strictly before it.
     """
     from quant_fund_agent.statistics import (
         StatTestResult,
@@ -110,6 +125,7 @@ def run_tests(
         hypothesis=hypothesis,
         oos_split_ratio=oos_split_ratio,
         bars_per_day=bars_per_day,
+        as_of=as_of,
     )
 
     results: list[dict[str, Any]] = []

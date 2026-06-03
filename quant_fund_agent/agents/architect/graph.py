@@ -333,6 +333,7 @@ def fit_and_backtest(state: ArchitectState) -> dict:
             min_conviction=spec.min_conviction,
             oos_split_ratio=state.oos_split_ratio,
             strategy_id=f"arch_{uuid.uuid4().hex[:8]}",
+            as_of=state.as_of,
         )
         metrics = result.get("metrics", {})
         metrics["diagnostics"] = result.get("diagnostics", {})

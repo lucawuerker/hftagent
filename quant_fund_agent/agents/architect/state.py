@@ -62,6 +62,11 @@ class ArchitectState(BaseModel):
     # out-of-sample test.  The architect only ever sees the in-sample slice.
     oos_split_ratio: float = 0.2
 
+    # ── walk-forward cutoff (backtest only) ──
+    # ISO date/datetime string.  When set, the architect only sees panel data
+    # strictly before it (no look-ahead).  ``None`` → full history (production).
+    as_of: str | None = None
+
     # ── prediction horizon (bars ahead the model forecasts; also the default
     #    holding period and the IC evaluation horizon).  Config-driven, not
     #    chosen by the LLM, so the showcase can sweep horizons cleanly. ──

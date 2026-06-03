@@ -17,6 +17,7 @@ class PaperSnippet(BaseModel):
     published_date: date | None = None
     text: str = ""        # truncated extracted body
     file_path: str = ""
+    source: str = ""      # "local_pdf" | "link" | "abstract"
 
 
 class FactorIdea(BaseModel):

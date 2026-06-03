@@ -1,0 +1,3 @@
+{"cutoff": "2019-01-16T00:00:00", "week": "2019-W03", "research": true, "strategy": true, "pm": true, "kept_factor_ids": ["volume_momentum", "effective_spread_ratio"], "strategies_built": 2, "strategies_approved": [], "allocation": {}}
+{"cutoff": "2019-01-23T00:00:00", "week": "2019-W04", "research": true, "strategy": true, "pm": true, "kept_factor_ids": ["order_flow_pressure", "hidden_volume_significance"], "strategies_built": 1, "strategies_approved": [], "allocation": {}}
+{"cutoff": "2019-01-30T00:00:00", "week": "2019-W05", "research": true, "strategy": true, "pm": true, "kept_factor_ids": ["order_flow_diffusion", "hidden_volume_impact"], "strategies_built": 1, "strategies_approved": [], "allocation": {}}

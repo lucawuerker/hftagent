@@ -30,6 +30,7 @@ Master's thesis project — Mathematics & Finance, Imperial College London.
 - **Portfolio construction** — seven allocation methods (equal weight through hierarchical risk parity), three risk personalities, optional multi-PM committee.
 - **MCP toolboxes** — heavy compute (panel loads, fits, IC tests) runs in persistent stdio servers with an in-process fallback for tests and debugging.
 - **End-to-end scripts** — one command runs research → strategy pipeline → persist → PM rebalance (`run_fund.py`).
+- **Walk-forward backtest** — `run_backtest.py` runs the fund *through time*: weekly research/strategy/PM meetings, frozen strategies, a consolidated **netted** (or independent-pod) book, and spread-aware costs — decoupled from the agents so the same code runs live.
 
 ## Architecture
 
@@ -80,6 +81,9 @@ export OPENAI_API_KEY=sk-...
 
 # Optional: include a factor-research session first
 ./venv/bin/python run_fund.py --research --n-strategies 3
+
+# 3. Walk-forward backtest: weekly research/strategy/PM meetings, traded over time
+./venv/bin/python run_backtest.py --start 2019-01-02 --end 2019-03-02 --n-tickers 8
 ```
 
 Individual stages:
@@ -199,6 +203,59 @@ export QF_USE_MCP=0
 
 Database mutations (flag/retire strategies, save portfolios) stay in the agent graphs because they use live in-memory DB handles shared with the committee.
 
+## Backtesting (walk-forward)
+
+`run_fund.py` is a single research → strategy → PM pass. `run_backtest.py` runs
+the fund **through time**: the `quant_fund_agent/simulation/` harness steps over a
+date range on a weekly grid, holding **research / strategy / PM meetings** on a
+schedule and trading the resulting book on genuinely unseen data with realistic
+execution.
+
+The harness is **deliberately separate from the agents** — it drives them only
+through the `pipeline.py` seam and is never imported by an agent, so the same
+agent code path runs in a backtest and in live trading.
+
+```bash
+# Two months, weekly meetings, consolidated netted book (default).
+./venv/bin/python run_backtest.py --start 2019-01-02 --end 2019-03-02 --n-tickers 8
+
+# Compare the independent-pod execution model on the same span.
+./venv/bin/python run_backtest.py --start 2019-01-02 --end 2019-03-02 --execution pod
+
+# Smoke run: shrink the warm-up so meetings fire on a short span.
+QF_USE_MCP=0 ./venv/bin/python run_backtest.py --start 2019-01-02 --end 2019-02-15 \
+  --warmup 2W --initial-strategies 2 --n-strategies 1
+```
+
+**How it works** (all knobs live in `simulation/config.py::BacktestConfig`):
+
+- **Warm-up** — no meetings or trading until `warmup` (default 1 month) of history
+  exists, so the agents always have enough data to research and fit on.
+- **Cadence** — `research_every` / `strategy_every` / `pm_rebalance_every` (default
+  weekly). The first strategy meeting builds `initial_strategies` (bootstrap), every
+  meeting after builds `n_strategies_per_meeting`.
+- **No look-ahead** — at each weekly *cutoff* the Architect/Statistician only see
+  data strictly *before* it (threaded as `cutoff_date`); the live trading window is
+  strictly *after* it. Strategies are **frozen on approval** (artifacts never refit);
+  the PM monitors live PnL and may retire them; only new research adds strategies.
+
+**Trade execution** — per-strategy positions become the traded book one of two ways
+(`--execution`, default `netted`):
+
+| Model | Same/opposite signals on a ticker | `max_positions` | Costs |
+|-------|-----------------------------------|-----------------|-------|
+| `netted` (default) | summed into **one fund book** per ticker — opposite signals **net out**, agreeing ones reinforce | **fund-level** cap on the consolidated book (+ per-name cap, gross-leverage cap) | charged once on the **net** turnover |
+| `pod` | each strategy trades its own book — **no netting** | per-strategy | each strategy pays its own |
+
+Costs are **spread-aware** (½ the quoted `effSpread` from the panel) **+ a fixed
+commission** (`--commission-bps`); there is no market-impact term.
+
+**Outputs** land in `data/backtests/<run_id>/`: `equity.csv` (fund return + drawdown),
+`fund_metrics.json` (Sharpe / Sortino / Calmar / maxDD / cost / turnover),
+`attribution.csv` (per-strategy contribution), `meetings.jsonl`, and the run's
+`config.json` + strategy/portfolio DBs (scoped to the run, so the live book is never
+clobbered). `fund_showcase.ipynb` §11 renders the latest run.
+
 ## Data
 
 Place LOBSTER CSVs under `ticker_data/` (or set `DATA_DIR`). The loader (`backtesting/data_loader.py`) builds an aligned panel of OHLCV plus microstructure fields (`orderFlow`, `lobImb`, `spread`, `nbTrades`, etc.) on a shared 10-second index.
@@ -232,14 +289,16 @@ QuantFundAgent/
 │   ├── mcp/                       # MCP servers, clients, shared services
 │   ├── portfolio/                 # Construction methods, personalities, correlations
 │   ├── statistics/                # Test registry + implementations
-│   └── strategies/                # BaseStrategy, ModelStrategy, DynamicStrategy
-├── run_fund.py                    # End-to-end fund demo
+│   ├── strategies/                # BaseStrategy, ModelStrategy, DynamicStrategy
+│   └── simulation/                # Walk-forward backtest harness (separate from agents)
+├── run_fund.py                    # End-to-end fund demo (single pass)
+├── run_backtest.py                # Walk-forward backtest (weekly meetings over time)
 ├── run_pipeline.py                # Strategy pipeline only
 ├── run_factor_research.py
 ├── run_portfolio_manager.py
 ├── run_all_factors.py
 ├── fund_showcase.ipynb
-└── tests/                         # Including test_mcp_*.py parity tests
+└── tests/                         # Including test_mcp_*.py + test_simulation.py
 ```
 
 ## Configuration

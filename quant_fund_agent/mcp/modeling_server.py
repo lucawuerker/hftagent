@@ -58,6 +58,7 @@ def fit_and_backtest(
     oos_split_ratio: float = 0.2,
     valid_ratio: float = 0.3,
     strategy_id: str = "",
+    as_of: str | None = None,
 ) -> str:
     """Fit ``model_type`` on the in-sample window and backtest it (JSON result).
 
@@ -65,6 +66,9 @@ def fit_and_backtest(
     is fit on an IS-train sub-window and back-tested on the held-out IS-valid
     sub-window.  For ``static_weights`` pass ``weights`` instead.  The held-out
     OOS slice (``oos_split_ratio``) is never shown to the model.
+
+    ``as_of`` (walk-forward backtest): ISO date string; when set, only data
+    strictly before it is visible to the fit/backtest.
 
     Returns JSON: ``{model_type, factor_ids, metrics, artifact_path, diagnostics}``.
     """
@@ -83,6 +87,7 @@ def fit_and_backtest(
         oos_split_ratio=oos_split_ratio,
         valid_ratio=valid_ratio,
         strategy_id=strategy_id or None,
+        as_of=as_of,
     )
     return json.dumps(result)
 

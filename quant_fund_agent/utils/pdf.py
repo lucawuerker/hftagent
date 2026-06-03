@@ -58,13 +58,48 @@ def extract_text(
         log.warning("Failed to open %s: %s", p, e)
         return ""
 
+    return _reader_to_text(reader, max_chars)
+
+
+def extract_text_from_bytes(
+    data: bytes,
+    max_chars: int | None = 30_000,
+) -> str:
+    """Extract plain text from in-memory PDF ``data`` (e.g. a download).
+
+    Same behaviour as :func:`extract_text` but reads from a byte string
+    instead of a file on disk, so a paper fetched over HTTP never has to be
+    written out before its text is extracted.  Returns ``""`` if the bytes
+    are not a parseable PDF.
+    """
+    import io
+
+    try:
+        from pypdf import PdfReader
+    except ImportError as e:  # pragma: no cover - dependency hint
+        raise ImportError(
+            "pypdf is required for PDF extraction.  "
+            "Install with `pip install pypdf`."
+        ) from e
+
+    try:
+        reader = PdfReader(io.BytesIO(data))
+    except Exception as e:
+        log.warning("Failed to parse PDF bytes (%d bytes): %s", len(data), e)
+        return ""
+
+    return _reader_to_text(reader, max_chars)
+
+
+def _reader_to_text(reader, max_chars: int | None) -> str:
+    """Concatenate page text from a ``pypdf`` reader, capped at ``max_chars``."""
     chunks: list[str] = []
     total = 0
     for i, page in enumerate(reader.pages):
         try:
             text = page.extract_text() or ""
         except Exception as e:
-            log.debug("page %d of %s failed: %s", i, p.name, e)
+            log.debug("page %d failed: %s", i, e)
             continue
         chunks.append(text)
         total += len(text)

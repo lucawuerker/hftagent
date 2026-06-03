@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 import time
 from datetime import date, datetime
 from pathlib import Path
@@ -27,6 +28,19 @@ log = logging.getLogger("research.service")
 PAPER_INDEX_PATH = Path(os.getenv("PAPER_INDEX_PATH", "data/papers/index.json"))
 PAPER_PDF_DIR = Path(os.getenv("PAPER_PDF_DIR", "data/papers/pdfs"))
 FACTOR_DB_PATH = Path(os.getenv("FACTOR_DB_PATH", "data/factors/factor_db.json"))
+
+# Most papers in the index have no local PDF — only a link (arXiv abstract page +
+# a direct ``pdf_url``).  We fetch and cache their *full text* from that link so
+# the agent reads the whole paper, not just the stored abstract.
+PAPER_FULLTEXT_CACHE_DIR = Path(
+    os.getenv("PAPER_FULLTEXT_CACHE", "data/papers/fulltext_cache")
+)
+# Set PAPER_FETCH_FULLTEXT=0 to stay fully offline (abstract-only fallback).
+FETCH_FULLTEXT = os.getenv("PAPER_FETCH_FULLTEXT", "1").strip().lower() not in (
+    "0", "false", "no",
+)
+_HTTP_TIMEOUT = float(os.getenv("PAPER_FETCH_TIMEOUT", "30"))
+_HTTP_HEADERS = {"User-Agent": "QuantFundAgent/1.0 (academic factor research)"}
 
 # Panel cache keyed by (field-set, universe size); see the original
 # factor_research graph for why memory makes this cache worthwhile.
@@ -59,6 +73,83 @@ def _select_paper_ids(paper_db, n: int, cutoff: date | None, strategy: str) -> l
     return [p.id for p in papers[:n]]
 
 
+def _pdf_url_for(paper) -> str | None:
+    """Best-effort direct-PDF (or fallback) URL for a paper's coupled link.
+
+    Prefers the stored ``metadata.pdf_url``; otherwise derives the PDF link
+    from an arXiv abstract URL, or uses the raw ``url`` as a last resort.
+    """
+    meta = paper.metadata or {}
+    pdf_url = meta.get("pdf_url")
+    if pdf_url:
+        return pdf_url
+    url = paper.url or ""
+    if not url:
+        return None
+    m = re.search(r"arxiv\.org/abs/([^\s/?#]+)", url)
+    if m:
+        return f"https://arxiv.org/pdf/{m.group(1)}"
+    return url
+
+
+def _strip_html(html: str) -> str:
+    """Crude HTML → text (drop scripts/styles/tags, collapse whitespace)."""
+    text = re.sub(r"(?is)<(script|style).*?</\1>", " ", html)
+    text = re.sub(r"(?s)<[^>]+>", " ", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def _fetch_fulltext(paper, max_chars: int) -> str:
+    """Download + extract the full text of ``paper`` from its coupled link.
+
+    The extracted text is cached under :data:`PAPER_FULLTEXT_CACHE_DIR` keyed by
+    paper id, so each paper is fetched at most once.  Returns ``""`` on any
+    failure (the caller then falls back to the stored abstract), and never
+    raises — a single unreachable link must not abort a research session.
+    """
+    cache = PAPER_FULLTEXT_CACHE_DIR / f"{paper.id}.txt"
+    if cache.exists():
+        cached = cache.read_text(encoding="utf-8", errors="ignore")
+        if cached.strip():
+            return cached[:max_chars] if max_chars else cached
+
+    if not FETCH_FULLTEXT:
+        return ""
+
+    url = _pdf_url_for(paper)
+    if not url:
+        return ""
+
+    try:
+        import requests
+
+        from quant_fund_agent.utils.pdf import extract_text_from_bytes
+
+        t0 = time.time()
+        resp = requests.get(url, timeout=_HTTP_TIMEOUT, headers=_HTTP_HEADERS)
+        resp.raise_for_status()
+        ctype = resp.headers.get("Content-Type", "").lower()
+        if "pdf" in ctype or url.lower().endswith(".pdf") or "/pdf/" in url.lower():
+            text = extract_text_from_bytes(resp.content, max_chars=max_chars)
+        else:
+            text = _strip_html(resp.text)
+            if max_chars:
+                text = text[:max_chars]
+        log.info("fetched full text for %s from %s (%d chars, %.1fs)",
+                 paper.id, url, len(text), time.time() - t0)
+    except Exception as e:  # noqa: BLE001 — degrade to abstract on any failure
+        log.warning("full-text fetch failed for %s (%s): %s", paper.id, url, e)
+        return ""
+
+    if text.strip():
+        try:
+            PAPER_FULLTEXT_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+            cache.write_text(text, encoding="utf-8")
+        except Exception as e:  # pragma: no cover — caching is best-effort
+            log.debug("could not cache full text for %s: %s", paper.id, e)
+    return text
+
+
 def load_papers(
     n: int = 2,
     cutoff_date: str | None = None,
@@ -86,16 +177,48 @@ def load_papers(
         p = paper_db.get_paper(pid)
         if p is None:
             continue
-        path = PAPER_PDF_DIR.parent / (p.file_path or "")
-        text = extract_text(path, max_chars=max_chars)
+
+        text = ""
+        source = ""
+
+        # 1) Prefer a locally-downloaded PDF.
+        if p.file_path:
+            path = PAPER_PDF_DIR.parent / p.file_path
+            if path.exists():
+                text = extract_text(path, max_chars=max_chars)
+                if text:
+                    source = "local_pdf"
+
+        # 2) Otherwise fetch the *full text* from the paper's coupled link
+        #    (most index.json papers are arXiv entries with a pdf_url).
         if not text:
-            log.warning("no text extracted from %s", p.file_path)
+            fetched = _fetch_fulltext(p, max_chars)
+            if fetched:
+                text = fetched
+                source = "link"
+
+        # 3) Last resort: the stored abstract + description.
+        if not text:
+            parts = []
+            desc = p.metadata.get("description", "")
+            if desc:
+                parts.append(desc)
+            if p.abstract:
+                parts.append(p.abstract)
+            text = "\n\n".join(parts)[:max_chars]
+            if text:
+                source = "abstract"
+
+        if not text:
+            log.warning("no text available for paper %s", pid)
+
         snippets.append({
             "paper_id": p.id,
             "title": p.title,
             "published_date": p.published_date.isoformat() if p.published_date else None,
             "text": text,
             "file_path": p.file_path or "",
+            "source": source,
         })
     return snippets
 

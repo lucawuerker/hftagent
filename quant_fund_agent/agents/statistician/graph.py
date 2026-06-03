@@ -88,6 +88,7 @@ def _run_tests(state: StatisticianState, test_ids: list[str]) -> list[StatTestRe
             hypothesis=state.hypothesis,
             oos_split_ratio=state.oos_split_ratio,
             bars_per_day=state.bars_per_day,
+            as_of=state.as_of,
         )
         return [StatTestResult.model_validate(r) for r in raw]
     except Exception as e:  # noqa: BLE001 — never crash the agent on infra failure
