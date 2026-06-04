@@ -44,7 +44,10 @@ LLM_MODEL = os.getenv("STATISTICIAN_LLM_MODEL", "gpt-4o-mini")
 
 
 def _get_llm() -> ChatOpenAI:
-    return ChatOpenAI(model=LLM_MODEL, temperature=0.2)
+    # Finite timeout + retries so a stalled response-body read can't hang the
+    # pipeline forever inside SSL_read (langchain-openai's default timeout=None
+    # = wait forever).  See the selector graph for the full explanation.
+    return ChatOpenAI(model=LLM_MODEL, temperature=0.2, timeout=120, max_retries=4)
 
 
 def _parse_json(content: str) -> dict:

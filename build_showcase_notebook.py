@@ -1,4 +1,4 @@
-"""Generate ``fund_showcase.ipynb`` — the supervisor-facing walkthrough.
+"""Generate ``fund_showcase.ipynb`` 
 
 Run once to (re)build the notebook:  ./venv/bin/python build_showcase_notebook.py
 Then execute it (cached mode) with nbconvert, or open it in Jupyter.

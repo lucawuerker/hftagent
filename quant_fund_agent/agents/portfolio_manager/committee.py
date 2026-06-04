@@ -370,7 +370,10 @@ def _llm_moderate(
 
     try:
         from langchain_openai import ChatOpenAI
-        llm = ChatOpenAI(model=LLM_MODEL, temperature=0.2)
+        # Finite timeout + retries so a stalled response-body read can't hang the
+        # pipeline forever inside SSL_read (langchain-openai's default
+        # timeout=None = wait forever).  See the selector graph for details.
+        llm = ChatOpenAI(model=LLM_MODEL, temperature=0.2, timeout=120, max_retries=4)
         resp = llm.invoke(MODERATOR_PROMPT.format(
             proposals_text="\n\n".join(proposals_text),
             correlation_hints=corr_hints,

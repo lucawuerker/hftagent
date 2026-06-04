@@ -5,7 +5,7 @@ where it would need the order-book / price panel:
 
     load_papers  →  brainstorm  →  generate_code   (this script)
     ───────────────────────────────────────────────────────────────
-    backtest_factors  →  filter_and_persist        (SKIPPED — needs ticker_data/)
+    backtest_factors       (SKIPPED — needs ticker_data/)
 
 So the agent reads real research papers, brainstorms alpha ideas and writes a
 complete ``BaseFactor`` subclass for each idea (validated + smoke-tested on
@@ -13,10 +13,6 @@ synthetic data inside ``codegen.materialise``).  The IC backtest that would
 normally decide which factors to keep is skipped, so every generated factor is
 persisted as a CANDIDATE (generated, not yet validated) into a *separate
 showcase factor database*.
-
-What your supervisor can inspect afterwards:
-  * the generated subclass files in ``quant_fund_agent/factors/researcher/``
-  * the new entries in ``data/factors/showcase_factor_db.json``
 
 Usage::
 

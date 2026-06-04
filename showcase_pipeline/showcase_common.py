@@ -38,6 +38,16 @@ STRATEGY_DB_REAL = Path("data/strategies/strategy_db.json")
 FACTOR_DB_SHOWCASE = Path("data/factors/showcase_factor_db.json")
 STRATEGY_DB_SHOWCASE = Path("data/strategies/showcase_strategy_db.json")
 
+# ── Portfolio Manager showcase (Stage 4) ──────────────────────────────────
+# The PM allocates over *approved* strategies that already have backtest
+# metrics + per-bar return series.  Those normally come from data-dependent
+# backtests, so the PM showcase builds a fully synthetic strategy book here
+# (no market data) and runs the real PM agent over it.  It lives in its own
+# files so it never collides with the architect's DRAFT strategies above.
+PM_STRATEGY_DB_SHOWCASE = Path("data/strategies/showcase_pm_strategy_db.json")
+PM_RETURNS_DIR_SHOWCASE = Path("data/strategies/showcase_pm_returns")
+PM_PORTFOLIO_DB_SHOWCASE = Path("data/portfolio/showcase_pm_portfolio_db.json")
+
 # Where the Factor Researcher materialises generated factor subclasses.
 RESEARCHER_FACTOR_DIR = Path("quant_fund_agent/factors/researcher")
 
@@ -53,7 +63,7 @@ def _configure_environment() -> None:
     # Run from the repo root so all the relative data paths resolve.
     os.chdir(REPO_ROOT)
 
-    # In-process tools: no MCP servers required for the supervisor to run this.
+    # In-process tools: no MCP servers required to run this.
     os.environ.setdefault("QF_USE_MCP", "0")
 
     # Redirect factor-DB reads/writes to the showcase copy (see module docstring).

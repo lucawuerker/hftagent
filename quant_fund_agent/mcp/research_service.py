@@ -99,13 +99,16 @@ def _strip_html(html: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
-def _fetch_fulltext(paper, max_chars: int) -> str:
+def _fetch_fulltext(paper, max_chars: int | None) -> str:
     """Download + extract the full text of ``paper`` from its coupled link.
 
-    The extracted text is cached under :data:`PAPER_FULLTEXT_CACHE_DIR` keyed by
-    paper id, so each paper is fetched at most once.  Returns ``""`` on any
-    failure (the caller then falls back to the stored abstract), and never
-    raises — a single unreachable link must not abort a research session.
+    The *complete* extracted text is cached under
+    :data:`PAPER_FULLTEXT_CACHE_DIR` keyed by paper id, so each paper is
+    fetched at most once and ``max_chars`` is applied only as a read-time
+    view — raising the cap later never needs a cache rebuild.  Returns
+    ``""`` on any failure (the caller then falls back to the stored
+    abstract), and never raises — a single unreachable link must not
+    abort a research session.
     """
     cache = PAPER_FULLTEXT_CACHE_DIR / f"{paper.id}.txt"
     if cache.exists():
@@ -129,12 +132,12 @@ def _fetch_fulltext(paper, max_chars: int) -> str:
         resp = requests.get(url, timeout=_HTTP_TIMEOUT, headers=_HTTP_HEADERS)
         resp.raise_for_status()
         ctype = resp.headers.get("Content-Type", "").lower()
+        # Extract/cache the WHOLE paper (max_chars=None); the cap is a
+        # read-time view applied below, not baked into the cache.
         if "pdf" in ctype or url.lower().endswith(".pdf") or "/pdf/" in url.lower():
-            text = extract_text_from_bytes(resp.content, max_chars=max_chars)
+            text = extract_text_from_bytes(resp.content, max_chars=None)
         else:
             text = _strip_html(resp.text)
-            if max_chars:
-                text = text[:max_chars]
         log.info("fetched full text for %s from %s (%d chars, %.1fs)",
                  paper.id, url, len(text), time.time() - t0)
     except Exception as e:  # noqa: BLE001 — degrade to abstract on any failure
@@ -147,14 +150,14 @@ def _fetch_fulltext(paper, max_chars: int) -> str:
             cache.write_text(text, encoding="utf-8")
         except Exception as e:  # pragma: no cover — caching is best-effort
             log.debug("could not cache full text for %s: %s", paper.id, e)
-    return text
+    return text[:max_chars] if max_chars else text
 
 
 def load_papers(
     n: int = 2,
     cutoff_date: str | None = None,
     strategy: str = "unread_first",
-    max_chars: int = 30_000,
+    max_chars: int = 200_000,  # whole paper, not just the beginning
 ) -> list[dict[str, Any]]:
     """Select papers (lookahead-safe) and extract their text.
 

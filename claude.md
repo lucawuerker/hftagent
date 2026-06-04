@@ -10,7 +10,8 @@ features, designing strategies, and deploying them live.
 A LangGraph multi-agent pipeline mirroring a quant fund's org chart:
 
 - **Factor Researcher** – reads papers, brainstorms alpha ideas, generates
-  factor code, keeps the ones that pass an IC backtest.
+  factor code, backtests each one (recording its IC for reference) and keeps
+  every factor that runs — IC magnitude is not a keep/drop gate.
 - **Selector** – picks factors for a hypothesis.
 - **Architect** – combines factors into a strategy via a refinement loop.
 - **Statistician** – OOS tests, deflated Sharpe, accept/reject gate.

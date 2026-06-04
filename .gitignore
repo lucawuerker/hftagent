@@ -20,6 +20,11 @@ claude.md
 # must not be tracked.
 data/factors/showcase_factor_db.json
 data/strategies/showcase_strategy_db.json
+# Stage 4 (Portfolio Manager) showcase: a synthetic strategy book + its
+# generated return series + the PM's allocation decisions, all rebuilt on run.
+data/strategies/showcase_pm_strategy_db.json
+data/strategies/showcase_pm_returns/
+data/portfolio/showcase_pm_portfolio_db.json
 
 # Full text of papers fetched from their links is cached locally (one .txt
 # per paper); regenerated on demand, so not tracked.

@@ -40,35 +40,41 @@ log = logging.getLogger("populate_papers")
 PAPER_INDEX_PATH = Path(os.getenv("PAPER_INDEX_PATH", "data/papers/index.json"))
 
 SEARCH_QUERIES = [
-    # --- Limit order book & microstructure (data we have) ---------------
-    "limit order book price prediction intraday",
-    "order flow imbalance mid-price movement",
-    "bid-ask spread dynamics liquidity intraday",
-    "price impact market depth order book",
-    "queue dynamics limit order book cancellation",
-    "LOBSTER high frequency equity microstructure",
+    # Stochastic Processes & Rough Path Theory
+    "signature transforms limit order book alpha",
+    "rough path theory high frequency price prediction",
+    "marked Hawkes process order flow toxicity",
+    "rough volatility fractional Brownian motion tick data",
+    "self-exciting point processes order book imbalance",
 
-    # --- Price & volume momentum / reversal -----------------------------
-    "cross-sectional momentum equity price returns",
-    "time-series momentum trend following",
-    "short-term price reversal mean reversion high frequency",
-    "intraday momentum price continuation volume",
-    "statistical arbitrage pairs trading price",
+    # Microstructure Dynamics & Liquidity State
+    "volume-synchronized probability of toxicity VPIN adverse selection",
+    "queue position cancellation-to-fill ratio alpha",
+    "order flow imbalance tick-by-tick cross-impact",
+    "latent liquidity iceberg order detection L3 data",
+    "intraday lead-lag effects information leadership order book",
 
-    # --- Volatility (computable from price/LOB) --------------------------
-    "realized volatility forecasting intraday high frequency",
-    "volatility clustering GARCH high frequency",
-    "low volatility anomaly equity price",
+    # Quantitative Execution & Market Impact
+    "Avellaneda-Stoikov inventory risk management high frequency",
+    "transient market impact Hasbrouck microstructure alpha",
+    "volume profile TWAP deviations mean reversion tick data",
+    "Fourier transforms wavelet decomposition regime detection order book",
+    "latency arbitrage adverse selection L2 quote stuffing",
 
-    # --- Regime & market state ------------------------------------------
-    "regime detection market state hidden Markov switching",
-    "structural break market microstructure",
+    # Advanced Mathematics & Physics-Based Modeling
+    "order book shape dynamics partial differential equations",
+    "stochastic control limit order placement L3 data",
+    "cross-impact models propagator limit order book",
+    "fractional cointegration high frequency statistical arbitrage",
+    "micro-price limit order book imbalance fair value estimation",
 
-    # --- Advanced stochastic / mathematical finance ---------------------
-    "path signature transform financial time series",
-    "rough path rough volatility stochastic",
-    "Hawkes process self-exciting order flow",
-    "point process financial markets tick data",
+    # Ultra-High-Frequency Stochastics & Regime Modeling
+    "hidden Markov models regime switching high frequency liquidity",
+    "point process models trade duration ultra high frequency",
+    "cancellation dynamics limit order book resilience",
+    "market microstructure noise robust volatility estimation",
+    "Hawkes processes cross-asset market impact tick data",
+    "information asymmetry probability of informed trading PIN L2 data",
 ]
 
 LLM_MODEL = os.getenv("POPULATE_PAPERS_LLM_MODEL", "gpt-4o-mini")

@@ -52,11 +52,22 @@ class FactorResearcherState(BaseModel):
     session_id: str = ""
     cutoff_date: date | None = None
     n_papers: int = 2
+    # Total idea budget for the session.  Brainstorm reads one paper per
+    # LLM call and splits this budget across the selected papers, then
+    # dedupes + trims the pooled ideas back down to this many.
     n_factor_ideas: int = 3
-    ic_threshold: float = 0.01
+    # Horizon (in 10-sec bars) at which each factor's IC is *measured and
+    # recorded* for reference.  It is no longer an accept/reject gate — every
+    # successfully-backtested factor is kept regardless of IC magnitude.
     ic_target_horizon: int = 6  # 1-minute bars at 10-sec resolution
     paper_sample_strategy: str = "unread_first"  # or "random"
-    max_chars_per_paper: int = 30_000
+    # Per-paper character budget for the text fed to the LLM.  Set high
+    # enough to include the *entire* body of a normal academic paper
+    # (methodology, results, conclusions) — not just the abstract/intro —
+    # so the researcher reads the whole paper.  The cap is only a safety
+    # bound against a pathological multi-hundred-page PDF blowing the LLM
+    # context window; a typical 30–40 page paper fits well within it.
+    max_chars_per_paper: int = 200_000
 
     # ── data path (where load_panel reads from) ──
     data_dir: str = "ticker_data"

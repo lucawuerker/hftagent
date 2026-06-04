@@ -6,19 +6,30 @@ single *research session* it:
   1. ``load_papers``       – pick N papers (respecting ``cutoff_date``
                               to avoid lookahead bias) and extract text
                               from their PDFs.
-  2. ``brainstorm``        – one LLM call: read the papers, propose K
-                              distinct factor ideas with a written
-                              trading thesis.
+  2. ``brainstorm``        – one LLM call *per paper* (read that single
+                              paper, propose ideas from it), so no call
+                              ever has to fit every paper in its context
+                              and each idea is grounded in one paper.
+                              The session-wide ``n_factor_ideas`` budget
+                              is split across papers and the pooled ideas
+                              are deduped + trimmed to that budget.
   3. ``generate_code``     – one LLM call per idea: produce a complete
                               ``BaseFactor`` subclass.  Bad code is
                               dropped without aborting the session.
   4. ``backtest_factors``  – run the standard single-factor IC backtest
-                              for every materialised candidate.
-  5. ``filter_and_persist`` – keep only ``|IC| ≥ ic_threshold`` at the
-                              target horizon; tag survivors with
+                              for every materialised candidate.  This
+                              validates that the factor actually runs on
+                              the panel and records its IC for reference;
+                              it is **not** an accept/reject gate.
+  5. ``filter_and_persist`` – keep every candidate that materialised and
+                              backtested successfully (IC magnitude is
+                              *not* a gate — a low-IC factor such as
+                              volatility can still be a useful feature in
+                              combination); tag survivors with
                               ``source=RESEARCHER`` and the session id;
-                              drop the rest (both from the registry and
-                              the filesystem).
+                              drop only the ones whose code failed to
+                              generate or errored in the backtest (both
+                              from the registry and the filesystem).
 
 Why this shape (one big LangGraph node per stage, with the per-idea
 loop done in plain Python inside ``generate_code`` / ``backtest_factors``):
@@ -35,6 +46,7 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import os
 import time
 
@@ -70,9 +82,22 @@ log = logging.getLogger("factor_research")
 LLM_MODEL = os.getenv("FACTOR_RESEARCH_LLM_MODEL", "gpt-4o-mini")
 FACTOR_DB_PATH = "data/factors/factor_db.json"
 
+# gpt-4o-mini exposes a 128k-token context window.  A single dense paper
+# (math / tables / LaTeX often tokenises at ~1 token per character) can on
+# its own blow past that, so brainstorm caps the *input* tokens it will send
+# in one call and splits the paper body across several calls when needed,
+# leaving the remaining headroom for the JSON response + tokeniser slack.
+BRAINSTORM_MAX_INPUT_TOKENS = int(
+    os.getenv("BRAINSTORM_MAX_INPUT_TOKENS", "110000")
+)
+
 
 def _get_llm(temperature: float = 0.6) -> ChatOpenAI:
-    return ChatOpenAI(model=LLM_MODEL, temperature=temperature)
+    # Finite timeout + retries so a stalled response-body read can't hang the
+    # pipeline forever inside SSL_read (langchain-openai's default timeout=None
+    # = wait forever).  See the selector graph for the full explanation.
+    return ChatOpenAI(model=LLM_MODEL, temperature=temperature,
+                      timeout=120, max_retries=4)
 
 
 def _parse_json(content: str) -> dict:
@@ -142,46 +167,194 @@ def _papers_block(snippets: list[PaperSnippet]) -> str:
     return "\n\n".join(parts)
 
 
-def brainstorm(state: FactorResearcherState) -> dict:
-    """Single LLM call → list[FactorIdea] (metadata + trading idea, no code yet)."""
-    existing = _existing_factor_ids()
-    prompt = BRAINSTORM_PROMPT.format(
-        n_ideas=state.n_factor_ideas,
-        data_context=DATA_CONTEXT,
-        papers_block=_papers_block(state.selected_papers),
-        existing_ids=", ".join(existing) if existing else "(none)",
-    )
-    log.info("[session %s] brainstorming %d ideas …",
-             state.session_id, state.n_factor_ideas)
+_TOKEN_ENCODER: object | None = None
 
-    llm = _get_llm(temperature=0.7)
+
+def _encoder():
+    """Lazily resolve a tiktoken encoder for ``LLM_MODEL``.
+
+    Cached across calls.  Returns ``None`` (and we fall back to a
+    conservative char-based estimate) if tiktoken is unavailable or has
+    no mapping for the model.
+    """
+    global _TOKEN_ENCODER
+    if _TOKEN_ENCODER is None:
+        try:
+            import tiktoken
+
+            try:
+                _TOKEN_ENCODER = tiktoken.encoding_for_model(LLM_MODEL)
+            except KeyError:
+                _TOKEN_ENCODER = tiktoken.get_encoding("o200k_base")
+        except Exception:  # tiktoken missing / failed to load
+            _TOKEN_ENCODER = False  # sentinel: don't retry the import
+    return _TOKEN_ENCODER or None
+
+
+def _count_tokens(text: str) -> int:
+    enc = _encoder()
+    if enc is not None:
+        return len(enc.encode(text))
+    # Without tiktoken, assume the worst case seen on dense PDFs (~1 token
+    # per char) so we under-fill rather than overflow the context window.
+    return len(text)
+
+
+def _split_text_by_tokens(text: str, max_tokens: int) -> list[str]:
+    """Split ``text`` into contiguous pieces each <= ``max_tokens`` tokens.
+
+    Slicing on token boundaries (then decoding back) guarantees every
+    piece fits, which a char-based split cannot promise for dense text.
+    """
+    max_tokens = max(1, max_tokens)
+    enc = _encoder()
+    if enc is None:
+        # Conservative char fallback: ~1 token/char, so chunk by chars.
+        return [text[i:i + max_tokens] for i in range(0, len(text), max_tokens)] or [""]
+    tokens = enc.encode(text)
+    if len(tokens) <= max_tokens:
+        return [text]
+    return [enc.decode(tokens[i:i + max_tokens])
+            for i in range(0, len(tokens), max_tokens)]
+
+
+def _render_brainstorm_prompt(
+    paper: PaperSnippet | None,
+    n_ideas: int,
+    known_ids: set[str],
+) -> str:
+    block = _papers_block([paper] if paper else [])
+    return BRAINSTORM_PROMPT.format(
+        n_ideas=n_ideas,
+        data_context=DATA_CONTEXT,
+        papers_block=block,
+        existing_ids=", ".join(sorted(known_ids)) if known_ids else "(none)",
+    )
+
+
+def _invoke_brainstorm(
+    llm: ChatOpenAI,
+    prompt: str,
+    tag: str,
+    n_ideas: int,
+    session_id: str,
+) -> list[dict]:
     t0 = time.time()
     resp = llm.invoke(prompt)
-    log.info("[session %s] brainstorm LLM call: %.1fs",
-             state.session_id, time.time() - t0)
-    parsed = _parse_json(resp.content)
+    log.info("[session %s] brainstorm call (%s, asked %d, %d tok): %.1fs",
+             session_id, tag, n_ideas, _count_tokens(prompt), time.time() - t0)
+    return _parse_json(resp.content).get("ideas", [])
 
-    raw_ideas = parsed.get("ideas", [])
-    existing_set = set(existing)
-    ideas: list[FactorIdea] = []
+
+def _brainstorm_one(
+    llm: ChatOpenAI,
+    paper: PaperSnippet | None,
+    n_ideas: int,
+    known_ids: set[str],
+    session_id: str,
+) -> list[dict]:
+    """Brainstorm ideas over a *single* paper (or own knowledge).
+
+    ``paper=None`` runs the knowledge-only fallback (used when a session
+    has no papers).  ``known_ids`` (existing factors + ideas already
+    accepted this session) is passed so the model avoids id collisions.
+
+    The whole paper text is read.  If a paper is so long that the prompt
+    would exceed the model's input budget, its body is split across the
+    fewest calls that each fit (two in the common case) and the ideas are
+    pooled — so a giant PDF never trips ``context_length_exceeded``.
+    Returns the raw idea dicts; validation/dedupe is the caller's job so
+    it can carry state across papers.
+    """
+    tag = paper.paper_id if paper else "own-knowledge"
+
+    prompt = _render_brainstorm_prompt(paper, n_ideas, known_ids)
+    # Common path: the whole paper fits in one call.  (Knowledge-only has
+    # no paper body to split, so it always goes here.)
+    if paper is None or _count_tokens(prompt) <= BRAINSTORM_MAX_INPUT_TOKENS:
+        return _invoke_brainstorm(llm, prompt, tag, n_ideas, session_id)
+
+    # Too long: budget the paper body = total input cap minus the fixed
+    # prompt scaffolding (rendered once with an empty body), then split the
+    # body on token boundaries so every part's prompt is guaranteed to fit.
+    overhead = _count_tokens(
+        _render_brainstorm_prompt(paper.model_copy(update={"text": ""}),
+                                  n_ideas, known_ids)
+    )
+    # Small reserve absorbs the per-part "(part i/n)" title suffix and the
+    # fact that token counts aren't exactly additive across a split point.
+    body_budget = BRAINSTORM_MAX_INPUT_TOKENS - overhead - 256
+    parts = _split_text_by_tokens(paper.text, body_budget)
+    n = len(parts)
+    log.info("[session %s] paper %s too long (%d tok) — splitting body into "
+             "%d part(s) so no single message overflows the context window",
+             session_id, tag, _count_tokens(paper.text), n)
+
+    ideas: list[dict] = []
+    for i, body in enumerate(parts, start=1):
+        part_paper = paper.model_copy(
+            update={"text": body, "title": f"{paper.title} (part {i}/{n})"}
+        )
+        part_prompt = _render_brainstorm_prompt(part_paper, n_ideas, known_ids)
+        ideas.extend(_invoke_brainstorm(
+            llm, part_prompt, f"{tag} part {i}/{n}", n_ideas, session_id))
+    return ideas
+
+
+def brainstorm(state: FactorResearcherState) -> dict:
+    """Brainstorm one paper at a time → pooled, deduped list[FactorIdea].
+
+    Each paper gets its own LLM call (so a call never has to fit every
+    paper in its context, and ideas stay grounded in a single paper).
+    The session-wide ``n_factor_ideas`` budget is divided across the
+    selected papers; the pooled ideas are deduped (against existing
+    factors and against each other) and trimmed to the budget.  With no
+    papers we make a single knowledge-only call for the whole budget.
+    """
+    existing = _existing_factor_ids()
+    known_ids: set[str] = set(existing)  # grows as ideas are accepted
     seen: set[str] = set()
-    for raw in raw_ideas:
-        fid = (raw.get("factor_id") or "").strip().lower()
-        if not fid or fid in seen or fid in existing_set:
-            log.warning("dropping idea with bad/collision id: %r", fid)
-            continue
-        seen.add(fid)
-        ideas.append(FactorIdea(
-            factor_id=fid,
-            name=raw.get("name", fid),
-            category=raw.get("category", "other"),
-            trading_idea=raw.get("trading_idea", ""),
-            description=raw.get("description", ""),
-            source_paper_ids=raw.get("source_paper_ids", []),
-        ))
+    ideas: list[FactorIdea] = []
 
-    log.info("[session %s] kept %d/%d brainstorm ideas after dedupe",
-             state.session_id, len(ideas), len(raw_ideas))
+    budget = state.n_factor_ideas
+    papers = state.selected_papers
+    if papers:
+        per_paper = max(1, math.ceil(budget / len(papers)))
+        plan: list[tuple[PaperSnippet | None, int]] = [(p, per_paper) for p in papers]
+    else:
+        plan = [(None, budget)]
+
+    log.info("[session %s] brainstorming up to %d idea(s) across %d paper(s), "
+             "one call each …", state.session_id, budget, len(papers))
+
+    llm = _get_llm(temperature=0.7)
+    for paper, n_ask in plan:
+        if len(ideas) >= budget:
+            break
+        raw_ideas = _brainstorm_one(llm, paper, n_ask, known_ids, state.session_id)
+        for raw in raw_ideas:
+            if len(ideas) >= budget:
+                break
+            fid = (raw.get("factor_id") or "").strip().lower()
+            if not fid or fid in seen or fid in known_ids:
+                log.warning("dropping idea with bad/collision id: %r", fid)
+                continue
+            seen.add(fid)
+            known_ids.add(fid)  # so later papers don't reuse it
+            ideas.append(FactorIdea(
+                factor_id=fid,
+                name=raw.get("name", fid),
+                category=raw.get("category", "other"),
+                trading_idea=raw.get("trading_idea", ""),
+                description=raw.get("description", ""),
+                # The idea came from this paper's call, so attribute it
+                # there authoritatively (knowledge-only: trust the model).
+                source_paper_ids=([paper.paper_id] if paper
+                                  else raw.get("source_paper_ids", [])),
+            ))
+
+    log.info("[session %s] kept %d idea(s) from %d paper-call(s)",
+             state.session_id, len(ideas), len(plan))
     return {"factor_ideas": ideas}
 
 
@@ -336,13 +509,21 @@ def _coerce_category(raw: str) -> TradingIdeaCategory:
 
 
 def filter_and_persist(state: FactorResearcherState) -> dict:
-    """Keep candidates whose |IC| meets the threshold; persist + tag them.
+    """Persist every successfully-backtested candidate; tag them.
+
+    IC magnitude is **not** a gate: a factor with a low standalone IC (e.g.
+    volatility) can still be a valuable feature in combination, so the
+    decision of whether to *use* a factor is left to the downstream agents
+    (Selector / Architect), not gated here.  A candidate is kept as long as
+    it materialised into runnable code and the IC backtest ran without
+    erroring; its IC at the target horizon is recorded for reference only.
 
     Survivors are added to the factor DB tagged as
     ``FactorSource.RESEARCHER`` with the current ``research_session_id``.
-    Rejects are removed from the registry AND from the filesystem so
-    nothing lingers to mislead the next session.  The actual DB write and
-    filesystem purge happen on the quant-research MCP server.
+    Rejects (codegen / backtest *failures* only) are removed from the
+    registry AND from the filesystem so nothing broken lingers to mislead
+    the next session.  The actual DB write and filesystem purge happen on
+    the quant-research MCP server.
     """
     kept_records: list[dict] = []
     rejected: list[dict] = []
@@ -352,9 +533,7 @@ def filter_and_persist(state: FactorResearcherState) -> dict:
         ic = _ic_at_horizon(cand.backtest_metrics, state.ic_target_horizon)
         passes = (
             cand.code_path                       # was materialised
-            and cand.backtest_metrics is not None
-            and ic is not None
-            and abs(ic) >= state.ic_threshold
+            and cand.backtest_metrics is not None  # IC backtest ran without erroring
         )
         if passes:
             record = FactorRecord(
@@ -371,22 +550,17 @@ def filter_and_persist(state: FactorResearcherState) -> dict:
                 research_session_id=state.session_id,
                 code_path=cand.code_path,
                 metadata={
-                    "ic_threshold": state.ic_threshold,
                     "ic_target_horizon": state.ic_target_horizon,
                     "ic_at_target": ic,
                 },
             )
             kept_records.append(record.model_dump(mode="json"))
-            log.info("[%s] KEPT  (|IC@%d|=%.4f ≥ %.4f)",
-                     fid, state.ic_target_horizon, abs(ic), state.ic_threshold)
+            ic_txt = f"{abs(ic):.4f}" if ic is not None else "NA"
+            log.info("[%s] KEPT  (|IC@%d|=%s, IC not gated)",
+                     fid, state.ic_target_horizon, ic_txt)
         else:
             rejected.append({"factor_id": fid, "code_path": cand.code_path})
-            reason = (
-                f"|IC@{state.ic_target_horizon}|="
-                f"{abs(ic) if ic is not None else 'NA'} < {state.ic_threshold}"
-                if cand.backtest_metrics is not None
-                else (cand.rejected_reason or "did not produce backtest metrics")
-            )
+            reason = cand.rejected_reason or "did not produce backtest metrics"
             log.info("[%s] REJECTED (%s)", fid, reason)
 
     result = research_client.persist_results(kept_records, rejected)

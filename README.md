@@ -101,7 +101,7 @@ See `fund_showcase.ipynb` for an interactive walkthrough.
 
 ### Factor Researcher
 
-Reads academic PDFs, proposes factor ideas, generates Python implementations, and keeps candidates that pass an IC threshold.
+Reads academic PDFs, proposes factor ideas, generates Python implementations, and keeps every candidate that backtests successfully. The IC backtest records each factor's IC for reference but does not gate on it — a low-IC factor (e.g. volatility) can still be a useful feature in combination, so whether to *use* a factor is left to the downstream agents.
 
 **Graph:** `agents/factor_research/graph.py` — `load_papers` → `brainstorm` → `generate_code` → `backtest_factors` → `filter_and_persist`
 

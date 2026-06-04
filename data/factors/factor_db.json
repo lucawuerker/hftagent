@@ -5803,6 +5803,138 @@
         "ic_target_horizon": 6,
         "ic_at_target": 0.013661
       }
+    },
+    {
+      "id": "lob_order_flow_impression",
+      "name": "Order Flow Impression",
+      "class_name": "",
+      "description": "This factor computes the cumulative order flow (orderFlow) over a defined lookback period to gauge the sentiment in the market. A positive order flow indicates buying pressure, while a negative order flow indicates selling pressure.",
+      "formula": "",
+      "trading_idea": "The order flow in the limit order book provides insights into market sentiment and potential price movements. By analyzing the net change in order flow over time, we can identify whether market participants are leaning towards buying or selling, giving us an edge in predicting future price movements based on current market pressure.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.060532,
+        "ic_std": 0.296284,
+        "ic_ir": 0.204303,
+        "ic_hit_rate": 0.5825,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.159251,
+            "ic_std": 0.293319,
+            "ic_ir": 0.542928,
+            "ic_hit_rate": 0.7066,
+            "n_timestamps": 46849
+          },
+          "6": {
+            "ic": 0.060532,
+            "ic_std": 0.296284,
+            "ic_ir": 0.204303,
+            "ic_hit_rate": 0.5825,
+            "n_timestamps": 46844
+          },
+          "60": {
+            "ic": 0.011638,
+            "ic_std": 0.29448,
+            "ic_ir": 0.03952,
+            "ic_hit_rate": 0.5171,
+            "n_timestamps": 46790
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46844,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "151_estrategias_de_trading_151_trading_strategies"
+      ],
+      "source": "researcher",
+      "research_session_id": "2026-06-03",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/lob_order_flow_impression.py",
+      "created_at": "2026-06-03T20:58:38.887154",
+      "metadata": {
+        "ic_threshold": 0.01,
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.060532
+      }
+    },
+    {
+      "id": "momentum_order_flow_ratios",
+      "name": "Momentum Order Flow Ratios",
+      "class_name": "",
+      "description": "This factor computes the ratio of net buyer-initiated order flow to total order flow over a specified lookback period, identifying stocks with strong recent buying momentum.",
+      "formula": "",
+      "trading_idea": "Stocks that experience a surge in order flow, especially net buyer-initiated orders, tend to continue their upward momentum due to the positive feedback loop created by increased buying interest. This behavior is supported by the theory of momentum which posits that trends persist due to herding behavior among investors.",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.017222,
+        "ic_std": 0.287002,
+        "ic_ir": 0.060007,
+        "ic_hit_rate": 0.5242,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.046405,
+            "ic_std": 0.292682,
+            "ic_ir": 0.158551,
+            "ic_hit_rate": 0.5629,
+            "n_timestamps": 46849
+          },
+          "6": {
+            "ic": 0.017222,
+            "ic_std": 0.287002,
+            "ic_ir": 0.060007,
+            "ic_hit_rate": 0.5242,
+            "n_timestamps": 46844
+          },
+          "60": {
+            "ic": 0.004657,
+            "ic_std": 0.285387,
+            "ic_ir": 0.01632,
+            "ic_hit_rate": 0.5058,
+            "n_timestamps": 46790
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46844,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "twenty_for_twenty"
+      ],
+      "source": "researcher",
+      "research_session_id": "2026-06-03",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/momentum_order_flow_ratios.py",
+      "created_at": "2026-06-03T20:58:38.888748",
+      "metadata": {
+        "ic_threshold": 0.01,
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.017222
+      }
     }
   ],
   "trading_ideas": []

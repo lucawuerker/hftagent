@@ -77,7 +77,11 @@
     "pm_status": "live",
     "pm_notes": "",
     "flagged_reason": "",
-    "correlations": {},
+    "correlations": {
+      "refined_mean_reversion_with_volume_momentum_668dfde7": 0.2676331335237592,
+      "revised_momentum_mean_reversion_strategy_94596f33": 0.43459827049898175,
+      "enhanced_momentum_mean_reversion_3f8e4550": 0.4786220273213859
+    },
     "returns_path": "data/strategies/returns/momentum_mean_reversion_f39da4f4.csv",
     "created_at": "2026-06-01T08:28:48.475089",
     "metadata": {
@@ -85,6 +89,311 @@
       "deflated_sharpe_ratio": 0.774299,
       "architect_reasoning": "The chosen strategy combines momentum and mean-reversion factors to capture both short-term price continuations and reversals. The ridge regression model is selected for its ability to handle potential multicollinearity among the factors while still providing a linear approach to predict returns. The features include Alpha#7 for momentum, Alpha#11 and Alpha#57 for mean-reversion around VWAP, and the RSI Mean Reversion to identify overbought/oversold conditions. This combination is expected to effectively identify stocks that are both trending strongly and showing signs of overextension.",
       "statistician_reasoning": "The strategy demonstrates strong in-sample metrics with a high Sharpe ratio of 4.48 and a solid out-of-sample Sharpe ratio of 1.19, indicating that the edge persists beyond the training data. Additionally, the deflated Sharpe ratio of 0.7743 exceeds the threshold of 0.75, suggesting that the strategy is robust. Given the positive test results and the absence of any failing metrics, the strategy is deemed acceptable."
+    }
+  },
+  {
+    "id": "refined_mean_reversion_with_volume_momentum_668dfde7",
+    "name": "Refined Mean Reversion with Volume Momentum",
+    "class_name": "ModelStrategy",
+    "description": "Stocks exhibiting high volume momentum coupled with extreme mean-reversion signals are likely to experience sharp price corrections. By identifying stocks that have both a significant deviation from their volume-weighted average price (VWAP) and are in overbought or oversold conditions, we can capitalize on potential reversals.",
+    "factor_ids": [
+      "alpha_005",
+      "alpha_011",
+      "rsi_mean_reversion",
+      "order_flow_anomaly",
+      "order_flow_pressure"
+    ],
+    "trading_idea_ids": [],
+    "status": "approved",
+    "backtest_metrics": {
+      "annualised_return": 1.477976,
+      "annualised_volatility": 0.305023,
+      "sharpe_ratio": 4.8455,
+      "sortino_ratio": 16.6919,
+      "calmar_ratio": 81.614,
+      "max_drawdown": -0.018109,
+      "max_drawdown_duration_bars": 12378,
+      "hit_rate": 0.4985,
+      "profit_factor": 1.0566,
+      "avg_win": 9.381e-05,
+      "avg_loss": -8.882e-05,
+      "avg_daily_turnover": 427.0417,
+      "avg_positions_held": 7.89,
+      "ic_mean": 0.004554,
+      "ic_ir": 0.013425,
+      "extra": {
+        "n_bars": 37489,
+        "bars_per_day": 2340
+      }
+    },
+    "oos_backtest_metrics": {
+      "annualised_return": 0.260422,
+      "annualised_volatility": 0.095258,
+      "sharpe_ratio": 2.7339,
+      "sortino_ratio": 3.4478,
+      "calmar_ratio": 28.7433,
+      "max_drawdown": -0.00906,
+      "max_drawdown_duration_bars": 6304,
+      "hit_rate": 0.5051,
+      "profit_factor": 1.0115,
+      "avg_win": 7.718e-05,
+      "avg_loss": -7.829e-05,
+      "avg_daily_turnover": 441.9116,
+      "avg_positions_held": 7.84,
+      "ic_mean": 0.007702,
+      "ic_ir": 0.023008,
+      "extra": {
+        "n_bars": 9373,
+        "bars_per_day": 2340
+      }
+    },
+    "live_metrics": null,
+    "model_type": "xgboost",
+    "model_params": {
+      "model_type": "xgboost",
+      "model_hyperparams": {
+        "n_estimators": 300,
+        "max_depth": 4,
+        "learning_rate": 0.05,
+        "subsample": 0.8,
+        "colsample_bytree": 0.8,
+        "reg_lambda": 1.0
+      },
+      "factor_ids": [
+        "alpha_005",
+        "alpha_011",
+        "rsi_mean_reversion",
+        "order_flow_anomaly",
+        "order_flow_pressure"
+      ],
+      "target_horizon": 6,
+      "model_artifact_path": "data/strategies/models/arch_6ec83869.joblib",
+      "weights": {},
+      "holding_period": 6,
+      "max_positions": 20,
+      "equal_weight": true,
+      "min_conviction": 0.5
+    },
+    "holding_period": 6,
+    "pm_status": "live",
+    "pm_notes": "",
+    "flagged_reason": "",
+    "correlations": {
+      "momentum_mean_reversion_f39da4f4": 0.2676331335237592,
+      "revised_momentum_mean_reversion_strategy_94596f33": 0.4745160684551819,
+      "enhanced_momentum_mean_reversion_3f8e4550": 0.654744583046036
+    },
+    "returns_path": "data/strategies/returns/refined_mean_reversion_with_volume_momentum_668dfde7.csv",
+    "created_at": "2026-06-03T23:00:13.501865",
+    "metadata": {
+      "n_trials": 3,
+      "deflated_sharpe_ratio": 0.911518,
+      "architect_reasoning": "I switched the model to XGBoost to capture non-linear interactions among the factors, which may improve performance given the previous models' limitations. I added 'order_flow_pressure' as a new factor to enhance the model's ability to gauge market sentiment and pressure, which could provide additional signals for reversals. The parameters are tuned for a balance between complexity and performance, aiming to improve the hit rate and IC values.",
+      "statistician_reasoning": "The candidate strategy demonstrates strong in-sample metrics, including a high Sharpe ratio of 4.8455 and a successful out-of-sample backtest with a Sharpe ratio of 2.7339, indicating that the strategy's edge persists beyond the training data. Additionally, the deflated Sharpe ratio of 0.9115 exceeds the threshold of 0.75, further supporting the strategy's robustness. Given these positive results and the absence of any failing tests, the strategy should be accepted."
+    }
+  },
+  {
+    "id": "revised_momentum_mean_reversion_strategy_94596f33",
+    "name": "Revised Momentum Mean Reversion Strategy",
+    "class_name": "ModelStrategy",
+    "description": "Stocks that exhibit strong upward momentum on high volume, as indicated by the 'momentum_order_flow_ratios' and 'volume_momentum' factors, are likely to continue their upward trend. Conversely, when these stocks show signs of extreme overextension, characterized by factors like 'rsi_mean_reversion' and 'hidden_volume_impact', they are expected to revert to their mean values.",
+    "factor_ids": [
+      "momentum_order_flow_ratios",
+      "volume_momentum",
+      "rsi_mean_reversion",
+      "hidden_volume_impact",
+      "hidden_volume_significance"
+    ],
+    "trading_idea_ids": [],
+    "status": "approved",
+    "backtest_metrics": {
+      "annualised_return": 3.019109,
+      "annualised_volatility": 0.39085,
+      "sharpe_ratio": 7.7245,
+      "sortino_ratio": 31.9213,
+      "calmar_ratio": 213.4332,
+      "max_drawdown": -0.014145,
+      "max_drawdown_duration_bars": 9758,
+      "hit_rate": 0.5028,
+      "profit_factor": 1.1193,
+      "avg_win": 9.556e-05,
+      "avg_loss": -8.689e-05,
+      "avg_daily_turnover": 330.7819,
+      "avg_positions_held": 8.35,
+      "ic_mean": 0.02559,
+      "ic_ir": 0.065724,
+      "extra": {
+        "n_bars": 37489,
+        "bars_per_day": 2340
+      }
+    },
+    "oos_backtest_metrics": {
+      "annualised_return": 1.187239,
+      "annualised_volatility": 0.093603,
+      "sharpe_ratio": 12.6838,
+      "sortino_ratio": 16.8857,
+      "calmar_ratio": 173.4207,
+      "max_drawdown": -0.006846,
+      "max_drawdown_duration_bars": 3390,
+      "hit_rate": 0.5009,
+      "profit_factor": 1.0556,
+      "avg_win": 7.636e-05,
+      "avg_loss": -7.307e-05,
+      "avg_daily_turnover": 328.8568,
+      "avg_positions_held": 8.44,
+      "ic_mean": 0.002221,
+      "ic_ir": 0.005606,
+      "extra": {
+        "n_bars": 9373,
+        "bars_per_day": 2340
+      }
+    },
+    "live_metrics": null,
+    "model_type": "xgboost",
+    "model_params": {
+      "model_type": "xgboost",
+      "model_hyperparams": {
+        "n_estimators": 500,
+        "max_depth": 4,
+        "learning_rate": 0.05,
+        "subsample": 0.8,
+        "colsample_bytree": 0.8,
+        "reg_lambda": 10.0
+      },
+      "factor_ids": [
+        "momentum_order_flow_ratios",
+        "volume_momentum",
+        "rsi_mean_reversion",
+        "hidden_volume_impact",
+        "hidden_volume_significance"
+      ],
+      "target_horizon": 6,
+      "model_artifact_path": "data/strategies/models/arch_880cfbb4.joblib",
+      "weights": {},
+      "holding_period": 6,
+      "max_positions": 20,
+      "equal_weight": true,
+      "min_conviction": 0.5
+    },
+    "holding_period": 6,
+    "pm_status": "live",
+    "pm_notes": "",
+    "flagged_reason": "",
+    "correlations": {
+      "momentum_mean_reversion_f39da4f4": 0.43459827049898175,
+      "refined_mean_reversion_with_volume_momentum_668dfde7": 0.4745160684551819,
+      "enhanced_momentum_mean_reversion_3f8e4550": 0.29917523585905287
+    },
+    "returns_path": "data/strategies/returns/revised_momentum_mean_reversion_strategy_94596f33.csv",
+    "created_at": "2026-06-03T23:32:11.386923",
+    "metadata": {
+      "n_trials": 3,
+      "deflated_sharpe_ratio": 0.97442,
+      "architect_reasoning": "I switched to the 'xgboost' model to leverage its ability to capture non-linear relationships and interactions among features. I increased the number of estimators to 500 to enhance model robustness and adjusted the max depth to 4 to allow for more complexity without overfitting. The learning rate was set to 0.05 for better convergence. Additionally, I included 'hidden_volume_significance' as a feature to provide more context on hidden trading activity, which may improve predictive power. This adjustment aims to address the low R2 values and enhance the overall performance metrics.",
+      "statistician_reasoning": "The strategy demonstrates strong in-sample performance metrics, including a high Sharpe ratio of 7.7245 and a deflated Sharpe ratio of 0.97442, which exceeds the threshold of 0.75. Additionally, the out-of-sample backtest shows a Sharpe ratio of 12.6838, indicating that the strategy retains its edge even when tested on unseen data. There are no failing test results, and the overall metrics suggest a robust strategy that effectively captures both momentum and mean reversion signals."
+    }
+  },
+  {
+    "id": "enhanced_momentum_mean_reversion_3f8e4550",
+    "name": "Enhanced Momentum Mean Reversion",
+    "class_name": "ModelStrategy",
+    "description": "Stocks exhibiting strong upward momentum accompanied by high-volume order flow will continue their upward trajectory, while those with significant hidden volume will revert to the mean. This strategy will capitalize on both momentum and mean-reversion principles.",
+    "factor_ids": [
+      "alpha_007",
+      "alpha_009",
+      "order_flow_pressure",
+      "hidden_volume_significance",
+      "hidden_volume_impact",
+      "order_flow_anomaly"
+    ],
+    "trading_idea_ids": [],
+    "status": "approved",
+    "backtest_metrics": {
+      "annualised_return": 2.534253,
+      "annualised_volatility": 0.464487,
+      "sharpe_ratio": 5.456,
+      "sortino_ratio": 30.8796,
+      "calmar_ratio": 191.4427,
+      "max_drawdown": -0.013238,
+      "max_drawdown_duration_bars": 16615,
+      "hit_rate": 0.494,
+      "profit_factor": 1.1027,
+      "avg_win": 9.341e-05,
+      "avg_loss": -8.325e-05,
+      "avg_daily_turnover": 299.497,
+      "avg_positions_held": 8.81,
+      "ic_mean": 0.006368,
+      "ic_ir": 0.015587,
+      "extra": {
+        "n_bars": 37489,
+        "bars_per_day": 2340
+      }
+    },
+    "oos_backtest_metrics": {
+      "annualised_return": 0.991513,
+      "annualised_volatility": 0.087181,
+      "sharpe_ratio": 11.373,
+      "sortino_ratio": 15.4387,
+      "calmar_ratio": 111.0899,
+      "max_drawdown": -0.008925,
+      "max_drawdown_duration_bars": 4605,
+      "hit_rate": 0.504,
+      "profit_factor": 1.0487,
+      "avg_win": 7.182e-05,
+      "avg_loss": -6.97e-05,
+      "avg_daily_turnover": 277.9825,
+      "avg_positions_held": 9.01,
+      "ic_mean": 0.003905,
+      "ic_ir": 0.009675,
+      "extra": {
+        "n_bars": 9373,
+        "bars_per_day": 2340
+      }
+    },
+    "live_metrics": null,
+    "model_type": "xgboost",
+    "model_params": {
+      "model_type": "xgboost",
+      "model_hyperparams": {
+        "n_estimators": 300,
+        "max_depth": 4,
+        "learning_rate": 0.05,
+        "subsample": 0.8,
+        "colsample_bytree": 0.8,
+        "reg_lambda": 1.0
+      },
+      "factor_ids": [
+        "alpha_007",
+        "alpha_009",
+        "order_flow_pressure",
+        "hidden_volume_significance",
+        "hidden_volume_impact",
+        "order_flow_anomaly"
+      ],
+      "target_horizon": 6,
+      "model_artifact_path": "data/strategies/models/arch_01c190d0.joblib",
+      "weights": {},
+      "holding_period": 6,
+      "max_positions": 20,
+      "equal_weight": true,
+      "min_conviction": 0.5
+    },
+    "holding_period": 6,
+    "pm_status": "live",
+    "pm_notes": "",
+    "flagged_reason": "",
+    "correlations": {
+      "momentum_mean_reversion_f39da4f4": 0.4786220273213859,
+      "refined_mean_reversion_with_volume_momentum_668dfde7": 0.654744583046036,
+      "revised_momentum_mean_reversion_strategy_94596f33": 0.29917523585905287
+    },
+    "returns_path": "data/strategies/returns/enhanced_momentum_mean_reversion_3f8e4550.csv",
+    "created_at": "2026-06-03T23:57:04.730087",
+    "metadata": {
+      "n_trials": 3,
+      "deflated_sharpe_ratio": 0.832565,
+      "architect_reasoning": "Switched to XGBoost to capture non-linear interactions among factors and improve predictive power. Increased the number of features by adding 'order_flow_anomaly' to enhance the model's ability to detect significant order flow changes. Adjusted hyperparameters for better performance, focusing on a balance between bias and variance.",
+      "statistician_reasoning": "The candidate strategy demonstrates strong in-sample metrics, including a high Sharpe ratio of 5.456 and a very favorable out-of-sample Sharpe ratio of 11.373, indicating that the strategy's edge persists beyond the initial testing phase. The deflated Sharpe ratio also exceeds the threshold of 0.75, further supporting the robustness of the strategy. Given these positive results and the absence of any failing tests, the strategy is deemed acceptable."
     }
   }
 ]

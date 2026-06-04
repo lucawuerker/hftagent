@@ -120,7 +120,6 @@ def run_research_session(
     cutoff_date: date | None = None,
     n_papers: int = 2,
     n_ideas: int = 3,
-    ic_threshold: float = 0.01,
     horizon: int = 6,
     n_tickers: int | None = 15,
     reset: bool = False,
@@ -146,12 +145,11 @@ def run_research_session(
         cutoff_date=cutoff_date,
         n_papers=n_papers,
         n_factor_ideas=n_ideas,
-        ic_threshold=ic_threshold,
         ic_target_horizon=horizon,
         n_tickers=n_tickers,
     )
-    log.info("Factor research session '%s' (papers=%d, ideas=%d, |IC@%d|>=%.3f)",
-             state.session_id, n_papers, n_ideas, horizon, ic_threshold)
+    log.info("Factor research session '%s' (papers=%d, ideas=%d, IC@%d recorded, not gated)",
+             state.session_id, n_papers, n_ideas, horizon)
     return factor_research_graph.invoke(state)
 
 

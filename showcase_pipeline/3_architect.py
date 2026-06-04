@@ -18,9 +18,6 @@ a ``DynamicStrategy`` (static weights) or ``ModelStrategy`` (fitted ML) subclass
 parameterised by that record — this script rebuilds the subclass from the record
 to show it concretely.
 
-What your supervisor can inspect afterwards:
-  * the new DRAFT entry in ``data/strategies/showcase_strategy_db.json``
-
 Usage::
 
     ./venv/bin/python showcase_pipeline/3_architect.py

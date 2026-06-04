@@ -25,7 +25,7 @@ def load_papers(
     n: int = 2,
     cutoff_date: str | None = None,
     strategy: str = "unread_first",
-    max_chars: int = 30_000,
+    max_chars: int = 200_000,
 ) -> list[dict[str, Any]]:
     args = dict(n=n, cutoff_date=cutoff_date, strategy=strategy, max_chars=max_chars)
     if not _use_mcp():

@@ -7,10 +7,13 @@ blow up the LLM context window.
 
 Design notes
 ------------
-- Academic PDFs can be 30+ pages.  Feeding all of it to the LLM would
-  be slow and burn tokens for marginal benefit (most of the alpha
-  intuition is in the abstract / introduction / methodology).  We
-  truncate at ``max_chars`` (default 30 000 chars ≈ 7-8 k tokens).
+- The researcher should read the *whole* paper — the key alpha details
+  (methodology, results, robustness checks, conclusions) are often well
+  past the introduction — so the default cap is set high enough to admit
+  an entire 30–40 page academic paper (``max_chars`` default 200 000
+  chars ≈ 50 k tokens).  The cap exists only as a safety bound so a
+  pathological multi-hundred-page PDF can't blow the LLM context window;
+  pass ``max_chars=None`` to disable it entirely.
 - Decoding errors on a single page should never crash the agent —
   we swallow them and move on.
 """
@@ -25,7 +28,7 @@ log = logging.getLogger("utils.pdf")
 
 def extract_text(
     path: str | Path,
-    max_chars: int | None = 30_000,
+    max_chars: int | None = 200_000,
 ) -> str:
     """Extract plain text from a PDF, capped at ``max_chars`` characters.
 
@@ -63,7 +66,7 @@ def extract_text(
 
 def extract_text_from_bytes(
     data: bytes,
-    max_chars: int | None = 30_000,
+    max_chars: int | None = 200_000,
 ) -> str:
     """Extract plain text from in-memory PDF ``data`` (e.g. a download).
 

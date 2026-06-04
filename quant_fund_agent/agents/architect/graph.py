@@ -72,7 +72,10 @@ def _resolve_n_tickers() -> int | None:
 
 
 def _get_llm() -> ChatOpenAI:
-    return ChatOpenAI(model=LLM_MODEL, temperature=0.4)
+    # Finite timeout + retries so a stalled response-body read can't hang the
+    # pipeline forever inside SSL_read (langchain-openai's default timeout=None
+    # = wait forever).  See the selector graph for the full explanation.
+    return ChatOpenAI(model=LLM_MODEL, temperature=0.4, timeout=120, max_retries=4)
 
 
 def _parse_json(content: str) -> dict:

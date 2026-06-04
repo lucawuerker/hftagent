@@ -37,7 +37,7 @@ def load_papers(
     n: int = 2,
     cutoff_date: str | None = None,
     strategy: str = "unread_first",
-    max_chars: int = 30_000,
+    max_chars: int = 200_000,
 ) -> str:
     """Select up to ``n`` papers (published before ``cutoff_date`` if given) and
     extract their text.  Returns a JSON array of snippet objects.

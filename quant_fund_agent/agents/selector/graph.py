@@ -28,7 +28,12 @@ LLM_MODEL = os.getenv("SELECTOR_LLM_MODEL", "gpt-4o-mini")
 
 
 def _get_llm() -> ChatOpenAI:
-    return ChatOpenAI(model=LLM_MODEL, temperature=0.7)
+    # Finite timeout + retries are essential: without them langchain-openai
+    # passes timeout=None to the OpenAI SDK (= wait forever), so a stalled
+    # response-body read hangs the whole pipeline inside SSL_read *after* the
+    # "200 OK" status line has already been logged.  A finite read timeout
+    # turns that into an APITimeoutError that max_retries transparently retries.
+    return ChatOpenAI(model=LLM_MODEL, temperature=0.7, timeout=120, max_retries=4)
 
 
 def _coerce_llm_text(val) -> str:
