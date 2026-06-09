@@ -1,0 +1,18 @@
+{
+  "n_bars": 25742,
+  "annualised_return": -5.741765,
+  "annualised_volatility": 0.066008,
+  "sharpe_ratio": -86.9858,
+  "sortino_ratio": -112.0708,
+  "calmar_ratio": -22.8874,
+  "max_drawdown": -0.25087,
+  "max_drawdown_duration_bars": 25725,
+  "hit_rate": 0.4422,
+  "total_return": -0.250652,
+  "total_cost": 0.251495,
+  "avg_daily_turnover": 186.2037,
+  "n_meetings": 4,
+  "n_strategies_deployed": 4,
+  "execution_model": "netted",
+  "netting_benefit_total": 0.01222
+}

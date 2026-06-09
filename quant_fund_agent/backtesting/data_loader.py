@@ -29,13 +29,24 @@ spread, event counts, etc.):
 Robustness
 ----------
 ``ticker_data/`` is auto-discovered, but the same directory tree often
-contains sibling folders that are NOT tickers (e.g. ``fillSamples/`` —
-a different LOBSTER output with a different schema).  The loader
-defends against this in two layers:
+contains sibling folders that are NOT per-symbol tickers — the raw
+LOBSTER aggregator dumps (``fillSamples/``, ``binSamples/``) stack
+*every* symbol into one multi-million-row file.  ``binSamples/`` is
+especially dangerous: it shares the exact per-ticker column schema, so
+a naive ``mid``/``midEnd`` check waves it through.  Ingesting it as a
+single fake "ticker" and then aligning its 25M-row, heavily-overlapping
+``DatetimeIndex`` against the real tickers explodes the panel to tens of
+GB and gets the process OOM-killed.  The loader defends in three cheap
+layers, all run on the *first* CSV **before** any full read:
 
-1. Per-ticker pre-check: a ticker must have ``mid`` and ``midEnd``
-   in its first CSV, otherwise it is skipped with a warning.
-2. Per-ticker try/except: any unhandled error (parse failure, schema
+1. Header-only required-column check: a ticker's first CSV must contain
+   ``mid`` and ``midEnd``, else it is skipped — this rejects
+   ``fillSamples/`` without parsing a single data row.
+2. Single-symbol identity check: a genuine ticker directory holds
+   exactly one symbol in its ``stock`` column; a dump holds many.  Any
+   directory whose first CSV spans >1 symbol is skipped — this rejects
+   ``binSamples/`` before its giant index can be loaded or aligned.
+3. Per-ticker try/except: any unhandled error (parse failure, schema
    surprise) is caught, logged, and the ticker is skipped — one bad
    CSV cannot abort the whole load.
 
@@ -205,16 +216,38 @@ def load_panel(
     skipped: list[tuple[str, str]] = []
     loaded: list[str] = []
     for ticker in tickers:
-        csv_files = list((data_dir / ticker).glob("*.csv"))
+        csv_files = sorted((data_dir / ticker).glob("*.csv"))
         if not csv_files:
             skipped.append((ticker, "no csv files"))
             continue
 
+        # Cheap pre-checks on the FIRST CSV, run *before* the full read so
+        # a mis-schema'd or multi-symbol sibling folder can never be parsed
+        # in bulk or aligned into the panel (see module docstring).  A
+        # genuine ticker dir is tiny here; the aggregator dumps are caught
+        # on a single-file scan instead of a 25M-row concat + alignment.
+        try:
+            header = pd.read_csv(csv_files[0], nrows=0).columns
+            missing = [c for c in _REQUIRED_COLUMNS if c not in header]
+            if missing:
+                skipped.append((ticker, f"missing required column(s): {missing}"))
+                continue
+            if "stock" in header:
+                n_symbols = pd.read_csv(
+                    csv_files[0], usecols=["stock"]
+                )["stock"].nunique(dropna=True)
+                if n_symbols != 1:
+                    skipped.append(
+                        (ticker, f"not a single-symbol ticker dir "
+                                 f"({n_symbols} symbols — likely an aggregator dump)")
+                    )
+                    continue
+        except Exception as e:
+            skipped.append((ticker, f"pre-check failed: {type(e).__name__}: {e}"))
+            continue
+
         # Wrap the whole per-ticker block: any parse error / schema
-        # surprise must be survivable.  A bad CSV is a warning, not a
-        # crash — particularly important because ``ticker_data/`` often
-        # contains stray sibling folders (e.g. fillSamples/) that look
-        # like tickers but have a completely different schema.
+        # surprise must be survivable.  A bad CSV is a warning, not a crash.
         try:
             df = pd.concat(
                 [load_ticker_csv(f, usecols=csv_cols) for f in csv_files]

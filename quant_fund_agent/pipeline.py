@@ -123,8 +123,15 @@ def run_research_session(
     horizon: int = 6,
     n_tickers: int | None = 15,
     reset: bool = False,
+    paper_sample_strategy: str = "unread_first",
+    data_dir: str = "ticker_data",
 ) -> dict[str, Any]:
     """Run one Factor Researcher session and persist any kept factors.
+
+    ``paper_sample_strategy`` (``"unread_first"`` | ``"random"``) controls how the
+    session's papers are picked.  Combined with the scenario-scoped read-log
+    (``PAPER_READ_LOG``), ``"unread_first"`` advances deterministically through the
+    library across sessions; ``"random"`` samples it.
 
     Returns the raw graph output (``selected_papers``, ``factor_ideas``,
     ``candidates``, ``kept_factor_ids``, ``rejected_factor_ids``).
@@ -147,6 +154,8 @@ def run_research_session(
         n_factor_ideas=n_ideas,
         ic_target_horizon=horizon,
         n_tickers=n_tickers,
+        paper_sample_strategy=paper_sample_strategy,
+        data_dir=data_dir,
     )
     log.info("Factor research session '%s' (papers=%d, ideas=%d, IC@%d recorded, not gated)",
              state.session_id, n_papers, n_ideas, horizon)

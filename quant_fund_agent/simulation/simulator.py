@@ -39,18 +39,38 @@ def run_backtest(config: BacktestConfig) -> BacktestResults:
     if config.n_tickers is not None:
         os.environ["ARCHITECT_N_TICKERS"] = str(config.n_tickers)
 
+    # ── point factor research + the Selector's catalog at this run's OWN factor
+    #    DB, and give the run its own "papers already read" log, so a backtest
+    #    never writes the permanent factor library nor mutates the global paper
+    #    index (and the prerun and other runs don't bias its paper selection).
+    #    These are read at call time by the services + inherited by any MCP
+    #    server subprocess spawned later, so set them before the first meeting.
+    os.environ["FACTOR_DB_PATH"] = str(config.factor_db_path)
+    os.environ["PAPER_READ_LOG"] = str(config.paper_read_log_path)
+
     import numpy as np
 
     np.random.seed(config.seed)
 
     from quant_fund_agent import pipeline
+    from quant_fund_agent.agents.factor_research import codegen
     from quant_fund_agent.backtesting.strategy_backtester import backtest_strategy
     from quant_fund_agent.databases import PortfolioDatabase, StrategyDatabase
     from quant_fund_agent.schemas import PMStatus
+    from quant_fund_agent.simulation import factor_store
     from quant_fund_agent.simulation.clock import TradingClock
     from quant_fund_agent.simulation.signals import SignalCache
 
     config.output_dir.mkdir(parents=True, exist_ok=True)
+
+    # ── seed this run's factor DB from the permanent library (per factor_universe).
+    #    Capture the permanent ids first so we can later tell which researcher
+    #    factors were discovered by THIS run (to snapshot + purge their code).
+    permanent_ids = factor_store.permanent_factor_ids(pipeline.FACTOR_DB_PATH)
+    if config.fresh or not config.factor_db_path.exists():
+        factor_store.seed_run_factor_db(
+            pipeline.FACTOR_DB_PATH, config.factor_db_path, config.factor_universe,
+        )
 
     # ── databases scoped to THIS run (don't clobber the live book) ──
     if config.fresh:
@@ -74,7 +94,6 @@ def run_backtest(config: BacktestConfig) -> BacktestResults:
         return results
 
     live_returns_accum: dict[str, list[pd.Series]] = {}
-    first_research_done = False
 
     for p in periods:
         meeting: dict = {
@@ -88,14 +107,13 @@ def run_backtest(config: BacktestConfig) -> BacktestResults:
         # 1 ── research meeting ────────────────────────────────────────
         if p.research_due:
             try:
-                reset = config.fresh and not first_research_done
+                # No global reset: the run already has its own seeded factor DB
+                # (FACTOR_DB_PATH), so the permanent library is never purged.
                 rs = pipeline.run_research_session(
                     session_id=p.week_tag,
                     cutoff_date=p.cutoff_date,
                     n_tickers=config.n_tickers or 15,
-                    reset=reset,
                 )
-                first_research_done = True
                 meeting["kept_factor_ids"] = rs.get("kept_factor_ids", [])
             except Exception as e:  # noqa: BLE001 — one bad meeting must not abort the run
                 log.warning("[%s] research meeting failed: %s", p.week_tag, e)
@@ -177,6 +195,13 @@ def run_backtest(config: BacktestConfig) -> BacktestResults:
     # ── finalise ────────────────────────────────────────────────────────
     pipeline.save_dbs(strategy_db, portfolio_db,
                       config.strategy_db_path, config.portfolio_db_path)
+    # Snapshot this run's researcher code into the run folder and purge it from
+    # the package dir, so the run's factors stay recoverable without permanently
+    # accumulating generated files in ``factors/researcher/``.
+    factor_store.snapshot_and_purge_run_code(
+        config.factor_db_path, permanent_ids,
+        codegen.RESEARCHER_DIR, config.factor_code_dir,
+    )
     results.finalize()
     results.save()
     log.info("\n%s", results.summary())

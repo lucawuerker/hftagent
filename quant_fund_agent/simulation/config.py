@@ -136,6 +136,17 @@ class BacktestConfig:
     construction_method: ConstructionMethod | None = None
     pm_name: str = "fund_committee"
 
+    # ── factor universe (which factors strategies may be built from) ──
+    # "all"     → the run's factor DB is seeded from the global permanent DB
+    #             (seed factors + every researcher factor found by past preruns),
+    #             and this run's research meetings append to it.
+    # "session" → the run's factor DB is seeded with the SEED factors only, so the
+    #             Selector sees seeds + only the factors discovered in THIS run's
+    #             research meetings (permanent prerun factors are excluded).
+    # Either way the run is scoped to its own DB under ``output_dir`` — a backtest
+    # never writes the global ``data/factors/factor_db.json``.
+    factor_universe: str = "all"    # "all" | "session"
+
     # ── data / universe ──
     data_dir: str = "ticker_data"
     n_tickers: int | None = None    # caps the universe via ARCHITECT_N_TICKERS
@@ -175,6 +186,34 @@ class BacktestConfig:
     def returns_dir(self) -> Path:
         return self.output_dir / "returns"
 
+    @property
+    def factor_db_path(self) -> Path:
+        """Run-scoped factor DB the research meetings write and the Selector reads.
+
+        Pointed at by the ``FACTOR_DB_PATH`` env var for the duration of the run,
+        so the global permanent factor DB is never touched by a backtest.
+        """
+        return self.output_dir / "factor_db.json"
+
+    @property
+    def factor_code_dir(self) -> Path:
+        """Where this run's researcher ``.py`` files are snapshotted at the end.
+
+        The generated code is recoverable from here even though it is purged from
+        the package ``factors/researcher/`` dir so the package stays clean.
+        """
+        return self.output_dir / "factor_code"
+
+    @property
+    def paper_read_log_path(self) -> Path:
+        """Run-scoped "papers already read" log (``PAPER_READ_LOG``).
+
+        Starts empty on a fresh run so this backtest's paper selection is never
+        biased by the prerun or by other runs, and the global paper index stays
+        untouched.
+        """
+        return self.output_dir / "papers_read.json"
+
     def to_dict(self) -> dict[str, Any]:
         d = asdict(self)
         # enums → their values for clean JSON
@@ -205,3 +244,8 @@ class BacktestConfig:
         for spec in (self.warmup, self.grid_freq, self.research_every,
                      self.strategy_every, self.pm_rebalance_every):
             _parse_offset(spec)
+        if self.factor_universe not in ("all", "session"):
+            raise ValueError(
+                f"factor_universe must be 'all' or 'session', got "
+                f"{self.factor_universe!r}."
+            )

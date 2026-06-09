@@ -14,12 +14,25 @@ import os
 from pathlib import Path
 from typing import Any
 
+# Default location, captured at import for backward-compatible importers (e.g.
+# the ``HAS_DB`` guard in tests).  The live lookup below is what actually drives
+# ``load_factor_catalog`` so per-run redirection still works.
 FACTOR_DB_PATH = Path(os.getenv("FACTOR_DB_PATH", "data/factors/factor_db.json"))
+
+
+def _factor_db_path() -> Path:
+    """Factor DB the Selector reads — resolved at call time.
+
+    Read live from ``FACTOR_DB_PATH`` on every call so a walk-forward backtest
+    can point the Selector at its run-scoped factor DB (seeded per the run's
+    ``factor_universe``) without re-importing this module.
+    """
+    return Path(os.getenv("FACTOR_DB_PATH", "data/factors/factor_db.json"))
 
 
 def load_factor_catalog() -> list[dict[str, Any]]:
     """Return a compact JSON-serialisable summary of every persisted factor."""
-    path = FACTOR_DB_PATH
+    path = _factor_db_path()
     if not path.exists():
         raise FileNotFoundError(
             f"Factor DB not found at {path}. Run `python run_all_factors.py` first."

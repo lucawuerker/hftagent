@@ -15,6 +15,7 @@ across every candidate's IC backtest.
 
 from __future__ import annotations
 
+import json
 import logging
 import os
 import re
@@ -27,7 +28,29 @@ log = logging.getLogger("research.service")
 
 PAPER_INDEX_PATH = Path(os.getenv("PAPER_INDEX_PATH", "data/papers/index.json"))
 PAPER_PDF_DIR = Path(os.getenv("PAPER_PDF_DIR", "data/papers/pdfs"))
-FACTOR_DB_PATH = Path(os.getenv("FACTOR_DB_PATH", "data/factors/factor_db.json"))
+
+
+def _factor_db_path() -> Path:
+    """Where research persists factors — resolved at call time.
+
+    Read live from ``FACTOR_DB_PATH`` on every call (rather than captured at
+    import) so the walk-forward backtest can redirect persistence to a
+    run-scoped DB without the module having to be re-imported.
+    """
+    return Path(os.getenv("FACTOR_DB_PATH", "data/factors/factor_db.json"))
+
+
+def _read_log_path() -> Path | None:
+    """Scenario-scoped "papers already read" log, or ``None`` if unset.
+
+    When ``PAPER_READ_LOG`` is set (the prerun and each backtest point it at
+    their own file), :func:`load_papers` excludes ids already in the log and
+    appends the ids it reads — so the prerun and a backtest never bias each
+    other's paper selection and the global paper index is never mutated.
+    Unset → today's behaviour (no exclusion, no write).
+    """
+    raw = os.getenv("PAPER_READ_LOG")
+    return Path(raw) if raw else None
 
 # Most papers in the index have no local PDF — only a link (arXiv abstract page +
 # a direct ``pdf_url``).  We fetch and cache their *full text* from that link so
@@ -57,13 +80,21 @@ def _parse_cutoff(cutoff_date: str | None) -> date | None:
 # Papers
 # ---------------------------------------------------------------------------
 
-def _select_paper_ids(paper_db, n: int, cutoff: date | None, strategy: str) -> list[str]:
+def _select_paper_ids(
+    paper_db,
+    n: int,
+    cutoff: date | None,
+    strategy: str,
+    exclude: set[str] | None = None,
+) -> list[str]:
     import random
 
     if cutoff is not None:
         papers = paper_db.list_papers_before(cutoff)
     else:
         papers = paper_db.list_papers()
+    if exclude:
+        papers = [p for p in papers if p.id not in exclude]
     if not papers:
         return []
     if strategy == "random":
@@ -71,6 +102,29 @@ def _select_paper_ids(paper_db, n: int, cutoff: date | None, strategy: str) -> l
     else:  # "unread_first"
         papers.sort(key=lambda p: (p.status.value != "unread", p.title))
     return [p.id for p in papers[:n]]
+
+
+def _load_read_log(path: Path | None) -> set[str]:
+    """Load the set of already-read paper ids from a read-log file."""
+    if path is None or not path.exists():
+        return set()
+    try:
+        payload = json.loads(path.read_text())
+        return set(payload.get("read", []))
+    except Exception:  # a corrupt log must not abort a session
+        return set()
+
+
+def _append_read_log(path: Path | None, already: set[str], new_ids: list[str]) -> None:
+    """Persist ``already ∪ new_ids`` back to the read-log file (best-effort)."""
+    if path is None or not new_ids:
+        return
+    merged = sorted(already | set(new_ids))
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps({"read": merged}, indent=2))
+    except Exception as e:  # pragma: no cover — read-log is best-effort
+        log.debug("could not write read log %s: %s", path, e)
 
 
 def _pdf_url_for(paper) -> str | None:
@@ -172,8 +226,14 @@ def load_papers(
     # Self-heal: register PDFs dropped in without index entries.
     paper_db.auto_discover_pdfs(PAPER_PDF_DIR, index_path=PAPER_INDEX_PATH)
 
+    # Scenario-scoped "already read" exclusion (prerun vs. backtest): exclude
+    # papers this scenario has already read so successive sessions advance
+    # through the library without re-reading, and record the new reads back.
+    read_log = _read_log_path()
+    already_read = _load_read_log(read_log)
     paper_ids = _select_paper_ids(paper_db, n=n, cutoff=_parse_cutoff(cutoff_date),
-                                  strategy=strategy)
+                                  strategy=strategy, exclude=already_read)
+    _append_read_log(read_log, already_read, paper_ids)
 
     snippets: list[dict[str, Any]] = []
     for pid in paper_ids:
@@ -232,15 +292,14 @@ def load_papers(
 
 def existing_factor_ids() -> list[str]:
     """Union of (1) registered factor classes and (2) factor_db.json IDs."""
-    import json
-
     from quant_fund_agent.factors import discover_factors, get_all_factor_classes
 
     discover_factors()
     ids: set[str] = set(get_all_factor_classes().keys())
-    if FACTOR_DB_PATH.exists():
+    factor_db_path = _factor_db_path()
+    if factor_db_path.exists():
         try:
-            payload = json.loads(FACTOR_DB_PATH.read_text())
+            payload = json.loads(factor_db_path.read_text())
             ids.update(f["id"] for f in payload.get("factors", []))
         except Exception:
             pass
@@ -380,8 +439,9 @@ def persist_results(
     from quant_fund_agent.databases import FactorDatabase
     from quant_fund_agent.schemas import FactorRecord
 
+    factor_db_path = _factor_db_path()
     factor_db = FactorDatabase()
-    factor_db.load_from_json(FACTOR_DB_PATH)
+    factor_db.load_from_json(factor_db_path)
 
     kept_ids: list[str] = []
     for raw in kept_records:
@@ -395,7 +455,7 @@ def persist_results(
         _drop_researcher_factor(fid, item.get("code_path", ""))
         rejected_ids.append(fid)
 
-    factor_db.save_to_json(FACTOR_DB_PATH)
+    factor_db.save_to_json(factor_db_path)
     log.info("research session persisted: %d kept, %d rejected",
              len(kept_ids), len(rejected_ids))
     return {"kept_factor_ids": kept_ids, "rejected_factor_ids": rejected_ids}

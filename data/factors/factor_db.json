@@ -5281,41 +5281,41 @@
       "metadata": {}
     },
     {
-      "id": "volume_momentum",
-      "name": "Volume Momentum Factor",
+      "id": "order_flow_momentum",
+      "name": "Order Flow Momentum",
       "class_name": "",
-      "description": "This factor computes the ratio of current volume to the average volume over the past N bars, adjusted for recent price movements. It aims to identify stocks with upward or downward momentum that is backed by increased trading volume.",
+      "description": "This factor computes the cumulative net order flow over a specified lookback period, normalized by the average volume over the same period, to gauge whether a stock is experiencing strong buying or selling pressure.",
       "formula": "",
-      "trading_idea": "High volume is often associated with strong price movements, and an increase in volume can indicate the strength of a price trend. By measuring the change in volume relative to price changes over recent bars, this factor aims to capture momentum in price behavior that is supported by significant trading activity.",
+      "trading_idea": "Price movements often follow momentum trends driven by order flow dynamics. When there is sustained positive order flow, it indicates bullish sentiment and can precede price increases, while negative order flow suggests bearish sentiment that may lead to price declines. This relationship is well-documented in market microstructure literature.",
       "trading_idea_ids": [],
       "category": "momentum",
       "status": "backtested",
       "backtest_metrics": {
-        "information_coefficient": -0.015762,
-        "ic_std": 0.292688,
-        "ic_ir": -0.053854,
-        "ic_hit_rate": 0.4735,
+        "information_coefficient": 0.004151,
+        "ic_std": 0.281121,
+        "ic_ir": 0.014766,
+        "ic_hit_rate": 0.4835,
         "ic_by_horizon": {
           "1": {
-            "ic": -0.046227,
-            "ic_std": 0.320577,
-            "ic_ir": -0.144199,
-            "ic_hit_rate": 0.442,
-            "n_timestamps": 21077
+            "ic": 0.00888,
+            "ic_std": 0.280783,
+            "ic_ir": 0.031627,
+            "ic_hit_rate": 0.492,
+            "n_timestamps": 9870
           },
           "6": {
-            "ic": -0.015762,
-            "ic_std": 0.292688,
-            "ic_ir": -0.053854,
-            "ic_hit_rate": 0.4735,
-            "n_timestamps": 21072
+            "ic": 0.004151,
+            "ic_std": 0.281121,
+            "ic_ir": 0.014766,
+            "ic_hit_rate": 0.4835,
+            "n_timestamps": 9865
           },
           "60": {
-            "ic": -0.002231,
-            "ic_std": 0.287452,
-            "ic_ir": -0.007761,
-            "ic_hit_rate": 0.4922,
-            "n_timestamps": 21018
+            "ic": 0.012467,
+            "ic_std": 0.289699,
+            "ic_ir": 0.043034,
+            "ic_hit_rate": 0.5017,
+            "n_timestamps": 9824
           }
         },
         "sharpe_ratio": null,
@@ -5324,71 +5324,7 @@
         "annualised_return": null,
         "hit_rate": null,
         "extra": {
-          "n_timestamps": 21072,
-          "horizon_bars": 6,
-          "horizons_bars": [
-            1,
-            6,
-            60
-          ]
-        }
-      },
-      "source_paper_ids": [],
-      "source": "researcher",
-      "research_session_id": "2019-W03",
-      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/volume_momentum.py",
-      "created_at": "2026-06-01T12:18:33.896065",
-      "metadata": {
-        "ic_threshold": 0.01,
-        "ic_target_horizon": 6,
-        "ic_at_target": -0.015762
-      }
-    },
-    {
-      "id": "effective_spread_ratio",
-      "name": "Effective Spread Ratio",
-      "class_name": "",
-      "description": "This factor computes the ratio of the effective spread to the stock's volatility over the same period. A high ratio may indicate a less efficient market for that stock, while a low ratio suggests more favorable trading conditions.",
-      "formula": "",
-      "trading_idea": "The effective spread provides insights into the actual cost of trading and can highlight inefficiencies in price execution. By relating the effective spread to the volatility of the stock, this factor captures the relative trading cost in different market conditions, helping to identify mispriced securities.",
-      "trading_idea_ids": [],
-      "category": "statistical_arbitrage",
-      "status": "backtested",
-      "backtest_metrics": {
-        "information_coefficient": -0.014964,
-        "ic_std": 0.290419,
-        "ic_ir": -0.051527,
-        "ic_hit_rate": 0.4741,
-        "ic_by_horizon": {
-          "1": {
-            "ic": -0.039953,
-            "ic_std": 0.312202,
-            "ic_ir": -0.127973,
-            "ic_hit_rate": 0.447,
-            "n_timestamps": 21105
-          },
-          "6": {
-            "ic": -0.014964,
-            "ic_std": 0.290419,
-            "ic_ir": -0.051527,
-            "ic_hit_rate": 0.4741,
-            "n_timestamps": 21100
-          },
-          "60": {
-            "ic": -0.004212,
-            "ic_std": 0.284685,
-            "ic_ir": -0.014797,
-            "ic_hit_rate": 0.4966,
-            "n_timestamps": 21046
-          }
-        },
-        "sharpe_ratio": null,
-        "max_drawdown": null,
-        "turnover": null,
-        "annualised_return": null,
-        "hit_rate": null,
-        "extra": {
-          "n_timestamps": 21100,
+          "n_timestamps": 9865,
           "horizon_bars": 6,
           "horizons_bars": [
             1,
@@ -5398,252 +5334,53 @@
         }
       },
       "source_paper_ids": [
-        "a_high_frequency_trade_execution_model_for_supervised_learni"
+        "a_bismut_elworthy_li_formula_for_singular_sde_s_driven_by_a_"
       ],
       "source": "researcher",
-      "research_session_id": "2019-W03",
-      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/effective_spread_ratio.py",
-      "created_at": "2026-06-01T12:18:33.896164",
+      "research_session_id": "2019-W02",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/order_flow_momentum.py",
+      "created_at": "2026-06-08T13:18:54.551859",
       "metadata": {
-        "ic_threshold": 0.01,
         "ic_target_horizon": 6,
-        "ic_at_target": -0.014964
+        "ic_at_target": 0.004151
       }
     },
     {
-      "id": "order_flow_pressure",
-      "name": "Order Flow Pressure",
+      "id": "hidden_volume_mean_reversion",
+      "name": "Hidden Volume Mean Reversion",
       "class_name": "",
-      "description": "This factor computes the net order flow (orderFlow) relative to the trade-side liquidity (trdLiq) to capture the pressure exerted by buyers or sellers on price movements.",
+      "description": "This factor calculates the ratio of hidden volume to total volume over a recent lookback window and identifies instances where hidden volume significantly deviates from historical levels, suggesting potential mean reversion opportunities.",
       "formula": "",
-      "trading_idea": "A strong order flow can indicate market sentiment and potential price movement. By analyzing the net order flow (buy vs. sell) combined with liquidity measures, we can anticipate short-term price changes as aggressive buyers or sellers exert pressure on the market. This aligns with the insights from the paper on order arrival rates and price dynamics.",
-      "trading_idea_ids": [],
-      "category": "microstructure",
-      "status": "backtested",
-      "backtest_metrics": {
-        "information_coefficient": 0.142567,
-        "ic_std": 0.288962,
-        "ic_ir": 0.493374,
-        "ic_hit_rate": 0.6925,
-        "ic_by_horizon": {
-          "1": {
-            "ic": 0.348815,
-            "ic_std": 0.276842,
-            "ic_ir": 1.259979,
-            "ic_hit_rate": 0.8842,
-            "n_timestamps": 30471
-          },
-          "6": {
-            "ic": 0.142567,
-            "ic_std": 0.288962,
-            "ic_ir": 0.493374,
-            "ic_hit_rate": 0.6925,
-            "n_timestamps": 30466
-          },
-          "60": {
-            "ic": 0.044357,
-            "ic_std": 0.289647,
-            "ic_ir": 0.15314,
-            "ic_hit_rate": 0.5618,
-            "n_timestamps": 30412
-          }
-        },
-        "sharpe_ratio": null,
-        "max_drawdown": null,
-        "turnover": null,
-        "annualised_return": null,
-        "hit_rate": null,
-        "extra": {
-          "n_timestamps": 30466,
-          "horizon_bars": 6,
-          "horizons_bars": [
-            1,
-            6,
-            60
-          ]
-        }
-      },
-      "source_paper_ids": [
-        "a_functional_limit_theorem_for_limit_order_books_with_state_"
-      ],
-      "source": "researcher",
-      "research_session_id": "2019-W04",
-      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/order_flow_pressure.py",
-      "created_at": "2026-06-01T12:21:19.873403",
-      "metadata": {
-        "ic_threshold": 0.01,
-        "ic_target_horizon": 6,
-        "ic_at_target": 0.142567
-      }
-    },
-    {
-      "id": "hidden_volume_significance",
-      "name": "Hidden Volume Significance",
-      "class_name": "",
-      "description": "This factor calculates the ratio of hidden volume (hidden) to total volume (|trade|) to identify periods of significant hidden interest relative to overall trading activity.",
-      "formula": "",
-      "trading_idea": "Hidden volume represents trades that may not be visible in the market and can indicate underlying interest that is not yet reflected in price. By analyzing the ratio of hidden volume to total traded volume, we can gauge potential market movements as hidden orders become visible. This concept is inspired by the idea of assessing market impact from hidden trades discussed in high-frequency trading literature.",
-      "trading_idea_ids": [],
-      "category": "statistical_arbitrage",
-      "status": "backtested",
-      "backtest_metrics": {
-        "information_coefficient": 0.022447,
-        "ic_std": 0.390835,
-        "ic_ir": 0.057433,
-        "ic_hit_rate": 0.5211,
-        "ic_by_horizon": {
-          "1": {
-            "ic": 0.056684,
-            "ic_std": 0.390025,
-            "ic_ir": 0.145335,
-            "ic_hit_rate": 0.5562,
-            "n_timestamps": 26005
-          },
-          "6": {
-            "ic": 0.022447,
-            "ic_std": 0.390835,
-            "ic_ir": 0.057433,
-            "ic_hit_rate": 0.5211,
-            "n_timestamps": 25895
-          },
-          "60": {
-            "ic": 0.006089,
-            "ic_std": 0.389094,
-            "ic_ir": 0.015648,
-            "ic_hit_rate": 0.5052,
-            "n_timestamps": 25846
-          }
-        },
-        "sharpe_ratio": null,
-        "max_drawdown": null,
-        "turnover": null,
-        "annualised_return": null,
-        "hit_rate": null,
-        "extra": {
-          "n_timestamps": 25895,
-          "horizon_bars": 6,
-          "horizons_bars": [
-            1,
-            6,
-            60
-          ]
-        }
-      },
-      "source_paper_ids": [
-        "a_high_frequency_trade_execution_model_for_supervised_learni"
-      ],
-      "source": "researcher",
-      "research_session_id": "2019-W04",
-      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/hidden_volume_significance.py",
-      "created_at": "2026-06-01T12:21:19.873508",
-      "metadata": {
-        "ic_threshold": 0.01,
-        "ic_target_horizon": 6,
-        "ic_at_target": 0.022447
-      }
-    },
-    {
-      "id": "order_flow_diffusion",
-      "name": "Order Flow Diffusion",
-      "class_name": "",
-      "description": "This factor computes the difference between the cumulative order flow (buyer-initiated minus seller-initiated) over a specified rolling window, normalized by the total volume traded. A positive value indicates bullish sentiment, while a negative value suggests bearish sentiment.",
-      "formula": "",
-      "trading_idea": "Order flow can indicate market sentiment and potential price movements. By analyzing the difference in order flow between buyer-initiated and seller-initiated trades over time, we can capture shifts in market dynamics that precede price changes. This approach leverages the insights from the paper on limit order book dynamics, proposing that such order flow differentials can predict future price movements effectively.",
-      "trading_idea_ids": [],
-      "category": "microstructure",
-      "status": "backtested",
-      "backtest_metrics": {
-        "information_coefficient": 0.020254,
-        "ic_std": 0.289666,
-        "ic_ir": 0.069923,
-        "ic_hit_rate": 0.524,
-        "ic_by_horizon": {
-          "1": {
-            "ic": 0.058091,
-            "ic_std": 0.299416,
-            "ic_ir": 0.194016,
-            "ic_hit_rate": 0.575,
-            "n_timestamps": 41160
-          },
-          "6": {
-            "ic": 0.020254,
-            "ic_std": 0.289666,
-            "ic_ir": 0.069923,
-            "ic_hit_rate": 0.524,
-            "n_timestamps": 41156
-          },
-          "60": {
-            "ic": 0.003747,
-            "ic_std": 0.289779,
-            "ic_ir": 0.01293,
-            "ic_hit_rate": 0.4999,
-            "n_timestamps": 41104
-          }
-        },
-        "sharpe_ratio": null,
-        "max_drawdown": null,
-        "turnover": null,
-        "annualised_return": null,
-        "hit_rate": null,
-        "extra": {
-          "n_timestamps": 41156,
-          "horizon_bars": 6,
-          "horizons_bars": [
-            1,
-            6,
-            60
-          ]
-        }
-      },
-      "source_paper_ids": [
-        "a_functional_limit_theorem_for_limit_order_books_with_state_"
-      ],
-      "source": "researcher",
-      "research_session_id": "2019-W05",
-      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/order_flow_diffusion.py",
-      "created_at": "2026-06-01T12:22:31.630557",
-      "metadata": {
-        "ic_threshold": 0.01,
-        "ic_target_horizon": 6,
-        "ic_at_target": 0.020254
-      }
-    },
-    {
-      "id": "hidden_volume_impact",
-      "name": "Hidden Volume Impact",
-      "class_name": "",
-      "description": "This factor computes the ratio of hidden traded volume to total traded volume over a specified period. A high ratio indicates significant hidden activity, which may trigger mean reversion as the market adjusts to this latent liquidity.",
-      "formula": "",
-      "trading_idea": "Hidden volume can act as a precursor to price movements, often leading to mean reversion opportunities as the market reacts to previously concealed trading activity. The notion that hidden trades can reveal underlying demand or supply signals can help traders anticipate potential reversals in price trends. This factor builds on the concept that the market adjusts to hidden volume revelations over time.",
+      "trading_idea": "Hidden liquidity often signals large institutional trading activity that can lead to mean reverting price movements once the market absorbs this liquidity. When hidden volume is disproportionately high relative to recent averages, it can indicate that prices may revert after an initial reaction to such trades.",
       "trading_idea_ids": [],
       "category": "mean_reversion",
       "status": "backtested",
       "backtest_metrics": {
-        "information_coefficient": 0.011493,
-        "ic_std": 0.289392,
-        "ic_ir": 0.039715,
-        "ic_hit_rate": 0.5075,
+        "information_coefficient": 0.013809,
+        "ic_std": 0.378272,
+        "ic_ir": 0.036504,
+        "ic_hit_rate": 0.5125,
         "ic_by_horizon": {
           "1": {
-            "ic": 0.031255,
-            "ic_std": 0.300323,
-            "ic_ir": 0.104072,
-            "ic_hit_rate": 0.536,
-            "n_timestamps": 39917
+            "ic": 0.037641,
+            "ic_std": 0.37855,
+            "ic_ir": 0.099436,
+            "ic_hit_rate": 0.5364,
+            "n_timestamps": 11041
           },
           "6": {
-            "ic": 0.011493,
-            "ic_std": 0.289392,
-            "ic_ir": 0.039715,
-            "ic_hit_rate": 0.5075,
-            "n_timestamps": 39907
+            "ic": 0.013809,
+            "ic_std": 0.378272,
+            "ic_ir": 0.036504,
+            "ic_hit_rate": 0.5125,
+            "n_timestamps": 11007
           },
           "60": {
-            "ic": 0.000214,
-            "ic_std": 0.291381,
-            "ic_ir": 0.000736,
-            "ic_hit_rate": 0.493,
-            "n_timestamps": 39857
+            "ic": 0.010153,
+            "ic_std": 0.378107,
+            "ic_ir": 0.026851,
+            "ic_hit_rate": 0.5068,
+            "n_timestamps": 10981
           }
         },
         "sharpe_ratio": null,
@@ -5652,7 +5389,7 @@
         "annualised_return": null,
         "hit_rate": null,
         "extra": {
-          "n_timestamps": 39907,
+          "n_timestamps": 11007,
           "horizon_bars": 6,
           "horizons_bars": [
             1,
@@ -5661,52 +5398,508 @@
           ]
         }
       },
-      "source_paper_ids": [],
+      "source_paper_ids": [
+        "a_bismut_elworthy_li_formula_for_singular_sde_s_driven_by_a_"
+      ],
       "source": "researcher",
-      "research_session_id": "2019-W05",
-      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/hidden_volume_impact.py",
-      "created_at": "2026-06-01T12:22:31.630678",
+      "research_session_id": "2019-W02",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/hidden_volume_mean_reversion.py",
+      "created_at": "2026-06-08T13:18:54.552258",
       "metadata": {
-        "ic_threshold": 0.01,
         "ic_target_horizon": 6,
-        "ic_at_target": 0.011493
+        "ic_at_target": 0.013809
       }
     },
     {
-      "id": "order_flow_anomaly",
-      "name": "Order Flow Anomaly Detection",
+      "id": "aggressive_order_flow",
+      "name": "Aggressive Order Flow Factor",
       "class_name": "",
-      "description": "This factor computes the z-score of the order flow (signed limit-order-flow) over a specified lookback period, helping to identify anomalies in order flow that may lead to price adjustments.",
+      "description": "This factor computes the ratio of aggressive order flow (net market orders) to total order flow within a given time frame. It captures market sentiment by assessing the intensity of aggressive buying versus selling.",
       "formula": "",
-      "trading_idea": "Order flow imbalances can indicate potential price movements as they reflect the collective sentiment of market participants. Significant deviations in the order flow can signal overreactions or underreactions in stock prices, providing opportunities for mean-reversion or momentum trades depending on the direction of the flow.",
+      "trading_idea": "Aggressive orders, which are typically market orders, indicate a strong conviction from traders about the direction of price. By analyzing the ratio of aggressive to passive orders, we can gauge market sentiment and potential price movements. This factor leverages the imbalance in order flow to predict short-term price changes, as indicated in studies on order book dynamics.",
       "trading_idea_ids": [],
       "category": "microstructure",
       "status": "backtested",
       "backtest_metrics": {
-        "information_coefficient": 0.17517,
-        "ic_std": 0.287249,
-        "ic_ir": 0.609819,
-        "ic_hit_rate": 0.7281,
+        "information_coefficient": -0.001186,
+        "ic_std": 0.286025,
+        "ic_ir": -0.004146,
+        "ic_hit_rate": 0.5016,
         "ic_by_horizon": {
           "1": {
-            "ic": 0.404628,
-            "ic_std": 0.265346,
-            "ic_ir": 1.524904,
-            "ic_hit_rate": 0.9204,
+            "ic": -0.006854,
+            "ic_std": 0.306611,
+            "ic_ir": -0.022354,
+            "ic_hit_rate": 0.4959,
+            "n_timestamps": 11693
+          },
+          "6": {
+            "ic": -0.001186,
+            "ic_std": 0.286025,
+            "ic_ir": -0.004146,
+            "ic_hit_rate": 0.5016,
+            "n_timestamps": 11688
+          },
+          "60": {
+            "ic": -0.002631,
+            "ic_std": 0.284921,
+            "ic_ir": -0.009235,
+            "ic_hit_rate": 0.4908,
+            "n_timestamps": 11634
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 11688,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "a_functional_limit_theorem_for_limit_order_books_with_state_"
+      ],
+      "source": "researcher",
+      "research_session_id": "2019-W02",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/aggressive_order_flow.py",
+      "created_at": "2026-06-08T13:18:54.552357",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": -0.001186
+      }
+    },
+    {
+      "id": "hidden_volume_analysis",
+      "name": "Hidden Volume Analysis",
+      "class_name": "",
+      "description": "This signal computes the ratio of hidden volume to total volume across a specified time frame, identifying stocks with high levels of hidden trading activity relative to their overall trading volume. It then normalizes this value to provide a cross-sectional view of stocks.",
+      "formula": "",
+      "trading_idea": "Hidden orders can significantly impact price movements without appearing in standard volume metrics. By analyzing the hidden volume in conjunction with order flow, we can identify potential price reversals or continuations, leveraging the information asymmetry that exists in the market. This aligns with literature suggesting that hidden volume often precedes significant price changes.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.00437,
+        "ic_std": 0.282438,
+        "ic_ir": 0.015474,
+        "ic_hit_rate": 0.4994,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.000426,
+            "ic_std": 0.297398,
+            "ic_ir": -0.001434,
+            "ic_hit_rate": 0.4941,
+            "n_timestamps": 20297
+          },
+          "6": {
+            "ic": 0.00437,
+            "ic_std": 0.282438,
+            "ic_ir": 0.015474,
+            "ic_hit_rate": 0.4994,
+            "n_timestamps": 20293
+          },
+          "60": {
+            "ic": 0.010238,
+            "ic_std": 0.285919,
+            "ic_ir": 0.035806,
+            "ic_hit_rate": 0.5079,
+            "n_timestamps": 20240
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 20293,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "a_bismut_elworthy_li_formula_for_singular_sde_s_driven_by_a_"
+      ],
+      "source": "researcher",
+      "research_session_id": "2019-W03",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/hidden_volume_analysis.py",
+      "created_at": "2026-06-08T13:35:47.337365",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.00437
+      }
+    },
+    {
+      "id": "effective_spread_momentum",
+      "name": "Effective Spread Momentum",
+      "class_name": "",
+      "description": "This factor computes the change in the effective spread over a rolling window, identifying stocks with improving or deteriorating liquidity conditions. It tracks this momentum to signal potential entry or exit points.",
+      "formula": "",
+      "trading_idea": "The effective spread reflects the true cost of trading and can indicate the market's liquidity. A rising effective spread may suggest increasing transaction costs and reduced liquidity, which could precede price corrections. Conversely, a declining effective spread may indicate emerging momentum in a stock as liquidity improves, aligning with behavioral finance theories about market reaction to liquidity changes.",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.006718,
+        "ic_std": 0.289057,
+        "ic_ir": -0.023243,
+        "ic_hit_rate": 0.4869,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.013189,
+            "ic_std": 0.297051,
+            "ic_ir": -0.044398,
+            "ic_hit_rate": 0.4818,
+            "n_timestamps": 21110
+          },
+          "6": {
+            "ic": -0.006718,
+            "ic_std": 0.289057,
+            "ic_ir": -0.023243,
+            "ic_hit_rate": 0.4869,
+            "n_timestamps": 21105
+          },
+          "60": {
+            "ic": -0.00153,
+            "ic_std": 0.283489,
+            "ic_ir": -0.005397,
+            "ic_hit_rate": 0.4995,
+            "n_timestamps": 21051
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 21105,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "a_bismut_elworthy_li_formula_for_singular_sde_s_driven_by_a_"
+      ],
+      "source": "researcher",
+      "research_session_id": "2019-W03",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/effective_spread_momentum.py",
+      "created_at": "2026-06-08T13:35:47.340744",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": -0.006718
+      }
+    },
+    {
+      "id": "liquidity_fluctuation_indicator",
+      "name": "Liquidity Fluctuation Indicator",
+      "class_name": "",
+      "description": "This factor computes the ratio of the change in average top-of-book depth to the change in average volume traded over a given period, normalized by the average liquidity over the same period. It captures the relative strength of liquidity fluctuations in the market.",
+      "formula": "",
+      "trading_idea": "Liquidity fluctuations can signal impending price movements. When liquidity suddenly decreases, it may indicate that market participants are pulling back, potentially leading to price declines, while increased liquidity can signal confidence in price stability. This aligns with findings from limit order book models that emphasize the relationship between liquidity and price dynamics.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.005236,
+        "ic_std": 0.282201,
+        "ic_ir": 0.018555,
+        "ic_hit_rate": 0.504,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.003521,
+            "ic_std": 0.276661,
+            "ic_ir": 0.012728,
+            "ic_hit_rate": 0.5063,
+            "n_timestamps": 21110
+          },
+          "6": {
+            "ic": 0.005236,
+            "ic_std": 0.282201,
+            "ic_ir": 0.018555,
+            "ic_hit_rate": 0.504,
+            "n_timestamps": 21105
+          },
+          "60": {
+            "ic": 0.001999,
+            "ic_std": 0.283919,
+            "ic_ir": 0.007039,
+            "ic_hit_rate": 0.5028,
+            "n_timestamps": 21051
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 21105,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "a_functional_limit_theorem_for_limit_order_books_with_state_"
+      ],
+      "source": "researcher",
+      "research_session_id": "2019-W03",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/liquidity_fluctuation_indicator.py",
+      "created_at": "2026-06-08T13:35:47.341061",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.005236
+      }
+    },
+    {
+      "id": "liquidity_spread_indicator",
+      "name": "Liquidity Spread Indicator",
+      "class_name": "",
+      "description": "This factor computes the ratio of the bid-ask spread to the average top-of-book depth, capturing relative liquidity conditions. A higher value suggests a wider spread relative to available liquidity, indicating potential trading opportunities.",
+      "formula": "",
+      "trading_idea": "The liquidity spread between the bid-ask prices can highlight market inefficiencies. When liquidity is low, the spread tends to widen, indicating potential mispricing that can be exploited through mean-reversion strategies. This aligns with the idea that markets tend to return to a normalized spread when liquidity conditions improve.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.002043,
+        "ic_std": 0.325303,
+        "ic_ir": 0.006281,
+        "ic_hit_rate": 0.499,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.005033,
+            "ic_std": 0.319682,
+            "ic_ir": 0.015743,
+            "ic_hit_rate": 0.5032,
+            "n_timestamps": 30456
+          },
+          "6": {
+            "ic": 0.002043,
+            "ic_std": 0.325303,
+            "ic_ir": 0.006281,
+            "ic_hit_rate": 0.499,
+            "n_timestamps": 30450
+          },
+          "60": {
+            "ic": -0.006397,
+            "ic_std": 0.329732,
+            "ic_ir": -0.019399,
+            "ic_hit_rate": 0.4925,
+            "n_timestamps": 30398
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 30450,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "a_bismut_elworthy_li_formula_for_singular_sde_s_driven_by_a_"
+      ],
+      "source": "researcher",
+      "research_session_id": "2019-W04",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/liquidity_spread_indicator.py",
+      "created_at": "2026-06-08T13:46:36.050729",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.002043
+      }
+    },
+    {
+      "id": "hidden_volume_momentum",
+      "name": "Hidden Volume Momentum",
+      "class_name": "",
+      "description": "This factor tracks the change in hidden volume over time, normalized by total volume, to identify stocks that are experiencing increasing hidden trading activity. It aims to capture momentum driven by concealed trading intentions.",
+      "formula": "",
+      "trading_idea": "Hidden volume, which is typically linked to aggressive trading intentions, can provide insights into future price movements. When hidden volume increases alongside price momentum, it suggests that buyers or sellers are positioning themselves for a significant move, which can create profitable follow-through opportunities.",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": null,
+        "ic_std": null,
+        "ic_ir": null,
+        "ic_hit_rate": null,
+        "ic_by_horizon": {
+          "1": {
+            "ic": null,
+            "ic_std": null,
+            "ic_ir": null,
+            "ic_hit_rate": null,
+            "n_timestamps": 0
+          },
+          "6": {
+            "ic": null,
+            "ic_std": null,
+            "ic_ir": null,
+            "ic_hit_rate": null,
+            "n_timestamps": 0
+          },
+          "60": {
+            "ic": null,
+            "ic_std": null,
+            "ic_ir": null,
+            "ic_hit_rate": null,
+            "n_timestamps": 0
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 0,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "a_bismut_elworthy_li_formula_for_singular_sde_s_driven_by_a_"
+      ],
+      "source": "researcher",
+      "research_session_id": "2019-W04",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/hidden_volume_momentum.py",
+      "created_at": "2026-06-08T13:46:36.052273",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": null
+      }
+    },
+    {
+      "id": "price_spread_mean_reversion",
+      "name": "Price Spread Mean Reversion",
+      "class_name": "",
+      "description": "This factor calculates the difference between the current price and its 10-second moving average, indicating how far the price has deviated from its recent average. A larger difference suggests a higher likelihood of mean reversion.",
+      "formula": "",
+      "trading_idea": "In intraday trading, prices tend to revert to their mean after experiencing significant deviations. This mean-reversion effect can be driven by traders correcting mispricings or reacting to new information. By analyzing the spread between a stock's price and its moving average over a short time frame, we can identify potential reversal points and capitalize on these corrections.",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.025146,
+        "ic_std": 0.299394,
+        "ic_ir": -0.08399,
+        "ic_hit_rate": 0.4653,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.035645,
+            "ic_std": 0.297609,
+            "ic_ir": -0.119772,
+            "ic_hit_rate": 0.4511,
+            "n_timestamps": 46844
+          },
+          "6": {
+            "ic": -0.025146,
+            "ic_std": 0.299394,
+            "ic_ir": -0.08399,
+            "ic_hit_rate": 0.4653,
+            "n_timestamps": 46839
+          },
+          "60": {
+            "ic": -0.016306,
+            "ic_std": 0.297595,
+            "ic_ir": -0.054794,
+            "ic_hit_rate": 0.4751,
+            "n_timestamps": 46785
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46839,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "a_common_shock_model_for_multidimensional_electricity_intrad"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-002",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/price_spread_mean_reversion.py",
+      "created_at": "2026-06-09T09:57:38.708327",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": -0.025146
+      }
+    },
+    {
+      "id": "dynamic_spread_analysis",
+      "name": "Dynamic Spread Analysis",
+      "class_name": "",
+      "description": "This factor computes the rolling average and standard deviation of the bid-ask spread over a specified window and identifies stocks with unusually high spreads relative to their historical norms, indicating potential trading opportunities.",
+      "formula": "",
+      "trading_idea": "The bid-ask spread often reflects the liquidity and market sentiment around a stock. A sudden increase in spread may indicate an impending price movement driven by increased uncertainty or market events. By analyzing the spread dynamics over time, traders can identify potential reversals, as periods of high spread may precede a return to lower spread levels, suggesting a mean-reversion opportunity.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.011558,
+        "ic_std": 0.285561,
+        "ic_ir": 0.040473,
+        "ic_hit_rate": 0.5145,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.020579,
+            "ic_std": 0.289787,
+            "ic_ir": 0.071014,
+            "ic_hit_rate": 0.5283,
             "n_timestamps": 46794
           },
           "6": {
-            "ic": 0.17517,
-            "ic_std": 0.287249,
-            "ic_ir": 0.609819,
-            "ic_hit_rate": 0.7281,
+            "ic": 0.011558,
+            "ic_std": 0.285561,
+            "ic_ir": 0.040473,
+            "ic_hit_rate": 0.5145,
             "n_timestamps": 46789
           },
           "60": {
-            "ic": 0.059683,
-            "ic_std": 0.289033,
-            "ic_ir": 0.206493,
-            "ic_hit_rate": 0.5829,
+            "ic": -0.002289,
+            "ic_std": 0.285487,
+            "ic_ir": -0.008016,
+            "ic_hit_rate": 0.4958,
             "n_timestamps": 46735
           }
         },
@@ -5726,119 +5919,897 @@
         }
       },
       "source_paper_ids": [
-        "151_estrategias_de_trading"
+        "asymptotic_proportion_of_arbitrage_points_in_fractional_bina"
       ],
       "source": "researcher",
-      "research_session_id": "2026-06-02",
-      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/order_flow_anomaly.py",
-      "created_at": "2026-06-02T14:53:02.850947",
+      "research_session_id": "prerun-002",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/dynamic_spread_analysis.py",
+      "created_at": "2026-06-09T09:57:38.710987",
       "metadata": {
-        "ic_threshold": 0.01,
         "ic_target_horizon": 6,
-        "ic_at_target": 0.17517
+        "ic_at_target": 0.011558
+      }
+    },
+    {
+      "id": "value_based_inventory_flow",
+      "name": "Value-Based Inventory Flow",
+      "class_name": "",
+      "description": "This signal computes the net signed traded volume adjusted for the effective limit-order-book imbalance, normalized by total volume. It aims to capture how the market's perception of value is influenced by the balance of buying and selling pressure relative to inventory levels.",
+      "formula": "",
+      "trading_idea": "Market participants often misjudge the implications of order flow on price movements, leading to inefficiencies. By analyzing the volume of signed traded volume in conjunction with the limit-order-book imbalance, this factor aims to capture the relationship between inventory levels and market sentiment, as firms optimize their order executions based on perceived future value, similar to concepts discussed in the value-based inventory management literature.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.054096,
+        "ic_std": 0.291714,
+        "ic_ir": 0.185441,
+        "ic_hit_rate": 0.571,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.128948,
+            "ic_std": 0.305561,
+            "ic_ir": 0.422004,
+            "ic_hit_rate": 0.6645,
+            "n_timestamps": 46849
+          },
+          "6": {
+            "ic": 0.054096,
+            "ic_std": 0.291714,
+            "ic_ir": 0.185441,
+            "ic_hit_rate": 0.571,
+            "n_timestamps": 46844
+          },
+          "60": {
+            "ic": 0.018798,
+            "ic_std": 0.288892,
+            "ic_ir": 0.065071,
+            "ic_hit_rate": 0.5268,
+            "n_timestamps": 46790
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46844,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "value_based_inventory_management"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-002",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/value_based_inventory_flow.py",
+      "created_at": "2026-06-09T09:57:38.711040",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.054096
+      }
+    },
+    {
+      "id": "hidden_volume_signal",
+      "name": "Hidden Volume Signal",
+      "class_name": "",
+      "description": "This factor computes the correlation between hidden volume and subsequent price changes over a short horizon, identifying stocks where hidden volume precedes significant price moves. It utilizes the 'hidden' field from the LOBSTER dataset to quantify this effect.",
+      "formula": "",
+      "trading_idea": "Hidden volume can indicate the intent of informed traders who prefer not to reveal their orders to the market. By analyzing the relationship between hidden volume and price movement, we can exploit the potential price impact of undisclosed trades, capturing alpha from these informed signals.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.00158,
+        "ic_std": 0.427853,
+        "ic_ir": 0.003692,
+        "ic_hit_rate": 0.4947,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.002665,
+            "ic_std": 0.426917,
+            "ic_ir": 0.006243,
+            "ic_hit_rate": 0.5003,
+            "n_timestamps": 29827
+          },
+          "6": {
+            "ic": 0.00158,
+            "ic_std": 0.427853,
+            "ic_ir": 0.003692,
+            "ic_hit_rate": 0.4947,
+            "n_timestamps": 29711
+          },
+          "60": {
+            "ic": -0.000443,
+            "ic_std": 0.428553,
+            "ic_ir": -0.001033,
+            "ic_hit_rate": 0.4953,
+            "n_timestamps": 29613
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 29711,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "subexponential_tail_equivalence_of_the_queue_length_distribu"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-002",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/hidden_volume_signal.py",
+      "created_at": "2026-06-09T09:57:38.711065",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.00158
+      }
+    },
+    {
+      "id": "order_flow_pressure_indicator",
+      "name": "Order Flow Pressure Indicator",
+      "class_name": "",
+      "description": "This factor computes the net signed order flow (orderFlow) over a defined lookback period, normalized by the total volume during that period. An increase in this indicator suggests growing pressure in the direction of the net order flow, while a decrease indicates diminishing pressure.",
+      "formula": "",
+      "trading_idea": "Studies in market microstructure indicate that persistent order flow can create pressure on prices, leading to predictable price movements (Eisler et al., 2011). When there is a significant and consistent imbalance in order flow (either buy or sell), it often signals potential price trends or reversals due to the impact of liquidity on the price formation process.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.022535,
+        "ic_std": 0.290374,
+        "ic_ir": 0.077608,
+        "ic_hit_rate": 0.5271,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.059861,
+            "ic_std": 0.300464,
+            "ic_ir": 0.199228,
+            "ic_hit_rate": 0.5765,
+            "n_timestamps": 45696
+          },
+          "6": {
+            "ic": 0.022535,
+            "ic_std": 0.290374,
+            "ic_ir": 0.077608,
+            "ic_hit_rate": 0.5271,
+            "n_timestamps": 45691
+          },
+          "60": {
+            "ic": 0.00396,
+            "ic_std": 0.290639,
+            "ic_ir": 0.013627,
+            "ic_hit_rate": 0.4996,
+            "n_timestamps": 45640
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 45691,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "models_for_the_impact_of_all_order_book_events"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-002",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/order_flow_pressure_indicator.py",
+      "created_at": "2026-06-09T09:57:38.711098",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.022535
+      }
+    },
+    {
+      "id": "order_flow_volatility",
+      "name": "Order Flow Volatility Indicator",
+      "class_name": "",
+      "description": "This signal computes the rolling standard deviation of the order flow over a specified window, normalized by the average order flow. It highlights periods of heightened activity and potential market impact, providing a measure of liquidity and sentiment.",
+      "formula": "",
+      "trading_idea": "High volatility in order flow can indicate market uncertainty and potential price movements. This factor leverages the premise that increased order flow volatility can lead to larger price swings, as traders react to rapidly changing conditions. By capturing these bursts of order flow activity, traders can position themselves ahead of potential market movements.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.009329,
+        "ic_std": 0.2857,
+        "ic_ir": 0.032654,
+        "ic_hit_rate": 0.5147,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.01928,
+            "ic_std": 0.285413,
+            "ic_ir": 0.067553,
+            "ic_hit_rate": 0.5265,
+            "n_timestamps": 46834
+          },
+          "6": {
+            "ic": 0.009329,
+            "ic_std": 0.2857,
+            "ic_ir": 0.032654,
+            "ic_hit_rate": 0.5147,
+            "n_timestamps": 46829
+          },
+          "60": {
+            "ic": -0.004989,
+            "ic_std": 0.284557,
+            "ic_ir": -0.017532,
+            "ic_hit_rate": 0.492,
+            "n_timestamps": 46775
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46829,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "forecasting_intermittent_time_series_with_gaussian_processes"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-002",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/order_flow_volatility.py",
+      "created_at": "2026-06-09T09:57:38.711131",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.009329
+      }
+    },
+    {
+      "id": "hidden_volume_surge",
+      "name": "Hidden Volume Surge",
+      "class_name": "",
+      "description": "This signal computes the difference between the hidden volume and a rolling average of hidden volume over a defined period. A significant increase in hidden volume compared to this average indicates a potential accumulation or distribution of shares, which may precede price changes.",
+      "formula": "",
+      "trading_idea": "Hidden volume often reflects informed trading behavior, where traders execute large orders without impacting the market. A sudden surge in hidden volume, particularly when it diverges from the visible volume, suggests increased interest or sentiment around a stock, which can lead to subsequent price movements. This aligns with findings in market microstructure that highlight the significance of non-displayed liquidity.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.008761,
+        "ic_std": 0.295333,
+        "ic_ir": 0.029663,
+        "ic_hit_rate": 0.5039,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.018125,
+            "ic_std": 0.308424,
+            "ic_ir": 0.058767,
+            "ic_hit_rate": 0.5185,
+            "n_timestamps": 38633
+          },
+          "6": {
+            "ic": 0.008761,
+            "ic_std": 0.295333,
+            "ic_ir": 0.029663,
+            "ic_hit_rate": 0.5039,
+            "n_timestamps": 38443
+          },
+          "60": {
+            "ic": 0.002085,
+            "ic_std": 0.291464,
+            "ic_ir": 0.007152,
+            "ic_hit_rate": 0.4952,
+            "n_timestamps": 38388
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 38443,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "contextual_sentence_analysis_for_the_sentiment_prediction_on"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-002",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/hidden_volume_surge.py",
+      "created_at": "2026-06-09T09:57:38.711162",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.008761
+      }
+    },
+    {
+      "id": "order_flow_correlation",
+      "name": "Order Flow Correlation",
+      "class_name": "",
+      "description": "This signal computes the correlation of signed order flow (from the `orderFlow` field) between pairs of stocks over a rolling window. It generates a cross-sectional signal that highlights stocks with correlated buying or selling pressure, which can indicate a higher likelihood of price convergence.",
+      "formula": "",
+      "trading_idea": "High-frequency trading strategies often exploit the correlation between order flow dynamics of related assets. When two assets exhibit similar order flow patterns, it may indicate a shared underlying driver, leading to potential price movements in the same direction. This factor aims to capture such correlations to identify trading opportunities.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.004518,
+        "ic_std": 0.28275,
+        "ic_ir": -0.015979,
+        "ic_hit_rate": 0.4909,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.00169,
+            "ic_std": 0.286947,
+            "ic_ir": -0.005891,
+            "ic_hit_rate": 0.4962,
+            "n_timestamps": 46794
+          },
+          "6": {
+            "ic": -0.004518,
+            "ic_std": 0.28275,
+            "ic_ir": -0.015979,
+            "ic_hit_rate": 0.4909,
+            "n_timestamps": 46789
+          },
+          "60": {
+            "ic": -0.013859,
+            "ic_std": 0.28086,
+            "ic_ir": -0.049346,
+            "ic_hit_rate": 0.4778,
+            "n_timestamps": 46735
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46789,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "optimal_cross_correlation_estimates_from_asynchronous_tick_b"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-002",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/order_flow_correlation.py",
+      "created_at": "2026-06-09T09:57:38.711183",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": -0.004518
+      }
+    },
+    {
+      "id": "order_flow_reversal",
+      "name": "Order Flow Reversal Indicator",
+      "class_name": "",
+      "description": "This factor computes the rate of change in order flow, measured by the signed traded volume over a rolling window, and identifies instances when the order flow switches from positive to negative or vice versa. The computed values are standardized and can be used to predict short-term price movements based on sudden changes in order flow.",
+      "formula": "",
+      "trading_idea": "In a market where order flow is predominantly driven by aggressive buyers or sellers, an abrupt reversal in order flow can indicate a potential price reversal. This is based on the premise that significant shifts in order flow often precede changes in market sentiment and price direction, as suggested by microstructure literature on liquidity and order dynamics.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.120724,
+        "ic_std": 0.338694,
+        "ic_ir": 0.356439,
+        "ic_hit_rate": 0.6441,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.238262,
+            "ic_std": 0.334233,
+            "ic_ir": 0.712862,
+            "ic_hit_rate": 0.765,
+            "n_timestamps": 46569
+          },
+          "6": {
+            "ic": 0.120724,
+            "ic_std": 0.338694,
+            "ic_ir": 0.356439,
+            "ic_hit_rate": 0.6441,
+            "n_timestamps": 46549
+          },
+          "60": {
+            "ic": 0.04197,
+            "ic_std": 0.338759,
+            "ic_ir": 0.123893,
+            "ic_hit_rate": 0.551,
+            "n_timestamps": 46493
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46549,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "causal_discovery_of_linear_non_gaussian_acyclic_models_in_th"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-002",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/order_flow_reversal.py",
+      "created_at": "2026-06-09T09:57:38.711205",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.120724
+      }
+    },
+    {
+      "id": "dynamic_order_flow_ratio",
+      "name": "Dynamic Order Flow Ratio",
+      "class_name": "",
+      "description": "This signal computes the ratio of the absolute value of buy order flow to the absolute value of sell order flow over a specified rolling window, normalized to a standard deviation to detect significant deviations from the mean. A higher ratio indicates a stronger buying pressure relative to selling pressure.",
+      "formula": "",
+      "trading_idea": "The Dynamic Order Flow Ratio captures the relationship between aggressive buy and sell orders, providing insights into market sentiment and potential price direction. When the ratio of buy to sell order flow increases significantly, it may indicate bullish sentiment, while a decline may suggest bearish sentiment. This aligns with behavioral finance theories that emphasize how order flow reflects trader intentions and market psychology.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.039826,
+        "ic_std": 0.286385,
+        "ic_ir": 0.139064,
+        "ic_hit_rate": 0.5525,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.09805,
+            "ic_std": 0.283892,
+            "ic_ir": 0.345378,
+            "ic_hit_rate": 0.6346,
+            "n_timestamps": 46735
+          },
+          "6": {
+            "ic": 0.039826,
+            "ic_std": 0.286385,
+            "ic_ir": 0.139064,
+            "ic_hit_rate": 0.5525,
+            "n_timestamps": 46730
+          },
+          "60": {
+            "ic": 0.011614,
+            "ic_std": 0.288095,
+            "ic_ir": 0.040314,
+            "ic_hit_rate": 0.5157,
+            "n_timestamps": 46676
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46730,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "on_the_role_of_f_llmer_schweizer_minimal_martingale_measure_"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-002",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/dynamic_order_flow_ratio.py",
+      "created_at": "2026-06-09T09:57:38.711229",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.039826
+      }
+    },
+    {
+      "id": "order_flow_volatility_indicator",
+      "name": "Order Flow Volatility Indicator",
+      "class_name": "",
+      "description": "This factor computes the rolling standard deviation of the `orderFlow` over a specified window, capturing changes in order flow volatility. It is then normalized to provide a score that indicates the relative volatility of order flow across different stocks at any given time.",
+      "formula": "",
+      "trading_idea": "Volatility in order flow can signal potential price swings due to increased trading activity or uncertainty among market participants. A significant increase in the volatility of order flow may indicate that traders are reacting to new information, leading to potential price movements. This factor leans on the understanding that high volatility in order flow often precedes higher volatility in price, which can be exploited for timely trades.",
+      "trading_idea_ids": [],
+      "category": "volatility",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.003591,
+        "ic_std": 0.286316,
+        "ic_ir": 0.012541,
+        "ic_hit_rate": 0.5033,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.011147,
+            "ic_std": 0.283369,
+            "ic_ir": 0.039338,
+            "ic_hit_rate": 0.5168,
+            "n_timestamps": 46794
+          },
+          "6": {
+            "ic": 0.003591,
+            "ic_std": 0.286316,
+            "ic_ir": 0.012541,
+            "ic_hit_rate": 0.5033,
+            "n_timestamps": 46789
+          },
+          "60": {
+            "ic": -0.00095,
+            "ic_std": 0.285804,
+            "ic_ir": -0.003322,
+            "ic_hit_rate": 0.4953,
+            "n_timestamps": 46735
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46789,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "learning_based_optimal_control_with_performance_guarantees_f"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-002",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/order_flow_volatility_indicator.py",
+      "created_at": "2026-06-09T09:57:38.711253",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.003591
+      }
+    },
+    {
+      "id": "informed_order_flow_ratio",
+      "name": "Informed Order Flow Ratio",
+      "class_name": "",
+      "description": "This factor computes the ratio of net buy order flow to total order flow over a specified period, indicating potential informed trading activity. A higher ratio suggests stronger informed buying, which may precede upward price movements.",
+      "formula": "",
+      "trading_idea": "Informed traders often leave clues in the order flow, particularly when they increase their net buying or selling pressure. When the ratio of buy to sell order flow exceeds a certain threshold, it indicates the presence of informed trading, which can lead to price movements in the same direction. This aligns with the insights from Easley et al. (2012) regarding order flow toxicity and its impact on price discovery.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.076766,
+        "ic_std": 0.29402,
+        "ic_ir": 0.261089,
+        "ic_hit_rate": 0.6061,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.176078,
+            "ic_std": 0.282558,
+            "ic_ir": 0.623155,
+            "ic_hit_rate": 0.733,
+            "n_timestamps": 46849
+          },
+          "6": {
+            "ic": 0.076766,
+            "ic_std": 0.29402,
+            "ic_ir": 0.261089,
+            "ic_hit_rate": 0.6061,
+            "n_timestamps": 46844
+          },
+          "60": {
+            "ic": 0.015619,
+            "ic_std": 0.291447,
+            "ic_ir": 0.053591,
+            "ic_hit_rate": 0.5238,
+            "n_timestamps": 46790
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46844,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "interpretable_hypothesis_driven_trading_a_rigorous_walk_forw"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-002",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/informed_order_flow_ratio.py",
+      "created_at": "2026-06-09T09:57:38.711274",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.076766
+      }
+    },
+    {
+      "id": "order_flow_surge_indicator",
+      "name": "Order Flow Surge Indicator",
+      "class_name": "",
+      "description": "This signal computes the ratio of the current bar's signed traded volume to a rolling average of the previous bars' signed traded volumes. A high ratio indicates a surge in order flow, suggesting potential price momentum.",
+      "formula": "",
+      "trading_idea": "Sudden spikes in order flow can indicate a shift in market sentiment and potential price movements. The presence of aggressive buying or selling pressure often precedes significant price changes, as it reflects the intentions of informed traders acting on new information. This factor leverages the principle that large, unexpected order flows can serve as a leading indicator of future price movements.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.011114,
+        "ic_std": 0.306247,
+        "ic_ir": -0.036289,
+        "ic_hit_rate": 0.4856,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.033326,
+            "ic_std": 0.33201,
+            "ic_ir": -0.100377,
+            "ic_hit_rate": 0.4589,
+            "n_timestamps": 46843
+          },
+          "6": {
+            "ic": -0.011114,
+            "ic_std": 0.306247,
+            "ic_ir": -0.036289,
+            "ic_hit_rate": 0.4856,
+            "n_timestamps": 46834
+          },
+          "60": {
+            "ic": -0.003098,
+            "ic_std": 0.302088,
+            "ic_ir": -0.010256,
+            "ic_hit_rate": 0.4944,
+            "n_timestamps": 46784
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46834,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "equity_warrant_pricing_under_subdiffusive_fractional_brownia"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-002",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/order_flow_surge_indicator.py",
+      "created_at": "2026-06-09T09:57:38.711301",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": -0.011114
       }
     },
     {
       "id": "hidden_volume_ratio",
       "name": "Hidden Volume Ratio",
       "class_name": "",
-      "description": "This factor computes the ratio of hidden traded volume to total traded volume, providing insight into the balance of institutional versus retail trading activity.",
+      "description": "This factor computes the ratio of hidden traded volume to the total volume in a 10-second bar for each stock. A higher ratio suggests potential upward or downward pressure based on hidden volumes, indicating that informed participants might be accumulating or distributing shares.",
       "formula": "",
-      "trading_idea": "Hidden volume, often associated with institutional trading, can reveal underlying sentiment not captured by visible trades. A higher ratio of hidden volume to total volume could indicate bullish sentiment, while a lower ratio may suggest bearish sentiment, leading to potential trading opportunities based on perceived market confidence.",
-      "trading_idea_ids": [],
-      "category": "sentiment",
-      "status": "backtested",
-      "backtest_metrics": {
-        "information_coefficient": 0.013661,
-        "ic_std": 0.307467,
-        "ic_ir": 0.044431,
-        "ic_hit_rate": 0.5155,
-        "ic_by_horizon": {
-          "1": {
-            "ic": 0.028939,
-            "ic_std": 0.312231,
-            "ic_ir": 0.092686,
-            "ic_hit_rate": 0.5341,
-            "n_timestamps": 44767
-          },
-          "6": {
-            "ic": 0.013661,
-            "ic_std": 0.307467,
-            "ic_ir": 0.044431,
-            "ic_hit_rate": 0.5155,
-            "n_timestamps": 44730
-          },
-          "60": {
-            "ic": 0.00456,
-            "ic_std": 0.30381,
-            "ic_ir": 0.015008,
-            "ic_hit_rate": 0.5031,
-            "n_timestamps": 44677
-          }
-        },
-        "sharpe_ratio": null,
-        "max_drawdown": null,
-        "turnover": null,
-        "annualised_return": null,
-        "hit_rate": null,
-        "extra": {
-          "n_timestamps": 44730,
-          "horizon_bars": 6,
-          "horizons_bars": [
-            1,
-            6,
-            60
-          ]
-        }
-      },
-      "source_paper_ids": [
-        "151_estrategias_de_trading"
-      ],
-      "source": "researcher",
-      "research_session_id": "2026-06-02",
-      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/hidden_volume_ratio.py",
-      "created_at": "2026-06-02T14:53:02.851522",
-      "metadata": {
-        "ic_threshold": 0.01,
-        "ic_target_horizon": 6,
-        "ic_at_target": 0.013661
-      }
-    },
-    {
-      "id": "lob_order_flow_impression",
-      "name": "Order Flow Impression",
-      "class_name": "",
-      "description": "This factor computes the cumulative order flow (orderFlow) over a defined lookback period to gauge the sentiment in the market. A positive order flow indicates buying pressure, while a negative order flow indicates selling pressure.",
-      "formula": "",
-      "trading_idea": "The order flow in the limit order book provides insights into market sentiment and potential price movements. By analyzing the net change in order flow over time, we can identify whether market participants are leaning towards buying or selling, giving us an edge in predicting future price movements based on current market pressure.",
+      "trading_idea": "Hidden volume can indicate the presence of informed trading, as it often reflects traders' intention to enter or exit positions without revealing their full size to the market. By comparing hidden volume to visible volume, we can identify stocks that are likely to experience price movements due to underlying demand or supply pressure that is not immediately visible in the market.",
       "trading_idea_ids": [],
       "category": "microstructure",
       "status": "backtested",
       "backtest_metrics": {
-        "information_coefficient": 0.060532,
-        "ic_std": 0.296284,
-        "ic_ir": 0.204303,
-        "ic_hit_rate": 0.5825,
+        "information_coefficient": 0.014489,
+        "ic_std": 0.297065,
+        "ic_ir": 0.048775,
+        "ic_hit_rate": 0.5184,
         "ic_by_horizon": {
           "1": {
-            "ic": 0.159251,
-            "ic_std": 0.293319,
-            "ic_ir": 0.542928,
-            "ic_hit_rate": 0.7066,
+            "ic": 0.025903,
+            "ic_std": 0.309866,
+            "ic_ir": 0.083595,
+            "ic_hit_rate": 0.5299,
+            "n_timestamps": 43476
+          },
+          "6": {
+            "ic": 0.014489,
+            "ic_std": 0.297065,
+            "ic_ir": 0.048775,
+            "ic_hit_rate": 0.5184,
+            "n_timestamps": 43400
+          },
+          "60": {
+            "ic": 0.0035,
+            "ic_std": 0.293659,
+            "ic_ir": 0.011919,
+            "ic_hit_rate": 0.5025,
+            "n_timestamps": 43359
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 43400,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "algebraic_groups_in_non_commutative_probability_theory_revis"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-002",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/hidden_volume_ratio.py",
+      "created_at": "2026-06-09T09:57:38.711321",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.014489
+      }
+    },
+    {
+      "id": "liquidity_order_flow_ratio",
+      "name": "Liquidity Order Flow Ratio",
+      "class_name": "",
+      "description": "This factor computes the ratio of signed order flow (net buyer vs. net seller initiated trades) to the liquidity available at the top of the order book, indicating whether the market is leaning towards buying or selling pressure. The resulting DataFrame shows this ratio across all tickers at each 10-second interval.",
+      "formula": "",
+      "trading_idea": "The liquidity order flow ratio captures the relationship between incoming order flow and the liquidity available at the best bid and ask prices. By analyzing the balance of liquidity in relation to order flow, traders can identify potential price movements as imbalances indicate underlying market sentiment and pressure. Such dynamics are essential for predicting short-term price changes, as noted in order book research.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.168081,
+        "ic_std": 0.290017,
+        "ic_ir": 0.579557,
+        "ic_hit_rate": 0.7187,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.40824,
+            "ic_std": 0.26612,
+            "ic_ir": 1.534046,
+            "ic_hit_rate": 0.9221,
+            "n_timestamps": 46853
+          },
+          "6": {
+            "ic": 0.168081,
+            "ic_std": 0.290017,
+            "ic_ir": 0.579557,
+            "ic_hit_rate": 0.7187,
+            "n_timestamps": 46848
+          },
+          "60": {
+            "ic": 0.052492,
+            "ic_std": 0.290338,
+            "ic_ir": 0.180795,
+            "ic_hit_rate": 0.5723,
+            "n_timestamps": 46794
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46848,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "a_functional_limit_theorem_for_limit_order_books_with_state_"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-002",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/liquidity_order_flow_ratio.py",
+      "created_at": "2026-06-09T09:57:38.711342",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.168081
+      }
+    },
+    {
+      "id": "dynamic_limit_order_imbalance",
+      "name": "Dynamic Limit Order Imbalance",
+      "class_name": "",
+      "description": "This signal computes the difference between the cumulative limit order volume on the buy side and the sell side, normalized by the total limit order volume at the top of the book. It captures the shifts in market sentiment and order pressure, providing insights into potential price direction.",
+      "formula": "",
+      "trading_idea": "The presence of limit orders can indicate where traders are willing to buy or sell, influencing price movement. A strong imbalance between buy and sell limit orders, particularly when it changes dynamically, can signal impending price movements as liquidity shifts and traders react to the market's order book structure.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.067988,
+        "ic_std": 0.294071,
+        "ic_ir": 0.231197,
+        "ic_hit_rate": 0.5934,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.159959,
+            "ic_std": 0.289113,
+            "ic_ir": 0.553276,
+            "ic_hit_rate": 0.708,
             "n_timestamps": 46849
           },
           "6": {
-            "ic": 0.060532,
-            "ic_std": 0.296284,
-            "ic_ir": 0.204303,
-            "ic_hit_rate": 0.5825,
+            "ic": 0.067988,
+            "ic_std": 0.294071,
+            "ic_ir": 0.231197,
+            "ic_hit_rate": 0.5934,
             "n_timestamps": 46844
           },
           "60": {
-            "ic": 0.011638,
-            "ic_std": 0.29448,
-            "ic_ir": 0.03952,
-            "ic_hit_rate": 0.5171,
+            "ic": 0.014034,
+            "ic_std": 0.292074,
+            "ic_ir": 0.04805,
+            "ic_hit_rate": 0.5159,
             "n_timestamps": 46790
           }
         },
@@ -5858,53 +6829,1222 @@
         }
       },
       "source_paper_ids": [
-        "151_estrategias_de_trading_151_trading_strategies"
+        "collaborative_information_bottleneck"
       ],
       "source": "researcher",
-      "research_session_id": "2026-06-03",
-      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/lob_order_flow_impression.py",
-      "created_at": "2026-06-03T20:58:38.887154",
+      "research_session_id": "prerun-002",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/dynamic_limit_order_imbalance.py",
+      "created_at": "2026-06-09T09:57:38.711370",
       "metadata": {
-        "ic_threshold": 0.01,
         "ic_target_horizon": 6,
-        "ic_at_target": 0.060532
+        "ic_at_target": 0.067988
       }
     },
     {
-      "id": "momentum_order_flow_ratios",
-      "name": "Momentum Order Flow Ratios",
+      "id": "dynamic_hidden_volume_ratio",
+      "name": "Dynamic Hidden Volume Ratio",
       "class_name": "",
-      "description": "This factor computes the ratio of net buyer-initiated order flow to total order flow over a specified lookback period, identifying stocks with strong recent buying momentum.",
+      "description": "This factor computes the ratio of hidden traded volume to total volume for each stock in the S&P 500 on a rolling basis. It captures changes in the dynamics of hidden orders relative to the overall trading activity, providing insight into potential shifts in market sentiment.",
       "formula": "",
-      "trading_idea": "Stocks that experience a surge in order flow, especially net buyer-initiated orders, tend to continue their upward momentum due to the positive feedback loop created by increased buying interest. This behavior is supported by the theory of momentum which posits that trends persist due to herding behavior among investors.",
+      "trading_idea": "The hidden volume can serve as a proxy for informed trading activity, as it often reflects the demand and supply dynamics that are not visible in the publicly quoted order book. By analyzing the ratio of hidden volume to total volume over rolling windows, we can capture shifts in trader sentiment and potential reversals in price trends, as informed traders may accumulate positions ahead of significant price movements.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.00596,
+        "ic_std": 0.289557,
+        "ic_ir": 0.020582,
+        "ic_hit_rate": 0.5009,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.001473,
+            "ic_std": 0.302276,
+            "ic_ir": 0.004873,
+            "ic_hit_rate": 0.4964,
+            "n_timestamps": 44378
+          },
+          "6": {
+            "ic": 0.00596,
+            "ic_std": 0.289557,
+            "ic_ir": 0.020582,
+            "ic_hit_rate": 0.5009,
+            "n_timestamps": 44367
+          },
+          "60": {
+            "ic": 0.003084,
+            "ic_std": 0.290575,
+            "ic_ir": 0.010613,
+            "ic_hit_rate": 0.4997,
+            "n_timestamps": 44319
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 44367,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "mola_enhancing_industrial_process_monitoring_using_multi_blo"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-002",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/dynamic_hidden_volume_ratio.py",
+      "created_at": "2026-06-09T09:57:38.711391",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.00596
+      }
+    },
+    {
+      "id": "dynamic_limit_order_flow_sensitivity",
+      "name": "Dynamic Limit Order Flow Sensitivity",
+      "class_name": "",
+      "description": "The signal computes the correlation between changes in limit order flow and subsequent price movements over a defined time frame, normalized by recent volatility. This captures how responsive the market is to incoming order flow, revealing potential trading opportunities.",
+      "formula": "",
+      "trading_idea": "This factor leverages the sensitivity of limit order flow to price movements, particularly in volatile conditions. When limit orders are adjusted in response to price changes, it can indicate impending shifts in supply and demand dynamics, providing insight into potential price reversals or continuations. The concept aligns with the findings in the dynamic grid trading strategy paper, which emphasizes the importance of order flow in predicting market movements.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.007892,
+        "ic_std": 0.412512,
+        "ic_ir": -0.019131,
+        "ic_hit_rate": 0.4848,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.005599,
+            "ic_std": 0.409997,
+            "ic_ir": -0.013655,
+            "ic_hit_rate": 0.4909,
+            "n_timestamps": 43326
+          },
+          "6": {
+            "ic": -0.007892,
+            "ic_std": 0.412512,
+            "ic_ir": -0.019131,
+            "ic_hit_rate": 0.4848,
+            "n_timestamps": 43320
+          },
+          "60": {
+            "ic": -0.01346,
+            "ic_std": 0.416196,
+            "ic_ir": -0.032341,
+            "ic_hit_rate": 0.4796,
+            "n_timestamps": 43273
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 43320,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "dynamic_grid_trading_strategy_from_zero_expectation_to_marke"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-002",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/dynamic_limit_order_flow_sensitivity.py",
+      "created_at": "2026-06-09T09:57:38.711411",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": -0.007892
+      }
+    },
+    {
+      "id": "high_order_flow_imbalance",
+      "name": "High Order Flow Imbalance",
+      "class_name": "",
+      "description": "This factor computes the rolling average of the signed limit-order-flow (orderFlow) over a specified lookback period, normalized by the total volume traded. A higher value indicates stronger buying pressure, while a lower value signals selling pressure.",
+      "formula": "",
+      "trading_idea": "Research suggests that significant order flow imbalances can indicate impending price movements, as they reflect the relative strength of buyers versus sellers in the market. This factor leverages the concept of order flow imbalance, where a persistent positive or negative imbalance can signal forthcoming price trends, particularly in the context of short-term trading strategies.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.022535,
+        "ic_std": 0.290374,
+        "ic_ir": 0.077608,
+        "ic_hit_rate": 0.5271,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.059861,
+            "ic_std": 0.300464,
+            "ic_ir": 0.199228,
+            "ic_hit_rate": 0.5765,
+            "n_timestamps": 45696
+          },
+          "6": {
+            "ic": 0.022535,
+            "ic_std": 0.290374,
+            "ic_ir": 0.077608,
+            "ic_hit_rate": 0.5271,
+            "n_timestamps": 45691
+          },
+          "60": {
+            "ic": 0.00396,
+            "ic_std": 0.290639,
+            "ic_ir": 0.013627,
+            "ic_hit_rate": 0.4996,
+            "n_timestamps": 45640
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 45691,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "fractional_cointegration_of_geometric_functionals"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-002",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/high_order_flow_imbalance.py",
+      "created_at": "2026-06-09T09:57:38.711431",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.022535
+      }
+    },
+    {
+      "id": "volatility_cluster_correlation",
+      "name": "Volatility Cluster Correlation",
+      "class_name": "",
+      "description": "This factor computes the rolling cross-correlation of the absolute returns of a stock with those of all other stocks in the S&P 500 over a specified window. A higher correlation suggests stronger synchronized volatility, which may precede price movements.",
+      "formula": "",
+      "trading_idea": "Volatility clustering, as observed in the Ising model, suggests that stocks tend to exhibit periods of high or low volatility that can be correlated across different assets. By analyzing the cross-correlation of absolute returns between a stock and others in the S&P 500, we can capture these interdependencies, which may indicate potential price movements based on collective volatility behavior.",
+      "trading_idea_ids": [],
+      "category": "volatility",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.002095,
+        "ic_std": 0.418242,
+        "ic_ir": -0.005008,
+        "ic_hit_rate": 0.4955,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.004346,
+            "ic_std": 0.417345,
+            "ic_ir": -0.010413,
+            "ic_hit_rate": 0.4901,
+            "n_timestamps": 43326
+          },
+          "6": {
+            "ic": -0.002095,
+            "ic_std": 0.418242,
+            "ic_ir": -0.005008,
+            "ic_hit_rate": 0.4955,
+            "n_timestamps": 43320
+          },
+          "60": {
+            "ic": -0.000592,
+            "ic_std": 0.41618,
+            "ic_ir": -0.001422,
+            "ic_hit_rate": 0.4913,
+            "n_timestamps": 43273
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 43320,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "multiple_time_series_ising_model_for_financial_market_simula"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-002",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/volatility_cluster_correlation.py",
+      "created_at": "2026-06-09T09:57:38.711451",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": -0.002095
+      }
+    },
+    {
+      "id": "order_flow_price_reversal",
+      "name": "Order Flow Price Reversal",
+      "class_name": "",
+      "description": "The factor computes the z-score of the order flow in relation to the price movement over the last 10 seconds. A significant positive or negative z-score indicates extreme buying or selling pressure, suggesting a potential price reversal.",
+      "formula": "",
+      "trading_idea": "This factor is based on the idea that extreme order flow (either aggressive buying or selling) often precedes price reversals, especially in volatile markets. When large buying or selling pressure occurs, it can push prices away from their equilibrium state, creating an opportunity for mean reversion as prices tend to revert back to their mean after such extreme movements.",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.07639,
+        "ic_std": 0.341572,
+        "ic_ir": 0.223644,
+        "ic_hit_rate": 0.589,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.192178,
+            "ic_std": 0.34173,
+            "ic_ir": 0.562368,
+            "ic_hit_rate": 0.7131,
+            "n_timestamps": 46747
+          },
+          "6": {
+            "ic": 0.07639,
+            "ic_std": 0.341572,
+            "ic_ir": 0.223644,
+            "ic_hit_rate": 0.589,
+            "n_timestamps": 46744
+          },
+          "60": {
+            "ic": 0.027028,
+            "ic_std": 0.338801,
+            "ic_ir": 0.079777,
+            "ic_hit_rate": 0.5301,
+            "n_timestamps": 46685
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46744,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "quantile_regression_for_qualifying_match_of_gefcom2017_proba"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-002",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/order_flow_price_reversal.py",
+      "created_at": "2026-06-09T09:57:38.711476",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.07639
+      }
+    },
+    {
+      "id": "hidden_volume_pressure_indicator",
+      "name": "Hidden Volume Pressure Indicator",
+      "class_name": "",
+      "description": "This signal computes the ratio of hidden volume to total volume over a rolling window, normalized by the standard deviation of hidden volume over the same period to gauge pressure. A higher ratio indicates stronger hidden demand or supply pressure in the market.",
+      "formula": "",
+      "trading_idea": "Stocks experiencing a surge in hidden volume often indicate increased interest from informed traders, which may predispose the stock to a price movement. This factor aims to capture the pressure exerted by hidden trades, which may lead to future price changes, leveraging the insights from microstructure theory that suggest hidden liquidity can signal impending volatility.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.002375,
+        "ic_std": 0.295574,
+        "ic_ir": -0.008034,
+        "ic_hit_rate": 0.4938,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.001379,
+            "ic_std": 0.301868,
+            "ic_ir": 0.004568,
+            "ic_hit_rate": 0.4999,
+            "n_timestamps": 46794
+          },
+          "6": {
+            "ic": -0.002375,
+            "ic_std": 0.295574,
+            "ic_ir": -0.008034,
+            "ic_hit_rate": 0.4938,
+            "n_timestamps": 46789
+          },
+          "60": {
+            "ic": -0.005983,
+            "ic_std": 0.293676,
+            "ic_ir": -0.020374,
+            "ic_hit_rate": 0.4885,
+            "n_timestamps": 46735
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46789,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "quantile_regression_for_qualifying_match_of_gefcom2017_proba"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-002",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/hidden_volume_pressure_indicator.py",
+      "created_at": "2026-06-09T09:57:38.711496",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": -0.002375
+      }
+    },
+    {
+      "id": "fractional_volatility_signal",
+      "name": "Fractional Volatility Signal",
+      "class_name": "",
+      "description": "This factor computes the volatility of each stock over a defined window using the effective volatility derived from the recent price changes, adjusted for the fractional noise characteristics as described in the literature. It captures the dynamic nature of volatility and its potential impact on future price behavior.",
+      "formula": "",
+      "trading_idea": "Recent research suggests that volatility can be better understood through fractional noise processes rather than traditional models. By analyzing the recent price movements and their volatility patterns, we can identify stocks that exhibit rough volatility behavior, indicating potential price reversals or continuations based on their volatility characteristics.",
+      "trading_idea_ids": [],
+      "category": "volatility",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.003781,
+        "ic_std": 0.298305,
+        "ic_ir": -0.012674,
+        "ic_hit_rate": 0.4914,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.000553,
+            "ic_std": 0.303168,
+            "ic_ir": -0.001824,
+            "ic_hit_rate": 0.495,
+            "n_timestamps": 46794
+          },
+          "6": {
+            "ic": -0.003781,
+            "ic_std": 0.298305,
+            "ic_ir": -0.012674,
+            "ic_hit_rate": 0.4914,
+            "n_timestamps": 46789
+          },
+          "60": {
+            "ic": -0.005275,
+            "ic_std": 0.298082,
+            "ic_ir": -0.017695,
+            "ic_hit_rate": 0.4879,
+            "n_timestamps": 46735
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46789,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "the_fractional_volatility_model_and_rough_volatility"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-002",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/fractional_volatility_signal.py",
+      "created_at": "2026-06-09T09:57:38.711515",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": -0.003781
+      }
+    },
+    {
+      "id": "effective_spread_cumulative_imbalance",
+      "name": "Effective Spread Cumulative Imbalance",
+      "class_name": "",
+      "description": "The signal computes the cumulative order flow imbalance over a defined window and correlates it with the effective spread. This factor captures the intensity and direction of market pressure, providing insights into potential price direction based on recent trading behavior.",
+      "formula": "",
+      "trading_idea": "This factor leverages the relationship between effective spread and cumulative order flow imbalance. A positive cumulative imbalance often precedes price moves, as observed in the literature detailing the dynamics of order flow and price impact. It can indicate the strength of buying or selling pressure, which is critical in predicting short-term price movements.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.021702,
+        "ic_std": 0.290721,
+        "ic_ir": 0.074648,
+        "ic_hit_rate": 0.5286,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.025965,
+            "ic_std": 0.311373,
+            "ic_ir": 0.08339,
+            "ic_hit_rate": 0.538,
+            "n_timestamps": 46786
+          },
+          "6": {
+            "ic": 0.021702,
+            "ic_std": 0.290721,
+            "ic_ir": 0.074648,
+            "ic_hit_rate": 0.5286,
+            "n_timestamps": 46781
+          },
+          "60": {
+            "ic": 0.007281,
+            "ic_std": 0.288376,
+            "ic_ir": 0.025249,
+            "ic_hit_rate": 0.511,
+            "n_timestamps": 46727
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46781,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "price_impact_without_order_book_a_study_of_the_otc_credit_in"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-003",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/effective_spread_cumulative_imbalance.py",
+      "created_at": "2026-06-09T10:09:46.857302",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.021702
+      }
+    },
+    {
+      "id": "hidden_volume_accumulation",
+      "name": "Hidden Volume Accumulation",
+      "class_name": "",
+      "description": "This signal computes the cumulative hidden volume over predefined short time frames, signaling when there is significant accumulation that may precede price movements. A higher accumulation of hidden volume might indicate stronger buying or selling interest, suggesting a potential price direction.",
+      "formula": "",
+      "trading_idea": "Hidden volume can indicate the presence of informed trading, where large trades are executed discreetly to avoid impacting the market. By observing the accumulation of hidden volume over short intervals, we can infer potential future price movements, as it reflects the strength of demand or supply pressure that isn't immediately visible in the order book.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.004563,
+        "ic_std": 0.294721,
+        "ic_ir": 0.015484,
+        "ic_hit_rate": 0.506,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.008338,
+            "ic_std": 0.292107,
+            "ic_ir": 0.028545,
+            "ic_hit_rate": 0.5106,
+            "n_timestamps": 46848
+          },
+          "6": {
+            "ic": 0.004563,
+            "ic_std": 0.294721,
+            "ic_ir": 0.015484,
+            "ic_hit_rate": 0.506,
+            "n_timestamps": 46843
+          },
+          "60": {
+            "ic": 0.000944,
+            "ic_std": 0.293315,
+            "ic_ir": 0.003217,
+            "ic_hit_rate": 0.5018,
+            "n_timestamps": 46790
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46843,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "deterministic_control_of_stochastic_reaction_diffusion_equat"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-003",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/hidden_volume_accumulation.py",
+      "created_at": "2026-06-09T10:09:46.860322",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.004563
+      }
+    },
+    {
+      "id": "adaptive_limit_order_imbalance",
+      "name": "Adaptive Limit Order Imbalance",
+      "class_name": "",
+      "description": "This signal computes the ratio of buy-limit orders to sell-limit orders at various depths in the order book, adjusted for the current market volatility. It provides a dynamic view of market sentiment and liquidity pressure, reflecting the balance of supply and demand.",
+      "formula": "",
+      "trading_idea": "Limit order imbalance can serve as a powerful indicator of future price movements. When there is a significant imbalance in limit orders (more buy orders than sell orders or vice versa), it can indicate potential upward or downward pressure on prices. This factor adapts to changing market conditions by analyzing the depth and direction of limit orders over time, allowing traders to capture shifts in market sentiment earlier than traditional measures.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.008626,
+        "ic_std": 0.285217,
+        "ic_ir": 0.030245,
+        "ic_hit_rate": 0.5098,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.006616,
+            "ic_std": 0.288834,
+            "ic_ir": 0.022907,
+            "ic_hit_rate": 0.5107,
+            "n_timestamps": 46853
+          },
+          "6": {
+            "ic": 0.008626,
+            "ic_std": 0.285217,
+            "ic_ir": 0.030245,
+            "ic_hit_rate": 0.5098,
+            "n_timestamps": 46848
+          },
+          "60": {
+            "ic": 0.001999,
+            "ic_std": 0.288339,
+            "ic_ir": 0.006933,
+            "ic_hit_rate": 0.5012,
+            "n_timestamps": 46794
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46848,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "logarithmic_regret_in_the_ergodic_avellaneda_stoikov_market_"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-003",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/adaptive_limit_order_imbalance.py",
+      "created_at": "2026-06-09T10:09:46.860391",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.008626
+      }
+    },
+    {
+      "id": "dynamic_hidden_volume_pressure",
+      "name": "Dynamic Hidden Volume Pressure",
+      "class_name": "",
+      "description": "This factor computes the ratio of hidden volume to total volume, adjusted over a rolling window, to capture shifts in buying or selling pressure. A rising ratio suggests increasing hidden buying pressure, while a falling ratio indicates increasing selling pressure.",
+      "formula": "",
+      "trading_idea": "Hidden volume can indicate market sentiment and potential price movements, especially during periods of high volatility. By dynamically assessing the hidden volume pressure over a short time frame, traders can gauge whether the market is leaning towards buying or selling pressure, thus anticipating potential price changes. This approach aligns with the idea that latent trading activity often precedes significant price movements.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.005028,
+        "ic_std": 0.433533,
+        "ic_ir": 0.011598,
+        "ic_hit_rate": 0.4845,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.00407,
+            "ic_std": 0.440226,
+            "ic_ir": -0.009244,
+            "ic_hit_rate": 0.4941,
+            "n_timestamps": 1103
+          },
+          "6": {
+            "ic": 0.005028,
+            "ic_std": 0.433533,
+            "ic_ir": 0.011598,
+            "ic_hit_rate": 0.4845,
+            "n_timestamps": 1100
+          },
+          "60": {
+            "ic": 0.004932,
+            "ic_std": 0.450428,
+            "ic_ir": 0.01095,
+            "ic_hit_rate": 0.4883,
+            "n_timestamps": 1028
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 1100,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "dataset_driven_channel_masks_in_transformers_for_multivariat"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-003",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/dynamic_hidden_volume_pressure.py",
+      "created_at": "2026-06-09T10:09:46.860429",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.005028
+      }
+    },
+    {
+      "id": "dynamic_order_flow_momentum",
+      "name": "Dynamic Order Flow Momentum",
+      "class_name": "",
+      "description": "This signal computes the rate of change of order flow over a specified period, indicating whether buying or selling pressure is gaining momentum. It uses the 'orderFlow' field from the LOBSTER data to measure changes in order flow and derive a momentum score for each stock.",
+      "formula": "",
+      "trading_idea": "Dynamic order flow can serve as a leading indicator of price movement, as increased buying or selling pressure often precedes significant price changes. By analyzing the momentum in order flow, traders can capture early signals of upcoming trends, particularly in volatile market conditions where order imbalances can drive price movements.",
       "trading_idea_ids": [],
       "category": "momentum",
       "status": "backtested",
       "backtest_metrics": {
-        "information_coefficient": 0.017222,
-        "ic_std": 0.287002,
-        "ic_ir": 0.060007,
-        "ic_hit_rate": 0.5242,
+        "information_coefficient": 0.12882,
+        "ic_std": 0.289974,
+        "ic_ir": 0.444247,
+        "ic_hit_rate": 0.6749,
         "ic_by_horizon": {
           "1": {
-            "ic": 0.046405,
-            "ic_std": 0.292682,
-            "ic_ir": 0.158551,
-            "ic_hit_rate": 0.5629,
+            "ic": 0.286109,
+            "ic_std": 0.279767,
+            "ic_ir": 1.022667,
+            "ic_hit_rate": 0.8407,
+            "n_timestamps": 46789
+          },
+          "6": {
+            "ic": 0.12882,
+            "ic_std": 0.289974,
+            "ic_ir": 0.444247,
+            "ic_hit_rate": 0.6749,
+            "n_timestamps": 46784
+          },
+          "60": {
+            "ic": 0.042891,
+            "ic_std": 0.290133,
+            "ic_ir": 0.147832,
+            "ic_hit_rate": 0.5577,
+            "n_timestamps": 46730
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46784,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "shrinking_horizon_model_predictive_control_with_signal_tempo"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-003",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/dynamic_order_flow_momentum.py",
+      "created_at": "2026-06-09T10:09:46.860459",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.12882
+      }
+    },
+    {
+      "id": "dynamic_effective_spread_analysis",
+      "name": "Dynamic Effective Spread Analysis",
+      "class_name": "",
+      "description": "This factor computes the rolling average of the effective spread over a specified window, adjusted for changes in trading volume and market conditions. It provides insights into liquidity conditions and potential price reversals.",
+      "formula": "",
+      "trading_idea": "The effective spread captures the true cost of trading and reflects market liquidity. By analyzing the dynamic changes in the effective spread over time, we can identify periods of heightened market activity or stress, which may precede price movements. This is particularly relevant in the context of the Hawkes process, as it accounts for self-exciting behavior in trading volume that can lead to temporary price impacts.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.006769,
+        "ic_std": 0.402217,
+        "ic_ir": -0.016829,
+        "ic_hit_rate": 0.4891,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.008159,
+            "ic_std": 0.39836,
+            "ic_ir": -0.020482,
+            "ic_hit_rate": 0.4881,
+            "n_timestamps": 42573
+          },
+          "6": {
+            "ic": -0.006769,
+            "ic_std": 0.402217,
+            "ic_ir": -0.016829,
+            "ic_hit_rate": 0.4891,
+            "n_timestamps": 42409
+          },
+          "60": {
+            "ic": -0.0128,
+            "ic_std": 0.403618,
+            "ic_ir": -0.031712,
+            "ic_hit_rate": 0.4802,
+            "n_timestamps": 42370
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 42409,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "on_the_hawkes_process_with_different_exciting_functions"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-003",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/dynamic_effective_spread_analysis.py",
+      "created_at": "2026-06-09T10:09:46.860975",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": -0.006769
+      }
+    },
+    {
+      "id": "volatility_clustering_signal",
+      "name": "Volatility Clustering Signal",
+      "class_name": "",
+      "description": "This factor computes the rolling standard deviation of price changes over a specified window, identifying stocks with significant deviations from their historical volatility levels. Stocks that exhibit a sudden increase in volatility may present trading opportunities as they revert to their mean volatility levels or continue trending based on the underlying market dynamics.",
+      "formula": "",
+      "trading_idea": "The presence of volatility clustering suggests that periods of high volatility are often followed by further high volatility, and vice versa. This phenomenon can be exploited by identifying stocks that experience sudden spikes in volatility, which may indicate that the market is reacting to new information or changing sentiment. Leveraging the insights from the paper on long-term memory and volatility clustering, we can capture potential price movements following such volatility spikes.",
+      "trading_idea_ids": [],
+      "category": "volatility",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": null,
+        "ic_std": null,
+        "ic_ir": null,
+        "ic_hit_rate": null,
+        "ic_by_horizon": {
+          "1": {
+            "ic": null,
+            "ic_std": null,
+            "ic_ir": null,
+            "ic_hit_rate": null,
+            "n_timestamps": 0
+          },
+          "6": {
+            "ic": null,
+            "ic_std": null,
+            "ic_ir": null,
+            "ic_hit_rate": null,
+            "n_timestamps": 0
+          },
+          "60": {
+            "ic": null,
+            "ic_std": null,
+            "ic_ir": null,
+            "ic_hit_rate": null,
+            "n_timestamps": 0
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 0,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "long_term_memory_and_volatility_clustering_in_daily_and_high"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-003",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/volatility_clustering_signal.py",
+      "created_at": "2026-06-09T10:09:46.861573",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": null
+      }
+    },
+    {
+      "id": "order_flow_intensity_ratio",
+      "name": "Order Flow Intensity Ratio",
+      "class_name": "",
+      "description": "This factor computes the ratio of signed trade volume (order flow) across a specified period, normalizing it to capture the intensity of buyer-initiated versus seller-initiated trades. A higher ratio suggests a bullish sentiment, while a lower ratio indicates bearish sentiment.",
+      "formula": "",
+      "trading_idea": "Increased order flow intensity can indicate the strength of market participants' conviction, especially when comparing buyer-initiated and seller-initiated trades. By analyzing the ratio of buyer-initiated to seller-initiated order flow, traders can identify potential trends or reversals, as stronger buying pressure often leads to upward price movement, while stronger selling pressure can indicate downtrends.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.015131,
+        "ic_std": 0.290319,
+        "ic_ir": 0.052119,
+        "ic_hit_rate": 0.5218,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.027409,
+            "ic_std": 0.296964,
+            "ic_ir": 0.092298,
+            "ic_hit_rate": 0.5354,
+            "n_timestamps": 46840
+          },
+          "6": {
+            "ic": 0.015131,
+            "ic_std": 0.290319,
+            "ic_ir": 0.052119,
+            "ic_hit_rate": 0.5218,
+            "n_timestamps": 46836
+          },
+          "60": {
+            "ic": 0.003325,
+            "ic_std": 0.287701,
+            "ic_ir": 0.011557,
+            "ic_hit_rate": 0.5052,
+            "n_timestamps": 46782
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46836,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "exploring_a_gradient_based_explainable_ai_technique_for_time"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-003",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/order_flow_intensity_ratio.py",
+      "created_at": "2026-06-09T10:09:46.861611",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.015131
+      }
+    },
+    {
+      "id": "liquidity_order_flow_momentum",
+      "name": "Liquidity Order Flow Momentum",
+      "class_name": "",
+      "description": "This factor computes the correlation between the order flow (both signed volume and liquidity metrics) and subsequent price movements. It looks for patterns where increased liquidity (measured by depth or effective spread) coincides with bullish or bearish order flow, indicating potential price momentum.",
+      "formula": "",
+      "trading_idea": "Liquidity dynamics play a crucial role in price formation, as higher liquidity often indicates stronger market confidence. By analyzing the order flow alongside liquidity metrics, this factor aims to capture momentum driven by increasing liquidity, which can lead to more significant price movements in the same direction.",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.045558,
+        "ic_std": 0.287498,
+        "ic_ir": 0.158464,
+        "ic_hit_rate": 0.5632,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.119523,
+            "ic_std": 0.289859,
+            "ic_ir": 0.412348,
+            "ic_hit_rate": 0.6609,
+            "n_timestamps": 46844
+          },
+          "6": {
+            "ic": 0.045558,
+            "ic_std": 0.287498,
+            "ic_ir": 0.158464,
+            "ic_hit_rate": 0.5632,
+            "n_timestamps": 46839
+          },
+          "60": {
+            "ic": 0.01089,
+            "ic_std": 0.288811,
+            "ic_ir": 0.037707,
+            "ic_hit_rate": 0.5145,
+            "n_timestamps": 46785
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46839,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "orthogonal_polynomial_ensembles_in_probability_theory"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-003",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/liquidity_order_flow_momentum.py",
+      "created_at": "2026-06-09T10:09:46.861643",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.045558
+      }
+    },
+    {
+      "id": "order_flow_volatility_predictor",
+      "name": "Order Flow Volatility Predictor",
+      "class_name": "",
+      "description": "This signal computes a rolling correlation between the net order flow (buy vs. sell orders) and the historical volatility of each stock over a specified period. A higher correlation suggests that order flow dynamics are predictive of future volatility, which can be leveraged for trading.",
+      "formula": "",
+      "trading_idea": "Studies have shown that significant changes in order flow can lead to changes in volatility, especially in periods of high market activity. As traders react to order imbalances and liquidity changes, the resulting volatility can influence future price movements. This factor aims to capture that predictive relationship by analyzing the order flow dynamics in relation to historical volatility trends.",
+      "trading_idea_ids": [],
+      "category": "volatility",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.105202,
+        "ic_std": 0.376248,
+        "ic_ir": 0.279608,
+        "ic_hit_rate": 0.6154,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.114671,
+            "ic_std": 0.562097,
+            "ic_ir": -0.204005,
+            "ic_hit_rate": 0.4286,
+            "n_timestamps": 14
+          },
+          "6": {
+            "ic": 0.105202,
+            "ic_std": 0.376248,
+            "ic_ir": 0.279608,
+            "ic_hit_rate": 0.6154,
+            "n_timestamps": 13
+          },
+          "60": {
+            "ic": 0.023125,
+            "ic_std": 0.274728,
+            "ic_ir": 0.084173,
+            "ic_hit_rate": 0.4286,
+            "n_timestamps": 14
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 13,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "indifference_prices_and_implied_volatilities"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-003",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/order_flow_volatility_predictor.py",
+      "created_at": "2026-06-09T10:09:46.862078",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.105202
+      }
+    },
+    {
+      "id": "limit_order_impact_ratio",
+      "name": "Limit Order Impact Ratio",
+      "class_name": "",
+      "description": "The signal computes the ratio of aggressive limit orders to the total limit orders (both aggressive and passive) over a rolling window. This ratio serves as a proxy for potential market impact and liquidity pressure.",
+      "formula": "",
+      "trading_idea": "This factor leverages the relationship between limit order flow and market impact, which has been shown to exhibit concave behavior. By calculating the ratio of aggressive to passive limit orders during a given time period, we can gauge the potential market impact of trades and identify opportunities where the market may be underpricing or overpricing based on order flow dynamics.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.042312,
+        "ic_std": 0.29245,
+        "ic_ir": 0.14468,
+        "ic_hit_rate": 0.5566,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.093334,
+            "ic_std": 0.290325,
+            "ic_ir": 0.321479,
+            "ic_hit_rate": 0.6281,
+            "n_timestamps": 46841
+          },
+          "6": {
+            "ic": 0.042312,
+            "ic_std": 0.29245,
+            "ic_ir": 0.14468,
+            "ic_hit_rate": 0.5566,
+            "n_timestamps": 46836
+          },
+          "60": {
+            "ic": 0.006452,
+            "ic_std": 0.286318,
+            "ic_ir": 0.022534,
+            "ic_hit_rate": 0.5124,
+            "n_timestamps": 46782
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46836,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "market_impact_a_systematic_study_of_limit_orders"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-003",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/limit_order_impact_ratio.py",
+      "created_at": "2026-06-09T10:09:46.862123",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.042312
+      }
+    },
+    {
+      "id": "momentum_based_limit_order_imbalance",
+      "name": "Momentum-Based Limit Order Imbalance",
+      "class_name": "",
+      "description": "This factor computes the difference between the volume of buy and sell limit orders over the recent bars, normalized by the total volume traded. It captures the prevailing market sentiment and its interaction with momentum, potentially signaling future price movements.",
+      "formula": "",
+      "trading_idea": "The concept of momentum in financial markets suggests that recent price movements can forecast future price direction. By incorporating the limit order imbalance, which reflects the buying versus selling pressure, we can enhance the momentum signal, capturing the tendency of prices to continue moving in the same direction as indicated by the order flow. This aligns with the findings in the literature that highlight the significance of order flow in predicting price movements.",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.06425,
+        "ic_std": 0.289635,
+        "ic_ir": 0.22183,
+        "ic_hit_rate": 0.5902,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.14453,
+            "ic_std": 0.278408,
+            "ic_ir": 0.519129,
+            "ic_hit_rate": 0.6996,
             "n_timestamps": 46849
           },
           "6": {
-            "ic": 0.017222,
-            "ic_std": 0.287002,
-            "ic_ir": 0.060007,
-            "ic_hit_rate": 0.5242,
+            "ic": 0.06425,
+            "ic_std": 0.289635,
+            "ic_ir": 0.22183,
+            "ic_hit_rate": 0.5902,
             "n_timestamps": 46844
           },
           "60": {
-            "ic": 0.004657,
-            "ic_std": 0.285387,
-            "ic_ir": 0.01632,
-            "ic_hit_rate": 0.5058,
+            "ic": 0.009633,
+            "ic_std": 0.290571,
+            "ic_ir": 0.033153,
+            "ic_hit_rate": 0.5118,
             "n_timestamps": 46790
           }
         },
@@ -5924,16 +8064,600 @@
         }
       },
       "source_paper_ids": [
-        "twenty_for_twenty"
+        "consentaneous_agent_based_and_stochastic_model_of_the_financ"
       ],
       "source": "researcher",
-      "research_session_id": "2026-06-03",
-      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/momentum_order_flow_ratios.py",
-      "created_at": "2026-06-03T20:58:38.888748",
+      "research_session_id": "prerun-003",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/momentum_based_limit_order_imbalance.py",
+      "created_at": "2026-06-09T10:09:46.862164",
       "metadata": {
-        "ic_threshold": 0.01,
         "ic_target_horizon": 6,
-        "ic_at_target": 0.017222
+        "ic_at_target": 0.06425
+      }
+    },
+    {
+      "id": "dynamic_order_flow_efficiency",
+      "name": "Dynamic Order Flow Efficiency",
+      "class_name": "",
+      "description": "This signal computes the ratio of order flow (net signed volume) to the price change within each 10-second bar, providing an efficiency measure of how much price movement is generated per unit of order flow. Higher values indicate more efficient order flow impacting prices positively.",
+      "formula": "",
+      "trading_idea": "Order flow efficiency captures how effectively market participants are utilizing their trading strategies in relation to market liquidity. By analyzing the relationship between order flow and price movements, this factor can identify stocks where traders are able to exert significant influence on price direction, potentially leading to profitable trading opportunities. This idea is inspired by concepts of liquidity and market impact discussed in the literature on order flow dynamics.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.007385,
+        "ic_std": 0.292096,
+        "ic_ir": -0.025283,
+        "ic_hit_rate": 0.4906,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.023171,
+            "ic_std": 0.322428,
+            "ic_ir": -0.071864,
+            "ic_hit_rate": 0.4709,
+            "n_timestamps": 46850
+          },
+          "6": {
+            "ic": -0.007385,
+            "ic_std": 0.292096,
+            "ic_ir": -0.025283,
+            "ic_hit_rate": 0.4906,
+            "n_timestamps": 46844
+          },
+          "60": {
+            "ic": -0.002834,
+            "ic_std": 0.287348,
+            "ic_ir": -0.009864,
+            "ic_hit_rate": 0.4949,
+            "n_timestamps": 46791
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46844,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "stochastic_control_on_the_half_line_and_applications_to_the_"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-003",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/dynamic_order_flow_efficiency.py",
+      "created_at": "2026-06-09T10:09:46.862191",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": -0.007385
+      }
+    },
+    {
+      "id": "hidden_volume_sensitivity",
+      "name": "Hidden Volume Sensitivity",
+      "class_name": "",
+      "description": "This signal computes the correlation between price changes and hidden volume over a short-term rolling window, allowing traders to assess how sensitive a stock is to hidden liquidity imbalances. A higher sensitivity suggests greater potential for price movement in response to hidden volume changes.",
+      "formula": "",
+      "trading_idea": "Markets often experience price movements driven by hidden liquidity, which can signal the intention of informed traders. By measuring the sensitivity of price changes to hidden volume fluctuations, we can identify stocks that are likely to respond sharply to underlying demand pressures, thus capturing potential short-term price reversals or continuations.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.00277,
+        "ic_std": 0.287563,
+        "ic_ir": -0.009632,
+        "ic_hit_rate": 0.4951,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.000969,
+            "ic_std": 0.289707,
+            "ic_ir": -0.003346,
+            "ic_hit_rate": 0.4974,
+            "n_timestamps": 46793
+          },
+          "6": {
+            "ic": -0.00277,
+            "ic_std": 0.287563,
+            "ic_ir": -0.009632,
+            "ic_hit_rate": 0.4951,
+            "n_timestamps": 46788
+          },
+          "60": {
+            "ic": -0.000797,
+            "ic_std": 0.289505,
+            "ic_ir": -0.002753,
+            "ic_hit_rate": 0.4967,
+            "n_timestamps": 46734
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46788,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "when_alpha_breaks_two_level_uncertainty_for_safe_deployment_"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-003",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/hidden_volume_sensitivity.py",
+      "created_at": "2026-06-09T10:09:46.862219",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": -0.00277
+      }
+    },
+    {
+      "id": "nonlinear_trade_imbalance_indicator",
+      "name": "Nonlinear Trade Imbalance Indicator",
+      "class_name": "",
+      "description": "This factor computes a nonlinear transformation of the trade imbalance, utilizing a logistic or polynomial function to emphasize the extremes of the trade imbalance values. The output is a cross-sectional signal reflecting the expected price impact based on the current market order flow dynamics.",
+      "formula": "",
+      "trading_idea": "Research indicates a nonlinear relationship between trade imbalance and price changes, suggesting that extreme values of trade imbalance may lead to disproportionate price impacts. This is particularly relevant in a high-frequency trading context, where rapid changes in order flow can lead to significant price movements. By capturing these nonlinearities, traders can better predict price movements based on the current trade imbalance.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.12687,
+        "ic_std": 0.286935,
+        "ic_ir": 0.442155,
+        "ic_hit_rate": 0.6727,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.292504,
+            "ic_std": 0.285796,
+            "ic_ir": 1.023473,
+            "ic_hit_rate": 0.8415,
+            "n_timestamps": 46851
+          },
+          "6": {
+            "ic": 0.12687,
+            "ic_std": 0.286935,
+            "ic_ir": 0.442155,
+            "ic_hit_rate": 0.6727,
+            "n_timestamps": 46846
+          },
+          "60": {
+            "ic": 0.043533,
+            "ic_std": 0.288135,
+            "ic_ir": 0.151086,
+            "ic_hit_rate": 0.5597,
+            "n_timestamps": 46792
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46846,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "order_flows_and_limit_order_book_resiliency_on_the_meso_scal"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-003",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/nonlinear_trade_imbalance_indicator.py",
+      "created_at": "2026-06-09T10:09:46.862240",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.12687
+      }
+    },
+    {
+      "id": "unexpected_volatility_signal",
+      "name": "Unexpected Volatility Signal",
+      "class_name": "",
+      "description": "This factor computes the unexpected volatility in a given time period, defined as the residuals from a linear regression of realized volatility against previous volatility, highlighting periods of significant volatility surprises that can influence price movements.",
+      "formula": "",
+      "trading_idea": "Based on the findings from Bianco and Ren\u00f2 (2006), unexpected volatility has been shown to correlate positively with intraday serial correlation. This can create profitable trading opportunities as traders tend to react to surprises in volatility, leading to price momentum in the direction of the volatility shock. Capturing these moments when volatility deviates from expectations can provide an edge in predicting short-term price movements.",
+      "trading_idea_ids": [],
+      "category": "volatility",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.000912,
+        "ic_std": 0.308943,
+        "ic_ir": -0.002952,
+        "ic_hit_rate": 0.4983,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.002583,
+            "ic_std": 0.311174,
+            "ic_ir": -0.008302,
+            "ic_hit_rate": 0.4966,
+            "n_timestamps": 46796
+          },
+          "6": {
+            "ic": -0.000912,
+            "ic_std": 0.308943,
+            "ic_ir": -0.002952,
+            "ic_hit_rate": 0.4983,
+            "n_timestamps": 46789
+          },
+          "60": {
+            "ic": -0.002954,
+            "ic_std": 0.308896,
+            "ic_ir": -0.009563,
+            "ic_hit_rate": 0.4942,
+            "n_timestamps": 46742
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46789,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "unexpected_volatility_and_intraday_serial_correlation"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-003",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/unexpected_volatility_signal.py",
+      "created_at": "2026-06-09T10:09:46.862261",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": -0.000912
+      }
+    },
+    {
+      "id": "aggressive_hidden_volume_signal",
+      "name": "Aggressive Hidden Volume Signal",
+      "class_name": "",
+      "description": "This factor computes the ratio of aggressive hidden volume to total volume over a rolling window, capturing the intensity of informed trading activity. A higher value suggests increased buying or selling pressure from informed traders, potentially leading to future price movements.",
+      "formula": "",
+      "trading_idea": "In high-frequency trading, aggressive hidden volume can indicate imminent price movements, as it suggests that informed traders are taking positions that could lead to significant price changes. This aligns with the findings in the paper 'Deep Limit Order Book Forecasting', which emphasize the predictive power of hidden volume in determining future price actions.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.00596,
+        "ic_std": 0.289557,
+        "ic_ir": 0.020582,
+        "ic_hit_rate": 0.5009,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.001473,
+            "ic_std": 0.302276,
+            "ic_ir": 0.004873,
+            "ic_hit_rate": 0.4964,
+            "n_timestamps": 44378
+          },
+          "6": {
+            "ic": 0.00596,
+            "ic_std": 0.289557,
+            "ic_ir": 0.020582,
+            "ic_hit_rate": 0.5009,
+            "n_timestamps": 44367
+          },
+          "60": {
+            "ic": 0.003084,
+            "ic_std": 0.290575,
+            "ic_ir": 0.010613,
+            "ic_hit_rate": 0.4997,
+            "n_timestamps": 44319
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 44367,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "deep_limit_order_book_forecasting"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-003",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/aggressive_hidden_volume_signal.py",
+      "created_at": "2026-06-09T10:09:46.862281",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.00596
+      }
+    },
+    {
+      "id": "order_flow_spread_sensitivity",
+      "name": "Order Flow Spread Sensitivity",
+      "class_name": "",
+      "description": "The factor computes the sensitivity of the bid-ask spread to changes in order flow, defined as the change in spread divided by the change in order flow over the bar. It is calculated as `spread_change / order_flow_change` across the 10-second intervals.",
+      "formula": "",
+      "trading_idea": "This factor captures the relationship between order flow and bid-ask spread dynamics. Given that increased order flow can lead to tighter spreads, understanding how spread changes in response to order flow can signal potential price movements. Market participants often react to changes in liquidity and order flow, making this a potentially predictive signal for short-term price changes.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.003585,
+        "ic_std": 0.289312,
+        "ic_ir": 0.012392,
+        "ic_hit_rate": 0.503,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.000914,
+            "ic_std": 0.290488,
+            "ic_ir": 0.003146,
+            "ic_hit_rate": 0.5022,
+            "n_timestamps": 46851
+          },
+          "6": {
+            "ic": 0.003585,
+            "ic_std": 0.289312,
+            "ic_ir": 0.012392,
+            "ic_hit_rate": 0.503,
+            "n_timestamps": 46843
+          },
+          "60": {
+            "ic": 0.001352,
+            "ic_std": 0.291666,
+            "ic_ir": 0.004635,
+            "ic_hit_rate": 0.5005,
+            "n_timestamps": 46792
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46843,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "continuous_time_modeling_of_bid_ask_spread_and_price_dynamic"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-003",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/order_flow_spread_sensitivity.py",
+      "created_at": "2026-06-09T10:09:46.862311",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.003585
+      }
+    },
+    {
+      "id": "dynamic_hidden_volume_pressure_ratio",
+      "name": "Dynamic Hidden Volume Pressure Ratio",
+      "class_name": "",
+      "description": "This factor computes the ratio of the dynamic hidden volume pressure (the net hidden volume in the order book) to the total trading volume over a specified timeframe. A higher ratio indicates stronger hidden accumulation, while a lower ratio may suggest distribution.",
+      "formula": "",
+      "trading_idea": "Informed traders often use hidden orders to accumulate positions without causing significant market impact. By analyzing the ratio of hidden volume pressure to overall trading volume, we can identify stocks with strong hidden accumulation or distribution, suggesting potential price movements. This factor leverages the premise that hidden volume can be a leading indicator of price trends, particularly in illiquid stocks.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.001467,
+        "ic_std": 0.300713,
+        "ic_ir": 0.004877,
+        "ic_hit_rate": 0.5022,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.012315,
+            "ic_std": 0.293922,
+            "ic_ir": 0.0419,
+            "ic_hit_rate": 0.5138,
+            "n_timestamps": 46843
+          },
+          "6": {
+            "ic": 0.001467,
+            "ic_std": 0.300713,
+            "ic_ir": 0.004877,
+            "ic_hit_rate": 0.5022,
+            "n_timestamps": 46834
+          },
+          "60": {
+            "ic": -0.000224,
+            "ic_std": 0.300774,
+            "ic_ir": -0.000744,
+            "ic_hit_rate": 0.5002,
+            "n_timestamps": 46787
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46834,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "smooth_density_for_some_nilpotent_rough_differential_equatio"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-003",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/dynamic_hidden_volume_pressure_ratio.py",
+      "created_at": "2026-06-09T10:09:46.862339",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.001467
+      }
+    },
+    {
+      "id": "limit_order_excess_imbalance",
+      "name": "Limit Order Excess Imbalance",
+      "class_name": "",
+      "description": "This factor computes the difference between the volume of buy limit orders and sell limit orders, scaled by the total limit order volume, over a specified recent time window. A positive value indicates bullish sentiment, while a negative value indicates bearish sentiment.",
+      "formula": "",
+      "trading_idea": "Market participants tend to react to price movements by adjusting their limit orders, which can create imbalances in the order book. A significant excess in limit order imbalance, especially following price movements, can indicate potential price reversals as the imbalance corrects itself. This aligns with concepts from the microstructure literature, particularly in the context of self-exciting processes and market reactions to information.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.067353,
+        "ic_std": 0.29585,
+        "ic_ir": 0.22766,
+        "ic_hit_rate": 0.5914,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.168504,
+            "ic_std": 0.291649,
+            "ic_ir": 0.577763,
+            "ic_hit_rate": 0.7181,
+            "n_timestamps": 46849
+          },
+          "6": {
+            "ic": 0.067353,
+            "ic_std": 0.29585,
+            "ic_ir": 0.22766,
+            "ic_hit_rate": 0.5914,
+            "n_timestamps": 46844
+          },
+          "60": {
+            "ic": 0.013224,
+            "ic_std": 0.291894,
+            "ic_ir": 0.045303,
+            "ic_hit_rate": 0.5189,
+            "n_timestamps": 46790
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46844,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "the_microstructural_foundations_of_leverage_effect_and_rough"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-003",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/limit_order_excess_imbalance.py",
+      "created_at": "2026-06-09T10:09:46.862374",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.067353
+      }
+    },
+    {
+      "id": "effective_spread_movement_analysis",
+      "name": "Effective Spread Movement Analysis",
+      "class_name": "",
+      "description": "This factor computes the rolling average and standard deviation of the effective spread across a defined lookback period, highlighting sudden movements that may indicate shifts in market conditions or liquidity pressures.",
+      "formula": "",
+      "trading_idea": "In financial markets, price movements often reflect underlying supply and demand dynamics. By analyzing the changes in effective spread over time, we can identify shifts in market sentiment and liquidity conditions, potentially signaling short-term price reversals or continuations. This aligns with the findings in the paper 'DeepVol: Volatility Forecasting from High-Frequency Data with Dilated Causal Convolutions', which highlights the importance of intra-bar dynamics.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.004674,
+        "ic_std": 0.304602,
+        "ic_ir": -0.015344,
+        "ic_hit_rate": 0.4893,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.001507,
+            "ic_std": 0.294927,
+            "ic_ir": -0.005109,
+            "ic_hit_rate": 0.4968,
+            "n_timestamps": 46794
+          },
+          "6": {
+            "ic": -0.004674,
+            "ic_std": 0.304602,
+            "ic_ir": -0.015344,
+            "ic_hit_rate": 0.4893,
+            "n_timestamps": 46789
+          },
+          "60": {
+            "ic": -0.009404,
+            "ic_std": 0.308752,
+            "ic_ir": -0.030459,
+            "ic_hit_rate": 0.4817,
+            "n_timestamps": 46735
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46789,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "deepvol_volatility_forecasting_from_high_frequency_data_with"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun-003",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/effective_spread_movement_analysis.py",
+      "created_at": "2026-06-09T10:09:46.862401",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": -0.004674
       }
     }
   ],
