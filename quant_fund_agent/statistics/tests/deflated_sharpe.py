@@ -26,6 +26,7 @@ import math
 import numpy as np
 from scipy import stats
 
+from quant_fund_agent.data.frequency import TRADING_DAYS_PER_YEAR
 from quant_fund_agent.statistics.base import BaseStatTest, StatTestContext
 from quant_fund_agent.statistics.registry import register_test
 from quant_fund_agent.statistics.schemas import StatTestResult, StatTestVerdict
@@ -91,7 +92,7 @@ class DeflatedSharpeRatio(BaseStatTest):
         # Variance of the SRs produced across all trials (bar-level to be
         # consistent with ``sr``).  We convert each annualised trial SR back
         # to bar-level via the same annualisation factor as the IS run.
-        bars_per_year = ctx.bars_per_day * 252
+        bars_per_year = ctx.bars_per_day * TRADING_DAYS_PER_YEAR
         ann_factor = math.sqrt(bars_per_year)
         trial_srs_bar = [s / ann_factor for s in trials]
 

@@ -49,6 +49,10 @@ from typing import Any
 
 import pandas as pd
 
+from quant_fund_agent.data.frequency import (
+    DEFAULT_BARS_PER_YEAR,
+    periods_per_year_from_index,
+)
 from quant_fund_agent.databases import PortfolioDatabase, StrategyDatabase
 from quant_fund_agent.portfolio import get_personality_profile
 from quant_fund_agent.schemas import (
@@ -75,11 +79,23 @@ PORTFOLIO_DB_PATH = Path("data/portfolio/portfolio_db.json")
 
 OOS_TEST_ID = "out_of_sample_backtest"
 
-# 10-second bars: 6.5h × 60min × 6 bars/min × 252 trading days.  This is the
-# correct covariance annualisation factor for the fund's intraday returns, so
-# that per-bar covariance lines up with the annualised returns stored on each
-# StrategyRecord (otherwise expected-Sharpe figures blow up by ~sqrt(BPY)).
-BARS_PER_YEAR = 2340 * 252
+# Legacy covariance annualisation factor (10-second bars: 6.5h × 360 bars/h ×
+# 252 trading days).  Used as the fallback; ``run_pm_rebalance`` now infers the
+# factor from the strategy returns' own frequency so per-bar covariance lines up
+# with the annualised returns at any data frequency (daily → 252, 10-sec → this).
+BARS_PER_YEAR = DEFAULT_BARS_PER_YEAR
+
+
+def _infer_annualisation(strategy_db: StrategyDatabase) -> float:
+    """Annualisation factor inferred from the strategy book's return frequency.
+
+    Falls back to :data:`BARS_PER_YEAR` (legacy 10-sec assumption) when no
+    returns are available to infer from.
+    """
+    for series in strategy_db.get_all_returns().values():
+        if series is not None and len(series) > 2:
+            return float(periods_per_year_from_index(series.index))
+    return float(BARS_PER_YEAR)
 
 
 # ---------------------------------------------------------------------------
@@ -427,7 +443,7 @@ def run_pm_rebalance(
     pm_name: str = "fund_pm",
     construction_method: ConstructionMethod | None = None,
     target_n_strategies: int | None = None,
-    annualisation_factor: float = BARS_PER_YEAR,
+    annualisation_factor: float | None = None,
 ) -> PortfolioRecord | None:
     """Run one PM (or a committee) over the current strategy book.
 
@@ -454,6 +470,8 @@ def run_pm_rebalance(
 
     personalities = personalities or [PMPersonality.BALANCED]
     strategy_db.refresh_correlations()
+    if annualisation_factor is None:
+        annualisation_factor = _infer_annualisation(strategy_db)
 
     def _make_state(personality: PMPersonality, name: str) -> PortfolioManagerState:
         return PortfolioManagerState(

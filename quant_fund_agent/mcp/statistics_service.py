@@ -72,6 +72,13 @@ def _build_context(
     data_full = _load_panel()
     factor_signals_full = {fid: _factor_signal(fid, data_full) for fid in feature_ids}
 
+    # Annualise the statistical tests at the data's *actual* frequency (2340 for
+    # 10-sec LOBSTER bars, 1 for daily) rather than the threaded legacy default.
+    if data_full:
+        from quant_fund_agent.data.frequency import bars_per_day_from_index
+
+        bars_per_day = bars_per_day_from_index(next(iter(data_full.values())).index)
+
     # Walk-forward cutoff: the OOS test must run on the tail of the pre-cutoff
     # window (genuinely held out from the architect AND strictly before the
     # simulator's live trading window), never on post-cutoff data.

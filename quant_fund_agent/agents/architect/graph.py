@@ -595,7 +595,7 @@ _SIGNAL_CACHE: dict[str, object] = {}
 def _load_panel_cached() -> dict:
     global _PANEL_CACHE
     if _PANEL_CACHE is None:
-        from quant_fund_agent.backtesting.data_loader import load_panel
+        from quant_fund_agent.data import load_panel
         n_tickers = _resolve_n_tickers()
         log.info("Loading data from %s%s …", DATA_DIR,
                  f" (capped at {n_tickers} tickers)" if n_tickers else "")

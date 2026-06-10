@@ -23,9 +23,12 @@ import numpy as np
 import pandas as pd
 
 from quant_fund_agent.backtesting.strategy_backtester import (
-    BARS_PER_DAY,
     _drawdown_series,
     _max_drawdown_duration,
+)
+from quant_fund_agent.data.frequency import (
+    TRADING_DAYS_PER_YEAR,
+    bars_per_day_from_index,
 )
 from quant_fund_agent.simulation.config import BacktestConfig
 from quant_fund_agent.simulation.execution import ExecutionResult
@@ -33,14 +36,21 @@ from quant_fund_agent.simulation.execution import ExecutionResult
 log = logging.getLogger("simulation.results")
 
 
-def fund_metrics(returns: pd.Series, bars_per_day: int = BARS_PER_DAY) -> dict[str, Any]:
-    """Return-based fund statistics from a per-bar fund return series."""
+def fund_metrics(returns: pd.Series, bars_per_day: int | None = None) -> dict[str, Any]:
+    """Return-based fund statistics from a per-bar fund return series.
+
+    ``bars_per_day=None`` infers the annualisation from the return index
+    (2340 for 10-sec bars, 1 for daily), so fund Sharpe/return are correct at
+    any data frequency.
+    """
     r = returns.dropna()
     n = len(r)
     if n < 2:
         return {"n_bars": n}
 
-    bars_per_year = bars_per_day * 252
+    if bars_per_day is None:
+        bars_per_day = bars_per_day_from_index(r.index)
+    bars_per_year = bars_per_day * TRADING_DAYS_PER_YEAR
     mean_bar, std_bar = float(r.mean()), float(r.std())
     ann_ret = mean_bar * bars_per_year
     ann_vol = std_bar * np.sqrt(bars_per_year) if std_bar > 0 else 0.0
@@ -138,11 +148,12 @@ class BacktestResults:
     def finalize(self) -> dict[str, Any]:
         r = self.fund_returns
         m = fund_metrics(r)
+        bars_per_day = bars_per_day_from_index(r.index)
         cost = self._concat(self._cost_parts)
         turn = self._concat(self._turnover_parts)
         m["total_cost"] = round(float(cost.sum()), 6) if len(cost) else 0.0
         m["avg_daily_turnover"] = (
-            round(float(turn.mean()) * BARS_PER_DAY, 4) if len(turn) else 0.0
+            round(float(turn.mean()) * bars_per_day, 4) if len(turn) else 0.0
         )
         m["n_meetings"] = len(self.meetings)
         m["n_strategies_deployed"] = len(self._attribution)

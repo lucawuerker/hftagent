@@ -30,11 +30,18 @@ import pandas as pd
 
 from quant_fund_agent.backtesting.data_loader import forward_returns
 from quant_fund_agent.backtesting.engine import _ic_series
+from quant_fund_agent.data.frequency import (
+    DEFAULT_BARS_PER_DAY,
+    TRADING_DAYS_PER_YEAR,
+    bars_per_day_from_index,
+)
 from quant_fund_agent.schemas import StrategyBacktestMetrics
 from quant_fund_agent.strategies.base import BaseStrategy
 
 
-BARS_PER_DAY = 2340  # 6.5 hours × 60 min × 6 bars/min  (10-sec bars)
+# Legacy default (10-sec LOBSTER bars).  Metrics now infer bars-per-day from the
+# data's own index; this remains as the fallback for too-short series.
+BARS_PER_DAY = DEFAULT_BARS_PER_DAY
 
 
 @dataclass
@@ -164,16 +171,22 @@ def _compute_metrics(
     positions: pd.DataFrame,
     signal: pd.DataFrame,
     close: pd.DataFrame,
-    bars_per_day: int = BARS_PER_DAY,
+    bars_per_day: int | None = None,
     ic_horizon: int = 6,
 ) -> StrategyBacktestMetrics:
-    """Derive all summary statistics from the portfolio return series."""
+    """Derive all summary statistics from the portfolio return series.
+
+    ``bars_per_day=None`` (the default) infers the annualisation from the
+    return series' own ``DatetimeIndex`` — 2340 for 10-sec LOBSTER bars, 1 for
+    daily — so the same code annualises correctly at any frequency.
+    """
     n = len(port_ret)
     if n < 2:
         return StrategyBacktestMetrics()
 
-    trading_days_per_year = 252
-    bars_per_year = bars_per_day * trading_days_per_year
+    if bars_per_day is None:
+        bars_per_day = bars_per_day_from_index(port_ret.index)
+    bars_per_year = bars_per_day * TRADING_DAYS_PER_YEAR
 
     # annualised return & vol
     mean_bar = float(port_ret.mean())

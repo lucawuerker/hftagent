@@ -353,7 +353,7 @@ def _load_panel_cached(data_dir: str, fields: list[str],
                        n_tickers: int | None) -> dict[str, Any]:
     key = (frozenset(fields), n_tickers)
     if key not in _PANEL_CACHE:
-        from quant_fund_agent.backtesting.data_loader import load_panel
+        from quant_fund_agent.data import load_panel
         log.info("Loading panel from %s (fields=%s, n_tickers=%s) …",
                  data_dir, fields, n_tickers if n_tickers is not None else "all")
         t0 = time.time()
