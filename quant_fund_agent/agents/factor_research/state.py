@@ -61,6 +61,14 @@ class FactorResearcherState(BaseModel):
     # successfully-backtested factor is kept regardless of IC magnitude.
     ic_target_horizon: int = 6  # 1-minute bars at 10-sec resolution
     paper_sample_strategy: str = "unread_first"  # or "random"
+    # What new factor ids are de-duped against during brainstorm:
+    #   "package" → every registered factor class (all code in the shared
+    #               researcher package) ∪ the active factor DB (default).
+    #   "prerun"  → only the active prerun's own factor DB, so a prerun's
+    #               brainstorm is not anchored by other preruns' factors (the
+    #               materialise step still drops any id that would clash with an
+    #               existing class, so the shared package is never corrupted).
+    dedup_scope: str = "package"  # "package" | "prerun"
     # Per-paper character budget for the text fed to the LLM.  Set high
     # enough to include the *entire* body of a normal academic paper
     # (methodology, results, conclusions) — not just the abstract/intro —

@@ -9,10 +9,12 @@ from __future__ import annotations
 
 from quant_fund_agent.data.providers.base import DataProvider
 from quant_fund_agent.data.providers.lobster import LobsterProvider
+from quant_fund_agent.data.providers.yfinance import YFinanceProvider
 
-# name → provider class.  yfinance / fmp / alphavantage land here in later phases.
+# name → provider class.  fmp / alphavantage land here in Phase 4.
 PROVIDERS: dict[str, type[DataProvider]] = {
     LobsterProvider.name: LobsterProvider,
+    YFinanceProvider.name: YFinanceProvider,
 }
 
 
@@ -26,4 +28,7 @@ def get_provider_class(name: str) -> type[DataProvider]:
     return cls
 
 
-__all__ = ["DataProvider", "LobsterProvider", "PROVIDERS", "get_provider_class"]
+__all__ = [
+    "DataProvider", "LobsterProvider", "YFinanceProvider",
+    "PROVIDERS", "get_provider_class",
+]

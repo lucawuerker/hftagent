@@ -1,0 +1,12 @@
+# Demo universe — ~10 liquid US mega-caps across sectors. Good for a fast
+# clone-and-run smoke (small fetch, quick fit). One ticker per line; '#' comments.
+AAPL
+MSFT
+NVDA
+AMZN
+GOOGL
+META
+TSLA
+JPM
+JNJ
+XOM

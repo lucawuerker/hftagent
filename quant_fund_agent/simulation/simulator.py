@@ -63,14 +63,27 @@ def run_backtest(config: BacktestConfig) -> BacktestResults:
 
     config.output_dir.mkdir(parents=True, exist_ok=True)
 
-    # ── seed this run's factor DB from the permanent library (per factor_universe).
-    #    Capture the permanent ids first so we can later tell which researcher
-    #    factors were discovered by THIS run (to snapshot + purge their code).
+    # ── seed this run's factor DB.  Capture the permanent ids first so we can
+    #    later tell which researcher factors were discovered by THIS run (to
+    #    snapshot + purge their code).
     permanent_ids = factor_store.permanent_factor_ids(pipeline.FACTOR_DB_PATH)
     if config.fresh or not config.factor_db_path.exists():
-        factor_store.seed_run_factor_db(
-            pipeline.FACTOR_DB_PATH, config.factor_db_path, config.factor_universe,
-        )
+        if config.prerun:
+            # A/B mode: seed from a named prerun's researcher factors (± seeds);
+            # factor_universe is irrelevant here.
+            if config.factor_universe != "all":
+                log.warning("--factor-universe is ignored when --prerun is set "
+                            "(seeding from prerun %r, include_seeds=%s).",
+                            config.prerun, config.include_seeds)
+            from quant_fund_agent.factors import preruns
+            preruns.build_downstream_factor_db(
+                config.factor_db_path, config.prerun, config.include_seeds,
+                base_db=pipeline.FACTOR_DB_PATH,
+            )
+        else:
+            factor_store.seed_run_factor_db(
+                pipeline.FACTOR_DB_PATH, config.factor_db_path, config.factor_universe,
+            )
 
     # ── databases scoped to THIS run (don't clobber the live book) ──
     if config.fresh:

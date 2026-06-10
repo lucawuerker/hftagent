@@ -48,9 +48,12 @@ def load_papers(
 
 
 @mcp.tool()
-def existing_factor_ids() -> str:
-    """Return the sorted union of registered + persisted factor IDs (JSON array)."""
-    return json.dumps(svc.existing_factor_ids())
+def existing_factor_ids(scope: str = "package") -> str:
+    """Return the factor ids a new brainstorm should avoid (JSON array).
+
+    ``scope="package"`` → registered classes ∪ active DB; ``"prerun"`` → active DB only.
+    """
+    return json.dumps(svc.existing_factor_ids(scope=scope))
 
 
 @mcp.tool()

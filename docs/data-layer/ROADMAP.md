@@ -76,13 +76,20 @@ Each phase is independently shippable with its own test gate
     executable verify scripts under `scripts/verify/` prove **no-op on LOBSTER
     (197/197)**, **98/197 on a standard provider** (99 microstructure gated),
     escape hatch, synthesis formulas, and the 4 known misdeclared alphas.
-- [ ] **Phase 3 — yfinance provider + onboarding MVP (first "clone-and-run")**
-  - `data/providers/yfinance.py` (no key, daily OHLCV, adjusted close).
-  - `data/cache.py` parquet cache; `data/universe.py` + presets in `data/universes/`.
-  - `setup_wizard.py` (`python -m quant_fund_agent.setup`): key detection,
-    prompts, validation fetch, write `quant.config.yaml`.
-  - Optional: high-low synthetic-spread cost enrichment in `simulation/execution.py`.
-  - Gate: wizard + `run_fund.py` run end-to-end on yfinance with no `ticker_data/`.
+- [x] **Phase 3 — yfinance provider + onboarding MVP (first "clone-and-run")** ✅ 2026-06-10
+  - `data/providers/yfinance.py` (no key, daily OHLCV, `auto_adjust=True`; network
+    isolated to `_fetch` so the rest is testable offline). Registered in `PROVIDERS`.
+  - `data/cache.py` per-symbol parquet cache (refetch-on-miss, atomic writes);
+    `data/universe.py` + `data/universes/{demo,sp100}.txt` presets.
+  - `quant_fund_agent/setup.py` wizard (`python -m quant_fund_agent.setup`):
+    provider/key detection, prompts **and** CLI flags, validation fetch, writes
+    `quant.config.yaml`.
+  - Cost: opt-in flat `fallback_spread_bps` in `BacktestConfig` (default 0 =
+    commission-only) — deliberately NOT a high-low proxy (overcharges ~100×).
+  - Gate met: full suite green (69); offline verify (cache/universe/synthesis/
+    252-yr/gating→98) + free live yfinance fetch + wizard round-trip, and a **real
+    paid `run_fund.py --n-strategies 1` on yfinance with no LOBSTER data** ran
+    Selector→Architect(ridge→lasso→xgboost)→Statistician(rejected, legit)→PM.
 - [ ] **Phase 4 — FMP + AlphaVantage providers**
   - `data/providers/fmp.py`, `alphavantage.py` (requests, key from `.env`,
     rate-limit-aware cache). These can fill the `fundamental` tier.
@@ -104,5 +111,7 @@ Each phase is independently shippable with its own test gate
 - 2026-06-10: Phase 2 complete (capability gating + tier metadata + vwap/returns
   synthesis). Gating verified no-op on LOBSTER, 98/197 on a standard provider.
   `data/factors/factor_db.json` now carries `required_inputs`/`required_tier`.
-  Next: Phase 3 (yfinance provider + parquet cache + onboarding wizard) — the
-  first "clone-and-run" milestone, where gating actually bites.
+- 2026-06-10: Phase 3 complete (yfinance provider + parquet cache + universe
+  presets + onboarding wizard). Verified a real paid `run_fund.py` end-to-end on
+  yfinance daily data with NO LOBSTER data. `quant.config.yaml` and `data/market/`
+  are gitignored. Next: Phase 4 (FMP + AlphaVantage; fills the `fundamental` tier).

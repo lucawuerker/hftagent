@@ -34,11 +34,11 @@ def load_papers(
     return _bridge().call("load_papers", {k: v for k, v in args.items() if v is not None})
 
 
-def existing_factor_ids() -> list[str]:
+def existing_factor_ids(scope: str = "package") -> list[str]:
     if not _use_mcp():
         from quant_fund_agent.mcp import research_service as svc
-        return svc.existing_factor_ids()
-    return _bridge().call("existing_factor_ids", {})
+        return svc.existing_factor_ids(scope=scope)
+    return _bridge().call("existing_factor_ids", {"scope": scope})
 
 
 def materialise_factor(factor_id: str, code: str) -> dict[str, Any]:

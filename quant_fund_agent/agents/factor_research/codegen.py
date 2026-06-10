@@ -432,10 +432,18 @@ def materialise(factor_id: str, code: str) -> Path:
          can register the class via ``@register_factor`` before the smoke
          test crashes, leaving a stale registry entry behind.
     """
-    from quant_fund_agent.factors.registry import _FACTOR_REGISTRY
+    from quant_fund_agent.factors.registry import _FACTOR_REGISTRY, get_factor_class
 
     class_name = validate_code(code, factor_id)
     log.info("validated %s (class %s)", factor_id, class_name)
+    # Never overwrite an already-registered factor's code (e.g. another prerun's
+    # under dedup_scope="prerun"): fail cleanly so the clash is dropped instead of
+    # clobbering and then unlinking a file we don't own.
+    if get_factor_class(factor_id) is not None:
+        raise CodeValidationError(
+            f"factor_id {factor_id!r} already exists in the registry; skipping "
+            f"to avoid overwriting another factor's code"
+        )
     path = write_factor_file(factor_id, code)
     try:
         import_factor_module(factor_id)

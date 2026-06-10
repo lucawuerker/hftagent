@@ -72,6 +72,10 @@ def cost_rate_panel(panel: dict[str, pd.DataFrame], cfg: BacktestConfig) -> pd.D
         spread_frac = (spread / close.replace(0, np.nan)).abs().fillna(0.0)
         mult = 0.5 if cfg.half_spread else 1.0
         rate = rate + mult * spread_frac
+    elif cfg.use_spread_cost and cfg.fallback_spread_bps > 0:
+        # Provider has no spread field (e.g. yfinance daily) → flat synthetic spread.
+        mult = 0.5 if cfg.half_spread else 1.0
+        rate = rate + mult * (cfg.fallback_spread_bps * 1e-4)
     return rate
 
 

@@ -121,6 +121,12 @@ class BacktestConfig:
     spread_field: str = "effSpread"     # panel field used for the half-spread
     half_spread: bool = True            # charge 0.5 * spread (one side) per trade
     commission_bps: float = 0.5         # fixed commission per unit turnover
+    # Flat synthetic spread (bps) applied only when ``spread_field`` is absent from
+    # the panel (e.g. yfinance daily, which has no effSpread).  Default 0 keeps the
+    # existing commission-only fallback; set e.g. 2.0 for a realistic large-cap
+    # spread.  A high-low range proxy is deliberately NOT used — it overcharges by
+    # ~100x vs real spreads.  Future: Corwin–Schultz high-low spread estimator.
+    fallback_spread_bps: float = 0.0
 
     # ── PM configuration ──
     pm_mode: PMMode = PMMode.SELECTOR
@@ -146,6 +152,15 @@ class BacktestConfig:
     # Either way the run is scoped to its own DB under ``output_dir`` — a backtest
     # never writes the global ``data/factors/factor_db.json``.
     factor_universe: str = "all"    # "all" | "session"
+
+    # ── named prerun selection (A/B different research LLMs) ──
+    # When set, the run's factor DB is seeded from this named prerun's researcher
+    # factors (data/factors/preruns/<prerun>/factor_db.json) instead of the global
+    # library; ``factor_universe`` is then ignored.  ``include_seeds`` toggles
+    # whether the 88 seed alphas are also visible to the Selector.  Typically used
+    # with ``run_research=False`` to compare a prerun's factors downstream.
+    prerun: str | None = None
+    include_seeds: bool = True
 
     # ── data / universe ──
     data_dir: str = "ticker_data"

@@ -225,3 +225,100 @@ def test_resolve_required_inputs_fallback_to_registry(monkeypatch):
     fid, cls = next(iter(get_all_factor_classes().items()))
     expected = list(getattr(cls, "inputs", ["close"]))
     assert resolve_required_inputs({"id": fid}) == expected
+
+
+# ── Phase 3: universe / cache / yfinance provider (all offline) ─────────────
+
+def _synthetic_ohlcv(symbol: str, n: int = 60) -> pd.DataFrame:
+    idx = pd.bdate_range("2023-01-02", periods=n)
+    base = 100 + np.arange(n, dtype=float)
+    return pd.DataFrame(
+        {"open": base, "high": base + 1, "low": base - 1,
+         "close": base + 0.5, "volume": np.full(n, 1e6)},
+        index=idx,
+    )
+
+
+def test_universe_resolution_preset_custom_and_cap():
+    from quant_fund_agent.config import DataSettings
+    from quant_fund_agent.data.universe import available_presets, resolve_universe
+
+    assert {"demo", "sp100"} <= set(available_presets())
+    demo = resolve_universe(DataSettings(universe_preset="demo"))
+    assert "AAPL" in demo and len(demo) >= 5
+
+    custom = resolve_universe(DataSettings(tickers=["aapl", "msft"]))
+    assert custom == ["AAPL", "MSFT"]  # explicit list wins, uppercased
+
+    capped = resolve_universe(DataSettings(universe_preset="sp100", n_tickers=4))
+    assert len(capped) == 4
+
+
+def test_cache_round_trip_second_call_hits_cache(tmp_path):
+    from quant_fund_agent.data.cache import cached_fetch
+
+    calls = []
+
+    def fake_fetch(syms):
+        calls.append(list(syms))
+        return {s: _synthetic_ohlcv(s) for s in syms}
+
+    kw = dict(provider="yfinance", symbols=["AAA", "BBB"],
+              start="2023-01-02", end="2023-03-01", freq="1d",
+              asset_class="equity", cache_dir=str(tmp_path), fetch_fn=fake_fetch)
+
+    panel1 = cached_fetch(**kw)
+    assert set(panel1) == {"open", "high", "low", "close", "volume"}
+    assert list(panel1["close"].columns) == ["AAA", "BBB"]
+    assert calls == [["AAA", "BBB"]]  # fetched once
+
+    panel2 = cached_fetch(**kw)          # same range → cache hit, no fetch
+    assert calls == [["AAA", "BBB"]]     # still only one fetch
+    # values identical; parquet round-trip drops the index `freq` attr (harmless —
+    # downstream infers frequency from spacing, not the attribute).
+    pd.testing.assert_frame_equal(panel1["close"], panel2["close"], check_freq=False)
+
+
+def test_yfinance_reshape_multiindex_and_single():
+    from quant_fund_agent.data.providers.yfinance import _reshape
+
+    idx = pd.bdate_range("2023-01-02", periods=5)
+    # multi-ticker (yfinance group_by="ticker" shape)
+    multi = pd.concat(
+        {sym: _synthetic_ohlcv(sym, 5).rename(columns=str.capitalize) for sym in ["AAA", "BBB"]},
+        axis=1,
+    )
+    out = _reshape(multi, ["AAA", "BBB"])
+    assert set(out) == {"AAA", "BBB"}
+    assert list(out["AAA"].columns) == ["open", "high", "low", "close", "volume"]
+
+    # single ticker (flat columns)
+    flat = _synthetic_ohlcv("AAA", 5).rename(columns=str.capitalize)
+    flat.index = idx
+    out1 = _reshape(flat, ["AAA"])
+    assert set(out1) == {"AAA"}
+
+
+def test_yfinance_provider_offline(monkeypatch, tmp_path):
+    """Full panel via the yfinance provider with an injected fetch (no network)."""
+    from quant_fund_agent.config import DataSettings, Settings
+    from quant_fund_agent.data import load_panel
+    from quant_fund_agent.data.frequency import periods_per_year_from_index
+    from quant_fund_agent.data.providers.yfinance import YFinanceProvider
+
+    monkeypatch.setattr(
+        YFinanceProvider, "_fetch",
+        lambda self, syms: {s: _synthetic_ohlcv(s) for s in syms},
+    )
+    settings = Settings(data=DataSettings(
+        provider="yfinance", tickers=["AAA", "BBB"],
+        start="2023-01-02", end="2023-04-01", frequency="1d",
+        cache_dir=str(tmp_path),
+    ))
+    panel = load_panel(settings=settings)  # full load → OHLCV + synthesised
+    assert {"open", "high", "low", "close", "volume", "vwap", "returns"} <= set(panel)
+    assert list(panel["close"].columns) == ["AAA", "BBB"]
+    pd.testing.assert_frame_equal(
+        panel["vwap"], (panel["high"] + panel["low"] + panel["close"]) / 3.0)
+    # daily data → 252 periods/year (frequency-aware annualisation)
+    assert periods_per_year_from_index(panel["close"].index) == 252

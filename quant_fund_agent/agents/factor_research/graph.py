@@ -92,12 +92,14 @@ BRAINSTORM_MAX_INPUT_TOKENS = int(
 )
 
 
-def _get_llm(temperature: float = 0.6) -> ChatOpenAI:
-    # Finite timeout + retries so a stalled response-body read can't hang the
-    # pipeline forever inside SSL_read (langchain-openai's default timeout=None
-    # = wait forever).  See the selector graph for the full explanation.
-    return ChatOpenAI(model=LLM_MODEL, temperature=temperature,
-                      timeout=120, max_retries=4)
+def _get_llm(temperature: float = 0.6):
+    # Built through the provider-agnostic factory so a prerun can pick the
+    # research model/provider via FACTOR_RESEARCH_LLM_MODEL / _PROVIDER (read at
+    # call time).  Finite timeout + retries so a stalled response-body read can't
+    # hang the pipeline forever (langchain's default timeout=None = wait forever).
+    from quant_fund_agent.llm import make_chat_llm
+
+    return make_chat_llm(temperature=temperature, timeout=120, max_retries=4)
 
 
 def _parse_json(content: str) -> dict:
@@ -146,13 +148,16 @@ def load_papers(state: FactorResearcherState) -> dict:
 # Node 2: brainstorm
 # ---------------------------------------------------------------------------
 
-def _existing_factor_ids() -> list[str]:
-    """Union of (1) registered factor classes and (2) factor_db.json IDs.
+def _existing_factor_ids(scope: str = "package") -> list[str]:
+    """Factor ids a new brainstorm should avoid, per ``scope``.
 
-    Computed by the quant-research MCP server so the registry it queries is the
-    same process that materialises and backtests new factors.
+    ``"package"`` (default) → all registered factor classes ∪ the active factor
+    DB; ``"prerun"`` → only the active prerun's factor DB (so a prerun is not
+    anchored by other preruns' factors).  Computed by the quant-research MCP
+    server so the registry it queries is the same process that materialises new
+    factors.
     """
-    return research_client.existing_factor_ids()
+    return research_client.existing_factor_ids(scope=scope)
 
 
 def _papers_block(snippets: list[PaperSnippet]) -> str:
@@ -311,7 +316,7 @@ def brainstorm(state: FactorResearcherState) -> dict:
     factors and against each other) and trimmed to the budget.  With no
     papers we make a single knowledge-only call for the whole budget.
     """
-    existing = _existing_factor_ids()
+    existing = _existing_factor_ids(scope=state.dedup_scope)
     known_ids: set[str] = set(existing)  # grows as ideas are accepted
     seen: set[str] = set()
     ideas: list[FactorIdea] = []
@@ -325,7 +330,8 @@ def brainstorm(state: FactorResearcherState) -> dict:
         plan = [(None, budget)]
 
     log.info("[session %s] brainstorming up to %d idea(s) across %d paper(s), "
-             "one call each …", state.session_id, budget, len(papers))
+             "one call each (dedup against %s, %d known id(s)) …",
+             state.session_id, budget, len(papers), state.dedup_scope, len(existing))
 
     llm = _get_llm(temperature=0.7)
     for paper, n_ask in plan:
@@ -528,6 +534,13 @@ def filter_and_persist(state: FactorResearcherState) -> dict:
     kept_records: list[dict] = []
     rejected: list[dict] = []
 
+    # Tag every factor with the research model that produced it, so named preruns
+    # are comparable and a factor's origin model is recoverable for analysis.
+    from quant_fund_agent.llm import resolve_research_model, resolve_research_provider
+
+    llm_model = resolve_research_model()
+    llm_provider = resolve_research_provider(llm_model)
+
     for cand in state.candidates:
         fid = cand.idea.factor_id
         ic = _ic_at_horizon(cand.backtest_metrics, state.ic_target_horizon)
@@ -561,6 +574,8 @@ def filter_and_persist(state: FactorResearcherState) -> dict:
                 metadata={
                     "ic_target_horizon": state.ic_target_horizon,
                     "ic_at_target": ic,
+                    "llm_model": llm_model,
+                    "llm_provider": llm_provider,
                 },
             )
             kept_records.append(record.model_dump(mode="json"))

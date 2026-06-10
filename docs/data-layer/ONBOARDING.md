@@ -18,7 +18,7 @@ python -m quant_fund_agent.setup   # guided wizard → writes quant.config.yaml
 
 No LOBSTER files, no code edits.
 
-## The wizard (`python -m quant_fund_agent.setup`) — (planned, Phase 3)
+## The wizard (`python -m quant_fund_agent.setup`) — ✅ live
 
 A deterministic, dependency-light CLI that:
 

@@ -78,6 +78,6 @@ incremental ranges and rate limits.
 | Provider | Key needed | Tier | Notes |
 |----------|------------|------|-------|
 | `lobster` | no (local CSVs) | `microstructure` | The original loader; `DATA_DIR=ticker_data`. |
-| `yfinance` | no | `standard` | Daily OHLCV; uses **adjusted** close. (Phase 3) |
+| `yfinance` | no | `standard` | ✅ live. Daily OHLCV, `auto_adjust=True` (adjusted close). Network only in `_fetch`; parquet-cached under `data/market/`. Static preset lists carry survivorship bias; adjusted prices aren't point-in-time. |
 | `fmp` | `FMP_API_KEY` | `standard` (+`fundamental`) | Rate-limited free tier. (Phase 4) |
 | `alphavantage` | `ALPHAVANTAGE_API_KEY` | `standard` | 25 req/day free tier; aggressive caching essential. (Phase 4) |

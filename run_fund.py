@@ -170,6 +170,17 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--fresh", action="store_true",
                    help="Ignore any existing strategy/portfolio DBs and start "
                         "from an empty book.")
+    p.add_argument("--prerun", default=None,
+                   help="Run the downstream agents on a named prerun's factors "
+                        "(data/factors/preruns/<name>/) instead of the global "
+                        "library — for comparing research models.")
+    p.add_argument("--no-seeds", action="store_true",
+                   help="With --prerun: hide the 88 seed alphas so the agents see "
+                        "only the prerun's researched factors.")
+    p.add_argument("--out-dir", default=None,
+                   help="Write the factor/strategy/portfolio DBs + showcase here "
+                        "(default with --prerun: data/preruns_downstream/<name>/), "
+                        "so comparison runs don't overwrite each other's books.")
     return p.parse_args()
 
 
@@ -183,6 +194,32 @@ def main() -> None:
     if args.n_tickers and args.n_tickers > 0:
         os.environ.setdefault("ARCHITECT_N_TICKERS", str(args.n_tickers))
 
+    # ── Output location + optional prerun factor source ──────────────
+    #   With --prerun the Selector is pointed at a composed DB (the prerun's
+    #   researcher factors ± the seeds) and the books are written to an isolated
+    #   out-dir so A/B comparison runs don't overwrite each other.
+    out_dir = (pathlib.Path(args.out_dir) if args.out_dir
+               else pathlib.Path("data/preruns_downstream") / args.prerun if args.prerun
+               else None)
+    if out_dir is not None:
+        out_dir.mkdir(parents=True, exist_ok=True)
+        strategy_db_path = out_dir / "strategy_db.json"
+        portfolio_db_path = out_dir / "portfolio_db.json"
+        showcase_path = out_dir / "showcase.json"
+    else:
+        strategy_db_path = pipeline.STRATEGY_DB_PATH
+        portfolio_db_path = pipeline.PORTFOLIO_DB_PATH
+        showcase_path = SHOWCASE_PATH
+
+    if args.prerun:
+        from quant_fund_agent.factors import preruns
+        composed = out_dir / "factor_db.json"
+        n = preruns.build_downstream_factor_db(
+            composed, args.prerun, include_seeds=not args.no_seeds)
+        os.environ["FACTOR_DB_PATH"] = str(composed)
+        print(f"Prerun '{args.prerun}': {n} factors visible "
+              f"({'seeds + ' if not args.no_seeds else ''}researcher) → {composed}")
+
     from quant_fund_agent.factors import discover_factors
     discover_factors()
 
@@ -191,7 +228,7 @@ def main() -> None:
         from quant_fund_agent.databases import PortfolioDatabase, StrategyDatabase
         strategy_db, portfolio_db = StrategyDatabase(), PortfolioDatabase()
     else:
-        strategy_db, portfolio_db = pipeline.load_dbs()
+        strategy_db, portfolio_db = pipeline.load_dbs(strategy_db_path, portfolio_db_path)
     print(f"\nStarting book: {len(strategy_db.list_strategies())} strategies "
           f"already persisted.\n")
 
@@ -255,15 +292,15 @@ def main() -> None:
                   f"{_fmt(dsr):>6s}")
 
     # Persist a lightweight showcase artifact for the notebook (cached mode).
-    pathlib.Path(SHOWCASE_PATH).parent.mkdir(parents=True, exist_ok=True)
-    with open(SHOWCASE_PATH, "w") as fh:
+    pathlib.Path(showcase_path).parent.mkdir(parents=True, exist_ok=True)
+    with open(showcase_path, "w") as fh:
         json.dump({
             "target_horizon": args.target_horizon,
             "n_tickers": args.n_tickers or "all",
             "gates": {"dsr_threshold": 0.75, "max_sharpe_decay": 0.85},
             "entries": showcase,
         }, fh, indent=2, default=str)
-    print(f"\nShowcase details → {SHOWCASE_PATH}")
+    print(f"\nShowcase details → {showcase_path}")
 
     # ── Stage 3: Portfolio Manager rebalance ─────────────────────────
     print("\n" + RULE)
@@ -271,7 +308,7 @@ def main() -> None:
     print(RULE)
     if n_book == 0:
         print("  No strategies in the book — skipping the PM.")
-        pipeline.save_dbs(strategy_db, portfolio_db)
+        pipeline.save_dbs(strategy_db, portfolio_db, strategy_db_path, portfolio_db_path)
         return
 
     use_committee = not args.no_committee and n_book >= 1
@@ -304,8 +341,8 @@ def main() -> None:
                 print(f"    {k:28s} {v}")
 
     # ── Persist everything ───────────────────────────────────────────
-    pipeline.save_dbs(strategy_db, portfolio_db)
-    print(f"\nSaved → {pipeline.STRATEGY_DB_PATH}, {pipeline.PORTFOLIO_DB_PATH}")
+    pipeline.save_dbs(strategy_db, portfolio_db, strategy_db_path, portfolio_db_path)
+    print(f"\nSaved → {strategy_db_path}, {portfolio_db_path}")
 
 
 if __name__ == "__main__":

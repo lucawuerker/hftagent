@@ -141,6 +141,7 @@ def run_research_session(
     reset: bool = False,
     paper_sample_strategy: str = "unread_first",
     data_dir: str = "ticker_data",
+    dedup_scope: str = "package",
 ) -> dict[str, Any]:
     """Run one Factor Researcher session and persist any kept factors.
 
@@ -148,6 +149,10 @@ def run_research_session(
     session's papers are picked.  Combined with the scenario-scoped read-log
     (``PAPER_READ_LOG``), ``"unread_first"`` advances deterministically through the
     library across sessions; ``"random"`` samples it.
+
+    ``dedup_scope`` (``"package"`` | ``"prerun"``) controls what new factor ids are
+    de-duped against during brainstorm: every registered class ∪ the active DB, or
+    only the active prerun's own factors (so a prerun is not anchored by others').
 
     Returns the raw graph output (``selected_papers``, ``factor_ideas``,
     ``candidates``, ``kept_factor_ids``, ``rejected_factor_ids``).
@@ -172,6 +177,7 @@ def run_research_session(
         n_tickers=n_tickers,
         paper_sample_strategy=paper_sample_strategy,
         data_dir=data_dir,
+        dedup_scope=dedup_scope,
     )
     log.info("Factor research session '%s' (papers=%d, ideas=%d, IC@%d recorded, not gated)",
              state.session_id, n_papers, n_ideas, horizon)

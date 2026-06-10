@@ -290,12 +290,23 @@ def load_papers(
 # Existing factor IDs (for brainstorm dedupe)
 # ---------------------------------------------------------------------------
 
-def existing_factor_ids() -> list[str]:
-    """Union of (1) registered factor classes and (2) factor_db.json IDs."""
-    from quant_fund_agent.factors import discover_factors, get_all_factor_classes
+def existing_factor_ids(scope: str = "package") -> list[str]:
+    """Factor ids a new brainstorm should avoid, per ``scope``.
 
-    discover_factors()
-    ids: set[str] = set(get_all_factor_classes().keys())
+    - ``"package"`` (default): every registered factor class (all code in the
+      shared researcher package) ∪ the ids in the active factor DB.
+    - ``"prerun"``: only the ids in the active factor DB (``FACTOR_DB_PATH``), so
+      a prerun's brainstorm is not anchored by other preruns' factors.  Safe
+      because :func:`materialise_factor` refuses to overwrite an already-registered
+      id, so a slipped-through clash is dropped rather than corrupting the package.
+    """
+    ids: set[str] = set()
+    if scope != "prerun":
+        from quant_fund_agent.factors import discover_factors, get_all_factor_classes
+
+        discover_factors()
+        ids.update(get_all_factor_classes().keys())
+
     factor_db_path = _factor_db_path()
     if factor_db_path.exists():
         try:

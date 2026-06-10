@@ -29,3 +29,11 @@ data/portfolio/showcase_pm_portfolio_db.json
 # Full text of papers fetched from their links is cached locally (one .txt
 # per paper); regenerated on demand, so not tracked.
 data/papers/fulltext_cache/
+
+# Vendor market-data parquet cache (yfinance/FMP/AlphaVantage pulls). Re-fetched
+# on demand from the provider; user-specific and potentially large, never tracked.
+data/market/
+
+# User onboarding config written by `python -m quant_fund_agent.setup`. Holds no
+# secrets (those stay in .env) but is environment-specific, so left untracked.
+quant.config.yaml

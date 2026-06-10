@@ -62,6 +62,13 @@ def _parse_args() -> argparse.Namespace:
                    help="Factors strategies may use: 'all' = seeds + every "
                         "permanent researcher factor + this run's; 'session' = "
                         "seeds + only this run's discovered factors.")
+    p.add_argument("--prerun", default=None,
+                   help="Seed this run's factors from a named prerun "
+                        "(data/factors/preruns/<name>/); overrides --factor-universe. "
+                        "Use with --no-research to A/B a prerun's factors downstream.")
+    p.add_argument("--no-seeds", action="store_true",
+                   help="With --prerun: hide the 88 seed alphas so the agents see "
+                        "only the prerun's researched factors.")
     # strategy counts
     p.add_argument("--initial-strategies", type=int, default=5,
                    help="Strategies built at the FIRST strategy meeting (bootstrap).")
@@ -102,6 +109,7 @@ def _config_from_args(args: argparse.Namespace) -> BacktestConfig:
         research_every=args.research_every, strategy_every=args.strategy_every,
         pm_rebalance_every=args.pm_every, run_research=not args.no_research,
         factor_universe=args.factor_universe,
+        prerun=args.prerun, include_seeds=not args.no_seeds,
         initial_strategies=args.initial_strategies,
         n_strategies_per_meeting=args.n_strategies,
         max_iterations=args.max_iterations, oos_ratio=args.oos_ratio,
