@@ -183,6 +183,12 @@ class FactorRecord(BaseModel):
     source: FactorSource = FactorSource.SEED
     research_session_id: str = ""
     code_path: str = ""
+    # Data requirements (drives provider capability-gating). ``required_inputs``
+    # mirrors the factor class's ``inputs``; ``required_tier`` is the highest
+    # capability tier those fields touch (e.g. "standard" / "microstructure").
+    # Empty on legacy records — the catalog falls back to the registry.
+    required_inputs: list[str] = Field(default_factory=list)
+    required_tier: str = ""
     created_at: datetime = Field(default_factory=datetime.utcnow)
     metadata: dict[str, Any] = Field(default_factory=dict)
 

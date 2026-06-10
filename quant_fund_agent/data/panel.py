@@ -24,10 +24,39 @@ if TYPE_CHECKING:
     from quant_fund_agent.data.providers.base import DataProvider
 
 
+# Fields the panel layer derives from OHLCV when a provider doesn't supply them,
+# mapped to the raw fields they need.  ``vwap`` uses the "typical price" proxy.
+SYNTH_DEPS: dict[str, tuple[str, ...]] = {
+    "vwap": ("high", "low", "close"),
+    "returns": ("close",),
+}
+
+
 def get_provider(settings: Settings | None = None) -> "DataProvider":
     """Instantiate the configured provider (cheap; loads no data)."""
     settings = settings or get_settings()
     return get_provider_class(settings.data.provider)(settings)
+
+
+def _synthesize(
+    panel: dict[str, pd.DataFrame], wanted: list[str]
+) -> dict[str, pd.DataFrame]:
+    """Add any ``wanted`` derived fields the provider didn't already supply.
+
+    A field is only synthesised when all of its OHLCV deps are present; otherwise
+    it is left absent so the consumer (factor gating) can drop the factor cleanly.
+    """
+    for field in wanted:
+        if field in panel or field not in SYNTH_DEPS:
+            continue
+        deps = SYNTH_DEPS[field]
+        if not all(d in panel for d in deps):
+            continue
+        if field == "vwap":
+            panel["vwap"] = (panel["high"] + panel["low"] + panel["close"]) / 3.0
+        elif field == "returns":
+            panel["returns"] = panel["close"].pct_change()
+    return panel
 
 
 def load_panel(
@@ -56,4 +85,22 @@ def load_panel(
         dtype=dtype,
     )
     provider = get_provider(settings)
-    return provider.load(fields=fields)
+
+    if fields is None:
+        # Full load: materialise everything the provider has, plus every derived
+        # field it didn't already supply.
+        panel = provider.load(fields=None)
+        return _synthesize(panel, list(SYNTH_DEPS))
+
+    # Targeted load: a synthesised field is replaced by its OHLCV deps in the
+    # provider request (the provider never sees vwap/returns), then derived and
+    # the result trimmed back to exactly what the caller asked for.
+    requested = list(fields)
+    synth_requested = [f for f in requested if f in SYNTH_DEPS]
+    provider_fields: set[str] = {f for f in requested if f not in SYNTH_DEPS}
+    for f in synth_requested:
+        provider_fields.update(SYNTH_DEPS[f])
+
+    panel = provider.load(fields=sorted(provider_fields) if provider_fields else None)
+    panel = _synthesize(panel, synth_requested)
+    return {k: panel[k] for k in requested if k in panel}

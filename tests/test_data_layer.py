@@ -42,13 +42,28 @@ def _write_lobster_dir(root: Path, symbols=("AAA", "BBB"), n: int = 24) -> Path:
 def test_routed_load_panel_matches_legacy(tmp_path):
     from quant_fund_agent.backtesting.data_loader import load_panel as legacy
     from quant_fund_agent.data import load_panel as routed
+    from quant_fund_agent.data.panel import SYNTH_DEPS
 
     root = _write_lobster_dir(tmp_path / "ticker_data")
     a = legacy(str(root))
     b = routed(str(root))
-    assert set(a) == set(b)
+    # routed adds synthesised derived fields on top of the provider's raw fields;
+    # every raw field must still be byte-identical to the legacy loader.
+    assert set(b) == set(a) | set(SYNTH_DEPS)
     for field in a:
         pd.testing.assert_frame_equal(a[field], b[field])
+    pd.testing.assert_frame_equal(b["vwap"], (a["high"] + a["low"] + a["close"]) / 3.0)
+    pd.testing.assert_frame_equal(b["returns"], a["close"].pct_change())
+
+
+def test_targeted_load_synthesises_and_trims(tmp_path):
+    """Requesting vwap/returns loads their OHLC deps, derives them, trims output."""
+    from quant_fund_agent.data import load_panel as routed
+
+    root = _write_lobster_dir(tmp_path / "ticker_data")
+    panel = routed(str(root), fields=["vwap", "returns", "close"])
+    assert set(panel) == {"vwap", "returns", "close"}  # high/low loaded as deps, trimmed out
+    pd.testing.assert_frame_equal(panel["returns"], panel["close"].pct_change())
 
 
 def test_settings_env_override(monkeypatch):
@@ -144,3 +159,69 @@ def test_frequency_inference_short_series_falls_back():
     )
 
     assert bars_per_day_from_index(pd.DatetimeIndex(["2020-01-01"])) == DEFAULT_BARS_PER_DAY
+
+
+# ── capability gating (Phase 2) ─────────────────────────────────────────────
+
+def test_compatible_factors_filters_by_provider_fields():
+    from quant_fund_agent.data.tiers import TIERS, compatible_factors
+
+    records = [
+        {"id": "f_ohlcv", "required_inputs": ["close", "high", "low", "volume"]},
+        {"id": "f_micro", "required_inputs": ["orderFlow", "volume"]},
+        {"id": "f_vwap", "required_inputs": ["vwap", "close"]},  # synthesised → ok
+    ]
+    std = TIERS["standard"]
+    keep = {r["id"] for r in compatible_factors(records, std)}
+    assert keep == {"f_ohlcv", "f_vwap"}  # micro gated out on a standard provider
+
+    full = TIERS["standard"] | TIERS["microstructure"]
+    keep_full = {r["id"] for r in compatible_factors(records, full)}
+    assert keep_full == {"f_ohlcv", "f_micro", "f_vwap"}  # LOBSTER-like: nothing gated
+
+
+def _write_factor_db(path, records):
+    import json
+    path.write_text(json.dumps({"factors": records}))
+
+
+def test_catalog_gating_lobster_noop_standard_gates(tmp_path, monkeypatch):
+    """Catalog: no-op on LOBSTER fields; microstructure gated on standard fields."""
+    from quant_fund_agent.data.tiers import TIERS
+    from quant_fund_agent.mcp import catalog_service
+
+    db = tmp_path / "factor_db.json"
+    _write_factor_db(db, [
+        {"id": "a", "name": "A", "required_inputs": ["close", "volume"], "required_tier": "standard"},
+        {"id": "b", "name": "B", "required_inputs": ["orderFlow"], "required_tier": "microstructure"},
+    ])
+    monkeypatch.setenv("FACTOR_DB_PATH", str(db))
+
+    # LOBSTER-like provider (standard ∪ microstructure): both visible — no-op.
+    monkeypatch.setattr(catalog_service, "_provider_available_fields",
+                        lambda: TIERS["standard"] | TIERS["microstructure"])
+    ids = {c["factor_id"] for c in catalog_service.load_factor_catalog()}
+    assert ids == {"a", "b"}
+
+    # Standard provider: microstructure factor gated out.
+    monkeypatch.setattr(catalog_service, "_provider_available_fields",
+                        lambda: TIERS["standard"])
+    cat = catalog_service.load_factor_catalog()
+    assert {c["factor_id"] for c in cat} == {"a"}
+    assert cat[0]["required_tier"] == "standard"  # tier surfaced to the Selector
+
+    # Escape hatch restores the full catalog even on a standard provider.
+    monkeypatch.setenv("QF_FACTOR_GATING", "0")
+    assert {c["factor_id"] for c in catalog_service.load_factor_catalog()} == {"a", "b"}
+
+
+def test_resolve_required_inputs_fallback_to_registry(monkeypatch):
+    """A record without stored inputs resolves from the live factor class."""
+    from quant_fund_agent.data.tiers import resolve_required_inputs
+    from quant_fund_agent.factors import discover_factors
+    from quant_fund_agent.factors.registry import get_all_factor_classes
+
+    discover_factors()
+    fid, cls = next(iter(get_all_factor_classes().items()))
+    expected = list(getattr(cls, "inputs", ["close"]))
+    assert resolve_required_inputs({"id": fid}) == expected

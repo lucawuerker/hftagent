@@ -97,3 +97,46 @@ def is_compatible(inputs: list[str] | None, available: frozenset[str] | set[str]
     """
     needed = set(inputs or [])
     return needed <= (set(available) | set(SYNTHESIZED_FIELDS))
+
+
+def resolve_required_inputs(record: object) -> list[str]:
+    """Best-effort list of fields a factor record needs, for gating.
+
+    Resolution order (conservative — admit rather than over-gate):
+      1. the record's persisted ``required_inputs`` (set at creation / backfill);
+      2. the live factor class's ``inputs`` from the registry;
+      3. ``["close"]`` (treat as plain ``standard``).
+
+    ``record`` may be a ``FactorRecord``-like object or a plain dict (the catalog
+    reads raw JSON), so attributes are looked up defensively.
+    """
+    def _get(key: str):
+        if isinstance(record, dict):
+            return record.get(key)
+        return getattr(record, key, None)
+
+    stored = _get("required_inputs")
+    if stored:
+        return list(stored)
+
+    fid = _get("id") or _get("factor_id")
+    if fid:
+        try:
+            from quant_fund_agent.factors.registry import get_factor_class
+
+            cls = get_factor_class(fid)
+            if cls is not None:
+                inputs = getattr(cls, "inputs", None)
+                if inputs:
+                    return list(inputs)
+        except Exception:
+            pass
+    return ["close"]
+
+
+def compatible_factors(
+    records: list,
+    available: frozenset[str] | set[str],
+) -> list:
+    """Filter records to those whose required fields the provider supplies."""
+    return [r for r in records if is_compatible(resolve_required_inputs(r), available)]

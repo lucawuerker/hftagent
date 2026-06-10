@@ -395,10 +395,23 @@ def backtest_factors(
     panel_full = _load_panel_cached(data_dir, fields, n_tickers=n_tickers)
     panel = _slice_panel_to_cutoff(panel_full, _parse_cutoff(cutoff_date))
 
+    # Capability-gating: a factor needing fields the active provider can't supply
+    # is reported as gated up front, with a clear reason, instead of reaching a
+    # cryptic missing-column error inside the backtest.  No-op on LOBSTER.
+    available = frozenset(panel.keys())
+
     results: dict[str, Any] = {}
     for fid in factor_ids:
         try:
             factor = instantiate_factor(fid)
+            from quant_fund_agent.data.tiers import is_compatible, required_tier
+
+            inputs = list(getattr(factor, "inputs", ["close"]) or ["close"])
+            if not is_compatible(inputs, available):
+                tier = required_tier(inputs)
+                log.info("[%s] gated: requires %s tier (provider lacks fields)", fid, tier)
+                results[fid] = {"ok": False, "error": f"gated: requires {tier} tier"}
+                continue
             t0 = time.time()
             metrics = backtest_factor(factor, panel, horizon=horizon)
             log.info("[%s] backtest %.1fs IC@%d=%s ICIR@%d=%s", fid,

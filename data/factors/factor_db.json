@@ -57,6 +57,10 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:29:54.161679",
       "metadata": {}
     },
@@ -117,6 +121,12 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "open",
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:29:54.920300",
       "metadata": {}
     },
@@ -177,6 +187,11 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "open",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:29:55.777075",
       "metadata": {}
     },
@@ -237,6 +252,10 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "low"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:30:49.759553",
       "metadata": {}
     },
@@ -297,6 +316,13 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "open",
+        "close",
+        "high",
+        "low"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:30:50.561705",
       "metadata": {}
     },
@@ -357,6 +383,11 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "open",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:30:51.367990",
       "metadata": {}
     },
@@ -417,6 +448,11 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:31:19.766998",
       "metadata": {}
     },
@@ -477,6 +513,11 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "open",
+        "close"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:31:20.507930",
       "metadata": {}
     },
@@ -537,6 +578,10 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:31:21.265997",
       "metadata": {}
     },
@@ -597,6 +642,10 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:31:22.082619",
       "metadata": {}
     },
@@ -657,6 +706,13 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "volume",
+        "high",
+        "low"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:31:23.011696",
       "metadata": {}
     },
@@ -717,6 +773,11 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:31:23.691606",
       "metadata": {}
     },
@@ -777,6 +838,11 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:31:24.581241",
       "metadata": {}
     },
@@ -837,6 +903,12 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "open",
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:31:25.790357",
       "metadata": {}
     },
@@ -897,6 +969,11 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "high",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:31:26.790733",
       "metadata": {}
     },
@@ -957,6 +1034,11 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "high",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:31:27.689496",
       "metadata": {}
     },
@@ -1017,6 +1099,11 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:32:59.808205",
       "metadata": {}
     },
@@ -1077,6 +1164,11 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "open",
+        "close"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:33:00.696757",
       "metadata": {}
     },
@@ -1137,6 +1229,10 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:33:01.286321",
       "metadata": {}
     },
@@ -1197,6 +1293,13 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "open",
+        "high",
+        "low",
+        "close"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:33:02.128630",
       "metadata": {}
     },
@@ -1257,6 +1360,11 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:33:02.874857",
       "metadata": {}
     },
@@ -1317,6 +1425,12 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:33:03.713379",
       "metadata": {}
     },
@@ -1377,6 +1491,10 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "high"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:33:04.315231",
       "metadata": {}
     },
@@ -1437,6 +1555,10 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:33:05.044282",
       "metadata": {}
     },
@@ -1497,6 +1619,13 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:33:05.740304",
       "metadata": {}
     },
@@ -1557,6 +1686,11 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "high",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:35:09.185045",
       "metadata": {}
     },
@@ -1617,6 +1751,13 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:35:10.121743",
       "metadata": {}
     },
@@ -1677,6 +1818,13 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:35:10.861551",
       "metadata": {}
     },
@@ -1737,6 +1885,10 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:36:10.687512",
       "metadata": {}
     },
@@ -1797,6 +1949,11 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:36:11.466677",
       "metadata": {}
     },
@@ -1857,6 +2014,12 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:36:13.219262",
       "metadata": {}
     },
@@ -1917,6 +2080,12 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:36:13.937410",
       "metadata": {}
     },
@@ -1977,6 +2146,11 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "open",
+        "close"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:36:14.640529",
       "metadata": {}
     },
@@ -2037,6 +2211,10 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:36:15.546622",
       "metadata": {}
     },
@@ -2097,6 +2275,13 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:38:12.904921",
       "metadata": {}
     },
@@ -2157,6 +2342,14 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "open",
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:39:14.055619",
       "metadata": {}
     },
@@ -2217,6 +2410,11 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "open",
+        "close"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:39:14.824627",
       "metadata": {}
     },
@@ -2277,6 +2475,11 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "open",
+        "close"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:40:07.510337",
       "metadata": {}
     },
@@ -2337,6 +2540,11 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:40:08.803152",
       "metadata": {}
     },
@@ -2397,6 +2605,11 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "high",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:40:09.665382",
       "metadata": {}
     },
@@ -2457,6 +2670,12 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "high",
+        "low",
+        "close"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:40:10.285773",
       "metadata": {}
     },
@@ -2517,6 +2736,12 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:40:11.002677",
       "metadata": {}
     },
@@ -2577,6 +2802,11 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:41:31.960061",
       "metadata": {}
     },
@@ -2637,6 +2867,11 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "high",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:41:32.803255",
       "metadata": {}
     },
@@ -2697,6 +2932,11 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:41:33.871985",
       "metadata": {}
     },
@@ -2757,6 +2997,10 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:41:34.521779",
       "metadata": {}
     },
@@ -2817,6 +3061,13 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:41:35.351091",
       "metadata": {}
     },
@@ -2877,6 +3128,10 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:41:36.102974",
       "metadata": {}
     },
@@ -2937,6 +3192,10 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:41:36.761259",
       "metadata": {}
     },
@@ -2997,6 +3256,13 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:41:37.715015",
       "metadata": {}
     },
@@ -3057,6 +3323,10 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:41:38.374837",
       "metadata": {}
     },
@@ -3117,6 +3387,12 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:42:40.303195",
       "metadata": {}
     },
@@ -3177,6 +3453,12 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:42:40.877186",
       "metadata": {}
     },
@@ -3237,6 +3519,13 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "open",
+        "close",
+        "high",
+        "low"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:42:41.600871",
       "metadata": {}
     },
@@ -3297,6 +3586,13 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:42:42.520549",
       "metadata": {}
     },
@@ -3357,6 +3653,11 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:42:43.317771",
       "metadata": {}
     },
@@ -3417,6 +3718,12 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:42:45.345556",
       "metadata": {}
     },
@@ -3477,6 +3784,13 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:43:17.484138",
       "metadata": {}
     },
@@ -3537,6 +3851,13 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:43:42.654581",
       "metadata": {}
     },
@@ -3597,6 +3918,13 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:43:44.650764",
       "metadata": {}
     },
@@ -3657,6 +3985,13 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:43:45.434317",
       "metadata": {}
     },
@@ -3717,6 +4052,14 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "open",
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:43:46.392577",
       "metadata": {}
     },
@@ -3777,6 +4120,14 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "open",
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:43:47.210463",
       "metadata": {}
     },
@@ -3837,6 +4188,14 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "open",
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:43:48.040401",
       "metadata": {}
     },
@@ -3897,6 +4256,13 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "open",
+        "close",
+        "high",
+        "low"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:43:49.653227",
       "metadata": {}
     },
@@ -3957,6 +4323,13 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:44:20.632563",
       "metadata": {}
     },
@@ -4017,6 +4390,14 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "open",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:46:46.292519",
       "metadata": {}
     },
@@ -4077,6 +4458,13 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:48:34.233524",
       "metadata": {}
     },
@@ -4137,6 +4525,13 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "open",
+        "close",
+        "high",
+        "low"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:49:18.573433",
       "metadata": {}
     },
@@ -4197,6 +4592,13 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:49:19.651924",
       "metadata": {}
     },
@@ -4257,6 +4659,13 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:49:20.664404",
       "metadata": {}
     },
@@ -4317,6 +4726,13 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:49:22.511457",
       "metadata": {}
     },
@@ -4377,6 +4793,13 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:49:23.596817",
       "metadata": {}
     },
@@ -4437,6 +4860,13 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:49:25.673327",
       "metadata": {}
     },
@@ -4497,6 +4927,13 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:49:26.524571",
       "metadata": {}
     },
@@ -4557,6 +4994,12 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:50:01.493772",
       "metadata": {}
     },
@@ -4617,6 +5060,13 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:51:57.760833",
       "metadata": {}
     },
@@ -4677,6 +5127,13 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:52:25.841685",
       "metadata": {}
     },
@@ -4737,6 +5194,14 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "open",
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:54:10.034796",
       "metadata": {}
     },
@@ -4797,6 +5262,14 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "open",
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:55:59.476187",
       "metadata": {}
     },
@@ -4857,6 +5330,13 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:57:33.500714",
       "metadata": {}
     },
@@ -4917,6 +5397,14 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "open",
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T14:57:58.950769",
       "metadata": {}
     },
@@ -4977,6 +5465,13 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T15:00:09.636205",
       "metadata": {}
     },
@@ -5037,6 +5532,14 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "open",
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T15:00:40.631011",
       "metadata": {}
     },
@@ -5097,6 +5600,13 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T15:00:41.636976",
       "metadata": {}
     },
@@ -5157,6 +5667,13 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "open",
+        "close",
+        "high",
+        "low"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T15:00:42.271828",
       "metadata": {}
     },
@@ -5217,6 +5734,10 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T15:00:42.914084",
       "metadata": {}
     },
@@ -5277,6 +5798,11 @@
       "source": "seed",
       "research_session_id": "",
       "code_path": "",
+      "required_inputs": [
+        "open",
+        "close"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-03-24T15:02:52.897303",
       "metadata": {}
     },
@@ -5339,6 +5865,11 @@
       "source": "researcher",
       "research_session_id": "2019-W02",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/order_flow_momentum.py",
+      "required_inputs": [
+        "orderFlow",
+        "volume"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-08T13:18:54.551859",
       "metadata": {
         "ic_target_horizon": 6,
@@ -5404,6 +5935,11 @@
       "source": "researcher",
       "research_session_id": "2019-W02",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/hidden_volume_mean_reversion.py",
+      "required_inputs": [
+        "hidden",
+        "volume"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-08T13:18:54.552258",
       "metadata": {
         "ic_target_horizon": 6,
@@ -5469,6 +6005,11 @@
       "source": "researcher",
       "research_session_id": "2019-W02",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/aggressive_order_flow.py",
+      "required_inputs": [
+        "orderFlow",
+        "volume"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-08T13:18:54.552357",
       "metadata": {
         "ic_target_horizon": 6,
@@ -5534,6 +6075,11 @@
       "source": "researcher",
       "research_session_id": "2019-W03",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/hidden_volume_analysis.py",
+      "required_inputs": [
+        "hidden",
+        "volume"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-08T13:35:47.337365",
       "metadata": {
         "ic_target_horizon": 6,
@@ -5599,6 +6145,10 @@
       "source": "researcher",
       "research_session_id": "2019-W03",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/effective_spread_momentum.py",
+      "required_inputs": [
+        "effSpread"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-08T13:35:47.340744",
       "metadata": {
         "ic_target_horizon": 6,
@@ -5664,6 +6214,11 @@
       "source": "researcher",
       "research_session_id": "2019-W03",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/liquidity_fluctuation_indicator.py",
+      "required_inputs": [
+        "depth",
+        "volume"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-08T13:35:47.341061",
       "metadata": {
         "ic_target_horizon": 6,
@@ -5729,6 +6284,11 @@
       "source": "researcher",
       "research_session_id": "2019-W04",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/liquidity_spread_indicator.py",
+      "required_inputs": [
+        "spread",
+        "depth"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-08T13:46:36.050729",
       "metadata": {
         "ic_target_horizon": 6,
@@ -5794,6 +6354,11 @@
       "source": "researcher",
       "research_session_id": "2019-W04",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/hidden_volume_momentum.py",
+      "required_inputs": [
+        "hidden",
+        "volume"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-08T13:46:36.052273",
       "metadata": {
         "ic_target_horizon": 6,
@@ -5859,6 +6424,11 @@
       "source": "researcher",
       "research_session_id": "prerun-002",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/price_spread_mean_reversion.py",
+      "required_inputs": [
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-06-09T09:57:38.708327",
       "metadata": {
         "ic_target_horizon": 6,
@@ -5924,6 +6494,10 @@
       "source": "researcher",
       "research_session_id": "prerun-002",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/dynamic_spread_analysis.py",
+      "required_inputs": [
+        "spread"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T09:57:38.710987",
       "metadata": {
         "ic_target_horizon": 6,
@@ -5989,6 +6563,13 @@
       "source": "researcher",
       "research_session_id": "prerun-002",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/value_based_inventory_flow.py",
+      "required_inputs": [
+        "trade",
+        "volume",
+        "lobImb",
+        "effLobImb"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T09:57:38.711040",
       "metadata": {
         "ic_target_horizon": 6,
@@ -6054,6 +6635,11 @@
       "source": "researcher",
       "research_session_id": "prerun-002",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/hidden_volume_signal.py",
+      "required_inputs": [
+        "hidden",
+        "close"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T09:57:38.711065",
       "metadata": {
         "ic_target_horizon": 6,
@@ -6119,6 +6705,11 @@
       "source": "researcher",
       "research_session_id": "prerun-002",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/order_flow_pressure_indicator.py",
+      "required_inputs": [
+        "orderFlow",
+        "volume"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T09:57:38.711098",
       "metadata": {
         "ic_target_horizon": 6,
@@ -6184,6 +6775,10 @@
       "source": "researcher",
       "research_session_id": "prerun-002",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/order_flow_volatility.py",
+      "required_inputs": [
+        "orderFlow"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T09:57:38.711131",
       "metadata": {
         "ic_target_horizon": 6,
@@ -6249,6 +6844,11 @@
       "source": "researcher",
       "research_session_id": "prerun-002",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/hidden_volume_surge.py",
+      "required_inputs": [
+        "hidden",
+        "volume"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T09:57:38.711162",
       "metadata": {
         "ic_target_horizon": 6,
@@ -6314,6 +6914,10 @@
       "source": "researcher",
       "research_session_id": "prerun-002",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/order_flow_correlation.py",
+      "required_inputs": [
+        "orderFlow"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T09:57:38.711183",
       "metadata": {
         "ic_target_horizon": 6,
@@ -6379,6 +6983,10 @@
       "source": "researcher",
       "research_session_id": "prerun-002",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/order_flow_reversal.py",
+      "required_inputs": [
+        "trade"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T09:57:38.711205",
       "metadata": {
         "ic_target_horizon": 6,
@@ -6444,6 +7052,10 @@
       "source": "researcher",
       "research_session_id": "prerun-002",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/dynamic_order_flow_ratio.py",
+      "required_inputs": [
+        "orderFlow"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T09:57:38.711229",
       "metadata": {
         "ic_target_horizon": 6,
@@ -6509,6 +7121,10 @@
       "source": "researcher",
       "research_session_id": "prerun-002",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/order_flow_volatility_indicator.py",
+      "required_inputs": [
+        "orderFlow"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T09:57:38.711253",
       "metadata": {
         "ic_target_horizon": 6,
@@ -6574,6 +7190,10 @@
       "source": "researcher",
       "research_session_id": "prerun-002",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/informed_order_flow_ratio.py",
+      "required_inputs": [
+        "orderFlow"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T09:57:38.711274",
       "metadata": {
         "ic_target_horizon": 6,
@@ -6639,6 +7259,10 @@
       "source": "researcher",
       "research_session_id": "prerun-002",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/order_flow_surge_indicator.py",
+      "required_inputs": [
+        "trade"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T09:57:38.711301",
       "metadata": {
         "ic_target_horizon": 6,
@@ -6704,6 +7328,11 @@
       "source": "researcher",
       "research_session_id": "prerun-002",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/hidden_volume_ratio.py",
+      "required_inputs": [
+        "hidden",
+        "volume"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T09:57:38.711321",
       "metadata": {
         "ic_target_horizon": 6,
@@ -6769,6 +7398,11 @@
       "source": "researcher",
       "research_session_id": "prerun-002",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/liquidity_order_flow_ratio.py",
+      "required_inputs": [
+        "orderFlow",
+        "depth"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T09:57:38.711342",
       "metadata": {
         "ic_target_horizon": 6,
@@ -6834,6 +7468,11 @@
       "source": "researcher",
       "research_session_id": "prerun-002",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/dynamic_limit_order_imbalance.py",
+      "required_inputs": [
+        "orderFlow",
+        "depth"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T09:57:38.711370",
       "metadata": {
         "ic_target_horizon": 6,
@@ -6899,6 +7538,11 @@
       "source": "researcher",
       "research_session_id": "prerun-002",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/dynamic_hidden_volume_ratio.py",
+      "required_inputs": [
+        "hidden",
+        "volume"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T09:57:38.711391",
       "metadata": {
         "ic_target_horizon": 6,
@@ -6964,6 +7608,12 @@
       "source": "researcher",
       "research_session_id": "prerun-002",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/dynamic_limit_order_flow_sensitivity.py",
+      "required_inputs": [
+        "orderFlow",
+        "close",
+        "effSpread"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T09:57:38.711411",
       "metadata": {
         "ic_target_horizon": 6,
@@ -7029,6 +7679,11 @@
       "source": "researcher",
       "research_session_id": "prerun-002",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/high_order_flow_imbalance.py",
+      "required_inputs": [
+        "orderFlow",
+        "volume"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T09:57:38.711431",
       "metadata": {
         "ic_target_horizon": 6,
@@ -7094,6 +7749,10 @@
       "source": "researcher",
       "research_session_id": "prerun-002",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/volatility_cluster_correlation.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-06-09T09:57:38.711451",
       "metadata": {
         "ic_target_horizon": 6,
@@ -7159,6 +7818,11 @@
       "source": "researcher",
       "research_session_id": "prerun-002",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/order_flow_price_reversal.py",
+      "required_inputs": [
+        "orderFlow",
+        "close"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T09:57:38.711476",
       "metadata": {
         "ic_target_horizon": 6,
@@ -7224,6 +7888,11 @@
       "source": "researcher",
       "research_session_id": "prerun-002",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/hidden_volume_pressure_indicator.py",
+      "required_inputs": [
+        "hidden",
+        "volume"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T09:57:38.711496",
       "metadata": {
         "ic_target_horizon": 6,
@@ -7289,6 +7958,11 @@
       "source": "researcher",
       "research_session_id": "prerun-002",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/fractional_volatility_signal.py",
+      "required_inputs": [
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-06-09T09:57:38.711515",
       "metadata": {
         "ic_target_horizon": 6,
@@ -7354,6 +8028,12 @@
       "source": "researcher",
       "research_session_id": "prerun-003",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/effective_spread_cumulative_imbalance.py",
+      "required_inputs": [
+        "effSpread",
+        "effLobImb",
+        "orderFlow"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:09:46.857302",
       "metadata": {
         "ic_target_horizon": 6,
@@ -7419,6 +8099,10 @@
       "source": "researcher",
       "research_session_id": "prerun-003",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/hidden_volume_accumulation.py",
+      "required_inputs": [
+        "hidden"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:09:46.860322",
       "metadata": {
         "ic_target_horizon": 6,
@@ -7484,6 +8168,12 @@
       "source": "researcher",
       "research_session_id": "prerun-003",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/adaptive_limit_order_imbalance.py",
+      "required_inputs": [
+        "lobImb",
+        "depth",
+        "volume"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:09:46.860391",
       "metadata": {
         "ic_target_horizon": 6,
@@ -7549,6 +8239,11 @@
       "source": "researcher",
       "research_session_id": "prerun-003",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/dynamic_hidden_volume_pressure.py",
+      "required_inputs": [
+        "hidden",
+        "volume"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:09:46.860429",
       "metadata": {
         "ic_target_horizon": 6,
@@ -7614,6 +8309,10 @@
       "source": "researcher",
       "research_session_id": "prerun-003",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/dynamic_order_flow_momentum.py",
+      "required_inputs": [
+        "orderFlow"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:09:46.860459",
       "metadata": {
         "ic_target_horizon": 6,
@@ -7679,6 +8378,11 @@
       "source": "researcher",
       "research_session_id": "prerun-003",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/dynamic_effective_spread_analysis.py",
+      "required_inputs": [
+        "effSpread",
+        "volume"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:09:46.860975",
       "metadata": {
         "ic_target_horizon": 6,
@@ -7744,6 +8448,10 @@
       "source": "researcher",
       "research_session_id": "prerun-003",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/volatility_clustering_signal.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-06-09T10:09:46.861573",
       "metadata": {
         "ic_target_horizon": 6,
@@ -7809,6 +8517,10 @@
       "source": "researcher",
       "research_session_id": "prerun-003",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/order_flow_intensity_ratio.py",
+      "required_inputs": [
+        "trade"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:09:46.861611",
       "metadata": {
         "ic_target_horizon": 6,
@@ -7874,6 +8586,13 @@
       "source": "researcher",
       "research_session_id": "prerun-003",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/liquidity_order_flow_momentum.py",
+      "required_inputs": [
+        "orderFlow",
+        "depth",
+        "effSpread",
+        "close"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:09:46.861643",
       "metadata": {
         "ic_target_horizon": 6,
@@ -7939,6 +8658,11 @@
       "source": "researcher",
       "research_session_id": "prerun-003",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/order_flow_volatility_predictor.py",
+      "required_inputs": [
+        "orderFlow",
+        "trdLiq"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:09:46.862078",
       "metadata": {
         "ic_target_horizon": 6,
@@ -8004,6 +8728,11 @@
       "source": "researcher",
       "research_session_id": "prerun-003",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/limit_order_impact_ratio.py",
+      "required_inputs": [
+        "orderFlow",
+        "depth"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:09:46.862123",
       "metadata": {
         "ic_target_horizon": 6,
@@ -8069,6 +8798,11 @@
       "source": "researcher",
       "research_session_id": "prerun-003",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/momentum_based_limit_order_imbalance.py",
+      "required_inputs": [
+        "orderFlow",
+        "volume"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:09:46.862164",
       "metadata": {
         "ic_target_horizon": 6,
@@ -8134,6 +8868,11 @@
       "source": "researcher",
       "research_session_id": "prerun-003",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/dynamic_order_flow_efficiency.py",
+      "required_inputs": [
+        "orderFlow",
+        "close"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:09:46.862191",
       "metadata": {
         "ic_target_horizon": 6,
@@ -8199,6 +8938,11 @@
       "source": "researcher",
       "research_session_id": "prerun-003",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/hidden_volume_sensitivity.py",
+      "required_inputs": [
+        "close",
+        "hidden"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:09:46.862219",
       "metadata": {
         "ic_target_horizon": 6,
@@ -8264,6 +9008,11 @@
       "source": "researcher",
       "research_session_id": "prerun-003",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/nonlinear_trade_imbalance_indicator.py",
+      "required_inputs": [
+        "trade",
+        "orderFlow"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:09:46.862240",
       "metadata": {
         "ic_target_horizon": 6,
@@ -8329,6 +9078,11 @@
       "source": "researcher",
       "research_session_id": "prerun-003",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/unexpected_volatility_signal.py",
+      "required_inputs": [
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-06-09T10:09:46.862261",
       "metadata": {
         "ic_target_horizon": 6,
@@ -8394,6 +9148,11 @@
       "source": "researcher",
       "research_session_id": "prerun-003",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/aggressive_hidden_volume_signal.py",
+      "required_inputs": [
+        "hidden",
+        "volume"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:09:46.862281",
       "metadata": {
         "ic_target_horizon": 6,
@@ -8459,6 +9218,11 @@
       "source": "researcher",
       "research_session_id": "prerun-003",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/order_flow_spread_sensitivity.py",
+      "required_inputs": [
+        "spread",
+        "orderFlow"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:09:46.862311",
       "metadata": {
         "ic_target_horizon": 6,
@@ -8524,6 +9288,11 @@
       "source": "researcher",
       "research_session_id": "prerun-003",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/dynamic_hidden_volume_pressure_ratio.py",
+      "required_inputs": [
+        "hidden",
+        "volume"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:09:46.862339",
       "metadata": {
         "ic_target_horizon": 6,
@@ -8589,6 +9358,11 @@
       "source": "researcher",
       "research_session_id": "prerun-003",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/limit_order_excess_imbalance.py",
+      "required_inputs": [
+        "orderFlow",
+        "depth"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:09:46.862374",
       "metadata": {
         "ic_target_horizon": 6,
@@ -8654,6 +9428,10 @@
       "source": "researcher",
       "research_session_id": "prerun-003",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/effective_spread_movement_analysis.py",
+      "required_inputs": [
+        "effSpread"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:09:46.862401",
       "metadata": {
         "ic_target_horizon": 6,
@@ -8719,6 +9497,11 @@
       "source": "researcher",
       "research_session_id": "prerun-004",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/hidden_volume_excess_signal.py",
+      "required_inputs": [
+        "hidden",
+        "volume"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:21:05.470693",
       "metadata": {
         "ic_target_horizon": 6,
@@ -8784,6 +9567,11 @@
       "source": "researcher",
       "research_session_id": "prerun-004",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/dynamic_order_flow_ratio_analysis.py",
+      "required_inputs": [
+        "orderFlow",
+        "volume"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:21:05.473633",
       "metadata": {
         "ic_target_horizon": 6,
@@ -8849,6 +9637,10 @@
       "source": "researcher",
       "research_session_id": "prerun-004",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/momentum_based_order_flow.py",
+      "required_inputs": [
+        "orderFlow"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:21:05.473686",
       "metadata": {
         "ic_target_horizon": 6,
@@ -8914,6 +9706,11 @@
       "source": "researcher",
       "research_session_id": "prerun-004",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/jump_volume_ratio.py",
+      "required_inputs": [
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-06-09T10:21:05.473720",
       "metadata": {
         "ic_target_horizon": 6,
@@ -8979,6 +9776,11 @@
       "source": "researcher",
       "research_session_id": "prerun-004",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/hidden_volume_momentum_signal.py",
+      "required_inputs": [
+        "hidden",
+        "close"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:21:05.473754",
       "metadata": {
         "ic_target_horizon": 6,
@@ -9044,6 +9846,10 @@
       "source": "researcher",
       "research_session_id": "prerun-004",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/intraday_volume_variation_signal.py",
+      "required_inputs": [
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-06-09T10:21:05.473966",
       "metadata": {
         "ic_target_horizon": 6,
@@ -9109,6 +9915,10 @@
       "source": "researcher",
       "research_session_id": "prerun-004",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/mutual_information_based_flows.py",
+      "required_inputs": [
+        "orderFlow"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:21:05.474036",
       "metadata": {
         "ic_target_horizon": 6,
@@ -9174,6 +9984,11 @@
       "source": "researcher",
       "research_session_id": "prerun-004",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/order_flow_volatility_ratio.py",
+      "required_inputs": [
+        "close",
+        "orderFlow"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:21:05.474075",
       "metadata": {
         "ic_target_horizon": 6,
@@ -9239,6 +10054,11 @@
       "source": "researcher",
       "research_session_id": "prerun-004",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/limit_order_flow_ratio_analysis.py",
+      "required_inputs": [
+        "orderFlow",
+        "volume"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:21:05.474101",
       "metadata": {
         "ic_target_horizon": 6,
@@ -9304,6 +10124,11 @@
       "source": "researcher",
       "research_session_id": "prerun-004",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/effective_spread_analysis.py",
+      "required_inputs": [
+        "effSpread",
+        "volume"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:21:05.474128",
       "metadata": {
         "ic_target_horizon": 6,
@@ -9369,6 +10194,11 @@
       "source": "researcher",
       "research_session_id": "prerun-004",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/mean_reversion_order_flow_imbalance.py",
+      "required_inputs": [
+        "orderFlow",
+        "volume"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:21:05.474150",
       "metadata": {
         "ic_target_horizon": 6,
@@ -9434,6 +10264,10 @@
       "source": "researcher",
       "research_session_id": "prerun-004",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/high_frequency_order_flow_analysis.py",
+      "required_inputs": [
+        "trade"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:21:05.474175",
       "metadata": {
         "ic_target_horizon": 6,
@@ -9499,6 +10333,10 @@
       "source": "researcher",
       "research_session_id": "prerun-004",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/spectral_distance_order_flow.py",
+      "required_inputs": [
+        "orderFlow"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:21:05.474221",
       "metadata": {
         "ic_target_horizon": 6,
@@ -9564,6 +10402,12 @@
       "source": "researcher",
       "research_session_id": "prerun-004",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/liquidity_pressure_indicator.py",
+      "required_inputs": [
+        "orderFlow",
+        "effSpread",
+        "depth"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:21:05.474253",
       "metadata": {
         "ic_target_horizon": 6,
@@ -9629,6 +10473,11 @@
       "source": "researcher",
       "research_session_id": "prerun-004",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/order_flow_sensitivity_analysis.py",
+      "required_inputs": [
+        "orderFlow",
+        "close"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:21:05.474285",
       "metadata": {
         "ic_target_horizon": 6,
@@ -9694,6 +10543,11 @@
       "source": "researcher",
       "research_session_id": "prerun-004",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/hidden_volume_execution_ratio.py",
+      "required_inputs": [
+        "hidden",
+        "volume"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:21:05.474309",
       "metadata": {
         "ic_target_horizon": 6,
@@ -9759,6 +10613,11 @@
       "source": "researcher",
       "research_session_id": "prerun-004",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/order_flow_momentum_reversal.py",
+      "required_inputs": [
+        "orderFlow",
+        "close"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:21:05.474330",
       "metadata": {
         "ic_target_horizon": 6,
@@ -9824,6 +10683,13 @@
       "source": "researcher",
       "research_session_id": "prerun-004",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/dynamic_order_flow_sensitivity_analysis.py",
+      "required_inputs": [
+        "close",
+        "orderFlow",
+        "effSpread",
+        "effLobImb"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:21:05.474351",
       "metadata": {
         "ic_target_horizon": 6,
@@ -9889,6 +10755,11 @@
       "source": "researcher",
       "research_session_id": "prerun-004",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/dynamic_spread_sensitivity_analysis.py",
+      "required_inputs": [
+        "spread",
+        "orderFlow"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T10:21:05.474370",
       "metadata": {
         "ic_target_horizon": 6,
@@ -9954,6 +10825,10 @@
       "source": "researcher",
       "research_session_id": "prerun-005",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/hidden_volume_mean_reversion_signal.py",
+      "required_inputs": [
+        "hidden"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T11:38:08.024756",
       "metadata": {
         "ic_target_horizon": 6,
@@ -10019,6 +10894,11 @@
       "source": "researcher",
       "research_session_id": "prerun-005",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/order_flow_excess_imbalance.py",
+      "required_inputs": [
+        "orderFlow",
+        "volume"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T11:38:08.026530",
       "metadata": {
         "ic_target_horizon": 6,
@@ -10084,6 +10964,11 @@
       "source": "researcher",
       "research_session_id": "prerun-005",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/intraday_volume_spread_ratio.py",
+      "required_inputs": [
+        "volume",
+        "spread"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T11:38:08.026577",
       "metadata": {
         "ic_target_horizon": 6,
@@ -10149,6 +11034,11 @@
       "source": "researcher",
       "research_session_id": "prerun-005",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/dynamic_market_depth_indicator.py",
+      "required_inputs": [
+        "depth",
+        "close"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T11:38:08.026648",
       "metadata": {
         "ic_target_horizon": 6,
@@ -10214,6 +11104,11 @@
       "source": "researcher",
       "research_session_id": "prerun-005",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/order_flow_momentum_reversal_signal.py",
+      "required_inputs": [
+        "orderFlow",
+        "close"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T11:38:08.026964",
       "metadata": {
         "ic_target_horizon": 6,
@@ -10279,6 +11174,10 @@
       "source": "researcher",
       "research_session_id": "prerun-005",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/effective_spread_mean_reversion.py",
+      "required_inputs": [
+        "effSpread"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T11:38:08.027001",
       "metadata": {
         "ic_target_horizon": 6,
@@ -10344,6 +11243,12 @@
       "source": "researcher",
       "research_session_id": "prerun-005",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/fractional_hawkes_intensity_signal.py",
+      "required_inputs": [
+        "trade",
+        "volume",
+        "effSpread"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T11:38:08.027085",
       "metadata": {
         "ic_target_horizon": 6,
@@ -10409,6 +11314,11 @@
       "source": "researcher",
       "research_session_id": "prerun-005",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/price_clustering_signal.py",
+      "required_inputs": [
+        "trade",
+        "nbTrades"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T11:38:08.027131",
       "metadata": {
         "ic_target_horizon": 6,
@@ -10474,6 +11384,11 @@
       "source": "researcher",
       "research_session_id": "prerun-005",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/order_flow_hidden_volume_ratio.py",
+      "required_inputs": [
+        "orderFlow",
+        "hidden"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T11:38:08.027204",
       "metadata": {
         "ic_target_horizon": 6,
@@ -10539,6 +11454,11 @@
       "source": "researcher",
       "research_session_id": "prerun-005",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/lead_lag_order_flow_signal.py",
+      "required_inputs": [
+        "orderFlow",
+        "close"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T11:38:08.027262",
       "metadata": {
         "ic_target_horizon": 6,
@@ -10604,6 +11524,10 @@
       "source": "researcher",
       "research_session_id": "prerun-005",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/fat_tail_volume_variation.py",
+      "required_inputs": [
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-06-09T11:38:08.027306",
       "metadata": {
         "ic_target_horizon": 6,
@@ -10669,6 +11593,10 @@
       "source": "researcher",
       "research_session_id": "prerun-005",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/limit_order_flow_momentum.py",
+      "required_inputs": [
+        "orderFlow"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T11:38:08.027328",
       "metadata": {
         "ic_target_horizon": 6,
@@ -10734,6 +11662,12 @@
       "source": "researcher",
       "research_session_id": "prerun-005",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/market_impact_decay_signal.py",
+      "required_inputs": [
+        "trade",
+        "close",
+        "volume"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T11:38:08.027349",
       "metadata": {
         "ic_target_horizon": 6,
@@ -10799,6 +11733,12 @@
       "source": "researcher",
       "research_session_id": "prerun-005",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/volatility_feedback_signal.py",
+      "required_inputs": [
+        "close",
+        "volume",
+        "effSpread"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T11:38:08.027370",
       "metadata": {
         "ic_target_horizon": 6,
@@ -10864,6 +11804,11 @@
       "source": "researcher",
       "research_session_id": "prerun-005",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/momentum_order_flow_ratio.py",
+      "required_inputs": [
+        "orderFlow",
+        "volume"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T11:38:08.027416",
       "metadata": {
         "ic_target_horizon": 6,
@@ -10929,6 +11874,11 @@
       "source": "researcher",
       "research_session_id": "prerun-005",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/order_flow_reversal_signal.py",
+      "required_inputs": [
+        "orderFlow",
+        "volume"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T11:38:08.027443",
       "metadata": {
         "ic_target_horizon": 6,
@@ -10994,6 +11944,11 @@
       "source": "researcher",
       "research_session_id": "prerun-005",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/self_excitement_order_flow.py",
+      "required_inputs": [
+        "orderFlow",
+        "trade"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T11:38:08.027464",
       "metadata": {
         "ic_target_horizon": 6,
@@ -11059,6 +12014,12 @@
       "source": "researcher",
       "research_session_id": "prerun-005",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/liquidity_stress_ratio.py",
+      "required_inputs": [
+        "trade",
+        "depth",
+        "effSpread"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T11:38:08.027484",
       "metadata": {
         "ic_target_horizon": 6,
@@ -11124,6 +12085,11 @@
       "source": "researcher",
       "research_session_id": "prerun-005",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/arbitrage_order_flow_imbalance.py",
+      "required_inputs": [
+        "orderFlow",
+        "volume"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T11:38:08.027505",
       "metadata": {
         "ic_target_horizon": 6,
@@ -11189,6 +12155,11 @@
       "source": "researcher",
       "research_session_id": "prerun-005",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/jump_volume_reversal.py",
+      "required_inputs": [
+        "volume",
+        "close"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-06-09T11:38:08.027584",
       "metadata": {
         "ic_target_horizon": 6,
@@ -11254,6 +12225,11 @@
       "source": "researcher",
       "research_session_id": "prerun-007",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/hidden_volume_momentum_analysis.py",
+      "required_inputs": [
+        "hidden",
+        "close"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T11:59:43.143188",
       "metadata": {
         "ic_target_horizon": 6,
@@ -11319,6 +12295,11 @@
       "source": "researcher",
       "research_session_id": "prerun-007",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/hidden_volume_pressure_ratio.py",
+      "required_inputs": [
+        "hidden",
+        "volume"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T11:59:43.148030",
       "metadata": {
         "ic_target_horizon": 6,
@@ -11384,6 +12365,10 @@
       "source": "researcher",
       "research_session_id": "prerun-007",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/order_flow_anomaly_detection.py",
+      "required_inputs": [
+        "trade"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T11:59:43.148062",
       "metadata": {
         "ic_target_horizon": 6,
@@ -11449,6 +12434,10 @@
       "source": "researcher",
       "research_session_id": "prerun-007",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/hidden_volume_surge_analysis.py",
+      "required_inputs": [
+        "hidden"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T11:59:43.148107",
       "metadata": {
         "ic_target_horizon": 6,
@@ -11514,6 +12503,11 @@
       "source": "researcher",
       "research_session_id": "prerun-007",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/hidden_volume_effective_spread_ratio.py",
+      "required_inputs": [
+        "hidden",
+        "effSpread"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T11:59:43.148129",
       "metadata": {
         "ic_target_horizon": 6,
@@ -11579,6 +12573,12 @@
       "source": "researcher",
       "research_session_id": "prerun-007",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/order_flow_liquidity_signal.py",
+      "required_inputs": [
+        "orderFlow",
+        "ofLiq",
+        "depth"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T11:59:43.148153",
       "metadata": {
         "ic_target_horizon": 6,
@@ -11644,6 +12644,10 @@
       "source": "researcher",
       "research_session_id": "prerun-007",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/effective_spread_momentum_analysis.py",
+      "required_inputs": [
+        "effSpread"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T11:59:43.148174",
       "metadata": {
         "ic_target_horizon": 6,
@@ -11709,6 +12713,11 @@
       "source": "researcher",
       "research_session_id": "prerun-007",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/jump_variance_ratio.py",
+      "required_inputs": [
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
       "created_at": "2026-06-09T11:59:43.148202",
       "metadata": {
         "ic_target_horizon": 6,
@@ -11774,6 +12783,13 @@
       "source": "researcher",
       "research_session_id": "prerun-007",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/small_order_market_impact_estimator.py",
+      "required_inputs": [
+        "trade",
+        "volume",
+        "effSpread",
+        "effLobImb"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T11:59:43.148224",
       "metadata": {
         "ic_target_horizon": 6,
@@ -11839,6 +12855,12 @@
       "source": "researcher",
       "research_session_id": "prerun-007",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/volatility_order_flow_ratio.py",
+      "required_inputs": [
+        "orderFlow",
+        "volume",
+        "close"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T11:59:43.148245",
       "metadata": {
         "ic_target_horizon": 6,
@@ -11904,6 +12926,14 @@
       "source": "researcher",
       "research_session_id": "prerun-007",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/trader_position_impact_analysis.py",
+      "required_inputs": [
+        "trade",
+        "close",
+        "volume",
+        "effSpread",
+        "lobImb"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T11:59:43.148265",
       "metadata": {
         "ic_target_horizon": 6,
@@ -11969,6 +12999,11 @@
       "source": "researcher",
       "research_session_id": "prerun-007",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/market_microstructure_momentum_signal.py",
+      "required_inputs": [
+        "orderFlow",
+        "close"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T11:59:43.148285",
       "metadata": {
         "ic_target_horizon": 6,
@@ -12034,6 +13069,11 @@
       "source": "researcher",
       "research_session_id": "prerun-007",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/passive_market_impact_factor.py",
+      "required_inputs": [
+        "orderFlow",
+        "depth"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T11:59:43.148305",
       "metadata": {
         "ic_target_horizon": 6,
@@ -12099,6 +13139,11 @@
       "source": "researcher",
       "research_session_id": "prerun-007",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/dynamic_order_flow_resilience.py",
+      "required_inputs": [
+        "orderFlow",
+        "effSpread"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T11:59:43.148325",
       "metadata": {
         "ic_target_horizon": 6,
@@ -12164,6 +13209,10 @@
       "source": "researcher",
       "research_session_id": "prerun-007",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/limit_order_pressure_ratio.py",
+      "required_inputs": [
+        "orderFlow"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T11:59:43.148358",
       "metadata": {
         "ic_target_horizon": 6,
@@ -12229,6 +13278,11 @@
       "source": "researcher",
       "research_session_id": "prerun-007",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/high_frequency_limit_order_pressure.py",
+      "required_inputs": [
+        "orderFlow",
+        "volume"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T11:59:43.148378",
       "metadata": {
         "ic_target_horizon": 6,
@@ -12294,6 +13348,11 @@
       "source": "researcher",
       "research_session_id": "prerun-007",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/liquidity_order_flow_reversal.py",
+      "required_inputs": [
+        "orderFlow",
+        "depth"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T11:59:43.148407",
       "metadata": {
         "ic_target_horizon": 6,
@@ -12359,6 +13418,11 @@
       "source": "researcher",
       "research_session_id": "prerun-007",
       "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/dynamic_order_flow_imbalance_ratio.py",
+      "required_inputs": [
+        "trade",
+        "volume"
+      ],
+      "required_tier": "microstructure",
       "created_at": "2026-06-09T11:59:43.148450",
       "metadata": {
         "ic_target_horizon": 6,

@@ -58,12 +58,24 @@ Each phase is independently shippable with its own test gate
     returns via new `_infer_annualisation`).
   - Gate met: full suite green; new tests assert 10-sec→2340/589680,
     daily→1/252, 1-min→390, crypto-daily→365.
-- [ ] **Phase 2 — Capability tiers + factor gating + derived fields**
-  - `data/tiers.py`; `compatible_factors(provider_fields)`.
-  - Gate factor universe at: factor-DB build (`run_all_factors.py`), Selector
-    catalog (`mcp/catalog_*`), research backtests (`mcp/research_service.py`).
-  - Add `required_inputs` + `required_tier` to `FactorRecord` (`schemas.py`).
-  - Synthesize `vwap`/`returns` in `data/panel.py`.
+- [x] **Phase 2 — Capability tiers + factor gating + derived fields** ✅ 2026-06-10
+  - `data/tiers.py`: added `compatible_factors()` + `resolve_required_inputs()`
+    (stored → registry → `["close"]`).
+  - `FactorRecord` gained `required_inputs` + `required_tier` (`schemas.py`);
+    populated on researcher creation (`factor_research/graph.py`) and backfilled
+    onto the committed DB via `FactorDatabase.annotate_tiers()` +
+    `scripts/annotate_factor_tiers.py` (197/197 → 98 standard, 99 microstructure).
+  - **Gate at catalog READ time** (`mcp/catalog_service.load_factor_catalog`):
+    filters by the active provider's `available_fields()`, annotates each row
+    with `required_tier`, honours `QF_FACTOR_GATING=0`. Research backtests
+    (`mcp/research_service.backtest_factors`) skip incompatible factors with a
+    clean "gated: requires <tier> tier" reason.
+  - `data/panel.py` synthesises `vwap=(H+L+C)/3` and `returns=close.pct_change()`
+    (strip-from-request → load deps → derive → trim).
+  - Gate met: full suite green (incl. MCP/in-process catalog parity); three
+    executable verify scripts under `scripts/verify/` prove **no-op on LOBSTER
+    (197/197)**, **98/197 on a standard provider** (99 microstructure gated),
+    escape hatch, synthesis formulas, and the 4 known misdeclared alphas.
 - [ ] **Phase 3 — yfinance provider + onboarding MVP (first "clone-and-run")**
   - `data/providers/yfinance.py` (no key, daily OHLCV, adjusted close).
   - `data/cache.py` parquet cache; `data/universe.py` + presets in `data/universes/`.
@@ -89,5 +101,8 @@ Each phase is independently shippable with its own test gate
 - 2026-06-09: Plan approved; docs created; Phase 0 started.
 - 2026-06-10: Phase 0 complete (data layer + routing, byte-identical, tests
   green). Phase 1 complete (frequency-aware annualization, full suite green).
-  Next: Phase 2 (capability tiers + factor gating + `FactorRecord.required_tier`
-  + vwap/returns synthesis).
+- 2026-06-10: Phase 2 complete (capability gating + tier metadata + vwap/returns
+  synthesis). Gating verified no-op on LOBSTER, 98/197 on a standard provider.
+  `data/factors/factor_db.json` now carries `required_inputs`/`required_tier`.
+  Next: Phase 3 (yfinance provider + parquet cache + onboarding wizard) — the
+  first "clone-and-run" milestone, where gating actually bites.

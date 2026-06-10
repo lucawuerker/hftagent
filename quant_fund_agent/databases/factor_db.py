@@ -60,6 +60,32 @@ class FactorDatabase:
     def remove_factor(self, factor_id: str) -> None:
         self._factors.pop(factor_id, None)
 
+    def annotate_tiers(self, *, force: bool = False) -> int:
+        """Fill ``required_inputs`` / ``required_tier`` on records from the registry.
+
+        Used to backfill capability-gating metadata onto an existing factor DB so
+        the Selector can gate by provider without re-instantiating factors (and so
+        fresh clones, where researcher ``.py`` files are absent, still gate).
+
+        Only records missing the metadata are touched unless ``force``.  Returns
+        the number of records updated.
+        """
+        from quant_fund_agent.data.tiers import required_tier
+        from quant_fund_agent.factors import discover_factors
+        from quant_fund_agent.factors.registry import get_factor_class
+
+        discover_factors()
+        updated = 0
+        for rec in self._factors.values():
+            if rec.required_inputs and rec.required_tier and not force:
+                continue
+            cls = get_factor_class(rec.id)
+            inputs = list(getattr(cls, "inputs", ["close"]) or ["close"]) if cls else ["close"]
+            rec.required_inputs = inputs
+            rec.required_tier = required_tier(inputs)
+            updated += 1
+        return updated
+
     def purge_researcher_factors(
         self,
         research_session_id: str | None = None,

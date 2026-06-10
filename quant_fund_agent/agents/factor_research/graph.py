@@ -536,6 +536,13 @@ def filter_and_persist(state: FactorResearcherState) -> dict:
             and cand.backtest_metrics is not None  # IC backtest ran without erroring
         )
         if passes:
+            # Capture the factor's data requirements for provider gating.
+            from quant_fund_agent.data.tiers import required_tier
+            from quant_fund_agent.factors.registry import get_factor_class
+
+            _cls = get_factor_class(fid)
+            _inputs = list(getattr(_cls, "inputs", ["close"]) or ["close"]) if _cls else ["close"]
+
             record = FactorRecord(
                 id=fid,
                 name=cand.idea.name,
@@ -549,6 +556,8 @@ def filter_and_persist(state: FactorResearcherState) -> dict:
                 source=FactorSource.RESEARCHER,
                 research_session_id=state.session_id,
                 code_path=cand.code_path,
+                required_inputs=_inputs,
+                required_tier=required_tier(_inputs),
                 metadata={
                     "ic_target_horizon": state.ic_target_horizon,
                     "ic_at_target": ic,
