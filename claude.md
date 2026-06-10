@@ -26,6 +26,15 @@ scripts, and backtests all drive the agents identically.
 A working **MVP** of the full pipeline exists. Each stage and agent is
 intended to be advanced significantly in future work.
 
+**Pluggable data layer (Phases 0–4 done).** The fund no longer requires the
+author's LOBSTER CSVs: any panel load goes through `quant_fund_agent/data/`
+(provider abstraction + parquet cache + capability gating + frequency-aware
+annualization). Providers: `lobster` (local CSVs), `yfinance` (key-free daily),
+`fmp`, `alphavantage`. Run `python -m quant_fund_agent.setup` to pick a
+provider/universe/timespan and write `quant.config.yaml`. See
+`docs/data-layer/ROADMAP.md`. Remaining: Phase 5 (wizard `--assist`), Phase 6
+(multi-asset crypto/FX).
+
 ## Roadmap
 - Longer backtests: simulate weekly researcher updates and trade over an
   extended period (the `pipeline.py` stages are built to be called on a
@@ -40,3 +49,5 @@ Always use the local virtual environment interpreter directly.
 - Run python scripts: `./venv/bin/python path/to/script.py`
 - Run tests: `./venv/bin/pytest`
 - Install packages: `./venv/bin/pip install <package>`
+
+Always update the global README.md and claude.md files after  significant changes to the last statusses mentioned in there. 

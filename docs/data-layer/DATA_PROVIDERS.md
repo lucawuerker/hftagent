@@ -79,5 +79,10 @@ incremental ranges and rate limits.
 |----------|------------|------|-------|
 | `lobster` | no (local CSVs) | `microstructure` | The original loader; `DATA_DIR=ticker_data`. |
 | `yfinance` | no | `standard` | ✅ live. Daily OHLCV, `auto_adjust=True` (adjusted close). Network only in `_fetch`; parquet-cached under `data/market/`. Static preset lists carry survivorship bias; adjusted prices aren't point-in-time. |
-| `fmp` | `FMP_API_KEY` | `standard` (+`fundamental`) | Rate-limited free tier. (Phase 4) |
-| `alphavantage` | `ALPHAVANTAGE_API_KEY` | `standard` | 25 req/day free tier; aggressive caching essential. (Phase 4) |
+| `fmp` | `FMP_API_KEY` | `standard` | ✅ live. FMP **stable** API `historical-price-eod/dividend-adjusted` → split/div-**adjusted** OHLC. (Legacy `/api/v3` returns 403 for keys issued after Aug 2025.) Generous free tier. |
+| `alphavantage` | `ALPHAVANTAGE_API_KEY` | `standard` | ✅ live. `TIME_SERIES_DAILY`. **Free tier = UNADJUSTED + `compact` (~100 recent bars) + ~25 req/day + 5/min**; throttled to ~13s/req, cache essential. Prefer FMP/yfinance for longer/adjusted history. |
+
+All three API providers extend `ApiProvider` (`base.py`) — they implement only
+`available_fields()` and `_fetch(symbols)`; the universe→cache→assemble flow is
+shared. The shared `_http.request_json` handles throttling + retry/backoff and
+detects vendor rate-limit payloads.

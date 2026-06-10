@@ -322,3 +322,69 @@ def test_yfinance_provider_offline(monkeypatch, tmp_path):
         panel["vwap"], (panel["high"] + panel["low"] + panel["close"]) / 3.0)
     # daily data → 252 periods/year (frequency-aware annualisation)
     assert periods_per_year_from_index(panel["close"].index) == 252
+
+
+# ── Phase 4: FMP + AlphaVantage (offline) ───────────────────────────────────
+
+def test_all_providers_registered():
+    from quant_fund_agent.data.providers import PROVIDERS
+
+    assert {"lobster", "yfinance", "fmp", "alphavantage"} <= set(PROVIDERS)
+
+
+def test_fmp_reshape_adjusted_array():
+    from quant_fund_agent.data.providers.fmp import _reshape
+
+    # FMP stable dividend-adjusted endpoint: flat array, DESC order, adj* fields.
+    payload = [
+        {"symbol": "AAA", "date": "2023-01-04", "adjOpen": 5, "adjHigh": 6,
+         "adjLow": 4, "adjClose": 5, "volume": 100},
+        {"symbol": "AAA", "date": "2023-01-03", "adjOpen": 10, "adjHigh": 11,
+         "adjLow": 9, "adjClose": 10, "volume": 200},
+    ]
+    df = _reshape(payload)
+    assert list(df.columns) == ["open", "high", "low", "close", "volume"]
+    assert df.index.is_monotonic_increasing                      # sorted ascending
+    assert df.loc["2023-01-04", "close"] == 5.0                  # adjClose → close
+    assert df.loc["2023-01-03", "open"] == 10.0                  # adjOpen → open
+
+
+def test_alphavantage_reshape_and_limit_detection():
+    from quant_fund_agent.data.providers._http import RateLimited
+    from quant_fund_agent.data.providers.alphavantage import _check_limits, _reshape
+
+    payload = {"Time Series (Daily)": {
+        "2023-01-03": {"1. open": "20", "2. high": "22", "3. low": "18",
+                       "4. close": "20", "5. volume": "200"},
+        "2023-01-04": {"1. open": "10", "2. high": "11", "3. low": "9",
+                       "4. close": "10", "5. volume": "100"},
+    }}
+    df = _reshape(payload)
+    assert list(df.columns) == ["open", "high", "low", "close", "volume"]
+    assert df.index.is_monotonic_increasing
+    assert df.loc["2023-01-04", "close"] == 10.0 and df.dtypes["close"] == float
+
+    import pytest
+    with pytest.raises(RateLimited):
+        _check_limits({"Note": "call frequency is 5 per minute"})
+    with pytest.raises(RateLimited):
+        _check_limits({"Information": "25 requests per day"})
+    with pytest.raises(RuntimeError):
+        _check_limits({"Error Message": "Invalid API call"})
+
+
+def test_fmp_provider_offline(monkeypatch, tmp_path):
+    """FMP provider drives the shared ApiProvider.load flow (injected fetch)."""
+    from quant_fund_agent.config import DataSettings, Settings
+    from quant_fund_agent.data import load_panel
+    from quant_fund_agent.data.providers.fmp import FMPProvider
+
+    monkeypatch.setattr(
+        FMPProvider, "_fetch",
+        lambda self, syms: {s: _synthetic_ohlcv(s) for s in syms})
+    settings = Settings(data=DataSettings(
+        provider="fmp", tickers=["AAA", "BBB"],
+        start="2023-01-02", end="2023-04-01", frequency="1d", cache_dir=str(tmp_path)))
+    panel = load_panel(settings=settings)
+    assert {"open", "high", "low", "close", "volume", "vwap", "returns"} <= set(panel)
+    assert list(panel["close"].columns) == ["AAA", "BBB"]

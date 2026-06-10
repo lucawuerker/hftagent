@@ -20,7 +20,7 @@ import logging
 
 import pandas as pd
 
-from quant_fund_agent.data.providers.base import DataProvider
+from quant_fund_agent.data.providers.base import ApiProvider
 from quant_fund_agent.data.tiers import TIERS
 
 log = logging.getLogger("data.providers.yfinance")
@@ -71,31 +71,12 @@ def _reshape(raw: pd.DataFrame, symbols: list[str]) -> dict[str, pd.DataFrame]:
     return out
 
 
-class YFinanceProvider(DataProvider):
+class YFinanceProvider(ApiProvider):
     name = "yfinance"
     asset_classes = ("equity",)
 
     def available_fields(self) -> frozenset[str]:
         return TIERS["standard"]
-
-    def load(self, *, fields: list[str] | None = None) -> dict[str, pd.DataFrame]:
-        from quant_fund_agent.data.cache import cached_fetch
-        from quant_fund_agent.data.universe import resolve_universe
-
-        if not (self.data.start and self.data.end):
-            raise ValueError(
-                "yfinance provider needs data.start and data.end (run "
-                "`python -m quant_fund_agent.setup` to write quant.config.yaml)."
-            )
-        symbols = resolve_universe(self.data)
-        panel = cached_fetch(
-            self.name, symbols, self.data.start, self.data.end,
-            self.data.frequency, self.data.asset_class, self.data.cache_dir,
-            self._fetch,
-        )
-        if fields is not None:
-            panel = {k: v for k, v in panel.items() if k in fields}
-        return panel
 
     def _fetch(self, symbols: list[str]) -> dict[str, pd.DataFrame]:
         """The ONLY network call — pull OHLCV from Yahoo for ``symbols``."""

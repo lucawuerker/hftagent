@@ -7,14 +7,18 @@ string (``data.provider``).  Add new vendors to ``PROVIDERS`` — see
 
 from __future__ import annotations
 
+from quant_fund_agent.data.providers.alphavantage import AlphaVantageProvider
 from quant_fund_agent.data.providers.base import DataProvider
+from quant_fund_agent.data.providers.fmp import FMPProvider
 from quant_fund_agent.data.providers.lobster import LobsterProvider
 from quant_fund_agent.data.providers.yfinance import YFinanceProvider
 
-# name → provider class.  fmp / alphavantage land here in Phase 4.
+# name → provider class.  Add a new vendor here (see docs/data-layer/DATA_PROVIDERS.md).
 PROVIDERS: dict[str, type[DataProvider]] = {
     LobsterProvider.name: LobsterProvider,
     YFinanceProvider.name: YFinanceProvider,
+    FMPProvider.name: FMPProvider,
+    AlphaVantageProvider.name: AlphaVantageProvider,
 }
 
 
@@ -30,5 +34,6 @@ def get_provider_class(name: str) -> type[DataProvider]:
 
 __all__ = [
     "DataProvider", "LobsterProvider", "YFinanceProvider",
+    "FMPProvider", "AlphaVantageProvider",
     "PROVIDERS", "get_provider_class",
 ]

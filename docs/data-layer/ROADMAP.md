@@ -90,9 +90,19 @@ Each phase is independently shippable with its own test gate
     252-yr/gating→98) + free live yfinance fetch + wizard round-trip, and a **real
     paid `run_fund.py --n-strategies 1` on yfinance with no LOBSTER data** ran
     Selector→Architect(ridge→lasso→xgboost)→Statistician(rejected, legit)→PM.
-- [ ] **Phase 4 — FMP + AlphaVantage providers**
-  - `data/providers/fmp.py`, `alphavantage.py` (requests, key from `.env`,
-    rate-limit-aware cache). These can fill the `fundamental` tier.
+- [x] **Phase 4 — FMP + AlphaVantage providers** ✅ 2026-06-10
+  - `data/providers/_http.py` shared throttle/retry GET; `fmp.py`
+    (FMP **stable** API `historical-price-eod/dividend-adjusted` → adjusted OHLC)
+    + `alphavantage.py` (`TIME_SERIES_DAILY`, **free tier = unadjusted + compact
+    ~100 bars + ~25/day**, 13s throttle). Both `standard`-tier; registered.
+  - Refactored the shared load flow into `base.py::ApiProvider` (yfinance/FMP/AV
+    all extend it; only `available_fields` + `_fetch` differ).
+  - **Fundamental tier deferred** — the 4 sector/cap factors pass a DataFrame to
+    `indneutralize` (which wants a Series); they already work via graceful
+    fallback. Tier + factor-shape fix = follow-up.
+  - Gate met: full suite green (73); offline reshape/limit/load tests; **live FMP
+    + AV fetches** (prices cross-check consistent); a **real paid `run_fund.py` on
+    FMP** ran the full pipeline on adjusted daily data with no LOBSTER data.
 - [ ] **Phase 5 — Onboarding polish + docs**
   - `setup_wizard.py --assist` (LLM proposes config, user confirms).
   - Finalize these docs; update `README.md` + `CLAUDE.md`.
@@ -114,4 +124,9 @@ Each phase is independently shippable with its own test gate
 - 2026-06-10: Phase 3 complete (yfinance provider + parquet cache + universe
   presets + onboarding wizard). Verified a real paid `run_fund.py` end-to-end on
   yfinance daily data with NO LOBSTER data. `quant.config.yaml` and `data/market/`
-  are gitignored. Next: Phase 4 (FMP + AlphaVantage; fills the `fundamental` tier).
+  are gitignored.
+- 2026-06-10: Phase 4 complete (FMP + AlphaVantage providers; `ApiProvider` base).
+  FMP uses the stable adjusted endpoint; AV free tier is unadjusted/compact/25-day
+  (documented). Verified with live fetches + a paid `run_fund.py` on FMP. Three
+  vendors now run the fund (yfinance/FMP/AV) + LOBSTER. Next: Phase 5 (wizard
+  `--assist` + README/CLAUDE polish).

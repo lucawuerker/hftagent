@@ -61,3 +61,37 @@ class DataProvider(ABC):
         maps field name → wide ``DataFrame`` (shared ``DatetimeIndex`` × tickers).
         """
         ...
+
+
+class ApiProvider(DataProvider):
+    """Base for REST/API vendors (yfinance / FMP / AlphaVantage / …).
+
+    Implements the shared ``load()`` flow — resolve the configured universe,
+    pull through the parquet cache, assemble the wide panel — so a concrete
+    provider only implements :meth:`available_fields` and :meth:`_fetch` (the
+    single network call returning ``{symbol: tidy OHLCV DataFrame}``).
+    """
+
+    def load(self, *, fields: list[str] | None = None) -> dict[str, pd.DataFrame]:
+        from quant_fund_agent.data.cache import cached_fetch
+        from quant_fund_agent.data.universe import resolve_universe
+
+        if not (self.data.start and self.data.end):
+            raise ValueError(
+                f"{self.name} provider needs data.start and data.end "
+                "(run `python -m quant_fund_agent.setup` to write quant.config.yaml)."
+            )
+        symbols = resolve_universe(self.data)
+        panel = cached_fetch(
+            self.name, symbols, self.data.start, self.data.end,
+            self.data.frequency, self.data.asset_class, self.data.cache_dir,
+            self._fetch,
+        )
+        if fields is not None:
+            panel = {k: v for k, v in panel.items() if k in fields}
+        return panel
+
+    @abstractmethod
+    def _fetch(self, symbols: list[str]) -> dict[str, pd.DataFrame]:
+        """The single network call — ``{symbol: tidy DataFrame}`` (index × OHLCV)."""
+        ...

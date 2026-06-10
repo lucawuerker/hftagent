@@ -258,7 +258,32 @@ clobbered). `fund_showcase.ipynb` §11 renders the latest run.
 
 ## Data
 
-Place LOBSTER CSVs under `ticker_data/` (or set `DATA_DIR`). The loader (`backtesting/data_loader.py`) builds an aligned panel of OHLCV plus microstructure fields (`orderFlow`, `lobImb`, `spread`, `nbTrades`, etc.) on a shared 10-second index.
+**You don't need the author's LOBSTER data to run this.** Data loads through a
+pluggable provider layer (`quant_fund_agent/data/`); pick one with the guided
+wizard:
+
+```bash
+cp .env.example .env                  # add OPENAI_API_KEY (+ FMP/AV keys if used)
+python -m quant_fund_agent.setup      # choose provider/universe/timespan → quant.config.yaml
+./venv/bin/python run_fund.py --n-strategies 1
+```
+
+| Provider | Key | Notes |
+|----------|-----|-------|
+| `yfinance` | none | Daily OHLCV, adjusted. Easiest clone-and-run. |
+| `fmp` | `FMP_API_KEY` | FMP stable API, split/div-adjusted daily. |
+| `alphavantage` | `ALPHAVANTAGE_API_KEY` | Daily; free tier is unadjusted + ~100 bars + ~25 req/day. |
+| `lobster` | none | The original 10-second microstructure CSVs under `ticker_data/`. |
+
+Vendor pulls are parquet-cached under `data/market/`. Factors are **capability-gated**
+to the active provider's fields (microstructure factors hide on plain-OHLCV
+vendors), and annualization is inferred from the data's frequency. See
+`docs/data-layer/` for the full design.
+
+**LOBSTER specifics:** place CSVs under `ticker_data/` (or set `DATA_DIR`). The
+loader (`backtesting/data_loader.py`) builds an aligned panel of OHLCV plus
+microstructure fields (`orderFlow`, `lobImb`, `spread`, `nbTrades`, etc.) on a
+shared 10-second index.
 
 Persisted state:
 
