@@ -506,3 +506,93 @@ def test_yfinance_crypto_panel_offline_annualises_365(monkeypatch, tmp_path):
     # weekend bars present → 365-day annualisation, no asset_class plumbing needed
     assert (panel["close"].index.dayofweek >= 5).any()
     assert periods_per_year_from_index(panel["close"].index) == 365
+
+
+# ── research-service panel cache keyed on the full data config ───────────────
+
+def test_research_panel_cache_keys_on_full_config(monkeypatch):
+    """The IC-backtest panel cache must key on the whole effective data config.
+
+    Keying on ``(fields, n_tickers)`` alone would hand back a stale panel after a
+    provider/config switch; an identical repeated call must still hit the cache.
+    """
+    from quant_fund_agent.mcp import research_service as rs
+
+    rs._PANEL_CACHE.clear()
+    calls: list[str] = []
+
+    def fake_load_panel(data_dir, fields=None, n_tickers=None, **kw):
+        # The panel content depends on the *ambient* config, not just the args —
+        # tag the returned panel with the active provider so callers can tell
+        # two panels apart and we can assert the cache didn't serve a stale one.
+        from quant_fund_agent.config import get_settings
+
+        provider = get_settings().data.provider
+        calls.append(provider)
+        df = pd.DataFrame({provider: [1.0, 2.0]})
+        return {"close": df}
+
+    monkeypatch.setattr("quant_fund_agent.data.load_panel", fake_load_panel)
+
+    monkeypatch.setenv("QF_DATA_PROVIDER", "yfinance")
+    p1 = rs._load_panel_cached("ticker_data", ["close"], 5)
+    p1_again = rs._load_panel_cached("ticker_data", ["close"], 5)  # identical → hit
+    assert calls == ["yfinance"]            # fetched exactly once
+    assert p1 is p1_again                   # same cached object reused
+
+    # Same (fields, n_tickers) but a DIFFERENT provider → must NOT reuse the panel.
+    monkeypatch.setenv("QF_DATA_PROVIDER", "fmp")
+    p2 = rs._load_panel_cached("ticker_data", ["close"], 5)
+    assert calls == ["yfinance", "fmp"]     # refetched on the config switch
+    assert list(p2["close"].columns) == ["fmp"]  # got the new provider's panel
+    assert p2 is not p1
+
+    rs._PANEL_CACHE.clear()
+
+
+# ── AlphaVantage _fetch: per-symbol resilience (mirror FMP) ──────────────────
+
+def _av_daily_payload() -> dict:
+    return {"Time Series (Daily)": {
+        "2023-01-03": {"1. open": "20", "2. high": "22", "3. low": "18",
+                       "4. close": "20", "5. volume": "200"},
+        "2023-01-04": {"1. open": "10", "2. high": "11", "3. low": "9",
+                       "4. close": "10", "5. volume": "100"}}}
+
+
+def test_alphavantage_fetch_resilient_per_symbol(monkeypatch):
+    """One failing symbol must not abort the whole AlphaVantage load."""
+    from quant_fund_agent.config import DataSettings, Settings
+    from quant_fund_agent.data.providers import alphavantage as av
+
+    monkeypatch.setenv("ALPHAVANTAGE_API_KEY", "test-key")
+
+    def fake_request_json(url, params, **kw):
+        if params.get("symbol") == "BBB":
+            raise RuntimeError("boom: bad symbol BBB")
+        return _av_daily_payload()
+
+    monkeypatch.setattr(av, "request_json", fake_request_json)
+
+    prov = av.AlphaVantageProvider(Settings(data=DataSettings(
+        provider="alphavantage", asset_class="equity")))
+    out = prov._fetch(["AAA", "BBB", "CCC"])
+    assert set(out) == {"AAA", "CCC"}       # BBB skipped, the others survive
+    assert list(out["AAA"].columns) == ["open", "high", "low", "close", "volume"]
+
+
+def test_alphavantage_fetch_rate_limit_is_fatal(monkeypatch):
+    """An explicit rate-limit aborts the load (not silently skipped per symbol)."""
+    from quant_fund_agent.config import DataSettings, Settings
+    from quant_fund_agent.data.providers import alphavantage as av
+    from quant_fund_agent.data.providers._http import RateLimited
+
+    monkeypatch.setenv("ALPHAVANTAGE_API_KEY", "test-key")
+    # AV signals throttling with a "Note" payload → _check_limits raises RateLimited.
+    monkeypatch.setattr(av, "request_json",
+                        lambda url, params, **kw: {"Note": "5 calls per minute"})
+
+    prov = av.AlphaVantageProvider(Settings(data=DataSettings(
+        provider="alphavantage", asset_class="equity")))
+    with pytest.raises(RateLimited):
+        prov._fetch(["AAA", "BBB"])

@@ -8,13 +8,15 @@ test), running the single-factor IC backtest, and persisting/rejecting survivors
 — lives here so the MCP server is a thin protocol wrapper and the in-process
 fallback computes identical results.
 
-The factor panel is cached at module level (keyed by field-set + universe size)
-so a long-lived server process loads the heavy intraday panel once and reuses it
-across every candidate's IC backtest.
+The factor panel is cached at module level (keyed by field-set + the full
+effective data config) so a long-lived server process loads the heavy intraday
+panel once and reuses it across every candidate's IC backtest — while a switch of
+provider / asset-class / universe / date-range correctly invalidates the cache.
 """
 
 from __future__ import annotations
 
+import dataclasses
 import json
 import logging
 import os
@@ -65,9 +67,12 @@ FETCH_FULLTEXT = os.getenv("PAPER_FETCH_FULLTEXT", "1").strip().lower() not in (
 _HTTP_TIMEOUT = float(os.getenv("PAPER_FETCH_TIMEOUT", "30"))
 _HTTP_HEADERS = {"User-Agent": "QuantFundAgent/1.0 (academic factor research)"}
 
-# Panel cache keyed by (field-set, universe size); see the original
-# factor_research graph for why memory makes this cache worthwhile.
-_PANEL_CACHE: dict[tuple[frozenset[str], int | None], dict[str, Any]] = {}
+# Panel cache keyed by (field-set, effective data config); see the original
+# factor_research graph for why memory makes this cache worthwhile.  The config
+# half of the key spans every ``DataSettings`` dimension that changes panel
+# content (provider, asset class, frequency, universe/tickers, start/end, dtype,
+# …), so a config switch never hands back a stale panel.
+_PANEL_CACHE: dict[tuple[frozenset[str], tuple], dict[str, Any]] = {}
 
 
 def _parse_cutoff(cutoff_date: str | None) -> date | None:
@@ -360,9 +365,32 @@ def _required_fields(factor_ids: list[str]) -> list[str]:
     return sorted(needed)
 
 
+def _panel_cache_key(data_dir: str, fields: list[str],
+                     n_tickers: int | None) -> tuple[frozenset[str], tuple]:
+    """Cache key spanning *every* config dimension that changes panel content.
+
+    ``load_panel`` re-resolves the active data config (``quant.config.yaml`` +
+    env) on every call, so the panel it returns depends on far more than
+    ``(fields, n_tickers)`` — the provider, asset class, frequency,
+    universe/tickers, start/end and dtype all change it.  We fold the *effective*
+    :class:`~quant_fund_agent.config.DataSettings` (overridden exactly the way
+    ``load_panel`` overrides it) into the key, so a provider/config switch can
+    never reuse a stale panel while an identical repeated call still hits cache.
+    """
+    from quant_fund_agent.config import get_settings
+
+    settings = get_settings().with_data_overrides(
+        data_dir=data_dir, n_tickers=n_tickers)
+    parts: list[tuple[str, Any]] = []
+    for f in dataclasses.fields(settings.data):
+        v = getattr(settings.data, f.name)
+        parts.append((f.name, tuple(v) if isinstance(v, list) else v))
+    return (frozenset(fields), tuple(parts))
+
+
 def _load_panel_cached(data_dir: str, fields: list[str],
                        n_tickers: int | None) -> dict[str, Any]:
-    key = (frozenset(fields), n_tickers)
+    key = _panel_cache_key(data_dir, fields, n_tickers)
     if key not in _PANEL_CACHE:
         from quant_fund_agent.data import load_panel
         log.info("Loading panel from %s (fields=%s, n_tickers=%s) …",

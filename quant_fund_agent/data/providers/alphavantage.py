@@ -247,12 +247,18 @@ class AlphaVantageProvider(ApiProvider):
         out: dict[str, pd.DataFrame] = {}
         for canonical in symbols:
             params, reshape = self._request_spec(ac, canonical, key)
-            payload = request_json(
-                AV_BASE, params,
-                provider="alphavantage", min_interval=_MIN_INTERVAL,
-            )
-            _check_limits(payload)  # raises RateLimited / RuntimeError with a clear msg
-            tidy = reshape(payload)
+            try:
+                payload = request_json(
+                    AV_BASE, params,
+                    provider="alphavantage", min_interval=_MIN_INTERVAL,
+                )
+                _check_limits(payload)  # raises RateLimited on a throttle/cap payload
+                tidy = reshape(payload)
+            except RateLimited:
+                raise  # an explicit rate limit is fatal — fail fast, don't churn
+            except Exception as e:  # noqa: BLE001 — one bad symbol must not abort
+                log.warning("alphavantage: fetch failed for %s: %s", canonical, e)
+                continue
             if tidy is not None and not tidy.empty:
                 out[canonical] = tidy
         return out
