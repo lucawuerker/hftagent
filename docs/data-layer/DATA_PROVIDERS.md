@@ -86,3 +86,31 @@ All three API providers extend `ApiProvider` (`base.py`) — they implement only
 `available_fields()` and `_fetch(symbols)`; the universe→cache→assemble flow is
 shared. The shared `_http.request_json` handles throttling + retry/backoff and
 detects vendor rate-limit payloads.
+
+## Multi-asset: crypto & FX (Phase 6)
+
+All three API vendors serve `equity`, `crypto` and `fx`
+(`asset_classes = ("equity","crypto","fx")`); `lobster` is `equity`-only.
+`data/panel.py::get_provider` rejects an unsupported provider/asset-class combo
+with a clear error before any fetch.
+
+**Canonical symbols.** Universe presets and the panel use one provider-agnostic
+symbol per instrument — equities are plain tickers (`AAPL`), crypto/fx are
+`BASE-QUOTE` pairs (`BTC-USD`, `EUR-USD`). Each provider translates canonical →
+native inside `_fetch` (via `data/symbols.py`) and returns frames **keyed by the
+canonical symbol**, so the parquet cache and every downstream agent stay
+vendor-agnostic. Presets: `crypto_demo`, `fx_demo`.
+
+| Vendor | crypto | fx | Native form / endpoint |
+|--------|--------|----|------------------------|
+| `yfinance` | ✅ | ✅ | `BTC-USD` (unchanged) / `EURUSD=X`; same `yf.download`. |
+| `fmp` | ✅ | ✅ | `BTCUSD`/`EURUSD` via `historical-price-eod/full` (**raw** OHLCV — no corporate actions for these). |
+| `alphavantage` | ✅ | ✅ | `DIGITAL_CURRENCY_DAILY` (`symbol`+`market`) / `FX_DAILY` (`from_symbol`+`to_symbol`); free-tier rate-limited. |
+
+**Caveats.**
+- **Annualization is data-driven**: `data/frequency.py` infers 365 days/year when
+  the index has weekend bars (crypto), else 252 — no `asset_class` plumbing.
+- **FX has no reliable volume** from these vendors (filled `NaN`/0); volume-based
+  factors are no-ops on an FX run. Prefer one `asset_class` per run.
+- **FX weekend bars are vendor-dependent**: FMP stamps weekend FX bars (→ 365),
+  yfinance/AV are weekday-only (→ 252). Each is annualized by its own sampling.

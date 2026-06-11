@@ -33,9 +33,22 @@ SYNTH_DEPS: dict[str, tuple[str, ...]] = {
 
 
 def get_provider(settings: Settings | None = None) -> "DataProvider":
-    """Instantiate the configured provider (cheap; loads no data)."""
+    """Instantiate the configured provider (cheap; loads no data).
+
+    Fails fast with a clear message if the configured ``asset_class`` isn't one
+    the provider serves (e.g. ``lobster`` + ``crypto``), rather than producing an
+    empty/garbled panel downstream.
+    """
     settings = settings or get_settings()
-    return get_provider_class(settings.data.provider)(settings)
+    cls = get_provider_class(settings.data.provider)
+    asset_class = settings.data.asset_class
+    if asset_class not in cls.asset_classes:
+        raise ValueError(
+            f"Provider {cls.name!r} does not serve asset_class {asset_class!r} "
+            f"(supports {list(cls.asset_classes)}). "
+            "Pick a compatible provider or change data.asset_class."
+        )
+    return cls(settings)
 
 
 def _synthesize(

@@ -38,6 +38,38 @@ def trading_days_per_year(asset_class: str = "equity") -> int:
     return 365 if str(asset_class).lower() == "crypto" else TRADING_DAYS_PER_YEAR
 
 
+def _is_continuous_calendar(index) -> bool:
+    """Infer whether the data trades 7 days/week (crypto) from the index itself.
+
+    Equities, FX and LOBSTER are weekday-stamped (no Sat/Sun bars); crypto trades
+    continuously, so a meaningful fraction of its bars fall on weekends.  We need a
+    few distinct days to judge — a window too short to span a weekend can't be
+    classified, so we conservatively return ``False`` (the equity calendar), which
+    is also exactly what keeps the legacy/short-window paths unchanged.
+
+    This keeps annualisation *data-driven* (the Phase-1 philosophy) instead of
+    threading ``asset_class`` through every metric function: crypto's defining
+    trait is literally present in the ``DatetimeIndex``.
+    """
+    idx = pd.DatetimeIndex(index)
+    days = pd.DatetimeIndex(idx.normalize().unique())
+    if len(days) < 7:                       # too short to see a weekend → assume 5-day
+        return False
+    weekend_fraction = float((days.dayofweek >= 5).mean())  # Sat=5, Sun=6
+    # Equities ≈ 0 weekend days; crypto ≈ 2/7 ≈ 0.29. A 0.1 threshold separates
+    # them with wide margin and tolerates the odd missing weekend bar.
+    return weekend_fraction > 0.1
+
+
+def trading_days_per_year_from_index(index) -> int:
+    """Trading days/year inferred from the index: 365 if it trades weekends, else 252.
+
+    Lets every existing call site (which already passes the return index) get the
+    right crypto annualisation with no ``asset_class`` plumbing.
+    """
+    return 365 if _is_continuous_calendar(index) else TRADING_DAYS_PER_YEAR
+
+
 def _median_bar_seconds(index) -> float | None:
     """Median spacing between consecutive timestamps, in seconds (``None`` if <3).
 
@@ -54,22 +86,37 @@ def _median_bar_seconds(index) -> float | None:
     return float(np.median(secs))
 
 
-def bars_per_day_from_index(index, asset_class: str = "equity") -> int:
+def bars_per_day_from_index(index, asset_class: str | None = None) -> int:
     """Infer bars-per-trading-day from a ``DatetimeIndex``.
 
     10-second equity bars → 2340; 1-minute → 390; daily (any spacing ≥ 12h) → 1.
-    Falls back to :data:`DEFAULT_BARS_PER_DAY` when the index is too short to
-    infer (degenerate series produce meaningless metrics anyway).
+    For intraday data the session length (24h crypto vs 6.5h equity) is taken from
+    an explicit ``asset_class`` when given, else inferred from the index (weekend
+    bars ⇒ continuous 24h market).  Falls back to :data:`DEFAULT_BARS_PER_DAY`
+    when the index is too short to infer (degenerate series produce meaningless
+    metrics anyway).
     """
     sec = _median_bar_seconds(index)
     if sec is None or sec <= 0:
         return DEFAULT_BARS_PER_DAY
     if sec >= _DAILY_THRESHOLD_SECONDS:
         return 1
-    session = 24 * 3600 if str(asset_class).lower() == "crypto" else SESSION_SECONDS_EQUITY
+    if asset_class is not None:
+        continuous = str(asset_class).lower() == "crypto"
+    else:
+        continuous = _is_continuous_calendar(index)
+    session = 24 * 3600 if continuous else SESSION_SECONDS_EQUITY
     return max(1, int(round(session / sec)))
 
 
-def periods_per_year_from_index(index, asset_class: str = "equity") -> int:
-    """Annualisation factor (periods/year) inferred from a ``DatetimeIndex``."""
-    return bars_per_day_from_index(index, asset_class) * trading_days_per_year(asset_class)
+def periods_per_year_from_index(index, asset_class: str | None = None) -> int:
+    """Annualisation factor (periods/year) inferred from a ``DatetimeIndex``.
+
+    With an explicit ``asset_class`` the calendar is taken from it; otherwise both
+    the session length and the trading-days/year are inferred from the index, so
+    weekend-trading (crypto) data annualises at 365 with no extra plumbing.
+    """
+    bpd = bars_per_day_from_index(index, asset_class)
+    tdays = (trading_days_per_year(asset_class) if asset_class is not None
+             else trading_days_per_year_from_index(index))
+    return bpd * tdays

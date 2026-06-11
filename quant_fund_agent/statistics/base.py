@@ -18,7 +18,10 @@ from typing import Any
 import pandas as pd
 
 from quant_fund_agent.agents.architect.state import StrategySpec, TrialRecord
-from quant_fund_agent.data.frequency import DEFAULT_BARS_PER_DAY
+from quant_fund_agent.data.frequency import (
+    DEFAULT_BARS_PER_DAY,
+    TRADING_DAYS_PER_YEAR,
+)
 from quant_fund_agent.statistics.schemas import StatTestResult
 
 
@@ -49,8 +52,10 @@ class StatTestContext:
     trial_history: list[TrialRecord] = field(default_factory=list)
 
     # ── bars / annualisation config ──
-    # Inferred from the panel by the context builder; this is only the fallback.
+    # Both inferred from the panel by the context builder; these are the fallbacks.
     bars_per_day: int = DEFAULT_BARS_PER_DAY
+    # Trading days/year: 252 for equities, 365 for 24/7 markets (crypto).
+    trading_days_per_year: int = TRADING_DAYS_PER_YEAR
 
 
 class BaseStatTest(ABC):

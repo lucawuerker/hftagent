@@ -111,11 +111,27 @@ The old code hardcoded 10-second bars: `BARS_PER_YEAR = 2340 * 252`,
 | 10s LOBSTER | 2340 | 2340 × 252 |
 | 1-minute | 390 | 390 × 252 |
 | daily equity | 1 | 252 |
-| daily crypto (Phase 6) | 1 | 365 |
+| daily crypto | 1 | 365 |
 
 Threaded into: `pipeline.BARS_PER_YEAR`, the statistics test context
-`bars_per_day` (`statistics/base.py`), the DSR test
+`bars_per_day` + `trading_days_per_year` (`statistics/base.py`), the DSR test
 (`statistics/tests/deflated_sharpe.py`), and the simulation's annualization.
+
+**Calendar inference (Phase 6).** Trading-days/year is **inferred from the
+index** — if the data has weekend bars it trades 7 days/week (crypto → 365), else
+252 (`_is_continuous_calendar` / `trading_days_per_year_from_index`). This keeps
+the Phase-1 "infer from the data" design: no call site needs to pass
+`asset_class`, and crypto annualizes correctly the moment its weekend-bearing
+panel is loaded. An explicit `asset_class` still overrides.
+
+## Multi-asset (crypto / FX)
+
+Asset class is `Settings.data.asset_class` (`equity` | `crypto` | `fx`). Providers
+declare the classes they serve (`DataProvider.asset_classes`); `get_provider`
+fails fast on an unsupported combo. Crypto/FX use **canonical `BASE-QUOTE`
+symbols** (`BTC-USD`, `EUR-USD`) translated to each vendor's native form in
+`data/symbols.py`; the cache and panel are keyed by the canonical symbol. See
+[`DATA_PROVIDERS.md`](DATA_PROVIDERS.md).
 
 ## Transaction costs on vendors without a spread field
 

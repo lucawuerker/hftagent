@@ -1,0 +1,8 @@
+# Demo crypto universe — canonical BASE-QUOTE pairs (USD-quoted).
+# Illustrative only; not survivorship-corrected. Add your own pairs below.
+# Works on any provider that serves asset_class=crypto (yfinance/fmp/alphavantage).
+BTC-USD
+ETH-USD
+SOL-USD
+XRP-USD
+ADA-USD

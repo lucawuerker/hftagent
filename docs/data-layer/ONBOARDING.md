@@ -26,9 +26,13 @@ A deterministic, dependency-light CLI that:
    yfinance needs none) and offers only providers you can actually use.
 2. **Prompts** for:
    - provider (from the detected set),
-   - asset class (equity now; crypto/FX later),
-   - universe — a **preset** (`demo`, `sp100`; add your own as a one-symbol-per-line
-     file under `data/universes/`) or a **custom** comma-separated ticker list,
+   - asset class — `equity`, `crypto` or `fx` (constrained to what the chosen
+     provider serves),
+   - universe — a **preset** (equity: `demo`, `sp100`; crypto: `crypto_demo`;
+     fx: `fx_demo`; the default preset matches the asset class — add your own as a
+     one-symbol-per-line file under `data/universes/`) or a **custom**
+     comma-separated list. Crypto/fx symbols are canonical `BASE-QUOTE` pairs
+     (`BTC-USD`, `EUR-USD`),
    - date range (`start`, `end`),
    - frequency (`1d` now; intraday later).
 3. **Validation fetch** — pulls a few bars for one symbol to confirm the key and
@@ -62,7 +66,7 @@ reply) falls straight back to the deterministic path.
 ```yaml
 data:
   provider: yfinance            # lobster | yfinance | fmp | alphavantage
-  asset_class: equity           # equity (crypto/FX later)
+  asset_class: equity           # equity | crypto | fx
   frequency: 1d                 # 1d | 1min | 10s | …
   start: 2024-01-01
   end: 2026-01-01

@@ -1,9 +1,15 @@
 """yfinance provider — key-free daily (and intraday) OHLCV from Yahoo Finance.
 
 The first public, no-API-key vendor, so anyone can clone the repo and run the
-fund on their own pull.  Supplies the ``standard`` tier (OHLCV); ``vwap`` and
-``returns`` are synthesised by the panel layer, and microstructure factors are
-gated out (see ``docs/data-layer``).
+fund on their own pull.  Multi-asset: equity, crypto and FX (Yahoo serves all
+three).  Supplies the ``standard`` tier (OHLCV); ``vwap`` and ``returns`` are
+synthesised by the panel layer, and microstructure factors are gated out (see
+``docs/data-layer``).
+
+Symbols are **canonical** (``AAPL``, ``BTC-USD``, ``EUR-USD``) and translated to
+Yahoo's form (``BTC-USD`` unchanged, ``EUR-USD`` → ``EURUSD=X``) inside
+:meth:`_fetch`; results are returned under the canonical key so the cache/panel
+stay vendor-agnostic.  FX has no volume on Yahoo (reported as 0).
 
 Prices use ``auto_adjust=True`` — split/dividend adjusted, with ``close`` the
 adjusted close.  NOTE: full-history adjustment is not point-in-time, a mild
@@ -21,6 +27,7 @@ import logging
 import pandas as pd
 
 from quant_fund_agent.data.providers.base import ApiProvider
+from quant_fund_agent.data.symbols import to_yfinance
 from quant_fund_agent.data.tiers import TIERS
 
 log = logging.getLogger("data.providers.yfinance")
@@ -73,18 +80,26 @@ def _reshape(raw: pd.DataFrame, symbols: list[str]) -> dict[str, pd.DataFrame]:
 
 class YFinanceProvider(ApiProvider):
     name = "yfinance"
-    asset_classes = ("equity",)
+    asset_classes = ("equity", "crypto", "fx")
 
     def available_fields(self) -> frozenset[str]:
         return TIERS["standard"]
 
     def _fetch(self, symbols: list[str]) -> dict[str, pd.DataFrame]:
-        """The ONLY network call — pull OHLCV from Yahoo for ``symbols``."""
+        """The ONLY network call — pull OHLCV from Yahoo for ``symbols``.
+
+        ``symbols`` are canonical; we translate to Yahoo's form, download, then
+        map results back to the canonical key.
+        """
         import yfinance as yf
+
+        ac = self.data.asset_class
+        native_to_canonical = {to_yfinance(s, ac): s for s in symbols}
+        native = list(native_to_canonical)
 
         interval = _YF_INTERVAL.get(self.data.frequency, self.data.frequency)
         raw = yf.download(
-            symbols,
+            native,
             start=self.data.start,
             end=self.data.end,
             interval=interval,
@@ -93,4 +108,5 @@ class YFinanceProvider(ApiProvider):
             group_by="ticker",
             threads=True,
         )
-        return _reshape(raw, symbols)
+        by_native = _reshape(raw, native)
+        return {native_to_canonical[n]: df for n, df in by_native.items()}

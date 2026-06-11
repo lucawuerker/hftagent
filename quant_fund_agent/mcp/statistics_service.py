@@ -17,6 +17,8 @@ from typing import Any
 
 import pandas as pd
 
+from quant_fund_agent.data.frequency import TRADING_DAYS_PER_YEAR
+
 log = logging.getLogger("statistics.service")
 
 
@@ -73,11 +75,18 @@ def _build_context(
     factor_signals_full = {fid: _factor_signal(fid, data_full) for fid in feature_ids}
 
     # Annualise the statistical tests at the data's *actual* frequency (2340 for
-    # 10-sec LOBSTER bars, 1 for daily) rather than the threaded legacy default.
+    # 10-sec LOBSTER bars, 1 for daily) and calendar (365 for weekend-trading
+    # crypto, else 252) rather than the threaded legacy defaults.
+    trading_days = TRADING_DAYS_PER_YEAR
     if data_full:
-        from quant_fund_agent.data.frequency import bars_per_day_from_index
+        from quant_fund_agent.data.frequency import (
+            bars_per_day_from_index,
+            trading_days_per_year_from_index,
+        )
 
-        bars_per_day = bars_per_day_from_index(next(iter(data_full.values())).index)
+        _idx = next(iter(data_full.values())).index
+        bars_per_day = bars_per_day_from_index(_idx)
+        trading_days = trading_days_per_year_from_index(_idx)
 
     # Walk-forward cutoff: the OOS test must run on the tail of the pre-cutoff
     # window (genuinely held out from the architect AND strictly before the
@@ -96,6 +105,7 @@ def _build_context(
         oos_split_ratio=oos_split_ratio,
         trial_history=[TrialRecord.model_validate(t) for t in trial_history],
         bars_per_day=bars_per_day,
+        trading_days_per_year=trading_days,
     )
 
 

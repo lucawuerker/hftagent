@@ -27,8 +27,8 @@ from quant_fund_agent.backtesting.strategy_backtester import (
     _max_drawdown_duration,
 )
 from quant_fund_agent.data.frequency import (
-    TRADING_DAYS_PER_YEAR,
     bars_per_day_from_index,
+    trading_days_per_year_from_index,
 )
 from quant_fund_agent.simulation.config import BacktestConfig
 from quant_fund_agent.simulation.execution import ExecutionResult
@@ -50,7 +50,9 @@ def fund_metrics(returns: pd.Series, bars_per_day: int | None = None) -> dict[st
 
     if bars_per_day is None:
         bars_per_day = bars_per_day_from_index(r.index)
-    bars_per_year = bars_per_day * TRADING_DAYS_PER_YEAR
+    # Trading-days/year is inferred from the index (365 if it trades weekends, e.g.
+    # crypto; 252 otherwise), so annualisation is correct across asset classes.
+    bars_per_year = bars_per_day * trading_days_per_year_from_index(r.index)
     mean_bar, std_bar = float(r.mean()), float(r.std())
     ann_ret = mean_bar * bars_per_year
     ann_vol = std_bar * np.sqrt(bars_per_year) if std_bar > 0 else 0.0

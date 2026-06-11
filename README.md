@@ -286,10 +286,18 @@ without an LLM key if you skip `--assist`.
 | `alphavantage` | `ALPHAVANTAGE_API_KEY` | Daily; free tier is unadjusted + ~100 bars + ~25 req/day. |
 | `lobster` | none | The original 10-second microstructure CSVs under `ticker_data/`. |
 
+**Multi-asset:** all three API vendors serve **equity, crypto and FX**. Pick
+`asset_class` in the wizard; crypto/FX use canonical `BASE-QUOTE` symbols
+(`BTC-USD`, `EUR-USD`) with `crypto_demo` / `fx_demo` presets. Annualization is
+**calendar-aware** — crypto (7-day trading) annualizes at 365, equities/FX at 252,
+inferred from the data itself.
+
 Vendor pulls are parquet-cached under `data/market/`. Factors are **capability-gated**
 to the active provider's fields (microstructure factors hide on plain-OHLCV
 vendors), and annualization is inferred from the data's frequency. See
-`docs/data-layer/` for the full design.
+`docs/data-layer/` for the full design — including
+[`FUNDAMENTAL_AND_ALT_DATA.md`](docs/data-layer/FUNDAMENTAL_AND_ALT_DATA.md) for
+the planned non-OHLCV (fundamentals / sentiment / macro) data fields.
 
 **LOBSTER specifics:** place CSVs under `ticker_data/` (or set `DATA_DIR`). The
 loader (`backtesting/data_loader.py`) builds an aligned panel of OHLCV plus

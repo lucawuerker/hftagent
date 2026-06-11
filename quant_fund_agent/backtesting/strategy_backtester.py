@@ -32,8 +32,8 @@ from quant_fund_agent.backtesting.data_loader import forward_returns
 from quant_fund_agent.backtesting.engine import _ic_series
 from quant_fund_agent.data.frequency import (
     DEFAULT_BARS_PER_DAY,
-    TRADING_DAYS_PER_YEAR,
     bars_per_day_from_index,
+    trading_days_per_year_from_index,
 )
 from quant_fund_agent.schemas import StrategyBacktestMetrics
 from quant_fund_agent.strategies.base import BaseStrategy
@@ -186,7 +186,9 @@ def _compute_metrics(
 
     if bars_per_day is None:
         bars_per_day = bars_per_day_from_index(port_ret.index)
-    bars_per_year = bars_per_day * TRADING_DAYS_PER_YEAR
+    # Trading-days/year inferred from the index (365 if it trades weekends, e.g.
+    # crypto; 252 otherwise) → correct annualisation across asset classes.
+    bars_per_year = bars_per_day * trading_days_per_year_from_index(port_ret.index)
 
     # annualised return & vol
     mean_bar = float(port_ret.mean())

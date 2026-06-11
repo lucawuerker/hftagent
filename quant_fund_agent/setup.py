@@ -31,7 +31,7 @@ import os
 import sys
 from datetime import date, timedelta
 
-from quant_fund_agent.data.providers import PROVIDERS
+from quant_fund_agent.data.providers import PROVIDERS, get_provider_class
 from quant_fund_agent.data.universe import available_presets
 
 CONFIG_PATH = "quant.config.yaml"
@@ -97,8 +97,13 @@ def build_config(
         data["asset_class"] = args.asset_class or "equity"
         return {"data": data}
 
-    # API providers (yfinance / fmp / alphavantage)
-    data["asset_class"] = pick(args.asset_class, "asset_class", "Asset class", "equity")
+    # API providers (yfinance / fmp / alphavantage) — multi-asset.
+    classes = list(get_provider_class(provider).asset_classes)
+    asset_class = pick(args.asset_class, "asset_class", f"Asset class {classes}", classes[0])
+    if asset_class not in classes:
+        raise SystemExit(
+            f"Provider {provider!r} serves {classes}, not {asset_class!r}.")
+    data["asset_class"] = asset_class
     data["frequency"] = pick(args.freq, "frequency", "Frequency (1d/1h/5m/1m)", "1d")
 
     default_end = date.today().isoformat()
@@ -108,13 +113,18 @@ def build_config(
     data["cache_dir"] = args.cache_dir or "data/market"
 
     # Universe: explicit tickers (CLI flag, then LLM proposal) win over a preset.
+    # The default preset matches the asset class (crypto→crypto_demo, fx→fx_demo).
     if args.tickers:
         data["tickers"] = [t.strip().upper() for t in args.tickers.split(",") if t.strip()]
     elif proposal.get("tickers"):
         data["tickers"] = list(proposal["tickers"])
     else:
+        preset_default = {"crypto": "crypto_demo", "fx": "fx_demo"}.get(asset_class, "demo")
+        if preset_default not in available_presets():
+            preset_default = available_presets()[0]
         preset = pick(args.preset, "preset",
-                      f"Universe preset {available_presets()} (or pass --tickers)", "demo")
+                      f"Universe preset {available_presets()} (or pass --tickers)",
+                      preset_default)
         data["universe_preset"] = preset
     n_tickers = args.n_tickers or proposal.get("n_tickers")
     if n_tickers:

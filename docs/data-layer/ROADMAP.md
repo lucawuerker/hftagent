@@ -121,9 +121,35 @@ Each phase is independently shippable with its own test gate
     stay in-bounds (incl. an adversarial "Bloomberg/weekly" prompt that was
     dropped/coerced), wrote a real config from free text, and confirmed graceful
     fallback under a forced LLM outage.
-- [ ] **Phase 6 — Multi-asset (LATER)**
-  - Asset-class-aware calendars + 365-day annualization; crypto/FX providers.
-    Enabled by `asset_class` already threaded through `PanelMeta`/`Settings`.
+- [x] **Phase 6 — Multi-asset (crypto / FX)** ✅ 2026-06-11
+  - **Calendar-aware annualization.** The Phase-1 `crypto→365` branch was dead
+    code (no call site passed `asset_class`). Fixed *data-drivenly*:
+    `frequency.py` infers the calendar from the index — weekend bars present ⇒
+    365, else 252 (`_is_continuous_calendar` + `trading_days_per_year_from_index`),
+    so every existing call site (`results.py`, `strategy_backtester.py`,
+    `pipeline.py`, the statistician's DSR context via a new
+    `StatTestContext.trading_days_per_year`) gets the right factor with no
+    plumbing. Explicit `asset_class` still overrides (keeps the Phase-1 test).
+  - **Multi-asset across all three API vendors.** `data/symbols.py` defines
+    canonical `BASE-QUOTE` pairs and translates to each vendor's native form;
+    each provider's `_fetch` dispatches on `asset_class` and returns frames keyed
+    by the canonical symbol (cache/panel stay vendor-agnostic). yfinance
+    (`BTC-USD`/`EURUSD=X`), FMP (`historical-price-eod/full`, raw OHLCV for
+    crypto/fx), AlphaVantage (`DIGITAL_CURRENCY_DAILY`/`FX_DAILY`). All three now
+    declare `asset_classes=("equity","crypto","fx")`; `lobster` stays equity-only.
+  - **Validation + presets + wizard.** `panel.get_provider` rejects an
+    unsupported provider/asset-class combo with a clear error; `crypto_demo` +
+    `fx_demo` presets; the wizard + `--assist` are asset-class-aware (default the
+    matching preset, clamp to the provider's classes). FX has no reliable volume
+    (filled NaN; documented).
+  - Gate met: full suite green (90); offline tests (weekend inference 365/252,
+    symbol translation, per-vendor crypto/fx reshape incl. legacy AV `(USD)`
+    format, asset-class validation). **Live** `verify_phase6_multiasset.py`:
+    yfinance+FMP+AV crypto/fx fetched through `load_panel`, crypto→365 vs
+    equity→252 proven, BTC-USD consistent to the dollar across all three vendors.
+    A **paid `run_fund.py` on a 5-coin crypto universe** ran
+    Selector→Architect(lasso/ridge)→Statistician(REJECT, legit)→PM on 730 daily
+    crypto bars, 365-annualized, 98 factors visible (microstructure gated).
 
 ## Follow-ups (out of scope here)
 - LLM-provider abstraction (OpenAI → +Anthropic/local) behind one env var.
@@ -151,3 +177,15 @@ Each phase is independently shippable with its own test gate
   Verified live (real proposals in-bounds incl. adversarial prompt; config
   written from free text; graceful fallback). Full suite green (84). Next: Phase 6
   (multi-asset crypto/FX).
+- 2026-06-11: Phase 6 complete — **the milestone is done.** Crypto + FX on all
+  three API vendors (yfinance/FMP/AV) via canonical-pair symbols + per-vendor
+  translation; calendar-aware annualization (weekend bars ⇒ 365) fixes the dead
+  crypto branch with zero plumbing; asset-class validation + crypto/fx presets +
+  asset-class-aware wizard/assist. Verified live (crypto→365 vs equity→252;
+  BTC-USD consistent across vendors) + a paid crypto `run_fund.py`. Full suite
+  green (90). A forward-looking design doc for the *next* stage (non-OHLCV
+  fundamental/alternative data fields) lives at
+  [`FUNDAMENTAL_AND_ALT_DATA.md`](FUNDAMENTAL_AND_ALT_DATA.md).
+  **Finding:** FX weekend-bar convention is vendor-dependent (FMP stamps weekend
+  FX bars ⇒ 365; yfinance/AV are weekday-only ⇒ 252) — the inference correctly
+  annualizes each series by its actual sampling rate.

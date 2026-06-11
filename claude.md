@@ -26,16 +26,21 @@ scripts, and backtests all drive the agents identically.
 A working **MVP** of the full pipeline exists. Each stage and agent is
 intended to be advanced significantly in future work.
 
-**Pluggable data layer (Phases 0–4 done).** The fund no longer requires the
-author's LOBSTER CSVs: any panel load goes through `quant_fund_agent/data/`
-(provider abstraction + parquet cache + capability gating + frequency-aware
-annualization). Providers: `lobster` (local CSVs), `yfinance` (key-free daily),
-`fmp`, `alphavantage`. Run `python -m quant_fund_agent.setup` to pick a
-provider/universe/timespan and write `quant.config.yaml`, or
+**Pluggable data layer (Phases 0–6 done — milestone complete).** The fund no
+longer requires the author's LOBSTER CSVs: any panel load goes through
+`quant_fund_agent/data/` (provider abstraction + parquet cache + capability
+gating + calendar-aware annualization). Providers: `lobster` (local CSVs),
+`yfinance` (key-free daily), `fmp`, `alphavantage` — the three API vendors are
+**multi-asset (equity / crypto / fx)** via canonical `BASE-QUOTE` symbols
+(`data/symbols.py`); crypto annualizes at 365 (inferred from weekend bars). Run
+`python -m quant_fund_agent.setup` to pick a provider/asset-class/universe/
+timespan and write `quant.config.yaml`, or
 `python -m quant_fund_agent.setup --assist "<plain-English description>"` to have
 an LLM draft a config you confirm (`setup_assist.py`; validated to legal values,
 falls back to the deterministic wizard with no LLM key). See
-`docs/data-layer/ROADMAP.md`. Remaining: Phase 6 (multi-asset crypto/FX).
+`docs/data-layer/ROADMAP.md`. Next data-layer step (designed, not built):
+non-OHLCV fundamental/alternative data fields — see
+`docs/data-layer/FUNDAMENTAL_AND_ALT_DATA.md`.
 
 ## Roadmap
 - Longer backtests: simulate weekly researcher updates and trade over an

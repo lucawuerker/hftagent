@@ -43,17 +43,20 @@ def _system_prompt(*, available: list[str], presets: list[str], today: str) -> s
         "'since 2020') into absolute ISO dates (YYYY-MM-DD) computed from today.\n\n"
         "Allowed keys (ALL optional — omit any you are unsure about):\n"
         f"  provider     one of {available} (pick the one the user names, else omit)\n"
-        "  asset_class  'equity' (only equities are supported today)\n"
+        "  asset_class  'equity', 'crypto', or 'fx' (match what the user describes)\n"
         "  frequency    '1d' (only daily is supported today)\n"
         "  start        ISO date YYYY-MM-DD\n"
         "  end          ISO date YYYY-MM-DD\n"
         f"  preset       one of {presets} (a named universe)\n"
-        "  tickers      a JSON list of US equity symbols, e.g. [\"AAPL\",\"MSFT\"] "
-        "(use this OR preset, not both; prefer it only when the user names symbols)\n"
+        "  tickers      a JSON list of symbols. Equities are plain tickers "
+        "(e.g. [\"AAPL\",\"MSFT\"]); crypto/fx are canonical BASE-QUOTE pairs "
+        "(e.g. [\"BTC-USD\",\"ETH-USD\"] or [\"EUR-USD\"]). Use tickers OR preset, "
+        "not both; prefer tickers only when the user names specific instruments.\n"
         "  n_tickers    positive integer cap on universe size\n\n"
-        "Rules: never invent a provider or preset outside the allowed lists; if the "
-        "user describes a sector/theme and you do not have a matching preset, return a "
-        "small explicit 'tickers' list instead. Keep 'tickers' to at most 15 symbols."
+        "Rules: never invent a provider or preset outside the allowed lists; match "
+        "asset_class to the instruments (crypto coins → 'crypto', currency pairs → "
+        "'fx'); if the user describes a theme with no matching preset, return a small "
+        "explicit 'tickers' list instead. Keep 'tickers' to at most 15 symbols."
     )
 
 
@@ -92,8 +95,8 @@ def validate_proposal(
         out["provider"] = prov
 
     ac = raw.get("asset_class")
-    if isinstance(ac, str) and ac:
-        out["asset_class"] = ac
+    if isinstance(ac, str) and ac.lower() in ("equity", "crypto", "fx"):
+        out["asset_class"] = ac.lower()
 
     freq = raw.get("frequency")
     if isinstance(freq, str) and freq:

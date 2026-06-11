@@ -1,0 +1,8 @@
+# Demo FX universe — canonical BASE-QUOTE currency pairs.
+# Illustrative only. Works on any provider that serves asset_class=fx.
+# NOTE: FX has no reliable volume from these vendors (reported 0 / NaN), so
+# volume-based factors are no-ops on an FX run.
+EUR-USD
+GBP-USD
+USD-JPY
+AUD-USD

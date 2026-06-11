@@ -388,3 +388,121 @@ def test_fmp_provider_offline(monkeypatch, tmp_path):
     panel = load_panel(settings=settings)
     assert {"open", "high", "low", "close", "volume", "vwap", "returns"} <= set(panel)
     assert list(panel["close"].columns) == ["AAA", "BBB"]
+
+
+# ── Phase 6: multi-asset (crypto / FX) ──────────────────────────────────────
+
+def _synthetic_crypto(symbol: str, n: int = 30) -> pd.DataFrame:
+    """Daily crypto OHLCV on a CONTINUOUS calendar (weekends present)."""
+    idx = pd.date_range("2023-01-01", periods=n, freq="D")  # incl Sat/Sun
+    base = 100 + np.arange(n, dtype=float)
+    return pd.DataFrame(
+        {"open": base, "high": base + 1, "low": base - 1,
+         "close": base + 0.5, "volume": np.full(n, 1e6)},
+        index=idx,
+    )
+
+
+def test_weekend_calendar_inference():
+    """365 for weekend-trading (crypto) data, 252 otherwise — no asset_class needed."""
+    from quant_fund_agent.data.frequency import (
+        periods_per_year_from_index,
+        trading_days_per_year_from_index,
+    )
+
+    crypto = pd.date_range("2023-01-01", periods=60, freq="D")     # has weekends
+    equity = pd.bdate_range("2023-01-01", periods=60)              # weekdays only
+    assert trading_days_per_year_from_index(crypto) == 365
+    assert trading_days_per_year_from_index(equity) == 252
+    # daily → 1 bar/day, so periods/year is just the trading-days
+    assert periods_per_year_from_index(crypto) == 365
+    assert periods_per_year_from_index(equity) == 252
+    # explicit asset_class still overrides (back-compat)
+    assert periods_per_year_from_index(equity, "crypto") == 365
+
+
+def test_symbol_translation_per_vendor():
+    from quant_fund_agent.data import symbols as s
+
+    assert s.split_pair("BTC-USD") == ("BTC", "USD")
+    with pytest.raises(ValueError):
+        s.split_pair("AAPL")
+    assert s.to_yfinance("BTC-USD", "crypto") == "BTC-USD"
+    assert s.to_yfinance("EUR-USD", "fx") == "EURUSD=X"
+    assert s.to_yfinance("AAPL", "equity") == "AAPL"
+    assert s.to_fmp("BTC-USD", "crypto") == "BTCUSD"
+    assert s.to_fmp("EUR-USD", "fx") == "EURUSD"
+    assert s.to_alphavantage("BTC-USD", "crypto") == {"symbol": "BTC", "market": "USD"}
+    assert s.to_alphavantage("EUR-USD", "fx") == {"from_symbol": "EUR", "to_symbol": "USD"}
+
+
+def test_alphavantage_crypto_and_fx_reshape():
+    from quant_fund_agent.data.providers.alphavantage import _reshape_crypto, _reshape_fx
+
+    crypto = {"Time Series (Digital Currency Daily)": {
+        "2024-01-02": {"1. open": "42000", "2. high": "43000", "3. low": "41000",
+                       "4. close": "42500", "5. volume": "1234"},
+        "2024-01-01": {"1. open": "41000", "2. high": "42000", "3. low": "40000",
+                       "4. close": "41500", "5. volume": "1000"}}}
+    cdf = _reshape_crypto(crypto)
+    assert list(cdf.columns) == ["open", "high", "low", "close", "volume"]
+    assert cdf.index.is_monotonic_increasing and float(cdf["close"].iloc[-1]) == 42500.0
+
+    # legacy "(USD)" digital-currency format must also parse (substring matcher)
+    crypto_old = {"Time Series (Digital Currency Daily)": {
+        "2024-01-02": {"1a. open (USD)": "42000", "2a. high (USD)": "43000",
+                       "3a. low (USD)": "41000", "4a. close (USD)": "42500",
+                       "5. volume": "1234", "6. market cap (USD)": "9"}}}
+    assert float(_reshape_crypto(crypto_old)["close"].iloc[0]) == 42500.0
+
+    fx = {"Time Series FX (Daily)": {
+        "2024-01-02": {"1. open": "1.10", "2. high": "1.12", "3. low": "1.09",
+                       "4. close": "1.11"}}}
+    fdf = _reshape_fx(fx)
+    assert "volume" in fdf.columns and fdf["volume"].isna().all()  # FX has no volume
+
+
+def test_fmp_raw_reshape():
+    from quant_fund_agent.data.providers.fmp import _reshape_raw
+
+    payload = [
+        {"symbol": "BTCUSD", "date": "2024-01-02", "open": 42000, "high": 43000,
+         "low": 41000, "close": 42500, "volume": 10},
+        {"symbol": "BTCUSD", "date": "2024-01-01", "open": 41000, "high": 42000,
+         "low": 40000, "close": 41500, "volume": 9},
+    ]
+    df = _reshape_raw(payload)
+    assert list(df.columns) == ["open", "high", "low", "close", "volume"]
+    assert df.index.is_monotonic_increasing and float(df["close"].iloc[0]) == 41500.0
+
+
+def test_provider_asset_class_validation():
+    from quant_fund_agent.config import DataSettings, Settings
+    from quant_fund_agent.data.panel import get_provider
+
+    # lobster is equity-only → asking it for crypto fails fast with a clear error
+    with pytest.raises(ValueError, match="does not serve asset_class"):
+        get_provider(Settings(data=DataSettings(provider="lobster", asset_class="crypto")))
+    # yfinance serves crypto → instantiates fine
+    prov = get_provider(Settings(data=DataSettings(provider="yfinance", asset_class="crypto")))
+    assert prov.name == "yfinance"
+
+
+def test_yfinance_crypto_panel_offline_annualises_365(monkeypatch, tmp_path):
+    """Crypto panel (weekend bars) loads through the seam and annualises at 365."""
+    from quant_fund_agent.config import DataSettings, Settings
+    from quant_fund_agent.data import load_panel
+    from quant_fund_agent.data.frequency import periods_per_year_from_index
+    from quant_fund_agent.data.providers.yfinance import YFinanceProvider
+
+    monkeypatch.setattr(
+        YFinanceProvider, "_fetch",
+        lambda self, syms: {s: _synthetic_crypto(s) for s in syms})
+    settings = Settings(data=DataSettings(
+        provider="yfinance", asset_class="crypto", tickers=["BTC-USD", "ETH-USD"],
+        start="2023-01-01", end="2023-01-31", frequency="1d", cache_dir=str(tmp_path)))
+    panel = load_panel(settings=settings)
+    assert list(panel["close"].columns) == ["BTC-USD", "ETH-USD"]
+    # weekend bars present → 365-day annualisation, no asset_class plumbing needed
+    assert (panel["close"].index.dayofweek >= 5).any()
+    assert periods_per_year_from_index(panel["close"].index) == 365
