@@ -22,6 +22,7 @@ returns the wide field panel ``{field: DataFrame(index × symbols)}``.
 from __future__ import annotations
 
 import logging
+import time
 from pathlib import Path
 from typing import Callable
 
@@ -30,6 +31,10 @@ import pandas as pd
 log = logging.getLogger("data.cache")
 
 FetchFn = Callable[[list[str]], dict[str, pd.DataFrame]]
+
+# Slow-moving non-OHLCV groups (fundamentals/estimates/events) refresh on a long
+# TTL rather than per-bar coverage — see :func:`cached_records`.
+DEFAULT_RECORDS_TTL_DAYS = 90
 
 
 def _coverage_tolerance(freq: str) -> pd.Timedelta:
@@ -145,3 +150,78 @@ def cached_fetch(
             per_symbol[sym] = merged
 
     return _assemble(per_symbol, symbols, start_ts, end_ts)
+
+
+# ── slow-moving record cache (fundamentals / estimates / events) ─────────────
+
+def _records_path(cache_dir, provider, asset_class, group, symbol) -> Path:
+    """Parquet path for a non-OHLCV ``group`` — a sibling of the price cache.
+
+    ``group`` (``fundamentals``/``estimates``/…) sits where the price cache's
+    ``freq`` ("1d") sits, and is never a freq value, so the OHLCV cache tree is
+    untouched: ``<cache_dir>/<provider>/<asset_class>/<group>/<symbol>.parquet``.
+    """
+    safe = str(symbol).replace("/", "_").replace("\\", "_")
+    return Path(cache_dir) / provider / asset_class / group / f"{safe}.parquet"
+
+
+def _is_fresh(path: Path, ttl: pd.Timedelta) -> bool:
+    """True if ``path`` exists and was written within ``ttl`` (file mtime)."""
+    if not path.exists():
+        return False
+    try:
+        age_s = time.time() - path.stat().st_mtime
+    except OSError:
+        return False
+    return age_s <= ttl.total_seconds()
+
+
+def cached_records(
+    provider: str,
+    symbols: list[str],
+    asset_class: str,
+    group: str,
+    cache_dir: str,
+    fetch_fn: FetchFn,
+    *,
+    ttl_days: int = DEFAULT_RECORDS_TTL_DAYS,
+) -> dict[str, pd.DataFrame]:
+    """Cache per-symbol **record** frames (availability-indexed, not OHLCV bars).
+
+    Unlike :func:`cached_fetch`, this returns the *per-symbol* frames (the caller
+    aligns them onto the price index later) and refreshes on a **TTL** — point
+    events have no contiguous "coverage" to check, so a file written within
+    ``ttl_days`` is reused; a stale/absent one is refetched and unioned with the
+    cache.  Caching is best-effort and never fails the load.
+    """
+    ttl = pd.Timedelta(days=int(ttl_days))
+    out: dict[str, pd.DataFrame] = {}
+    to_fetch: list[tuple[str, Path, pd.DataFrame | None]] = []
+    for sym in symbols:
+        path = _records_path(cache_dir, provider, asset_class, group, sym)
+        cached = _read_cached(path)
+        if cached is not None and _is_fresh(path, ttl):
+            out[sym] = cached
+        else:
+            to_fetch.append((sym, path, cached))
+
+    if to_fetch:
+        log.info("records cache (%s): %d/%d fresh, fetching %d from %s",
+                 group, len(out), len(symbols), len(to_fetch), provider)
+        fetched = fetch_fn([s for s, _, _ in to_fetch]) or {}
+        for sym, path, cached in to_fetch:
+            new = fetched.get(sym)
+            if new is None or new.empty:
+                if cached is not None:
+                    out[sym] = cached  # serve stale rather than nothing
+                continue
+            new = new.copy()
+            new.index = pd.to_datetime(new.index)
+            merged = _union(cached, new)
+            try:
+                _write_cached(path, merged)
+            except Exception as e:  # best-effort
+                log.warning("records cache write failed (%s): %s", path, e)
+            out[sym] = merged
+
+    return out

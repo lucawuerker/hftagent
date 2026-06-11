@@ -38,9 +38,22 @@ timespan and write `quant.config.yaml`, or
 `python -m quant_fund_agent.setup --assist "<plain-English description>"` to have
 an LLM draft a config you confirm (`setup_assist.py`; validated to legal values,
 falls back to the deterministic wizard with no LLM key). See
-`docs/data-layer/ROADMAP.md`. Next data-layer step (designed, not built):
-non-OHLCV fundamental/alternative data fields — see
-`docs/data-layer/FUNDAMENTAL_AND_ALT_DATA.md`.
+`docs/data-layer/ROADMAP.md`.
+
+**Non-OHLCV data — Stage 7 done (fundamentals + estimates/events).** Factors can
+now read availability-stamped fundamentals (`sector`/`peRatio`/`roe`/`revenue`/…),
+analyst estimates (`epsEstimate`/`revenueEstimate`) and earnings events
+(`epsSurprise`) from FMP + AlphaVantage. Point-in-time is enforced in the data
+layer (`data/fundamentals.py`: stamp at filing/`reportedDate` else fiscal-end +
+lag → forward-fill onto the daily index with a staleness cap; `_truncate_as_of`
+then keeps look-ahead out). Canonical field vocabulary + per-vendor normalization
+(`data/fields.py`), enriched `fundamental` tier + new `estimates`/`events` tiers
+(gating unchanged), a quarterly-TTL record cache (`cache.py::cached_records`), an
+additive `ApiProvider._fetch_fundamentals` hook, the `indneutralize` wide-frame
+fix, and example factors in `factors/fundamentals/`. Equity-only; `QF_FUNDAMENTALS=0`
+to opt out. Live: AV's free tier delivers these; FMP's free tier serves only
+`profile` and paywalls the rest (factors degrade, never crash). **Next (designed,
+not built):** sentiment + macro — see `docs/data-layer/FUNDAMENTAL_AND_ALT_DATA.md`.
 
 ## Roadmap
 - Longer backtests: simulate weekly researcher updates and trade over an

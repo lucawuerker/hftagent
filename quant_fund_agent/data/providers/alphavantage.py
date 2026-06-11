@@ -25,6 +25,24 @@ import os
 
 import pandas as pd
 
+from quant_fund_agent.data.fields import (
+    AV_EARNINGS_ACTUAL_KEYS,
+    AV_EARNINGS_ESTIMATE_KEYS,
+    AV_NET_INCOME_KEYS,
+    AV_PERIOD_END_KEYS,
+    AV_PROFILE_MAP,
+    AV_REPORTED_DATE_KEYS,
+    AV_REVENUE_KEYS,
+    coerce_numeric,
+    normalize,
+    pick,
+)
+from quant_fund_agent.data.fundamentals import (
+    DEFAULT_REPORTING_LAG_DAYS,
+    availability_date,
+    build_record_frame,
+    parse_date,
+)
 from quant_fund_agent.data.providers._http import RateLimited, request_json
 from quant_fund_agent.data.providers.base import ApiProvider
 from quant_fund_agent.data.symbols import to_alphavantage
@@ -34,6 +52,16 @@ log = logging.getLogger("data.providers.alphavantage")
 
 AV_BASE = "https://www.alphavantage.co/query"
 _MIN_INTERVAL = 13.0  # ~5 requests/minute free tier
+
+# Static-label availability sentinel (sector/industry are near-constant).
+_STATIC_AVAILABILITY = pd.Timestamp("1990-01-01")
+
+# Canonical non-OHLCV fields AV fills with a PIT-safe date (no leaky snapshot
+# ratios — those have no historical date on the free tier).
+_AV_NON_OHLCV = frozenset(
+    {"sector", "industry", "revenue", "netMargin", "eps",
+     "epsEstimate", "epsSurprise"}
+)
 
 _OHLCV = ("open", "high", "low", "close", "volume")
 _COLMAP = {
@@ -110,12 +138,105 @@ def _reshape_fx(payload: dict) -> pd.DataFrame | None:
     return df.dropna(how="all")
 
 
+# ── fundamentals: per-endpoint JSON → availability-stamped row dicts ──────────
+
+def _av_profile_rows(payload) -> list[dict]:
+    """COMPANY_OVERVIEW → one static-label row (sector/industry).
+
+    The overview is an undated *current* snapshot, so only the near-constant
+    labels are safe to backfill; its ratios would leak and are skipped.
+    """
+    if not isinstance(payload, dict):
+        return []
+    vals = normalize(payload, AV_PROFILE_MAP)
+    return [{"availability": _STATIC_AVAILABILITY, **vals}] if vals else []
+
+
+def _av_income_rows(payload, lag_days: int) -> list[dict]:
+    """INCOME_STATEMENT quarterlyReports → revenue + derived netMargin."""
+    reports = payload.get("quarterlyReports") if isinstance(payload, dict) else None
+    out: list[dict] = []
+    for rec in reports or []:
+        avail = availability_date(
+            None, pick(rec, AV_PERIOD_END_KEYS), reporting_lag_days=lag_days)
+        if avail is None:
+            continue
+        revenue = coerce_numeric(pick(rec, AV_REVENUE_KEYS))
+        net_income = coerce_numeric(pick(rec, AV_NET_INCOME_KEYS))
+        vals: dict = {}
+        if revenue is not None:
+            vals["revenue"] = revenue
+            if net_income is not None and revenue != 0:
+                vals["netMargin"] = net_income / revenue
+        if vals:
+            out.append({"availability": avail, **vals})
+    return out
+
+
+def _av_earnings_rows(payload) -> list[dict]:
+    """EARNINGS quarterlyEarnings → eps + estimate + surprise at the reportedDate."""
+    quarterly = payload.get("quarterlyEarnings") if isinstance(payload, dict) else None
+    out: list[dict] = []
+    for rec in quarterly or []:
+        avail = parse_date(pick(rec, AV_REPORTED_DATE_KEYS))
+        if avail is None:
+            continue
+        actual = coerce_numeric(pick(rec, AV_EARNINGS_ACTUAL_KEYS))
+        est = coerce_numeric(pick(rec, AV_EARNINGS_ESTIMATE_KEYS))
+        vals: dict = {}
+        if actual is not None:
+            vals["eps"] = actual
+        if est is not None:
+            vals["epsEstimate"] = est
+        if actual is not None and est is not None:
+            vals["epsSurprise"] = actual - est
+        if vals:
+            out.append({"availability": avail, **vals})
+    return out
+
+
 class AlphaVantageProvider(ApiProvider):
     name = "alphavantage"
     asset_classes = ("equity", "crypto", "fx")
 
     def available_fields(self) -> frozenset[str]:
+        # Fundamentals are equity-only; crypto/fx stay OHLCV (`standard`).
+        if str(self.data.asset_class).lower() == "equity":
+            return TIERS["standard"] | _AV_NON_OHLCV
         return TIERS["standard"]
+
+    def _fetch_fundamentals(self, symbols: list[str]) -> dict[str, pd.DataFrame]:
+        key = os.getenv("ALPHAVANTAGE_API_KEY")
+        if not key:
+            raise ValueError("ALPHAVANTAGE_API_KEY not set in .env (see .env.example).")
+        lag = int(getattr(self.data, "reporting_lag_days", DEFAULT_REPORTING_LAG_DAYS))
+
+        out: dict[str, pd.DataFrame] = {}
+        for canonical in symbols:
+            native = to_alphavantage(canonical, "equity")["symbol"]
+            rows: list[dict] = []
+            rows += _av_profile_rows(self._fund_get("OVERVIEW", native, key))
+            rows += _av_income_rows(self._fund_get("INCOME_STATEMENT", native, key), lag)
+            rows += _av_earnings_rows(self._fund_get("EARNINGS", native, key))
+            frame = build_record_frame(rows)
+            if frame is not None and not frame.empty:
+                out[canonical] = frame
+        return out
+
+    def _fund_get(self, function: str, symbol: str, key: str):
+        """One fundamental GET; rate limits propagate, other errors degrade."""
+        try:
+            payload = request_json(
+                AV_BASE, {"function": function, "symbol": symbol, "apikey": key},
+                provider="alphavantage", min_interval=_MIN_INTERVAL,
+            )
+            _check_limits(payload)  # raises RateLimited on Note/Information
+            return payload
+        except RateLimited:
+            raise
+        except Exception as e:  # noqa: BLE001
+            log.warning("alphavantage: %s fetch failed for %s: %s", function, symbol, e)
+            return {}
 
     def _fetch(self, symbols: list[str]) -> dict[str, pd.DataFrame]:
         key = os.getenv("ALPHAVANTAGE_API_KEY")

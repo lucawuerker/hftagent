@@ -58,6 +58,12 @@ class DataSettings:
     end: str | None = None             # ISO date, exclusive (API providers)
     dtype: str = "float32"             # panel numeric precision
 
+    # Non-OHLCV (fundamentals / estimates / events) enrichment — equity only.
+    fundamentals: bool = True          # off-switch (also QF_FUNDAMENTALS=0)
+    reporting_lag_days: int = 60       # availability = fiscal-end + lag (no filing date)
+    fundamentals_staleness_days: int = 400  # drop a fundamental older than this → NaN
+    fundamentals_ttl_days: int = 90    # quarterly cache refresh for slow-moving data
+
 
 @dataclass
 class Settings:

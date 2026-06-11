@@ -1,12 +1,63 @@
-# Beyond OHLCV — Fundamental & Alternative Data Fields (design doc)
+# Beyond OHLCV — Fundamental & Alternative Data Fields
 
-> **Status: PROPOSED (not built).** Forward-looking spec for the data-layer stage
-> *after* the multi-asset milestone (Phases 0–6). Companion to
-> [`ARCHITECTURE.md`](ARCHITECTURE.md), [`DATA_PROVIDERS.md`](DATA_PROVIDERS.md),
-> [`ROADMAP.md`](ROADMAP.md). FMP "stable" endpoint paths below should be
-> **re-confirmed against the live docs at build time** — the site blocks
-> scraping, so they're from working knowledge of the v3→stable migration, not a
-> fresh fetch. AlphaVantage `function=` names are from its public docs.
+> **Status: PARTIALLY IMPLEMENTED.** The first slice — **fundamentals +
+> estimates + events** on **FMP and AlphaVantage**, with full point-in-time
+> machinery — is built and tested (see "What's built" below). **Sentiment and
+> macro remain proposed** (the symbol-agnostic macro shape question is still
+> open). Companion to [`ARCHITECTURE.md`](ARCHITECTURE.md),
+> [`DATA_PROVIDERS.md`](DATA_PROVIDERS.md), [`ROADMAP.md`](ROADMAP.md).
+
+## What's built (fundamentals + estimates/events)
+
+The non-OHLCV vertical slice that turns the fund from a technical-signal
+generator into one that can read fundamentals:
+
+- **Canonical field vocabulary + per-vendor normalization** —
+  `quant_fund_agent/data/fields.py` (FMP `peRatio` / AV `PERatio` → one
+  canonical `peRatio`, the ticker-level analogue of `data/symbols.py`).
+- **Point-in-time alignment** — `quant_fund_agent/data/fundamentals.py` stamps
+  every value at its **availability date** (vendor filing/`reportedDate`, else
+  `fiscalDateEnding + reporting_lag`, default 60d) and forward-fills onto the
+  daily panel index with a staleness cap. Because it rides the same index as
+  prices, `modeling/service._truncate_as_of` enforces PIT for free.
+- **Tiers** — `data/tiers.py` enriches `fundamental` and adds `estimates` +
+  `events`; gating (`mcp/catalog_service`) needed **zero** changes.
+- **Cache** — `data/cache.py::cached_records` caches per-symbol record frames in
+  a sibling namespace (`…/<provider>/<asset_class>/fundamentals/<symbol>.parquet`)
+  on a quarterly TTL; the OHLCV cache tree is untouched.
+- **Providers** — `data/providers/{fmp,alphavantage}.py` gain
+  `_fetch_fundamentals` (the base class caches + aligns; an additive
+  `ApiProvider._fetch_fundamentals` hook). Equity-only; `QF_FUNDAMENTALS=0` /
+  `DataSettings.fundamentals` to opt out.
+- **`indneutralize` fix** — `factors/ops.py` now accepts the wide `data["sector"]`
+  frame (collapses to a per-ticker label Series), so alphas 048/058/059 actually
+  sector-neutralize instead of silently skipping — the **latent crash** that the
+  first real `sector` provider would have triggered.
+- **Example factors** — `factors/fundamentals/` (`value_earnings_yield`,
+  `quality_roe`, `earnings_surprise_drift`), defensive against an
+  advertised-but-undelivered field.
+- **Researcher prompt** — `agents/factor_research/prompts.py` teaches the new
+  field vocabulary + the look-ahead rule (the fields are *already* PIT; don't
+  shift them).
+
+**Live findings (verified):** AlphaVantage's free tier **does** serve
+fundamentals (sector/eps/epsEstimate/epsSurprise/netMargin/revenue) with correct
+PIT; FMP's free tier serves only `profile` (sector/industry) and **paywalls**
+(HTTP 402) `key-metrics`/`ratios`/`income-statement`/`earnings`, which degrade
+per-endpoint. So gating advertises a field the key may not actually deliver —
+factors must (and now do) degrade rather than `KeyError`. Restatement caveat:
+free tiers expose only the latest value per fiscal period (no as-first-reported
+vintages); availability stamping is still conservative.
+
+> The FMP "stable" endpoint paths below were **re-confirmed against the live
+> API at build time** (the `historical-price-eod` OHLCV paths and `profile` work
+> on the free tier; the statement/ratio endpoints return 402 without a paid
+> plan). AlphaVantage `function=` names are from its public docs and verified
+> live on the free tier.
+
+---
+
+## Original design notes (retained for the deferred sentiment/macro work)
 
 ## Why this matters
 

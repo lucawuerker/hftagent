@@ -294,10 +294,18 @@ inferred from the data itself.
 
 Vendor pulls are parquet-cached under `data/market/`. Factors are **capability-gated**
 to the active provider's fields (microstructure factors hide on plain-OHLCV
-vendors), and annualization is inferred from the data's frequency. See
-`docs/data-layer/` for the full design — including
-[`FUNDAMENTAL_AND_ALT_DATA.md`](docs/data-layer/FUNDAMENTAL_AND_ALT_DATA.md) for
-the planned non-OHLCV (fundamentals / sentiment / macro) data fields.
+vendors), and annualization is inferred from the data's frequency.
+
+**Beyond OHLCV — fundamentals, estimates & events.** On an equity universe, FMP
+and AlphaVantage also supply non-price fields — `sector`, `peRatio`, `roe`,
+`revenue`, `eps`, analyst `epsEstimate`/`revenueEstimate`, and earnings
+`epsSurprise`. These are **point-in-time**: each value is stamped at its filing /
+report date (or fiscal-end + a reporting lag) and forward-filled onto the daily
+panel, so a backtest never sees a number before it was public. A factor just
+declares the field in `inputs` and the gating layer routes it to a capable
+provider (`QF_FUNDAMENTALS=0` to opt out). See
+[`FUNDAMENTAL_AND_ALT_DATA.md`](docs/data-layer/FUNDAMENTAL_AND_ALT_DATA.md);
+sentiment + macro are the next (planned) fields.
 
 **LOBSTER specifics:** place CSVs under `ticker_data/` (or set `DATA_DIR`). The
 loader (`backtesting/data_loader.py`) builds an aligned panel of OHLCV plus

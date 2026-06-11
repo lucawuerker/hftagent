@@ -151,11 +151,44 @@ Each phase is independently shippable with its own test gate
     Selector→Architect(lasso/ridge)→Statistician(REJECT, legit)→PM on 730 daily
     crypto bars, 365-annualized, 98 factors visible (microstructure gated).
 
+## Beyond the milestone — non-OHLCV data
+
+- [x] **Stage 7 — Fundamentals + estimates/events (FMP + AlphaVantage)** ✅ 2026-06-11
+  - First non-OHLCV slice: factors can now read availability-stamped
+    fundamentals (sector/peRatio/roe/revenue/eps/…), analyst estimates
+    (epsEstimate/revenueEstimate) and earnings events (epsSurprise). Full
+    point-in-time machinery (`data/fundamentals.py`: filing/`reportedDate` else
+    fiscal-end + lag → forward-fill onto the daily index with a staleness cap),
+    a canonical field vocabulary + per-vendor normalization (`data/fields.py`),
+    enriched `fundamental` tier + new `estimates`/`events` tiers (gating
+    unchanged), a quarterly-TTL record cache (`cache.py::cached_records`), an
+    additive `ApiProvider._fetch_fundamentals` hook, the `indneutralize`
+    wide-frame fix (un-breaks alphas 048/058/059), three example factors, and
+    the researcher prompt's new field/look-ahead vocabulary.
+  - Gate met: full suite green (126; +37 in `tests/test_fundamentals.py`),
+    new/core modules ≥80% coverage (fundamentals 93%, fields 95%, base/panel 95%).
+    **Live** `verify_fundamentals.py`: AlphaVantage free tier serves fundamentals
+    with correct PIT (epsSurprise steps at earnings dates, NaN before);
+    `earnings_surprise_drift` produced sensible live ranks; the `alpha_058`
+    latent-bug fix ran on real FMP `sector`. **Finding:** FMP's free tier paywalls
+    the deep statement/ratio endpoints (HTTP 402) — only `profile` is free — so
+    factors degrade on advertised-but-undelivered fields. **Deferred:** sentiment
+    + macro (`FUNDAMENTAL_AND_ALT_DATA.md`).
+
 ## Follow-ups (out of scope here)
+- Non-OHLCV **sentiment** (NEWS_SENTIMENT / social) and **macro** (CPI/yield/GDP —
+  needs the symbol-agnostic panel-shape decision). See `FUNDAMENTAL_AND_ALT_DATA.md`.
 - LLM-provider abstraction (OpenAI → +Anthropic/local) behind one env var.
 - Live index-constituent resolution (point-in-time, survivorship-aware).
 
 ## Status log
+- 2026-06-11: Stage 7 complete — **non-OHLCV fundamentals + estimates/events**
+  on FMP + AlphaVantage, with point-in-time availability stamping +
+  forward-fill alignment, canonical field normalization, new `estimates`/`events`
+  tiers, a quarterly-TTL record cache, the `indneutralize` wide-frame fix, three
+  example factors, and the researcher prompt's new vocabulary. Full suite green
+  (126); core modules ≥80% coverage. Verified live (AV free tier delivers PIT
+  fundamentals; FMP free tier paywalls the deep endpoints → graceful degrade).
 - 2026-06-09: Plan approved; docs created; Phase 0 started.
 - 2026-06-10: Phase 0 complete (data layer + routing, byte-identical, tests
   green). Phase 1 complete (frequency-aware annualization, full suite green).

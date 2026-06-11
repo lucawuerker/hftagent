@@ -16,6 +16,7 @@ scikit-learn>=1.3.0
 joblib>=1.3.0
 mcp>=1.0.0
 pytest>=8.0.0
+pytest-cov>=4.0.0    # coverage reporting (PYTHONPATH=. pytest --cov=quant_fund_agent)
 # xgboost / lightgbm need an OpenMP runtime (macOS: `brew install libomp`).
 # They are auto-detected and dropped from the architect's model menu when the
 # runtime is missing, so the rest of the toolbox works without them.

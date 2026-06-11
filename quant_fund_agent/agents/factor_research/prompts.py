@@ -59,6 +59,35 @@ Notes:
 - All fields are aligned on the same DatetimeIndex and the same ticker
   columns, so cross-field arithmetic is safe.
 - The data is per 10-second bar.  Bar count per trading day ≈ 2340.
+
+Fundamental / estimate / event fields (ONLY present when the configured
+data provider supplies them — e.g. FMP / AlphaVantage on a daily equity
+universe; absent on LOBSTER / yfinance / crypto.  If your idea needs one,
+list it in ``inputs`` and the gating layer will route the factor only to a
+provider that has it):
+
+    sector    : GICS-style sector label (text, e.g. "Technology"). Static.
+    industry  : finer industry label (text). Static.
+    marketCap : market capitalization in USD (float, per fiscal quarter).
+    peRatio   : price / earnings (float; negative for loss-makers).
+    pbRatio   : price / book.    psRatio : price / sales.
+    roe       : return on equity.   roic : return on invested capital.
+    debtToEquity, currentRatio    : leverage / liquidity ratios.
+    grossMargin, netMargin        : profitability margins (fractions).
+    revenue   : quarterly revenue (USD).   eps : reported EPS (USD).
+    freeCashFlow : free cash flow per share.
+    epsEstimate, revenueEstimate  : analyst consensus for the latest quarter.
+    epsSurprise  : reported EPS − estimate (the post-earnings-drift signal).
+
+LOOK-AHEAD — read carefully.  These fields are **already point-in-time**:
+each value is stamped at its *availability date* (the filing / report date,
+or fiscal-period-end + a reporting lag) and forward-filled, so reading
+``data["peRatio"]`` at date t only ever sees what was public by t.  You do
+NOT need to (and must not) shift them yourself.  They are **quarterly step
+functions**: ``NaN`` before a name's first report and after a long staleness
+gap, and otherwise constant between reports — so be defensive (``.fillna``,
+``df.where(...)``) and prefer cross-sectional ops (``rank``) and slow changes
+(quarter-over-quarter ``delta``) over fast time-series ops.
 """
 
 

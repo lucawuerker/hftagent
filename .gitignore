@@ -37,3 +37,6 @@ data/market/
 # User onboarding config written by `python -m quant_fund_agent.setup`. Holds no
 # secrets (those stay in .env) but is environment-specific, so left untracked.
 quant.config.yaml
+# coverage (pytest-cov)
+.coverage
+htmlcov/

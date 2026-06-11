@@ -133,6 +133,36 @@ symbols** (`BTC-USD`, `EUR-USD`) translated to each vendor's native form in
 `data/symbols.py`; the cache and panel are keyed by the canonical symbol. See
 [`DATA_PROVIDERS.md`](DATA_PROVIDERS.md).
 
+## Non-OHLCV fundamentals / estimates / events (point-in-time)
+
+Beyond OHLCV, providers can supply **fundamentals** (`sector`, `peRatio`, `roe`,
+`revenue`, …), **estimates** (`epsEstimate`, `revenueEstimate`) and **events**
+(`epsSurprise`) — see [`FUNDAMENTAL_AND_ALT_DATA.md`](FUNDAMENTAL_AND_ALT_DATA.md).
+These are *not* OHLCV-with-more-columns; the central risk is look-ahead:
+
+- **Canonical vocabulary** (`data/fields.py`) normalizes each vendor's names
+  (FMP `peRatio` / AV `PERatio` → `peRatio`).
+- **Availability stamping** (`data/fundamentals.py`) tags every value with the
+  date it became *knowable* — the vendor filing/`reportedDate`, else
+  `fiscalDateEnding + reporting_lag` — and forward-fills onto the daily panel
+  index with a staleness cap. A value is therefore `NaN` until its filing date.
+  Because the result shares the price `DatetimeIndex`, the existing
+  `_truncate_as_of` slice enforces PIT with no per-factor effort.
+- **Additive provider hook** — `ApiProvider._fetch_fundamentals` returns
+  per-symbol availability-indexed frames; the base `load()` caches them
+  (`cache.py::cached_records`, a sibling cache namespace on a quarterly TTL) and
+  aligns them onto the price index, then merges into the panel. Equity-only;
+  `QF_FUNDAMENTALS=0` opts out.
+- **Tiers + gating unchanged** — `fundamental` is enriched and `estimates` /
+  `events` are new tiers; a factor declares the fields in `inputs` and gating
+  routes it to a capable provider exactly as before. Gating advertises *capability*,
+  so a factor can be admitted on a key that doesn't actually deliver the field
+  (e.g. FMP's free tier paywalls statements) — factors degrade to `NaN` rather
+  than crash.
+- **`indneutralize`** (`factors/ops.py`) now accepts the wide `data["sector"]`
+  frame, so the sector-neutralizing seed alphas work the moment a provider
+  supplies `sector`.
+
 ## Transaction costs on vendors without a spread field
 
 `simulation/execution.py::cost_rate_panel()` already **falls back to

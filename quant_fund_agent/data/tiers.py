@@ -19,15 +19,23 @@ OHLCV provider satisfies factors that need them.
 
 from __future__ import annotations
 
+from quant_fund_agent.data.fields import (
+    ESTIMATE_FIELDS,
+    EVENT_FIELDS,
+    FUNDAMENTAL_FIELDS,
+)
+
 # Each tier lists the fields it ADDS; ``available_fields`` for a provider is the
-# union of the tiers it can fill.
+# union of the tiers it can fill.  ``fundamental`` / ``estimates`` / ``events``
+# carry the non-OHLCV vocabulary from :mod:`quant_fund_agent.data.fields` (kept
+# there so the normalization maps and the tier sets can't drift apart).
 TIERS: dict[str, frozenset[str]] = {
     "standard": frozenset(
         {"open", "high", "low", "close", "volume", "vwap", "returns"}
     ),
-    "fundamental": frozenset(
-        {"sector", "industry", "subindustry", "cap"}
-    ),
+    "fundamental": FUNDAMENTAL_FIELDS,
+    "estimates": ESTIMATE_FIELDS,
+    "events": EVENT_FIELDS,
     "microstructure": frozenset(
         {
             "trade", "orderFlow", "hidden", "auction",
@@ -44,7 +52,13 @@ SYNTHESIZED_FIELDS: frozenset[str] = frozenset({"vwap", "returns"})
 
 # Tier "rank" only for choosing a human-readable label for a factor's required
 # tier (display/filtering).  Higher = richer data requirement.
-_TIER_RANK = {"standard": 0, "fundamental": 1, "microstructure": 2}
+_TIER_RANK = {
+    "standard": 0,
+    "fundamental": 1,
+    "estimates": 2,
+    "events": 3,
+    "microstructure": 4,
+}
 
 
 def all_known_fields() -> frozenset[str]:

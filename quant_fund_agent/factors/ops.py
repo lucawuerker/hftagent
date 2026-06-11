@@ -162,16 +162,25 @@ def power(df: pd.DataFrame, a: float) -> pd.DataFrame:
 
 def indneutralize(
     df: pd.DataFrame,
-    groups: pd.Series,
+    groups: "pd.Series | pd.DataFrame",
 ) -> pd.DataFrame:
     """Industry-neutralize by subtracting the group mean per row.
 
     Args:
         df: signal DataFrame (index=dates, columns=tickers).
-        groups: Series mapping ticker → group label (e.g. GICS
-                sub-industry).  Tickers not in ``groups`` are left
-                un-neutralized.
+        groups: either a Series mapping ticker → group label (e.g. GICS
+                sector), **or** the wide panel field ``data["sector"]``
+                (dates × tickers of labels) the data layer now supplies.  A
+                wide frame is collapsed to the latest known label per ticker
+                (sector is near-static), so callers can pass ``data["sector"]``
+                directly.  Tickers with no label are left un-neutralized.
     """
+    if isinstance(groups, pd.DataFrame):
+        # Collapse the wide (dates × tickers) label frame to a ticker→label
+        # Series using each ticker's most recent non-null label.
+        groups = groups.ffill().bfill().iloc[-1]
+    groups = groups.dropna()
+
     result = df.copy()
     for _label, tickers in groups.groupby(groups).groups.items():
         cols = [c for c in tickers if c in df.columns]

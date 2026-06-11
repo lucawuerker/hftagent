@@ -114,3 +114,32 @@ vendor-agnostic. Presets: `crypto_demo`, `fx_demo`.
   factors are no-ops on an FX run. Prefer one `asset_class` per run.
 - **FX weekend bars are vendor-dependent**: FMP stamps weekend FX bars (→ 365),
   yfinance/AV are weekday-only (→ 252). Each is annualized by its own sampling.
+
+## Non-OHLCV fundamentals / estimates / events (Stage 7, equity-only)
+
+A provider may also supply non-OHLCV fields by overriding
+`ApiProvider._fetch_fundamentals(symbols)` → per-symbol **availability-stamped**
+record frames; the base `load()` caches (`cache.py::cached_records`, quarterly
+TTL) and aligns them onto the price index (`data/fundamentals.py`), then merges
+into the panel. Declare the canonical fields you fill in `available_fields()`
+(only what you actually deliver). Equity-only; `QF_FUNDAMENTALS=0` opts out. See
+[`FUNDAMENTAL_AND_ALT_DATA.md`](FUNDAMENTAL_AND_ALT_DATA.md).
+
+| Vendor | Fields delivered | Endpoints | Notes |
+|--------|------------------|-----------|-------|
+| `fmp` | sector, industry (free); marketCap, peRatio, pbRatio, psRatio, roe, roic, debtToEquity, currentRatio, grossMargin, netMargin, revenue, eps, freeCashFlow, epsEstimate, revenueEstimate, epsSurprise (**paid**) | `profile`, `key-metrics`, `ratios`, `income-statement`, `earnings` | Free tier returns only `profile`; the statement/ratio endpoints **402 Payment Required**. Degrades per-endpoint. |
+| `alphavantage` | sector, industry, revenue, netMargin, eps, epsEstimate, epsSurprise | `OVERVIEW`, `INCOME_STATEMENT`, `EARNINGS` | **Free tier delivers these.** Only static labels are taken from the undated `OVERVIEW` snapshot; eps/surprise use the real `reportedDate`. Heavily rate-limited (≈25/day). |
+
+**Caveats.**
+- **Look-ahead is enforced in the data layer**: each value is stamped at its
+  availability date (filing/`reportedDate`, else `fiscalDateEnding +
+  reporting_lag_days`, default 60) and forward-filled with a staleness cap, so a
+  fundamental is `NaN` before it was filed. The `_truncate_as_of` slice then
+  needs no special handling.
+- **Advertised ≠ delivered**: gating admits a factor when the provider advertises
+  its field, but a key may not actually deliver it (FMP free tier) — factors must
+  read `data.get("field")` and degrade to `NaN`, never `KeyError`.
+- **No restatement vintages** on free tiers: the latest value per fiscal period is
+  used (mild restatement leak); availability stamping is still conservative.
+- AV's `OVERVIEW` ratios are a *current* snapshot (undated) → **not** backfilled
+  (that would leak); only sector/industry are taken from it.
