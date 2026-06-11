@@ -103,9 +103,24 @@ Each phase is independently shippable with its own test gate
   - Gate met: full suite green (73); offline reshape/limit/load tests; **live FMP
     + AV fetches** (prices cross-check consistent); a **real paid `run_fund.py` on
     FMP** ran the full pipeline on adjusted daily data with no LOBSTER data.
-- [ ] **Phase 5 — Onboarding polish + docs**
-  - `setup_wizard.py --assist` (LLM proposes config, user confirms).
-  - Finalize these docs; update `README.md` + `CLAUDE.md`.
+- [x] **Phase 5 — Onboarding polish + docs** ✅ 2026-06-11
+  - `quant_fund_agent/setup_assist.py` + `setup.py --assist`: an LLM turns a
+    plain-English description into a **proposed** config. The proposal is fed to
+    the deterministic wizard as *confirmable defaults* (precedence stays
+    **CLI flag > LLM proposal > built-in default**); every value is validated
+    against ground truth (usable providers, existing presets, coherent
+    `start < end` dates) so the model can only narrow to legal values. Any assist
+    failure (no LLM key / network / bad JSON) falls back to the deterministic
+    wizard — onboarding never depends on an LLM. Built via the shared
+    `llm.make_chat_llm` factory (`SETUP_ASSIST_LLM_MODEL` to override).
+  - Fixed onboarding-doc drift (advertised `sp500`/`nasdaq100` presets that don't
+    exist → actual `demo`/`sp100`, with a note on adding your own).
+  - Gate met: full suite green (84); 11 offline assist unit tests
+    (`tests/test_setup_assist.py`) cover validation/parsing/fallback/precedence;
+    a **live** `scripts/verify/verify_phase5_assist.py` proved real LLM proposals
+    stay in-bounds (incl. an adversarial "Bloomberg/weekly" prompt that was
+    dropped/coerced), wrote a real config from free text, and confirmed graceful
+    fallback under a forced LLM outage.
 - [ ] **Phase 6 — Multi-asset (LATER)**
   - Asset-class-aware calendars + 365-day annualization; crypto/FX providers.
     Enabled by `asset_class` already threaded through `PanelMeta`/`Settings`.
@@ -130,3 +145,9 @@ Each phase is independently shippable with its own test gate
   (documented). Verified with live fetches + a paid `run_fund.py` on FMP. Three
   vendors now run the fund (yfinance/FMP/AV) + LOBSTER. Next: Phase 5 (wizard
   `--assist` + README/CLAUDE polish).
+- 2026-06-11: Phase 5 complete (LLM-assisted onboarding `setup.py --assist` +
+  `setup_assist.py`; doc-drift fix). Proposal validated/clamped to legal values,
+  fed as confirmable defaults, with hard fallback to the deterministic wizard.
+  Verified live (real proposals in-bounds incl. adversarial prompt; config
+  written from free text; graceful fallback). Full suite green (84). Next: Phase 6
+  (multi-asset crypto/FX).

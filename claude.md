@@ -31,9 +31,11 @@ author's LOBSTER CSVs: any panel load goes through `quant_fund_agent/data/`
 (provider abstraction + parquet cache + capability gating + frequency-aware
 annualization). Providers: `lobster` (local CSVs), `yfinance` (key-free daily),
 `fmp`, `alphavantage`. Run `python -m quant_fund_agent.setup` to pick a
-provider/universe/timespan and write `quant.config.yaml`. See
-`docs/data-layer/ROADMAP.md`. Remaining: Phase 5 (wizard `--assist`), Phase 6
-(multi-asset crypto/FX).
+provider/universe/timespan and write `quant.config.yaml`, or
+`python -m quant_fund_agent.setup --assist "<plain-English description>"` to have
+an LLM draft a config you confirm (`setup_assist.py`; validated to legal values,
+falls back to the deterministic wizard with no LLM key). See
+`docs/data-layer/ROADMAP.md`. Remaining: Phase 6 (multi-asset crypto/FX).
 
 ## Roadmap
 - Longer backtests: simulate weekly researcher updates and trade over an

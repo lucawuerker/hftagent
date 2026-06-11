@@ -27,20 +27,35 @@ A deterministic, dependency-light CLI that:
 2. **Prompts** for:
    - provider (from the detected set),
    - asset class (equity now; crypto/FX later),
-   - universe — a **preset** (`sp100`, `sp500`, `nasdaq100`) or a **custom**
-     comma-separated ticker list,
+   - universe — a **preset** (`demo`, `sp100`; add your own as a one-symbol-per-line
+     file under `data/universes/`) or a **custom** comma-separated ticker list,
    - date range (`start`, `end`),
    - frequency (`1d` now; intraday later).
 3. **Validation fetch** — pulls a few bars for one symbol to confirm the key and
    symbols resolve before committing.
 4. **Writes `quant.config.yaml`** (schema below).
 
-### Optional `--assist` (planned, Phase 5)
+### Optional `--assist` (LLM-guided) — ✅ live
 
-`python -m quant_fund_agent.setup --assist` adds an LLM layer that turns free
-text ("mid-cap US tech, last 2 years, daily") into a proposed config, which the
-deterministic wizard then shows for confirmation before writing. The core wizard
-always works without an LLM key.
+`python -m quant_fund_agent.setup --assist "mid-cap US tech, last 2 years, daily"`
+adds an LLM layer (`setup_assist.py`) that turns free text into a *proposed*
+config, which the deterministic wizard then shows for confirmation before
+writing. Pass the description inline, or use the flag alone to be prompted for it.
+
+The proposal is only ever a set of **suggested defaults** — precedence stays
+**explicit CLI flag > LLM proposal > built-in default**, and in interactive mode
+every field is still shown for you to accept or override. Every value the model
+returns is **validated against ground truth** (usable providers, existing
+presets, parseable `start < end` dates), so the LLM can only narrow to legal
+values, never inject a bad one. Free-text **tickers** are passed through
+un-validated for existence — a wrong symbol simply fails to fetch (it won't
+appear in the panel), it can't corrupt the run.
+
+The LLM is built through the same `quant_fund_agent.llm.make_chat_llm` factory
+the agents use (so `OPENAI_API_KEY` + `gpt-4o-mini` by default; override the
+assist model with `SETUP_ASSIST_LLM_MODEL`). **The core wizard always works
+without an LLM key** — any assist failure (no key, network down, unparseable
+reply) falls straight back to the deterministic path.
 
 ## `quant.config.yaml` schema
 

@@ -268,6 +268,17 @@ python -m quant_fund_agent.setup      # choose provider/universe/timespan → qu
 ./venv/bin/python run_fund.py --n-strategies 1
 ```
 
+Prefer plain English? `--assist` lets an LLM draft the config, which the wizard
+then shows for you to confirm:
+
+```bash
+python -m quant_fund_agent.setup --assist "US tech mega-caps, last 2 years, daily"
+```
+
+The proposal is only ever a *suggested default* (explicit flags still win, every
+value is validated against real providers/presets/dates), and the wizard works
+without an LLM key if you skip `--assist`.
+
 | Provider | Key | Notes |
 |----------|-----|-------|
 | `yfinance` | none | Daily OHLCV, adjusted. Easiest clone-and-run. |

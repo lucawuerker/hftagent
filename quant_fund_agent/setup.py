@@ -13,7 +13,15 @@ non-interactive (`--yes` accepts defaults for anything not supplied):
     python -m quant_fund_agent.setup --provider yfinance --preset demo \
         --start 2023-01-01 --end 2025-01-01 --freq 1d --yes
 
-The optional LLM ``--assist`` mode is Phase 5.
+Optional ``--assist`` adds an LLM layer that turns a plain-English description
+into a *proposed* config you then confirm field by field (needs an LLM key, e.g.
+``OPENAI_API_KEY``):
+
+    python -m quant_fund_agent.setup --assist "tech mega-caps, last 18 months, daily"
+
+The proposal is only ever a set of suggested defaults — precedence stays
+**CLI flag > LLM proposal > built-in default** — and the wizard always works
+without an LLM (see ``setup_assist.py``).
 """
 
 from __future__ import annotations
@@ -59,12 +67,21 @@ def _ask(prompt: str, default: str, *, interactive: bool) -> str:
 
 # ── config assembly ────────────────────────────────────────────────────────
 
-def build_config(args: argparse.Namespace, *, interactive: bool) -> dict:
+def build_config(
+    args: argparse.Namespace, *, interactive: bool, proposal: dict | None = None
+) -> dict:
+    proposal = proposal or {}
     usable = detect_providers()
     available = [p for p, ok in usable.items() if ok]
 
-    provider = args.provider or _ask(
-        f"Data provider {available}", "yfinance", interactive=interactive)
+    # Precedence per field: explicit CLI flag > LLM proposal (shown as the prompt
+    # default the user confirms/overrides) > built-in default.
+    def pick(cli_value, key: str, prompt: str, default: str) -> str:
+        if cli_value is not None:
+            return cli_value
+        return _ask(prompt, str(proposal.get(key, default)), interactive=interactive)
+
+    provider = pick(args.provider, "provider", f"Data provider {available}", "yfinance")
     if provider not in PROVIDERS:
         raise SystemExit(f"Unknown provider {provider!r}; choose from {list(PROVIDERS)}.")
     if not usable.get(provider, False):
@@ -81,29 +98,27 @@ def build_config(args: argparse.Namespace, *, interactive: bool) -> dict:
         return {"data": data}
 
     # API providers (yfinance / fmp / alphavantage)
-    data["asset_class"] = args.asset_class or _ask(
-        "Asset class", "equity", interactive=interactive)
-    data["frequency"] = args.freq or _ask(
-        "Frequency (1d/1h/5m/1m)", "1d", interactive=interactive)
+    data["asset_class"] = pick(args.asset_class, "asset_class", "Asset class", "equity")
+    data["frequency"] = pick(args.freq, "frequency", "Frequency (1d/1h/5m/1m)", "1d")
 
     default_end = date.today().isoformat()
     default_start = (date.today() - timedelta(days=365 * 2)).isoformat()
-    data["start"] = args.start or _ask("Start date (YYYY-MM-DD)", default_start,
-                                        interactive=interactive)
-    data["end"] = args.end or _ask("End date (YYYY-MM-DD)", default_end,
-                                   interactive=interactive)
+    data["start"] = pick(args.start, "start", "Start date (YYYY-MM-DD)", default_start)
+    data["end"] = pick(args.end, "end", "End date (YYYY-MM-DD)", default_end)
     data["cache_dir"] = args.cache_dir or "data/market"
 
-    # Universe: explicit tickers win over a preset.
+    # Universe: explicit tickers (CLI flag, then LLM proposal) win over a preset.
     if args.tickers:
         data["tickers"] = [t.strip().upper() for t in args.tickers.split(",") if t.strip()]
+    elif proposal.get("tickers"):
+        data["tickers"] = list(proposal["tickers"])
     else:
-        preset = args.preset or _ask(
-            f"Universe preset {available_presets()} (or pass --tickers)",
-            "demo", interactive=interactive)
+        preset = pick(args.preset, "preset",
+                      f"Universe preset {available_presets()} (or pass --tickers)", "demo")
         data["universe_preset"] = preset
-    if args.n_tickers:
-        data["n_tickers"] = args.n_tickers
+    n_tickers = args.n_tickers or proposal.get("n_tickers")
+    if n_tickers:
+        data["n_tickers"] = int(n_tickers)
 
     return {"data": data}
 
@@ -158,11 +173,46 @@ def _parse_args(argv=None) -> argparse.Namespace:
     p.add_argument("--data-dir", dest="data_dir", help="LOBSTER provider only")
     p.add_argument("--cache-dir", dest="cache_dir")
     p.add_argument("--output", default=CONFIG_PATH, help="config file to write")
+    p.add_argument("--assist", nargs="?", const="", metavar="DESCRIPTION",
+                   help="LLM-assisted setup: describe your fund in plain English and "
+                        "an LLM proposes a config you then confirm (needs an LLM key). "
+                        "Pass the text inline, or use the flag alone to be prompted.")
     p.add_argument("--no-validate", action="store_true",
                    help="skip the small validation fetch")
     p.add_argument("--yes", "-y", action="store_true",
                    help="non-interactive: accept defaults for anything not given")
     return p.parse_args(argv)
+
+
+def _run_assist(
+    args: argparse.Namespace, usable: dict[str, bool], *, interactive: bool
+) -> dict:
+    """If ``--assist`` was given, return a validated LLM proposal (``{}`` otherwise)."""
+    if args.assist is None:
+        return {}
+
+    description = args.assist
+    if not description and interactive:
+        description = input(
+            "Describe your fund (universe, timespan, frequency): ").strip()
+    if not description:
+        print("  (no description given — falling back to the standard wizard)\n")
+        return {}
+
+    from quant_fund_agent.setup_assist import propose_config
+
+    available = [p for p, ok in usable.items() if ok]
+    print("Asking the assistant to draft a config…")
+    proposal = propose_config(
+        description, available=available, presets=available_presets())
+    if proposal:
+        print("  assistant proposal (edit/confirm below):")
+        for key, value in proposal.items():
+            print(f"    {key}: {value}")
+    else:
+        print("  (assistant unavailable or produced nothing usable — using defaults)")
+    print()
+    return proposal
 
 
 def main(argv=None) -> None:
@@ -173,11 +223,14 @@ def main(argv=None) -> None:
     interactive = sys.stdin.isatty() and not args.yes
 
     print("QuantFundAgent setup — detecting providers…")
-    for name, ok in detect_providers().items():
+    usable = detect_providers()
+    for name, ok in usable.items():
         print(f"  {name:<14s} {'available' if ok else 'needs API key (.env)'}")
     print()
 
-    config = build_config(args, interactive=interactive)
+    proposal = _run_assist(args, usable, interactive=interactive)
+
+    config = build_config(args, interactive=interactive, proposal=proposal)
 
     if not args.no_validate:
         print("Validating with a small fetch…")
