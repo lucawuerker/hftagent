@@ -14,7 +14,7 @@ Two modes:
   ``run_fund.py --prerun A``) and compare.
 
 Paper read-tracking is its own scenario per prerun (a read-log), so successive
-sessions advance through the 714-paper library without re-reading and without
+sessions advance through the 714-paper library without
 biasing any backtest's paper selection.  The loop keeps researching (broad paper
 sample, ~1 idea per paper) until ``--target-factors`` are kept or ``--max-sessions``.
 

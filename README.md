@@ -95,6 +95,32 @@ Individual stages:
 ./venv/bin/python -m quant_fund_agent.main        # orchestrator (single task)
 ```
 
+### Comparing research LLMs
+
+Mine factors with different research models into named **preruns**, then compare
+their factor sets on three axes — single-factor IC, brute-force ML (catalog +
+ensemble), and the full downstream agentic fund:
+
+```bash
+# 1. Mine ~50 factors per model into a self-contained prerun (dedup per-prerun
+#    so each model's brainstorm isn't anchored by the others — fair A/B).
+./venv/bin/python run_factor_research.py --name gpt4omini --model gpt-4o-mini \
+  --dedup-scope prerun --target-factors 50
+./venv/bin/python run_factor_research.py --name claude --model claude-3-5-sonnet-latest \
+  --llm-provider anthropic --dedup-scope prerun --target-factors 50
+
+# 2. Compare them → figures + tables + report.md + comparison.ipynb under
+#    data/comparisons/<id>/.  IC + brute-force are LLM-free; --no-downstream
+#    skips the only LLM-spending track for a fully offline run.
+./venv/bin/python run_model_comparison.py --preruns gpt4omini,claude
+QF_USE_MCP=0 ./venv/bin/python run_model_comparison.py --all --no-downstream
+```
+
+Factors that need data not yet downloaded (e.g. fundamentals) are filtered and
+reported, so the comparison runs on the current data and re-runs unchanged once
+the full LOBSTER universe / FMP membership is in place.  `run_model_comparison.py
+--research --prerun-spec name=model[:provider] …` can also mine the preruns first.
+
 See `fund_showcase.ipynb` for an interactive walkthrough.
 
 ## Agents

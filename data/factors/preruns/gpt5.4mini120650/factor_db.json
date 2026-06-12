@@ -1,0 +1,1709 @@
+{
+  "factors": [
+    {
+      "id": "book_pressure_impulse_reversal",
+      "name": "Book Pressure Impulse Reversal",
+      "class_name": "",
+      "description": "Measure the conjunction of top-of-book imbalance and recent signed trade/order-flow imbalance, then fade it when the pressure is unusually one-sided relative to each stock\u2019s own recent distribution. The factor is positive when a stock is under strong sell pressure and the book is bid-heavy (or vice versa), and negative when the two signals agree and reinforce continuation.",
+      "formula": "",
+      "trading_idea": "Short-horizon price pressure in LOB data is often driven by temporary imbalances in displayed liquidity rather than durable information. When visible book imbalance and aggressive order flow both become extreme, the move can overshoot because liquidity providers adapt or fade, creating a reversal once the pressure decays. This is consistent with the limit-order-book adaptation theme emphasized in the paper on learning trader behavior from LOB state and order-flow context.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.022135,
+        "ic_std": 0.292077,
+        "ic_ir": -0.075786,
+        "ic_hit_rate": 0.467,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.054233,
+            "ic_std": 0.291852,
+            "ic_ir": -0.185824,
+            "ic_hit_rate": 0.4237,
+            "n_timestamps": 46849
+          },
+          "6": {
+            "ic": -0.022135,
+            "ic_std": 0.292077,
+            "ic_ir": -0.075786,
+            "ic_hit_rate": 0.467,
+            "n_timestamps": 46844
+          },
+          "60": {
+            "ic": -0.009397,
+            "ic_std": 0.29134,
+            "ic_ir": -0.032255,
+            "ic_hit_rate": 0.4862,
+            "n_timestamps": 46790
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46844,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "deep_learning_can_replicate_adaptive_traders_in_a_limit_orde"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun:gpt5.4mini120650:001",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/book_pressure_impulse_reversal.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-06-12T08:47:55.274710",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": -0.022135,
+        "llm_model": "gpt-5.4-mini",
+        "llm_provider": "openai"
+      }
+    },
+    {
+      "id": "critical_cost_pressure_skew",
+      "name": "Critical Cost Pressure Skew",
+      "class_name": "",
+      "description": "Compute a pressure-skew score from a normalized combination of short-horizon changes in effLobImb/lobImb and orderFlow, divided by contemporaneous trading friction proxied by spread, effSpread, and inverse depth. Rank stocks cross-sectionally each bar; high scores indicate persistent directional book pressure with low effective cost to express it.",
+      "formula": "",
+      "trading_idea": "A market with strong one-sided book pressure but only modest immediate price response is closer to a \"critical transaction cost\" regime in the spirit of Cordero and Perez-Ostafe: the imbalance is there, but friction still prevents a clean directional move. When order-flow pressure persists while effective spread and depth remain favorable, the next move is more likely to unfold once local liquidity is exhausted. Cross-sectionally, names where pressure is high relative to realized execution cost should outperform those where the same pressure is already fully priced into impact.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.060305,
+        "ic_std": 0.295647,
+        "ic_ir": 0.203977,
+        "ic_hit_rate": 0.582,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.146768,
+            "ic_std": 0.293679,
+            "ic_ir": 0.499758,
+            "ic_hit_rate": 0.6934,
+            "n_timestamps": 46849
+          },
+          "6": {
+            "ic": 0.060305,
+            "ic_std": 0.295647,
+            "ic_ir": 0.203977,
+            "ic_hit_rate": 0.582,
+            "n_timestamps": 46844
+          },
+          "60": {
+            "ic": 0.020243,
+            "ic_std": 0.293928,
+            "ic_ir": 0.068869,
+            "ic_hit_rate": 0.5253,
+            "n_timestamps": 46790
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46844,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "critical_transaction_costs_and_1_step_asymptotic_arbitrage_i"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun:gpt5.4mini120650:001",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/critical_cost_pressure_skew.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-06-12T08:47:55.280655",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.060305,
+        "llm_model": "gpt-5.4-mini",
+        "llm_provider": "openai"
+      }
+    },
+    {
+      "id": "hidden_trade_absorption_gap",
+      "name": "Hidden Trade Absorption Gap",
+      "class_name": "",
+      "description": "Compute a cross-sectional z-scored signal from the interaction of hidden volume intensity, signed trade imbalance, and contemporaneous execution costs, e.g. hidden/volume times sign(trade) times a normalized (effSpread/spread) or (effSpread - spread) term. Higher values indicate buy-side hidden absorption with poor execution quality; lower values indicate the mirror image.",
+      "formula": "",
+      "trading_idea": "When a name prints a lot of hidden volume, the visible book can look deceptively calm even though latent liquidity is being consumed. If hidden prints are large relative to visible trading while the spread and effective spread remain elevated, that usually signals aggressive informed demand/supply meeting passive absorption, which tends to be followed by short-horizon continuation in the direction of the hidden flow. This is consistent with the paper\u2019s emphasis on transaction-level information improving live intraday forecasting and with the idea that last-price-only benchmarks miss information embedded in execution quality and hidden activity.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.121091,
+        "ic_std": 0.289906,
+        "ic_ir": 0.417691,
+        "ic_hit_rate": 0.6624,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.285431,
+            "ic_std": 0.290961,
+            "ic_ir": 0.980993,
+            "ic_hit_rate": 0.8316,
+            "n_timestamps": 46851
+          },
+          "6": {
+            "ic": 0.121091,
+            "ic_std": 0.289906,
+            "ic_ir": 0.417691,
+            "ic_hit_rate": 0.6624,
+            "n_timestamps": 46846
+          },
+          "60": {
+            "ic": 0.040085,
+            "ic_std": 0.289275,
+            "ic_ir": 0.138571,
+            "ic_hit_rate": 0.5554,
+            "n_timestamps": 46792
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46846,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "bayesian_hierarchical_probabilistic_forecasting_of_intraday_"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun:gpt5.4mini120650:001",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/hidden_trade_absorption_gap.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-06-12T08:47:55.280884",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.121091,
+        "llm_model": "gpt-5.4-mini",
+        "llm_provider": "openai"
+      }
+    },
+    {
+      "id": "spread_depth_squeeze_reversion",
+      "name": "Spread-Depth Squeeze Reversion",
+      "class_name": "",
+      "description": "Compute a cross-sectional z-score of a liquidity-squeeze state from high spread and low depth, optionally reinforced by elevated effective spread and weak order-flow liquidity. The factor is the negative of that score, so stocks with the most severe squeeze receive the strongest mean-reversion signal.",
+      "formula": "",
+      "trading_idea": "When quoted spread widens while visible depth collapses, the book is signaling a temporary liquidity vacuum rather than a durable information shock. In LOBSTER bars this often reflects transitory inventory imbalance, fleeting cancellation waves, or short-lived adverse selection; once the squeeze passes, prices tend to mean-revert as liquidity replenishes. The intuition is consistent with the paper\u2019s emphasis on market design under asymmetric access to liquidity: when the effective price of immediacy spikes, short-horizon excess moves are often overextensions rather than new equilibrium.",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.004782,
+        "ic_std": 0.278838,
+        "ic_ir": -0.017148,
+        "ic_hit_rate": 0.4763,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.003897,
+            "ic_std": 0.290734,
+            "ic_ir": -0.013404,
+            "ic_hit_rate": 0.4788,
+            "n_timestamps": 42498
+          },
+          "6": {
+            "ic": -0.004782,
+            "ic_std": 0.278838,
+            "ic_ir": -0.017148,
+            "ic_hit_rate": 0.4763,
+            "n_timestamps": 42493
+          },
+          "60": {
+            "ic": -0.003836,
+            "ic_std": 0.284873,
+            "ic_ir": -0.013467,
+            "ic_hit_rate": 0.4782,
+            "n_timestamps": 42439
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 42493,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "fairness_welfare_and_equity_in_personalized_pricing"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun:gpt5.4mini120650:001",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/spread_depth_squeeze_reversion.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-06-12T08:47:55.280918",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": -0.004782,
+        "llm_model": "gpt-5.4-mini",
+        "llm_provider": "openai"
+      }
+    },
+    {
+      "id": "adaptive_book_resilience",
+      "name": "Adaptive Book Resilience",
+      "class_name": "",
+      "description": "Measure short-horizon resilience as the cross-sectional z-scored interaction of signed trade impact with subsequent recovery in depth, effLobImb, and lobImb over a small rolling window. A positive factor indicates strong replenishment after adverse flow; negative values indicate fragile books and greater continuation risk.",
+      "formula": "",
+      "trading_idea": "When visible depth is rebuilt quickly after aggressive trading, the market is showing queue resiliency rather than true directional conviction. Inspired by the paper\u2019s emphasis on queue length as the most informative state, this signal looks for bars where order-flow impact is large but the book replenishes strongly via top-of-book depth and imbalance recovery, which often precedes short-horizon mean reversion. Conversely, persistent depletion with weak replenishment suggests the move is more likely to continue.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.005471,
+        "ic_std": 0.288086,
+        "ic_ir": -0.01899,
+        "ic_hit_rate": 0.4925,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.017432,
+            "ic_std": 0.287769,
+            "ic_ir": -0.060577,
+            "ic_hit_rate": 0.4759,
+            "n_timestamps": 46844
+          },
+          "6": {
+            "ic": -0.005471,
+            "ic_std": 0.288086,
+            "ic_ir": -0.01899,
+            "ic_hit_rate": 0.4925,
+            "n_timestamps": 46839
+          },
+          "60": {
+            "ic": 0.000238,
+            "ic_std": 0.286878,
+            "ic_ir": 0.000831,
+            "ic_hit_rate": 0.4974,
+            "n_timestamps": 46785
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46839,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "leveraging_queue_length_and_attention_mechanisms_for_enhance"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun:gpt5.4mini120650:001",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/adaptive_book_resilience.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-06-12T08:47:55.280956",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": -0.005471,
+        "llm_model": "gpt-5.4-mini",
+        "llm_provider": "openai"
+      }
+    },
+    {
+      "id": "auction_dislocation_mean_reversion",
+      "name": "Auction Dislocation Mean Reversion",
+      "class_name": "",
+      "description": "Measures the signed price dislocation of the bar's close relative to the bar's open/high-low range, scaled by spread and conditioned on auction volume versus normal volume. The factor is stronger when auction participation is high and visible book support is weak.",
+      "formula": "",
+      "trading_idea": "Large auction prints can force prices away from the pre-open or pre-close equilibrium because they are driven by non-continuous clearing rather than immediate two-sided book interaction. When an auction print occurs alongside weak displayed depth or poor book imbalance support, the move is often partially reversed as regular trading resumes and liquidity providers fade the auction-induced dislocation. This complements intraday microstructure signals by explicitly isolating a distinct mechanism: price impact from call/closing auction clearing rather than continuous trading pressure.",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.089334,
+        "ic_std": 0.286126,
+        "ic_ir": 0.31222,
+        "ic_hit_rate": 0.624,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.181894,
+            "ic_std": 0.293683,
+            "ic_ir": 0.619354,
+            "ic_hit_rate": 0.734,
+            "n_timestamps": 46839
+          },
+          "6": {
+            "ic": 0.089334,
+            "ic_std": 0.286126,
+            "ic_ir": 0.31222,
+            "ic_hit_rate": 0.624,
+            "n_timestamps": 46836
+          },
+          "60": {
+            "ic": 0.028419,
+            "ic_std": 0.284774,
+            "ic_ir": 0.099793,
+            "ic_hit_rate": 0.5405,
+            "n_timestamps": 46783
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46836,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "embedding_of_walsh_brownian_motion"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun:gpt5.4mini120650:001",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/auction_dislocation_mean_reversion.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-06-12T08:47:55.281187",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.089334,
+        "llm_model": "gpt-5.4-mini",
+        "llm_provider": "openai"
+      }
+    },
+    {
+      "id": "orderflow_imbalance_divergence",
+      "name": "Order-Flow / LOB Imbalance Divergence",
+      "class_name": "",
+      "description": "Compute a z-scored divergence between signed trade pressure and signed book pressure using trade, effSpread, lobImb, and effLobImb, optionally damped by spread and low depth. Positive values indicate bullish trade flow not confirmed by book support; negative values indicate bearish trade flow not confirmed by book resistance.",
+      "formula": "",
+      "trading_idea": "Price often overreacts when aggressive trades and visible book pressure disagree: if trading is buyer-initiated but depth/imbalance still favors sellers, the move is frequently liquidity-taking rather than informed continuation. The converse applies for sell pressure against a strongly bid book. This is a cross-sectional version of detecting a disagreement between two conditional views of the same state, inspired by the paper's emphasis on consistent section-wise representations under different conditionals.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.120713,
+        "ic_std": 0.285675,
+        "ic_ir": 0.422551,
+        "ic_hit_rate": 0.6668,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.28291,
+            "ic_std": 0.283339,
+            "ic_ir": 0.998485,
+            "ic_hit_rate": 0.8354,
+            "n_timestamps": 46734
+          },
+          "6": {
+            "ic": 0.120713,
+            "ic_std": 0.285675,
+            "ic_ir": 0.422551,
+            "ic_hit_rate": 0.6668,
+            "n_timestamps": 46729
+          },
+          "60": {
+            "ic": 0.03945,
+            "ic_std": 0.28547,
+            "ic_ir": 0.138192,
+            "ic_hit_rate": 0.5567,
+            "n_timestamps": 46675
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46729,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "splitting_of_liftings_in_products_of_probability_spaces"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun:gpt5.4mini120650:001",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/orderflow_imbalance_divergence.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-06-12T08:47:55.281213",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.120713,
+        "llm_model": "gpt-5.4-mini",
+        "llm_provider": "openai"
+      }
+    },
+    {
+      "id": "local_impact_decay_asymmetry",
+      "name": "Local Impact Decay Asymmetry",
+      "class_name": "",
+      "description": "Compute a short-term ratio of rolling traded volume to rolling effective spread, then compare its fast change against the same statistic over a slower window. Cross-sectionally rank the signed divergence so that high values reflect impact decaying more slowly than flow (momentum-like), and low values reflect impact fading quickly (mean-reversion-like).",
+      "formula": "",
+      "trading_idea": "Large trades that print with unusually low immediate impact often indicate transient liquidity demand being absorbed by the book, while the same trade size with high effective spread signals more permanent price pressure. Inspired by the paper\u2019s emphasis on local, non-stationary oscillation behavior, this factor looks at whether recent trade impact is decaying faster or slower than recent trade flow itself. Names where impact decays relative to flow should mean-revert; names where impact remains elevated should continue short-term drift.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.004562,
+        "ic_std": 0.276958,
+        "ic_ir": 0.016471,
+        "ic_hit_rate": 0.4875,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.003356,
+            "ic_std": 0.289933,
+            "ic_ir": 0.011576,
+            "ic_hit_rate": 0.4897,
+            "n_timestamps": 39851
+          },
+          "6": {
+            "ic": 0.004562,
+            "ic_std": 0.276958,
+            "ic_ir": 0.016471,
+            "ic_hit_rate": 0.4875,
+            "n_timestamps": 39845
+          },
+          "60": {
+            "ic": 0.002811,
+            "ic_std": 0.283743,
+            "ic_ir": 0.009908,
+            "ic_hit_rate": 0.4877,
+            "n_timestamps": 39786
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 39845,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "strassen_s_local_law_of_the_iterated_logarithm_for_the_gener"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun:gpt5.4mini120650:001",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/local_impact_decay_asymmetry.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-06-12T08:47:55.281997",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.004562,
+        "llm_model": "gpt-5.4-mini",
+        "llm_provider": "openai"
+      }
+    },
+    {
+      "id": "regime_switching_liquidity_reaction",
+      "name": "Regime-Switching Liquidity Reaction",
+      "class_name": "",
+      "description": "Compute a liquidity-regime score from spread, depth, trdLiq, ofLiq, and nbEvents, then interact it with short-horizon order-flow pressure from trade, orderFlow, effLobImb, and effSpread. High values indicate buy-side pressure that is likely to be underreacted to in resilient books or overreacted to in fragile books, producing a cross-sectional time-series signal.",
+      "formula": "",
+      "trading_idea": "LOB state changes often matter more than raw imbalance alone: when depth is thin and spreads are wide, the same order-flow shock should move prices more than in calm, well-buffered regimes. Inspired by the regime-switching Hawkes view of limit-order-book dynamics, this factor looks for situations where current order flow is mispriced relative to the prevailing liquidity regime, then fades that mispricing when the book is fragile and follows it when the book is robust. The goal is to capture asymmetric price impact from endogenous order clustering and liquidity withdrawal without explicitly estimating a Hawkes model.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.008409,
+        "ic_std": 0.290628,
+        "ic_ir": -0.028935,
+        "ic_hit_rate": 0.4833,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.027611,
+            "ic_std": 0.291012,
+            "ic_ir": -0.094879,
+            "ic_hit_rate": 0.4612,
+            "n_timestamps": 46834
+          },
+          "6": {
+            "ic": -0.008409,
+            "ic_std": 0.290628,
+            "ic_ir": -0.028935,
+            "ic_hit_rate": 0.4833,
+            "n_timestamps": 46829
+          },
+          "60": {
+            "ic": -0.000236,
+            "ic_std": 0.289363,
+            "ic_ir": -0.000816,
+            "ic_hit_rate": 0.5013,
+            "n_timestamps": 46775
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46829,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "compound_hawkes_processes_in_limit_order_books"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun:gpt5.4mini120650:001",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/regime_switching_liquidity_reaction.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-06-12T08:47:55.282041",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": -0.008409,
+        "llm_model": "gpt-5.4-mini",
+        "llm_provider": "openai"
+      }
+    },
+    {
+      "id": "hidden_order_persistence_reversal",
+      "name": "Hidden Order Persistence Reversal",
+      "class_name": "",
+      "description": "Compute a standardized persistence score from rolling sums of signed trade, hidden volume, and orderFlow over short windows, then multiply by contemporaneous pressure proxies such as effSpread, lobImb/effLobImb, and spread. Cross-sectionally rank the resulting score each bar so names with the strongest same-side execution pressure are shorted if positive and bought if negative.",
+      "formula": "",
+      "trading_idea": "Large hidden orders are typically executed as persistent directional patches, but the paper shows that these patches are short-lived, fragmented, and often followed by a rebalancing of order flow once the local execution regime ends. A bar where signed trade flow, hidden volume, and order-flow into the book all align in the same direction while effective spread and imbalance remain elevated is consistent with an ongoing meta-order that has likely already pushed price away from short-term fair value; the next few bars often reflect exhaustion rather than continuation. This factor aims to fade the most extreme persistent execution pressure after it becomes crowded and mechanically expensive.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.054659,
+        "ic_std": 0.292256,
+        "ic_ir": -0.187025,
+        "ic_hit_rate": 0.4216,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.125617,
+            "ic_std": 0.292906,
+            "ic_ir": -0.428866,
+            "ic_hit_rate": 0.3267,
+            "n_timestamps": 46431
+          },
+          "6": {
+            "ic": -0.054659,
+            "ic_std": 0.292256,
+            "ic_ir": -0.187025,
+            "ic_hit_rate": 0.4216,
+            "n_timestamps": 46396
+          },
+          "60": {
+            "ic": -0.015399,
+            "ic_std": 0.292342,
+            "ic_ir": -0.052674,
+            "ic_hit_rate": 0.4764,
+            "n_timestamps": 46356
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46396,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "statistical_identification_with_hidden_markov_models_of_larg"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun:gpt5.4mini120650:001",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/hidden_order_persistence_reversal.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-06-12T08:47:55.282068",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": -0.054659,
+        "llm_model": "gpt-5.4-mini",
+        "llm_provider": "openai"
+      }
+    },
+    {
+      "id": "impact_liquidity_discrepancy_reversal",
+      "name": "Impact-Liquidity Discrepancy Reversal",
+      "class_name": "",
+      "description": "Compute a residual between short-horizon signed trade pressure and a liquidity-capacity score built from depth, trdLiq/ofLiq, spread, and book imbalance. High residuals indicate trades that moved price more than the book structure justifies; low residuals indicate underreaction.",
+      "formula": "",
+      "trading_idea": "The market impact paper argues that price moves from trades should scale with traded volume and inversely with available touch liquidity. When printed volume is large but depth, order-flow liquidity, and displayed imbalance all imply an unusually resilient book, the price response is often overdone and mean-reverts as transient impact fades. This creates a cross-sectional reversal signal that is strongest when effective spread and signed trade pressure are large relative to the contemporaneous liquidity cushion.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.000675,
+        "ic_std": 0.295006,
+        "ic_ir": -0.002288,
+        "ic_hit_rate": 0.4999,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.011036,
+            "ic_std": 0.302842,
+            "ic_ir": -0.036442,
+            "ic_hit_rate": 0.4867,
+            "n_timestamps": 46837
+          },
+          "6": {
+            "ic": -0.000675,
+            "ic_std": 0.295006,
+            "ic_ir": -0.002288,
+            "ic_hit_rate": 0.4999,
+            "n_timestamps": 46832
+          },
+          "60": {
+            "ic": 0.002134,
+            "ic_std": 0.294206,
+            "ic_ir": 0.007252,
+            "ic_hit_rate": 0.5041,
+            "n_timestamps": 46778
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46832,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "market_impact_of_small_orders"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun:gpt5.4mini120650:001",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/impact_liquidity_discrepancy_reversal.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-06-12T08:47:55.282091",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": -0.000675,
+        "llm_model": "gpt-5.4-mini",
+        "llm_provider": "openai"
+      }
+    },
+    {
+      "id": "multiscale_liquidity_leadlag_reversal",
+      "name": "Multiscale Liquidity Lead-Lag Reversal",
+      "class_name": "",
+      "description": "Compute a cross-sectional score from the disagreement between fine-scale and coarse-scale signed pressure, using short-window EWMA of orderFlow and effLobImb versus a slower EWMA or rolling average of the same fields. Positive signals indicate fast pressure that is not sustained; negative signals indicate broad, persistent pressure that is more likely to continue.",
+      "formula": "",
+      "trading_idea": "Order-flow and book-pressure often lead price at different horizons, but the direction of the lead-lag can flip across fast and slow traders. Inspired by the multiscale lead-lag framework in Hayashi & Koike, this factor looks for short-horizon order-flow pressure that is strong at the finest scale but not confirmed at coarser scales, which tends to indicate transient price discovery rather than durable information. Stocks where fast liquidity pressure is front-running the current bar but fades on slower scales often mean-revert once the temporary imbalance is digested.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.066534,
+        "ic_std": 0.287033,
+        "ic_ir": 0.2318,
+        "ic_hit_rate": 0.5918,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.158258,
+            "ic_std": 0.282588,
+            "ic_ir": 0.560031,
+            "ic_hit_rate": 0.7111,
+            "n_timestamps": 46814
+          },
+          "6": {
+            "ic": 0.066534,
+            "ic_std": 0.287033,
+            "ic_ir": 0.2318,
+            "ic_hit_rate": 0.5918,
+            "n_timestamps": 46809
+          },
+          "60": {
+            "ic": 0.031326,
+            "ic_std": 0.288103,
+            "ic_ir": 0.108734,
+            "ic_hit_rate": 0.5412,
+            "n_timestamps": 46755
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46809,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "wavelet_based_methods_for_high_frequency_lead_lag_analysis"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun:gpt5.4mini120650:001",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/multiscale_liquidity_leadlag_reversal.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-06-12T08:47:55.282290",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.066534,
+        "llm_model": "gpt-5.4-mini",
+        "llm_provider": "openai"
+      }
+    },
+    {
+      "id": "liquidity_uncertainty_gap",
+      "name": "Liquidity Uncertainty Gap",
+      "class_name": "",
+      "description": "Cross-sectional score that is high when normalized depth and LOB imbalance are strong but effSpread is wide and trdLiq is weak, with an optional penalty for low nbTrades confirmation. A practical form is a rank-based spread between a \"displayed liquidity\" composite and an \"execution liquidity\" composite, computed per bar across tickers.",
+      "formula": "",
+      "trading_idea": "When displayed depth and book imbalance imply ample liquidity, but effective spread and realized trade-side liquidity are still poor, the book is likely shallow in practice and prices are vulnerable to overreaction on the next aggressive trade. This is a microstructure analogue of a low-rank-versus-locality mismatch: the visible state of the book is the broad smooth component, while recent prints reveal the local correction, similar in spirit to combining global and local information in the GP paper. Stocks where displayed liquidity looks strong but execution quality remains weak should underperform once the market re-prices that hidden fragility.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.006635,
+        "ic_std": 0.290653,
+        "ic_ir": 0.022829,
+        "ic_hit_rate": 0.5076,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.017294,
+            "ic_std": 0.29058,
+            "ic_ir": 0.059515,
+            "ic_hit_rate": 0.5245,
+            "n_timestamps": 46853
+          },
+          "6": {
+            "ic": 0.006635,
+            "ic_std": 0.290653,
+            "ic_ir": 0.022829,
+            "ic_hit_rate": 0.5076,
+            "n_timestamps": 46848
+          },
+          "60": {
+            "ic": 0.003305,
+            "ic_std": 0.288334,
+            "ic_ir": 0.011463,
+            "ic_hit_rate": 0.5048,
+            "n_timestamps": 46794
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46848,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "parallel_gaussian_process_regression_with_low_rank_covarianc"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun:gpt5.4mini120650:001",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/liquidity_uncertainty_gap.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-06-12T08:47:55.282316",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.006635,
+        "llm_model": "gpt-5.4-mini",
+        "llm_provider": "openai"
+      }
+    },
+    {
+      "id": "liquidity_replenishment_pressure",
+      "name": "Liquidity Replenishment Pressure",
+      "class_name": "",
+      "description": "Rank a composite of short-horizon increases in depth and ofLiq, penalized by spread and effSpread, using robust rolling deltas/standardization. Higher values indicate stronger book replenishment relative to trading friction, which should favor mean reversion in next-bar returns.",
+      "formula": "",
+      "trading_idea": "When displayed depth is rebuilding quickly after trade-heavy bars, the book is often absorbing informed or urgent flow and reverting toward a more balanced state. A combination of rising depth and improving order-flow liquidity relative to contemporaneous spread/effective-spread conditions should identify names where transient impact is likely to decay, consistent with parametric microstructure noise ideas in Clinet and Potiron (2017) and the broader liquidity-pressure literature. Cross-sectionally, this should separate temporary price concessions from genuine information-driven moves.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.002835,
+        "ic_std": 0.285657,
+        "ic_ir": -0.009925,
+        "ic_hit_rate": 0.4965,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.0007,
+            "ic_std": 0.290675,
+            "ic_ir": -0.002408,
+            "ic_hit_rate": 0.4954,
+            "n_timestamps": 46834
+          },
+          "6": {
+            "ic": -0.002835,
+            "ic_std": 0.285657,
+            "ic_ir": -0.009925,
+            "ic_hit_rate": 0.4965,
+            "n_timestamps": 46829
+          },
+          "60": {
+            "ic": 0.000432,
+            "ic_std": 0.283433,
+            "ic_ir": 0.001524,
+            "ic_hit_rate": 0.4989,
+            "n_timestamps": 46775
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46829,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "estimation_for_high_frequency_data_under_parametric_market_m"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun:gpt5.4mini120650:001",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/liquidity_replenishment_pressure.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-06-12T08:47:55.282644",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": -0.002835,
+        "llm_model": "gpt-5.4-mini",
+        "llm_provider": "openai"
+      }
+    },
+    {
+      "id": "autoregressive_liquidity_gap",
+      "name": "Autoregressive Liquidity Gap",
+      "class_name": "",
+      "description": "Build a sparse autoregressive forecast of a liquidity state vector formed from standardized spread, depth, trdLiq, ofLiq, and nbEvents using several recent lags. The alpha is the negative cross-sectional z-score of the forecast residual: positive when current liquidity is tighter/stronger than expected, negative when it is materially worse than the AR-implied baseline.",
+      "formula": "",
+      "trading_idea": "Short-horizon order-book liquidity often mean-reverts, but when today\u2019s spread/depth/trade-liquidity state deviates persistently from its own recent history, that persistence can indicate a temporary microstructure shock rather than durable information. Inspired by the AR-Net paper, this factor treats liquidity conditions as a sparse high-order autoregressive process and looks for stocks where the current liquidity regime is still far from the autoregressive forecast, especially when the deviation aligns with stressed execution conditions. The edge comes from betting that transient book dislocations in liquid names compress quickly once the shock passes.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.001311,
+        "ic_std": 0.279905,
+        "ic_ir": 0.004684,
+        "ic_hit_rate": 0.4989,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.000272,
+            "ic_std": 0.286229,
+            "ic_ir": 0.000952,
+            "ic_hit_rate": 0.4981,
+            "n_timestamps": 42938
+          },
+          "6": {
+            "ic": 0.001311,
+            "ic_std": 0.279905,
+            "ic_ir": 0.004684,
+            "ic_hit_rate": 0.4989,
+            "n_timestamps": 42933
+          },
+          "60": {
+            "ic": -0.000208,
+            "ic_std": 0.276122,
+            "ic_ir": -0.000753,
+            "ic_hit_rate": 0.4999,
+            "n_timestamps": 42879
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 42933,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "ar_net_a_simple_auto_regressive_neural_network_for_time_seri"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun:gpt5.4mini120650:001",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/autoregressive_liquidity_gap.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-06-12T08:47:55.282667",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.001311,
+        "llm_model": "gpt-5.4-mini",
+        "llm_provider": "openai"
+      }
+    },
+    {
+      "id": "liquidity_regime_reversal",
+      "name": "Liquidity Regime Reversal",
+      "class_name": "",
+      "description": "Compute a cross-sectional z-scored reversal score from a composite of widened spread, low depth, low liquidity proxies (trdLiq/ofLiq), and elevated event/trade intensity versus each stock's trailing baseline, then rank-fade the most stressed names. Higher values indicate more extreme temporary liquidity dislocation and stronger expected mean reversion.",
+      "formula": "",
+      "trading_idea": "Short-horizon returns often overshoot when visible liquidity temporarily deteriorates: spreads widen, depth thins, and event intensity rises, but these states are frequently transitory as liquidity providers step back and then re-enter. The factor looks for names where the current quote/flow regime is extreme relative to its own recent history and fades the implied price pressure. This is consistent with the paper's warning that proxy-rich regimes can look decisive at the surface while still lacking stable identifying structure; here we deliberately exploit regime shifts in the observable microstructure rather than a single raw proxy.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.000227,
+        "ic_std": 0.286156,
+        "ic_ir": 0.000793,
+        "ic_hit_rate": 0.4985,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.006228,
+            "ic_std": 0.287273,
+            "ic_ir": -0.021679,
+            "ic_hit_rate": 0.4913,
+            "n_timestamps": 46794
+          },
+          "6": {
+            "ic": 0.000227,
+            "ic_std": 0.286156,
+            "ic_ir": 0.000793,
+            "ic_hit_rate": 0.4985,
+            "n_timestamps": 46789
+          },
+          "60": {
+            "ic": 0.000435,
+            "ic_std": 0.283973,
+            "ic_ir": 0.001533,
+            "ic_hit_rate": 0.498,
+            "n_timestamps": 46735
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46789,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "position_prioritize_identifying_structure_not_complex_models"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun:gpt5.4mini120650:001",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/liquidity_regime_reversal.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-06-12T08:47:55.282689",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.000227,
+        "llm_model": "gpt-5.4-mini",
+        "llm_provider": "openai"
+      }
+    },
+    {
+      "id": "self_exciting_flow_persistence",
+      "name": "Self-Exciting Flow Persistence",
+      "class_name": "",
+      "description": "Build a self-excitation score from exponentially weighted recent nbTrades, nbEvents, and |trade|/depth, then combine it with signed trade and orderFlow persistence over a short lookback. Cross-sectionally rank the result so high values identify stocks with unusually persistent microstructure activity and low values identify quiet or mean-reverting names.",
+      "formula": "",
+      "trading_idea": "LOB event arrival often clusters: a burst of trades and book updates tends to trigger more near-term activity before the order book fully re-equilibrates. Inspired by the discrete-time Hawkes literature, this factor looks for names where recent trade intensity is still elevated relative to their own baseline, but the book is not yet showing compensating depth or imbalance repair. Those situations are prone to short-horizon continuation in the direction of the dominant signed flow, especially when the pressure is persistent across consecutive 10-second bars rather than a one-off shock.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.088361,
+        "ic_std": 0.292172,
+        "ic_ir": 0.302428,
+        "ic_hit_rate": 0.6204,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.205603,
+            "ic_std": 0.282938,
+            "ic_ir": 0.726671,
+            "ic_hit_rate": 0.7651,
+            "n_timestamps": 46849
+          },
+          "6": {
+            "ic": 0.088361,
+            "ic_std": 0.292172,
+            "ic_ir": 0.302428,
+            "ic_hit_rate": 0.6204,
+            "n_timestamps": 46844
+          },
+          "60": {
+            "ic": 0.025269,
+            "ic_std": 0.29099,
+            "ic_ir": 0.086836,
+            "ic_hit_rate": 0.5367,
+            "n_timestamps": 46790
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46844,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "large_and_moderate_deviations_for_a_discrete_time_marked_haw"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun:gpt5.4mini120650:001",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/self_exciting_flow_persistence.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-06-12T08:47:55.282710",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.088361,
+        "llm_model": "gpt-5.4-mini",
+        "llm_provider": "openai"
+      }
+    },
+    {
+      "id": "dominant_microstructure_phase_alignment",
+      "name": "Dominant Phase Alignment",
+      "class_name": "",
+      "description": "Compute a rolling FFT on a short window of standardized orderFlow, trade, lobImb, and effLobImb, retain the top-k dominant frequencies, and measure the phase coherence between trade/order-flow components and book-imbalance components. Cross-sectionally rank the signed coherence score, with positive values favoring continuation and negative values favoring reversal.",
+      "formula": "",
+      "trading_idea": "LOBSTER bars often contain a small number of dominant intraday pressure cycles driven by inventory management, queue replenishment, and episodic liquidity demand. Inspired by the dominant-frequency idea in the provided paper, this factor isolates the main periodic components of order flow and book imbalance, then measures whether trade-side pressure is in phase with book-side pressure or operating against it. When the dominant components align, short-horizon continuation is more likely; when they are out of phase, the market is often in a transient, mean-reverting dislocation.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.004692,
+        "ic_std": 0.286291,
+        "ic_ir": 0.016388,
+        "ic_hit_rate": 0.5058,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.004305,
+            "ic_std": 0.285435,
+            "ic_ir": 0.015081,
+            "ic_hit_rate": 0.5065,
+            "n_timestamps": 46758
+          },
+          "6": {
+            "ic": 0.004692,
+            "ic_std": 0.286291,
+            "ic_ir": 0.016388,
+            "ic_hit_rate": 0.5058,
+            "n_timestamps": 46753
+          },
+          "60": {
+            "ic": -0.002286,
+            "ic_std": 0.286657,
+            "ic_ir": -0.007975,
+            "ic_hit_rate": 0.4962,
+            "n_timestamps": 46699
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46753,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "dominant_shuffle_a_simple_yet_powerful_data_augmentation_for"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun:gpt5.4mini120650:001",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/dominant_microstructure_phase_alignment.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-06-12T08:47:55.282733",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": 0.004692,
+        "llm_model": "gpt-5.4-mini",
+        "llm_provider": "openai"
+      }
+    },
+    {
+      "id": "intraday_safety_margin_pressure",
+      "name": "Intraday Safety Margin Pressure",
+      "class_name": "",
+      "description": "Combine a positive liquidity safety score from low spread, high depth, high trdLiq/ofLiq, and positive book imbalance with a negative pressure score from effSpread, signed trade, and signed orderFlow. The factor is high when the book looks 'safe' but pressure is building against that safety; low when the safety margin is being rebuilt.",
+      "formula": "",
+      "trading_idea": "A market with thick depth, tight spreads, and low effective spread is closer to a 'safe operating region' where price shocks are less likely to push it into instability. Inspired by the paper's average-reward safety framing, this factor looks for names whose current microstructure resembles a high-probability safe state, but where order-flow pressure is simultaneously eroding that safety margin. The edge comes from fading assets that look mechanically resilient on the surface yet are being pushed toward a less stable regime by persistent signed flow and worsening execution quality.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.016562,
+        "ic_std": 0.454804,
+        "ic_ir": -0.036416,
+        "ic_hit_rate": 0.4709,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.070862,
+            "ic_std": 0.445504,
+            "ic_ir": -0.159061,
+            "ic_hit_rate": 0.4224,
+            "n_timestamps": 2119
+          },
+          "6": {
+            "ic": -0.016562,
+            "ic_std": 0.454804,
+            "ic_ir": -0.036416,
+            "ic_hit_rate": 0.4709,
+            "n_timestamps": 2111
+          },
+          "60": {
+            "ic": -0.021701,
+            "ic_std": 0.451927,
+            "ic_ir": -0.048019,
+            "ic_hit_rate": 0.4652,
+            "n_timestamps": 2038
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 2111,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "probabilistic_safety_guarantee_for_stochastic_control_system"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun:gpt5.4mini120650:001",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/intraday_safety_margin_pressure.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-06-12T08:47:55.282762",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": -0.016562,
+        "llm_model": "gpt-5.4-mini",
+        "llm_provider": "openai"
+      }
+    },
+    {
+      "id": "endogenous_pressure_dislocation",
+      "name": "Endogenous Pressure Dislocation",
+      "class_name": "",
+      "description": "Compute a cross-sectional z-score of short-horizon signed order-flow pressure times inefficiency: normalize rolling sum of `orderFlow` and `trade`, then multiply by a penalty for weak `trdLiq` / high `effSpread` and by the sign of `lobImb` to isolate one-sided book stress. The factor is higher for names where buying/selling pressure is persistent but the trade-side liquidity is deteriorating, implying fragile microstructure.",
+      "formula": "",
+      "trading_idea": "The paper argues that price/volume dynamics can become unstable when book pressure and trading activity amplify each other through endogenous feedback rather than new information. In LOBSTER data, a strong mismatch between persistent order-flow pressure and poor execution quality often signals a local bifurcation-like state: liquidity is present on one side, but trades are still moving price inefficiently. I expect these dislocations to mean-revert once liquidity replenishes or the flow imbalance exhausts, especially when the spread is not yet wide enough to fully compensate market makers.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.00274,
+        "ic_std": 0.287477,
+        "ic_ir": -0.009531,
+        "ic_hit_rate": 0.4936,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.001613,
+            "ic_std": 0.286308,
+            "ic_ir": -0.005635,
+            "ic_hit_rate": 0.4972,
+            "n_timestamps": 46830
+          },
+          "6": {
+            "ic": -0.00274,
+            "ic_std": 0.287477,
+            "ic_ir": -0.009531,
+            "ic_hit_rate": 0.4936,
+            "n_timestamps": 46825
+          },
+          "60": {
+            "ic": 0.000669,
+            "ic_std": 0.286974,
+            "ic_ir": 0.00233,
+            "ic_hit_rate": 0.4989,
+            "n_timestamps": 46771
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46825,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "short_term_equity_dynamics_and_endogenous_market_fluctuation"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun:gpt5.4mini120650:001",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/endogenous_pressure_dislocation.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-06-12T08:47:55.282785",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": -0.00274,
+        "llm_model": "gpt-5.4-mini",
+        "llm_provider": "openai"
+      }
+    },
+    {
+      "id": "volterra_memory_imbalance_drift",
+      "name": "Volterra Memory Imbalance Drift",
+      "class_name": "",
+      "description": "Compute a cross-sectional signal from an exponentially/Volterra-weighted difference between smoothed book imbalance (using lobImb and effLobImb) and smoothed signed trade/orderFlow (trade, orderFlow), scaled by spread and depth to avoid illiquid noise. Positive values indicate latent bid-side pressure with weak realized selling; negative values indicate the mirror.",
+      "formula": "",
+      "trading_idea": "LOB pressure is often not absorbed instantly: persistent imbalance in displayed depth tends to leak into price with a fading, memory-like kernel rather than a one-bar shock. Inspired by the Volterra rough-path perspective in the supplied paper, this factor treats recent imbalance and order-flow history as a decaying memory process and looks for cases where the book remains one-sided while actual traded flow has not yet fully confirmed the move. That combination often precedes short-horizon continuation when pressure persists, and mild mean reversion when the pressure is extreme but trades are failing to validate it.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.084937,
+        "ic_std": 0.297255,
+        "ic_ir": -0.28574,
+        "ic_hit_rate": 0.3833,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.21551,
+            "ic_std": 0.290566,
+            "ic_ir": -0.74169,
+            "ic_hit_rate": 0.229,
+            "n_timestamps": 46833
+          },
+          "6": {
+            "ic": -0.084937,
+            "ic_std": 0.297255,
+            "ic_ir": -0.28574,
+            "ic_hit_rate": 0.3833,
+            "n_timestamps": 46828
+          },
+          "60": {
+            "ic": -0.019117,
+            "ic_std": 0.295113,
+            "ic_ir": -0.064777,
+            "ic_hit_rate": 0.4743,
+            "n_timestamps": 46774
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46828,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "volterra_equations_driven_by_rough_signals_3_probabilistic_c"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun:gpt5.4mini120650:001",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/volterra_memory_imbalance_drift.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-06-12T08:47:55.282986",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": -0.084937,
+        "llm_model": "gpt-5.4-mini",
+        "llm_provider": "openai"
+      }
+    },
+    {
+      "id": "eff_spread_imbalance_fade",
+      "name": "Effective Spread Imbalance Fade",
+      "class_name": "",
+      "description": "Measure signed trade pressure relative to execution cost by combining trade imbalance with effective spread, then compare it cross-sectionally. A simple implementation is a z-scored or ranked factor proportional to -sign(trade) * effSpread * abs(trade) / (abs(trade) + abs(hidden) + 1), optionally smoothed over a short rolling window.",
+      "formula": "",
+      "trading_idea": "When aggressive trading is concentrated on one side of the book but the effective spread is simultaneously wide, the move is often driven more by temporary price impact than by durable information. The Byrd et al. low-latency imbalance paper suggests that short-horizon book-pressure signals can be real, but their profitability depends on how quickly they are acted upon; a widened effective spread is a sign that the move is already being paid for by takers and may be close to exhaustion. Fading that combination targets the post-impact snapback that typically follows transient liquidity shocks rather than persistent informed flow.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.069463,
+        "ic_std": 0.291666,
+        "ic_ir": -0.238159,
+        "ic_hit_rate": 0.4036,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.142261,
+            "ic_std": 0.287255,
+            "ic_ir": -0.495245,
+            "ic_hit_rate": 0.3094,
+            "n_timestamps": 46853
+          },
+          "6": {
+            "ic": -0.069463,
+            "ic_std": 0.291666,
+            "ic_ir": -0.238159,
+            "ic_hit_rate": 0.4036,
+            "n_timestamps": 46848
+          },
+          "60": {
+            "ic": -0.023656,
+            "ic_std": 0.289475,
+            "ic_ir": -0.081719,
+            "ic_hit_rate": 0.4646,
+            "n_timestamps": 46794
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46848,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "the_importance_of_low_latency_to_order_book_imbalance_tradin"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun:gpt5.4mini120650:001",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/eff_spread_imbalance_fade.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-06-12T08:47:55.283008",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": -0.069463,
+        "llm_model": "gpt-5.4-mini",
+        "llm_provider": "openai"
+      }
+    },
+    {
+      "id": "resampling_tail_pressure",
+      "name": "Resampling Tail Pressure",
+      "class_name": "",
+      "description": "Compute a rolling cross-sectional 'tail state' score from z-scored trade, orderFlow, effSpread, spread, lobImb, effLobImb, and hidden-volume deviations, then aggregate it with exponentially decayed weights to emphasize rare, persistent microstructure combinations. Go long names with extreme positive tail-pressure and short names with extreme negative tail-pressure, or invert if the learned calibration favors reversal.",
+      "formula": "",
+      "trading_idea": "Large intraday moves are often preceded by a small cluster of unusually directional microstructure states rather than by a single metric spike. Inspired by sequential Monte Carlo rare-event tilting, this factor builds a rolling, likelihood-like score for the current bar by emphasizing joint extreme order-flow, spread, imbalance, and hidden-trade conditions that historically precede continuation or mean reversion. The edge should come from identifying when the market has moved into a low-probability regime whose forward return asymmetry is different from the normal state.",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": null,
+        "ic_std": null,
+        "ic_ir": null,
+        "ic_hit_rate": null,
+        "ic_by_horizon": {
+          "1": {
+            "ic": null,
+            "ic_std": null,
+            "ic_ir": null,
+            "ic_hit_rate": null,
+            "n_timestamps": 0
+          },
+          "6": {
+            "ic": null,
+            "ic_std": null,
+            "ic_ir": null,
+            "ic_hit_rate": null,
+            "n_timestamps": 0
+          },
+          "60": {
+            "ic": null,
+            "ic_std": null,
+            "ic_ir": null,
+            "ic_hit_rate": null,
+            "n_timestamps": 0
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 0,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "a_sequential_monte_carlo_approach_to_computing_tail_probabil"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun:gpt5.4mini120650:001",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/resampling_tail_pressure.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-06-12T08:47:55.283224",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": null,
+        "llm_model": "gpt-5.4-mini",
+        "llm_provider": "openai"
+      }
+    },
+    {
+      "id": "effort_vs_result_dispersion",
+      "name": "Effort vs Result Dispersion",
+      "class_name": "",
+      "description": "Compute a cross-sectional z-score or rank of high-frequency activity normalized by realized range, e.g. (nbEvents + nbTrades + nbHidden + |trade| + |orderFlow|) / (high - low + spread + effSpread). Optionally emphasize persistence by comparing the current ratio to its short rolling mean and taking the residual.",
+      "formula": "",
+      "trading_idea": "When trading effort is high but price result is small, the market is absorbing flow rather than repricing efficiently. In microstructure terms, heavy activity with muted realized move often signals latent two-sided inventory taking or hidden liquidity, which tends to precede short-horizon continuation once the temporary absorption is exhausted. The idea is consistent with the paper's emphasis on path-dependent regime adaptation: when the recent path is \"smooth\" despite high activity, the next move often becomes more directional than the realized bar history suggests.",
+      "trading_idea_ids": [],
+      "category": "volatility",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.015988,
+        "ic_std": 0.299239,
+        "ic_ir": -0.05343,
+        "ic_hit_rate": 0.4768,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.033805,
+            "ic_std": 0.336367,
+            "ic_ir": -0.100499,
+            "ic_hit_rate": 0.4583,
+            "n_timestamps": 46853
+          },
+          "6": {
+            "ic": -0.015988,
+            "ic_std": 0.299239,
+            "ic_ir": -0.05343,
+            "ic_hit_rate": 0.4768,
+            "n_timestamps": 46848
+          },
+          "60": {
+            "ic": -0.006599,
+            "ic_std": 0.292302,
+            "ic_ir": -0.022574,
+            "ic_hit_rate": 0.4878,
+            "n_timestamps": 46794
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46848,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "american_option_pricing_under_time_varying_rough_volatility_"
+      ],
+      "source": "researcher",
+      "research_session_id": "prerun:gpt5.4mini120650:001",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/effort_vs_result_dispersion.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-06-12T08:47:55.283247",
+      "metadata": {
+        "ic_target_horizon": 6,
+        "ic_at_target": -0.015988,
+        "llm_model": "gpt-5.4-mini",
+        "llm_provider": "openai"
+      }
+    }
+  ],
+  "trading_ideas": []
+}

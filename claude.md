@@ -26,6 +26,20 @@ scripts, and backtests all drive the agents identically.
 A working **MVP** of the full pipeline exists. Each stage and agent is
 intended to be advanced significantly in future work.
 
+**Research-LLM comparison (done).** Named factor-research *preruns*
+(`run_factor_research.py --name <id> --model <llm> [--llm-provider <p>]
+--dedup-scope prerun`) mine N factors with a chosen research model into a
+self-contained `data/factors/preruns/<name>/`. `run_model_comparison.py` then
+compares several preruns' factor sets on three axes — **single-factor IC**
+(raw quality), **brute-force ML** (factors → model catalog + ensemble, OOS),
+and **downstream agents** (the full Selector→Architect→Statistician→PM fund,
+single-pass OOS) — emitting presentation-ready figures, CSV/JSON tables, a
+`report.md` and a `comparison.ipynb` under `data/comparisons/<id>/`
+(`quant_fund_agent/comparison/`). IC + brute-force are LLM-free; only the
+downstream track and `--research` spend LLM. Factors needing fields the current
+data lacks are filtered (and reported), so it runs on today's 51-ticker LOBSTER
+sample now and re-runs unchanged once full LOBSTER / FMP data is downloaded.
+
 **Pluggable data layer (Phases 0–6 done — milestone complete).** The fund no
 longer requires the author's LOBSTER CSVs: any panel load goes through
 `quant_fund_agent/data/` (provider abstraction + parquet cache + capability
