@@ -23,6 +23,16 @@ log = logging.getLogger("comparison.config")
 # prelim notebook (data/factors/factor_db.json::ic_by_horizon keys "1"/"6"/"60").
 DEFAULT_IC_HORIZONS: tuple[int, ...] = (1, 6, 60)
 
+# Lighter hyper-parameters swapped in under ``--fast`` (merged over catalog
+# defaults; unknown keys are dropped per model, so it is safe to apply to any
+# model_type — linear models simply ignore ``n_estimators``).
+_FAST_MODEL_PARAMS: dict[str, dict[str, object]] = {
+    "random_forest": {"n_estimators": 60},
+    "gradient_boosting": {"n_estimators": 60},
+    "xgboost": {"n_estimators": 80},
+    "lightgbm": {"n_estimators": 120},
+}
+
 
 @dataclass
 class ComparisonConfig:
@@ -51,6 +61,16 @@ class ComparisonConfig:
     oos_split_ratio: float = 0.2      # held-out tail fraction
     holding_period: int | None = None  # None → target_horizon
     max_positions: int = 20
+
+    # ── speed knobs (brute-force track) ──
+    # train_sample_frac < 1.0 fits each model on a random subset of the training
+    # rows (the backtest still uses all data); the dominant lever for the heavy
+    # tree/boosting models on a large panel.  `fast` is a convenience preset that
+    # also swaps in lighter tree/boosting hyper-parameters.  Pair either with
+    # `n_tickers` (fewer underlyings → a smaller panel speeds up *every* model
+    # and the IC track too).
+    fast: bool = False
+    train_sample_frac: float = 1.0
 
     # ── downstream-agent track ──
     n_strategies: int = 3             # strategies built per prerun
@@ -105,6 +125,12 @@ class ComparisonConfig:
             else:
                 out.append(m)
         return out
+
+    def fast_model_params(self, model_type: str) -> dict[str, Any] | None:
+        """Lighter hyper-parameters for ``model_type`` under ``--fast`` (else None)."""
+        if not self.fast:
+            return None
+        return _FAST_MODEL_PARAMS.get(model_type)
 
     def to_dict(self) -> dict[str, Any]:
         d = asdict(self)

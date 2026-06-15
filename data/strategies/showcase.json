@@ -9,18 +9,19 @@
     {
       "approved": true,
       "reject_stage": null,
-      "hypothesis": "Utilizing a combination of mean-reversion factors (alpha_001, alpha_004, alpha_018) and momentum factors (alpha_007, alpha_014, alpha_038) can create a robust trading strategy that capitalizes on overreactions in stock prices. Specifically, the strategy would short stocks exhibiting extreme negative mean-reversion signals while simultaneously going long on those showing strong momentum after pullbacks.",
-      "selection_rationale": "alpha_001: This mean-reversion factor targets stocks that have experienced significant negative returns, betting on their reversion to historical averages, which aligns with the hypothesis of exploiting overreactions.\nalpha_004: This factor identifies stocks at persistent relative lows, enhancing the mean-reversion strategy by focusing on those likely to revert upward after prolonged weakness.\nalpha_018: Captures stocks with elevated intraday dislocations, fading those that deviate significantly from their typical behavior, further supporting the mean-reversion aspect of the hypothesis.\nalpha_007: This momentum factor captures stocks experiencing strong price trends after high-volume days, essential for identifying potential long candidates post-pullback.\nalpha_014: Incorporating momentum weighted by the strength of the open-volume relationship, this factor enhances the strategy's ability to capitalize on price continuation in trending stocks.\nalpha_038: This factor fades stocks exhibiting local highs and strong intraday moves, effectively complementing the mean-reversion strategy by identifying candidates for shorting.\nrsi_mean_reversion: The RSI Mean Reversion factor provides a contrarian signal based on overbought and oversold conditions, adding a robust mechanism for identifying mean-reversion opportunities.\njump_volume_reversal: This factor assesses the commitment to price jumps, allowing for the identification of potential reversals after significant price movements, which can enhance the mean-reversion approach.\nfat_tail_volume_variation: By highlighting stocks with significant volume spikes, this factor captures potential momentum phases, adding liquidity insights that can reveal underlying market dynamics supporting price trends.",
-      "model_type": "lasso",
+      "hypothesis": "Combine mean-reversion signals from alpha factors that capture deviations from VWAP and close price (e.g., alpha_005, alpha_041, alpha_057) with momentum factors that signal continuations during high-volume days (e.g., alpha_007, alpha_019). This strategy aims to identify stocks that are temporarily mispriced relative to their intrinsic value while also capitalizing on short-term momentum fueled by increased trading activity.",
+      "selection_rationale": "alpha_005: This factor captures mean-reversion around the VWAP, allowing us to identify stocks that are mispriced relative to volume-weighted fair value.\nalpha_041: By measuring the deviation between the geometric midprice and VWAP, it further enhances the mean-reversion signals, complementing the VWAP-focused strategy.\nalpha_007: This momentum factor signals price continuation during high-volume days, aligning well with the hypothesis of leveraging market conviction.\nalpha_019: As a contrarian momentum factor, it allows us to fade short-term moves while considering long-term trends, enhancing the strategy's robustness.\nalpha_057: Captures deviations of the close from VWAP, reinforcing the mean-reversion approach by focusing on recent price behaviors.\njump_volume_reversal: This factor identifies potential reversals during significant price jumps, capturing market reactions that align with the high-volume momentum aspect of the strategy.\nintraday_volume_variation_signal: Captures real-time volume changes, providing insights into immediate market interest, which can help validate both mean-reversion and momentum signals.\nfat_tail_volume_variation: This factor highlights stocks with significant volume spikes, indicating heightened market activity, which can leverage the momentum aspect of the strategy.",
+      "model_type": "ridge",
       "model_params": {},
       "factor_ids": [
-        "alpha_001",
-        "alpha_018",
+        "alpha_005",
+        "alpha_041",
+        "alpha_057",
         "alpha_007",
-        "alpha_038"
+        "alpha_019"
       ],
       "target_horizon": 6,
-      "model_artifact_path": "data/strategies/models/arch_422abf64.joblib",
+      "model_artifact_path": "data/strategies/models/arch_59995552.joblib",
       "holding_period": 6,
       "max_positions": 20,
       "min_conviction": 0.5,
@@ -30,59 +31,56 @@
           "iteration": 1,
           "model_type": "ridge",
           "model_params": {},
-          "n_features": 6,
-          "valid_ic": -0.018044,
-          "train_r2": 0.000717,
-          "valid_r2": -0.009804,
-          "is_sharpe": 0.7241
+          "n_features": 5,
+          "valid_ic": 0.055618,
+          "train_r2": 0.000471,
+          "valid_r2": 5.7e-05,
+          "is_sharpe": 1.5459
         },
         {
           "iteration": 2,
           "model_type": "lasso",
           "model_params": {},
-          "n_features": 4,
+          "n_features": 3,
           "valid_ic": 0.0,
           "train_r2": 0.0,
-          "valid_r2": -0.009592,
-          "is_sharpe": 1.3389
+          "valid_r2": -0.002256,
+          "is_sharpe": 1.3681
         },
         {
           "iteration": 3,
-          "model_type": "elastic_net",
-          "model_params": {
-            "alpha": 0.5,
-            "l1_ratio": 0.5
-          },
-          "n_features": 6,
-          "valid_ic": 0.0,
-          "train_r2": 0.0,
-          "valid_r2": -0.008965,
-          "is_sharpe": 0.0
+          "model_type": "ridge",
+          "model_params": {},
+          "n_features": 5,
+          "valid_ic": 0.055618,
+          "train_r2": 0.000471,
+          "valid_r2": 5.7e-05,
+          "is_sharpe": 1.5459
         }
       ],
       "stat_tests": [
         {
           "test_id": "deflated_sharpe_ratio",
           "verdict": "pass",
-          "value": 0.842055,
+          "value": 0.961589,
           "threshold": 0.75,
-          "summary": "DSR = 0.8421 (threshold 0.75, 3 trials, T=400 bars)."
+          "summary": "DSR = 0.9616 (threshold 0.75, 3 trials, T=398 bars)."
         },
         {
           "test_id": "out_of_sample_backtest",
           "verdict": "pass",
-          "value": 1.1259,
-          "threshold": 0.2008,
-          "summary": "OOS Sharpe 1.13 vs IS 1.34 (decay 16%). Edge persists."
+          "value": 0.9868,
+          "threshold": 0.2319,
+          "summary": "OOS Sharpe 0.99 vs IS 1.55 (decay 36%). Edge persists."
         }
       ],
       "final_decision": "accept",
-      "id": "enhanced_mean_reversion_and_momentum_strategy_be6c5a27",
-      "name": "Enhanced Mean-Reversion and Momentum Strategy",
-      "artifact_path": "data/strategies/models/arch_422abf64.joblib",
-      "is_sharpe": 1.3389,
-      "oos_sharpe": 1.1259,
-      "deflated_sharpe": 0.842055
+      "id": "mean_reversion_momentum_6df22903",
+      "name": "Mean-Reversion Momentum",
+      "artifact_path": "data/strategies/models/arch_59995552.joblib",
+      "is_sharpe": 1.5459,
+      "oos_sharpe": 0.9868,
+      "deflated_sharpe": 0.961589
     }
   ]
 }

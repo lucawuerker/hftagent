@@ -22,6 +22,15 @@ Examples
     # Fully offline: factor-quality + brute-force only, every prerun on disk.
     QF_USE_MCP=0 ./venv/bin/python run_model_comparison.py --all --no-downstream
 
+    # Fast brute-force of a single model on a small universe (quick iteration).
+    QF_USE_MCP=0 ./venv/bin/python run_model_comparison.py \
+      --preruns gpt4omini,gpt5.4mini --no-downstream \
+      --models random_forest --fast --n-tickers 20
+
+    # Or tune the speed knobs explicitly (30% of rows, all models, 25 tickers).
+    QF_USE_MCP=0 ./venv/bin/python run_model_comparison.py --all --no-downstream \
+      --train-sample-frac 0.3 --n-tickers 25
+
     # Create the preruns first (spends research LLM), then compare.
     ./venv/bin/python run_model_comparison.py --research \
       --prerun-spec gpt4omini=gpt-4o-mini \
@@ -58,7 +67,9 @@ def _parse_args() -> argparse.Namespace:
     g.add_argument("--all", action="store_true",
                    help="Compare every prerun under data/factors/preruns/.")
     p.add_argument("--models", default=None,
-                   help="Comma-separated brute-force models (default: all catalog models).")
+                   help="Comma-separated brute-force models to run, e.g. "
+                        "'--models random_forest' or '--models ridge,lightgbm' "
+                        "(default: all catalog models).")
     p.add_argument("--no-ensemble", action="store_true",
                    help="Skip the equal-weight ensemble in the brute-force track.")
     p.add_argument("--include-seeds", action="store_true",
@@ -74,7 +85,18 @@ def _parse_args() -> argparse.Namespace:
                    help="Forecast horizon (bars) for brute-force + downstream.")
     p.add_argument("--oos-ratio", type=float, default=0.2)
     p.add_argument("--n-tickers", type=int, default=None,
-                   help="Cap the universe (memory); default = all tickers in the data dir.")
+                   help="How many underlyings to use (caps the universe). Fewer tickers "
+                        "→ a smaller panel that speeds up every model AND the IC track. "
+                        "Default = all tickers in the data dir.")
+    # ── speed knobs (brute-force model training) ──
+    p.add_argument("--fast", action="store_true",
+                   help="Fast preset: subsample training rows (--train-sample-frac "
+                        "defaults to 0.1) and use lighter tree/boosting hyper-parameters. "
+                        "Combine with --n-tickers for the biggest speedup.")
+    p.add_argument("--train-sample-frac", type=float, default=None,
+                   help="Fraction (0–1] of training ROWS used to FIT each model; the "
+                        "backtest still uses all data. The main lever for the heavy "
+                        "tree/boosting models. Default 1.0 (or 0.1 under --fast).")
     p.add_argument("--data-dir", default=os.getenv("DATA_DIR", "ticker_data"))
     p.add_argument("--out-dir", default=None, help="Override the output folder.")
     # ── optional research stage (creates the preruns first) ──
@@ -134,6 +156,12 @@ def main() -> None:
         raise SystemExit("No preruns to compare. Create some with run_factor_research.py "
                          "--name <id> --model <llm>, or pass --research --prerun-spec ….")
 
+    # --fast implies a low default training-row fraction unless one is given.
+    train_sample_frac = (
+        args.train_sample_frac if args.train_sample_frac is not None
+        else (0.1 if args.fast else 1.0)
+    )
+
     cfg = ComparisonConfig(
         preruns=prerun_names,
         models=[m.strip() for m in args.models.split(",")] if args.models else None,
@@ -144,6 +172,7 @@ def main() -> None:
         target_horizon=args.horizon, ic_horizons=(1, args.horizon, 60),
         oos_split_ratio=args.oos_ratio, n_strategies=args.n_strategies,
         data_dir=args.data_dir, n_tickers=args.n_tickers,
+        fast=args.fast, train_sample_frac=train_sample_frac,
     )
     if args.out_dir:
         cfg.output_root = str(Path(args.out_dir).parent)
@@ -151,6 +180,10 @@ def main() -> None:
 
     log.info("Comparison '%s' over %d prerun(s): %s", cfg.comparison_id,
              len(prerun_names), prerun_names)
+    if cfg.fast or cfg.train_sample_frac < 1.0 or cfg.n_tickers is not None:
+        log.info("speed: fast=%s  train_sample_frac=%.3g  n_tickers=%s  models=%s",
+                 cfg.fast, cfg.train_sample_frac, cfg.n_tickers,
+                 cfg.models or "all")
 
     # ── shared panel + per-prerun usable factor ids ──
     panel = factors.load_panel_cached(cfg.data_dir, cfg.n_tickers)

@@ -58,11 +58,13 @@ def evaluate_prerun_models(
             r = evaluate_config(
                 factor_ids=factor_ids,
                 model_type=model,
+                model_params=cfg.fast_model_params(model),
                 target_horizon=cfg.target_horizon,
                 holding_period=cfg.holding_period,
                 max_positions=cfg.max_positions,
                 oos_split_ratio=cfg.oos_split_ratio,
                 strategy_id=f"cmp_{prerun}_{model}",
+                train_sample_frac=cfg.train_sample_frac,
             )
         except Exception as e:  # noqa: BLE001 — one model must not abort the sweep
             log.warning("brute-force %s/%s failed: %s", prerun, model, e)
@@ -133,9 +135,11 @@ def _evaluate_ensemble(
         try:
             fit = fit_and_backtest(
                 factor_signals_is=signals_is, data_is=data_is, model_type=model,
+                model_params=cfg.fast_model_params(model),
                 factor_ids=factor_ids, target_horizon=cfg.target_horizon,
                 holding_period=hp, max_positions=cfg.max_positions,
                 strategy_id=f"ens_{prerun}_{model}",
+                train_sample_frac=cfg.train_sample_frac,
             )
             strats.append(ModelStrategy.from_artifact(
                 fit["artifact_path"], strategy_id=f"ens_{prerun}_{model}",

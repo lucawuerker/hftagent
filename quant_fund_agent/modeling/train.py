@@ -97,6 +97,27 @@ def _r2(estimator, X: np.ndarray, y: np.ndarray) -> float | None:
         return None
 
 
+def _subsample_rows(
+    X: np.ndarray, y: np.ndarray, frac: float, seed: int = 0,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Deterministically keep a fraction of the ``(X, y)`` *fitting* rows.
+
+    Speeds up fitting (especially the tree/boosting models, whose cost scales
+    with sample count) without touching the backtest, which still runs on the
+    full panel.  ``frac >= 1`` is a no-op; a small floor avoids degenerate
+    near-empty fits when ``frac`` is tiny.
+    """
+    n = len(y)
+    if frac >= 1.0 or n == 0:
+        return X, y
+    k = min(n, max(50, int(round(n * frac))))
+    if k >= n:
+        return X, y
+    rng = np.random.default_rng(seed)
+    idx = np.sort(rng.choice(n, size=k, replace=False))
+    return X[idx], y[idx]
+
+
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
@@ -117,10 +138,13 @@ def fit_and_backtest(
     valid_ratio: float = 0.3,
     artifact_dir: str | Path = DEFAULT_ARTIFACT_DIR,
     strategy_id: str | None = None,
+    train_sample_frac: float = 1.0,
 ) -> dict[str, Any]:
     """Fit (if ML) + backtest one candidate; returns metrics/artifact/diagnostics.
 
     ``factor_signals_is`` / ``data_is`` are the architect's **in-sample** slices.
+    ``train_sample_frac`` (< 1.0) randomly subsamples the rows used to *fit* the
+    model — a speed knob for large panels; the backtest still uses all data.
     """
     sid = strategy_id or f"model_{uuid.uuid4().hex[:8]}"
     t0 = time.time()
@@ -187,7 +211,8 @@ def fit_and_backtest(
     )
 
     trial_estimator = build_estimator(model_type, model_params)
-    trial_estimator.fit(X_tr, y_tr)
+    X_tr_fit, y_tr_fit = _subsample_rows(X_tr, y_tr, train_sample_frac)
+    trial_estimator.fit(X_tr_fit, y_tr_fit)
 
     # Held-out validation rank-IC: the robust, leakage-free trial selection score.
     close_va = close.iloc[cut:]
@@ -202,8 +227,9 @@ def fit_and_backtest(
 
     # (2) refit on the FULL in-sample window — this is the model we keep.
     X_full, y_full = build_training_matrix(normed_is, fids, close, target_horizon)
+    X_full_fit, y_full_fit = _subsample_rows(X_full, y_full, train_sample_frac)
     estimator = build_estimator(model_type, model_params)
-    estimator.fit(X_full, y_full)
+    estimator.fit(X_full_fit, y_full_fit)
 
     diagnostics = {
         "train_r2": _r2(trial_estimator, X_tr, y_tr),
@@ -211,6 +237,7 @@ def fit_and_backtest(
         "valid_ic": round(validation_score, 6),
         "n_train_samples": int(len(y_tr)),
         "n_valid_samples": int(len(y_va)),
+        "n_fit_samples": int(len(y_full_fit)),
         "feature_importances": _feature_importances(estimator, fids),
     }
 

@@ -82,6 +82,71 @@ def test_predict_to_signal_shape(panel):
     assert np.isfinite(sig.values).mean() > 0.9
 
 
+def test_build_training_matrix_imputes_sparse_factor():
+    """A sparse factor must not collapse the joint sample set (regression).
+
+    Previously ``dropna(how="any")`` kept only rows where *every* factor was
+    non-NaN, so one sparse factor among many wiped out training/prediction.  The
+    fix imputes missing features to 0 and keeps any sample with a finite target
+    and at least one present feature.
+    """
+    rng = np.random.default_rng(3)
+    idx = pd.date_range("2020-01-01", periods=N_BARS, freq="10s")
+    cols = [f"T{i}" for i in range(N_TICKERS)]
+    dense = pd.DataFrame(rng.normal(size=(N_BARS, N_TICKERS)), index=idx, columns=cols)
+    sparse = dense.copy()
+    sparse.iloc[:, :] = np.nan
+    sparse.iloc[::50, 0] = 1.0  # present for ~2% of cells only
+    signals = {"dense": dense, "sparse": sparse}
+    close = pd.DataFrame(
+        100 + np.cumsum(rng.normal(0, 0.01, (N_BARS, N_TICKERS)), axis=0),
+        index=idx, columns=cols,
+    )
+
+    X, y = build_training_matrix(signals, ["dense", "sparse"], close, target_horizon=HORIZON)
+    # Driven by the dense factor: nearly every labelled cell survives (vs. the
+    # ~12 the old complete-case logic would have kept).
+    assert X.shape[0] == (N_BARS - HORIZON) * N_TICKERS
+    assert np.isfinite(X).all()  # NaNs were imputed, not left in
+    # The sparse column is mostly the neutral 0 fill.
+    assert (X[:, 1] == 0.0).mean() > 0.9
+
+    est = build_estimator("ridge", {})
+    est.fit(X, y)
+    sig = predict_to_signal(est, signals, ["dense", "sparse"], close.index, close.columns)
+    # Predictions populate wherever the dense factor is present (was ~all-NaN).
+    assert np.isfinite(sig.values).mean() > 0.9
+
+
+def test_build_training_matrix_caps_samples():
+    """Fitting rows are bounded so the CV linear models stay fast on big panels.
+
+    The cap is a deterministic uniform subsample of the kept rows; below the cap
+    every row is kept (no effect on small windows).
+    """
+    rng = np.random.default_rng(11)
+    idx = pd.date_range("2020-01-01", periods=N_BARS, freq="10s")
+    cols = [f"T{i}" for i in range(N_TICKERS)]
+    signals = {f: pd.DataFrame(rng.normal(size=(N_BARS, N_TICKERS)), index=idx, columns=cols)
+               for f in FACTOR_IDS}
+    close = pd.DataFrame(
+        100 + np.cumsum(rng.normal(0, 0.01, (N_BARS, N_TICKERS)), axis=0),
+        index=idx, columns=cols,
+    )
+    full = (N_BARS - HORIZON) * N_TICKERS
+
+    # No cap (large default) → every labelled row kept.
+    X0, y0 = build_training_matrix(signals, FACTOR_IDS, close, HORIZON)
+    assert X0.shape[0] == full == y0.shape[0]
+
+    # Explicit small cap → exactly that many rows, deterministically.
+    cap = 100
+    X1, y1 = build_training_matrix(signals, FACTOR_IDS, close, HORIZON, max_samples=cap)
+    X2, y2 = build_training_matrix(signals, FACTOR_IDS, close, HORIZON, max_samples=cap)
+    assert X1.shape[0] == cap == y1.shape[0]
+    assert np.array_equal(X1, X2) and np.array_equal(y1, y2)  # reproducible
+
+
 def test_unavailable_models_excluded_from_menu():
     """Models whose native lib is missing must drop out of the menu cleanly."""
     menu_types = {m["model_type"] for m in list_model_menu()}
@@ -91,6 +156,47 @@ def test_unavailable_models_excluded_from_menu():
     for mt in ("linear_regression", "ridge", "lasso", "elastic_net",
                "random_forest", "gradient_boosting"):
         assert is_model_available(mt) and mt in menu_types
+
+
+def test_subsample_rows_deterministic_and_floored():
+    from quant_fund_agent.modeling.train import _subsample_rows
+
+    X = np.arange(2000 * 3, dtype=float).reshape(2000, 3)
+    y = np.arange(2000, dtype=float)
+
+    # frac >= 1 is a no-op (identity)
+    X1, y1 = _subsample_rows(X, y, 1.0)
+    assert X1.shape == X.shape and np.array_equal(y1, y)
+
+    # frac=0.1 keeps ~10% of rows, sorted, and is deterministic
+    Xa, ya = _subsample_rows(X, y, 0.1)
+    Xb, yb = _subsample_rows(X, y, 0.1)
+    assert len(ya) == 200
+    assert np.array_equal(ya, yb)               # deterministic
+    assert np.all(np.diff(ya) > 0)              # sorted, unique
+    assert np.array_equal(Xa[:, 0], ya * 3)     # rows stay aligned to X
+
+    # tiny frac is floored (avoids degenerate near-empty fits)
+    _, yc = _subsample_rows(X, y, 0.0001)
+    assert len(yc) == 50
+
+
+def test_fit_and_backtest_train_sample_frac(panel, tmp_path):
+    """train_sample_frac fits on fewer rows but still backtests on all data."""
+    signals, data = panel
+    full = fit_and_backtest(
+        factor_signals_is=signals, data_is=data, model_type="ridge",
+        factor_ids=FACTOR_IDS, target_horizon=HORIZON, artifact_dir=tmp_path,
+        strategy_id="frac_full", train_sample_frac=1.0,
+    )
+    sub = fit_and_backtest(
+        factor_signals_is=signals, data_is=data, model_type="ridge",
+        factor_ids=FACTOR_IDS, target_horizon=HORIZON, artifact_dir=tmp_path,
+        strategy_id="frac_sub", train_sample_frac=0.1,
+    )
+    # Far fewer rows actually fitted, yet a real (finite) backtest still runs.
+    assert sub["diagnostics"]["n_fit_samples"] < full["diagnostics"]["n_fit_samples"] / 5
+    assert np.isfinite(sub["metrics"]["sharpe_ratio"])
 
 
 @pytest.mark.parametrize("model_type", available_model_types(include_static=False))

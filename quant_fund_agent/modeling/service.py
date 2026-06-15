@@ -166,13 +166,15 @@ def evaluate_config(
     min_conviction: float = 0.0,
     oos_split_ratio: float = 0.2,
     strategy_id: str | None = None,
+    train_sample_frac: float = 1.0,
 ) -> dict[str, Any]:
     """Fit one (model, horizon) config on IS and evaluate IS **and** OOS.
 
     Deterministic and LLM-free — used by the notebook's horizon sweep.  Holds the
     position over the forecast horizon (``holding_period`` defaults to
     ``target_horizon``) and reloads the persisted full-IS model for the OOS leg
-    (never refits on OOS).
+    (never refits on OOS).  ``train_sample_frac`` (< 1.0) subsamples the rows
+    used to fit the model (a speed knob; the backtest still uses all data).
     """
     from quant_fund_agent.backtesting.strategy_backtester import backtest_strategy
     from quant_fund_agent.factors import discover_factors
@@ -192,6 +194,7 @@ def evaluate_config(
         max_positions=max_positions, equal_weight=equal_weight,
         min_conviction=min_conviction,
         strategy_id=strategy_id or f"sweep_{model_type}_h{target_horizon}",
+        train_sample_frac=train_sample_frac,
     )
 
     strat = ModelStrategy.from_artifact(

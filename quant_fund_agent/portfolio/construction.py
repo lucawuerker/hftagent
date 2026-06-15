@@ -57,23 +57,38 @@ PortfolioWeights = dict[str, float]
 def _align_cov(strategy_ids: list[str], cov: pd.DataFrame) -> pd.DataFrame:
     """Reorder/restrict the covariance matrix to the requested IDs.
 
-    Missing rows/columns are filled in with zero off-diagonal and the
-    median variance on the diagonal so the matrix stays PSD.  This is
-    only a safety net — callers should pass a properly-sized cov.
+    Missing rows/columns — and any NaN cells, whether from an
+    insufficient-overlap pair (``DataFrame.cov(min_periods=…)`` returns NaN
+    there) or a strict-JSON round-trip over MCP (NaN→null→None, object
+    dtype) — are filled with zero off-diagonal and the median variance on
+    the diagonal so the matrix stays PSD and float-typed.  This is only a
+    safety net — callers should pass a properly-sized cov.
     """
+    # A strict-JSON round-trip turns NaN into None and the frame into
+    # object dtype; coerce back to float so a None can never reach the
+    # matmul as ``None * float`` (it becomes NaN, handled just below).
+    cov = cov.apply(pd.to_numeric, errors="coerce")
+
     missing = [s for s in strategy_ids if s not in cov.index]
     if missing:
         log.warning("Covariance missing rows for %s — filling with median variance.", missing)
-        med_var = float(np.median(np.diag(cov.values))) if len(cov) else 1e-4
-        for s in missing:
-            cov.loc[s, s] = med_var
-        for s in missing:
-            for o in strategy_ids:
-                if o == s:
-                    continue
-                cov.loc[s, o] = 0.0
-                cov.loc[o, s] = 0.0
-    return cov.loc[strategy_ids, strategy_ids]
+
+    # Median of the finite diagonal is the fallback variance for any
+    # missing/NaN diagonal entry (1e-4 if the whole diagonal is unusable).
+    diag = np.diag(cov.values).astype(float) if len(cov) else np.array([])
+    finite = diag[np.isfinite(diag)]
+    med_var = float(np.median(finite)) if finite.size else 1e-4
+
+    aligned = cov.reindex(index=strategy_ids, columns=strategy_ids)
+    vals = aligned.to_numpy(dtype=float, copy=True)
+    n = len(strategy_ids)
+    for i in range(n):
+        if not np.isfinite(vals[i, i]):
+            vals[i, i] = med_var
+        for j in range(n):
+            if i != j and not np.isfinite(vals[i, j]):
+                vals[i, j] = 0.0
+    return pd.DataFrame(vals, index=strategy_ids, columns=strategy_ids)
 
 
 def _normalise(w: np.ndarray) -> np.ndarray:

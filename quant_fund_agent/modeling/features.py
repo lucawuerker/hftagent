@@ -20,15 +20,38 @@ Normalisation contract
 Features are expected to be the **already cross-sectionally normalised** factor
 signals (the backtester z-scores signals before calling ``strategy.calc``).
 Training therefore normalises once up front and prediction receives the
-already-normalised signals — the two paths build identical features.
+already-normalised signals — the two paths build identical features.  Missing
+(NaN) features are imputed to ``0`` (the neutral value post-z-score) in both
+paths rather than dropped, so a sparse factor cannot collapse the sample set.
 """
 
 from __future__ import annotations
+
+import os
 
 import numpy as np
 import pandas as pd
 
 from quant_fund_agent.backtesting.data_loader import forward_returns
+
+# Fitting cross-sectional return predictors on the full intraday panel can mean
+# millions of (timestamp, ticker) rows.  That gives the CV linear models
+# (``LassoCV`` / ``ElasticNetCV``, coordinate descent over an alpha grid × folds)
+# no statistical benefit but dominates wall-clock — a single fit can take many
+# minutes.  We therefore cap the rows actually handed to ``estimator.fit`` via a
+# deterministic uniform subsample.  ``MODELING_MAX_TRAIN_SAMPLES=0`` disables it.
+DEFAULT_MAX_TRAIN_SAMPLES = 200_000
+
+
+def _max_train_samples() -> int | None:
+    raw = os.getenv("MODELING_MAX_TRAIN_SAMPLES")
+    if raw is None or raw == "":
+        return DEFAULT_MAX_TRAIN_SAMPLES
+    try:
+        n = int(raw)
+    except ValueError:
+        return DEFAULT_MAX_TRAIN_SAMPLES
+    return n if n > 0 else None
 
 
 def _stack(df: pd.DataFrame) -> pd.Series:
@@ -82,18 +105,44 @@ def build_training_matrix(
     factor_ids: list[str],
     close: pd.DataFrame,
     target_horizon: int,
+    max_samples: int | None = None,
 ) -> tuple[np.ndarray, np.ndarray]:
-    """Build ``(X, y)`` for fitting, dropping any row with a NaN feature/target.
+    """Build ``(X, y)`` for fitting.
 
     ``y`` is the ``target_horizon``-bar forward return for each ``(timestamp,
-    ticker)`` sample.
+    ticker)`` sample.  A sample is kept when its target is finite **and at least
+    one feature is present**; any remaining missing feature is imputed to ``0``
+    — the neutral value for the cross-sectionally z-scored signals (a factor
+    with no reading on a name simply abstains).
+
+    This deliberately avoids ``dropna(how="any")`` across all factors: with many
+    factors, each carrying its own NaN footprint (warm-up bars, or genuinely
+    sparse alphas that only fire under specific conditions), the joint
+    complete-case intersection collapses to a handful of rows — or zero — which
+    silently destroys the model.
+
+    ``max_samples`` (default: :data:`DEFAULT_MAX_TRAIN_SAMPLES`, overridable via
+    ``MODELING_MAX_TRAIN_SAMPLES``) caps how many rows reach the estimator: when
+    the kept set is larger it is uniformly subsampled with a fixed seed.  The
+    same cap applied identically across preruns and models keeps a comparison
+    fair while bounding fit time; prediction is never subsampled.
     """
     X = stack_features(factor_signals, factor_ids)
     y = _stack(forward_returns(close, horizon=target_horizon)).reindex(X.index)
-    df = X.copy()
-    df["__target__"] = y.replace([np.inf, -np.inf], np.nan)
-    df = df.dropna(axis=0, how="any")
-    return df[factor_ids].to_numpy(dtype=float), df["__target__"].to_numpy(dtype=float)
+    y = y.replace([np.inf, -np.inf], np.nan)
+
+    feats = X.to_numpy(dtype=float)
+    target = y.to_numpy(dtype=float)
+    keep = np.isfinite(target) & ~np.isnan(feats).all(axis=1)
+    X_kept = np.where(np.isnan(feats[keep]), 0.0, feats[keep])  # impute neutral
+    y_kept = target[keep]
+
+    cap = max_samples if max_samples is not None else _max_train_samples()
+    if cap and len(y_kept) > cap:
+        sel = np.random.default_rng(0).choice(len(y_kept), size=cap, replace=False)
+        sel.sort()
+        X_kept, y_kept = X_kept[sel], y_kept[sel]
+    return X_kept, y_kept
 
 
 def predict_to_signal(
@@ -105,14 +154,19 @@ def predict_to_signal(
 ) -> pd.DataFrame:
     """Run ``estimator.predict`` over the panel → ``(time × ticker)`` signal.
 
-    Rows with any NaN feature are left as NaN (no position), exactly mirroring
-    how the training matrix dropped them.  The result is reindexed onto the
-    requested ``index``/``columns`` so it lines up with the backtester's frames.
+    Predicts on every ``(timestamp, ticker)`` with **at least one present
+    feature**, imputing missing features to ``0`` — identically to
+    :func:`build_training_matrix` — so the model takes a position wherever any
+    factor has a reading.  Rows with no feature at all stay NaN (no position).
+    The result is reindexed onto the requested ``index``/``columns`` so it lines
+    up with the backtester's frames.
     """
     X = stack_features(factor_signals, factor_ids)
-    mask = X.notna().all(axis=1)
-    preds = pd.Series(np.nan, index=X.index, dtype=float)
+    feats = X.to_numpy(dtype=float)
+    mask = ~np.isnan(feats).all(axis=1)
+    preds = np.full(len(X), np.nan, dtype=float)
     if mask.any():
-        preds.loc[mask] = estimator.predict(X.loc[mask].to_numpy(dtype=float))
-    signal = preds.unstack()
+        Xi = np.where(np.isnan(feats[mask]), 0.0, feats[mask])  # impute neutral
+        preds[mask] = estimator.predict(Xi)
+    signal = pd.Series(preds, index=X.index).unstack()
     return signal.reindex(index=index, columns=columns)

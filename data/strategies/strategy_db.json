@@ -474,7 +474,10 @@
     "pm_status": "not_deployed",
     "pm_notes": "",
     "flagged_reason": "",
-    "correlations": {},
+    "correlations": {
+      "enhanced_mean_reversion_with_momentum_confirmation_681aa37b": 0.3013215156758175,
+      "mean_reversion_momentum_6df22903": 0.20111246959992424
+    },
     "returns_path": "data/strategies/returns/enhanced_mean_reversion_and_momentum_strategy_be6c5a27.csv",
     "created_at": "2026-06-12T10:05:42.979911",
     "metadata": {
@@ -482,6 +485,193 @@
       "deflated_sharpe_ratio": 0.842055,
       "architect_reasoning": "I switched to a Lasso regression model to enhance factor selection and reduce potential overfitting. This model will automatically drive weak factors' weights to zero, which can help improve the hit rate and overall robustness of the strategy. I also reduced the number of features by removing alpha_004 and alpha_014, which had weaker information coefficients (ICs) and may contribute to multicollinearity. This should help improve the model's generalization to unseen data.",
       "statistician_reasoning": "The strategy demonstrates strong in-sample metrics with a Sharpe ratio of 1.3389 and a solid out-of-sample Sharpe ratio of 1.1259, indicating that the edge persists beyond the training data. The deflated Sharpe ratio of 0.8421 exceeds the threshold of 0.75, suggesting that the strategy is robust against overfitting. Given that all tests passed and the metrics indicate a favorable risk-return profile, the candidate strategy should be accepted."
+    }
+  },
+  {
+    "id": "enhanced_mean_reversion_with_momentum_confirmation_681aa37b",
+    "name": "Enhanced Mean Reversion with Momentum Confirmation",
+    "class_name": "ModelStrategy",
+    "description": "Stocks that exhibit significant deviations from their volume-weighted average price (VWAP) and show a high likelihood of mean reversion are expected to revert back towards VWAP over the trading day. Additionally, a bullish momentum signal on volume spikes can confirm the direction of the expected price movement.",
+    "factor_ids": [
+      "alpha_005",
+      "alpha_011",
+      "alpha_018",
+      "fat_tail_volume_variation"
+    ],
+    "trading_idea_ids": [],
+    "status": "approved",
+    "backtest_metrics": {
+      "annualised_return": 0.23063,
+      "annualised_volatility": 0.144182,
+      "sharpe_ratio": 1.5996,
+      "sortino_ratio": 2.7024,
+      "calmar_ratio": 2.1117,
+      "max_drawdown": -0.109215,
+      "max_drawdown_duration_bars": 83,
+      "hit_rate": 0.5327,
+      "profit_factor": 1.3155,
+      "avg_win": 0.00716339,
+      "avg_loss": -0.00648534,
+      "avg_daily_turnover": 0.2225,
+      "avg_positions_held": 6.23,
+      "ic_mean": 0.081221,
+      "ic_ir": 0.227631,
+      "extra": {
+        "n_bars": 398,
+        "bars_per_day": 1
+      }
+    },
+    "oos_backtest_metrics": {
+      "annualised_return": 0.036729,
+      "annualised_volatility": 0.121897,
+      "sharpe_ratio": 0.3013,
+      "sortino_ratio": 0.5265,
+      "calmar_ratio": 0.4451,
+      "max_drawdown": -0.082524,
+      "max_drawdown_duration_bars": 45,
+      "hit_rate": 0.47,
+      "profit_factor": 1.051,
+      "avg_win": 0.00638934,
+      "avg_loss": -0.00560243,
+      "avg_daily_turnover": 0.2314,
+      "avg_positions_held": 6.52,
+      "ic_mean": 0.029,
+      "ic_ir": 0.079019,
+      "extra": {
+        "n_bars": 100,
+        "bars_per_day": 1
+      }
+    },
+    "live_metrics": null,
+    "model_type": "elastic_net",
+    "model_params": {
+      "model_type": "elastic_net",
+      "model_hyperparams": {
+        "alpha": 0.5,
+        "l1_ratio": 0.5
+      },
+      "factor_ids": [
+        "alpha_005",
+        "alpha_011",
+        "alpha_018",
+        "fat_tail_volume_variation"
+      ],
+      "target_horizon": 6,
+      "model_artifact_path": "data/strategies/models/arch_d469abdc.joblib",
+      "weights": {},
+      "holding_period": 6,
+      "max_positions": 20,
+      "equal_weight": true,
+      "min_conviction": 0.5
+    },
+    "holding_period": 6,
+    "pm_status": "live",
+    "pm_notes": "",
+    "flagged_reason": "",
+    "correlations": {
+      "enhanced_mean_reversion_and_momentum_strategy_be6c5a27": 0.3013215156758175,
+      "mean_reversion_momentum_6df22903": 0.6281132556265252
+    },
+    "returns_path": "data/strategies/returns/enhanced_mean_reversion_with_momentum_confirmation_681aa37b.csv",
+    "created_at": "2026-06-15T14:44:46.333093",
+    "metadata": {
+      "n_trials": 3,
+      "deflated_sharpe_ratio": 0.967917,
+      "architect_reasoning": "I switched to an Elastic Net model to leverage both L1 and L2 regularization, which can help with both factor selection and overfitting. This addresses the previous overfitting issue indicated by the significant difference between train R\u00b2 and valid R\u00b2. I retained only the strongest factors from the previous trials while omitting weaker factors to improve robustness. The inclusion of 'fat_tail_volume_variation' allows for capturing momentum signals during high-volume days, which aligns with the trading hypothesis.",
+      "statistician_reasoning": "The candidate strategy demonstrates strong in-sample performance with a Sharpe ratio of 1.5996 and a solid out-of-sample Sharpe ratio of 0.3013, indicating that the strategy's edge persists beyond the training data. Both the deflated Sharpe ratio and out-of-sample backtest results pass their respective thresholds, suggesting robustness and reliability. Given these positive indicators and the architect's rationale for model selection and factor inclusion, the strategy is deemed acceptable."
+    }
+  },
+  {
+    "id": "mean_reversion_momentum_6df22903",
+    "name": "Mean-Reversion Momentum",
+    "class_name": "ModelStrategy",
+    "description": "Combine mean-reversion signals from alpha factors that capture deviations from VWAP and close price (e.g., alpha_005, alpha_041, alpha_057) with momentum factors that signal continuations during high-volume days (e.g., alpha_007, alpha_019). This strategy aims to identify stocks that are temporarily mispriced relative to their intrinsic value while also capitalizing on short-term momentum fueled by increased trading activity.",
+    "factor_ids": [
+      "alpha_005",
+      "alpha_041",
+      "alpha_057",
+      "alpha_007",
+      "alpha_019"
+    ],
+    "trading_idea_ids": [],
+    "status": "approved",
+    "backtest_metrics": {
+      "annualised_return": 0.225177,
+      "annualised_volatility": 0.145661,
+      "sharpe_ratio": 1.5459,
+      "sortino_ratio": 2.1339,
+      "calmar_ratio": 1.8211,
+      "max_drawdown": -0.123651,
+      "max_drawdown_duration_bars": 77,
+      "hit_rate": 0.5402,
+      "profit_factor": 1.304,
+      "avg_win": 0.00709544,
+      "avg_loss": -0.00646344,
+      "avg_daily_turnover": 0.2251,
+      "avg_positions_held": 6.63,
+      "ic_mean": 0.060064,
+      "ic_ir": 0.171963,
+      "extra": {
+        "n_bars": 398,
+        "bars_per_day": 1
+      }
+    },
+    "oos_backtest_metrics": {
+      "annualised_return": 0.164828,
+      "annualised_volatility": 0.16703,
+      "sharpe_ratio": 0.9868,
+      "sortino_ratio": 1.3363,
+      "calmar_ratio": 2.1146,
+      "max_drawdown": -0.077949,
+      "max_drawdown_duration_bars": 16,
+      "hit_rate": 0.49,
+      "profit_factor": 1.21,
+      "avg_win": 0.00769044,
+      "avg_loss": -0.00635558,
+      "avg_daily_turnover": 0.2151,
+      "avg_positions_held": 7.22,
+      "ic_mean": 0.088954,
+      "ic_ir": 0.279745,
+      "extra": {
+        "n_bars": 100,
+        "bars_per_day": 1
+      }
+    },
+    "live_metrics": null,
+    "model_type": "ridge",
+    "model_params": {
+      "model_type": "ridge",
+      "model_hyperparams": {},
+      "factor_ids": [
+        "alpha_005",
+        "alpha_041",
+        "alpha_057",
+        "alpha_007",
+        "alpha_019"
+      ],
+      "target_horizon": 6,
+      "model_artifact_path": "data/strategies/models/arch_59995552.joblib",
+      "weights": {},
+      "holding_period": 6,
+      "max_positions": 20,
+      "equal_weight": true,
+      "min_conviction": 0.5
+    },
+    "holding_period": 6,
+    "pm_status": "live",
+    "pm_notes": "",
+    "flagged_reason": "",
+    "correlations": {
+      "enhanced_mean_reversion_and_momentum_strategy_be6c5a27": 0.20111246959992424,
+      "enhanced_mean_reversion_with_momentum_confirmation_681aa37b": 0.6281132556265252
+    },
+    "returns_path": "data/strategies/returns/mean_reversion_momentum_6df22903.csv",
+    "created_at": "2026-06-15T14:52:41.376238",
+    "metadata": {
+      "n_trials": 3,
+      "deflated_sharpe_ratio": 0.961589,
+      "architect_reasoning": "The chosen strategy combines mean-reversion factors (alpha_005, alpha_041, alpha_057) that capture price deviations from VWAP and close price, with momentum factors (alpha_007, alpha_019) that signal continuation during high-volume days. The ridge regression model is selected for its ability to handle potential collinearity among the factors while allowing for some regularization. This approach is suitable given the hypothesis of identifying mispriced stocks and capturing short-term momentum, while the holding period aligns with the forecast horizon of 6 bars.",
+      "statistician_reasoning": "The strategy demonstrates strong in-sample metrics with a Sharpe ratio of 1.5459 and a deflated Sharpe ratio of 0.9616, which exceeds the threshold of 0.75. Additionally, the out-of-sample backtest shows a Sharpe ratio of 0.9868, indicating that the strategy's edge persists beyond the in-sample period. Both tests passed, suggesting that the strategy is robust and has potential for profitability."
     }
   }
 ]
