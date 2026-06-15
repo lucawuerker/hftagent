@@ -47,9 +47,33 @@ def stack_features(
     factor_signals: dict[str, pd.DataFrame],
     factor_ids: list[str],
 ) -> pd.DataFrame:
-    """Long feature frame: index ``(timestamp, ticker)``, columns ``factor_ids``."""
-    cols = {fid: _stack(factor_signals[fid]) for fid in factor_ids}
-    X = pd.DataFrame(cols)
+    """Long feature frame: index ``(timestamp, ticker)``, columns ``factor_ids``.
+
+    Fast path: when every factor frame shares the same ``(index, columns)`` — the
+    common case, since all signals are computed on the same panel — the long
+    matrix is built by raveling each ``(time × ticker)`` array in C-order (which
+    matches ``MultiIndex.from_product([index, columns])``), skipping pandas'
+    slow per-frame ``.stack()``.  Falls back to the alignment-safe stack path
+    when the frames differ in shape/labels.
+    """
+    if not factor_ids:
+        return pd.DataFrame()
+    ref = factor_signals[factor_ids[0]]
+    ref_index, ref_cols = ref.index, ref.columns
+    aligned = all(
+        factor_signals[fid].index.equals(ref_index)
+        and factor_signals[fid].columns.equals(ref_cols)
+        for fid in factor_ids
+    )
+    if aligned:
+        mi = pd.MultiIndex.from_product([ref_index, ref_cols])
+        mat = np.empty((len(ref_index) * len(ref_cols), len(factor_ids)), dtype=float)
+        for j, fid in enumerate(factor_ids):
+            mat[:, j] = factor_signals[fid].to_numpy(dtype=float).ravel()
+        X = pd.DataFrame(mat, index=mi, columns=list(factor_ids))
+    else:
+        cols = {fid: _stack(factor_signals[fid]) for fid in factor_ids}
+        X = pd.DataFrame(cols)
     return X.replace([np.inf, -np.inf], np.nan)
 
 

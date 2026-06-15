@@ -65,24 +65,47 @@ def factor_names(names: list[str]) -> dict[str, str]:
 
 
 def load_panel_cached(data_dir: str | None = None, n_tickers: int | None = None) -> dict[str, Any]:
-    """Load (and module-cache) the factor panel the whole comparison shares.
+    """Load (and cache) the factor panel the whole comparison shares.
 
-    Sets ``DATA_DIR`` / ``ARCHITECT_N_TICKERS`` so the modeling service — whose
-    ``_load_panel`` / ``_factor_signal`` every track reuses — reads the intended
-    data and universe.  ``DATA_DIR`` is captured at import in the service, so we
-    also override its module global defensively in case it imported earlier.
+    # ── TODO: switch to quant.config.yaml once the full data is downloaded ──────
+    # Currently uses the direct LOBSTER/backtesting loader
+    # (``backtesting.data_loader.load_panel``) rather than the abstracted
+    # ``quant_fund_agent.data.load_panel`` (which respects ``quant.config.yaml``).
+    #
+    # Reason: the researcher factors were designed and IC-tested against the full
+    # LOBSTER microstructure panel (19 fields: orderFlow, effSpread, depth, …).
+    # The abstracted loader with a yfinance/FMP config only delivers 7 OHLCV fields,
+    # which causes every microstructure factor to fail the usability probe.
+    #
+    # When to switch: once ``quant.config.yaml`` points to the full LOBSTER dataset
+    # (or another provider that exposes the same microstructure fields), replace the
+    # ``_lobster_load`` call below with ``from quant_fund_agent.data import load_panel``
+    # and remove the direct import.  The rest of this function stays the same.
+    # ─────────────────────────────────────────────────────────────────────────────
+
+    The loaded panel is injected into ``modeling.service._PANEL_CACHE`` so the
+    brute-force track's ``evaluate_config`` / ``fit_and_backtest`` and the IC track's
+    ``backtest_factor`` all use the same panel and universe.
     """
+    from quant_fund_agent.backtesting.data_loader import load_panel as _lobster_load
     from quant_fund_agent.factors import discover_factors
     from quant_fund_agent.modeling import service
 
+    dir_ = data_dir or os.getenv("DATA_DIR", "ticker_data")
     if data_dir:
-        os.environ["DATA_DIR"] = data_dir
-        service.DATA_DIR = data_dir
+        os.environ["DATA_DIR"] = dir_
+        service.DATA_DIR = dir_
     if n_tickers is not None:
         os.environ["ARCHITECT_N_TICKERS"] = str(n_tickers)
 
     discover_factors()
-    return service._load_panel()
+
+    # Load with the direct LOBSTER loader (full microstructure fields), cap universe,
+    # then inject into the modeling-service cache so every downstream call reuses it.
+    panel = _lobster_load(dir_, n_tickers=n_tickers)
+    service._PANEL_CACHE = panel
+    service._SIGNAL_CACHE = {}   # flush stale signals from any prior run
+    return panel
 
 
 def usable_factor_ids(
@@ -101,7 +124,11 @@ def usable_factor_ids(
 
     usable: list[str] = []
     dropped: dict[str, str] = {}
-    for fid in factor_ids:
+    n = len(factor_ids)
+    log.info("usable_factor_ids: probing %d factors (computing signals) ...", n)
+    for i, fid in enumerate(factor_ids):
+        if i % 20 == 0:
+            log.info("usable_factor_ids: [%d/%d] ...", i + 1, n)
         if get_factor_class(fid) is None:
             dropped[fid] = "no factor class registered (generated code missing)"
             continue

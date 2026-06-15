@@ -65,11 +65,24 @@ def normalise_factor_signals(
     at each timestamp) so that strategies combining multiple alphas are not
     dominated by whichever alpha has the largest raw magnitude.
     """
+    # Vectorised cross-sectional z-score in NumPy.  Equivalent to the pandas
+    # ``sig.mean/std(axis=1)`` form (skipna, std ddof=1, σ==0 → NaN) but avoids
+    # pandas' per-row NaN-mask machinery (``_isna_array``), which dominated the
+    # backtest hot path when this runs thousands of times across the comparison.
     out: dict[str, pd.DataFrame] = {}
     for fid, sig in factor_signals.items():
-        mu = sig.mean(axis=1)
-        std = sig.std(axis=1).replace(0, np.nan)
-        out[fid] = sig.sub(mu, axis=0).div(std, axis=0)
+        arr = sig.to_numpy(dtype=float)
+        mask = ~np.isnan(arr)
+        cnt = mask.sum(axis=1)
+        ssum = np.where(mask, arr, 0.0).sum(axis=1)
+        with np.errstate(invalid="ignore", divide="ignore"):
+            mu = np.where(cnt > 0, ssum / cnt, np.nan)
+            diff = arr - mu[:, None]
+            sq = np.where(mask, diff * diff, 0.0).sum(axis=1)
+            std = np.sqrt(np.where(cnt > 1, sq / np.where(cnt > 1, cnt - 1, 1), np.nan))
+            std = np.where(std == 0.0, np.nan, std)
+            normed = (arr - mu[:, None]) / std[:, None]
+        out[fid] = pd.DataFrame(normed, index=sig.index, columns=sig.columns)
     return out
 
 

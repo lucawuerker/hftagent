@@ -68,23 +68,29 @@ def _ic_series(
 
 
 def backtest_factor(
-    factor: BaseFactor,
+    factor: BaseFactor | None,
     data: dict[str, pd.DataFrame],
     horizon: int = 6,
     horizons: tuple[int, ...] = (1, 6, 60),
+    *,
+    signal: pd.DataFrame | None = None,
 ) -> BacktestMetrics:
     """Compute IC-based metrics for a single factor.
 
     Args:
-        factor: instantiated factor with a ``.calc()`` method.
+        factor: instantiated factor with a ``.calc()`` method. May be ``None``
+            when ``signal`` is supplied directly (e.g. from a cache).
         data: OHLCV panel dict (index=timestamps, columns=tickers).
         horizon: legacy single default horizon (kept for compatibility).
         horizons: set of forward-return horizons in bars to evaluate.
+        signal: pre-computed factor signal; skips ``factor.calc(data)`` when provided.
 
     Returns:
         BacktestMetrics with IC, IC std, ICIR, IC hit rate populated.
     """
-    signal = factor.calc(data)
+    if signal is None:
+        assert factor is not None, "factor required when signal is not provided"
+        signal = factor.calc(data)
     ic_by_horizon: dict[str, dict[str, float | int | None]] = {}
 
     for h in sorted(set(horizons)):

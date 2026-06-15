@@ -28,15 +28,20 @@ def evaluate_prerun_ic(
 ) -> list[dict[str, Any]]:
     """Per-factor IC rows for one prerun (one row per usable factor)."""
     from quant_fund_agent.backtesting.engine import backtest_factor
-    from quant_fund_agent.factors import instantiate_factor
+    from quant_fund_agent.modeling.service import _factor_signal
 
     names = names or {}
     rows: list[dict[str, Any]] = []
-    for fid in factor_ids:
+    n = len(factor_ids)
+    log.info("IC: prerun '%s' — %d factors at horizons %s", prerun, n, list(horizons))
+    for i, fid in enumerate(factor_ids):
+        if i % 10 == 0:
+            log.info("IC: prerun '%s' [%d/%d] ...", prerun, i + 1, n)
         try:
-            metrics = backtest_factor(
-                instantiate_factor(fid), panel, horizons=horizons,
-            )
+            # Reuse the signal already cached by usable_factor_ids — avoids
+            # recomputing factor.calc() for every factor a second time.
+            sig = _factor_signal(fid, panel)
+            metrics = backtest_factor(None, panel, horizons=horizons, signal=sig)
         except Exception as e:  # noqa: BLE001 — one bad factor must not abort
             log.warning("IC backtest failed for %s/%s: %s", prerun, fid, e)
             continue

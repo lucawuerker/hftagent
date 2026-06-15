@@ -50,7 +50,10 @@ def evaluate_prerun_models(
     from quant_fund_agent.modeling.service import evaluate_config
 
     rows: list[dict[str, Any]] = []
-    for model in cfg.resolved_models():
+    models = cfg.resolved_models()
+    log.info("brute-force: prerun '%s' — %d factors × %d models", prerun, len(factor_ids), len(models))
+    for model in models:
+        log.info("brute-force: prerun '%s' fitting '%s' ...", prerun, model)
         try:
             r = evaluate_config(
                 factor_ids=factor_ids,
@@ -76,6 +79,7 @@ def evaluate_prerun_models(
         })
 
     if cfg.include_ensemble:
+        log.info("brute-force: prerun '%s' building ensemble ...", prerun)
         ens = _evaluate_ensemble(prerun, factor_ids, cfg)
         if ens is not None:
             rows.append(ens)
@@ -107,8 +111,25 @@ def _evaluate_ensemble(
     signals_is, signals_oos = split_signals(signals_full, cfg.oos_split_ratio)
     hp = cfg.holding_period or cfg.target_horizon
 
+    from pathlib import Path
+
+    from quant_fund_agent.modeling.train import DEFAULT_ARTIFACT_DIR
+
     strats: list[ModelStrategy] = []
     for model in base_models:
+        # Reuse the cmp_ artifact just saved by evaluate_prerun_models — same data,
+        # same split, same factors — avoids refitting the same model a second time.
+        cmp_path = Path(DEFAULT_ARTIFACT_DIR) / f"cmp_{prerun}_{model}.joblib"
+        if cmp_path.exists():
+            try:
+                strats.append(ModelStrategy.from_artifact(
+                    cmp_path, strategy_id=f"ens_{prerun}_{model}",
+                    holding_period=hp, max_positions=cfg.max_positions,
+                ))
+                log.info("ensemble: reusing cmp_%s_%s artifact", prerun, model)
+                continue
+            except Exception as e:  # noqa: BLE001
+                log.debug("could not reuse cmp_ artifact for %s/%s: %s", model, prerun, e)
         try:
             fit = fit_and_backtest(
                 factor_signals_is=signals_is, data_is=data_is, model_type=model,

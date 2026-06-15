@@ -395,5 +395,93 @@
       "architect_reasoning": "Switched to XGBoost to capture non-linear interactions among factors and improve predictive power. Increased the number of features by adding 'order_flow_anomaly' to enhance the model's ability to detect significant order flow changes. Adjusted hyperparameters for better performance, focusing on a balance between bias and variance.",
       "statistician_reasoning": "The candidate strategy demonstrates strong in-sample metrics, including a high Sharpe ratio of 5.456 and a very favorable out-of-sample Sharpe ratio of 11.373, indicating that the strategy's edge persists beyond the initial testing phase. The deflated Sharpe ratio also exceeds the threshold of 0.75, further supporting the robustness of the strategy. Given these positive results and the absence of any failing tests, the strategy is deemed acceptable."
     }
+  },
+  {
+    "id": "enhanced_mean_reversion_and_momentum_strategy_be6c5a27",
+    "name": "Enhanced Mean-Reversion and Momentum Strategy",
+    "class_name": "ModelStrategy",
+    "description": "Utilizing a combination of mean-reversion factors (alpha_001, alpha_004, alpha_018) and momentum factors (alpha_007, alpha_014, alpha_038) can create a robust trading strategy that capitalizes on overreactions in stock prices. Specifically, the strategy would short stocks exhibiting extreme negative mean-reversion signals while simultaneously going long on those showing strong momentum after pullbacks.",
+    "factor_ids": [
+      "alpha_001",
+      "alpha_018",
+      "alpha_007",
+      "alpha_038"
+    ],
+    "trading_idea_ids": [],
+    "status": "approved",
+    "backtest_metrics": {
+      "annualised_return": 0.26863,
+      "annualised_volatility": 0.200635,
+      "sharpe_ratio": 1.3389,
+      "sortino_ratio": 1.6743,
+      "calmar_ratio": 1.3058,
+      "max_drawdown": -0.205719,
+      "max_drawdown_duration_bars": 76,
+      "hit_rate": 0.475,
+      "profit_factor": 1.3318,
+      "avg_win": 0.00900799,
+      "avg_loss": -0.00905015,
+      "avg_daily_turnover": 0.0,
+      "avg_positions_held": 8.35,
+      "ic_mean": null,
+      "ic_ir": null,
+      "extra": {
+        "n_bars": 400,
+        "bars_per_day": 1
+      }
+    },
+    "oos_backtest_metrics": {
+      "annualised_return": 0.172627,
+      "annualised_volatility": 0.153318,
+      "sharpe_ratio": 1.1259,
+      "sortino_ratio": 1.7899,
+      "calmar_ratio": 1.8244,
+      "max_drawdown": -0.094623,
+      "max_drawdown_duration_bars": 51,
+      "hit_rate": 0.5545,
+      "profit_factor": 1.2026,
+      "avg_win": 0.0073324,
+      "avg_loss": -0.00794015,
+      "avg_daily_turnover": 0.0,
+      "avg_positions_held": 10.0,
+      "ic_mean": null,
+      "ic_ir": null,
+      "extra": {
+        "n_bars": 101,
+        "bars_per_day": 1
+      }
+    },
+    "live_metrics": null,
+    "model_type": "lasso",
+    "model_params": {
+      "model_type": "lasso",
+      "model_hyperparams": {},
+      "factor_ids": [
+        "alpha_001",
+        "alpha_018",
+        "alpha_007",
+        "alpha_038"
+      ],
+      "target_horizon": 6,
+      "model_artifact_path": "data/strategies/models/arch_422abf64.joblib",
+      "weights": {},
+      "holding_period": 6,
+      "max_positions": 20,
+      "equal_weight": true,
+      "min_conviction": 0.5
+    },
+    "holding_period": 6,
+    "pm_status": "not_deployed",
+    "pm_notes": "",
+    "flagged_reason": "",
+    "correlations": {},
+    "returns_path": "data/strategies/returns/enhanced_mean_reversion_and_momentum_strategy_be6c5a27.csv",
+    "created_at": "2026-06-12T10:05:42.979911",
+    "metadata": {
+      "n_trials": 3,
+      "deflated_sharpe_ratio": 0.842055,
+      "architect_reasoning": "I switched to a Lasso regression model to enhance factor selection and reduce potential overfitting. This model will automatically drive weak factors' weights to zero, which can help improve the hit rate and overall robustness of the strategy. I also reduced the number of features by removing alpha_004 and alpha_014, which had weaker information coefficients (ICs) and may contribute to multicollinearity. This should help improve the model's generalization to unseen data.",
+      "statistician_reasoning": "The strategy demonstrates strong in-sample metrics with a Sharpe ratio of 1.3389 and a solid out-of-sample Sharpe ratio of 1.1259, indicating that the edge persists beyond the training data. The deflated Sharpe ratio of 0.8421 exceeds the threshold of 0.75, suggesting that the strategy is robust against overfitting. Given that all tests passed and the metrics indicate a favorable risk-return profile, the candidate strategy should be accepted."
+    }
   }
 ]

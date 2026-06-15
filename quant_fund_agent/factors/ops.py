@@ -13,6 +13,41 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
+from numpy.lib.stride_tricks import sliding_window_view
+
+
+# ---------------------------------------------------------------------------
+# Rolling-window helper
+# ---------------------------------------------------------------------------
+
+def _rolling_windows(col: np.ndarray, n: int) -> np.ndarray:
+    """All length-``n`` rolling windows of a 1-D array → shape ``(T-n+1, n)``.
+
+    A view (no copy); callers materialise only the reductions they need.
+    """
+    return sliding_window_view(col, n)
+
+
+def _apply_window_reduce(df: pd.DataFrame, n: int, reduce_fn) -> pd.DataFrame:
+    """Apply a vectorised window reduction per column, ``min_periods=n``.
+
+    ``reduce_fn(windows)`` receives the ``(T-n+1, n)`` window matrix for one
+    column and returns a length ``T-n+1`` array.  Matches
+    ``rolling(n, min_periods=n)``: the first ``n-1`` rows are NaN, and — because
+    ``min_periods`` counts *non-NaN* observations — any window containing a NaN
+    yields NaN (the reduction's own value there is discarded).  ``n > T`` →
+    all-NaN.
+    """
+    values = df.to_numpy(dtype=float)
+    T = values.shape[0]
+    out = np.full(values.shape, np.nan, dtype=float)
+    if n >= 1 and n <= T:
+        for j in range(values.shape[1]):
+            windows = _rolling_windows(values[:, j], n)  # (T-n+1, n)
+            red = np.asarray(reduce_fn(windows), dtype=float)
+            red[np.isnan(windows).any(axis=1)] = np.nan  # min_periods=n
+            out[n - 1:, j] = red
+    return pd.DataFrame(out, index=df.index, columns=df.columns)
 
 
 # ---------------------------------------------------------------------------
@@ -77,25 +112,44 @@ def ts_max(df: pd.DataFrame, n: int) -> pd.DataFrame:
 
 
 def ts_argmax(df: pd.DataFrame, n: int) -> pd.DataFrame:
-    """Position of the max value within a rolling window (1 = oldest)."""
-    return df.rolling(n, min_periods=n).apply(
-        lambda x: float(np.argmax(x) + 1), raw=True,
-    )
+    """Position of the max value within a rolling window (1 = oldest).
+
+    Vectorised equivalent of ``rolling(n).apply(lambda x: np.argmax(x) + 1)``
+    (``np.argmax`` on the same windows, so the tie/NaN behaviour is identical).
+    """
+    return _apply_window_reduce(df, n, lambda w: np.argmax(w, axis=1) + 1.0)
 
 
 def ts_argmin(df: pd.DataFrame, n: int) -> pd.DataFrame:
-    """Position of the min value within a rolling window (1 = oldest)."""
-    return df.rolling(n, min_periods=n).apply(
-        lambda x: float(np.argmin(x) + 1), raw=True,
-    )
+    """Position of the min value within a rolling window (1 = oldest).
+
+    Vectorised equivalent of ``rolling(n).apply(lambda x: np.argmin(x) + 1)``.
+    """
+    return _apply_window_reduce(df, n, lambda w: np.argmin(w, axis=1) + 1.0)
 
 
 def ts_rank(df: pd.DataFrame, n: int) -> pd.DataFrame:
-    """Percentile rank of the latest value within a rolling window."""
-    return df.rolling(n, min_periods=n).apply(
-        lambda x: float(pd.Series(x).rank(pct=True).iloc[-1]),
-        raw=False,
-    )
+    """Percentile rank of the latest value within a rolling window.
+
+    Vectorised equivalent of
+    ``rolling(n).apply(lambda x: pd.Series(x).rank(pct=True).iloc[-1])``:
+    the average-method percentile rank of the window's last value, dividing by
+    the number of non-NaN observations (a NaN last value yields NaN).
+    """
+    def _rank_last(w: np.ndarray) -> np.ndarray:
+        last = w[:, -1]
+        valid = ~np.isnan(w)
+        count = valid.sum(axis=1)                       # non-NaN per window
+        less = np.nansum(w < last[:, None], axis=1)     # strictly smaller
+        equal = np.nansum(w == last[:, None], axis=1)   # equal (incl. itself)
+        avg_rank = less + (equal + 1.0) / 2.0           # average 1-based rank
+        with np.errstate(invalid="ignore", divide="ignore"):
+            pct = avg_rank / count
+        # NaN last value (or empty window) → NaN, matching pandas.
+        pct = np.where(np.isnan(last) | (count == 0), np.nan, pct)
+        return pct
+
+    return _apply_window_reduce(df, n, _rank_last)
 
 
 # ---------------------------------------------------------------------------
@@ -132,8 +186,12 @@ def adv(volume: pd.DataFrame, n: int) -> pd.DataFrame:
 
 
 def product(df: pd.DataFrame, n: int) -> pd.DataFrame:
-    """Rolling product over *n* periods."""
-    return df.rolling(n, min_periods=n).apply(np.prod, raw=True)
+    """Rolling product over *n* periods.
+
+    Vectorised equivalent of ``rolling(n).apply(np.prod)`` (``np.prod`` over the
+    same windows, so NaN propagation is identical).
+    """
+    return _apply_window_reduce(df, n, lambda w: np.prod(w, axis=1))
 
 
 def scale(df: pd.DataFrame) -> pd.DataFrame:
@@ -150,9 +208,10 @@ def decay_linear(df: pd.DataFrame, n: int) -> pd.DataFrame:
     weights = np.arange(1, n + 1, dtype=float)
     weights /= weights.sum()
 
-    return df.rolling(n, min_periods=n).apply(
-        lambda x: np.dot(x, weights), raw=True,
-    )
+    # Vectorised equivalent of ``rolling(n).apply(lambda x: np.dot(x, weights))``:
+    # the window matrix is oldest→newest, matching the weight ordering, so the
+    # dot product (and its NaN propagation) is identical per window.
+    return _apply_window_reduce(df, n, lambda w: w @ weights)
 
 
 def power(df: pd.DataFrame, a: float) -> pd.DataFrame:
