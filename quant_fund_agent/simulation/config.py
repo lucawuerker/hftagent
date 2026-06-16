@@ -202,6 +202,16 @@ class BacktestConfig:
         return self.output_dir / "returns"
 
     @property
+    def models_dir(self) -> Path:
+        """Run-scoped fitted-model artifact dir (``MODEL_ARTIFACT_DIR``).
+
+        Pointed at by the env var for the run's duration so the modeling service
+        (incl. the MCP subprocess) writes each strategy's ``.joblib`` here instead
+        of the global ``data/strategies/models`` — no collisions across runs.
+        """
+        return self.output_dir / "models"
+
+    @property
     def factor_db_path(self) -> Path:
         """Run-scoped factor DB the research meetings write and the Selector reads.
 

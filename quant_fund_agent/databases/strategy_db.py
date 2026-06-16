@@ -63,6 +63,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 from pathlib import Path
 
 import pandas as pd
@@ -82,7 +83,14 @@ DEFAULT_RETURNS_DIR = Path("data/strategies/returns")
 class StrategyDatabase:
     """Registry of trading strategies + their PnL series + correlations."""
 
-    def __init__(self, returns_dir: str | Path = DEFAULT_RETURNS_DIR) -> None:
+    def __init__(self, returns_dir: str | Path | None = None) -> None:
+        # Resolve the returns dir live from ``STRATEGY_RETURNS_DIR`` when no
+        # explicit dir is given, so a scoped run (run_fund/simulator) keeps its
+        # per-strategy PnL CSVs under its own workspace instead of colliding in
+        # the global ``data/strategies/returns``.  An explicit arg always wins
+        # (the simulator passes ``config.returns_dir``).
+        if returns_dir is None:
+            returns_dir = os.getenv("STRATEGY_RETURNS_DIR", str(DEFAULT_RETURNS_DIR))
         self._strategies: dict[str, StrategyRecord] = {}
         self._returns_dir = Path(returns_dir)
 

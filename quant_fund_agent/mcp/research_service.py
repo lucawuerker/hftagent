@@ -488,6 +488,7 @@ def persist_results(
     ``kept_records`` are ``FactorRecord`` model dumps; ``rejected`` is a list of
     ``{"factor_id": str, "code_path": str}``.  Writes the updated factor DB once.
     """
+    from quant_fund_agent.config import get_settings, provenance_stamp
     from quant_fund_agent.databases import FactorDatabase
     from quant_fund_agent.schemas import FactorRecord
 
@@ -495,9 +496,14 @@ def persist_results(
     factor_db = FactorDatabase()
     factor_db.load_from_json(factor_db_path)
 
+    # Stamp which (config, prerun) scope + data config this factor was researched
+    # under, so a factor stays auditable after it is merged into a book.
+    stamp = provenance_stamp(os.getenv("QF_SCOPE", "main"), get_settings().data)
+
     kept_ids: list[str] = []
     for raw in kept_records:
         record = FactorRecord.model_validate(raw)
+        record.metadata.setdefault("provenance", stamp)
         factor_db.add_factor(record)
         kept_ids.append(record.id)
 

@@ -47,6 +47,12 @@ def run_backtest(config: BacktestConfig) -> BacktestResults:
     #    server subprocess spawned later, so set them before the first meeting.
     os.environ["FACTOR_DB_PATH"] = str(config.factor_db_path)
     os.environ["PAPER_READ_LOG"] = str(config.paper_read_log_path)
+    # Scope the fitted model artifacts (and returns) to THIS run too, so parallel
+    # backtests/preruns never collide on the global data/strategies/{models,returns}.
+    # Read live by the modeling service + inherited by the MCP subprocess, so set
+    # them here before the first strategy meeting (same ordering as FACTOR_DB_PATH).
+    os.environ["MODEL_ARTIFACT_DIR"] = str(config.models_dir)
+    os.environ["STRATEGY_RETURNS_DIR"] = str(config.returns_dir)
 
     import numpy as np
 

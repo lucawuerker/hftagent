@@ -21,6 +21,7 @@ pre-existing behaviour.
 
 from __future__ import annotations
 
+import os
 import time
 import uuid
 from pathlib import Path
@@ -37,6 +38,18 @@ from quant_fund_agent.modeling.catalog import STATIC_WEIGHTS, build_estimator
 from quant_fund_agent.modeling.features import build_training_matrix
 
 DEFAULT_ARTIFACT_DIR = Path("data/strategies/models")
+
+
+def _artifact_dir() -> Path:
+    """Where fitted ``.joblib`` estimators are written — resolved at call time.
+
+    Read live from ``MODEL_ARTIFACT_DIR`` on every call (rather than captured at
+    import) so a scoped run (``run_fund``/simulator) can redirect artifacts to its
+    own ``data/workspaces/.../models`` dir — including across the MCP modeling
+    subprocess, which inherits the parent's environment.  Mirrors
+    ``research_service._factor_db_path`` / ``FACTOR_DB_PATH``.
+    """
+    return Path(os.getenv("MODEL_ARTIFACT_DIR", str(DEFAULT_ARTIFACT_DIR)))
 
 
 # ---------------------------------------------------------------------------
@@ -136,7 +149,7 @@ def fit_and_backtest(
     equal_weight: bool = False,
     min_conviction: float = 0.0,
     valid_ratio: float = 0.3,
-    artifact_dir: str | Path = DEFAULT_ARTIFACT_DIR,
+    artifact_dir: str | Path | None = None,
     strategy_id: str | None = None,
     train_sample_frac: float = 1.0,
 ) -> dict[str, Any]:
@@ -242,7 +255,7 @@ def fit_and_backtest(
     }
 
     # Persist the full-IS model so OOS / live reload (never refit) it.
-    artifact_dir = Path(artifact_dir)
+    artifact_dir = Path(artifact_dir) if artifact_dir is not None else _artifact_dir()
     artifact_dir.mkdir(parents=True, exist_ok=True)
     artifact_path = artifact_dir / f"{sid}.joblib"
     import joblib

@@ -79,9 +79,6 @@ def _fmt(x, nd: int = 3) -> str:
         return "-"
 
 
-SHOWCASE_PATH = "data/strategies/showcase.json"
-
-
 def _showcase_entry(res, record) -> dict:
     """Lightweight, JSON-able record of one strategy attempt for the notebook."""
     spec = res.strategy_spec
@@ -170,17 +167,26 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--fresh", action="store_true",
                    help="Ignore any existing strategy/portfolio DBs and start "
                         "from an empty book.")
-    p.add_argument("--prerun", default=None,
-                   help="Run the downstream agents on a named prerun's factors "
-                        "(data/factors/preruns/<name>/) instead of the global "
-                        "library — for comparing research models.")
+    p.add_argument("--config", default=None,
+                   help="Path to an alternate quant.config.yaml to run under "
+                        "(sets QF_CONFIG_FILE so the whole data layer uses it). "
+                        "Default: the repo's quant.config.yaml.")
+    p.add_argument("--config-name", default=None,
+                   help="Name of the (config) scope under data/workspaces/<name>/ "
+                        "(default: derived from the active config, e.g. "
+                        "yfinance_equity_demo).  Factors+strategies are isolated "
+                        "per (config, prerun).")
+    p.add_argument("--prerun", default="base",
+                   help="Prerun (research-LLM batch) within the config scope "
+                        "(data/workspaces/<config>/preruns/<prerun>/).  Default "
+                        "'base' = strategies from seed alphas only.")
     p.add_argument("--no-seeds", action="store_true",
-                   help="With --prerun: hide the 88 seed alphas so the agents see "
-                        "only the prerun's researched factors.")
+                   help="Hide the seed alphas so the agents see only the prerun's "
+                        "researched factors.")
     p.add_argument("--out-dir", default=None,
-                   help="Write the factor/strategy/portfolio DBs + showcase here "
-                        "(default with --prerun: data/preruns_downstream/<name>/), "
-                        "so comparison runs don't overwrite each other's books.")
+                   help="[deprecated] Write every DB + returns + models under this "
+                        "dir instead of the (config, prerun) workspace — full "
+                        "override for ad-hoc comparison books.")
     return p.parse_args()
 
 
@@ -190,35 +196,73 @@ def main() -> None:
     if not os.getenv("OPENAI_API_KEY"):
         raise SystemExit("Set OPENAI_API_KEY in .env or the environment first.")
 
-    # Universe cap must be set before the architect module is imported.
+    # Universe cap must be set before the architect/modeling stages run.
     if args.n_tickers and args.n_tickers > 0:
         os.environ.setdefault("ARCHITECT_N_TICKERS", str(args.n_tickers))
 
-    # ── Output location + optional prerun factor source ──────────────
-    #   With --prerun the Selector is pointed at a composed DB (the prerun's
-    #   researcher factors ± the seeds) and the books are written to an isolated
-    #   out-dir so A/B comparison runs don't overwrite each other.
-    out_dir = (pathlib.Path(args.out_dir) if args.out_dir
-               else pathlib.Path("data/preruns_downstream") / args.prerun if args.prerun
-               else None)
-    if out_dir is not None:
+    # ── Resolve the (config, prerun) scope this run is isolated to ────
+    #   Factors, strategies, returns, fitted model artifacts, portfolio and the
+    #   showcase all live under data/workspaces/<config>/preruns/<prerun>/ so runs
+    #   under different configs/preruns never collide.  --out-dir is a legacy full
+    #   override (the comparison harness still uses it).
+    if args.config:
+        os.environ["QF_CONFIG_FILE"] = args.config
+
+    from quant_fund_agent.config import default_config_name, get_settings
+    from quant_fund_agent.workspace import (
+        Scope, compose_factor_db, extract_researcher_db,
+    )
+
+    settings = get_settings()
+    config_name = args.config_name or default_config_name(settings.data)
+    scope = Scope(config_name, args.prerun)
+    scope.ensure()
+
+    # Config snapshot + reproducibility guard (warn if the live config differs
+    # from the one this scope was first created under).
+    scope.write_config_snapshot(settings.data)
+    mismatch = scope.config_mismatch(settings.data)
+    if mismatch:
+        log.warning(mismatch)
+
+    # This run's researched factors: the scope's own researcher DB, falling back
+    # to a legacy flat prerun dir until migrated by scripts/migrate_main_seed_only.
+    researcher_db = scope.factor_db_path
+    if not researcher_db.exists() and args.prerun != "base":
+        legacy = pathlib.Path("data/factors/preruns") / args.prerun / "factor_db.json"
+        if legacy.exists():
+            researcher_db = legacy
+
+    if args.out_dir:
+        out_dir = pathlib.Path(args.out_dir)
         out_dir.mkdir(parents=True, exist_ok=True)
+        factor_db_path = out_dir / "factor_db.json"
         strategy_db_path = out_dir / "strategy_db.json"
         portfolio_db_path = out_dir / "portfolio_db.json"
         showcase_path = out_dir / "showcase.json"
+        returns_dir, models_dir = out_dir / "returns", out_dir / "models"
+        read_log_path = out_dir / "papers_read.json"
     else:
-        strategy_db_path = pipeline.STRATEGY_DB_PATH
-        portfolio_db_path = pipeline.PORTFOLIO_DB_PATH
-        showcase_path = SHOWCASE_PATH
+        factor_db_path = scope.composed_db_path
+        strategy_db_path = scope.strategy_db_path
+        portfolio_db_path = scope.portfolio_db_path
+        showcase_path = scope.showcase_path
+        returns_dir, models_dir = scope.returns_dir, scope.models_dir
+        read_log_path = scope.read_log_path
 
-    if args.prerun:
-        from quant_fund_agent.factors import preruns
-        composed = out_dir / "factor_db.json"
-        n = preruns.build_downstream_factor_db(
-            composed, args.prerun, include_seeds=not args.no_seeds)
-        os.environ["FACTOR_DB_PATH"] = str(composed)
-        print(f"Prerun '{args.prerun}': {n} factors visible "
-              f"({'seeds + ' if not args.no_seeds else ''}researcher) → {composed}")
+    # Compose the factor DB the agents read: seed alphas + this scope's research.
+    n_factors = compose_factor_db(
+        factor_db_path, researcher_db, include_seeds=not args.no_seeds)
+
+    # Activate the scope env: read live by the services + inherited by any MCP
+    # subprocess, so set it before the first agent call (NOT after).
+    os.environ["FACTOR_DB_PATH"] = str(factor_db_path)
+    os.environ["STRATEGY_RETURNS_DIR"] = str(returns_dir)
+    os.environ["MODEL_ARTIFACT_DIR"] = str(models_dir)
+    os.environ["PAPER_READ_LOG"] = str(read_log_path)
+    os.environ["QF_SCOPE"] = scope.label
+    print(f"Scope {scope.label!r}: {n_factors} factors visible "
+          f"({'seeds + ' if not args.no_seeds else ''}researcher from {researcher_db})")
 
     from quant_fund_agent.factors import discover_factors
     discover_factors()
@@ -240,6 +284,10 @@ def main() -> None:
         research = pipeline.run_research_session(n_tickers=args.n_tickers or 15)
         print(f"  kept     : {research.get('kept_factor_ids', [])}")
         print(f"  rejected : {research.get('rejected_factor_ids', [])}")
+        # Sync the scope's canonical researcher DB (researcher-only) with whatever
+        # this inline session just discovered (the run DB also holds the seeds).
+        if not args.out_dir:
+            extract_researcher_db(factor_db_path, scope.factor_db_path)
 
     # ── Stage 2: strategy research × N (Selector → Architect → Stat) ──
     print("\n" + RULE)

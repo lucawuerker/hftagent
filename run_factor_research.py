@@ -1,28 +1,28 @@
 """Factor-research **prerun**: mine a batch of alpha factors once and keep them.
 
-Two modes:
+Research is strictly modularised by **(config, prerun)** and ALWAYS persists into a
+scope under ``data/workspaces/<config>/preruns/<prerun>/`` (its own
+``factor_db.json`` + ``manifest.json`` + paper read-log) — never the seed-only
+*main* library ``data/factors/factor_db.json``.  The config scope defaults to the
+active ``quant.config.yaml`` (e.g. ``yfinance_equity_demo``); the prerun defaults
+to ``base``.
 
-- **Global (default)** — persist to the global factor DB
-  (``data/factors/factor_db.json``) + the package ``factors/researcher/`` code dir.
-  This is the library a walk-forward backtest draws on with ``--factor-universe all``.
+Use ``--name`` to compare research LLMs: mine ~100 factors with one ``--model``
+into prerun A and ~100 with another into prerun B, then run the downstream agents
+on each (``run_fund.py --prerun A`` / ``run_backtest.py --prerun A``) and compare.
+The generated ``.py`` code stays in the shared ``factors/researcher/`` package
+(global id de-dup); the scope owns its factor DB.
 
-- **Named** (``--name <id>``) — persist to a self-contained prerun under
-  ``data/factors/preruns/<name>/`` (its own ``factor_db.json`` + ``manifest.json``),
-  with a prerun-scoped paper read-log.  Use this to **compare research LLMs**: mine
-  ~100 factors with one ``--model`` into prerun A and ~100 with another into prerun
-  B, then run the downstream agents on each (``run_backtest.py --prerun A`` /
-  ``run_fund.py --prerun A``) and compare.
-
-Paper read-tracking is its own scenario per prerun (a read-log), so successive
-sessions advance through the 714-paper library without
-biasing any backtest's paper selection.  The loop keeps researching (broad paper
-sample, ~1 idea per paper) until ``--target-factors`` are kept or ``--max-sessions``.
+Paper read-tracking is its own scenario per scope (a read-log), so successive
+sessions advance through the paper library without biasing any backtest's paper
+selection.  The loop keeps researching (broad paper sample, ~1 idea per paper)
+until ``--target-factors`` are kept or ``--max-sessions``.
 
 Examples
 --------
 ::
 
-    # Global permanent library: ~100 factors.
+    # The active config's 'base' prerun: ~100 factors.
     python run_factor_research.py --target-factors 100
 
     # Named prerun with a specific research model (model A).
@@ -56,15 +56,17 @@ logging.basicConfig(
 )
 log = logging.getLogger("run_factor_research")
 
-# Global-mode prerun read-log (used when --name is absent).
-GLOBAL_READ_LOG = Path("data/papers/prerun_read_log.json")
-
 
 def _parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     p.add_argument("--name", default=None,
-                   help="Named prerun id → data/factors/preruns/<name>/. "
-                        "Omit to write the global permanent library.")
+                   help="Prerun id (research-LLM batch) within the config scope → "
+                        "data/workspaces/<config>/preruns/<name>/.  Omit → the "
+                        "'base' prerun.  Research never writes the seed-only main DB.")
+    p.add_argument("--config-name", default=None,
+                   help="Config scope name under data/workspaces/<name>/ "
+                        "(default: derived from the active config, e.g. "
+                        "yfinance_equity_demo).")
     p.add_argument("--model", default=None,
                    help="Research LLM model id (sets FACTOR_RESEARCH_LLM_MODEL).")
     p.add_argument("--llm-provider", default=None,
@@ -119,32 +121,33 @@ def main() -> None:
     os.environ["DATA_DIR"] = args.data_dir
 
     from quant_fund_agent import pipeline
-    from quant_fund_agent.factors import preruns
+    from quant_fund_agent.config import default_config_name, get_settings
     from quant_fund_agent.llm import resolve_research_model, resolve_research_provider
+    from quant_fund_agent.workspace import Scope
 
-    # ── resolve persistence target + read-log (named prerun vs. global) ──
-    if args.name:
-        factor_db_path = preruns.db_path(args.name)
-        read_log = preruns.read_log_path(args.name)
-    else:
-        factor_db_path = pipeline.FACTOR_DB_PATH
-        read_log = GLOBAL_READ_LOG
+    # ── resolve the (config, prerun) scope research persists into ──
+    #   Research ALWAYS writes a scope's researcher-only DB — never the seed-only
+    #   main library — so factors stay strictly modularised by (config, prerun).
+    settings = get_settings()
+    config_name = args.config_name or default_config_name(settings.data)
+    prerun = args.name or "base"
+    scope = Scope(config_name, prerun)
+    scope.ensure()
+    scope.write_config_snapshot(settings.data)
+    factor_db_path = scope.factor_db_path
+    read_log = scope.read_log_path
     os.environ["FACTOR_DB_PATH"] = str(factor_db_path)
     os.environ["PAPER_READ_LOG"] = str(read_log)
+    os.environ["QF_SCOPE"] = scope.label
 
     if args.reset:
-        if args.name:
-            log.info("Resetting prerun '%s' (factors, code, read-log) …", args.name)
-            preruns.targeted_purge(args.name)
-        else:
-            from quant_fund_agent.agents.factor_research.graph import reset_researcher_state
-            log.info("Resetting global researcher state (factors, code, read-log) …")
-            reset_researcher_state()
-            GLOBAL_READ_LOG.unlink(missing_ok=True)
+        log.info("Resetting scope '%s' (factors, code, read-log) …", scope.label)
+        scope.purge()
+        scope.ensure()
 
     model = resolve_research_model()
     provider = resolve_research_provider(model)
-    label = f"prerun '{args.name}'" if args.name else "global library"
+    label = f"scope '{scope.label}'"
     log.info("Researching into %s at %s (model=%s, provider=%s); target %d",
              label, factor_db_path, model, provider, args.target_factors)
 
@@ -155,7 +158,7 @@ def main() -> None:
             break
         log.info("── session %d/%d  (have %d, want %d) ──",
                  i, args.max_sessions, have, args.target_factors)
-        sid = f"prerun:{args.name}:{i:03d}" if args.name else f"prerun-{i:03d}"
+        sid = f"prerun:{config_name}:{prerun}:{i:03d}"
         try:
             rs = pipeline.run_research_session(
                 session_id=sid,
@@ -170,13 +173,12 @@ def main() -> None:
             )
             kept = rs.get("kept_factor_ids", [])
             log.info("session %d kept %d factor(s): %s", i, len(kept), kept)
-            if args.name:
-                preruns.write_manifest(
-                    args.name, llm_model=model, llm_provider=provider,
-                    target_factors=args.target_factors,
-                    n_factors=_researcher_count(factor_db_path),
-                    sessions=i,
-                )
+            scope.write_manifest(
+                llm_model=model, llm_provider=provider,
+                target_factors=args.target_factors,
+                n_factors=_researcher_count(factor_db_path),
+                sessions=i,
+            )
             if not rs.get("selected_papers"):
                 log.warning("No papers left to read — stopping early.")
                 break

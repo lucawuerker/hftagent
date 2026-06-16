@@ -69,6 +69,24 @@ to opt out. Live: AV's free tier delivers these; FMP's free tier serves only
 `profile` and paywalls the rest (factors degrade, never crash). **Next (designed,
 not built):** sentiment + macro — see `docs/data-layer/FUNDAMENTAL_AND_ALT_DATA.md`.
 
+**Strict modularisation by (config, prerun) — done.** Researched factors and the
+strategies built from them are isolated per **(data config, research-LLM prerun)**
+under `data/workspaces/<config>/preruns/<prerun>/` (factors, strategies, returns,
+fitted model artifacts, portfolio, showcase) via a single layout seam
+(`quant_fund_agent/workspace.py`: `Scope`/`Book`, consumed by `run_fund.py`,
+`run_factor_research.py`, the simulator and the merge tool). Returns and `.joblib`
+artifacts are now scoped through the `STRATEGY_RETURNS_DIR` / `MODEL_ARTIFACT_DIR`
+env seam (read live, inherited across the MCP subprocess — same pattern as
+`FACTOR_DB_PATH`), so parallel runs never collide. The canonical *main* factor
+library `data/factors/factor_db.json` holds **only seed/formulaic alphas** and is
+never written by research; every factor/strategy is stamped with a `provenance`
+(config hash + scope). `run_merge.py` (`quant_fund_agent/merge.py`) composes a
+separate *active book* under `data/books/<name>/` by pooling chosen scopes'
+factors + strategies for the PM — main is never mutated, cross-config pooling is
+warned not blocked. `scripts/migrate_main_seed_only.py` splits the legacy mixed
+main DB into seed-only main + a preserved `legacy` scope (backed up, idempotent,
+`--dry-run`). `factors/preruns.py` is now a compatibility shim over `Scope`.
+
 ## Roadmap
 - Longer backtests: simulate weekly researcher updates and trade over an
   extended period (the `pipeline.py` stages are built to be called on a

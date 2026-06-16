@@ -1,5 +1,15 @@
 # Important Runnable Files
 
+> **Modularisation by (config, prerun).** Researched factors and the strategies
+> built from them are isolated per **(data config, research-LLM prerun)** under
+> `data/workspaces/<config>/preruns/<prerun>/` (factors, strategies, returns,
+> model artifacts, portfolio, showcase).  The canonical *main* factor library
+> `data/factors/factor_db.json` holds **only the seed/formulaic alphas** and is
+> never written by research.  `run_merge.py` composes a separate *active book*
+> under `data/books/<name>/` by pooling chosen scopes for the PM; main is never
+> mutated.  Run `scripts/migrate_main_seed_only.py` once to split the legacy
+> mixed main DB into seed-only main + a preserved `legacy` scope.
+
 ---
 
 ## Setup
@@ -41,18 +51,23 @@ Full end-to-end single pass: optional factor research → Selector → Architect
 | `--no-committee` | off | Single balanced PM instead of a 3-PM committee |
 | `--voting` | `simple_average` | Committee aggregation (`simple_average` / `weighted_average` / `llm_moderator`) |
 | `--fresh` | off | Ignore existing DBs and start from an empty book |
-| `--prerun <name>` | — | Use a named prerun's factor set instead of the global library |
-| `--no-seeds` | off | With `--prerun`: hide seed alphas, use only researched factors |
-| `--out-dir` | auto | Output directory for DBs + showcase |
+| `--config` | `quant.config.yaml` | Alternate config file to run the whole data layer under |
+| `--config-name` | derived | Config scope name under `data/workspaces/<name>/` (default e.g. `yfinance_equity_demo`) |
+| `--prerun <name>` | `base` | Prerun (research-LLM batch) within the config scope; `base` = seed alphas only |
+| `--no-seeds` | off | Hide seed alphas, use only the prerun's researched factors |
+| `--out-dir` | — | *[deprecated]* full override: write every DB + returns + models under this dir |
+
+Default output: `data/workspaces/<config>/preruns/<prerun>/` (factors, strategies, returns, models, portfolio, showcase).
 
 ---
 
 ### `run_factor_research.py`
-Runs the Factor Researcher agent only — mines factors from papers into a named prerun or the global DB.
+Runs the Factor Researcher agent only — mines factors from papers into a **(config, prerun) scope**. Never writes the seed-only main DB.
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--name <id>` | — | Prerun name (saves to `data/factors/preruns/<name>/`) |
+| `--name <id>` | `base` | Prerun name → `data/workspaces/<config>/preruns/<name>/` |
+| `--config-name` | derived | Config scope name (default from the active config) |
 | `--model <llm>` | — | LLM model override for the researcher |
 | `--llm-provider` | `openai` | LLM provider (`openai` / `anthropic` / …) |
 | `--target-factors` | `100` | Stop after this many successful factors |
@@ -64,7 +79,36 @@ Runs the Factor Researcher agent only — mines factors from papers into a named
 | `--sample` | `random` | Paper sampling: `random` or `unread_first` |
 | `--dedup-scope` | `package` | Dedup against `package` (global) or `prerun` (only this run) |
 | `--data-dir` | `ticker_data` | Data directory |
-| `--reset` | off | Clear existing prerun before starting |
+| `--reset` | off | Clear this scope's factors/code/read-log before starting |
+
+---
+
+### `run_merge.py`
+Composes an *active book* under `data/books/<name>/` by pooling selected scopes' researched factors **and** strategies (artifacts + returns copied, paths rewritten). The seed-only main library is never touched. Idempotent.
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--from <config/prerun> …` | — | One or more source scopes (mutually exclusive with `--from-config`) |
+| `--from-config <config>` | — | Pool every prerun under this config |
+| `--into <book>` | required | Destination book name (`data/books/<name>/`) |
+| `--factors <ids…>` | all | Specific factor ids to merge |
+| `--factors-only` | off | Merge factors only — don't pool strategies/artifacts |
+| `--on-collision` | `skip` | `skip` (idempotent) or `overwrite` |
+| `--dry-run` | off | Report only; write nothing |
+| `--run-pm` | off | After merging, run the PM committee over the composed book |
+| `--no-committee` | off | With `--run-pm`: single PM instead of a committee |
+
+---
+
+### `scripts/migrate_main_seed_only.py`
+One-shot migration: make `data/factors/factor_db.json` seed-only by moving researcher factors into a preserved `legacy` scope (backed up, idempotent).
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--dry-run` | off | Report only; write nothing |
+| `--no-backup` | off | Skip the timestamped backup of the main DB |
+| `--migrate-preruns` | off | Also copy existing flat preruns into config-scoped workspaces |
+| `--config-name` | derived | Config scope for `--migrate-preruns` |
 
 ---
 

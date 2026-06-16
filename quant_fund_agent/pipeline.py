@@ -369,9 +369,21 @@ def build_strategy_record(
             "deflated_sharpe_ratio": deflated_sr,
             "architect_reasoning": spec.reasoning,
             "statistician_reasoning": final_reasoning,
+            # Which (config, prerun) scope + data config this strategy was built
+            # under — so a merged/pooled book stays auditable (see merge.py).
+            "provenance": _scope_provenance(),
         },
     )
     return record, is_returns
+
+
+def _scope_provenance() -> dict:
+    """Provenance stamp for the active scope (``QF_SCOPE`` + live data config)."""
+    import os
+
+    from quant_fund_agent.config import get_settings, provenance_stamp
+
+    return provenance_stamp(os.getenv("QF_SCOPE", "main"), get_settings().data)
 
 
 def persist_approved_strategy(

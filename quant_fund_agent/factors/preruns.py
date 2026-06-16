@@ -1,20 +1,17 @@
-"""Named factor-research "preruns".
+"""Named factor-research "preruns" — compatibility shim over :mod:`workspace`.
 
-A *prerun* is one batch of factor research run with a chosen LLM (e.g. ~100
-factors mined by ``gpt-4o-mini`` vs ~100 by another model), kept under its own
-directory so the **same** downstream agents can be run on each and compared:
-
-```
-data/factors/preruns/<name>/factor_db.json   # this prerun's researcher factors
-data/factors/preruns/<name>/manifest.json    # model/provider/counts/timestamps
-data/papers/preruns/<name>_read_log.json     # prerun-scoped paper read-log
-```
+A *prerun* is one batch of factor research run with a chosen LLM.  Preruns are now
+modularised by **(config, prerun)** under
+``data/workspaces/<config>/preruns/<prerun>/`` (see :class:`quant_fund_agent.
+workspace.Scope`).  This module preserves the original prerun-name-only API for
+existing callers (the simulator and comparison harness), resolving a bare prerun
+name to its scope when no legacy flat ``data/factors/preruns/<name>/`` dir exists.
 
 Isolation is intentionally *lightweight*: generated ``.py`` code stays in the
 shared ``factors/researcher/`` package (global id de-dup), and a prerun is scoped
 purely by its factor DB — which is all the Selector's catalog reads
-(``FACTOR_DB_PATH``).  This module owns the prerun layout, the manifest, composing
-the downstream factor DB, and tearing a prerun down again.
+(``FACTOR_DB_PATH``).  ``build_downstream_factor_db`` composes the seed-only main
+library + a prerun's researcher factors into the DB the downstream agents see.
 """
 
 from __future__ import annotations
@@ -26,40 +23,65 @@ from pathlib import Path
 
 from quant_fund_agent.databases import FactorDatabase
 from quant_fund_agent.schemas import FactorSource
+from quant_fund_agent.workspace import MAIN_FACTOR_DB, Scope, list_scopes
 
 log = logging.getLogger("factors.preruns")
 
-PRERUNS_ROOT = Path("data/factors/preruns")
-PAPER_READ_LOG_ROOT = Path("data/papers/preruns")
-# The seed/global library SEED records are sourced from here when composing a
-# downstream DB.  A literal (not pipeline.FACTOR_DB_PATH) avoids an import cycle.
-BASE_FACTOR_DB = Path("data/factors/factor_db.json")
+PRERUNS_ROOT = Path("data/factors/preruns")          # legacy flat location
+PAPER_READ_LOG_ROOT = Path("data/papers/preruns")    # legacy flat read-logs
+# The SEED records are sourced from the (now seed-only) main library when
+# composing a downstream DB.
+BASE_FACTOR_DB = MAIN_FACTOR_DB
 
 
-# ── path helpers ───────────────────────────────────────────────────────────
+# ── prerun-name → scope resolution ─────────────────────────────────────────
+
+def _scope_for_prerun(name: str) -> Scope | None:
+    """The first (config, prerun) scope whose prerun matches ``name``, if any."""
+    for sc in list_scopes():
+        if sc.prerun == name and sc.factor_db_path.exists():
+            return sc
+    return None
+
+
+# ── path helpers (legacy flat first, then scope) ───────────────────────────
 
 def prerun_dir(name: str) -> Path:
     return PRERUNS_ROOT / name
 
 
 def db_path(name: str) -> Path:
-    return prerun_dir(name) / "factor_db.json"
+    legacy = PRERUNS_ROOT / name / "factor_db.json"
+    if legacy.exists():
+        return legacy
+    sc = _scope_for_prerun(name)
+    return sc.factor_db_path if sc else legacy
 
 
 def manifest_path(name: str) -> Path:
-    return prerun_dir(name) / "manifest.json"
+    legacy = PRERUNS_ROOT / name / "manifest.json"
+    if legacy.exists():
+        return legacy
+    sc = _scope_for_prerun(name)
+    return sc.manifest_path if sc else legacy
 
 
 def read_log_path(name: str) -> Path:
-    return PAPER_READ_LOG_ROOT / f"{name}_read_log.json"
+    legacy = PAPER_READ_LOG_ROOT / f"{name}_read_log.json"
+    if legacy.exists():
+        return legacy
+    sc = _scope_for_prerun(name)
+    return sc.read_log_path if sc else legacy
 
 
 def list_preruns() -> list[str]:
-    """Names of all preruns that have a factor DB on disk."""
-    if not PRERUNS_ROOT.exists():
-        return []
-    return sorted(p.name for p in PRERUNS_ROOT.iterdir()
-                  if (p / "factor_db.json").exists())
+    """Names of all preruns with a factor DB on disk (legacy flat ∪ scopes)."""
+    names: set[str] = set()
+    if PRERUNS_ROOT.exists():
+        names |= {p.name for p in PRERUNS_ROOT.iterdir()
+                  if (p / "factor_db.json").exists()}
+    names |= {sc.prerun for sc in list_scopes()}
+    return sorted(names)
 
 
 # ── manifest ───────────────────────────────────────────────────────────────
@@ -147,28 +169,38 @@ def targeted_purge(name: str) -> list[str]:
 
     Removes from the shared ``factors/researcher/`` package only the ``.py`` files
     whose ids belong to this prerun's DB (and drops them from the in-memory
-    registry), so other preruns' and the seeds' code are never touched.  Returns
-    the purged factor ids.
+    registry), so other preruns' and the seeds' code are never touched.  Resolves
+    scope-based preruns via :meth:`Scope.purge`; otherwise purges the legacy flat
+    layout.  Returns the purged factor ids.
     """
+    legacy_db = PRERUNS_ROOT / name / "factor_db.json"
+    if not legacy_db.exists():
+        sc = _scope_for_prerun(name)
+        if sc is not None:
+            purged = sc.purge()
+            log.info("Purged scope prerun '%s' (%d factor code files removed)",
+                     sc.label, len(purged))
+            return purged
+
     from quant_fund_agent.agents.factor_research.codegen import RESEARCHER_DIR
     from quant_fund_agent.factors.registry import _FACTOR_REGISTRY
 
     purged: list[str] = []
-    p = db_path(name)
-    if p.exists():
+    if legacy_db.exists():
         db = FactorDatabase()
-        db.load_from_json(p)
+        db.load_from_json(legacy_db)
         for f in db.list_factors(source=FactorSource.RESEARCHER):
             (RESEARCHER_DIR / f"{f.id}.py").unlink(missing_ok=True)
             _FACTOR_REGISTRY.pop(f.id, None)
             purged.append(f.id)
 
-    # Drop the prerun dir (DB + manifest) and its read-log.
+    # Drop the legacy flat prerun dir (DB + manifest) and its read-log.
     import shutil
 
     if prerun_dir(name).exists():
         shutil.rmtree(prerun_dir(name), ignore_errors=True)
-    read_log_path(name).unlink(missing_ok=True)
+    legacy_log = PAPER_READ_LOG_ROOT / f"{name}_read_log.json"
+    legacy_log.unlink(missing_ok=True)
 
     log.info("Purged prerun '%s' (%d factor code files removed)", name, len(purged))
     return purged

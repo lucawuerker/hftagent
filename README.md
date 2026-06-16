@@ -121,6 +121,30 @@ reported, so the comparison runs on the current data and re-runs unchanged once
 the full LOBSTER universe / FMP membership is in place.  `run_model_comparison.py
 --research --prerun-spec name=model[:provider] …` can also mine the preruns first.
 
+### Workspaces & books (modularisation by config + prerun)
+
+Researched factors **and** the strategies built from them are strictly isolated
+per **(data config, research-LLM prerun)** under
+`data/workspaces/<config>/preruns/<prerun>/` — its own factor DB, strategies,
+return series, fitted `.joblib` artifacts, portfolio and showcase. The canonical
+*main* factor library `data/factors/factor_db.json` holds **only the
+seed/formulaic alphas** and is never written by research. Every factor/strategy is
+stamped with a `provenance` (data-config hash + scope).
+
+```bash
+# Strip the legacy mixed main DB → seed-only main + a preserved `legacy` scope
+# (backed up, idempotent; --dry-run to preview).  Run once.
+./venv/bin/python scripts/migrate_main_seed_only.py --dry-run
+./venv/bin/python scripts/migrate_main_seed_only.py --migrate-preruns
+
+# Research + build a fund under a named scope (config derived from quant.config.yaml).
+./venv/bin/python run_fund.py --research --prerun gpt4omini --n-strategies 3
+
+# Compose a separate ACTIVE BOOK by pooling chosen scopes' factors + strategies
+# for the PM (main is never mutated; cross-config pooling is warned, not blocked).
+./venv/bin/python run_merge.py --from-config yfinance_equity_demo --into demo_book --run-pm
+```
+
 See `fund_showcase.ipynb` for an interactive walkthrough.
 
 ## Agents
@@ -338,17 +362,21 @@ loader (`backtesting/data_loader.py`) builds an aligned panel of OHLCV plus
 microstructure fields (`orderFlow`, `lobImb`, `spread`, `nbTrades`, etc.) on a
 shared 10-second index.
 
-Persisted state:
+Persisted state (modularised by config + prerun):
 
 ```
 data/
-├── factors/factor_db.json       # FactorRecord registry
-├── papers/index.json + pdfs/  # Paper metadata and PDFs
-├── strategies/
-│   ├── strategy_db.json       # StrategyRecord registry
-│   ├── returns/*.csv          # Per-strategy PnL series
-│   └── models/*.joblib        # Fitted ML artifacts
-└── portfolio/portfolio_db.json
+├── factors/factor_db.json               # MAIN: seed/formulaic alphas ONLY (never written by research)
+├── papers/index.json + pdfs/            # Paper metadata and PDFs
+├── workspaces/<config>/                 # one data config (e.g. yfinance_equity_demo)
+│   ├── config.snapshot.json
+│   └── preruns/<prerun>/                # one research-LLM batch
+│       ├── factors/factor_db.json       # this scope's RESEARCHER factors
+│       ├── strategies/{strategy_db.json, returns/*.csv, models/*.joblib}
+│       ├── portfolio/portfolio_db.json
+│       └── showcase.json
+└── books/<name>/                        # composed active book (run_merge.py output) for the PM
+    └── {factors, strategies, portfolio}/…
 ```
 
 ## Project structure
@@ -357,6 +385,8 @@ data/
 QuantFundAgent/
 ├── quant_fund_agent/
 │   ├── pipeline.py              # Stage functions (research / strategy / persist / PM)
+│   ├── workspace.py              # Single source of truth for (config, prerun) layout: Scope / Book
+│   ├── merge.py                  # Compose an active book by pooling scopes (factors + strategies)
 │   ├── orchestrator.py            # Top-level task router
 │   ├── schemas.py                 # Pydantic records
 │   ├── agents/                    # LangGraph subgraphs (one dir per agent)
@@ -369,14 +399,16 @@ QuantFundAgent/
 │   ├── statistics/                # Test registry + implementations
 │   ├── strategies/                # BaseStrategy, ModelStrategy, DynamicStrategy
 │   └── simulation/                # Walk-forward backtest harness (separate from agents)
-├── run_fund.py                    # End-to-end fund demo (single pass)
+├── run_fund.py                    # End-to-end fund demo (single pass, per scope)
+├── run_merge.py                   # Pool scopes into an active book for the PM
 ├── run_backtest.py                # Walk-forward backtest (weekly meetings over time)
 ├── run_pipeline.py                # Strategy pipeline only
 ├── run_factor_research.py
 ├── run_portfolio_manager.py
 ├── run_all_factors.py
+├── scripts/migrate_main_seed_only.py  # One-shot: make main factor DB seed-only
 ├── fund_showcase.ipynb
-└── tests/                         # Including test_mcp_*.py + test_simulation.py
+└── tests/                         # Including test_workspace/merge/migration/provenance.py
 ```
 
 ## Configuration

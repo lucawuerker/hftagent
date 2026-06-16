@@ -22,8 +22,12 @@ LOBSTER path.
 from __future__ import annotations
 
 import dataclasses
+import hashlib
+import json
 import os
+import re
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -75,9 +79,15 @@ class Settings:
 
     @classmethod
     def load(cls, config_path: str | Path | None = None) -> "Settings":
-        """Build settings from defaults → ``quant.config.yaml`` → env overrides."""
+        """Build settings from defaults → config file → env overrides.
+
+        The config file is ``config_path`` if given, else ``QF_CONFIG_FILE`` (so
+        ``run_fund --config other.yaml`` can run the whole data layer under an
+        alternate config), else ``quant.config.yaml``.
+        """
         settings = cls()
-        path = Path(config_path) if config_path else Path(CONFIG_FILENAME)
+        chosen = config_path or os.getenv("QF_CONFIG_FILE") or CONFIG_FILENAME
+        path = Path(chosen)
         if path.exists():
             settings._apply_yaml(path)
         settings._apply_env()
@@ -130,3 +140,64 @@ def get_settings(config_path: str | Path | None = None) -> Settings:
     cached by the callers, so this runs rarely.
     """
     return Settings.load(config_path)
+
+
+# ── config identity & provenance ────────────────────────────────────────────
+#
+# A factor or strategy is meaningful only relative to the data it was researched
+# on (provider / asset-class / universe / timespan).  These helpers give that
+# data config a stable identity so a (config, prerun) *scope* can be named on
+# disk and stamped onto every record for reproducibility.  They span exactly the
+# ``DataSettings`` dimensions that change panel *content* — the same set the
+# research panel cache keys on (see ``research_service._panel_cache_key``).
+
+_FINGERPRINT_KEYS = (
+    "provider", "asset_class", "frequency", "universe_preset",
+    "tickers", "start", "end", "n_tickers", "dtype",
+)
+
+
+def config_fingerprint(data: DataSettings) -> str:
+    """Stable 12-char hash of the panel-defining config dimensions.
+
+    Two configs with the same fingerprint produce the same panel; a change to
+    provider / asset-class / frequency / universe / timespan / dtype changes it.
+    """
+    blob = json.dumps(
+        {k: getattr(data, k) for k in _FINGERPRINT_KEYS},
+        sort_keys=True, default=str,
+    )
+    return hashlib.sha1(blob.encode()).hexdigest()[:12]
+
+
+def _slug(text: str) -> str:
+    """Filesystem-safe lowercase slug (``yfinance/equity`` → ``yfinance_equity``)."""
+    s = re.sub(r"[^0-9a-zA-Z]+", "_", str(text)).strip("_").lower()
+    return s or "x"
+
+
+def default_config_name(data: DataSettings) -> str:
+    """Human-readable default scope name derived from the config.
+
+    ``<provider>_<asset_class>_<universe>`` (e.g. ``yfinance_equity_demo``).  Two
+    configs that differ only in timespan share a name; the per-scope config
+    snapshot + hash mismatch warning surface that, and ``--config-name`` overrides.
+    """
+    universe = data.universe_preset or (
+        f"custom{len(data.tickers)}" if data.tickers else "custom"
+    )
+    return "_".join(_slug(p) for p in (data.provider, data.asset_class, universe))
+
+
+def provenance_stamp(scope_label: str, data: DataSettings) -> dict[str, Any]:
+    """Record of *which scope + data config* a factor/strategy was born under."""
+    return {
+        "scope": scope_label,
+        "config_hash": config_fingerprint(data),
+        "provider": data.provider,
+        "asset_class": data.asset_class,
+        "frequency": data.frequency,
+        "universe": data.universe_preset,
+        "timespan": [data.start, data.end],
+        "stamped_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    }
