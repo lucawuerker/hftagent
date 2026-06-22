@@ -142,6 +142,7 @@ def run_research_session(
     paper_sample_strategy: str = "unread_first",
     data_dir: str = "ticker_data",
     dedup_scope: str = "package",
+    allowed_fields: list[str] | None = None,
 ) -> dict[str, Any]:
     """Run one Factor Researcher session and persist any kept factors.
 
@@ -168,6 +169,20 @@ def run_research_session(
     if reset:
         reset_researcher_state()
 
+    # Restrict the researcher to the fields the configured feed can actually
+    # supply (LOBSTER order-book level + the fundamentals opt-out), so it only
+    # invents factors this run can serve.  Computed once from the active config
+    # unless the caller passes an explicit set; falls back to un-gated (None) if
+    # the provider/config can't be resolved.
+    if allowed_fields is None:
+        try:
+            from quant_fund_agent.data import usable_fields
+
+            allowed_fields = sorted(usable_fields())
+        except Exception as e:  # noqa: BLE001 — never block research on field resolution
+            log.warning("could not resolve usable fields (%s) — research un-gated", e)
+            allowed_fields = None
+
     state = FactorResearcherState(
         session_id=session_id or date.today().isoformat(),
         cutoff_date=cutoff_date,
@@ -178,9 +193,12 @@ def run_research_session(
         paper_sample_strategy=paper_sample_strategy,
         data_dir=data_dir,
         dedup_scope=dedup_scope,
+        allowed_fields=allowed_fields,
     )
-    log.info("Factor research session '%s' (papers=%d, ideas=%d, IC@%d recorded, not gated)",
-             state.session_id, n_papers, n_ideas, horizon)
+    log.info("Factor research session '%s' (papers=%d, ideas=%d, IC@%d recorded, "
+             "not gated; %s data fields in scope)",
+             state.session_id, n_papers, n_ideas, horizon,
+             len(allowed_fields) if allowed_fields is not None else "all")
     return factor_research_graph.invoke(state)
 
 

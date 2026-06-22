@@ -1,0 +1,14 @@
+# LOBSTER universe — 10 ETFs covering equities, commodities, bonds, FX and EM.
+# Used as the default preset when provider=lobster; covers the author's
+# LOBSTER pull (ticker_data/ must contain the matching subdirectories).
+# One ticker per line; '#' comments.
+SPY
+QQQ
+USO
+GLD
+CORN
+CPER
+SHY
+IEF
+FXE
+FXI

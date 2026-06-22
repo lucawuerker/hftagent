@@ -80,6 +80,14 @@ class FactorResearcherState(BaseModel):
     # ── data path (where load_panel reads from) ──
     data_dir: str = "ticker_data"
 
+    # Fields the configured data feed can actually supply this run (provider
+    # capabilities + LOBSTER order-book level + the fundamentals opt-out; see
+    # ``quant_fund_agent.data.usable_fields``).  The brainstorm/codegen DATA
+    # CONTEXT is built from this set and produced factors are gated against it,
+    # so the researcher only invents factors this run can serve.  ``None`` →
+    # un-gated (every LOBSTER field + fundamentals), the historical behaviour.
+    allowed_fields: list[str] | None = None
+
     # Cap the universe loaded for the research-time IC backtest.
     # ``None`` means "load every ticker in ``data_dir``"; useful values
     # are 10–20 on memory-constrained machines.  This only affects the

@@ -1,0 +1,5811 @@
+{
+  "factors": [
+    {
+      "id": "alpha_001",
+      "name": "Alpha#1",
+      "class_name": "Alpha001",
+      "description": "Ts_ArgMax of signed-power transformed input: uses trailing 20-day return volatility when returns are negative, close price otherwise.  Mean-reversion signal betting on extremes reverting.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.021916,
+        "ic_std": 0.224826,
+        "ic_ir": -0.09748,
+        "ic_hit_rate": 0.4589,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.028655,
+            "ic_std": 0.220466,
+            "ic_ir": -0.129977,
+            "ic_hit_rate": 0.4459,
+            "n_timestamps": 46736
+          },
+          "6": {
+            "ic": -0.021916,
+            "ic_std": 0.224826,
+            "ic_ir": -0.09748,
+            "ic_hit_rate": 0.4589,
+            "n_timestamps": 46729
+          },
+          "60": {
+            "ic": -0.016133,
+            "ic_std": 0.22297,
+            "ic_ir": -0.072355,
+            "ic_hit_rate": 0.4729,
+            "n_timestamps": 46676
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46729,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:29:54.161679",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_002",
+      "name": "Alpha#2",
+      "class_name": "Alpha002",
+      "description": "Negative 6-day rolling correlation between ranked 2-day log-volume change and ranked intraday return.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.000482,
+        "ic_std": 0.441165,
+        "ic_ir": 0.001093,
+        "ic_hit_rate": 0.4917,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.008639,
+            "ic_std": 0.441678,
+            "ic_ir": -0.01956,
+            "ic_hit_rate": 0.4859,
+            "n_timestamps": 10691
+          },
+          "6": {
+            "ic": 0.000482,
+            "ic_std": 0.441165,
+            "ic_ir": 0.001093,
+            "ic_hit_rate": 0.4917,
+            "n_timestamps": 10662
+          },
+          "60": {
+            "ic": -0.008034,
+            "ic_std": 0.447316,
+            "ic_ir": -0.01796,
+            "ic_hit_rate": 0.4871,
+            "n_timestamps": 10599
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 10662,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "open",
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:29:54.920300",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_003",
+      "name": "Alpha#3",
+      "class_name": "Alpha003",
+      "description": "Negative 10-day rolling correlation between cross-sectionally ranked open price and ranked volume.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.002489,
+        "ic_std": 0.193768,
+        "ic_ir": -0.012845,
+        "ic_hit_rate": 0.4953,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.001563,
+            "ic_std": 0.195305,
+            "ic_ir": -0.008002,
+            "ic_hit_rate": 0.4963,
+            "n_timestamps": 46809
+          },
+          "6": {
+            "ic": -0.002489,
+            "ic_std": 0.193768,
+            "ic_ir": -0.012845,
+            "ic_hit_rate": 0.4953,
+            "n_timestamps": 46804
+          },
+          "60": {
+            "ic": 0.003475,
+            "ic_std": 0.193995,
+            "ic_ir": 0.017912,
+            "ic_hit_rate": 0.5087,
+            "n_timestamps": 46750
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46804,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "open",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:29:55.777075",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_004",
+      "name": "Alpha#4",
+      "class_name": "Alpha004",
+      "description": "Negative time-series rank of cross-sectionally ranked lows over 9 days.  Bets that stocks at persistent relative lows will revert upward.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.001177,
+        "ic_std": 0.194408,
+        "ic_ir": -0.006052,
+        "ic_hit_rate": 0.4989,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.001656,
+            "ic_std": 0.189626,
+            "ic_ir": -0.008734,
+            "ic_hit_rate": 0.4965,
+            "n_timestamps": 46686
+          },
+          "6": {
+            "ic": -0.001177,
+            "ic_std": 0.194408,
+            "ic_ir": -0.006052,
+            "ic_hit_rate": 0.4989,
+            "n_timestamps": 46681
+          },
+          "60": {
+            "ic": 6.7e-05,
+            "ic_std": 0.198589,
+            "ic_ir": 0.000335,
+            "ic_hit_rate": 0.4992,
+            "n_timestamps": 46640
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46681,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "low"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:30:49.759553",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_005",
+      "name": "Alpha#5",
+      "class_name": "Alpha005",
+      "description": "Interaction between open-price deviation from 10-day VWAP mean and close-to-VWAP rank.  Captures mean-reversion around the volume-weighted fair value.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.077264,
+        "ic_std": 0.206337,
+        "ic_ir": 0.374454,
+        "ic_hit_rate": 0.6503,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.133388,
+            "ic_std": 0.204138,
+            "ic_ir": 0.65342,
+            "ic_hit_rate": 0.7457,
+            "n_timestamps": 46809
+          },
+          "6": {
+            "ic": 0.077264,
+            "ic_std": 0.206337,
+            "ic_ir": 0.374454,
+            "ic_hit_rate": 0.6503,
+            "n_timestamps": 46804
+          },
+          "60": {
+            "ic": 0.033424,
+            "ic_std": 0.206271,
+            "ic_ir": 0.16204,
+            "ic_hit_rate": 0.5636,
+            "n_timestamps": 46750
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46804,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "open",
+        "close",
+        "high",
+        "low"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:30:50.561705",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_006",
+      "name": "Alpha#6",
+      "class_name": "Alpha006",
+      "description": "Negative 10-day rolling correlation between raw open price and raw volume.  Exploits breakdown of the open-volume relationship.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.001308,
+        "ic_std": 0.190749,
+        "ic_ir": -0.006856,
+        "ic_hit_rate": 0.4976,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.01058,
+            "ic_std": 0.191547,
+            "ic_ir": -0.055235,
+            "ic_hit_rate": 0.4786,
+            "n_timestamps": 46809
+          },
+          "6": {
+            "ic": -0.001308,
+            "ic_std": 0.190749,
+            "ic_ir": -0.006856,
+            "ic_hit_rate": 0.4976,
+            "n_timestamps": 46804
+          },
+          "60": {
+            "ic": -0.003431,
+            "ic_std": 0.191754,
+            "ic_ir": -0.017893,
+            "ic_hit_rate": 0.4927,
+            "n_timestamps": 46750
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46804,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "open",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:30:51.367990",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_007",
+      "name": "Alpha#7",
+      "class_name": "Alpha007",
+      "description": "On high-volume days (volume > 20-day ADV), returns the signed 60-day time-series rank of the 7-day close delta magnitude.  Momentum signal conditioned on unusual activity.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.005586,
+        "ic_std": 0.174765,
+        "ic_ir": -0.031962,
+        "ic_hit_rate": 0.486,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.020717,
+            "ic_std": 0.212351,
+            "ic_ir": -0.097562,
+            "ic_hit_rate": 0.4613,
+            "n_timestamps": 45734
+          },
+          "6": {
+            "ic": -0.005586,
+            "ic_std": 0.174765,
+            "ic_ir": -0.031962,
+            "ic_hit_rate": 0.486,
+            "n_timestamps": 45724
+          },
+          "60": {
+            "ic": -0.001671,
+            "ic_std": 0.170982,
+            "ic_ir": -0.009774,
+            "ic_hit_rate": 0.4932,
+            "n_timestamps": 45665
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 45724,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:31:19.766998",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_008",
+      "name": "Alpha#8",
+      "class_name": "Alpha008",
+      "description": "Negative rank of the 10-day change in the product of 5-day cumulative open and 5-day cumulative returns.  Captures momentum shocks in the open-return interaction.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.027177,
+        "ic_std": 0.219163,
+        "ic_ir": 0.124004,
+        "ic_hit_rate": 0.5514,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.034736,
+            "ic_std": 0.210494,
+            "ic_ir": 0.16502,
+            "ic_hit_rate": 0.5707,
+            "n_timestamps": 46795
+          },
+          "6": {
+            "ic": 0.027177,
+            "ic_std": 0.219163,
+            "ic_ir": 0.124004,
+            "ic_hit_rate": 0.5514,
+            "n_timestamps": 46790
+          },
+          "60": {
+            "ic": 0.009651,
+            "ic_std": 0.220749,
+            "ic_ir": 0.04372,
+            "ic_hit_rate": 0.5179,
+            "n_timestamps": 46736
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46790,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "open",
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:31:20.507930",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_009",
+      "name": "Alpha#9",
+      "class_name": "Alpha009",
+      "description": "If the 5-day minimum of daily close changes is positive (sustained uptrend) or the 5-day maximum is negative (sustained downtrend), follow the trend; otherwise, fade it.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.048615,
+        "ic_std": 0.176639,
+        "ic_ir": 0.275223,
+        "ic_hit_rate": 0.6103,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.068577,
+            "ic_std": 0.180419,
+            "ic_ir": 0.380099,
+            "ic_hit_rate": 0.6496,
+            "n_timestamps": 46849
+          },
+          "6": {
+            "ic": 0.048615,
+            "ic_std": 0.176639,
+            "ic_ir": 0.275223,
+            "ic_hit_rate": 0.6103,
+            "n_timestamps": 46844
+          },
+          "60": {
+            "ic": 0.021252,
+            "ic_std": 0.172273,
+            "ic_ir": 0.123363,
+            "ic_hit_rate": 0.5506,
+            "n_timestamps": 46791
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46844,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:31:21.265997",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_010",
+      "name": "Alpha#10",
+      "class_name": "Alpha010",
+      "description": "Cross-sectional rank of a regime-conditioned 1-day close delta using a 4-day min/max filter.  Ranked variant of Alpha#9 with a shorter lookback.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.043396,
+        "ic_std": 0.17448,
+        "ic_ir": 0.248718,
+        "ic_hit_rate": 0.6012,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.063325,
+            "ic_std": 0.178201,
+            "ic_ir": 0.35536,
+            "ic_hit_rate": 0.6409,
+            "n_timestamps": 46849
+          },
+          "6": {
+            "ic": 0.043396,
+            "ic_std": 0.17448,
+            "ic_ir": 0.248718,
+            "ic_hit_rate": 0.6012,
+            "n_timestamps": 46844
+          },
+          "60": {
+            "ic": 0.018771,
+            "ic_std": 0.170669,
+            "ic_ir": 0.109985,
+            "ic_hit_rate": 0.5457,
+            "n_timestamps": 46791
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46844,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:31:22.082619",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_011",
+      "name": "Alpha#11",
+      "class_name": "Alpha011",
+      "description": "Interaction of the 3-day max and min of (VWAP \u2212 close) with ranked 3-day volume change.  Captures mean-reversion around VWAP amplified by volume acceleration.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.022759,
+        "ic_std": 0.181143,
+        "ic_ir": 0.125642,
+        "ic_hit_rate": 0.553,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.040667,
+            "ic_std": 0.20053,
+            "ic_ir": 0.202797,
+            "ic_hit_rate": 0.5807,
+            "n_timestamps": 46839
+          },
+          "6": {
+            "ic": 0.022759,
+            "ic_std": 0.181143,
+            "ic_ir": 0.125642,
+            "ic_hit_rate": 0.553,
+            "n_timestamps": 46834
+          },
+          "60": {
+            "ic": 0.006589,
+            "ic_std": 0.177616,
+            "ic_ir": 0.037095,
+            "ic_hit_rate": 0.5156,
+            "n_timestamps": 46780
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46834,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "volume",
+        "high",
+        "low"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:31:23.011696",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_012",
+      "name": "Alpha#12",
+      "class_name": "Alpha012",
+      "description": "Contrarian signal: fades the 1-day close change when volume rises, follows it when volume drops.  Volume-confirmed short-term reversal / continuation filter.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.01111,
+        "ic_std": 0.167154,
+        "ic_ir": -0.066468,
+        "ic_hit_rate": 0.4719,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.026352,
+            "ic_std": 0.175203,
+            "ic_ir": -0.150411,
+            "ic_hit_rate": 0.4386,
+            "n_timestamps": 46849
+          },
+          "6": {
+            "ic": -0.01111,
+            "ic_std": 0.167154,
+            "ic_ir": -0.066468,
+            "ic_hit_rate": 0.4719,
+            "n_timestamps": 46844
+          },
+          "60": {
+            "ic": -0.004685,
+            "ic_std": 0.165073,
+            "ic_ir": -0.02838,
+            "ic_hit_rate": 0.4878,
+            "n_timestamps": 46791
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46844,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:31:23.691606",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_013",
+      "name": "Alpha#13",
+      "class_name": "Alpha013",
+      "description": "Negative ranked 5-day covariance of cross-sectionally ranked close and ranked volume.  Exploits breakdown in the price-volume co-movement structure.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.002853,
+        "ic_std": 0.171073,
+        "ic_ir": -0.016678,
+        "ic_hit_rate": 0.4947,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.001206,
+            "ic_std": 0.178118,
+            "ic_ir": -0.006768,
+            "ic_hit_rate": 0.4963,
+            "n_timestamps": 46834
+          },
+          "6": {
+            "ic": -0.002853,
+            "ic_std": 0.171073,
+            "ic_ir": -0.016678,
+            "ic_hit_rate": 0.4947,
+            "n_timestamps": 46829
+          },
+          "60": {
+            "ic": 0.001325,
+            "ic_std": 0.171456,
+            "ic_ir": 0.007729,
+            "ic_hit_rate": 0.5046,
+            "n_timestamps": 46775
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46829,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:31:24.581241",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_014",
+      "name": "Alpha#14",
+      "class_name": "Alpha014",
+      "description": "Negative ranked 3-day return acceleration scaled by the 10-day open-volume correlation.  Momentum signal weighted by the strength of the open-volume relationship.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.002142,
+        "ic_std": 0.19156,
+        "ic_ir": 0.01118,
+        "ic_hit_rate": 0.504,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.004559,
+            "ic_std": 0.19163,
+            "ic_ir": -0.023791,
+            "ic_hit_rate": 0.4916,
+            "n_timestamps": 46809
+          },
+          "6": {
+            "ic": 0.002142,
+            "ic_std": 0.19156,
+            "ic_ir": 0.01118,
+            "ic_hit_rate": 0.504,
+            "n_timestamps": 46804
+          },
+          "60": {
+            "ic": -0.002206,
+            "ic_std": 0.191798,
+            "ic_ir": -0.0115,
+            "ic_hit_rate": 0.497,
+            "n_timestamps": 46750
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46804,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "open",
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:31:25.790357",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_015",
+      "name": "Alpha#15",
+      "class_name": "Alpha015",
+      "description": "Negative 3-day sum of ranked 3-day correlation between ranked highs and ranked volume.  Smoothed measure of high-volume co-movement breakdown.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.002847,
+        "ic_std": 0.176258,
+        "ic_ir": -0.016155,
+        "ic_hit_rate": 0.4941,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.000776,
+            "ic_std": 0.177285,
+            "ic_ir": -0.004377,
+            "ic_hit_rate": 0.5015,
+            "n_timestamps": 46834
+          },
+          "6": {
+            "ic": -0.002847,
+            "ic_std": 0.176258,
+            "ic_ir": -0.016155,
+            "ic_hit_rate": 0.4941,
+            "n_timestamps": 46829
+          },
+          "60": {
+            "ic": -0.000153,
+            "ic_std": 0.177547,
+            "ic_ir": -0.000863,
+            "ic_hit_rate": 0.5026,
+            "n_timestamps": 46775
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46829,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "high",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:31:26.790733",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_016",
+      "name": "Alpha#16",
+      "class_name": "Alpha016",
+      "description": "Negative ranked 5-day covariance of cross-sectionally ranked highs and ranked volume.  Similar structure to Alpha#13 but uses high instead of close.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.002848,
+        "ic_std": 0.171011,
+        "ic_ir": -0.016653,
+        "ic_hit_rate": 0.4945,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.001372,
+            "ic_std": 0.17801,
+            "ic_ir": -0.007706,
+            "ic_hit_rate": 0.4963,
+            "n_timestamps": 46834
+          },
+          "6": {
+            "ic": -0.002848,
+            "ic_std": 0.171011,
+            "ic_ir": -0.016653,
+            "ic_hit_rate": 0.4945,
+            "n_timestamps": 46829
+          },
+          "60": {
+            "ic": 0.001375,
+            "ic_std": 0.171262,
+            "ic_ir": 0.008028,
+            "ic_hit_rate": 0.5055,
+            "n_timestamps": 46775
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46829,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "high",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:31:27.689496",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_017",
+      "name": "Alpha#17",
+      "class_name": "Alpha017",
+      "description": "Three-way interaction: negative ranked 10-day close ts-rank, ranked 1-day close acceleration, and ranked relative volume ts-rank.  Captures momentum reversals amplified by unusual volume.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.04338,
+        "ic_std": 0.231151,
+        "ic_ir": 0.187669,
+        "ic_hit_rate": 0.5775,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.07201,
+            "ic_std": 0.23685,
+            "ic_ir": 0.304033,
+            "ic_hit_rate": 0.624,
+            "n_timestamps": 46739
+          },
+          "6": {
+            "ic": 0.04338,
+            "ic_std": 0.231151,
+            "ic_ir": 0.187669,
+            "ic_hit_rate": 0.5775,
+            "n_timestamps": 46734
+          },
+          "60": {
+            "ic": 0.019855,
+            "ic_std": 0.229858,
+            "ic_ir": 0.086379,
+            "ic_hit_rate": 0.534,
+            "n_timestamps": 46680
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46734,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:32:59.808205",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_018",
+      "name": "Alpha#18",
+      "class_name": "Alpha018",
+      "description": "Negative ranked composite of 5-day intraday-range volatility, current intraday return, and 10-day close-open correlation.  Fades stocks with elevated intraday dislocations.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.026205,
+        "ic_std": 0.196481,
+        "ic_ir": 0.133374,
+        "ic_hit_rate": 0.5549,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.04736,
+            "ic_std": 0.192115,
+            "ic_ir": 0.246519,
+            "ic_hit_rate": 0.6004,
+            "n_timestamps": 46809
+          },
+          "6": {
+            "ic": 0.026205,
+            "ic_std": 0.196481,
+            "ic_ir": 0.133374,
+            "ic_hit_rate": 0.5549,
+            "n_timestamps": 46804
+          },
+          "60": {
+            "ic": 0.012227,
+            "ic_std": 0.196697,
+            "ic_ir": 0.062161,
+            "ic_hit_rate": 0.5244,
+            "n_timestamps": 46750
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46804,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "open",
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:33:00.696757",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_019",
+      "name": "Alpha#19",
+      "class_name": "Alpha019",
+      "description": "Contrarian 7-day price direction scaled by ranked 250-day cumulative return.  Fades the weekly move, but more aggressively for stocks with strong annual momentum.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.019871,
+        "ic_std": 0.3798,
+        "ic_ir": 0.052321,
+        "ic_hit_rate": 0.5236,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.025388,
+            "ic_std": 0.37305,
+            "ic_ir": 0.068056,
+            "ic_hit_rate": 0.5278,
+            "n_timestamps": 44331
+          },
+          "6": {
+            "ic": 0.019871,
+            "ic_std": 0.3798,
+            "ic_ir": 0.052321,
+            "ic_hit_rate": 0.5236,
+            "n_timestamps": 44338
+          },
+          "60": {
+            "ic": 0.013895,
+            "ic_std": 0.379907,
+            "ic_ir": 0.036575,
+            "ic_hit_rate": 0.5152,
+            "n_timestamps": 44282
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 44338,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:33:01.286321",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_020",
+      "name": "Alpha#20",
+      "class_name": "Alpha020",
+      "description": "Three-way interaction of ranked gap components: open vs prior high, close, and low.  Captures overnight gap mean-reversion pressure.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.018827,
+        "ic_std": 0.176755,
+        "ic_ir": -0.106514,
+        "ic_hit_rate": 0.4589,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.068844,
+            "ic_std": 0.178669,
+            "ic_ir": -0.385313,
+            "ic_hit_rate": 0.351,
+            "n_timestamps": 46849
+          },
+          "6": {
+            "ic": -0.018827,
+            "ic_std": 0.176755,
+            "ic_ir": -0.106514,
+            "ic_hit_rate": 0.4589,
+            "n_timestamps": 46844
+          },
+          "60": {
+            "ic": -0.001059,
+            "ic_std": 0.174221,
+            "ic_ir": -0.006077,
+            "ic_hit_rate": 0.4989,
+            "n_timestamps": 46791
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46844,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "open",
+        "high",
+        "low",
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:33:02.128630",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_021",
+      "name": "Alpha#21",
+      "class_name": "Alpha021",
+      "description": "Bollinger-band regime switch: short when 2-day close mean exceeds the 8-day upper band, long when below the lower band, else follow relative volume direction.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "volatility",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.010509,
+        "ic_std": 0.166766,
+        "ic_ir": 0.063016,
+        "ic_hit_rate": 0.5248,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.000929,
+            "ic_std": 0.174626,
+            "ic_ir": -0.00532,
+            "ic_hit_rate": 0.499,
+            "n_timestamps": 46835
+          },
+          "6": {
+            "ic": 0.010509,
+            "ic_std": 0.166766,
+            "ic_ir": 0.063016,
+            "ic_hit_rate": 0.5248,
+            "n_timestamps": 46829
+          },
+          "60": {
+            "ic": 0.00786,
+            "ic_std": 0.165807,
+            "ic_ir": 0.047405,
+            "ic_hit_rate": 0.5173,
+            "n_timestamps": 46779
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46829,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:33:02.874857",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_022",
+      "name": "Alpha#22",
+      "class_name": "Alpha022",
+      "description": "Negative product of the 5-day change in high-volume correlation and ranked 20-day close volatility.  Captures shifts in the high-volume relationship weighted by volatility.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.002353,
+        "ic_std": 0.223737,
+        "ic_ir": -0.010519,
+        "ic_hit_rate": 0.4943,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.011832,
+            "ic_std": 0.224464,
+            "ic_ir": -0.052714,
+            "ic_hit_rate": 0.4787,
+            "n_timestamps": 46759
+          },
+          "6": {
+            "ic": -0.002353,
+            "ic_std": 0.223737,
+            "ic_ir": -0.010519,
+            "ic_hit_rate": 0.4943,
+            "n_timestamps": 46754
+          },
+          "60": {
+            "ic": -0.001528,
+            "ic_std": 0.22262,
+            "ic_ir": -0.006863,
+            "ic_hit_rate": 0.4985,
+            "n_timestamps": 46700
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46754,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:33:03.713379",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_023",
+      "name": "Alpha#23",
+      "class_name": "Alpha023",
+      "description": "When the current high exceeds the 20-day average high (breakout), fade by returning the negative 2-day high change.  Zero otherwise.  Pure breakout mean-reversion.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.009995,
+        "ic_std": 0.167206,
+        "ic_ir": 0.059777,
+        "ic_hit_rate": 0.5215,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.005772,
+            "ic_std": 0.168142,
+            "ic_ir": 0.034325,
+            "ic_hit_rate": 0.5124,
+            "n_timestamps": 45775
+          },
+          "6": {
+            "ic": 0.009995,
+            "ic_std": 0.167206,
+            "ic_ir": 0.059777,
+            "ic_hit_rate": 0.5215,
+            "n_timestamps": 45762
+          },
+          "60": {
+            "ic": 0.006871,
+            "ic_std": 0.166114,
+            "ic_ir": 0.04136,
+            "ic_hit_rate": 0.5174,
+            "n_timestamps": 45718
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 45762,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "high"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:33:04.315231",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_024",
+      "name": "Alpha#24",
+      "class_name": "Alpha024",
+      "description": "Long-horizon regime switch: when the 100-day moving-average drift is small (<=5%% of lagged close), short the gap from 100-day low; otherwise short the 3-day close delta.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.036123,
+        "ic_std": 0.186336,
+        "ic_ir": 0.193857,
+        "ic_hit_rate": 0.5767,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.042289,
+            "ic_std": 0.182698,
+            "ic_ir": 0.23147,
+            "ic_hit_rate": 0.592,
+            "n_timestamps": 46847
+          },
+          "6": {
+            "ic": 0.036123,
+            "ic_std": 0.186336,
+            "ic_ir": 0.193857,
+            "ic_hit_rate": 0.5767,
+            "n_timestamps": 46842
+          },
+          "60": {
+            "ic": 0.021722,
+            "ic_std": 0.188068,
+            "ic_ir": 0.115504,
+            "ic_hit_rate": 0.5462,
+            "n_timestamps": 46789
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46842,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:33:05.044282",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_025",
+      "name": "Alpha#25",
+      "class_name": "Alpha025",
+      "description": "Cross-sectional rank of the product of negative returns, 20-day average volume, VWAP, and the high-close spread.  Captures momentum weighted by liquidity and intraday range.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.016496,
+        "ic_std": 0.221725,
+        "ic_ir": 0.074399,
+        "ic_hit_rate": 0.5303,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.011634,
+            "ic_std": 0.241243,
+            "ic_ir": 0.048223,
+            "ic_hit_rate": 0.5209,
+            "n_timestamps": 46306
+          },
+          "6": {
+            "ic": 0.016496,
+            "ic_std": 0.221725,
+            "ic_ir": 0.074399,
+            "ic_hit_rate": 0.5303,
+            "n_timestamps": 46296
+          },
+          "60": {
+            "ic": 0.008577,
+            "ic_std": 0.217087,
+            "ic_ir": 0.039511,
+            "ic_hit_rate": 0.5175,
+            "n_timestamps": 46246
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46296,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:33:05.740304",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_026",
+      "name": "Alpha#26",
+      "class_name": "Alpha026",
+      "description": "Negative 3-day max of the 5-day correlation between time-series ranked volume and time-series ranked high.  Fades peak volume-high co-movement.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 7e-06,
+        "ic_std": 0.199542,
+        "ic_ir": 3.7e-05,
+        "ic_hit_rate": 0.4991,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.005897,
+            "ic_std": 0.19757,
+            "ic_ir": -0.029849,
+            "ic_hit_rate": 0.4906,
+            "n_timestamps": 46804
+          },
+          "6": {
+            "ic": 7e-06,
+            "ic_std": 0.199542,
+            "ic_ir": 3.7e-05,
+            "ic_hit_rate": 0.4991,
+            "n_timestamps": 46799
+          },
+          "60": {
+            "ic": -0.000703,
+            "ic_std": 0.199864,
+            "ic_ir": -0.00352,
+            "ic_hit_rate": 0.4991,
+            "n_timestamps": 46745
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46799,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "high",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:35:09.185045",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_027",
+      "name": "Alpha#27",
+      "class_name": "Alpha027",
+      "description": "Binary signal based on the ranked 2-day average of the 6-day correlation between ranked volume and ranked VWAP.  Short when the correlation rank is high, long otherwise.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.002607,
+        "ic_std": 0.155819,
+        "ic_ir": -0.016734,
+        "ic_hit_rate": 0.495,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.00086,
+            "ic_std": 0.155551,
+            "ic_ir": -0.00553,
+            "ic_hit_rate": 0.4977,
+            "n_timestamps": 46841
+          },
+          "6": {
+            "ic": -0.002607,
+            "ic_std": 0.155819,
+            "ic_ir": -0.016734,
+            "ic_hit_rate": 0.495,
+            "n_timestamps": 46834
+          },
+          "60": {
+            "ic": 0.000756,
+            "ic_std": 0.157343,
+            "ic_ir": 0.004808,
+            "ic_hit_rate": 0.5035,
+            "n_timestamps": 46784
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46834,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:35:10.121743",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_028",
+      "name": "Alpha#28",
+      "class_name": "Alpha028",
+      "description": "Row-normalised composite of ADV20-low correlation, midprice, and close.  Captures deviations of the close from the liquidity-adjusted midprice.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.001563,
+        "ic_std": 0.226441,
+        "ic_ir": 0.006901,
+        "ic_hit_rate": 0.5013,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.007647,
+            "ic_std": 0.226543,
+            "ic_ir": 0.033754,
+            "ic_hit_rate": 0.5148,
+            "n_timestamps": 33532
+          },
+          "6": {
+            "ic": 0.001563,
+            "ic_std": 0.226441,
+            "ic_ir": 0.006901,
+            "ic_hit_rate": 0.5013,
+            "n_timestamps": 33529
+          },
+          "60": {
+            "ic": 0.000525,
+            "ic_std": 0.226211,
+            "ic_ir": 0.00232,
+            "ic_hit_rate": 0.497,
+            "n_timestamps": 33481
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 33529,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:35:10.861551",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_029",
+      "name": "Alpha#29",
+      "class_name": "Alpha029",
+      "description": "Complex nested signal combining a scaled log-transform of deeply ranked close-level changes with a 5-day time-series rank of 6-day-lagged negative returns.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.009361,
+        "ic_std": 0.207851,
+        "ic_ir": 0.045035,
+        "ic_hit_rate": 0.5163,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.007492,
+            "ic_std": 0.200382,
+            "ic_ir": 0.03739,
+            "ic_hit_rate": 0.5141,
+            "n_timestamps": 46799
+          },
+          "6": {
+            "ic": 0.009361,
+            "ic_std": 0.207851,
+            "ic_ir": 0.045035,
+            "ic_hit_rate": 0.5163,
+            "n_timestamps": 46794
+          },
+          "60": {
+            "ic": 0.013424,
+            "ic_std": 0.210049,
+            "ic_ir": 0.06391,
+            "ic_hit_rate": 0.5261,
+            "n_timestamps": 46740
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46794,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:36:10.687512",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_030",
+      "name": "Alpha#30",
+      "class_name": "Alpha030",
+      "description": "Contrarian 3-day consecutive-direction score (ranked and inverted), scaled by the 5-day vs 20-day volume ratio.  Fades sustained directional moves when recent volume is elevated relative to the longer window.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.018287,
+        "ic_std": 0.22205,
+        "ic_ir": 0.082357,
+        "ic_hit_rate": 0.5343,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.010891,
+            "ic_std": 0.222005,
+            "ic_ir": 0.049057,
+            "ic_hit_rate": 0.5239,
+            "n_timestamps": 46759
+          },
+          "6": {
+            "ic": 0.018287,
+            "ic_std": 0.22205,
+            "ic_ir": 0.082357,
+            "ic_hit_rate": 0.5343,
+            "n_timestamps": 46754
+          },
+          "60": {
+            "ic": 0.011711,
+            "ic_std": 0.220823,
+            "ic_ir": 0.053033,
+            "ic_hit_rate": 0.5213,
+            "n_timestamps": 46700
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46754,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:36:11.466677",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_031",
+      "name": "Alpha#31",
+      "class_name": "Alpha031",
+      "description": "Three-term composite: triply-ranked decay-linear of the 10-day close delta, ranked 3-day close reversal, and the sign of scaled ADV20-low correlation.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.017193,
+        "ic_std": 0.236723,
+        "ic_ir": 0.072631,
+        "ic_hit_rate": 0.5321,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.019274,
+            "ic_std": 0.2355,
+            "ic_ir": 0.081845,
+            "ic_hit_rate": 0.5364,
+            "n_timestamps": 46703
+          },
+          "6": {
+            "ic": 0.017193,
+            "ic_std": 0.236723,
+            "ic_ir": 0.072631,
+            "ic_hit_rate": 0.5321,
+            "n_timestamps": 46699
+          },
+          "60": {
+            "ic": 0.012517,
+            "ic_std": 0.238085,
+            "ic_ir": 0.052575,
+            "ic_hit_rate": 0.5193,
+            "n_timestamps": 46645
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46699,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:36:13.219262",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_032",
+      "name": "Alpha#32",
+      "class_name": "Alpha032",
+      "description": "Scaled 7-day MA deviation from close (short-term reversion) plus 20x-scaled 230-day correlation of VWAP with the 5-day lagged close (long-horizon fair-value anchor).",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.015568,
+        "ic_std": 0.36096,
+        "ic_ir": 0.043128,
+        "ic_hit_rate": 0.5146,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.010289,
+            "ic_std": 0.358181,
+            "ic_ir": 0.028727,
+            "ic_hit_rate": 0.5097,
+            "n_timestamps": 44597
+          },
+          "6": {
+            "ic": 0.015568,
+            "ic_std": 0.36096,
+            "ic_ir": 0.043128,
+            "ic_hit_rate": 0.5146,
+            "n_timestamps": 44600
+          },
+          "60": {
+            "ic": 0.02841,
+            "ic_std": 0.358238,
+            "ic_ir": 0.079305,
+            "ic_hit_rate": 0.5312,
+            "n_timestamps": 44545
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 44600,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:36:13.937410",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_033",
+      "name": "Alpha#33",
+      "class_name": "Alpha033",
+      "description": "Cross-sectional rank of the intraday return (open/close - 1). Simplifies to rank((open/close) - 1).  Bets on reversion of the intraday gap.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.115748,
+        "ic_std": 0.16459,
+        "ic_ir": 0.703255,
+        "ic_hit_rate": 0.759,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.234896,
+            "ic_std": 0.174563,
+            "ic_ir": 1.345629,
+            "ic_hit_rate": 0.9059,
+            "n_timestamps": 46854
+          },
+          "6": {
+            "ic": 0.115748,
+            "ic_std": 0.16459,
+            "ic_ir": 0.703255,
+            "ic_hit_rate": 0.759,
+            "n_timestamps": 46849
+          },
+          "60": {
+            "ic": 0.039401,
+            "ic_std": 0.159121,
+            "ic_ir": 0.247616,
+            "ic_hit_rate": 0.5996,
+            "n_timestamps": 46795
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46849,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "open",
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:36:14.640529",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_034",
+      "name": "Alpha#34",
+      "class_name": "Alpha034",
+      "description": "Composite of inverted short-to-medium volatility ratio (2-day vs 5-day return stddev) and inverted ranked 1-day close change.  Favours stocks where short-term vol is low relative to medium-term vol and recent price change is small.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "volatility",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.03271,
+        "ic_std": 0.18648,
+        "ic_ir": 0.175407,
+        "ic_hit_rate": 0.5714,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.050432,
+            "ic_std": 0.187193,
+            "ic_ir": 0.269412,
+            "ic_hit_rate": 0.6105,
+            "n_timestamps": 46829
+          },
+          "6": {
+            "ic": 0.03271,
+            "ic_std": 0.18648,
+            "ic_ir": 0.175407,
+            "ic_hit_rate": 0.5714,
+            "n_timestamps": 46824
+          },
+          "60": {
+            "ic": 0.015018,
+            "ic_std": 0.185616,
+            "ic_ir": 0.080911,
+            "ic_hit_rate": 0.5344,
+            "n_timestamps": 46770
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46824,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:36:15.546622",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_035",
+      "name": "Alpha#35",
+      "class_name": "Alpha035",
+      "description": "Three-way interaction of time-series ranks: volume rank (32-day), inverted range rank (16-day), and inverted return rank (32-day).  Favours high-volume, low-range, low-return regimes.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.029706,
+        "ic_std": 0.25332,
+        "ic_ir": 0.117265,
+        "ic_hit_rate": 0.5485,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.03076,
+            "ic_std": 0.265311,
+            "ic_ir": 0.115941,
+            "ic_hit_rate": 0.5464,
+            "n_timestamps": 46691
+          },
+          "6": {
+            "ic": 0.029706,
+            "ic_std": 0.25332,
+            "ic_ir": 0.117265,
+            "ic_hit_rate": 0.5485,
+            "n_timestamps": 46686
+          },
+          "60": {
+            "ic": 0.019599,
+            "ic_std": 0.249261,
+            "ic_ir": 0.078628,
+            "ic_hit_rate": 0.5332,
+            "n_timestamps": 46633
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46686,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:38:12.904921",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_036",
+      "name": "Alpha#36",
+      "class_name": "Alpha036",
+      "description": "Five-term weighted composite: 15-day gap-volume correlation, ranked intraday gap, lagged-return ts-rank, absolute VWAP-ADV20 correlation, and long-term MA deviation \u00d7 gap.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.01659,
+        "ic_std": 0.346185,
+        "ic_ir": 0.047922,
+        "ic_hit_rate": 0.5206,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.038613,
+            "ic_std": 0.346528,
+            "ic_ir": 0.111429,
+            "ic_hit_rate": 0.5484,
+            "n_timestamps": 45049
+          },
+          "6": {
+            "ic": 0.01659,
+            "ic_std": 0.346185,
+            "ic_ir": 0.047922,
+            "ic_hit_rate": 0.5206,
+            "n_timestamps": 45052
+          },
+          "60": {
+            "ic": 0.002704,
+            "ic_std": 0.348756,
+            "ic_ir": 0.007753,
+            "ic_hit_rate": 0.5002,
+            "n_timestamps": 44996
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 45052,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "open",
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:39:14.055619",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_037",
+      "name": "Alpha#37",
+      "class_name": "Alpha037",
+      "description": "Ranked 200-day correlation between the lagged intraday gap and close, plus ranked current gap.  Long-horizon structural relationship between overnight gap persistence and price.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.051346,
+        "ic_std": 0.345333,
+        "ic_ir": 0.148684,
+        "ic_hit_rate": 0.5644,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.102758,
+            "ic_std": 0.346552,
+            "ic_ir": 0.296515,
+            "ic_hit_rate": 0.6271,
+            "n_timestamps": 45127
+          },
+          "6": {
+            "ic": 0.051346,
+            "ic_std": 0.345333,
+            "ic_ir": 0.148684,
+            "ic_hit_rate": 0.5644,
+            "n_timestamps": 45127
+          },
+          "60": {
+            "ic": 0.032732,
+            "ic_std": 0.34133,
+            "ic_ir": 0.095895,
+            "ic_hit_rate": 0.5386,
+            "n_timestamps": 45073
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 45127,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "open",
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:39:14.824627",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_038",
+      "name": "Alpha#38",
+      "class_name": "Alpha038",
+      "description": "Negative ranked 10-day time-series rank of close multiplied by ranked intraday return (close/open).  Fades stocks that are both at local highs and had a strong intraday move.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.096142,
+        "ic_std": 0.205532,
+        "ic_ir": 0.467771,
+        "ic_hit_rate": 0.6845,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.174648,
+            "ic_std": 0.209094,
+            "ic_ir": 0.835257,
+            "ic_hit_rate": 0.7992,
+            "n_timestamps": 46809
+          },
+          "6": {
+            "ic": 0.096142,
+            "ic_std": 0.205532,
+            "ic_ir": 0.467771,
+            "ic_hit_rate": 0.6845,
+            "n_timestamps": 46804
+          },
+          "60": {
+            "ic": 0.039188,
+            "ic_std": 0.201821,
+            "ic_ir": 0.194172,
+            "ic_hit_rate": 0.5778,
+            "n_timestamps": 46750
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46804,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "open",
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:40:07.510337",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_039",
+      "name": "Alpha#39",
+      "class_name": "Alpha039",
+      "description": "Negative ranked 7-day close delta adjusted by decay-linear-smoothed relative volume, scaled by ranked 250-day cumulative return.  Contrarian short-term signal amplified by long-term momentum.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.034081,
+        "ic_std": 0.363413,
+        "ic_ir": 0.093779,
+        "ic_hit_rate": 0.5429,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.036852,
+            "ic_std": 0.364818,
+            "ic_ir": 0.101015,
+            "ic_hit_rate": 0.5419,
+            "n_timestamps": 44331
+          },
+          "6": {
+            "ic": 0.034081,
+            "ic_std": 0.363413,
+            "ic_ir": 0.093779,
+            "ic_hit_rate": 0.5429,
+            "n_timestamps": 44338
+          },
+          "60": {
+            "ic": 0.023991,
+            "ic_std": 0.366719,
+            "ic_ir": 0.065422,
+            "ic_hit_rate": 0.5249,
+            "n_timestamps": 44282
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 44338,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:40:08.803152",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_040",
+      "name": "Alpha#40",
+      "class_name": "Alpha040",
+      "description": "Negative ranked 10-day high volatility multiplied by the 10-day high-volume correlation.  Short stocks with high volatility in highs when that volatility co-moves with volume.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "volatility",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.000865,
+        "ic_std": 0.193223,
+        "ic_ir": 0.004477,
+        "ic_hit_rate": 0.5032,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.004604,
+            "ic_std": 0.194797,
+            "ic_ir": -0.023635,
+            "ic_hit_rate": 0.4922,
+            "n_timestamps": 46809
+          },
+          "6": {
+            "ic": 0.000865,
+            "ic_std": 0.193223,
+            "ic_ir": 0.004477,
+            "ic_hit_rate": 0.5032,
+            "n_timestamps": 46804
+          },
+          "60": {
+            "ic": -0.003304,
+            "ic_std": 0.192043,
+            "ic_ir": -0.017205,
+            "ic_hit_rate": 0.4937,
+            "n_timestamps": 46750
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46804,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "high",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:40:09.665382",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_041",
+      "name": "Alpha#41",
+      "class_name": "Alpha041",
+      "description": "Geometric midprice (sqrt(high*low)) minus VWAP.  Captures deviation between the range-based fair value and the volume-weighted fair value.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.11022,
+        "ic_std": 0.162476,
+        "ic_ir": 0.678377,
+        "ic_hit_rate": 0.7518,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.225451,
+            "ic_std": 0.170887,
+            "ic_ir": 1.319299,
+            "ic_hit_rate": 0.902,
+            "n_timestamps": 46854
+          },
+          "6": {
+            "ic": 0.11022,
+            "ic_std": 0.162476,
+            "ic_ir": 0.678377,
+            "ic_hit_rate": 0.7518,
+            "n_timestamps": 46849
+          },
+          "60": {
+            "ic": 0.037886,
+            "ic_std": 0.157415,
+            "ic_ir": 0.240679,
+            "ic_hit_rate": 0.5962,
+            "n_timestamps": 46796
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46849,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "high",
+        "low",
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:40:10.285773",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_042",
+      "name": "Alpha#42",
+      "class_name": "Alpha042",
+      "description": "Ratio of ranked VWAP-close spread to ranked VWAP+close sum.  Positive when close is cheap relative to VWAP in cross-section.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.066709,
+        "ic_std": 0.173191,
+        "ic_ir": 0.385174,
+        "ic_hit_rate": 0.6518,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.134394,
+            "ic_std": 0.16717,
+            "ic_ir": 0.803933,
+            "ic_hit_rate": 0.7889,
+            "n_timestamps": 46854
+          },
+          "6": {
+            "ic": 0.066709,
+            "ic_std": 0.173191,
+            "ic_ir": 0.385174,
+            "ic_hit_rate": 0.6518,
+            "n_timestamps": 46849
+          },
+          "60": {
+            "ic": 0.02917,
+            "ic_std": 0.175746,
+            "ic_ir": 0.165977,
+            "ic_hit_rate": 0.5649,
+            "n_timestamps": 46796
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46849,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:40:11.002677",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_043",
+      "name": "Alpha#43",
+      "class_name": "Alpha043",
+      "description": "Product of 20-day relative-volume ts-rank and 8-day ts-rank of negative 7-day close change.  Favours high-relative-volume stocks with recent price declines (contrarian with volume confirmation).",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.011943,
+        "ic_std": 0.259208,
+        "ic_ir": 0.046074,
+        "ic_hit_rate": 0.5181,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.001295,
+            "ic_std": 0.27288,
+            "ic_ir": 0.004746,
+            "ic_hit_rate": 0.5028,
+            "n_timestamps": 46662
+          },
+          "6": {
+            "ic": 0.011943,
+            "ic_std": 0.259208,
+            "ic_ir": 0.046074,
+            "ic_hit_rate": 0.5181,
+            "n_timestamps": 46658
+          },
+          "60": {
+            "ic": 0.004809,
+            "ic_std": 0.254474,
+            "ic_ir": 0.018898,
+            "ic_hit_rate": 0.5084,
+            "n_timestamps": 46604
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46658,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:41:31.960061",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_044",
+      "name": "Alpha#44",
+      "class_name": "Alpha044",
+      "description": "Negative 5-day correlation between high price and cross-sectionally ranked volume.  Fades stocks where highs and relative volume are tightly co-moving.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.009174,
+        "ic_std": 0.174435,
+        "ic_ir": -0.052593,
+        "ic_hit_rate": 0.4793,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.022374,
+            "ic_std": 0.176239,
+            "ic_ir": -0.126951,
+            "ic_hit_rate": 0.4481,
+            "n_timestamps": 46834
+          },
+          "6": {
+            "ic": -0.009174,
+            "ic_std": 0.174435,
+            "ic_ir": -0.052593,
+            "ic_hit_rate": 0.4793,
+            "n_timestamps": 46829
+          },
+          "60": {
+            "ic": -0.002395,
+            "ic_std": 0.173236,
+            "ic_ir": -0.013823,
+            "ic_hit_rate": 0.4965,
+            "n_timestamps": 46775
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46829,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "high",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:41:32.803255",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_045",
+      "name": "Alpha#45",
+      "class_name": "Alpha045",
+      "description": "Negative product of ranked 20-day mean of 5-day-lagged close, 2-day close-volume correlation, and ranked 2-day correlation between short (5-day) and medium (20-day) close sums.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.001989,
+        "ic_std": 0.249656,
+        "ic_ir": -0.007969,
+        "ic_hit_rate": 0.498,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.015074,
+            "ic_std": 0.252158,
+            "ic_ir": -0.059779,
+            "ic_hit_rate": 0.4732,
+            "n_timestamps": 46728
+          },
+          "6": {
+            "ic": -0.001989,
+            "ic_std": 0.249656,
+            "ic_ir": -0.007969,
+            "ic_hit_rate": 0.498,
+            "n_timestamps": 46723
+          },
+          "60": {
+            "ic": -0.002159,
+            "ic_std": 0.248456,
+            "ic_ir": -0.00869,
+            "ic_hit_rate": 0.4963,
+            "n_timestamps": 46667
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46723,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:41:33.871985",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_046",
+      "name": "Alpha#46",
+      "class_name": "Alpha046",
+      "description": "Price-acceleration regime switch: short when 10-day acceleration exceeds 0.25 (strong deceleration), long when negative (accelerating), otherwise short the daily close change.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.030948,
+        "ic_std": 0.177169,
+        "ic_ir": 0.174681,
+        "ic_hit_rate": 0.5703,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.044026,
+            "ic_std": 0.173085,
+            "ic_ir": 0.254362,
+            "ic_hit_rate": 0.601,
+            "n_timestamps": 46798
+          },
+          "6": {
+            "ic": 0.030948,
+            "ic_std": 0.177169,
+            "ic_ir": 0.174681,
+            "ic_hit_rate": 0.5703,
+            "n_timestamps": 46788
+          },
+          "60": {
+            "ic": 0.014072,
+            "ic_std": 0.175332,
+            "ic_ir": 0.08026,
+            "ic_hit_rate": 0.5317,
+            "n_timestamps": 46737
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46788,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:41:34.521779",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_047",
+      "name": "Alpha#47",
+      "class_name": "Alpha047",
+      "description": "Composite of inverse-price-weighted relative volume times the high-close deviation normalised by 5-day average high, minus ranked 5-day VWAP change.  Microstructure signal combining liquidity, range, and fair-value momentum.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.019337,
+        "ic_std": 0.23229,
+        "ic_ir": 0.083243,
+        "ic_hit_rate": 0.5344,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.007858,
+            "ic_std": 0.249651,
+            "ic_ir": 0.031475,
+            "ic_hit_rate": 0.5132,
+            "n_timestamps": 46759
+          },
+          "6": {
+            "ic": 0.019337,
+            "ic_std": 0.23229,
+            "ic_ir": 0.083243,
+            "ic_hit_rate": 0.5344,
+            "n_timestamps": 46754
+          },
+          "60": {
+            "ic": 0.017113,
+            "ic_std": 0.229954,
+            "ic_ir": 0.074421,
+            "ic_hit_rate": 0.5307,
+            "n_timestamps": 46700
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46754,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:41:35.351091",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_048",
+      "name": "Alpha#48",
+      "class_name": "Alpha048",
+      "description": "Industry-neutralized 250-day return-autocorrelation signal scaled by close, divided by 250-day sum of squared daily returns.  Requires subindustry classification in data['subindustry'].",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.014871,
+        "ic_std": 0.355268,
+        "ic_ir": 0.041858,
+        "ic_hit_rate": 0.5178,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.02682,
+            "ic_std": 0.363283,
+            "ic_ir": 0.073827,
+            "ic_hit_rate": 0.5324,
+            "n_timestamps": 44300
+          },
+          "6": {
+            "ic": 0.014871,
+            "ic_std": 0.355268,
+            "ic_ir": 0.041858,
+            "ic_hit_rate": 0.5178,
+            "n_timestamps": 44308
+          },
+          "60": {
+            "ic": 0.002991,
+            "ic_std": 0.357287,
+            "ic_ir": 0.008371,
+            "ic_hit_rate": 0.5036,
+            "n_timestamps": 44252
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 44308,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:41:36.102974",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_049",
+      "name": "Alpha#49",
+      "class_name": "Alpha049",
+      "description": "Price-acceleration regime: long when the 10-day acceleration is strongly negative (< -0.1, implying recent speed-up), otherwise short the 1-day close change.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.051934,
+        "ic_std": 0.178343,
+        "ic_ir": 0.291202,
+        "ic_hit_rate": 0.6169,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.072014,
+            "ic_std": 0.18205,
+            "ic_ir": 0.395571,
+            "ic_hit_rate": 0.655,
+            "n_timestamps": 46849
+          },
+          "6": {
+            "ic": 0.051934,
+            "ic_std": 0.178343,
+            "ic_ir": 0.291202,
+            "ic_hit_rate": 0.6169,
+            "n_timestamps": 46844
+          },
+          "60": {
+            "ic": 0.023807,
+            "ic_std": 0.173955,
+            "ic_ir": 0.136855,
+            "ic_hit_rate": 0.555,
+            "n_timestamps": 46791
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46844,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:41:36.761259",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_050",
+      "name": "Alpha#50",
+      "class_name": "Alpha050",
+      "description": "Negative 5-day max of the ranked 5-day correlation between ranked volume and ranked VWAP.  Fades peak volume-VWAP co-movement.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.002758,
+        "ic_std": 0.188595,
+        "ic_ir": -0.014623,
+        "ic_hit_rate": 0.4917,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.001633,
+            "ic_std": 0.188645,
+            "ic_ir": -0.008656,
+            "ic_hit_rate": 0.4939,
+            "n_timestamps": 46814
+          },
+          "6": {
+            "ic": -0.002758,
+            "ic_std": 0.188595,
+            "ic_ir": -0.014623,
+            "ic_hit_rate": 0.4917,
+            "n_timestamps": 46809
+          },
+          "60": {
+            "ic": 0.000738,
+            "ic_std": 0.192642,
+            "ic_ir": 0.003832,
+            "ic_hit_rate": 0.5018,
+            "n_timestamps": 46755
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46809,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:41:37.715015",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_051",
+      "name": "Alpha#51",
+      "class_name": "Alpha051",
+      "description": "Price-acceleration regime: long when 10-day acceleration is below -0.05 (recent speed-up), otherwise short the 1-day close change.  Tighter threshold variant of #49.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.05128,
+        "ic_std": 0.178665,
+        "ic_ir": 0.287015,
+        "ic_hit_rate": 0.615,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.071382,
+            "ic_std": 0.181836,
+            "ic_ir": 0.392565,
+            "ic_hit_rate": 0.6548,
+            "n_timestamps": 46849
+          },
+          "6": {
+            "ic": 0.05128,
+            "ic_std": 0.178665,
+            "ic_ir": 0.287015,
+            "ic_hit_rate": 0.615,
+            "n_timestamps": 46844
+          },
+          "60": {
+            "ic": 0.023437,
+            "ic_std": 0.173989,
+            "ic_ir": 0.134706,
+            "ic_hit_rate": 0.5544,
+            "n_timestamps": 46791
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46844,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:41:38.374837",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_052",
+      "name": "Alpha#52",
+      "class_name": "Alpha052",
+      "description": "5-day low support change times ranked long-vs-short return differential (240-day minus 20-day) times 5-day volume ts-rank.  Momentum signal combining support-level shifts, trend, and volume.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.014593,
+        "ic_std": 0.359457,
+        "ic_ir": 0.040598,
+        "ic_hit_rate": 0.519,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.007601,
+            "ic_std": 0.366855,
+            "ic_ir": 0.020719,
+            "ic_hit_rate": 0.5067,
+            "n_timestamps": 44501
+          },
+          "6": {
+            "ic": 0.014593,
+            "ic_std": 0.359457,
+            "ic_ir": 0.040598,
+            "ic_hit_rate": 0.519,
+            "n_timestamps": 44504
+          },
+          "60": {
+            "ic": 0.015251,
+            "ic_std": 0.362441,
+            "ic_ir": 0.042079,
+            "ic_hit_rate": 0.5157,
+            "n_timestamps": 44450
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 44504,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:42:40.303195",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_053",
+      "name": "Alpha#53",
+      "class_name": "Alpha053",
+      "description": "Negative 9-day change in the Williams %R-style close location within the daily range.  Fades shifts in where the close sits inside the high-low range.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": null,
+        "ic_std": null,
+        "ic_ir": null,
+        "ic_hit_rate": null,
+        "ic_by_horizon": {
+          "1": {
+            "ic": null,
+            "ic_std": null,
+            "ic_ir": null,
+            "ic_hit_rate": null,
+            "n_timestamps": 0
+          },
+          "6": {
+            "ic": null,
+            "ic_std": null,
+            "ic_ir": null,
+            "ic_hit_rate": null,
+            "n_timestamps": 0
+          },
+          "60": {
+            "ic": null,
+            "ic_std": null,
+            "ic_ir": null,
+            "ic_hit_rate": null,
+            "n_timestamps": 0
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 0,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:42:40.877186",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_054",
+      "name": "Alpha#54",
+      "class_name": "Alpha054",
+      "description": "Ratio of (close-low)*open^5 to (high-low)*close^5.  Nonlinear intraday range location signal weighted by the open/close price ratio to the 5th power.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.10281,
+        "ic_std": 0.222433,
+        "ic_ir": 0.462205,
+        "ic_hit_rate": 0.6818,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.212935,
+            "ic_std": 0.217279,
+            "ic_ir": 0.980006,
+            "ic_hit_rate": 0.8373,
+            "n_timestamps": 46849
+          },
+          "6": {
+            "ic": 0.10281,
+            "ic_std": 0.222433,
+            "ic_ir": 0.462205,
+            "ic_hit_rate": 0.6818,
+            "n_timestamps": 46844
+          },
+          "60": {
+            "ic": 0.035021,
+            "ic_std": 0.222283,
+            "ic_ir": 0.157552,
+            "ic_hit_rate": 0.5675,
+            "n_timestamps": 46789
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46844,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "open",
+        "close",
+        "high",
+        "low"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:42:41.600871",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_055",
+      "name": "Alpha#55",
+      "class_name": "Alpha055",
+      "description": "Negative 6-day correlation between ranked 12-day stochastic oscillator and ranked volume.  Fades stocks where the stochastic-volume relationship is strong.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.004392,
+        "ic_std": 0.207639,
+        "ic_ir": 0.021153,
+        "ic_hit_rate": 0.509,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.011057,
+            "ic_std": 0.206,
+            "ic_ir": 0.053674,
+            "ic_hit_rate": 0.5216,
+            "n_timestamps": 46774
+          },
+          "6": {
+            "ic": 0.004392,
+            "ic_std": 0.207639,
+            "ic_ir": 0.021153,
+            "ic_hit_rate": 0.509,
+            "n_timestamps": 46769
+          },
+          "60": {
+            "ic": -0.0034,
+            "ic_std": 0.206946,
+            "ic_ir": -0.016428,
+            "ic_hit_rate": 0.4941,
+            "n_timestamps": 46715
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46769,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:42:42.520549",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_056",
+      "name": "Alpha#56",
+      "class_name": "Alpha056",
+      "description": "Negative product of ranked smoothed-return ratio and ranked cap-weighted returns.  Requires data['cap'] (market cap); falls back to volume if absent.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.016359,
+        "ic_std": 0.207113,
+        "ic_ir": 0.078988,
+        "ic_hit_rate": 0.5333,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.013839,
+            "ic_std": 0.212873,
+            "ic_ir": 0.065011,
+            "ic_hit_rate": 0.5287,
+            "n_timestamps": 46804
+          },
+          "6": {
+            "ic": 0.016359,
+            "ic_std": 0.207113,
+            "ic_ir": 0.078988,
+            "ic_hit_rate": 0.5333,
+            "n_timestamps": 46799
+          },
+          "60": {
+            "ic": 0.008451,
+            "ic_std": 0.206178,
+            "ic_ir": 0.04099,
+            "ic_hit_rate": 0.5199,
+            "n_timestamps": 46745
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46799,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:42:43.317771",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_057",
+      "name": "Alpha#57",
+      "class_name": "Alpha057",
+      "description": "Negative close-VWAP deviation scaled by decay-linear smoothed rank of the 30-day argmax of close.  Fades close-VWAP spread, more aggressively near recent highs.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.087173,
+        "ic_std": 0.233796,
+        "ic_ir": 0.372858,
+        "ic_hit_rate": 0.65,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.181591,
+            "ic_std": 0.242933,
+            "ic_ir": 0.747492,
+            "ic_hit_rate": 0.7773,
+            "n_timestamps": 46702
+          },
+          "6": {
+            "ic": 0.087173,
+            "ic_std": 0.233796,
+            "ic_ir": 0.372858,
+            "ic_hit_rate": 0.65,
+            "n_timestamps": 46698
+          },
+          "60": {
+            "ic": 0.027466,
+            "ic_std": 0.231317,
+            "ic_ir": 0.118736,
+            "ic_hit_rate": 0.5489,
+            "n_timestamps": 46643
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46698,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:42:45.345556",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_058",
+      "name": "Alpha#58",
+      "class_name": "Alpha058",
+      "description": "Negative ts-rank of decay-linear-smoothed correlation between sector-neutralized VWAP and volume.  Requires data['sector'].",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.000531,
+        "ic_std": 0.258636,
+        "ic_ir": -0.002053,
+        "ic_hit_rate": 0.4978,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.009682,
+            "ic_std": 0.257069,
+            "ic_ir": -0.037663,
+            "ic_hit_rate": 0.4834,
+            "n_timestamps": 46767
+          },
+          "6": {
+            "ic": -0.000531,
+            "ic_std": 0.258636,
+            "ic_ir": -0.002053,
+            "ic_hit_rate": 0.4978,
+            "n_timestamps": 46762
+          },
+          "60": {
+            "ic": -0.000153,
+            "ic_std": 0.259119,
+            "ic_ir": -0.000592,
+            "ic_hit_rate": 0.4984,
+            "n_timestamps": 46708
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46762,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:43:17.484138",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_059",
+      "name": "Alpha#59",
+      "class_name": "Alpha059",
+      "description": "Negative ts-rank of decay-linear-smoothed correlation between industry-neutralized VWAP and volume.  Variant of Alpha#58 with industry-level neutralisation and longer smoothing.  Requires data['industry'].",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.001176,
+        "ic_std": 0.299363,
+        "ic_ir": 0.003929,
+        "ic_hit_rate": 0.5004,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.006833,
+            "ic_std": 0.298784,
+            "ic_ir": -0.022871,
+            "ic_hit_rate": 0.4884,
+            "n_timestamps": 46438
+          },
+          "6": {
+            "ic": 0.001176,
+            "ic_std": 0.299363,
+            "ic_ir": 0.003929,
+            "ic_hit_rate": 0.5004,
+            "n_timestamps": 46435
+          },
+          "60": {
+            "ic": 0.00189,
+            "ic_std": 0.300272,
+            "ic_ir": 0.006295,
+            "ic_hit_rate": 0.4998,
+            "n_timestamps": 46382
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46435,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:43:42.654581",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_060",
+      "name": "Alpha#60",
+      "class_name": "Alpha060",
+      "description": "Negative composite of scaled ranked Chaikin-style money-flow volume and scaled ranked 10-day close argmax.  Captures volume-weighted close-location imbalance relative to the position of the recent high.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.079662,
+        "ic_std": 0.281816,
+        "ic_ir": 0.282673,
+        "ic_hit_rate": 0.6195,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.153396,
+            "ic_std": 0.286686,
+            "ic_ir": 0.535066,
+            "ic_hit_rate": 0.7135,
+            "n_timestamps": 46654
+          },
+          "6": {
+            "ic": 0.079662,
+            "ic_std": 0.281816,
+            "ic_ir": 0.282673,
+            "ic_hit_rate": 0.6195,
+            "n_timestamps": 46633
+          },
+          "60": {
+            "ic": 0.02036,
+            "ic_std": 0.281386,
+            "ic_ir": 0.072357,
+            "ic_hit_rate": 0.5323,
+            "n_timestamps": 46579
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46633,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:43:44.650764",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_061",
+      "name": "Alpha#61",
+      "class_name": "Alpha061",
+      "description": "Binary signal: 1 when ranked VWAP distance from 16-day low is less than ranked 18-day VWAP-ADV180 correlation, else 0.  Long when VWAP is near its floor relative to its volume co-movement.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.006178,
+        "ic_std": 0.175672,
+        "ic_ir": 0.035168,
+        "ic_hit_rate": 0.5137,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.003733,
+            "ic_std": 0.172124,
+            "ic_ir": 0.021686,
+            "ic_hit_rate": 0.5086,
+            "n_timestamps": 46196
+          },
+          "6": {
+            "ic": 0.006178,
+            "ic_std": 0.175672,
+            "ic_ir": 0.035168,
+            "ic_hit_rate": 0.5137,
+            "n_timestamps": 46191
+          },
+          "60": {
+            "ic": 0.004898,
+            "ic_std": 0.180638,
+            "ic_ir": 0.027115,
+            "ic_hit_rate": 0.5143,
+            "n_timestamps": 46138
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46191,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:43:45.434317",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_062",
+      "name": "Alpha#62",
+      "class_name": "Alpha062",
+      "description": "Negative binary signal comparing ranked VWAP-cumulative-ADV20 correlation with a ranked open vs midprice/high composite inequality.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.001512,
+        "ic_std": 0.164694,
+        "ic_ir": 0.009181,
+        "ic_hit_rate": 0.5001,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.000816,
+            "ic_std": 0.165701,
+            "ic_ir": 0.004926,
+            "ic_hit_rate": 0.5023,
+            "n_timestamps": 46611
+          },
+          "6": {
+            "ic": 0.001512,
+            "ic_std": 0.164694,
+            "ic_ir": 0.009181,
+            "ic_hit_rate": 0.5001,
+            "n_timestamps": 46607
+          },
+          "60": {
+            "ic": 0.003402,
+            "ic_std": 0.165325,
+            "ic_ir": 0.020576,
+            "ic_hit_rate": 0.508,
+            "n_timestamps": 46554
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46607,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "open",
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:43:46.392577",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_064",
+      "name": "Alpha#64",
+      "class_name": "Alpha064",
+      "description": "Negative binary signal: ranked 17-day correlation of blended open-low sum with cumulative ADV120, compared against ranked 4-day change of a VWAP-midprice blend.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.006617,
+        "ic_std": 0.17091,
+        "ic_ir": 0.038716,
+        "ic_hit_rate": 0.5138,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.007631,
+            "ic_std": 0.171501,
+            "ic_ir": 0.044498,
+            "ic_hit_rate": 0.516,
+            "n_timestamps": 45992
+          },
+          "6": {
+            "ic": 0.006617,
+            "ic_std": 0.17091,
+            "ic_ir": 0.038716,
+            "ic_hit_rate": 0.5138,
+            "n_timestamps": 45985
+          },
+          "60": {
+            "ic": 0.006624,
+            "ic_std": 0.173101,
+            "ic_ir": 0.038265,
+            "ic_hit_rate": 0.5087,
+            "n_timestamps": 45933
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 45985,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "open",
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:43:47.210463",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_065",
+      "name": "Alpha#65",
+      "class_name": "Alpha065",
+      "description": "Negative binary signal: ranked 6-day correlation of near-VWAP blend with cumulative ADV60, compared against ranked open distance from 14-day low.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.002064,
+        "ic_std": 0.167607,
+        "ic_ir": 0.012313,
+        "ic_hit_rate": 0.5042,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.002641,
+            "ic_std": 0.170501,
+            "ic_ir": -0.015489,
+            "ic_hit_rate": 0.4907,
+            "n_timestamps": 46479
+          },
+          "6": {
+            "ic": 0.002064,
+            "ic_std": 0.167607,
+            "ic_ir": 0.012313,
+            "ic_hit_rate": 0.5042,
+            "n_timestamps": 46474
+          },
+          "60": {
+            "ic": 0.005272,
+            "ic_std": 0.169208,
+            "ic_ir": 0.031154,
+            "ic_hit_rate": 0.5106,
+            "n_timestamps": 46421
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46474,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "open",
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:43:48.040401",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_066",
+      "name": "Alpha#66",
+      "class_name": "Alpha066",
+      "description": "Negative sum of ranked decay-linear 4-day VWAP delta and ts-ranked decay-linear of low-VWAP deviation normalised by open-midprice spread.  Captures VWAP trend and low-side pressure.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": null,
+        "ic_std": null,
+        "ic_ir": null,
+        "ic_hit_rate": null,
+        "ic_by_horizon": {
+          "1": {
+            "ic": null,
+            "ic_std": null,
+            "ic_ir": null,
+            "ic_hit_rate": null,
+            "n_timestamps": 0
+          },
+          "6": {
+            "ic": null,
+            "ic_std": null,
+            "ic_ir": null,
+            "ic_hit_rate": null,
+            "n_timestamps": 0
+          },
+          "60": {
+            "ic": null,
+            "ic_std": null,
+            "ic_ir": null,
+            "ic_hit_rate": null,
+            "n_timestamps": 0
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 0,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "open",
+        "close",
+        "high",
+        "low"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:43:49.653227",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_068",
+      "name": "Alpha#68",
+      "class_name": "Alpha068",
+      "description": "Negative binary signal: ts-ranked 9-day high-ADV15 correlation (14-day window) compared against ranked 1-day change of a close-low blend.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.011534,
+        "ic_std": 0.157111,
+        "ic_ir": 0.073412,
+        "ic_hit_rate": 0.5283,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.015678,
+            "ic_std": 0.158276,
+            "ic_ir": 0.099054,
+            "ic_hit_rate": 0.5387,
+            "n_timestamps": 46657
+          },
+          "6": {
+            "ic": 0.011534,
+            "ic_std": 0.157111,
+            "ic_ir": 0.073412,
+            "ic_hit_rate": 0.5283,
+            "n_timestamps": 46649
+          },
+          "60": {
+            "ic": 0.007743,
+            "ic_std": 0.158053,
+            "ic_ir": 0.048992,
+            "ic_hit_rate": 0.5141,
+            "n_timestamps": 46598
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46649,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:44:20.632563",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_071",
+      "name": "Alpha#71",
+      "class_name": "Alpha071",
+      "description": "Max of two ts-ranked decay-linear signals: (1) correlation of close ts-rank with ADV180 ts-rank, and (2) squared ranked deviation of (low+open) from 2\u00d7VWAP.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.004942,
+        "ic_std": 0.356639,
+        "ic_ir": -0.013858,
+        "ic_hit_rate": 0.494,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.01048,
+            "ic_std": 0.356095,
+            "ic_ir": -0.02943,
+            "ic_hit_rate": 0.4863,
+            "n_timestamps": 44599
+          },
+          "6": {
+            "ic": -0.004942,
+            "ic_std": 0.356639,
+            "ic_ir": -0.013858,
+            "ic_hit_rate": 0.494,
+            "n_timestamps": 44605
+          },
+          "60": {
+            "ic": -0.003966,
+            "ic_std": 0.353973,
+            "ic_ir": -0.011204,
+            "ic_hit_rate": 0.4946,
+            "n_timestamps": 44546
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 44605,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "open",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:46:46.292519",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_072",
+      "name": "Alpha#72",
+      "class_name": "Alpha072",
+      "description": "Ratio of ranked decay-linear midprice-ADV40 correlation to ranked decay-linear VWAP-ts-rank / volume-ts-rank correlation.  Captures relative strength of midprice-liquidity vs VWAP-volume co-movement.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.000277,
+        "ic_std": 0.271926,
+        "ic_ir": 0.001019,
+        "ic_hit_rate": 0.5029,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.003358,
+            "ic_std": 0.269936,
+            "ic_ir": -0.012441,
+            "ic_hit_rate": 0.4934,
+            "n_timestamps": 46563
+          },
+          "6": {
+            "ic": 0.000277,
+            "ic_std": 0.271926,
+            "ic_ir": 0.001019,
+            "ic_hit_rate": 0.5029,
+            "n_timestamps": 46557
+          },
+          "60": {
+            "ic": 0.002571,
+            "ic_std": 0.269601,
+            "ic_ir": 0.009536,
+            "ic_hit_rate": 0.5047,
+            "n_timestamps": 46508
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46557,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:48:34.233524",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_073",
+      "name": "Alpha#73",
+      "class_name": "Alpha073",
+      "description": "Negative max of ranked decay-linear 5-day VWAP delta and ts-ranked decay-linear of negative 2-day return on a low-weighted open-low blend.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 3e-06,
+        "ic_std": 0.228376,
+        "ic_ir": 1.4e-05,
+        "ic_hit_rate": 0.4978,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.001157,
+            "ic_std": 0.223572,
+            "ic_ir": -0.005176,
+            "ic_hit_rate": 0.4961,
+            "n_timestamps": 46748
+          },
+          "6": {
+            "ic": 3e-06,
+            "ic_std": 0.228376,
+            "ic_ir": 1.4e-05,
+            "ic_hit_rate": 0.4978,
+            "n_timestamps": 46744
+          },
+          "60": {
+            "ic": 0.010846,
+            "ic_std": 0.22929,
+            "ic_ir": 0.047302,
+            "ic_hit_rate": 0.5202,
+            "n_timestamps": 46690
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46744,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "open",
+        "close",
+        "high",
+        "low"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:49:18.573433",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_074",
+      "name": "Alpha#74",
+      "class_name": "Alpha074",
+      "description": "Negative binary signal: ranked close vs cumulative-ADV30 correlation compared against ranked near-VWAP-blend vs volume-rank correlation.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.001021,
+        "ic_std": 0.165033,
+        "ic_ir": 0.006184,
+        "ic_hit_rate": 0.501,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.001905,
+            "ic_std": 0.165285,
+            "ic_ir": 0.011527,
+            "ic_hit_rate": 0.5032,
+            "n_timestamps": 46435
+          },
+          "6": {
+            "ic": 0.001021,
+            "ic_std": 0.165033,
+            "ic_ir": 0.006184,
+            "ic_hit_rate": 0.501,
+            "n_timestamps": 46430
+          },
+          "60": {
+            "ic": 0.000696,
+            "ic_std": 0.165623,
+            "ic_ir": 0.0042,
+            "ic_hit_rate": 0.4981,
+            "n_timestamps": 46378
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46430,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:49:19.651924",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_075",
+      "name": "Alpha#75",
+      "class_name": "Alpha075",
+      "description": "Binary signal: 1 when ranked 4-day VWAP-volume correlation is below ranked 12-day low-rank vs ADV50-rank correlation.  Long when VWAP-volume linkage weakens relative to low-liquidity co-movement.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.001816,
+        "ic_std": 0.16018,
+        "ic_ir": -0.011335,
+        "ic_hit_rate": 0.4976,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.005725,
+            "ic_std": 0.163737,
+            "ic_ir": -0.034965,
+            "ic_hit_rate": 0.4838,
+            "n_timestamps": 46637
+          },
+          "6": {
+            "ic": -0.001816,
+            "ic_std": 0.16018,
+            "ic_ir": -0.011335,
+            "ic_hit_rate": 0.4976,
+            "n_timestamps": 46636
+          },
+          "60": {
+            "ic": -0.003385,
+            "ic_std": 0.161936,
+            "ic_ir": -0.020904,
+            "ic_hit_rate": 0.4933,
+            "n_timestamps": 46582
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46636,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:49:20.664404",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_077",
+      "name": "Alpha#77",
+      "class_name": "Alpha077",
+      "description": "Min of ranked decay-linear midprice-VWAP deviation (simplifies to (low/2 - vwap/2)) and ranked decay-linear midprice-ADV40 correlation.  Captures the weaker of two fair-value reversion signals.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.020596,
+        "ic_std": 0.281614,
+        "ic_ir": 0.073135,
+        "ic_hit_rate": 0.5336,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.040588,
+            "ic_std": 0.283934,
+            "ic_ir": 0.142949,
+            "ic_hit_rate": 0.5624,
+            "n_timestamps": 46567
+          },
+          "6": {
+            "ic": 0.020596,
+            "ic_std": 0.281614,
+            "ic_ir": 0.073135,
+            "ic_hit_rate": 0.5336,
+            "n_timestamps": 46563
+          },
+          "60": {
+            "ic": 0.00706,
+            "ic_std": 0.281958,
+            "ic_ir": 0.02504,
+            "ic_hit_rate": 0.5099,
+            "n_timestamps": 46506
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46563,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:49:22.511457",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_078",
+      "name": "Alpha#78",
+      "class_name": "Alpha078",
+      "description": "Ranked 7-day correlation of 20-day cumulative low-VWAP blend with cumulative ADV40, raised to the power of ranked 6-day VWAP-rank vs volume-rank correlation.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.002,
+        "ic_std": 0.283434,
+        "ic_ir": -0.007058,
+        "ic_hit_rate": 0.4954,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 8.1e-05,
+            "ic_std": 0.28291,
+            "ic_ir": 0.000286,
+            "ic_hit_rate": 0.4975,
+            "n_timestamps": 46449
+          },
+          "6": {
+            "ic": -0.002,
+            "ic_std": 0.283434,
+            "ic_ir": -0.007058,
+            "ic_hit_rate": 0.4954,
+            "n_timestamps": 46447
+          },
+          "60": {
+            "ic": -0.000937,
+            "ic_std": 0.28862,
+            "ic_ir": -0.003248,
+            "ic_hit_rate": 0.4976,
+            "n_timestamps": 46393
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46447,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:49:23.596817",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_081",
+      "name": "Alpha#81",
+      "class_name": "Alpha081",
+      "description": "Negative binary signal: ranked log of rolling product of 4th-power ranked VWAP-cumADV10 correlation, compared against ranked VWAP-rank vs volume-rank correlation.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.001345,
+        "ic_std": 0.163197,
+        "ic_ir": 0.008243,
+        "ic_hit_rate": 0.5016,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.002595,
+            "ic_std": 0.164412,
+            "ic_ir": 0.015783,
+            "ic_hit_rate": 0.5054,
+            "n_timestamps": 46416
+          },
+          "6": {
+            "ic": 0.001345,
+            "ic_std": 0.163197,
+            "ic_ir": 0.008243,
+            "ic_hit_rate": 0.5016,
+            "n_timestamps": 46413
+          },
+          "60": {
+            "ic": 0.000497,
+            "ic_std": 0.16575,
+            "ic_ir": 0.003,
+            "ic_hit_rate": 0.5014,
+            "n_timestamps": 46362
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46413,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:49:25.673327",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_083",
+      "name": "Alpha#83",
+      "class_name": "Alpha083",
+      "description": "Ranked 2-day lagged normalised range times doubly-ranked volume, divided by the current normalised range over the VWAP-close spread.  Captures range-volume dynamics relative to fair-value deviation.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.098798,
+        "ic_std": 0.259174,
+        "ic_ir": 0.381206,
+        "ic_hit_rate": 0.6573,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.195339,
+            "ic_std": 0.257664,
+            "ic_ir": 0.758113,
+            "ic_hit_rate": 0.7827,
+            "n_timestamps": 46758
+          },
+          "6": {
+            "ic": 0.098798,
+            "ic_std": 0.259174,
+            "ic_ir": 0.381206,
+            "ic_hit_rate": 0.6573,
+            "n_timestamps": 46739
+          },
+          "60": {
+            "ic": 0.032451,
+            "ic_std": 0.259425,
+            "ic_ir": 0.125086,
+            "ic_hit_rate": 0.5525,
+            "n_timestamps": 46693
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46739,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:49:26.524571",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_084",
+      "name": "Alpha#84",
+      "class_name": "Alpha084",
+      "description": "Signed power of 21-day ts-rank of VWAP distance from its 15-day max, with exponent equal to the 5-day close delta.  Nonlinear mean-reversion around the VWAP ceiling.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.030403,
+        "ic_std": 0.256225,
+        "ic_ir": 0.118658,
+        "ic_hit_rate": 0.5505,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.034195,
+            "ic_std": 0.253591,
+            "ic_ir": 0.134843,
+            "ic_hit_rate": 0.5579,
+            "n_timestamps": 46683
+          },
+          "6": {
+            "ic": 0.030403,
+            "ic_std": 0.256225,
+            "ic_ir": 0.118658,
+            "ic_hit_rate": 0.5505,
+            "n_timestamps": 46678
+          },
+          "60": {
+            "ic": 0.022047,
+            "ic_std": 0.255668,
+            "ic_ir": 0.086233,
+            "ic_hit_rate": 0.533,
+            "n_timestamps": 46625
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46678,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:50:01.493772",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_085",
+      "name": "Alpha#85",
+      "class_name": "Alpha085",
+      "description": "Ranked 10-day high-close-blend vs ADV30 correlation, raised to the power of ranked midprice-ts-rank vs volume-ts-rank correlation.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.001436,
+        "ic_std": 0.247558,
+        "ic_ir": -0.005803,
+        "ic_hit_rate": 0.4988,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.00646,
+            "ic_std": 0.244187,
+            "ic_ir": -0.026455,
+            "ic_hit_rate": 0.4897,
+            "n_timestamps": 46662
+          },
+          "6": {
+            "ic": -0.001436,
+            "ic_std": 0.247558,
+            "ic_ir": -0.005803,
+            "ic_hit_rate": 0.4988,
+            "n_timestamps": 46658
+          },
+          "60": {
+            "ic": 0.000952,
+            "ic_std": 0.246867,
+            "ic_ir": 0.003855,
+            "ic_hit_rate": 0.4995,
+            "n_timestamps": 46604
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46658,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:51:57.760833",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_086",
+      "name": "Alpha#86",
+      "class_name": "Alpha086",
+      "description": "Negative binary signal: ts-ranked close vs cumulative-ADV20 correlation (20-day) compared against ranked close-VWAP deviation.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.02485,
+        "ic_std": 0.165751,
+        "ic_ir": 0.149927,
+        "ic_hit_rate": 0.5611,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.048837,
+            "ic_std": 0.165333,
+            "ic_ir": 0.295385,
+            "ic_hit_rate": 0.6182,
+            "n_timestamps": 46568
+          },
+          "6": {
+            "ic": 0.02485,
+            "ic_std": 0.165751,
+            "ic_ir": 0.149927,
+            "ic_hit_rate": 0.5611,
+            "n_timestamps": 46559
+          },
+          "60": {
+            "ic": 0.009454,
+            "ic_std": 0.166782,
+            "ic_ir": 0.056685,
+            "ic_hit_rate": 0.5207,
+            "n_timestamps": 46510
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46559,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:52:25.841685",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_088",
+      "name": "Alpha#88",
+      "class_name": "Alpha088",
+      "description": "Min of ranked decay-linear OHLC rank-balance (open+low ranks vs high+close ranks) and ts-ranked decay-linear close-ADV60 ts-rank correlation.  Picks the weaker of two reversion signals.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.000322,
+        "ic_std": 0.300207,
+        "ic_ir": 0.001073,
+        "ic_hit_rate": 0.5017,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.002128,
+            "ic_std": 0.29922,
+            "ic_ir": 0.00711,
+            "ic_hit_rate": 0.5023,
+            "n_timestamps": 46056
+          },
+          "6": {
+            "ic": 0.000322,
+            "ic_std": 0.300207,
+            "ic_ir": 0.001073,
+            "ic_hit_rate": 0.5017,
+            "n_timestamps": 46056
+          },
+          "60": {
+            "ic": 6.5e-05,
+            "ic_std": 0.299272,
+            "ic_ir": 0.000217,
+            "ic_hit_rate": 0.4982,
+            "n_timestamps": 46000
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46056,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "open",
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:54:10.034796",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_092",
+      "name": "Alpha#92",
+      "class_name": "Alpha092",
+      "description": "Min of two ts-ranked decay-linear signals: (1) boolean midprice+close < low+open condition, and (2) ranked-low vs ranked-ADV30 correlation.  Picks the weaker reversion signal.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.029616,
+        "ic_std": 0.283894,
+        "ic_ir": 0.104321,
+        "ic_hit_rate": 0.5442,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.048551,
+            "ic_std": 0.28453,
+            "ic_ir": 0.170637,
+            "ic_hit_rate": 0.5754,
+            "n_timestamps": 45964
+          },
+          "6": {
+            "ic": 0.029616,
+            "ic_std": 0.283894,
+            "ic_ir": 0.104321,
+            "ic_hit_rate": 0.5442,
+            "n_timestamps": 45960
+          },
+          "60": {
+            "ic": 0.00882,
+            "ic_std": 0.283136,
+            "ic_ir": 0.031153,
+            "ic_hit_rate": 0.5147,
+            "n_timestamps": 45896
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 45960,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "open",
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:55:59.476187",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_094",
+      "name": "Alpha#94",
+      "class_name": "Alpha094",
+      "description": "Negative ranked VWAP distance from 12-day low raised to the power of ts-ranked VWAP-ts-rank vs ADV60-ts-rank correlation.  Mean-reversion around the VWAP floor.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.021803,
+        "ic_std": 0.293622,
+        "ic_ir": 0.074255,
+        "ic_hit_rate": 0.5312,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.02106,
+            "ic_std": 0.28873,
+            "ic_ir": 0.07294,
+            "ic_hit_rate": 0.5322,
+            "n_timestamps": 46413
+          },
+          "6": {
+            "ic": 0.021803,
+            "ic_std": 0.293622,
+            "ic_ir": 0.074255,
+            "ic_hit_rate": 0.5312,
+            "n_timestamps": 46408
+          },
+          "60": {
+            "ic": 0.026016,
+            "ic_std": 0.297004,
+            "ic_ir": 0.087595,
+            "ic_hit_rate": 0.5337,
+            "n_timestamps": 46353
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46408,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:57:33.500714",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_095",
+      "name": "Alpha#95",
+      "class_name": "Alpha095",
+      "description": "Binary signal: ranked open distance from 12-day low compared against ts-ranked 5th-power of ranked midprice-ADV40 cumulative correlation.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.000977,
+        "ic_std": 0.167554,
+        "ic_ir": 0.005831,
+        "ic_hit_rate": 0.5027,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.00471,
+            "ic_std": 0.166738,
+            "ic_ir": -0.028248,
+            "ic_hit_rate": 0.4885,
+            "n_timestamps": 46486
+          },
+          "6": {
+            "ic": 0.000977,
+            "ic_std": 0.167554,
+            "ic_ir": 0.005831,
+            "ic_hit_rate": 0.5027,
+            "n_timestamps": 46480
+          },
+          "60": {
+            "ic": 0.003873,
+            "ic_std": 0.168911,
+            "ic_ir": 0.022931,
+            "ic_hit_rate": 0.5102,
+            "n_timestamps": 46429
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46480,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "open",
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T14:57:58.950769",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_096",
+      "name": "Alpha#96",
+      "class_name": "Alpha096",
+      "description": "Negative max of two ts-ranked decay-linear signals: (1) VWAP-rank vs volume-rank correlation, and (2) argmax of close-ts-rank vs ADV60-ts-rank correlation.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.014546,
+        "ic_std": 0.479075,
+        "ic_ir": -0.030363,
+        "ic_hit_rate": 0.4937,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.018178,
+            "ic_std": 0.476903,
+            "ic_ir": -0.038118,
+            "ic_hit_rate": 0.4801,
+            "n_timestamps": 2060
+          },
+          "6": {
+            "ic": -0.014546,
+            "ic_std": 0.479075,
+            "ic_ir": -0.030363,
+            "ic_hit_rate": 0.4937,
+            "n_timestamps": 2072
+          },
+          "60": {
+            "ic": 0.01692,
+            "ic_std": 0.467587,
+            "ic_ir": 0.036185,
+            "ic_hit_rate": 0.5211,
+            "n_timestamps": 2015
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 2072,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T15:00:09.636205",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_098",
+      "name": "Alpha#98",
+      "class_name": "Alpha098",
+      "description": "Ranked decay-linear VWAP vs cumulative-ADV5 correlation minus ranked decay-linear of ts-ranked argmin of open-rank vs ADV15-rank correlation.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.003949,
+        "ic_std": 0.286141,
+        "ic_ir": 0.013801,
+        "ic_hit_rate": 0.5059,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.000104,
+            "ic_std": 0.285256,
+            "ic_ir": 0.000365,
+            "ic_hit_rate": 0.5017,
+            "n_timestamps": 46350
+          },
+          "6": {
+            "ic": 0.003949,
+            "ic_std": 0.286141,
+            "ic_ir": 0.013801,
+            "ic_hit_rate": 0.5059,
+            "n_timestamps": 46348
+          },
+          "60": {
+            "ic": -0.0018,
+            "ic_std": 0.287801,
+            "ic_ir": -0.006253,
+            "ic_hit_rate": 0.4966,
+            "n_timestamps": 46291
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46348,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "open",
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T15:00:40.631011",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_099",
+      "name": "Alpha#99",
+      "class_name": "Alpha099",
+      "description": "Negative binary signal: ranked 9-day correlation of cumulative midprice with cumulative ADV60, compared against ranked 6-day low-volume correlation.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.000871,
+        "ic_std": 0.167994,
+        "ic_ir": 0.005183,
+        "ic_hit_rate": 0.4981,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.000436,
+            "ic_std": 0.169466,
+            "ic_ir": -0.002575,
+            "ic_hit_rate": 0.4967,
+            "n_timestamps": 46410
+          },
+          "6": {
+            "ic": 0.000871,
+            "ic_std": 0.167994,
+            "ic_ir": 0.005183,
+            "ic_hit_rate": 0.4981,
+            "n_timestamps": 46407
+          },
+          "60": {
+            "ic": -0.000769,
+            "ic_std": 0.167286,
+            "ic_ir": -0.004595,
+            "ic_hit_rate": 0.4957,
+            "n_timestamps": 46352
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46407,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T15:00:41.636976",
+      "metadata": {}
+    },
+    {
+      "id": "alpha_101",
+      "name": "Alpha#101",
+      "class_name": "Alpha101",
+      "description": "Intraday return normalised by the daily range.  Measures where the close sits relative to the open as a fraction of the full high-low range.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.112445,
+        "ic_std": 0.162528,
+        "ic_ir": -0.691849,
+        "ic_hit_rate": 0.2447,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.229775,
+            "ic_std": 0.171998,
+            "ic_ir": -1.335919,
+            "ic_hit_rate": 0.0947,
+            "n_timestamps": 46854
+          },
+          "6": {
+            "ic": -0.112445,
+            "ic_std": 0.162528,
+            "ic_ir": -0.691849,
+            "ic_hit_rate": 0.2447,
+            "n_timestamps": 46849
+          },
+          "60": {
+            "ic": -0.038213,
+            "ic_std": 0.157678,
+            "ic_ir": -0.242349,
+            "ic_hit_rate": 0.4022,
+            "n_timestamps": 46795
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46849,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "open",
+        "close",
+        "high",
+        "low"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T15:00:42.271828",
+      "metadata": {}
+    },
+    {
+      "id": "rsi_mean_reversion",
+      "name": "RSI Mean Reversion",
+      "class_name": "RSIMeanReversionSignal",
+      "description": "Computes the 14-period RSI and maps it to a contrarian signal: +1 when RSI < oversold threshold (expect bounce), -1 when RSI > overbought threshold (expect pullback), 0 otherwise.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.018964,
+        "ic_std": 0.171851,
+        "ic_ir": 0.110353,
+        "ic_hit_rate": 0.5473,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.020374,
+            "ic_std": 0.162671,
+            "ic_ir": 0.125249,
+            "ic_hit_rate": 0.5494,
+            "n_timestamps": 46191
+          },
+          "6": {
+            "ic": 0.018964,
+            "ic_std": 0.171851,
+            "ic_ir": 0.110353,
+            "ic_hit_rate": 0.5473,
+            "n_timestamps": 46163
+          },
+          "60": {
+            "ic": 0.02124,
+            "ic_std": 0.171517,
+            "ic_ir": 0.123836,
+            "ic_hit_rate": 0.5489,
+            "n_timestamps": 46098
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 46163,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T15:00:42.914084",
+      "metadata": {}
+    },
+    {
+      "id": "three_soldiers",
+      "name": "Three Advancing White Soldiers",
+      "class_name": "ThreeSoldiersSignal",
+      "description": "Detects the bullish three-white-soldiers candlestick pattern: three consecutive days where each candle opens within the prior body and closes at a new high.",
+      "formula": "",
+      "trading_idea": "",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.008585,
+        "ic_std": 0.157027,
+        "ic_ir": -0.054674,
+        "ic_hit_rate": 0.4488,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.011253,
+            "ic_std": 0.163524,
+            "ic_ir": -0.068813,
+            "ic_hit_rate": 0.4603,
+            "n_timestamps": 302
+          },
+          "6": {
+            "ic": -0.008585,
+            "ic_std": 0.157027,
+            "ic_ir": -0.054674,
+            "ic_hit_rate": 0.4488,
+            "n_timestamps": 303
+          },
+          "60": {
+            "ic": -0.000994,
+            "ic_std": 0.16326,
+            "ic_ir": -0.00609,
+            "ic_hit_rate": 0.4849,
+            "n_timestamps": 299
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 303,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "seed",
+      "research_session_id": "",
+      "code_path": "",
+      "required_inputs": [
+        "open",
+        "close"
+      ],
+      "required_tier": "standard",
+      "created_at": "2026-03-24T15:02:52.897303",
+      "metadata": {}
+    }
+  ],
+  "trading_ideas": []
+}

@@ -42,6 +42,22 @@ def _save(fig, figures_dir: Path, name: str) -> Path:
     return path
 
 
+def _nums(seq) -> list[float]:
+    """Coerce a sequence to floats, mapping None / non-numeric → NaN.
+
+    matplotlib's ``bar`` rejects ``None`` heights (``int + None``); NaN is fine
+    (the bar is simply skipped).  Degenerate runs (e.g. a 1-ticker universe with
+    no cross-section → all-None IC) must not crash figure rendering.
+    """
+    out: list[float] = []
+    for v in seq:
+        try:
+            out.append(float(v))
+        except (TypeError, ValueError):
+            out.append(np.nan)
+    return out
+
+
 def _label_bars(ax, bars, fmt="{:.2f}", fontsize=7) -> None:
     for b in bars:
         h = b.get_height()
@@ -90,11 +106,16 @@ def ic_mean_by_horizon(ic_summary: list[dict[str, Any]], figures_dir: Path,
     x = np.arange(len(horizons))
     width = 0.8 / max(1, len(preruns))
     fig, ax = plt.subplots(figsize=(2 * len(horizons) + 3, 4.2))
+    drew = False
     for i, p in enumerate(preruns):
         row = df[df.prerun == p].iloc[0]
-        vals = [row.get(f"mean_abs_ic_{h}") for h in horizons]
+        vals = _nums([row.get(f"mean_abs_ic_{h}") for h in horizons])
+        drew = drew or any(not np.isnan(v) for v in vals)
         bars = ax.bar(x + i * width, vals, width, label=p, color=cmap[p], alpha=0.85)
         _label_bars(ax, bars, fmt="{:.3f}")
+    if not drew:
+        plt.close(fig)
+        return None
     ax.set_xticks(x + width * (len(preruns) - 1) / 2)
     ax.set_xticklabels([f"h={h}\n({h * 10}s)" for h in horizons])
     ax.set_ylabel("mean |IC| across factors")
@@ -152,7 +173,7 @@ def bruteforce_oos_sharpe(bf_rows: list[dict[str, Any]], figures_dir: Path) -> P
     ax.set_xticklabels(models, rotation=30, ha="right", fontsize=8)
     ax.axhline(0, color="black", lw=0.6)
     ax.set_ylabel("OOS Sharpe")
-    ax.set_title("Brute-force ML: out-of-sample Sharpe by model and research set")
+    ax.set_title("ML-combined signal: out-of-sample Sharpe by model and research set")
     ax.legend(fontsize=8)
     return _save(fig, figures_dir, "bruteforce_oos_sharpe.png")
 
@@ -178,7 +199,7 @@ def bruteforce_ic_heatmap(bf_rows: list[dict[str, Any]], figures_dir: Path) -> P
             if not np.isnan(v):
                 ax.text(j, i, f"{v:.3f}", ha="center", va="center", fontsize=7)
     fig.colorbar(im, ax=ax, label="OOS IC", fraction=0.046, pad=0.04)
-    ax.set_title("Brute-force ML: out-of-sample IC (prerun × model)")
+    ax.set_title("ML-combined signal: out-of-sample IC (prerun × model)")
     return _save(fig, figures_dir, "bruteforce_ic_heatmap.png")
 
 
@@ -206,9 +227,100 @@ def bruteforce_is_vs_oos(bf_rows: list[dict[str, Any]], figures_dir: Path) -> Pa
     ax.axvline(0, color="black", lw=0.5)
     ax.set_xlabel("IS Sharpe")
     ax.set_ylabel("OOS Sharpe")
-    ax.set_title("Brute-force ML: in-sample vs out-of-sample Sharpe")
+    ax.set_title("ML-combined signal: in-sample vs out-of-sample Sharpe")
     ax.legend(fontsize=8)
     return _save(fig, figures_dir, "bruteforce_is_vs_oos.png")
+
+
+# ── Track A: diversity & redundancy ──────────────────────────────────────────
+
+def factor_correlation_heatmap(corr, figures_dir: Path, prerun: str) -> Path | None:
+    """Heatmap of the pairwise signal correlation matrix for one prerun."""
+    if corr is None or getattr(corr, "empty", True) or corr.shape[0] < 2:
+        return None
+    C = corr.to_numpy(dtype=float)
+    n = C.shape[0]
+    fig, ax = plt.subplots(figsize=(0.32 * n + 2.5, 0.32 * n + 2))
+    im = ax.imshow(np.nan_to_num(C, nan=0.0), cmap="RdBu_r", vmin=-1, vmax=1, aspect="auto")
+    if n <= 30:
+        labels = [str(c)[:16] for c in corr.columns]
+        ax.set_xticks(range(n)); ax.set_xticklabels(labels, rotation=90, fontsize=6)
+        ax.set_yticks(range(n)); ax.set_yticklabels(labels, fontsize=6)
+    else:
+        ax.set_xticks([]); ax.set_yticks([])
+    fig.colorbar(im, ax=ax, label="signal corr", fraction=0.046, pad=0.04)
+    ax.set_title(f"Factor signal correlation — {prerun} (n={n})")
+    return _save(fig, figures_dir, f"factor_correlation_{prerun}.png")
+
+
+def effective_factors_bar(div_summary: list[dict[str, Any]], figures_dir: Path) -> Path | None:
+    """Per-prerun bars: effective # independent factors vs the raw count."""
+    df = pd.DataFrame(div_summary)
+    if df.empty or "eff_n_factors" not in df:
+        return None
+    preruns = list(df["prerun"])
+    cmap = _colour_map(preruns)
+    x = np.arange(len(preruns))
+    fig, ax = plt.subplots(figsize=(1.8 * len(preruns) + 3, 4.4))
+    b1 = ax.bar(x - 0.2, _nums(df["n_factors"]), 0.4, label="# factors",
+                color="#9ca3af", alpha=0.7)
+    b2 = ax.bar(x + 0.2, _nums(df["eff_n_factors"]), 0.4, label="effective # (independent)",
+                color=[cmap[p] for p in preruns], alpha=0.9)
+    _label_bars(ax, b1, fmt="{:.0f}"); _label_bars(ax, b2, fmt="{:.1f}")
+    ax.set_xticks(x); ax.set_xticklabels(preruns, rotation=20, ha="right", fontsize=8)
+    ax.set_ylabel("# factors")
+    ax.set_title("Factor zoo diversity: effective vs raw factor count")
+    ax.legend(fontsize=8)
+    return _save(fig, figures_dir, "effective_factors.png")
+
+
+# ── Track B: deflation & model-based importance ──────────────────────────────
+
+def deflation_bar(mv_summary: list[dict[str, Any]], figures_dir: Path) -> Path | None:
+    """Per-prerun bars: best |IC| vs the selection-deflated best |IC|."""
+    df = pd.DataFrame(mv_summary)
+    if df.empty or "best_ic" not in df or not df["best_ic"].notna().any():
+        return None
+    preruns = list(df["prerun"])
+    cmap = _colour_map(preruns)
+    x = np.arange(len(preruns))
+    fig, ax = plt.subplots(figsize=(1.8 * len(preruns) + 3, 4.4))
+    b1 = ax.bar(x - 0.2, _nums(df["best_ic"]), 0.4, label="best |IC|",
+                color="#9ca3af", alpha=0.7)
+    b2 = ax.bar(x + 0.2, _nums(df.get("deflated_best_ic", [np.nan] * len(preruns))), 0.4,
+                label="deflated best |IC|", color=[cmap[p] for p in preruns], alpha=0.9)
+    _label_bars(ax, b1, fmt="{:.3f}"); _label_bars(ax, b2, fmt="{:.3f}")
+    ax.set_xticks(x); ax.set_xticklabels(preruns, rotation=20, ha="right", fontsize=8)
+    ax.set_ylabel("|IC| at default horizon")
+    ax.set_title("Best single-factor |IC| before vs after multiple-testing deflation")
+    ax.legend(fontsize=8)
+    return _save(fig, figures_dir, "deflation.png")
+
+
+def feature_importance_bar(importance_rows: list[dict[str, Any]], figures_dir: Path,
+                           model: str | None = None, top_n: int = 10) -> Path | None:
+    """Per-prerun horizontal bars of the top factors by model importance."""
+    df = pd.DataFrame(importance_rows)
+    if df.empty or "importance" not in df:
+        return None
+    if model is None:
+        model = df["model"].iloc[0]
+    df = df[df["model"] == model]
+    if df.empty:
+        return None
+    preruns = sorted(df["prerun"].unique())
+    cmap = _colour_map(preruns)
+    fig, axes = plt.subplots(1, len(preruns), figsize=(3.2 * len(preruns) + 1, 4.4),
+                             squeeze=False)
+    for ax, p in zip(axes[0], preruns):
+        g = df[df.prerun == p].sort_values("importance", ascending=True).tail(top_n)
+        ax.barh(g["factor_id"].astype(str).str.slice(0, 22), g["importance"],
+                color=cmap[p], alpha=0.85)
+        ax.set_title(p, fontsize=10)
+        ax.set_xlabel(f"{model} importance")
+        ax.tick_params(axis="y", labelsize=7)
+    fig.suptitle(f"Top {top_n} factors by {model} importance per research model", y=1.02)
+    return _save(fig, figures_dir, f"feature_importance_{model}.png")
 
 
 # ── Track 3: downstream agents ───────────────────────────────────────────────
@@ -222,7 +334,7 @@ def downstream_summary(ds_rows: list[dict[str, Any]], figures_dir: Path) -> Path
     cmap = _colour_map(preruns)
     x = np.arange(len(preruns))
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(2 * len(preruns) + 4, 4.2))
-    sharpe = [df[df.prerun == p].iloc[0].get("mean_oos_sharpe") for p in preruns]
+    sharpe = _nums([df[df.prerun == p].iloc[0].get("mean_oos_sharpe") for p in preruns])
     b1 = ax1.bar(x, sharpe, color=[cmap[p] for p in preruns], alpha=0.85)
     _label_bars(ax1, b1)
     ax1.axhline(0, color="black", lw=0.6)

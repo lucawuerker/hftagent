@@ -9,76 +9,98 @@ Kept in their own module for two reasons:
 
 from __future__ import annotations
 
-DATA_CONTEXT = """\
-You are working with LOBSTER-derived 10-second bars covering ~500 S&P 500
-stocks and a handful of commodities.  When you write a factor, the
-``data`` dict passed to ``calc`` exposes the full LOBSTER field set as
-``pd.DataFrame`` (index = 10-sec timestamps, columns = tickers).  Every
-field below is available — pick whichever ones your idea actually
-needs.
+# ---------------------------------------------------------------------------
+# DATA CONTEXT — built dynamically from the field set this run can supply.
+#
+# The Factor Researcher must only invent factors the configured data feed can
+# actually serve, so the data-context prose is assembled by ``build_data_context``
+# from an ``allowed_fields`` set (provider capabilities + LOBSTER order-book level
+# + the fundamentals opt-out; see ``quant_fund_agent.data.usable_fields``).  Each
+# field below is a pre-formatted entry; only the allowed ones are emitted, and a
+# whole section (microstructure / fundamentals / per-level book) is dropped when
+# none of its fields are available.
+# ---------------------------------------------------------------------------
 
-Price / OHLCV view (synthesised from mid and midEnd):
+# Price / OHLCV view (the ``standard`` tier — mid-derived on LOBSTER).
+_PRICE_ENTRIES: dict[str, str] = {
+    "open": "    open      : start-of-bar price (mid-price on LOBSTER)",
+    "high": "    high      : intra-bar high (max(mid, midEnd) on LOBSTER)",
+    "low": "    low       : intra-bar low (min(mid, midEnd) on LOBSTER)",
+    "close": "    close     : end-of-bar price (mid-price on LOBSTER)",
+    "volume": "    volume    : traded volume in the bar (|signed trade| on LOBSTER)",
+}
 
-    open      : start-of-bar mid-price (= mid)
-    high      : max(mid, midEnd) within the bar
-    low       : min(mid, midEnd) within the bar
-    close     : end-of-bar mid-price (= midEnd)
-    volume    : abs(signed traded volume), legacy alias for |trade|
+# Raw LOBSTER microstructure fields (signed quantities use +buy / -sell).
+_MICRO_ENTRIES: dict[str, str] = {
+    "trade": (
+        "    trade     : signed traded volume in the bar (shares; +buyer-initiated,\n"
+        "                -seller-initiated). ``volume`` above is its absolute value."
+    ),
+    "orderFlow": (
+        "    orderFlow : signed limit-order-flow into the top of book (shares).\n"
+        "                Positive = net additions to the bid side / cancellations\n"
+        "                on the ask, negative = the mirror."
+    ),
+    "hidden": "    hidden    : hidden traded volume in the bar (shares).",
+    "auction": (
+        "    auction   : auction-print volume in the bar (shares; usually zero\n"
+        "                outside the open / close auction windows)."
+    ),
+    "spread": "    spread    : end-of-bar quoted bid-ask spread (price units).",
+    "effSpread": (
+        "    effSpread : volume-weighted effective spread in the bar — captures\n"
+        "                price impact of the trades that printed."
+    ),
+    "lobImb": (
+        "    lobImb    : top-of-book limit-order-book imbalance,\n"
+        "                (bid_size - ask_size) / (bid_size + ask_size), in [-1, +1]."
+    ),
+    "effLobImb": (
+        "    effLobImb : effective LOB imbalance weighted by depth across the\n"
+        "                visible book — a sturdier book-pressure signal."
+    ),
+    "trdLiq": (
+        "    trdLiq    : trade-side liquidity proxy (size traded per unit price\n"
+        "                move during the bar; higher = more liquid)."
+    ),
+    "ofLiq": (
+        "    ofLiq     : order-flow liquidity proxy (size posted per unit price\n"
+        "                move; higher = denser book)."
+    ),
+    "depth": "    depth     : average top-of-book depth (best bid + best ask sizes).",
+    "nbEvents": "    nbEvents  : number of LOB events (any update) in the bar.",
+    "nbHidden": "    nbHidden  : number of hidden trade prints in the bar.",
+    "nbTrades": "    nbTrades  : number of visible trade prints in the bar.",
+}
 
-Raw LOBSTER fields (signed quantities use +buy / -sell convention):
+_LEVEL_BOOK_NOTE = """\
+Per-level order-book fields (when the feed carries depth beyond the top of
+book) are exposed as ``askPrice{i}`` / ``askDepth{i}`` / ``bidPrice{i}`` /
+``bidDepth{i}`` for each visible level ``i`` (1 = best), e.g. ``data["bidDepth1"]``.
+Deeper levels are NaN when the pull was shallower — guard with ``.fillna``."""
 
-    trade     : signed traded volume in the bar (shares; +buyer-initiated,
-                -seller-initiated). ``volume`` above is its absolute value.
-    orderFlow : signed limit-order-flow into the top of book (shares).
-                Positive = net additions to the bid side / cancellations
-                on the ask, negative = the mirror.
-    hidden    : hidden traded volume in the bar (shares).
-    auction   : auction-print volume in the bar (shares; usually zero
-                outside the open / close auction windows).
-    spread    : end-of-bar quoted bid-ask spread (price units).
-    effSpread : volume-weighted effective spread in the bar — captures
-                price impact of the trades that printed.
-    lobImb    : top-of-book limit-order-book imbalance,
-                (bid_size - ask_size) / (bid_size + ask_size), in [-1, +1].
-    effLobImb : effective LOB imbalance weighted by depth across the
-                visible book — a sturdier book-pressure signal.
-    trdLiq    : trade-side liquidity proxy (size traded per unit price
-                move during the bar; higher = more liquid).
-    ofLiq     : order-flow liquidity proxy (size posted per unit price
-                move; higher = denser book).
-    depth     : average top-of-book depth (best bid + best ask sizes).
-    nbEvents  : number of LOB events (any update) in the bar.
-    nbHidden  : number of hidden trade prints in the bar.
-    nbTrades  : number of visible trade prints in the bar.
+_FUNDAMENTAL_ENTRIES: dict[str, str] = {
+    "sector": '    sector    : GICS-style sector label (text, e.g. "Technology"). Static.',
+    "industry": "    industry  : finer industry label (text). Static.",
+    "marketCap": "    marketCap : market capitalization in USD (float, per fiscal quarter).",
+    "peRatio": "    peRatio   : price / earnings (float; negative for loss-makers).",
+    "pbRatio": "    pbRatio   : price / book.",
+    "psRatio": "    psRatio   : price / sales.",
+    "roe": "    roe       : return on equity.",
+    "roic": "    roic      : return on invested capital.",
+    "debtToEquity": "    debtToEquity : leverage ratio.",
+    "currentRatio": "    currentRatio : liquidity ratio.",
+    "grossMargin": "    grossMargin : gross profitability margin (fraction).",
+    "netMargin": "    netMargin   : net profitability margin (fraction).",
+    "revenue": "    revenue   : quarterly revenue (USD).",
+    "eps": "    eps       : reported EPS (USD).",
+    "freeCashFlow": "    freeCashFlow : free cash flow per share.",
+    "epsEstimate": "    epsEstimate    : analyst EPS consensus for the latest quarter.",
+    "revenueEstimate": "    revenueEstimate: analyst revenue consensus for the latest quarter.",
+    "epsSurprise": "    epsSurprise : reported EPS − estimate (post-earnings-drift signal).",
+}
 
-Notes:
-- Many fields are sparse (lots of NaN / zero on quiet bars).  Be
-  defensive on rolling ops: use ``.fillna``, ``.replace(0, np.nan)``,
-  ``df.where(...)``, etc.  Do NOT pass extra keyword arguments to the
-  helper operators below — they take positional arguments only.
-- All fields are aligned on the same DatetimeIndex and the same ticker
-  columns, so cross-field arithmetic is safe.
-- The data is per 10-second bar.  Bar count per trading day ≈ 2340.
-
-Fundamental / estimate / event fields (ONLY present when the configured
-data provider supplies them — e.g. FMP / AlphaVantage on a daily equity
-universe; absent on LOBSTER / yfinance / crypto.  If your idea needs one,
-list it in ``inputs`` and the gating layer will route the factor only to a
-provider that has it):
-
-    sector    : GICS-style sector label (text, e.g. "Technology"). Static.
-    industry  : finer industry label (text). Static.
-    marketCap : market capitalization in USD (float, per fiscal quarter).
-    peRatio   : price / earnings (float; negative for loss-makers).
-    pbRatio   : price / book.    psRatio : price / sales.
-    roe       : return on equity.   roic : return on invested capital.
-    debtToEquity, currentRatio    : leverage / liquidity ratios.
-    grossMargin, netMargin        : profitability margins (fractions).
-    revenue   : quarterly revenue (USD).   eps : reported EPS (USD).
-    freeCashFlow : free cash flow per share.
-    epsEstimate, revenueEstimate  : analyst consensus for the latest quarter.
-    epsSurprise  : reported EPS − estimate (the post-earnings-drift signal).
-
+_FUNDAMENTAL_LOOKAHEAD = """\
 LOOK-AHEAD — read carefully.  These fields are **already point-in-time**:
 each value is stamped at its *availability date* (the filing / report date,
 or fiscal-period-end + a reporting lag) and forward-filled, so reading
@@ -87,8 +109,92 @@ NOT need to (and must not) shift them yourself.  They are **quarterly step
 functions**: ``NaN`` before a name's first report and after a long staleness
 gap, and otherwise constant between reports — so be defensive (``.fillna``,
 ``df.where(...)``) and prefer cross-sectional ops (``rank``) and slow changes
-(quarter-over-quarter ``delta``) over fast time-series ops.
-"""
+(quarter-over-quarter ``delta``) over fast time-series ops."""
+
+
+def _section(allowed, entries: dict[str, str]) -> list[str]:
+    """The pre-formatted entry lines for the allowed fields, in declared order."""
+    return [text for name, text in entries.items() if allowed is None or name in allowed]
+
+
+def build_data_context(allowed_fields=None) -> str:
+    """Assemble the DATA CONTEXT prose for the fields this run can supply.
+
+    ``allowed_fields`` is the set the configured data feed actually serves (see
+    :func:`quant_fund_agent.data.usable_fields`).  ``None`` keeps every field
+    (full LOBSTER + fundamentals) — the historical, un-gated behaviour.  Only
+    allowed fields are listed and empty sections are dropped, so the researcher
+    is never told about data it cannot use.
+    """
+    allowed = set(allowed_fields) if allowed_fields is not None else None
+
+    price_lines = _section(allowed, _PRICE_ENTRIES)
+    micro_lines = _section(allowed, _MICRO_ENTRIES)
+    fund_lines = _section(allowed, _FUNDAMENTAL_ENTRIES)
+    has_levels = allowed is None or any(
+        name.startswith(("askPrice", "askDepth", "bidPrice", "bidDepth"))
+        for name in allowed
+    )
+    is_lobster = bool(micro_lines) or has_levels
+
+    parts: list[str] = []
+    if is_lobster:
+        parts.append(
+            "You are working with LOBSTER-derived microstructure bars (10-second\n"
+            "bars on the sampled feed).  When you write a factor, the ``data`` dict\n"
+            "passed to ``calc`` exposes the fields below as ``pd.DataFrame`` (index =\n"
+            "bar timestamps, columns = tickers).  Every field below is available —\n"
+            "pick whichever ones your idea actually needs; do NOT use any field that\n"
+            "is not listed (the factor would be rejected as out-of-scope)."
+        )
+    else:
+        parts.append(
+            "You are working with the configured market-data feed.  When you write a\n"
+            "factor, the ``data`` dict passed to ``calc`` exposes the fields below as\n"
+            "``pd.DataFrame`` (index = bar timestamps, columns = tickers).  Every\n"
+            "field below is available — pick whichever ones your idea actually needs;\n"
+            "do NOT use any field that is not listed (the factor would be rejected as\n"
+            "out-of-scope)."
+        )
+
+    if price_lines:
+        parts.append("Price / OHLCV view:\n\n" + "\n".join(price_lines))
+    if micro_lines:
+        parts.append(
+            "Microstructure fields (signed quantities use +buy / -sell convention):"
+            "\n\n" + "\n".join(micro_lines)
+        )
+    if has_levels:
+        parts.append(_LEVEL_BOOK_NOTE)
+
+    notes = [
+        "Notes:",
+        "- All fields are aligned on the same DatetimeIndex and the same ticker",
+        "  columns, so cross-field arithmetic is safe.",
+        "- Do NOT pass extra keyword arguments to the helper operators below —",
+        "  they take positional arguments only.",
+    ]
+    if is_lobster:
+        notes.insert(1,
+            "- Many fields are sparse (lots of NaN / zero on quiet bars).  Be\n"
+            "  defensive on rolling ops: use ``.fillna``, ``.replace(0, np.nan)``,\n"
+            "  ``df.where(...)``, etc.")
+    parts.append("\n".join(notes))
+
+    if fund_lines:
+        # Only mention the fundamentals look-ahead caveat when those fields are in play.
+        parts.append(
+            "Fundamental / estimate / event fields (point-in-time, quarterly):\n\n"
+            + "\n".join(fund_lines)
+        )
+        parts.append(_FUNDAMENTAL_LOOKAHEAD)
+
+    return "\n\n".join(parts) + "\n"
+
+
+# Full, un-gated context (every LOBSTER field + fundamentals).  Kept as a module
+# constant for back-compat with importers that don't thread an allowed-field set.
+DATA_CONTEXT = build_data_context(None)
 
 
 # ---------------------------------------------------------------------------

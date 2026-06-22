@@ -26,6 +26,13 @@ spread, event counts, etc.):
     trdLiq, ofLiq, depth,
     nbEvents, nbHidden, nbTrades
 
+When the converter emitted per-level order-book columns
+(``askPrice{i}``/``askDepth{i}``/``bidPrice{i}``/``bidDepth{i}`` — one set per
+book level), those are forwarded too.  Their count depends on the level of the
+pull, so on a full load they are **discovered from the CSV header** rather than
+hard-coded; on a targeted ``fields=[...]`` load any name matching that pattern is
+accepted and read.
+
 Robustness
 ----------
 ``ticker_data/`` is auto-discovered, but the same directory tree often
@@ -58,12 +65,31 @@ Returns ``dict[str, pd.DataFrame]`` where each DataFrame has:
 from __future__ import annotations
 
 import logging
+import re
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
 log = logging.getLogger("backtesting.data_loader")
+
+# Per-level order-book columns the LOBSTER converter appends after the 19
+# aggregates (``askPrice1``/``askDepth1``/``bidPrice1``/``bidDepth1``, …).  Their
+# count depends on the level of the pull, so they are discovered from the CSV
+# header rather than hard-coded — any column matching this pattern is forwarded
+# into the panel under its own field name.
+_LEVEL_FIELD_RE = re.compile(r"^(?:askPrice|bidPrice|askDepth|bidDepth)\d+$")
+
+
+def _is_level_field(name: str) -> bool:
+    return bool(_LEVEL_FIELD_RE.match(name))
+
+
+def _level_sort_key(name: str) -> tuple[int, int]:
+    """Order level fields by (level, side) for deterministic panel layout."""
+    side, level = re.match(r"^([a-zA-Z]+?)(\d+)$", name).groups()
+    rank = {"askPrice": 0, "askDepth": 1, "bidPrice": 2, "bidDepth": 3}.get(side, 9)
+    return (int(level), rank)
 
 # Columns a CSV must contain for us to derive the OHLCV view.  Other
 # LOBSTER columns are optional — missing ones just produce NaN for that
@@ -116,8 +142,8 @@ def _csv_columns_needed(requested_fields: tuple[str, ...]) -> set[str]:
     for f in requested_fields:
         if f == "volume":
             needed.add("trade")
-        elif f in PASSTHROUGH_FIELDS:
-            needed.add(f)
+        elif f in PASSTHROUGH_FIELDS or _is_level_field(f):
+            needed.add(f)  # passthrough + per-level fields are CSV columns by name
         # synthesised OHLC fields (open/high/low/close) need only mid+midEnd,
         # which are already in ``needed`` above.
     return needed
@@ -162,6 +188,29 @@ def _downcast_to_float32(panel: dict[str, pd.DataFrame]) -> dict[str, pd.DataFra
     return panel
 
 
+def _discover_level_fields(
+    data_dir: Path, tickers: list[str]
+) -> list[str]:
+    """Per-level book columns present in the tickers' CSVs (header-only scan).
+
+    The level count varies by pull, so on a full (``fields=None``) load we read
+    each ticker's first CSV header and collect any ``askPrice{i}``/``askDepth{i}``/
+    ``bidPrice{i}``/``bidDepth{i}`` columns it carries.  Cheap (one header read per
+    ticker) and tolerant — a directory we can't read just contributes nothing.
+    """
+    found: set[str] = set()
+    for ticker in tickers:
+        csv_files = sorted((data_dir / ticker).glob("*.csv"))
+        if not csv_files:
+            continue
+        try:
+            header = pd.read_csv(csv_files[0], nrows=0).columns
+        except Exception:
+            continue
+        found.update(c for c in header if _is_level_field(c))
+    return sorted(found, key=_level_sort_key)
+
+
 def load_panel(
     data_dir: str | Path,
     tickers: list[str] | None = None,
@@ -201,10 +250,15 @@ def load_panel(
                  n_tickers, len(tickers))
         tickers = tickers[:n_tickers]
 
-    requested = tuple(fields) if fields is not None else ALL_FIELDS
-    unknown = set(requested) - set(ALL_FIELDS)
-    if unknown:
-        raise ValueError(f"Unknown fields requested: {sorted(unknown)}")
+    if fields is not None:
+        requested = tuple(fields)
+        unknown = {f for f in requested if f not in ALL_FIELDS and not _is_level_field(f)}
+        if unknown:
+            raise ValueError(f"Unknown fields requested: {sorted(unknown)}")
+    else:
+        # Full load: every known field plus whatever per-level book columns the
+        # CSVs actually contain (the level count depends on the LOBSTER pull).
+        requested = ALL_FIELDS + tuple(_discover_level_fields(data_dir, tickers))
 
     # Minimum CSV columns we need to satisfy ``requested``.  This is the
     # big memory win — without it every ticker CSV is read in full (19
@@ -271,6 +325,11 @@ def load_panel(
 
             for f in PASSTHROUGH_FIELDS:
                 if f in frames and f in df.columns:
+                    frames[f][ticker] = df[f]
+
+            # Per-level book columns (variable count) pass straight through too.
+            for f in requested:
+                if _is_level_field(f) and f in frames and f in df.columns:
                     frames[f][ticker] = df[f]
 
             # df has served its purpose; drop the reference so peak

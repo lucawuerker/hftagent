@@ -52,6 +52,7 @@ class ComparisonConfig:
 
     # ── which tracks to run ──
     run_ic: bool = True
+    run_analytics: bool = True       # diversity/redundancy + deflation/importance
     run_bruteforce: bool = True
     run_downstream: bool = True
 
@@ -72,6 +73,19 @@ class ComparisonConfig:
     fast: bool = False
     train_sample_frac: float = 1.0
 
+    # ── ML-combined-signal vectorised backtest (brute-force track) ──
+    # Each catalog model fits the factors (standardised per-underlying over time on
+    # the IS window — `fit_standardize`) and predicts ONE combined signal per
+    # (timestamp, underlying).  That signal is run through a *simple* per-underlying
+    # vectorised backtest: position(signal) × the underlying's own forward return,
+    # then aggregated.  Every modelling choice below is a changeable argument.
+    fit_standardize: str = "per_underlying"   # "per_underlying" | "cross_sectional"
+    position_mode: str = "threshold"          # "threshold" | "sign" | "continuous"
+    position_threshold: float = 1.0           # ±t (in z units) for the threshold band
+    position_zscore_basis: str = "expanding"  # "expanding" | "full" | "rolling" | "none"
+    position_zscore_window: int = 500         # window for the "rolling" basis
+    backtest_aggregation: str = "portfolio"   # "portfolio" | "per_underlying"
+
     # ── downstream-agent track ──
     n_strategies: int = 3             # strategies built per prerun
     committee: bool = True            # PM committee vs single PM
@@ -79,8 +93,22 @@ class ComparisonConfig:
     # ── data / universe ──
     data_dir: str = field(default_factory=lambda: os.getenv("DATA_DIR", "ticker_data"))
     n_tickers: int | None = None      # cap universe via ARCHITECT_N_TICKERS (None = all)
+    # Uniform timestamp subsample of the whole panel (None = keep every bar).  The
+    # single biggest speed lever on the intraday LOBSTER panel (~1.4M bars/ticker):
+    # striding the index to `max_bars` slims *every* track at once (IC, analytics,
+    # brute-force) and removes the brute-force OOM, since feature matrices are built
+    # from the slim panel.  Horizons are then in retained-bar units (consistent
+    # across preruns).  `--fast` defaults this to 20_000 when unset.
+    max_bars: int | None = None
+
+    # ── factor-analytics track (diversity/redundancy + deflation/importance) ──
+    # Both reuse the already-cached factor signals, so they are near-free.
+    analytics_max_rows: int = 50_000  # cap (timestamp×ticker) rows for corr / model fit
+    corr_threshold: float = 0.7       # |corr| ≥ τ groups factors into a redundancy cluster
+    importance_models: tuple[str, ...] = ("lasso", "gradient_boosting")
 
     # ── persistence ──
+    checkpoint: bool = True           # persist tables+figures after EACH track (crash-safe)
     comparison_id: str = field(
         default_factory=lambda: datetime.now().strftime("%Y%m%d_%H%M%S")
     )

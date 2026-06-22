@@ -54,6 +54,11 @@ class DataSettings:
     asset_class: str = "equity"        # equity (crypto/FX in a later phase)
     frequency: str = "1d"             # 1d | 1min | 10s | …
     data_dir: str = "ticker_data"      # LOBSTER CSV root (provider="lobster")
+    # LOBSTER order-book depth available in the feed: 3 = full message stream
+    # (trades / order flow / hidden / auctions, the default), 2 = order book only
+    # (prices/sizes, spread, depth, imbalance + traded volume).  Gates which
+    # fields the provider advertises and which the Factor Researcher may use.
+    lobster_level: int = 3
     cache_dir: str = "data/market"     # parquet cache root (API providers)
     n_tickers: int | None = None       # optional universe cap (memory)
     tickers: list[str] | None = None   # explicit ticker list (None = auto)

@@ -1,0 +1,230 @@
+{
+  "target_horizon": 6,
+  "n_tickers": "all",
+  "gates": {
+    "dsr_threshold": 0.75,
+    "max_sharpe_decay": 0.85
+  },
+  "entries": [
+    {
+      "approved": true,
+      "reject_stage": null,
+      "hypothesis": "A trading strategy that combines mean-reversion factors (like alpha_001 and alpha_005) with momentum factors (such as alpha_007 and alpha_012) can effectively capitalize on short-term price dislocations. By identifying stocks that are at extreme deviations from their volume-weighted fair value while also exhibiting signs of momentum, the strategy aims to capture both the reversal potential of mean-reversion and the continuation potential of momentum.",
+      "selection_rationale": "alpha_001: This factor captures mean-reversion by targeting extreme price movements, aligning with the hypothesis of capitalizing on price dislocations.\nalpha_005: It focuses on mean-reversion around VWAP, which is crucial for identifying stocks that are mispriced relative to their fair value.\nalpha_007: This momentum factor identifies stocks with strong recent price movements, providing a continuation signal that complements the mean-reversion strategy.\nalpha_012: It offers a contrarian momentum signal that fades the price change based on volume, enhancing the strategy's ability to exploit price trends confirmed by volume dynamics.\nalpha_041: By measuring the deviation between the geometric midprice and VWAP, this factor incorporates a microstructure perspective to capture fair value dislocations, adding depth to the strategy.\nrsi_mean_reversion: The RSI factor provides an additional mean-reversion signal based on momentum indicators, offering a contrarian view that complements the existing mean-reversion factors.\nthree_soldiers: As a candlestick pattern factor, it captures bullish momentum signals, enhancing the strategy's overall ability to leverage price trends alongside mean-reversion.",
+      "model_type": "lasso",
+      "model_params": {},
+      "factor_ids": [
+        "alpha_005",
+        "alpha_041",
+        "rsi_mean_reversion"
+      ],
+      "target_horizon": 6,
+      "model_artifact_path": "data/workspaces/yfinance_equity_demo/preruns/base/strategies/models/arch_78e92a20.joblib",
+      "holding_period": 6,
+      "max_positions": 20,
+      "min_conviction": 0.5,
+      "equal_weight": true,
+      "trials": [
+        {
+          "iteration": 1,
+          "model_type": "ridge",
+          "model_params": {},
+          "n_features": 5,
+          "valid_ic": -0.010673,
+          "train_r2": 0.002642,
+          "valid_r2": -0.001363,
+          "is_sharpe": 1.8886
+        },
+        {
+          "iteration": 2,
+          "model_type": "lasso",
+          "model_params": {},
+          "n_features": 3,
+          "valid_ic": 0.056905,
+          "train_r2": 0.002639,
+          "valid_r2": -0.003251,
+          "is_sharpe": 1.3845
+        },
+        {
+          "iteration": 3,
+          "model_type": "ridge",
+          "model_params": {},
+          "n_features": 4,
+          "valid_ic": 0.017324,
+          "train_r2": 0.000614,
+          "valid_r2": -0.0001,
+          "is_sharpe": 2.4098
+        }
+      ],
+      "stat_tests": [
+        {
+          "test_id": "deflated_sharpe_ratio",
+          "verdict": "pass",
+          "value": 0.888655,
+          "threshold": 0.75,
+          "summary": "DSR = 0.8887 (threshold 0.75, 3 trials, T=400 bars)."
+        },
+        {
+          "test_id": "out_of_sample_backtest",
+          "verdict": "pass",
+          "value": 0.3841,
+          "threshold": 0.2077,
+          "summary": "OOS Sharpe 0.38 vs IS 1.38 (decay 72%). Edge persists."
+        }
+      ],
+      "final_decision": "accept",
+      "id": "enhanced_mean_reversion_and_momentum_strategy_a151a572",
+      "name": "Enhanced Mean-Reversion and Momentum Strategy",
+      "artifact_path": "data/workspaces/yfinance_equity_demo/preruns/base/strategies/models/arch_78e92a20.joblib",
+      "is_sharpe": 1.3845,
+      "oos_sharpe": 0.3841,
+      "deflated_sharpe": 0.888655
+    },
+    {
+      "approved": true,
+      "reject_stage": null,
+      "hypothesis": "Combine mean-reversion factors (alpha_001, alpha_005, alpha_041) with momentum factors (alpha_007, alpha_012) to create a hybrid trading strategy that capitalizes on short-term price dislocations around volume-weighted average price (VWAP) and reinforces trades with momentum confirmation on high-volume days.",
+      "selection_rationale": "alpha_005: This factor captures mean-reversion around the volume-weighted average price (VWAP), aligning directly with the hypothesis of exploiting price dislocations. It identifies situations where the opening price deviates from the 10-day VWAP, suggesting a potential reversion opportunity.\nalpha_007: This momentum factor analyzes price movements on high-volume days, providing confirmation for price continuation. It complements the mean-reversion signals by ensuring that the trades are reinforced by extraordinary volume, which often indicates stronger market conviction.\nalpha_011: This factor identifies mean-reversion opportunities based on VWAP and volume changes, reinforcing the strategy's focus on price dislocations around VWAP. It combines mean-reversion with volume dynamics, capturing scenarios where price reverts after significant volume spikes.\nalpha_041: By measuring the deviation between the geometric midprice and VWAP, this factor provides an alternative mean-reversion signal. It captures the relationship between range-based fair value and volume-weighted fair value, enhancing the strategy's robustness.\nalpha_012: This contrarian momentum factor acts as a confirmation tool, supporting trades when volume drops but price moves up, and fading them when volume rises. It aligns well with the hypothesis of confirming price direction with volume, ensuring that trades are supported by market liquidity.\nalpha_018: This mean-reversion factor focuses on intraday price dislocations, capturing scenarios where elevated volatility indicates a potential reversal opportunity. It adds a layer of complexity to the model by targeting short-term fluctuations, further diversifying the factors employed.",
+      "model_type": "ridge",
+      "model_params": {},
+      "factor_ids": [
+        "alpha_005",
+        "alpha_011",
+        "alpha_041",
+        "alpha_018",
+        "alpha_012"
+      ],
+      "target_horizon": 6,
+      "model_artifact_path": "data/workspaces/yfinance_equity_demo/preruns/base/strategies/models/arch_d37d1b5a.joblib",
+      "holding_period": 6,
+      "max_positions": 20,
+      "min_conviction": 0.5,
+      "equal_weight": true,
+      "trials": [
+        {
+          "iteration": 1,
+          "model_type": "ridge",
+          "model_params": {},
+          "n_features": 5,
+          "valid_ic": 0.043926,
+          "train_r2": 0.000815,
+          "valid_r2": 0.000331,
+          "is_sharpe": 1.0137
+        },
+        {
+          "iteration": 2,
+          "model_type": "lasso",
+          "model_params": {},
+          "n_features": 4,
+          "valid_ic": 0.0,
+          "train_r2": 0.0,
+          "valid_r2": -0.000635,
+          "is_sharpe": 1.3845
+        },
+        {
+          "iteration": 3,
+          "model_type": "ridge",
+          "model_params": {},
+          "n_features": 5,
+          "valid_ic": 0.081791,
+          "train_r2": 0.000781,
+          "valid_r2": 0.000784,
+          "is_sharpe": 1.2511
+        }
+      ],
+      "stat_tests": [
+        {
+          "test_id": "deflated_sharpe_ratio",
+          "verdict": "pass",
+          "value": 0.910985,
+          "threshold": 0.75,
+          "summary": "DSR = 0.9110 (threshold 0.75, 3 trials, T=400 bars)."
+        },
+        {
+          "test_id": "out_of_sample_backtest",
+          "verdict": "pass",
+          "value": 0.2455,
+          "threshold": 0.1877,
+          "summary": "OOS Sharpe 0.25 vs IS 1.25 (decay 80%). Edge persists."
+        }
+      ],
+      "final_decision": "accept",
+      "id": "hybrid_mean_reversion_and_momentum_strategy_0831d2f9",
+      "name": "Hybrid Mean-Reversion and Momentum Strategy",
+      "artifact_path": "data/workspaces/yfinance_equity_demo/preruns/base/strategies/models/arch_d37d1b5a.joblib",
+      "is_sharpe": 1.2511,
+      "oos_sharpe": 0.2455,
+      "deflated_sharpe": 0.910985
+    },
+    {
+      "approved": false,
+      "reject_stage": "statistician",
+      "hypothesis": "Combining mean-reversion factors like alpha_001 (Mean Reversion on extremes) and alpha_023 (Breakout mean-reversion) with momentum signals such as alpha_007 (High-volume momentum on close delta) can create a strategy that capitalizes on price reversals following extreme volatility events. When extreme price movements occur on high volume, the likelihood of subsequent mean-reversion increases, allowing for profitable trades in both directions.",
+      "selection_rationale": "alpha_001: This mean-reversion factor focuses on extremes in price movements, making it ideal for identifying potential reversals after high volatility events.\nalpha_023: A breakout mean-reversion factor, it provides a complementary approach by capturing price reversals following breakouts, further enhancing the strategy's ability to capitalize on price dislocations.\nalpha_007: This momentum factor indicates high-volume price movements, signaling strength in price changes that can confirm the potential for mean-reversion following extreme events.\nalpha_018: Capturing elevated intraday dislocations, this mean-reversion factor adds a layer of nuance, helping to identify when prices are likely to revert after significant volatility.\nalpha_011: This factor combines mean-reversion around VWAP with volume dynamics, allowing the strategy to leverage both price and volume conditions effectively.\nalpha_057: By capturing the close-VWAP deviation, this factor provides insights into short-term mean-reversion opportunities, particularly near recent price extremes.\nalpha_092: This factor helps identify weaker signals for mean-reversion, adding robustness to the strategy by filtering out potential noise in price movements.\nrsi_mean_reversion: The RSI-based mean-reversion factor adds a well-known technical indicator to the mix, providing a straightforward yet effective measure of overbought and oversold conditions that can trigger reversals.",
+      "model_type": "lasso",
+      "model_params": {},
+      "factor_ids": [
+        "alpha_001",
+        "alpha_011",
+        "alpha_018",
+        "alpha_057",
+        "rsi_mean_reversion"
+      ],
+      "target_horizon": 6,
+      "model_artifact_path": "data/workspaces/yfinance_equity_demo/preruns/base/strategies/models/arch_96aaa5b5.joblib",
+      "holding_period": 6,
+      "max_positions": 20,
+      "min_conviction": 0.5,
+      "equal_weight": true,
+      "trials": [
+        {
+          "iteration": 1,
+          "model_type": "ridge",
+          "model_params": {},
+          "n_features": 7,
+          "valid_ic": -0.015607,
+          "train_r2": 0.000479,
+          "valid_r2": -0.001985,
+          "is_sharpe": 0.6199
+        },
+        {
+          "iteration": 2,
+          "model_type": "lasso",
+          "model_params": {},
+          "n_features": 5,
+          "valid_ic": 0.0,
+          "train_r2": 0.0,
+          "valid_r2": -0.001061,
+          "is_sharpe": 0.0
+        },
+        {
+          "iteration": 3,
+          "model_type": "ridge",
+          "model_params": {},
+          "n_features": 6,
+          "valid_ic": -0.000483,
+          "train_r2": 0.000366,
+          "valid_r2": -0.001612,
+          "is_sharpe": 0.0179
+        }
+      ],
+      "stat_tests": [
+        {
+          "test_id": "deflated_sharpe_ratio",
+          "verdict": "fail",
+          "value": 0.0,
+          "threshold": null,
+          "summary": "Zero return variance \u2014 strategy is effectively flat."
+        },
+        {
+          "test_id": "out_of_sample_backtest",
+          "verdict": "info",
+          "value": 0.0,
+          "threshold": 0.0,
+          "summary": "In-sample Sharpe was non-positive; OOS comparison uninformative."
+        }
+      ],
+      "final_decision": "reject"
+    }
+  ]
+}

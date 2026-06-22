@@ -1,184 +1,145 @@
-"""Track 2 — brute-force ML on the researched factors (no agents).
+"""Track — ML-combined signal → per-underlying vectorised backtest (no agents).
 
-Feed *only* a prerun's researched factors straight into the model catalog and an
-equal-weight ensemble, fit on the in-sample window and evaluate on the held-out
-tail.  This isolates "are these factors good raw features?" from whether the
-downstream agents happen to exploit them well.
+Each catalog model is fed *all* of a prerun's researched factors and learns to
+**combine** them into a single predicted signal: it fits ``factors → forward
+return`` on the in-sample window and predicts one value per (timestamp,
+underlying).  That combined signal is then run through the *simple* per-underlying
+vectorised backtest (:mod:`comparison.vector_backtest`) — ``position(signal) × the
+underlying's own forward return`` — on the held-out out-of-sample tail.
 
-Per-model rows reuse :func:`modeling.service.evaluate_config` (the same IS-fit /
-OOS-reload path the notebook's horizon sweep uses).  The ensemble fits each base
-model, reloads it, averages the base models' cross-sectionally-standardised
-predicted signals, and backtests that averaged signal — all on the identical
-IS/OOS split, so every number is comparable across preruns and models.
+This isolates "how good is this zoo as raw features for a return model?" from the
+downstream agents, and — unlike the old cross-sectional long-short backtest — it
+treats each factor combination as a standalone directional signal, so it needs no
+cross-section (works with any number of underlyings).
+
+Factors are standardised **per underlying over time** before fitting (using
+in-sample statistics, so no out-of-sample leakage); ``fit_standardize`` switches
+back to the cross-sectional z-score.  ``±inf`` from a factor (e.g. a ratio with a
+near-zero denominator) is treated as missing — otherwise it poisons the mean/std
+and the model fit.  The equal-weight **ensemble** averages the models' (rescaled)
+combined signals and backtests that.
 """
 
 from __future__ import annotations
 
 import logging
+import warnings
 from typing import Any
 
+import numpy as np
 import pandas as pd
 
-from quant_fund_agent.strategies.base import BaseStrategy
+from quant_fund_agent.comparison.vector_backtest import vector_backtest
 
 log = logging.getLogger("comparison.bruteforce")
 
 
-class _PrecomputedSignalStrategy(BaseStrategy):
-    """Backtest a signal frame that's already been computed (the ensemble mean)."""
+def _standardised_features(
+    factor_ids: list[str], panel: dict[str, Any], is_idx, cfg,
+) -> dict[str, pd.DataFrame]:
+    """Each factor's signal, standardised for fitting (per-underlying or cross-sectional).
 
-    def __init__(self, signal: pd.DataFrame, holding_period: int, max_positions: int) -> None:
-        self.strategy_id = "ensemble"
-        self.name = "ensemble"
-        self.description = ""
-        self.factor_ids = []
-        self.holding_period = holding_period
-        self.max_positions = max_positions
-        self.equal_weight = False
-        self.min_conviction = 0.0
-        self._signal = signal
+    ``±inf`` is replaced with NaN first so it neither warns in the mean/std nor
+    leaks into the fit (it is later imputed to 0 = the per-underlying mean).
+    """
+    from quant_fund_agent.backtesting.strategy_backtester import normalise_factor_signals
+    from quant_fund_agent.modeling.service import _factor_signal
 
-    def calc(self, factor_signals, data):  # noqa: D401 — returns the stored signal
-        close = data["close"]
-        return self._signal.reindex(index=close.index, columns=close.columns)
+    close = panel["close"]
+    feats: dict[str, pd.DataFrame] = {}
+    for fid in factor_ids:
+        sig = (_factor_signal(fid, panel)
+               .reindex(index=close.index, columns=close.columns)
+               .replace([np.inf, -np.inf], np.nan))
+        if cfg.fit_standardize == "cross_sectional":
+            feats[fid] = normalise_factor_signals({fid: sig})[fid]
+        else:  # per-underlying over time, using IS-window stats (no OOS leakage)
+            mu = sig.loc[is_idx].mean()
+            sd = sig.loc[is_idx].std().replace(0, np.nan)
+            feats[fid] = (sig - mu) / sd
+    return feats
+
+
+def _pooled_features(factor_ids: list[str], panel: dict[str, Any], cfg):
+    """Build the shared, sanitised ``(T·N) × F`` matrix + target + IS train mask.
+
+    Computed once per prerun (not per model).  Row order is timestamp-major so a
+    prediction vector reshapes straight back to a ``(T×N)`` combined signal.
+    """
+    from quant_fund_agent.backtesting.data_loader import forward_returns
+
+    close = panel["close"]
+    index, cols = close.index, close.columns
+    n_rows, n_cols = len(index), len(cols)
+    cut = int(n_rows * (1.0 - cfg.oos_split_ratio))
+
+    feats = _standardised_features(factor_ids, panel, index[:cut], cfg)
+    X = np.column_stack([feats[fid].to_numpy(dtype=float).ravel() for fid in factor_ids])
+    X = np.nan_to_num(X, nan=0.0, posinf=0.0, neginf=0.0)  # missing/∞ → the (0) mean
+    y = forward_returns(close, horizon=cfg.target_horizon).to_numpy(dtype=float).ravel()
+
+    is_rows = np.arange(n_rows * n_cols) < (cut * n_cols)
+    train = np.flatnonzero(is_rows & np.isfinite(y))
+    if cfg.train_sample_frac < 1.0 and len(train) > 100:
+        rng = np.random.default_rng(cfg.seed)
+        train = np.sort(rng.choice(train, size=max(100, int(len(train) * cfg.train_sample_frac)),
+                                   replace=False))
+    return X, y, train, index, cols, n_cols
 
 
 def evaluate_prerun_models(
-    prerun: str, factor_ids: list[str], cfg,
+    prerun: str, factor_ids: list[str], panel: dict[str, Any], cfg,
 ) -> list[dict[str, Any]]:
-    """One brute-force KPI row per catalog model (+ the ensemble)."""
-    from quant_fund_agent.modeling.service import evaluate_config
+    """One row per catalog model (+ ensemble): vectorised backtest of its combined signal."""
+    from quant_fund_agent.modeling.catalog import build_estimator
 
     rows: list[dict[str, Any]] = []
     models = cfg.resolved_models()
-    log.info("brute-force: prerun '%s' — %d factors × %d models", prerun, len(factor_ids), len(models))
-    for model in models:
-        log.info("brute-force: prerun '%s' fitting '%s' ...", prerun, model)
-        try:
-            r = evaluate_config(
-                factor_ids=factor_ids,
-                model_type=model,
-                model_params=cfg.fast_model_params(model),
-                target_horizon=cfg.target_horizon,
-                holding_period=cfg.holding_period,
-                max_positions=cfg.max_positions,
-                oos_split_ratio=cfg.oos_split_ratio,
-                strategy_id=f"cmp_{prerun}_{model}",
-                train_sample_frac=cfg.train_sample_frac,
-            )
-        except Exception as e:  # noqa: BLE001 — one model must not abort the sweep
-            log.warning("brute-force %s/%s failed: %s", prerun, model, e)
-            rows.append({"prerun": prerun, "model": model,
-                         "n_factors_used": len(factor_ids), "error": str(e)[:200]})
-            continue
-        rows.append({
-            "prerun": prerun, "model": model, "n_factors_used": len(factor_ids),
-            "valid_ic": r.get("valid_ic"),
-            "is_ic": r.get("is_ic"), "oos_ic": r.get("oos_ic"),
-            "is_sharpe": r.get("is_sharpe"), "oos_sharpe": r.get("oos_sharpe"),
-            "is_ann_return": r.get("is_ann_return"), "oos_ann_return": r.get("oos_ann_return"),
-            "oos_max_drawdown": r.get("oos_max_drawdown"),
-        })
+    log.info("ML-combine: prerun '%s' — %d factors → %d models (fit_standardize=%s, "
+             "position=%s, aggregation=%s)", prerun, len(factor_ids), len(models),
+             cfg.fit_standardize, cfg.position_mode, cfg.backtest_aggregation)
 
-    if cfg.include_ensemble:
-        log.info("brute-force: prerun '%s' building ensemble ...", prerun)
-        ens = _evaluate_ensemble(prerun, factor_ids, cfg)
-        if ens is not None:
-            rows.append(ens)
-    return rows
+    X, y, train, index, cols, n_cols = _pooled_features(factor_ids, panel, cfg)
+    if len(train) < 50:
+        log.warning("ML-combine '%s': only %d IS training rows — skipping.", prerun, len(train))
+        return [{"prerun": prerun, "model": m, "n_factors_used": len(factor_ids),
+                 "error": "insufficient IS rows"} for m in models]
 
-
-def _evaluate_ensemble(
-    prerun: str, factor_ids: list[str], cfg, base_models: list[str] | None = None,
-) -> dict[str, Any] | None:
-    """Equal-weight ensemble of the base models' predicted OOS signals."""
-    from quant_fund_agent.backtesting.data_split import split_panel, split_signals
-    from quant_fund_agent.backtesting.strategy_backtester import (
-        backtest_strategy,
-        normalise_factor_signals,
-    )
-    from quant_fund_agent.factors import discover_factors
-    from quant_fund_agent.modeling.service import _factor_signal, _load_panel
-    from quant_fund_agent.modeling.train import fit_and_backtest
-    from quant_fund_agent.strategies.model_strategy import ModelStrategy
-
-    discover_factors()
-    base_models = base_models or [m for m in cfg.resolved_models() if m != "ensemble"]
-    if len(base_models) < 2:
-        return None
-
-    data_full = _load_panel()
-    signals_full = {fid: _factor_signal(fid, data_full) for fid in factor_ids}
-    data_is, data_oos = split_panel(data_full, cfg.oos_split_ratio)
-    signals_is, signals_oos = split_signals(signals_full, cfg.oos_split_ratio)
-    hp = cfg.holding_period or cfg.target_horizon
-
-    from pathlib import Path
-
-    from quant_fund_agent.modeling.train import DEFAULT_ARTIFACT_DIR
-
-    strats: list[ModelStrategy] = []
-    for model in base_models:
-        # Reuse the cmp_ artifact just saved by evaluate_prerun_models — same data,
-        # same split, same factors — avoids refitting the same model a second time.
-        cmp_path = Path(DEFAULT_ARTIFACT_DIR) / f"cmp_{prerun}_{model}.joblib"
-        if cmp_path.exists():
+    combined: dict[str, pd.DataFrame] = {}
+    with warnings.catch_warnings():
+        # Benign sklearn deprecation from LassoCV/ElasticNetCV (n_alphas → alphas).
+        warnings.filterwarnings("ignore", category=FutureWarning)
+        # LightGBM auto-names numpy columns ("Column_0"…) at fit, so predicting on a
+        # nameless array trips sklearn's feature-name check — cosmetic, predictions
+        # are identical.  Filter just that message.
+        warnings.filterwarnings("ignore", message="X does not have valid feature names",
+                                category=UserWarning)
+        for model in models:
+            log.info("ML-combine: prerun '%s' fitting '%s' → combined signal ...", prerun, model)
             try:
-                strats.append(ModelStrategy.from_artifact(
-                    cmp_path, strategy_id=f"ens_{prerun}_{model}",
-                    holding_period=hp, max_positions=cfg.max_positions,
-                ))
-                log.info("ensemble: reusing cmp_%s_%s artifact", prerun, model)
+                est = build_estimator(model, cfg.fast_model_params(model))
+                est.fit(X[train], y[train])
+                pred = np.asarray(est.predict(X), dtype=float).reshape(len(index), n_cols)
+                sig = pd.DataFrame(pred, index=index, columns=cols)
+                metrics = vector_backtest(sig, panel, cfg)
+            except Exception as e:  # noqa: BLE001 — one model must not abort the sweep
+                log.warning("ML-combine %s/%s failed: %s", prerun, model, e)
+                rows.append({"prerun": prerun, "model": model,
+                             "n_factors_used": len(factor_ids), "error": str(e)[:200]})
                 continue
-            except Exception as e:  # noqa: BLE001
-                log.debug("could not reuse cmp_ artifact for %s/%s: %s", model, prerun, e)
+            combined[model] = sig
+            rows.append({"prerun": prerun, "model": model,
+                         "n_factors_used": len(factor_ids), **metrics})
+
+    if cfg.include_ensemble and len(combined) >= 2:
+        log.info("ML-combine: prerun '%s' building ensemble of %d models ...", prerun, len(combined))
+        # Rescale each combined signal to comparable spread, then average.
+        parts = [s / (float(s.stack().std()) or 1.0) for s in combined.values()]
+        ens = sum(parts) / len(parts)
         try:
-            fit = fit_and_backtest(
-                factor_signals_is=signals_is, data_is=data_is, model_type=model,
-                model_params=cfg.fast_model_params(model),
-                factor_ids=factor_ids, target_horizon=cfg.target_horizon,
-                holding_period=hp, max_positions=cfg.max_positions,
-                strategy_id=f"ens_{prerun}_{model}",
-                train_sample_frac=cfg.train_sample_frac,
-            )
-            strats.append(ModelStrategy.from_artifact(
-                fit["artifact_path"], strategy_id=f"ens_{prerun}_{model}",
-                holding_period=hp, max_positions=cfg.max_positions,
-            ))
+            metrics = vector_backtest(ens, panel, cfg)
+            rows.append({"prerun": prerun, "model": "ensemble", "n_factors_used": len(factor_ids),
+                         **metrics, "ensemble_members": ",".join(combined)})
         except Exception as e:  # noqa: BLE001
-            log.warning("ensemble base %s failed for %s: %s", model, prerun, e)
-    if len(strats) < 2:
-        return None
-
-    def _ensemble_signal(signals, data) -> pd.DataFrame:
-        normed = normalise_factor_signals(signals)
-        preds = []
-        for s in strats:
-            p = s.calc(normed, data)
-            # cross-sectionally standardise per timestamp so no single model
-            # (with larger-variance predictions) dominates the average.
-            p = p.sub(p.mean(axis=1), axis=0).div(p.std(axis=1).replace(0, pd.NA), axis=0)
-            preds.append(p)
-        return sum(preds) / len(preds)
-
-    try:
-        oos = backtest_strategy(
-            _PrecomputedSignalStrategy(_ensemble_signal(signals_oos, data_oos), hp, cfg.max_positions),
-            signals_oos, data_oos,
-        ).metrics
-        is_ = backtest_strategy(
-            _PrecomputedSignalStrategy(_ensemble_signal(signals_is, data_is), hp, cfg.max_positions),
-            signals_is, data_is,
-        ).metrics
-    except Exception as e:  # noqa: BLE001
-        log.warning("ensemble backtest failed for %s: %s", prerun, e)
-        return None
-
-    return {
-        "prerun": prerun, "model": "ensemble", "n_factors_used": len(factor_ids),
-        "is_ic": is_.ic_mean, "oos_ic": oos.ic_mean,
-        "is_sharpe": is_.sharpe_ratio, "oos_sharpe": oos.sharpe_ratio,
-        "is_ann_return": is_.annualised_return, "oos_ann_return": oos.annualised_return,
-        "oos_max_drawdown": oos.max_drawdown,
-        "ensemble_members": ",".join(s.model_params["model_type"] for s in strats),
-    }
+            log.warning("ML-combine ensemble failed for %s: %s", prerun, e)
+    return rows

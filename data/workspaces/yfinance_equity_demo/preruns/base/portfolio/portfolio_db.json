@@ -1,0 +1,333 @@
+[
+  {
+    "id": "portfolio_0fb76cf6a6",
+    "pm_name": "fund_committee",
+    "mode": "selector",
+    "personality": "defensive",
+    "construction_method": "equal_weight",
+    "target_n_strategies": 12,
+    "allocations": [
+      {
+        "strategy_id": "enhanced_vwap_mean_reversion_and_momentum_strategy_2a71af55",
+        "weight": 1.0,
+        "enabled": true,
+        "rationale": "committee simple_average"
+      }
+    ],
+    "flagged_strategy_ids": [],
+    "retired_strategy_ids": [],
+    "expected_metrics": {
+      "expected_volatility": 0.21874931815425477,
+      "expected_variance": 0.04785126419295138,
+      "gross_exposure": 1.0,
+      "net_exposure": 1.0,
+      "expected_return": 0.287726,
+      "expected_sharpe": 1.3153229570165113
+    },
+    "pm_rationale": "Committee aggregation (simple_average) of 3 PMs:\n  \u2022 fund_committee_defensive (defensive, method=equal_weight)\n  \u2022 fund_committee_balanced (balanced, method=equal_weight)\n  \u2022 fund_committee_aggressive (aggressive, method=max_sharpe)\n\nsimple_average of 3 PM proposals.",
+    "created_at": "2026-06-16T08:31:08.417620",
+    "metadata": {
+      "voting_method": "simple_average",
+      "flag_threshold": 0.5,
+      "retire_threshold": 0.5,
+      "n_pms": 3,
+      "pm_names": [
+        "fund_committee_defensive",
+        "fund_committee_balanced",
+        "fund_committee_aggressive"
+      ],
+      "pm_proposals": [
+        {
+          "pm_name": "fund_committee_defensive",
+          "personality": "defensive",
+          "construction_method": "equal_weight",
+          "weights": {},
+          "flagged": [],
+          "retired": [],
+          "rationale": "no eligible strategies\n\nno strategies passed screening \u2014 empty portfolio"
+        },
+        {
+          "pm_name": "fund_committee_balanced",
+          "personality": "balanced",
+          "construction_method": "equal_weight",
+          "weights": {},
+          "flagged": [],
+          "retired": [],
+          "rationale": "no eligible strategies\n\nno strategies passed screening \u2014 empty portfolio"
+        },
+        {
+          "pm_name": "fund_committee_aggressive",
+          "personality": "aggressive",
+          "construction_method": "max_sharpe",
+          "weights": {
+            "enhanced_vwap_mean_reversion_and_momentum_strategy_2a71af55": 1.0
+          },
+          "flagged": [],
+          "retired": [],
+          "rationale": "SELECTOR mode: top-6 by IS Sharpe with diversification cap |\u03c1| <= 0.9 and personality filters (min_sharpe=0.4, max_dd=-0.2).\n\nSELECTOR mode: using personality default method 'max_sharpe' with target_n=6 strategies."
+        }
+      ]
+    }
+  },
+  {
+    "id": "portfolio_4117d5532e",
+    "pm_name": "fund_committee",
+    "mode": "selector",
+    "personality": "defensive",
+    "construction_method": "equal_weight",
+    "target_n_strategies": 12,
+    "allocations": [
+      {
+        "strategy_id": "mean_reversion_momentum_7cef7081",
+        "weight": 0.8588856799748477,
+        "enabled": true,
+        "rationale": "committee simple_average"
+      },
+      {
+        "strategy_id": "enhanced_vwap_mean_reversion_and_momentum_strategy_2a71af55",
+        "weight": 0.14111432002515234,
+        "enabled": true,
+        "rationale": "committee simple_average"
+      }
+    ],
+    "flagged_strategy_ids": [],
+    "retired_strategy_ids": [],
+    "expected_metrics": {
+      "expected_volatility": 0.12985578261927785,
+      "expected_variance": 0.016862524279665145,
+      "gross_exposure": 1.0,
+      "net_exposure": 1.0,
+      "expected_return": 0.2808119702762024,
+      "expected_sharpe": 2.162491069800955
+    },
+    "pm_rationale": "Committee aggregation (simple_average) of 3 PMs:\n  \u2022 fund_committee_defensive (defensive, method=equal_weight)\n  \u2022 fund_committee_balanced (balanced, method=risk_parity)\n  \u2022 fund_committee_aggressive (aggressive, method=max_sharpe)\n\nsimple_average of 3 PM proposals.",
+    "created_at": "2026-06-16T08:49:53.555132",
+    "metadata": {
+      "voting_method": "simple_average",
+      "flag_threshold": 0.5,
+      "retire_threshold": 0.5,
+      "n_pms": 3,
+      "pm_names": [
+        "fund_committee_defensive",
+        "fund_committee_balanced",
+        "fund_committee_aggressive"
+      ],
+      "pm_proposals": [
+        {
+          "pm_name": "fund_committee_defensive",
+          "personality": "defensive",
+          "construction_method": "equal_weight",
+          "weights": {},
+          "flagged": [],
+          "retired": [],
+          "rationale": "no eligible strategies\n\nno strategies passed screening \u2014 empty portfolio"
+        },
+        {
+          "pm_name": "fund_committee_balanced",
+          "personality": "balanced",
+          "construction_method": "risk_parity",
+          "weights": {
+            "mean_reversion_momentum_7cef7081": 1.0
+          },
+          "flagged": [],
+          "retired": [],
+          "rationale": "SELECTOR mode: top-10 by IS Sharpe with diversification cap |\u03c1| <= 0.8 and personality filters (min_sharpe=0.6, max_dd=-0.1).\n\nSELECTOR mode: using personality default method 'risk_parity' with target_n=10 strategies."
+        },
+        {
+          "pm_name": "fund_committee_aggressive",
+          "personality": "aggressive",
+          "construction_method": "max_sharpe",
+          "weights": {
+            "mean_reversion_momentum_7cef7081": 0.7177713599496952,
+            "enhanced_vwap_mean_reversion_and_momentum_strategy_2a71af55": 0.2822286400503047
+          },
+          "flagged": [],
+          "retired": [],
+          "rationale": "SELECTOR mode: top-6 by IS Sharpe with diversification cap |\u03c1| <= 0.9 and personality filters (min_sharpe=0.4, max_dd=-0.2).\n\nSELECTOR mode: using personality default method 'max_sharpe' with target_n=6 strategies."
+        }
+      ]
+    }
+  },
+  {
+    "id": "portfolio_965491416e",
+    "pm_name": "fund_committee",
+    "mode": "selector",
+    "personality": "defensive",
+    "construction_method": "equal_weight",
+    "target_n_strategies": 12,
+    "allocations": [
+      {
+        "strategy_id": "mean_reversion_and_momentum_hybrid_strategy_a310327d",
+        "weight": 0.5959898161690125,
+        "enabled": true,
+        "rationale": "committee simple_average"
+      },
+      {
+        "strategy_id": "enhanced_mean_reversion_with_momentum_eda109a8",
+        "weight": 0.36784264289531643,
+        "enabled": true,
+        "rationale": "committee simple_average"
+      },
+      {
+        "strategy_id": "enhanced_vwap_mean_reversion_and_momentum_strategy_2a71af55",
+        "weight": 0.036167540935671115,
+        "enabled": true,
+        "rationale": "committee simple_average"
+      }
+    ],
+    "flagged_strategy_ids": [],
+    "retired_strategy_ids": [],
+    "expected_metrics": {
+      "expected_volatility": 0.12765621472224667,
+      "expected_variance": 0.016296109157212347,
+      "gross_exposure": 1.0,
+      "net_exposure": 1.0,
+      "expected_return": 0.7693967511396153,
+      "expected_sharpe": 6.027099838528522
+    },
+    "pm_rationale": "Committee aggregation (simple_average) of 3 PMs:\n  \u2022 fund_committee_defensive (defensive, method=equal_weight)\n  \u2022 fund_committee_balanced (balanced, method=risk_parity)\n  \u2022 fund_committee_aggressive (aggressive, method=max_sharpe)\n\nsimple_average of 3 PM proposals.",
+    "created_at": "2026-06-16T08:53:06.327287",
+    "metadata": {
+      "voting_method": "simple_average",
+      "flag_threshold": 0.5,
+      "retire_threshold": 0.5,
+      "n_pms": 3,
+      "pm_names": [
+        "fund_committee_defensive",
+        "fund_committee_balanced",
+        "fund_committee_aggressive"
+      ],
+      "pm_proposals": [
+        {
+          "pm_name": "fund_committee_defensive",
+          "personality": "defensive",
+          "construction_method": "equal_weight",
+          "weights": {},
+          "flagged": [],
+          "retired": [],
+          "rationale": "no eligible strategies\n\nno strategies passed screening \u2014 empty portfolio"
+        },
+        {
+          "pm_name": "fund_committee_balanced",
+          "personality": "balanced",
+          "construction_method": "risk_parity",
+          "weights": {
+            "enhanced_mean_reversion_with_momentum_eda109a8": 0.5557394359962257,
+            "mean_reversion_and_momentum_hybrid_strategy_a310327d": 0.4442605640037743
+          },
+          "flagged": [],
+          "retired": [],
+          "rationale": "SELECTOR mode: top-10 by IS Sharpe with diversification cap |\u03c1| <= 0.8 and personality filters (min_sharpe=0.6, max_dd=-0.1).\n\nSELECTOR mode: using personality default method 'risk_parity' with target_n=10 strategies."
+        },
+        {
+          "pm_name": "fund_committee_aggressive",
+          "personality": "aggressive",
+          "construction_method": "max_sharpe",
+          "weights": {
+            "mean_reversion_and_momentum_hybrid_strategy_a310327d": 0.7477190683342505,
+            "enhanced_mean_reversion_with_momentum_eda109a8": 0.17994584979440717,
+            "enhanced_vwap_mean_reversion_and_momentum_strategy_2a71af55": 0.07233508187134223
+          },
+          "flagged": [],
+          "retired": [],
+          "rationale": "SELECTOR mode: top-6 by IS Sharpe with diversification cap |\u03c1| <= 0.9 and personality filters (min_sharpe=0.4, max_dd=-0.2).\n\nSELECTOR mode: using personality default method 'max_sharpe' with target_n=6 strategies."
+        }
+      ]
+    }
+  },
+  {
+    "id": "portfolio_4304f4c3ca",
+    "pm_name": "fund_committee",
+    "mode": "selector",
+    "personality": "defensive",
+    "construction_method": "equal_weight",
+    "target_n_strategies": 12,
+    "allocations": [
+      {
+        "strategy_id": "mean_reversion_and_momentum_hybrid_strategy_a310327d",
+        "weight": 0.49569958811329506,
+        "enabled": true,
+        "rationale": "committee simple_average"
+      },
+      {
+        "strategy_id": "enhanced_mean_reversion_with_momentum_eda109a8",
+        "weight": 0.27089741801768114,
+        "enabled": true,
+        "rationale": "committee simple_average"
+      },
+      {
+        "strategy_id": "hybrid_mean_reversion_and_momentum_strategy_0831d2f9",
+        "weight": 0.19494606225552752,
+        "enabled": true,
+        "rationale": "committee simple_average"
+      },
+      {
+        "strategy_id": "enhanced_mean_reversion_and_momentum_strategy_a151a572",
+        "weight": 0.03845693161349634,
+        "enabled": true,
+        "rationale": "committee simple_average"
+      }
+    ],
+    "flagged_strategy_ids": [],
+    "retired_strategy_ids": [],
+    "expected_metrics": {
+      "expected_volatility": 0.11150969993757207,
+      "expected_variance": 0.012434413180167359,
+      "gross_exposure": 1.0,
+      "net_exposure": 1.0,
+      "expected_return": 0.66688655689786,
+      "expected_sharpe": 5.98052507782921
+    },
+    "pm_rationale": "Committee aggregation (simple_average) of 3 PMs:\n  \u2022 fund_committee_defensive (defensive, method=equal_weight)\n  \u2022 fund_committee_balanced (balanced, method=risk_parity)\n  \u2022 fund_committee_aggressive (aggressive, method=max_sharpe)\n\nsimple_average of 3 PM proposals.",
+    "created_at": "2026-06-20T09:40:52.070371",
+    "metadata": {
+      "voting_method": "simple_average",
+      "flag_threshold": 0.5,
+      "retire_threshold": 0.5,
+      "n_pms": 3,
+      "pm_names": [
+        "fund_committee_defensive",
+        "fund_committee_balanced",
+        "fund_committee_aggressive"
+      ],
+      "pm_proposals": [
+        {
+          "pm_name": "fund_committee_defensive",
+          "personality": "defensive",
+          "construction_method": "equal_weight",
+          "weights": {},
+          "flagged": [],
+          "retired": [],
+          "rationale": "no eligible strategies\n\nno strategies passed screening \u2014 empty portfolio"
+        },
+        {
+          "pm_name": "fund_committee_balanced",
+          "personality": "balanced",
+          "construction_method": "risk_parity",
+          "weights": {
+            "hybrid_mean_reversion_and_momentum_strategy_0831d2f9": 0.36953388971829676,
+            "enhanced_mean_reversion_with_momentum_eda109a8": 0.3658781880922024,
+            "mean_reversion_and_momentum_hybrid_strategy_a310327d": 0.26458792218950095
+          },
+          "flagged": [],
+          "retired": [],
+          "rationale": "SELECTOR mode: top-10 by IS Sharpe with diversification cap |\u03c1| <= 0.8 and personality filters (min_sharpe=0.6, max_dd=-0.1).\n\nSELECTOR mode: using personality default method 'risk_parity' with target_n=10 strategies."
+        },
+        {
+          "pm_name": "fund_committee_aggressive",
+          "personality": "aggressive",
+          "construction_method": "max_sharpe",
+          "weights": {
+            "mean_reversion_and_momentum_hybrid_strategy_a310327d": 0.7268112540370891,
+            "enhanced_mean_reversion_with_momentum_eda109a8": 0.17591664794315984,
+            "enhanced_mean_reversion_and_momentum_strategy_a151a572": 0.07691386322699267,
+            "hybrid_mean_reversion_and_momentum_strategy_0831d2f9": 0.020358234792758285
+          },
+          "flagged": [],
+          "retired": [],
+          "rationale": "SELECTOR mode: top-6 by IS Sharpe with diversification cap |\u03c1| <= 0.9 and personality filters (min_sharpe=0.4, max_dd=-0.2).\n\nSELECTOR mode: using personality default method 'max_sharpe' with target_n=6 strategies."
+        }
+      ]
+    }
+  }
+]

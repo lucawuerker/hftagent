@@ -110,11 +110,36 @@ ensemble), and the full downstream agentic fund:
   --llm-provider anthropic --dedup-scope prerun --target-factors 50
 
 # 2. Compare them → figures + tables + report.md + comparison.ipynb under
-#    data/comparisons/<id>/.  IC + brute-force are LLM-free; --no-downstream
-#    skips the only LLM-spending track for a fully offline run.
+#    data/comparisons/<id>/.  Four tracks: single-factor IC, factor analytics
+#    (diversity/redundancy + deflation/importance), ML-combined-signal vectorised
+#    backtest, downstream agents.  Only downstream spends LLM; --no-downstream is
+#    a fully offline run.
 ./venv/bin/python run_model_comparison.py --preruns gpt4omini,claude
 QF_USE_MCP=0 ./venv/bin/python run_model_comparison.py --all --no-downstream
+
+# Fast + crash-safe on the big intraday panel: --fast strides the panel to
+# 20000 bars (override with --max-bars), and every track is checkpointed to
+# disk as it finishes (status.json), so an interrupt never loses progress.
+./venv/bin/python run_model_comparison.py --preruns gpt4omini,claude \
+  --data-dir ticker_data --no-downstream --fast
 ```
+
+The **factor-analytics** track (`comparison/analytics.py`) is near-free — it reuses
+the factor signals already cached by the IC track — and answers questions IC and the
+ML track can't: is a zoo genuinely *diverse* or just redundant variants
+(`eff_n_factors`, `eff_ratio`, `n_clusters`), and is its best |IC| real or a
+multiple-testing artefact (`deflated_best_ic`, `deflated_best_t`), plus which factors a
+model actually leans on (LASSO/GBM importance, `lasso_sparsity`).
+
+Single factors are scored by **IC** (cross-sectional rank-IC). The **ML track** instead
+treats a factor zoo as inputs to a model: each catalog model + an ensemble fits the factors
+(standardised per-underlying over time on the in-sample window) into **one combined signal**
+and that signal is run through a **simple per-underlying vectorised backtest** —
+`position(signal) × the underlying's own forward return`, fit on IS and evaluated OOS — *not*
+a cross-sectional ranking, so it works with any number of underlyings (even one). Every
+modelling choice is a CLI argument: `--position-mode {threshold,sign,continuous}`
+(default threshold band, `--position-threshold`), `--position-zscore {expanding,full,rolling,none}`,
+`--aggregation {portfolio,per_underlying}`, `--fit-standardize {per_underlying,cross_sectional}`.
 
 Factors that need data not yet downloaded (e.g. fundamentals) are filtered and
 reported, so the comparison runs on the current data and re-runs unchanged once
@@ -158,6 +183,8 @@ Reads academic PDFs, proposes factor ideas, generates Python implementations, an
 **Codegen:** `agents/factor_research/codegen.py` validates generated code (AST checks, import allow-list, smoke test on synthetic data) before registering factors.
 
 **Seed vs researcher factors:** seed alphas live under `quant_fund_agent/factors/` (version-controlled). Researcher output goes to `factors/researcher/` (gitignored) and is tagged `source=RESEARCHER` in the factor DB. `purge_researcher_factors()` clears researcher state between simulation runs.
+
+**Data scope:** the researcher only invents factors the configured feed can serve. `pipeline.run_research_session` computes `data.usable_fields(settings)` — the provider's advertised fields, honoring the LOBSTER **order-book level** (`lobster_level` 2 vs 3, set in `setup`) and the **fundamentals** opt-out — and threads it onto `FactorResearcherState.allowed_fields`. The brainstorm/codegen data-context (`prompts.build_data_context`) lists only those fields, and `filter_and_persist` drops any factor whose `inputs` fall outside the scope.
 
 **Lookahead:** paper selection respects `published_date`; the IC backtest panel can be sliced to a `cutoff_date`.
 
@@ -318,6 +345,8 @@ python -m quant_fund_agent.setup      # choose provider/universe/timespan → qu
 ./venv/bin/python run_fund.py --n-strategies 1
 ```
 
+The wizard also pins **what data the Factor Researcher may use**: for LOBSTER it asks the **order-book level** (`--lobster-level` 2 = book only + volume, 3 = full message stream incl. trades/order-flow/hidden), and for the API vendors whether to use **fundamentals** (`--fundamentals yes|no`, equity FMP/AlphaVantage). The researcher then only proposes factors the chosen scope can serve.
+
 Prefer plain English? `--assist` lets an LLM draft the config, which the wizard
 then shows for you to confirm:
 
@@ -360,7 +389,33 @@ sentiment + macro are the next (planned) fields.
 **LOBSTER specifics:** place CSVs under `ticker_data/` (or set `DATA_DIR`). The
 loader (`backtesting/data_loader.py`) builds an aligned panel of OHLCV plus
 microstructure fields (`orderFlow`, `lobImb`, `spread`, `nbTrades`, etc.) on a
-shared 10-second index.
+shared 10-second index, **including per-level book columns** when present
+(`askPrice{i}`/`askDepth{i}`/`bidPrice{i}`/`bidDepth{i}` — the price and displayed
+depth at each order-book level, discovered from the CSV header so any level count
+works).
+
+**Building `ticker_data` from LOBSTER.** `quant_fund_agent/data/lobster_ingest/`
+converts LOBSTER exports into the 10s-bar format above — levels-agnostic, one day
+at a time (RAM-bounded), clipped to the regular session (2340 bars/day). It
+auto-detects the product: **raw** message+orderbook (the 19 aggregate columns) or
+the **sampled** 10s order book (book columns only; flow columns empty); both also
+emit the per-level price/depth columns (`4·NumLevels` of them). Convert a folder
+or a `.7z` you already have, offline:
+
+```bash
+./venv/bin/python scripts/convert_lobster.py --raw-dir GLD_2026-06-01_2026-06-11_3
+```
+
+For a multi-ticker, multi-year pull, `scripts/run_lobster_ingest.py` drives the
+LOBSTER web portal end-to-end (validated live): a one-time `--recon` login, then
+`--place-raw` requests the **raw** message+orderbook product (the single
+`requestdata.php` form → the 19 aggregate columns + per-level book columns; the
+bulk form returns only a book), and
+`--ingest` downloads each finished `.7z` off `mydata.php` and **stream-converts it
+day-by-day then deletes it** — so a 2-year raw archive never unzips in full.
+Resumable via `orders_done.json`. The derived microstructure columns are
+**reconstructed** from the LOBSTER spec (see the drift-warning in
+[`docs/lobster-ingestion/`](docs/lobster-ingestion/README.md)).
 
 Persisted state (modularised by config + prerun):
 

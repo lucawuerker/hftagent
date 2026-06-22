@@ -57,10 +57,10 @@ from quant_fund_agent.agents.factor_research.codegen import purge_researcher_cod
 from quant_fund_agent.agents.factor_research.prompts import (
     BRAINSTORM_PROMPT,
     CODEGEN_PROMPT,
-    DATA_CONTEXT,
     EXAMPLE_FACTOR,
     OPERATOR_REFERENCE,
     RETRY_FEEDBACK,
+    build_data_context,
 )
 from quant_fund_agent.agents.factor_research.state import (
     FactorCandidate,
@@ -227,11 +227,12 @@ def _render_brainstorm_prompt(
     paper: PaperSnippet | None,
     n_ideas: int,
     known_ids: set[str],
+    data_context: str,
 ) -> str:
     block = _papers_block([paper] if paper else [])
     return BRAINSTORM_PROMPT.format(
         n_ideas=n_ideas,
-        data_context=DATA_CONTEXT,
+        data_context=data_context,
         papers_block=block,
         existing_ids=", ".join(sorted(known_ids)) if known_ids else "(none)",
     )
@@ -257,6 +258,7 @@ def _brainstorm_one(
     n_ideas: int,
     known_ids: set[str],
     session_id: str,
+    data_context: str,
 ) -> list[dict]:
     """Brainstorm ideas over a *single* paper (or own knowledge).
 
@@ -273,7 +275,7 @@ def _brainstorm_one(
     """
     tag = paper.paper_id if paper else "own-knowledge"
 
-    prompt = _render_brainstorm_prompt(paper, n_ideas, known_ids)
+    prompt = _render_brainstorm_prompt(paper, n_ideas, known_ids, data_context)
     # Common path: the whole paper fits in one call.  (Knowledge-only has
     # no paper body to split, so it always goes here.)
     if paper is None or _count_tokens(prompt) <= BRAINSTORM_MAX_INPUT_TOKENS:
@@ -284,7 +286,7 @@ def _brainstorm_one(
     # body on token boundaries so every part's prompt is guaranteed to fit.
     overhead = _count_tokens(
         _render_brainstorm_prompt(paper.model_copy(update={"text": ""}),
-                                  n_ideas, known_ids)
+                                  n_ideas, known_ids, data_context)
     )
     # Small reserve absorbs the per-part "(part i/n)" title suffix and the
     # fact that token counts aren't exactly additive across a split point.
@@ -300,7 +302,8 @@ def _brainstorm_one(
         part_paper = paper.model_copy(
             update={"text": body, "title": f"{paper.title} (part {i}/{n})"}
         )
-        part_prompt = _render_brainstorm_prompt(part_paper, n_ideas, known_ids)
+        part_prompt = _render_brainstorm_prompt(
+            part_paper, n_ideas, known_ids, data_context)
         ideas.extend(_invoke_brainstorm(
             llm, part_prompt, f"{tag} part {i}/{n}", n_ideas, session_id))
     return ideas
@@ -321,6 +324,10 @@ def brainstorm(state: FactorResearcherState) -> dict:
     seen: set[str] = set()
     ideas: list[FactorIdea] = []
 
+    # Only describe the fields this run can actually supply, so brainstormed
+    # ideas stay within the configured data scope (LOBSTER level / fundamentals).
+    data_context = build_data_context(state.allowed_fields)
+
     budget = state.n_factor_ideas
     papers = state.selected_papers
     if papers:
@@ -337,7 +344,8 @@ def brainstorm(state: FactorResearcherState) -> dict:
     for paper, n_ask in plan:
         if len(ideas) >= budget:
             break
-        raw_ideas = _brainstorm_one(llm, paper, n_ask, known_ids, state.session_id)
+        raw_ideas = _brainstorm_one(
+            llm, paper, n_ask, known_ids, state.session_id, data_context)
         for raw in raw_ideas:
             if len(ideas) >= budget:
                 break
@@ -368,7 +376,7 @@ def brainstorm(state: FactorResearcherState) -> dict:
 # Node 3: generate_code (per idea, in a plain Python loop)
 # ---------------------------------------------------------------------------
 
-def _codegen_prompt(idea: FactorIdea, feedback: str = "") -> str:
+def _codegen_prompt(idea: FactorIdea, data_context: str, feedback: str = "") -> str:
     """Render the codegen prompt for one idea, optionally with retry feedback.
 
     On the first try ``feedback`` is empty so the FEEDBACK block in
@@ -377,7 +385,7 @@ def _codegen_prompt(idea: FactorIdea, feedback: str = "") -> str:
     """
     feedback_block = RETRY_FEEDBACK.format(error=feedback) if feedback else ""
     return CODEGEN_PROMPT.format(
-        data_context=DATA_CONTEXT,
+        data_context=data_context,
         operator_reference=OPERATOR_REFERENCE,
         example_factor=EXAMPLE_FACTOR,
         factor_id=idea.factor_id,
@@ -392,6 +400,7 @@ def _codegen_prompt(idea: FactorIdea, feedback: str = "") -> str:
 def _try_codegen_once(
     llm: ChatOpenAI,
     idea: FactorIdea,
+    data_context: str,
     feedback: str = "",
 ) -> tuple[str | None, str]:
     """One LLM round-trip + materialise.
@@ -401,7 +410,7 @@ def _try_codegen_once(
     back into a retry prompt.
     """
     try:
-        resp = llm.invoke(_codegen_prompt(idea, feedback=feedback))
+        resp = llm.invoke(_codegen_prompt(idea, data_context, feedback=feedback))
         parsed = _parse_json(resp.content)
         code = parsed.get("code", "")
     except Exception as e:
@@ -427,13 +436,18 @@ def generate_code(state: FactorResearcherState) -> dict:
     llm = _get_llm(temperature=0.2)  # lower temp for code-gen
     max_retries = 1
 
+    # Same field-scoped context as brainstorm, so generated code only reads
+    # fields this run can supply (out-of-scope factors are also gated at persist).
+    data_context = build_data_context(state.allowed_fields)
+
     for idea in state.factor_ideas:
-        code_path, error = _try_codegen_once(llm, idea)
+        code_path, error = _try_codegen_once(llm, idea, data_context)
         attempts = 1
         while code_path is None and attempts <= max_retries:
             log.info("[%s] codegen attempt %d failed (%s) — retrying with feedback",
                      idea.factor_id, attempts, error)
-            code_path, error = _try_codegen_once(llm, idea, feedback=error)
+            code_path, error = _try_codegen_once(
+                llm, idea, data_context, feedback=error)
             attempts += 1
 
         if code_path is None:
@@ -548,13 +562,34 @@ def filter_and_persist(state: FactorResearcherState) -> dict:
             cand.code_path                       # was materialised
             and cand.backtest_metrics is not None  # IC backtest ran without erroring
         )
+
+        # Resolve the factor's declared inputs once (for the scope gate below
+        # and for the persisted provenance / required_tier).
+        from quant_fund_agent.factors.registry import get_factor_class
+
+        _cls = get_factor_class(fid) if cand.code_path else None
+        _inputs = list(getattr(_cls, "inputs", ["close"]) or ["close"]) if _cls else ["close"]
+
+        # Out-of-scope gate: drop a factor that reads a field this run's data
+        # feed cannot supply (e.g. a Level-3 microstructure field on a Level-2
+        # LOBSTER config, or a fundamental field with fundamentals turned off),
+        # even if its IC backtest happened to run.  ``allowed_fields is None``
+        # disables the gate (un-scoped legacy callers).
+        if passes and state.allowed_fields is not None:
+            from quant_fund_agent.data.tiers import SYNTHESIZED_FIELDS, is_compatible
+
+            if not is_compatible(_inputs, set(state.allowed_fields)):
+                out_of_scope = sorted(
+                    set(_inputs) - set(state.allowed_fields) - set(SYNTHESIZED_FIELDS)
+                )
+                passes = False
+                cand.rejected_reason = (
+                    f"uses fields outside the configured data scope: {out_of_scope}"
+                )
+
         if passes:
             # Capture the factor's data requirements for provider gating.
             from quant_fund_agent.data.tiers import required_tier
-            from quant_fund_agent.factors.registry import get_factor_class
-
-            _cls = get_factor_class(fid)
-            _inputs = list(getattr(_cls, "inputs", ["close"]) or ["close"]) if _cls else ["close"]
 
             record = FactorRecord(
                 id=fid,

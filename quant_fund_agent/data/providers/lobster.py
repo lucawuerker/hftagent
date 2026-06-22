@@ -13,7 +13,7 @@ from __future__ import annotations
 import pandas as pd
 
 from quant_fund_agent.data.providers.base import DataProvider
-from quant_fund_agent.data.tiers import TIERS
+from quant_fund_agent.data.tiers import lobster_fields_for_level
 
 
 class LobsterProvider(DataProvider):
@@ -23,16 +23,26 @@ class LobsterProvider(DataProvider):
     asset_classes = ("equity",)
 
     def available_fields(self) -> frozenset[str]:
-        # LOBSTER supplies OHLCV + full microstructure, but NOT the fundamental
-        # classification fields (sector/industry/cap).
-        return TIERS["standard"] | TIERS["microstructure"]
+        # LOBSTER supplies OHLCV + microstructure, but NOT the fundamental
+        # classification fields (sector/industry/cap).  Which microstructure
+        # fields are advertised depends on the configured order-book level: a
+        # Level-2 feed exposes only book-derivable fields, a Level-3 feed adds
+        # the trade/message-stream fields (see ``data.lobster_level``).
+        level = int(getattr(self.data, "lobster_level", 3) or 3)
+        return lobster_fields_for_level(level)
 
     def load(self, *, fields: list[str] | None = None) -> dict[str, pd.DataFrame]:
         from quant_fund_agent.backtesting.data_loader import load_panel
 
+        # Resolve explicit list > preset > None (auto-discover from disk).
+        tickers = self.data.tickers
+        if tickers is None and self.data.universe_preset:
+            from quant_fund_agent.data.universe import resolve_universe
+            tickers = resolve_universe(self.data)
+
         return load_panel(
             self.data.data_dir,
-            tickers=self.data.tickers,
+            tickers=tickers,
             fields=fields,
             n_tickers=self.data.n_tickers,
             dtype=self.data.dtype,

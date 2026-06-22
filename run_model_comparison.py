@@ -76,6 +76,8 @@ def _parse_args() -> argparse.Namespace:
                    help="Also expose the 88 seed alphas to every track (default: only "
                         "the researched factors).")
     p.add_argument("--no-ic", action="store_true", help="Skip the single-factor IC track.")
+    p.add_argument("--no-analytics", action="store_true",
+                   help="Skip the factor-analytics track (diversity + deflation/importance).")
     p.add_argument("--no-bruteforce", action="store_true", help="Skip the brute-force ML track.")
     p.add_argument("--no-downstream", action="store_true",
                    help="Skip the (LLM-spending) downstream-agent track.")
@@ -97,6 +99,30 @@ def _parse_args() -> argparse.Namespace:
                    help="Fraction (0–1] of training ROWS used to FIT each model; the "
                         "backtest still uses all data. The main lever for the heavy "
                         "tree/boosting models. Default 1.0 (or 0.1 under --fast).")
+    p.add_argument("--max-bars", type=int, default=None,
+                   help="Uniformly subsample the panel to at most N timestamps (the biggest "
+                        "speed lever on the intraday panel; slims EVERY track and removes the "
+                        "brute-force OOM). Default = all bars (or 20000 under --fast).")
+    p.add_argument("--analytics-max-rows", type=int, default=None,
+                   help="Cap (timestamp×ticker) rows used in the analytics correlation / "
+                        "importance fits (default 50000).")
+    p.add_argument("--corr-threshold", type=float, default=None,
+                   help="|corr| ≥ τ groups factors into a redundancy cluster (default 0.7).")
+    p.add_argument("--no-checkpoint", action="store_true",
+                   help="Disable persisting tables/figures after each track (crash-safety).")
+    # ── ML-combined-signal vectorised backtest (brute-force track) ──
+    p.add_argument("--fit-standardize", choices=["per_underlying", "cross_sectional"], default=None,
+                   help="How factors are standardised before the ML fit (default per_underlying).")
+    p.add_argument("--position-mode", choices=["threshold", "sign", "continuous"], default=None,
+                   help="Map the combined signal to a position (default threshold band).")
+    p.add_argument("--position-threshold", type=float, default=None,
+                   help="±t (in z units) for the threshold band (default 1.0).")
+    p.add_argument("--position-zscore", choices=["expanding", "full", "rolling", "none"], default=None,
+                   help="Per-underlying z-score basis for the position signal (default expanding).")
+    p.add_argument("--position-zscore-window", type=int, default=None,
+                   help="Window for the 'rolling' position z-score basis (default 500).")
+    p.add_argument("--aggregation", choices=["portfolio", "per_underlying"], default=None,
+                   help="Combine per-underlying P&L into one book, or report per-underlying mean/std (default portfolio).")
     p.add_argument("--data-dir", default=os.getenv("DATA_DIR", "ticker_data"))
     p.add_argument("--out-dir", default=None, help="Override the output folder.")
     # ── optional research stage (creates the preruns first) ──
@@ -136,9 +162,59 @@ def _run_research(specs: list[str], target_factors: int, dedup_scope: str,
     return names
 
 
+def _write_status(cfg, status: dict) -> None:
+    """Write ``status.json`` (which tracks have completed) into the output dir."""
+    import json
+
+    out = cfg.output_dir
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "status.json").write_text(json.dumps(status, indent=2, default=str))
+
+
+def _checkpoint(cfg, results: dict, status: dict) -> None:
+    """Persist tables + figures so far so a later crash can't wipe progress.
+
+    Both ``write_tables`` and ``render_figures`` overwrite, so calling them after
+    every track is idempotent and cheap relative to the tracks themselves.
+    """
+    from quant_fund_agent.comparison import report
+
+    if not cfg.checkpoint:
+        return
+    try:
+        report.write_tables(cfg, results)
+        report.render_figures(cfg, results)
+        _write_status(cfg, status)
+    except Exception as e:  # noqa: BLE001 — a checkpoint failure must not abort the run
+        log.warning("checkpoint failed (continuing): %s", e)
+
+
+def _run_track(name: str, fn, cfg, results: dict, status: dict) -> None:
+    """Run one track, record status, and checkpoint — never aborting the whole run."""
+    import time
+
+    log.info("── track '%s' starting ──", name)
+    t0 = time.time()
+    try:
+        fn()
+        status["tracks"][name] = {"status": "ok", "seconds": round(time.time() - t0, 1)}
+    except Exception as e:  # noqa: BLE001 — one track failing must not lose the others
+        log.exception("track '%s' failed: %s", name, e)
+        status["tracks"][name] = {"status": "failed", "error": str(e)[:300],
+                                  "seconds": round(time.time() - t0, 1)}
+    _checkpoint(cfg, results, status)
+
+
 def main() -> None:
     args = _parse_args()
-    from quant_fund_agent.comparison import bruteforce, downstream, factors, ic, report
+    from quant_fund_agent.comparison import (
+        analytics,
+        bruteforce,
+        downstream,
+        factors,
+        ic,
+        report,
+    )
     from quant_fund_agent.comparison.config import ComparisonConfig
     from quant_fund_agent.factors import preruns
 
@@ -156,10 +232,15 @@ def main() -> None:
         raise SystemExit("No preruns to compare. Create some with run_factor_research.py "
                          "--name <id> --model <llm>, or pass --research --prerun-spec ….")
 
-    # --fast implies a low default training-row fraction unless one is given.
+    # --fast implies a low default training-row fraction AND a slim panel unless
+    # one is given (so "fast" is genuinely fast end-to-end on the intraday panel).
     train_sample_frac = (
         args.train_sample_frac if args.train_sample_frac is not None
         else (0.1 if args.fast else 1.0)
+    )
+    max_bars = (
+        args.max_bars if args.max_bars is not None
+        else (20_000 if args.fast else None)
     )
 
     cfg = ComparisonConfig(
@@ -167,12 +248,22 @@ def main() -> None:
         models=[m.strip() for m in args.models.split(",")] if args.models else None,
         include_ensemble=not args.no_ensemble,
         include_seeds=args.include_seeds,
-        run_ic=not args.no_ic, run_bruteforce=not args.no_bruteforce,
+        run_ic=not args.no_ic, run_analytics=not args.no_analytics,
+        run_bruteforce=not args.no_bruteforce,
         run_downstream=not args.no_downstream,
         target_horizon=args.horizon, ic_horizons=(1, args.horizon, 60),
         oos_split_ratio=args.oos_ratio, n_strategies=args.n_strategies,
-        data_dir=args.data_dir, n_tickers=args.n_tickers,
+        data_dir=args.data_dir, n_tickers=args.n_tickers, max_bars=max_bars,
         fast=args.fast, train_sample_frac=train_sample_frac,
+        checkpoint=not args.no_checkpoint,
+        **({"analytics_max_rows": args.analytics_max_rows} if args.analytics_max_rows else {}),
+        **({"corr_threshold": args.corr_threshold} if args.corr_threshold is not None else {}),
+        **({"fit_standardize": args.fit_standardize} if args.fit_standardize else {}),
+        **({"position_mode": args.position_mode} if args.position_mode else {}),
+        **({"position_threshold": args.position_threshold} if args.position_threshold is not None else {}),
+        **({"position_zscore_basis": args.position_zscore} if args.position_zscore else {}),
+        **({"position_zscore_window": args.position_zscore_window} if args.position_zscore_window else {}),
+        **({"backtest_aggregation": args.aggregation} if args.aggregation else {}),
     )
     if args.out_dir:
         cfg.output_root = str(Path(args.out_dir).parent)
@@ -180,13 +271,19 @@ def main() -> None:
 
     log.info("Comparison '%s' over %d prerun(s): %s", cfg.comparison_id,
              len(prerun_names), prerun_names)
-    if cfg.fast or cfg.train_sample_frac < 1.0 or cfg.n_tickers is not None:
-        log.info("speed: fast=%s  train_sample_frac=%.3g  n_tickers=%s  models=%s",
-                 cfg.fast, cfg.train_sample_frac, cfg.n_tickers,
+    if cfg.fast or cfg.train_sample_frac < 1.0 or cfg.n_tickers is not None or cfg.max_bars:
+        log.info("speed: fast=%s  train_sample_frac=%.3g  n_tickers=%s  max_bars=%s  models=%s",
+                 cfg.fast, cfg.train_sample_frac, cfg.n_tickers, cfg.max_bars,
                  cfg.models or "all")
 
     # ── shared panel + per-prerun usable factor ids ──
-    panel = factors.load_panel_cached(cfg.data_dir, cfg.n_tickers)
+    panel = factors.load_panel_cached(cfg.data_dir, cfg.n_tickers, cfg.max_bars)
+    universe = next(iter(panel.values())).shape[1] if panel else 0
+    if universe < 2:
+        log.warning("universe has %d ticker(s): this comparison is CROSS-SECTIONAL "
+                    "(rank-IC, the ML fits and factor correlations all need ≥2 names), so "
+                    "IC/brute-force will be degenerate. For speed prefer --max-bars over "
+                    "--n-tickers.", universe)
     names_map = factors.factor_names(prerun_names)
     prerun_models = {p: (preruns.read_manifest(p).get("llm_model", "?")) for p in prerun_names}
 
@@ -202,49 +299,88 @@ def main() -> None:
                  p, len(ok), len(all_ids))
 
     results: dict = {"usability": usability, "prerun_models": prerun_models}
+    status: dict = {"comparison_id": cfg.comparison_id, "tracks": {}}
+    _checkpoint(cfg, results, status)  # persist usability immediately
 
     # ── track 1: single-factor IC ──
     if cfg.run_ic:
-        ic_rows: list = []
-        for p in prerun_names:
-            ic_rows += ic.evaluate_prerun_ic(p, usable[p], panel,
-                                             tuple(cfg.ic_horizons), names_map)
-        results["ic_rows"] = ic_rows
-        results["ic_summary"] = ic.summarise_ic(ic_rows, tuple(cfg.ic_horizons))
+        def _ic() -> None:
+            ic_rows: list = []
+            for p in prerun_names:
+                ic_rows += ic.evaluate_prerun_ic(p, usable[p], panel,
+                                                 tuple(cfg.ic_horizons), names_map)
+            results["ic_rows"] = ic_rows
+            results["ic_summary"] = ic.summarise_ic(ic_rows, tuple(cfg.ic_horizons))
+        _run_track("ic", _ic, cfg, results, status)
 
-    # ── track 2: brute-force ML ──
+    # ── track 2: factor analytics (diversity/redundancy + deflation/importance) ──
+    if cfg.run_analytics:
+        def _an() -> None:
+            div_summary, div_factor, corr_mats = [], [], {}
+            mv_summary, imp_rows = [], []
+            for p in prerun_names:
+                if not usable[p]:
+                    continue
+                s, f, corr = analytics.evaluate_prerun_diversity(p, usable[p], panel, cfg, names_map)
+                div_summary.append(s); div_factor += f; corr_mats[p] = corr
+                ms, ir = analytics.evaluate_prerun_modelview(
+                    p, usable[p], panel, cfg, ic_rows=results.get("ic_rows"), names=names_map)
+                mv_summary.append(ms); imp_rows += ir
+            results["diversity_summary"] = div_summary
+            results["diversity_factor"] = div_factor
+            results["corr_matrices"] = corr_mats
+            results["modelview_summary"] = mv_summary
+            results["importance_rows"] = imp_rows
+        _run_track("analytics", _an, cfg, results, status)
+
+    # ── track 3: brute-force ML ──
     if cfg.run_bruteforce:
-        bf_rows: list = []
-        for p in prerun_names:
-            if not usable[p]:
-                log.warning("prerun '%s' has no usable factors — skipping brute-force.", p)
-                continue
-            bf_rows += bruteforce.evaluate_prerun_models(p, usable[p], cfg)
-        results["bruteforce_rows"] = bf_rows
+        def _bf() -> None:
+            bf_rows: list = []
+            for p in prerun_names:
+                if not usable[p]:
+                    log.warning("prerun '%s' has no usable factors — skipping brute-force.", p)
+                    continue
+                bf_rows += bruteforce.evaluate_prerun_models(p, usable[p], panel, cfg)
+            results["bruteforce_rows"] = bf_rows
+        _run_track("bruteforce", _bf, cfg, results, status)
 
-    # ── track 3: downstream agents (LLM) ──
+    # ── track 4: downstream agents (LLM) ──
     if cfg.run_downstream:
-        ds_summary: list = []
-        ds_strategies: list = []
-        for p in prerun_names:
-            summary, rows = downstream.evaluate_prerun_downstream(p, cfg)
-            ds_summary.append(summary)
-            ds_strategies += rows
-        results["downstream_summary"] = ds_summary
-        results["downstream_strategies"] = ds_strategies
+        def _ds() -> None:
+            ds_summary: list = []
+            ds_strategies: list = []
+            for p in prerun_names:
+                summary, rows = downstream.evaluate_prerun_downstream(p, cfg)
+                ds_summary.append(summary)
+                ds_strategies += rows
+            results["downstream_summary"] = ds_summary
+            results["downstream_strategies"] = ds_strategies
+        _run_track("downstream", _ds, cfg, results, status)
 
-    # ── persist tables, figures, report, notebook ──
+    # ── final persist: tables, figures, report, notebook ──
+    # Tables were already checkpointed after each track, so a late figure/report
+    # error must not abort with a traceback — degrade to what we have on disk.
     tables = report.write_tables(cfg, results)
-    figs = report.render_figures(cfg, results)
-    report_md = report.write_report_md(cfg, results, figs)
-    nb = report.build_comparison_notebook(cfg)
+    figs: dict = {}
+    report_md = cfg.output_dir / "report.md"
+    nb = cfg.output_dir / "comparison.ipynb"
+    try:
+        figs = report.render_figures(cfg, results)
+        report_md = report.write_report_md(cfg, results, figs)
+        nb = report.build_comparison_notebook(cfg)
+    except Exception as e:  # noqa: BLE001 — tables are safe; report is best-effort
+        log.exception("final figures/report failed (tables are on disk): %s", e)
+    _write_status(cfg, status)
 
     print("\n" + "=" * 80)
     print(f"Comparison '{cfg.comparison_id}' → {cfg.output_dir}")
     print(f"  preruns         : {prerun_names}")
     print(f"  tracks          : "
-          f"{'IC ' if cfg.run_ic else ''}{'brute-force ' if cfg.run_bruteforce else ''}"
+          f"{'IC ' if cfg.run_ic else ''}{'analytics ' if cfg.run_analytics else ''}"
+          f"{'brute-force ' if cfg.run_bruteforce else ''}"
           f"{'downstream' if cfg.run_downstream else ''}".strip())
+    print(f"  status          : {status['tracks']}")
     print(f"  figures         : {len(figs)} → {cfg.figures_dir}")
     print(f"  tables          : {len(tables)} CSV/JSON")
     print(f"  report          : {report_md}")

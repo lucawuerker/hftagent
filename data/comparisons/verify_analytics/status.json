@@ -1,0 +1,17 @@
+{
+  "comparison_id": "verify_analytics",
+  "tracks": {
+    "ic": {
+      "status": "ok",
+      "seconds": 4.4
+    },
+    "analytics": {
+      "status": "ok",
+      "seconds": 54.6
+    },
+    "bruteforce": {
+      "status": "ok",
+      "seconds": 0.7
+    }
+  }
+}

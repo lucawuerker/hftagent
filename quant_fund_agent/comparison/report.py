@@ -44,6 +44,10 @@ def write_tables(cfg, results: dict[str, Any]) -> dict[str, Path]:
     for key, fname in [
         ("ic_rows", "ic_results.csv"),
         ("ic_summary", "ic_summary.csv"),
+        ("diversity_summary", "analytics_diversity_summary.csv"),
+        ("diversity_factor", "analytics_diversity_factor.csv"),
+        ("modelview_summary", "analytics_modelview_summary.csv"),
+        ("importance_rows", "analytics_importance.csv"),
         ("bruteforce_rows", "bruteforce_results.csv"),
         ("downstream_summary", "downstream_results.csv"),
         ("downstream_strategies", "downstream_strategies.csv"),
@@ -54,6 +58,13 @@ def write_tables(cfg, results: dict[str, Any]) -> dict[str, Path]:
             df.to_csv(out / fname, index=False)
             paths[key] = out / fname
             log.info("wrote table %s (%d rows)", out / fname, len(df))
+
+    # Per-prerun correlation matrices (DataFrames, written with index).
+    for prerun, corr in (results.get("corr_matrices") or {}).items():
+        if corr is not None and not getattr(corr, "empty", True):
+            fp = out / f"factor_correlation_{prerun}.csv"
+            corr.to_csv(fp)
+            paths[f"corr_{prerun}"] = fp
     return paths
 
 
@@ -75,6 +86,16 @@ def render_figures(cfg, results: dict[str, Any]) -> dict[str, Path]:
     if results.get("ic_summary"):
         _add("ic_mean_by_horizon",
              plots.ic_mean_by_horizon(results["ic_summary"], fd, tuple(cfg.ic_horizons)))
+    if results.get("diversity_summary"):
+        _add("effective_factors", plots.effective_factors_bar(results["diversity_summary"], fd))
+    for prerun, corr in (results.get("corr_matrices") or {}).items():
+        _add(f"corr_{prerun}", plots.factor_correlation_heatmap(corr, fd, prerun))
+    if results.get("modelview_summary"):
+        _add("deflation", plots.deflation_bar(results["modelview_summary"], fd))
+    if results.get("importance_rows"):
+        for model in dict.fromkeys(r["model"] for r in results["importance_rows"]):
+            _add(f"feature_importance_{model}",
+                 plots.feature_importance_bar(results["importance_rows"], fd, model=model))
     if results.get("bruteforce_rows"):
         _add("bruteforce_oos_sharpe", plots.bruteforce_oos_sharpe(results["bruteforce_rows"], fd))
         _add("bruteforce_ic_heatmap", plots.bruteforce_ic_heatmap(results["bruteforce_rows"], fd))
@@ -106,17 +127,29 @@ def _findings(results: dict[str, Any]) -> list[str]:
     bf = pd.DataFrame(results.get("bruteforce_rows") or [])
     if not bf.empty and "oos_sharpe" in bf and bf["oos_sharpe"].notna().any():
         best = bf.loc[bf["oos_sharpe"].idxmax()]
-        out.append(f"**Best brute-force OOS Sharpe:** `{best['prerun']}` with "
+        out.append(f"**Best ML-combined OOS Sharpe:** `{best['prerun']}` with "
                    f"`{best['model']}` (OOS Sharpe = {best['oos_sharpe']:.3f}).")
         per = bf.dropna(subset=["oos_sharpe"]).groupby("prerun")["oos_sharpe"].mean()
         if len(per):
             out.append("**Mean OOS Sharpe across models, by research set:** "
                        + ", ".join(f"`{p}` = {v:.3f}" for p, v in per.sort_values(ascending=False).items()) + ".")
     ic = pd.DataFrame(results.get("ic_summary") or [])
-    if not ic.empty and "mean_abs_ic_6" in ic:
+    if not ic.empty and "mean_abs_ic_6" in ic and ic["mean_abs_ic_6"].notna().any():
         best = ic.loc[ic["mean_abs_ic_6"].idxmax()]
         out.append(f"**Highest mean single-factor |IC| (h=6):** `{best['prerun']}` "
                    f"(mean |IC| = {best['mean_abs_ic_6']:.4f}).")
+    dv = pd.DataFrame(results.get("diversity_summary") or [])
+    if not dv.empty and "eff_ratio" in dv and dv["eff_ratio"].notna().any():
+        best = dv.loc[dv["eff_ratio"].idxmax()]
+        out.append(f"**Most diverse zoo (highest effective/raw factor ratio):** "
+                   f"`{best['prerun']}` (eff {best['eff_n_factors']:.1f} of "
+                   f"{int(best['n_factors'])}, ratio {best['eff_ratio']:.2f}).")
+    mv = pd.DataFrame(results.get("modelview_summary") or [])
+    if not mv.empty and "deflated_best_ic" in mv and mv["deflated_best_ic"].notna().any():
+        best = mv.loc[mv["deflated_best_ic"].idxmax()]
+        out.append(f"**Best selection-deflated single-factor |IC|:** `{best['prerun']}` "
+                   f"(deflated |IC| = {best['deflated_best_ic']:.4f} from "
+                   f"{int(best['ic_n_tested'])} factors tried).")
     ds = pd.DataFrame(results.get("downstream_summary") or [])
     if not ds.empty and "mean_oos_sharpe" in ds and ds["mean_oos_sharpe"].notna().any():
         best = ds.loc[ds["mean_oos_sharpe"].idxmax()]
@@ -168,19 +201,54 @@ def write_report_md(cfg, results: dict[str, Any], figures: dict[str, Path]) -> P
         fig("ic_distribution", "Per-factor |IC| distribution by research model")
         fig("ic_top_factors", "Top factors by |IC| per research model")
 
+    if results.get("diversity_summary"):
+        lines.append("## 2. Factor diversity & redundancy\n")
+        lines.append("Pairwise correlation of each zoo's *signals*. `eff_n_factors` is the "
+                     "effective number of independent factors (participation ratio of the "
+                     "correlation eigenvalues); `eff_ratio` and `redundancy` summarise how "
+                     "much unique information the zoo holds vs. how much is duplicated; "
+                     "`n_clusters` groups factors at |corr| ≥ "
+                     f"{cfg.corr_threshold}.\n")
+        lines.append(_md_table(results["diversity_summary"],
+                               ["prerun", "n_factors", "eff_n_factors", "eff_ratio",
+                                "mean_abs_corr", "n_clusters", "redundancy"]))
+        fig("effective_factors", "Effective vs raw factor count per research model")
+        for p in cfg.resolved_preruns():
+            fig(f"corr_{p}", f"Signal correlation matrix — {p}")
+
+    if results.get("modelview_summary"):
+        lines.append("## 3. Deflation & model-based importance\n")
+        lines.append("`deflated_best_ic` haircuts each zoo's best |IC| for the number of "
+                     "factors tried (`ic_n_tested`) — a bigger zoo's best factor is more "
+                     "likely to be lucky. `lasso_n_nonzero` / `lasso_sparsity` show how many "
+                     "factors a sparse linear model actually keeps (model-view redundancy).\n")
+        lines.append(_md_table(results["modelview_summary"],
+                               ["prerun", "best_ic", "deflated_best_ic", "deflated_best_t",
+                                "ic_n_tested", "ic_n_obs", "lasso_n_nonzero", "lasso_sparsity"]))
+        fig("deflation", "Best |IC| before vs after multiple-testing deflation")
+        for model in dict.fromkeys(r["model"] for r in (results.get("importance_rows") or [])):
+            fig(f"feature_importance_{model}", f"Top factors by {model} importance per zoo")
+
     if results.get("bruteforce_rows"):
-        lines.append("## 2. Brute-force ML (factors as raw features, no agents)\n")
-        lines.append("Each prerun's factors fed straight into the model catalog + an equal-weight "
-                     "ensemble; fit on IS, evaluated on the held-out OOS tail.\n")
+        lines.append("## 4. ML-combined signal — per-underlying vectorised backtest\n")
+        lines.append("Each model combines a prerun's factors into ONE signal (fit "
+                     "`factors → forward return` on IS, predict per (bar, underlying)), then "
+                     "that combined signal is run through a simple vectorised backtest — "
+                     "`position(signal) × the underlying's own forward return` — on the "
+                     "held-out OOS tail (+ an equal-weight ensemble). No cross-sectional "
+                     "ranking.\n")
+        lines.append(f"> Config: position=**{cfg.position_mode}** (t={cfg.position_threshold}, "
+                     f"z-score `{cfg.position_zscore_basis}`), aggregation=**{cfg.backtest_aggregation}**, "
+                     f"fit-standardise=**{cfg.fit_standardize}**, horizon={cfg.target_horizon}.\n")
         lines.append(_md_table(results["bruteforce_rows"],
                                ["prerun", "model", "n_factors_used", "oos_ic", "oos_sharpe",
                                 "is_sharpe", "oos_ann_return", "oos_max_drawdown"]))
-        fig("bruteforce_oos_sharpe", "Brute-force OOS Sharpe by model and research set")
-        fig("bruteforce_ic_heatmap", "Brute-force OOS IC (prerun × model)")
+        fig("bruteforce_oos_sharpe", "ML-combined OOS Sharpe by model and research set")
+        fig("bruteforce_ic_heatmap", "ML-combined OOS IC (prerun × model)")
         fig("bruteforce_is_vs_oos", "IS vs OOS Sharpe (overfitting diagnostic)")
 
     if results.get("downstream_summary"):
-        lines.append("## 3. Downstream agents (the full fund)\n")
+        lines.append("## 5. Downstream agents (the full fund)\n")
         lines.append("Each prerun's factors run through Selector → Architect → Statistician → PM; "
                      "per-strategy OOS verdicts and the PM's expected portfolio metrics.\n")
         lines.append(_md_table(results["downstream_summary"],
@@ -241,7 +309,26 @@ def build_comparison_notebook(cfg) -> Path:
         "    if p.exists():\n"
         "        display(plt.imread(p).shape); from IPython.display import Image, display as d; d(Image(str(p)))"))
 
-    cells.append(new_markdown_cell("## 2. Brute-force ML"))
+    cells.append(new_markdown_cell("## 2. Factor diversity & redundancy"))
+    cells.append(new_code_cell(
+        "div = load('analytics_diversity_summary.csv'); display(div)\n"
+        "from IPython.display import Image, display as d\n"
+        "p = FIG / 'effective_factors.png'\n"
+        "if p.exists(): d(Image(str(p)))\n"
+        "for pr in cfg['resolved_preruns']:\n"
+        "    q = FIG / ('factor_correlation_%s.png' % pr)\n"
+        "    if q.exists(): d(Image(str(q)))"))
+
+    cells.append(new_markdown_cell("## 3. Deflation & model-based importance"))
+    cells.append(new_code_cell(
+        "mv = load('analytics_modelview_summary.csv'); display(mv)\n"
+        "imp = load('analytics_importance.csv'); display(imp)\n"
+        "from IPython.display import Image, display as d\n"
+        "for f in ['deflation.png'] + sorted(str(x.name) for x in FIG.glob('feature_importance_*.png')):\n"
+        "    p = FIG / f\n"
+        "    if p.exists(): d(Image(str(p)))"))
+
+    cells.append(new_markdown_cell("## 4. ML-combined signal — vectorised backtest"))
     cells.append(new_code_cell(
         "bf = load('bruteforce_results.csv'); display(bf)\n"
         "from IPython.display import Image, display as d\n"
@@ -249,7 +336,7 @@ def build_comparison_notebook(cfg) -> Path:
         "    p = FIG / f\n"
         "    if p.exists(): d(Image(str(p)))"))
 
-    cells.append(new_markdown_cell("## 3. Downstream agents"))
+    cells.append(new_markdown_cell("## 5. Downstream agents"))
     cells.append(new_code_cell(
         "ds = load('downstream_results.csv'); display(ds)\n"
         "from IPython.display import Image, display as d\n"

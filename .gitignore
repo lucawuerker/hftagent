@@ -41,3 +41,9 @@ quant.config.yaml
 .coverage
 htmlcov/
 GLD_2026-06-01_2026-06-11_3
+
+# LOBSTER ingest scratch: raw downloads (auto-deleted per chunk), the resumable
+# manifest, and the Playwright cookie session (.lobster_state.json — a secret;
+# never commit). All regenerated locally.
+data/lobster_raw/
+data/lobster_drop/

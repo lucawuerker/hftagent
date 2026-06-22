@@ -112,7 +112,8 @@ def test_propose_config_empty_description_skips_llm(monkeypatch):
 
 def _args(**over):
     base = dict(provider=None, asset_class=None, freq=None, start=None, end=None,
-                preset=None, tickers=None, n_tickers=None, data_dir=None, cache_dir=None)
+                preset=None, tickers=None, n_tickers=None, data_dir=None, cache_dir=None,
+                lobster_level=None, fundamentals=None)
     base.update(over)
     return argparse.Namespace(**base)
 

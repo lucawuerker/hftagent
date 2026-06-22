@@ -64,7 +64,36 @@ def factor_names(names: list[str]) -> dict[str, str]:
     return out
 
 
-def load_panel_cached(data_dir: str | None = None, n_tickers: int | None = None) -> dict[str, Any]:
+def _subsample_bars(panel: dict[str, Any], max_bars: int | None) -> dict[str, Any]:
+    """Uniformly stride every field frame to at most ``max_bars`` timestamps.
+
+    The intraday LOBSTER panel is ~1.4M bars/ticker; striding the *shared* index
+    to a few thousand bars is the single biggest speed lever — it slims every
+    track at once (IC, analytics, brute-force) and removes the brute-force OOM,
+    since feature matrices are built from this slim panel.  Every field is sliced
+    to the *same* retained index so the panel stays aligned.  Horizons are then in
+    retained-bar units (consistent across preruns).  ``None`` / already-small
+    panels are a no-op.
+    """
+    if not max_bars or not panel:
+        return panel
+    index = next(iter(panel.values())).index
+    n = len(index)
+    if n <= max_bars:
+        return panel
+    import numpy as np
+
+    keep = index[np.linspace(0, n - 1, max_bars, dtype=int)]
+    keep = keep[~keep.duplicated()]
+    log.info("subsampling panel: %d → %d bars (max_bars=%d)", n, len(keep), max_bars)
+    return {k: df.loc[keep] for k, df in panel.items()}
+
+
+def load_panel_cached(
+    data_dir: str | None = None,
+    n_tickers: int | None = None,
+    max_bars: int | None = None,
+) -> dict[str, Any]:
     """Load (and cache) the factor panel the whole comparison shares.
 
     # ── TODO: switch to quant.config.yaml once the full data is downloaded ──────
@@ -101,8 +130,10 @@ def load_panel_cached(data_dir: str | None = None, n_tickers: int | None = None)
     discover_factors()
 
     # Load with the direct LOBSTER loader (full microstructure fields), cap universe,
-    # then inject into the modeling-service cache so every downstream call reuses it.
+    # uniformly stride to max_bars, then inject into the modeling-service cache so
+    # every downstream call reuses the same slim panel.
     panel = _lobster_load(dir_, n_tickers=n_tickers)
+    panel = _subsample_bars(panel, max_bars)
     service._PANEL_CACHE = panel
     service._SIGNAL_CACHE = {}   # flush stale signals from any prior run
     return panel
