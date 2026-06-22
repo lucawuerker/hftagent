@@ -386,6 +386,20 @@ provider (`QF_FUNDAMENTALS=0` to opt out). See
 [`FUNDAMENTAL_AND_ALT_DATA.md`](docs/data-layer/FUNDAMENTAL_AND_ALT_DATA.md);
 sentiment + macro are the next (planned) fields.
 
+**Survivorship-bias-free universes (S&P 500, point-in-time).** A static ticker
+list over a multi-year backtest over-represents survivors. Set `data.membership:
+sp500` (or `QF_MEMBERSHIP=sp500`) and the universe becomes **time-varying**: the
+provider fetches every name that was *ever* an S&P 500 member in your window (834
+distinct tickers since 2010 vs ~503 today), and the panel is **masked per-bar** to
+each date's actual constituents at load — so research, the architect/statistician,
+the walk-forward trade loop and the comparison harness are all survivorship-correct
+at once. The membership table is reconstructed from **free public sources**
+(GitHub `fja05680/sp500` as primary + Wikipedia change-log as cross-check),
+audited (month-end count 497–506; TSLA/ATVI spot-checks), and fully reproducible —
+`./venv/bin/python scripts/build_sp500_membership.py`. Free path is **tickers-only**
+(yfinance can't serve most delisted names — the residual gap a premium provider
+closes); see [`SP500_MEMBERSHIP.md`](docs/data-layer/SP500_MEMBERSHIP.md).
+
 **LOBSTER specifics:** place CSVs under `ticker_data/` (or set `DATA_DIR`). The
 loader (`backtesting/data_loader.py`) builds an aligned panel of OHLCV plus
 microstructure fields (`orderFlow`, `lobImb`, `spread`, `nbTrades`, etc.) on a

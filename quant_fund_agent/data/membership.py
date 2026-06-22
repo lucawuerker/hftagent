@@ -149,10 +149,13 @@ def membership_mask(
     contract as :func:`fundamentals.align_to_index` so it composes with the panel.
     """
     df = load_membership(index)
-    dates = pd.DatetimeIndex(pd.to_datetime(dates)).normalize()
+    dates = pd.DatetimeIndex(pd.to_datetime(dates))
     symbols = list(symbols)
-    mask = pd.DataFrame(False, index=dates, columns=symbols)
-    dvals = dates.values
+    mask = pd.DataFrame(False, index=dates, columns=symbols)  # preserve caller index
+    # Compare on tz-naive, day-normalized values (spell bounds are tz-naive dates),
+    # while the mask keeps the caller's exact index so it re-aligns to the panel.
+    cmp = dates.tz_localize(None) if dates.tz is not None else dates
+    dvals = cmp.normalize().values
     by_ticker = df.groupby("ticker")
     for ticker in symbols:
         if ticker not in by_ticker.groups:

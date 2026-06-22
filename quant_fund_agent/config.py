@@ -63,6 +63,12 @@ class DataSettings:
     n_tickers: int | None = None       # optional universe cap (memory)
     tickers: list[str] | None = None   # explicit ticker list (None = auto)
     universe_preset: str | None = None # e.g. "sp100" (resolved in data/universe.py)
+    # Point-in-time, survivorship-bias-free membership (e.g. "sp500").  When set,
+    # the universe is the *union* of every name that was ever a constituent in
+    # [start, end] (so names that later left still load), and the panel is masked
+    # per-bar to each date's actual constituents (data/membership.py).  Overrides
+    # the static tickers/universe_preset path.  See docs/data-layer/SP500_MEMBERSHIP.md.
+    membership: str | None = None
     start: str | None = None           # ISO date, inclusive (API providers)
     end: str | None = None             # ISO date, exclusive (API providers)
     dtype: str = "float32"             # panel numeric precision
@@ -121,6 +127,8 @@ class Settings:
         n = _env_int("ARCHITECT_N_TICKERS")
         if n is not None:
             self.data.n_tickers = n
+        if os.getenv("QF_MEMBERSHIP"):
+            self.data.membership = os.environ["QF_MEMBERSHIP"]
 
     # ── helpers ─────────────────────────────────────────────────────────
 
@@ -168,10 +176,12 @@ def config_fingerprint(data: DataSettings) -> str:
     Two configs with the same fingerprint produce the same panel; a change to
     provider / asset-class / frequency / universe / timespan / dtype changes it.
     """
-    blob = json.dumps(
-        {k: getattr(data, k) for k in _FINGERPRINT_KEYS},
-        sort_keys=True, default=str,
-    )
+    payload = {k: getattr(data, k) for k in _FINGERPRINT_KEYS}
+    # Point-in-time membership is panel-defining, but include it only when set so
+    # existing (non-PIT) scope hashes are unchanged — keeps old workspaces valid.
+    if data.membership:
+        payload["membership"] = data.membership
+    blob = json.dumps(payload, sort_keys=True, default=str)
     return hashlib.sha1(blob.encode()).hexdigest()[:12]
 
 
@@ -188,8 +198,10 @@ def default_config_name(data: DataSettings) -> str:
     configs that differ only in timespan share a name; the per-scope config
     snapshot + hash mismatch warning surface that, and ``--config-name`` overrides.
     """
-    universe = data.universe_preset or (
-        f"custom{len(data.tickers)}" if data.tickers else "custom"
+    universe = (
+        f"{data.membership}pit" if data.membership
+        else data.universe_preset
+        or (f"custom{len(data.tickers)}" if data.tickers else "custom")
     )
     return "_".join(_slug(p) for p in (data.provider, data.asset_class, universe))
 

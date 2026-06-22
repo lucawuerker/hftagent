@@ -103,7 +103,8 @@ def load_panel(
         # Full load: materialise everything the provider has, plus every derived
         # field it didn't already supply.
         panel = provider.load(fields=None)
-        return _synthesize(panel, list(SYNTH_DEPS))
+        panel = _synthesize(panel, list(SYNTH_DEPS))
+        return _apply_membership(panel, settings)
 
     # Targeted load: a synthesised field is replaced by its OHLCV deps in the
     # provider request (the provider never sees vwap/returns), then derived and
@@ -116,4 +117,25 @@ def load_panel(
 
     panel = provider.load(fields=sorted(provider_fields) if provider_fields else None)
     panel = _synthesize(panel, synth_requested)
-    return {k: panel[k] for k in requested if k in panel}
+    panel = {k: panel[k] for k in requested if k in panel}
+    return _apply_membership(panel, settings)
+
+
+def _apply_membership(
+    panel: dict[str, pd.DataFrame], settings: Settings
+) -> dict[str, pd.DataFrame]:
+    """Mask the panel to point-in-time index constituents when configured.
+
+    Survivorship-bias-free universes set ``DataSettings.membership`` (e.g.
+    ``"sp500"``): every ``(date, ticker)`` cell where the ticker was *not* an index
+    member on that date is ``NaN``-ed out, so the whole system (research, the
+    Architect/Statistician, the walk-forward trade loop, the comparison harness)
+    sees only the names that were actually in the index at each point in time.  A
+    no-op when ``membership`` is unset.
+    """
+    index_name = settings.data.membership
+    if not index_name:
+        return panel
+    from quant_fund_agent.data.membership import apply_membership_mask
+
+    return apply_membership_mask(panel, index_name)

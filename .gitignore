@@ -1,5 +1,10 @@
 # .gitignore
 *.csv
+# Survivorship-free S&P 500 membership: version the small canonical interval
+# table, but not the bulky re-fetchable raw source snapshots (provenance summary
+# lives in the tracked build_report.md).
+!quant_fund_agent/data/universes/membership/sp500.csv
+quant_fund_agent/data/universes/membership/sources/
 ticker_data/
 binSamples/
 fillSamples/

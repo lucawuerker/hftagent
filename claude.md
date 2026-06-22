@@ -106,6 +106,32 @@ to opt out. Live: AV's free tier delivers these; FMP's free tier serves only
 `profile` and paywalls the rest (factors degrade, never crash). **Next (designed,
 not built):** sentiment + macro — see `docs/data-layer/FUNDAMENTAL_AND_ALT_DATA.md`.
 
+**Survivorship-bias-free S&P 500 — point-in-time membership (done).** A static
+ticker list over a 2010→today backtest over-represents survivors. `DataSettings.
+membership="sp500"` (or `QF_MEMBERSHIP`) turns the universe **time-varying**:
+`resolve_universe` returns the **union of every name ever an S&P 500 member** in
+`[start,end]` (834 distinct tickers since 2010 vs ~503 today) so names that later
+left still load, and `data/panel.load_panel` applies a **per-bar boolean mask**
+once at load (`data/membership.py::apply_membership_mask`) — `NaN`-ing every
+`(date,ticker)` cell where the ticker wasn't a constituent. Because it's the single
+panel-load seam, research, the Architect/Statistician, the walk-forward trade loop
+and the comparison harness are **all** survivorship-correct with no per-loop change
+(cross-sectional ops skip the NaNs; the cutoff `_truncate_as_of` is orthogonal).
+The canonical interval table `data/universes/membership/sp500.csv`
+(`ticker,name,start_date,end_date,add_reason,remove_reason,source`; end exclusive)
+is reconstructed from **free public sources** by `scripts/build_sp500_membership.py`
+— **primary** GitHub `fja05680/sp500` (date→full-set series, forward run-length
+scan into spells) cross-checked against **Wikipedia** (current + "Selected changes"
+backward-walk, month-end Jaccard 0.91 mean rising 0.84→0.99; reasons + rename
+detection). Renames (FB→META, …) coalesce into one continuous spell under the
+current ticker. Audited (month-end count 497–506; no overlaps; TSLA absent-2015/
+present-2022, ATVI present-2016/gone-2024) in-build and in `tests/test_membership.py`.
+Build is idempotent + offline-replayable (dated raw snapshots under
+`membership/sources/`, `MANIFEST.json`). **Free path is tickers-only** — yfinance
+can't serve most delisted names (≈82% sampled coverage, the residual bias a premium
+`CrspSource`/`FmpSource` closes via the `MembershipSource` seam). The static
+`sp100.txt` is untouched. See `docs/data-layer/SP500_MEMBERSHIP.md`.
+
 **Strict modularisation by (config, prerun) — done.** Researched factors and the
 strategies built from them are isolated per **(data config, research-LLM prerun)**
 under `data/workspaces/<config>/preruns/<prerun>/` (factors, strategies, returns,

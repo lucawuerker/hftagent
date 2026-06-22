@@ -1,7 +1,9 @@
 # S&P 100 (OEX) — static snapshot. NOTE: this is a point-in-time list and is NOT
 # survivorship-corrected; using it for a historical backtest over-represents names
-# that survived to the snapshot date. Point-in-time constituents are a roadmap
-# follow-up. One ticker per line; '#' comments allowed.
+# that survived to the snapshot date. For a survivorship-bias-free, point-in-time
+# universe use DataSettings.membership (e.g. "sp500") instead — see
+# quant_fund_agent/data/membership.py and docs/data-layer/SP500_MEMBERSHIP.md.
+# One ticker per line; '#' comments allowed.
 AAPL
 ABBV
 ABT

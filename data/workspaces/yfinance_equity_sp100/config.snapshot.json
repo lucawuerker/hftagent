@@ -1,0 +1,23 @@
+{
+  "config_hash": "695534d71353",
+  "config_name": "yfinance_equity_sp100",
+  "written_at": "2026-06-22T11:37:03+00:00",
+  "data": {
+    "provider": "yfinance",
+    "asset_class": "equity",
+    "frequency": "1d",
+    "data_dir": "ticker_data",
+    "lobster_level": 3,
+    "cache_dir": "data/market",
+    "n_tickers": null,
+    "tickers": null,
+    "universe_preset": "sp100",
+    "start": "2020-01-01",
+    "end": "2026-06-22",
+    "dtype": "float32",
+    "fundamentals": true,
+    "reporting_lag_days": 60,
+    "fundamentals_staleness_days": 400,
+    "fundamentals_ttl_days": 90
+  }
+}
