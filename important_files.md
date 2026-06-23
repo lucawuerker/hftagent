@@ -124,7 +124,7 @@ One-shot migration: make `data/factors/factor_db.json` seed-only by moving resea
 ### `run_model_comparison.py`
 Compares factor sets from multiple research-LLM preruns on **four** tracks: single-factor IC, factor analytics (diversity/redundancy + deflation/importance), ML-combined-signal brute-force (catalog models + ensemble → per-underlying vectorised backtest), and the full downstream agent fund. Outputs figures, CSV/JSON tables, `report.md`, and `comparison.ipynb` under `data/comparisons/<id>/`; tables+figures are checkpointed after each track (`status.json`) so an interrupt never loses progress. Only the downstream track (and `--research`) spends LLM.
 
-**Data source:** provider-aware — the shared panel follows `quant.config.yaml`. With `provider: lobster` it uses the direct LOBSTER CSV loader (the full microstructure panel) and `--data-dir` points at the per-ticker CSV root; with an API provider (`yfinance` / `fmp` / `alphavantage`) it loads through the abstracted data layer (universe / timespan from the config) and `--data-dir` is ignored.
+**Data source:** provider-aware — the shared panel loads through `quant_fund_agent.data.load_panel`, following `quant.config.yaml` plus any CLI overrides. With `provider: lobster`, `--data-dir` points at the per-ticker CSV root; with an API provider (`yfinance` / `fmp` / `alphavantage`), universe/date/cache settings come from the data config or the flags below and `--data-dir` is ignored.
 
 | Flag | Default | Description |
 |------|---------|-------------|
@@ -139,7 +139,8 @@ Compares factor sets from multiple research-LLM preruns on **four** tracks: sing
 | `--no-downstream` | off | Skip the downstream agent track (the only LLM-spending step) |
 | `--n-strategies` | `3` | Strategy attempts per prerun in the downstream track |
 | `--horizon` | `6` | Forecast horizon in bars (brute-force + downstream) |
-| `--oos-ratio` | `0.2` | OOS tail fraction — last N% of bars are OOS. **Ignored when `--train-months`/`--oos-months` are given** (calendar split takes over) for the LLM-free tracks; the downstream agent track always uses this ratio. |
+| `--oos-ratio` | `0.2` | OOS tail fraction — last N% of bars are OOS. **Ignored when `--split-date` or `--train-months`/`--oos-months` are given** for the LLM-free tracks; when `--split-date` is used the downstream-compatible ratio is derived from that cutoff. |
+| `--split-date <date>` | — | Exact cutoff split: IS is every bar `< date`, OOS is every bar `>= date` (e.g. `2024-06-01`). Cannot be combined with `--train-months`/`--oos-months`. |
 | `--train-months <spec>` | — | Calendar IS/train window instead of the `--oos-ratio` tail. A comma list of months/dates (`2024-06,2024-07` / `2024-06-15`) or an inclusive range (`2024-06:2024-08`). **Requires `--oos-months`** and must be disjoint from it; the panel is restricted to train∪OOS so every track scores those months. |
 | `--oos-months <spec>` | — | Calendar OOS window (same format as `--train-months`); must be disjoint from it. |
 | `--n-tickers` | all | Cap universe size by **count** (smaller panel = faster every track) |
@@ -157,6 +158,13 @@ Compares factor sets from multiple research-LLM preruns on **four** tracks: sing
 | `--position-zscore` | `expanding` | Per-underlying z-score basis: `expanding` / `full` / `rolling` / `none` |
 | `--position-zscore-window` | `500` | Window for the `rolling` z-score basis |
 | `--aggregation` | `portfolio` | `portfolio` (one netted book) or `per_underlying` (mean/std across names) |
+| `--provider` | config/env | Market-data provider override (`yfinance` / `fmp` / `alphavantage` / `lobster`) |
+| `--asset-class` | config/env | Asset class override (`equity` / `crypto` / `fx`) |
+| `--frequency` | config/env | Data frequency override (`1d`, `1m`, `10s`, …) |
+| `--universe-preset` | config/env | Bundled API-provider universe preset (e.g. `sp100`) |
+| `--data-start` | config/env | Provider load start date, inclusive (e.g. `2018-01-01`) |
+| `--data-end` | config/env | Provider load end date (passed through to the provider; yfinance treats this as its download end) |
+| `--cache-dir` | config/env | API provider parquet cache root |
 | `--data-dir` | `ticker_data` | LOBSTER provider only (per-ticker CSV root); ignored for API providers |
 | `--out-dir` | auto | Override output folder |
 | `--research` | off | Mine preruns first before comparing |
@@ -273,4 +281,3 @@ Walk-forward backtest: runs weekly research/strategy/PM meetings over a date ran
 | `--data-dir` | `ticker_data` | Data directory |
 | `--run-id` | auto | Name for the output folder under `data/backtests/` |
 | `--resume` | off | Resume an existing run |
-

@@ -46,6 +46,13 @@ def _env_int(name: str) -> int | None:
         return None
 
 
+def _env_bool(name: str) -> bool | None:
+    raw = os.getenv(name)
+    if raw is None:
+        return None
+    return raw.strip().lower() not in {"0", "false", "no", "off"}
+
+
 @dataclass
 class DataSettings:
     """Everything about *where the market data comes from*."""
@@ -122,6 +129,24 @@ class Settings:
         """Environment variables override the file (back-compat with legacy code)."""
         if os.getenv("QF_DATA_PROVIDER"):
             self.data.provider = os.environ["QF_DATA_PROVIDER"]
+        if os.getenv("QF_DATA_ASSET_CLASS"):
+            self.data.asset_class = os.environ["QF_DATA_ASSET_CLASS"]
+        if os.getenv("QF_DATA_FREQUENCY"):
+            self.data.frequency = os.environ["QF_DATA_FREQUENCY"]
+        if os.getenv("QF_DATA_CACHE_DIR"):
+            self.data.cache_dir = os.environ["QF_DATA_CACHE_DIR"]
+        if os.getenv("QF_DATA_UNIVERSE_PRESET"):
+            self.data.universe_preset = os.environ["QF_DATA_UNIVERSE_PRESET"]
+        if os.getenv("QF_DATA_START"):
+            self.data.start = os.environ["QF_DATA_START"]
+        if os.getenv("QF_DATA_END"):
+            self.data.end = os.environ["QF_DATA_END"]
+        if os.getenv("QF_DATA_TICKERS"):
+            self.data.tickers = [
+                t.strip().upper()
+                for t in os.environ["QF_DATA_TICKERS"].split(",")
+                if t.strip()
+            ]
         if os.getenv("DATA_DIR"):
             self.data.data_dir = os.environ["DATA_DIR"]
         n = _env_int("ARCHITECT_N_TICKERS")
@@ -129,6 +154,9 @@ class Settings:
             self.data.n_tickers = n
         if os.getenv("QF_MEMBERSHIP"):
             self.data.membership = os.environ["QF_MEMBERSHIP"]
+        fundamentals = _env_bool("QF_FUNDAMENTALS")
+        if fundamentals is not None:
+            self.data.fundamentals = fundamentals
 
     # ── helpers ─────────────────────────────────────────────────────────
 

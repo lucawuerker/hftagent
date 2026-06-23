@@ -153,6 +153,18 @@ class ComparisonConfig:
     # ("2024-06:2024-08").  Must be disjoint.  Default None → the ratio tail split.
     is_window: str | None = None      # train period spec
     oos_window: str | None = None     # OOS period spec
+    # Exact chronological cutoff.  When set, IS is every bar strictly before this
+    # timestamp and OOS is every bar at/after it.  This is less error-prone than
+    # inclusive date windows for boundary dates such as 2024-06-01.
+    split_date: str | None = None
+    # Data-layer overrides.  None means "use quant.config.yaml / env".
+    data_provider: str | None = None
+    data_asset_class: str | None = None
+    data_frequency: str | None = None
+    data_start: str | None = None
+    data_end: str | None = None
+    data_universe_preset: str | None = None
+    data_cache_dir: str | None = None
     # Uniform timestamp subsample of the whole panel (None = keep every bar).  The
     # single biggest speed lever on the intraday LOBSTER panel (~1.4M bars/ticker):
     # striding the index to `max_bars` slims *every* track at once (IC, analytics,
@@ -230,6 +242,15 @@ class ComparisonConfig:
         import numpy as np
 
         n = len(index)
+        if self.split_date:
+            if self.is_window or self.oos_window:
+                raise ValueError(
+                    "--split-date cannot be combined with --train-months/--oos-months."
+                )
+            split = datetime.fromisoformat(self.split_date)
+            is_mask = np.asarray(index < split)
+            oos_mask = np.asarray(index >= split)
+            return is_mask, oos_mask
         if self.is_window or self.oos_window:
             if not (self.is_window and self.oos_window):
                 raise ValueError(
@@ -250,9 +271,24 @@ class ComparisonConfig:
 
     def window_union_mask(self, index) -> Any | None:
         """Boolean mask of the train∪OOS calendar windows (None if not in date mode)."""
+        if self.split_date:
+            return None
         if not (self.is_window and self.oos_window):
             return None
         return period_mask(self.is_window, index) | period_mask(self.oos_window, index)
+
+    def data_overrides(self) -> dict[str, Any]:
+        """DataSettings fields this comparison intentionally overrides."""
+        mapping = {
+            "provider": self.data_provider,
+            "asset_class": self.data_asset_class,
+            "frequency": self.data_frequency,
+            "start": self.data_start,
+            "end": self.data_end,
+            "universe_preset": self.data_universe_preset,
+            "cache_dir": self.data_cache_dir,
+        }
+        return {k: v for k, v in mapping.items() if v is not None}
 
     def to_dict(self) -> dict[str, Any]:
         d = asdict(self)

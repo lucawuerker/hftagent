@@ -2,12 +2,13 @@
 
 Given several named preruns (each a batch of factors mined by a chosen research
 LLM via ``run_factor_research.py``), evaluate and compare their factor sets on
-three axes and emit presentation-ready figures, tables, a Markdown report and a
+four tracks and emit presentation-ready figures, tables, a Markdown report and a
 notebook under ``data/comparisons/<id>/``:
 
 1. **single-factor IC**  — raw cross-sectional rank-IC per factor (LLM-free);
-2. **brute-force ML**     — factors → model catalog + ensemble, OOS (LLM-free);
-3. **downstream agents**  — factors → Selector→Architect→Statistician→PM (uses LLM).
+2. **factor analytics**  — diversity/redundancy + deflation/importance (LLM-free);
+3. **brute-force ML**     — factors → model catalog + ensemble, OOS (LLM-free);
+4. **downstream agents**  — factors → Selector→Architect→Statistician→PM (uses LLM).
 
 Everything runs on whatever data is present *now* (factors needing absent fields
 are filtered, and reported) and re-runs unchanged once more data is downloaded.
@@ -36,6 +37,13 @@ Examples
     QF_USE_MCP=0 ./venv/bin/python run_model_comparison.py --all --no-downstream \
       --tickers AAPL,MSFT,CORN \
       --train-months 2024-06:2024-08 --oos-months 2024-09
+
+    # Provider-aware SP100/yfinance comparison with an exact cutoff split.
+    QF_USE_MCP=0 ./venv/bin/python run_model_comparison.py \
+      --preruns sp100-5.4-mini,sp100-4o-mini --no-downstream \
+      --provider yfinance --asset-class equity --frequency 1d \
+      --universe-preset sp100 --data-start 2018-01-01 --data-end 2026-06-23 \
+      --split-date 2024-06-01
 
     # Create the preruns first (spends research LLM), then compare.
     ./venv/bin/python run_model_comparison.py --research \
@@ -93,11 +101,11 @@ def _parse_args() -> argparse.Namespace:
                    help="Forecast horizon (bars) for brute-force + downstream.")
     p.add_argument("--oos-ratio", type=float, default=0.2,
                    help="Held-out tail fraction for the IS/OOS split (used unless "
-                        "--train-months/--oos-months give a calendar split instead).")
+                        "--split-date or --train-months/--oos-months give a date split).")
     p.add_argument("--n-tickers", type=int, default=None,
                    help="How many underlyings to use (caps the universe). Fewer tickers "
-                        "→ a smaller panel that speeds up every model AND the IC track. "
-                        "Default = all tickers in the data dir.")
+                   "→ a smaller panel that speeds up every model AND the IC track. "
+                   "Default = all tickers in the active provider universe.")
     p.add_argument("--tickers", default=None,
                    help="Explicit comma-separated underlyings to use (e.g. 'AAPL,MSFT,CORN'); "
                         "loads exactly these and OVERRIDES --n-tickers. Default = all tickers.")
@@ -149,6 +157,24 @@ def _parse_args() -> argparse.Namespace:
                    help="Window for the 'rolling' position z-score basis (default 500).")
     p.add_argument("--aggregation", choices=["portfolio", "per_underlying"], default=None,
                    help="Combine per-underlying P&L into one book, or report per-underlying mean/std (default portfolio).")
+    # ── data-provider overrides (default: quant.config.yaml / env) ──
+    p.add_argument("--provider", dest="data_provider", default=None,
+                   help="Market-data provider override (e.g. yfinance, fmp, alphavantage, lobster).")
+    p.add_argument("--asset-class", dest="data_asset_class", default=None,
+                   help="Asset class override (e.g. equity, crypto, fx).")
+    p.add_argument("--frequency", dest="data_frequency", default=None,
+                   help="Data frequency override (e.g. 1d, 1m, 10s).")
+    p.add_argument("--universe-preset", dest="data_universe_preset", default=None,
+                   help="Bundled universe preset for API providers (e.g. sp100).")
+    p.add_argument("--data-start", default=None,
+                   help="Provider load start date, inclusive (e.g. 2018-01-01).")
+    p.add_argument("--data-end", default=None,
+                   help="Provider load end date (for yfinance this is passed as the download end).")
+    p.add_argument("--cache-dir", dest="data_cache_dir", default=None,
+                   help="API provider parquet cache root (default from quant.config.yaml).")
+    p.add_argument("--split-date", default=None,
+                   help="Exact IS/OOS cutoff: IS < date, OOS >= date (e.g. 2024-06-01). "
+                        "Cannot be combined with --train-months/--oos-months.")
     p.add_argument("--data-dir", default=os.getenv("DATA_DIR", "ticker_data"))
     p.add_argument("--out-dir", default=None, help="Override the output folder.")
     # ── optional research stage (creates the preruns first) ──
@@ -161,6 +187,23 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--dedup-scope", choices=["package", "prerun"], default="prerun",
                    help="De-dup scope for --research (default 'prerun' for a fair A/B).")
     return p.parse_args()
+
+
+def _export_data_env(args: argparse.Namespace, tickers: list[str] | None) -> None:
+    """Make CLI data overrides visible to provider loaders and MCP subprocesses."""
+    mapping = {
+        "QF_DATA_PROVIDER": args.data_provider,
+        "QF_DATA_ASSET_CLASS": args.data_asset_class,
+        "QF_DATA_FREQUENCY": args.data_frequency,
+        "QF_DATA_UNIVERSE_PRESET": args.data_universe_preset,
+        "QF_DATA_START": args.data_start,
+        "QF_DATA_END": args.data_end,
+        "QF_DATA_CACHE_DIR": args.data_cache_dir,
+        "QF_DATA_TICKERS": ",".join(tickers) if tickers else None,
+    }
+    for key, value in mapping.items():
+        if value is not None:
+            os.environ[key] = str(value)
 
 
 def _run_research(specs: list[str], target_factors: int, dedup_scope: str,
@@ -233,6 +276,11 @@ def _run_track(name: str, fn, cfg, results: dict, status: dict) -> None:
 
 def main() -> None:
     args = _parse_args()
+    tickers = (
+        [t.strip().upper() for t in args.tickers.split(",") if t.strip()]
+        if args.tickers else None
+    )
+    _export_data_env(args, tickers)
     from quant_fund_agent.comparison import (
         analytics,
         bruteforce,
@@ -268,15 +316,13 @@ def main() -> None:
         args.max_bars if args.max_bars is not None
         else (20_000 if args.fast else None)
     )
-    tickers = (
-        [t.strip().upper() for t in args.tickers.split(",") if t.strip()]
-        if args.tickers else None
-    )
     if tickers and args.n_tickers is not None:
         log.info("--tickers given (%d names) → ignoring --n-tickers=%d.", len(tickers), args.n_tickers)
     if bool(args.train_months) != bool(args.oos_months):
         raise SystemExit("--train-months and --oos-months must be given together "
                          "(a calendar split needs both a train and an OOS window).")
+    if args.split_date and (args.train_months or args.oos_months):
+        raise SystemExit("--split-date cannot be combined with --train-months/--oos-months.")
 
     cfg = ComparisonConfig(
         preruns=prerun_names,
@@ -290,6 +336,11 @@ def main() -> None:
         oos_split_ratio=args.oos_ratio, n_strategies=args.n_strategies,
         data_dir=args.data_dir, n_tickers=args.n_tickers, max_bars=max_bars,
         tickers=tickers, is_window=args.train_months, oos_window=args.oos_months,
+        split_date=args.split_date,
+        data_provider=args.data_provider, data_asset_class=args.data_asset_class,
+        data_frequency=args.data_frequency, data_start=args.data_start,
+        data_end=args.data_end, data_universe_preset=args.data_universe_preset,
+        data_cache_dir=args.data_cache_dir,
         fast=args.fast, train_sample_frac=train_sample_frac,
         checkpoint=not args.no_checkpoint,
         **({"analytics_max_rows": args.analytics_max_rows} if args.analytics_max_rows else {}),
@@ -318,9 +369,23 @@ def main() -> None:
     # ── shared panel + per-prerun usable factor ids ──
     panel = factors.load_panel_cached(
         cfg.data_dir, cfg.n_tickers, cfg.max_bars,
-        tickers=cfg.tickers, is_window=cfg.is_window, oos_window=cfg.oos_window)
+        tickers=cfg.tickers, is_window=cfg.is_window, oos_window=cfg.oos_window,
+        data_overrides=cfg.data_overrides())
     universe = next(iter(panel.values())).shape[1] if panel else 0
-    if cfg.is_window or cfg.oos_window:
+    if cfg.split_date:
+        idx = next(iter(panel.values())).index if panel else None
+        if idx is not None:
+            im, om = cfg.split_masks(idx)
+            log.info("cutoff IS/OOS split: IS=%d bars [< %s], OOS=%d bars [>= %s]",
+                     int(im.sum()), cfg.split_date, int(om.sum()), cfg.split_date)
+            if im.sum() == 0 or om.sum() == 0:
+                log.warning("the split date selected 0 bars on one side — check it lies within "
+                            "the loaded data range (%s … %s).", idx.min(), idx.max())
+            if len(idx):
+                cfg.oos_split_ratio = float(om.sum() / len(idx))
+                log.info("downstream-compatible OOS ratio derived from split date: %.4f",
+                         cfg.oos_split_ratio)
+    elif cfg.is_window or cfg.oos_window:
         idx = next(iter(panel.values())).index if panel else None
         try:
             im, om = cfg.split_masks(idx)
@@ -429,7 +494,9 @@ def main() -> None:
     print(f"Comparison '{cfg.comparison_id}' → {cfg.output_dir}")
     print(f"  preruns         : {prerun_names}")
     print(f"  universe        : {cfg.tickers if cfg.tickers else f'{universe} tickers'}")
-    if cfg.is_window or cfg.oos_window:
+    if cfg.split_date:
+        print(f"  split           : IS < {cfg.split_date}  OOS >= {cfg.split_date}")
+    elif cfg.is_window or cfg.oos_window:
         print(f"  split           : IS=[{cfg.is_window}]  OOS=[{cfg.oos_window}]")
     print(f"  tracks          : "
           f"{'IC ' if cfg.run_ic else ''}{'analytics ' if cfg.run_analytics else ''}"

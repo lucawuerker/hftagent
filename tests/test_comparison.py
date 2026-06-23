@@ -13,6 +13,7 @@ import hashlib
 import json
 from pathlib import Path
 
+import pandas as pd
 import pytest
 
 from quant_fund_agent.databases import FactorDatabase
@@ -46,6 +47,25 @@ def _make_prerun(root: Path, name: str, ids: list[str]) -> None:
     db.save_to_json(p)
 
 
+def _lobster_tickers(n: int) -> list[str]:
+    return sorted(d.name for d in TICKER_DATA.iterdir() if d.is_dir())[:n]
+
+
+def _synthetic_ohlcv(symbol: str, n: int = 8) -> pd.DataFrame:
+    idx = pd.bdate_range("2023-01-02", periods=n)
+    base = 10.0 + (sum(map(ord, symbol)) % 7)
+    return pd.DataFrame(
+        {
+            "open": base,
+            "high": base + 1,
+            "low": base - 1,
+            "close": [base + i * 0.1 for i in range(n)],
+            "volume": 1000,
+        },
+        index=idx,
+    )
+
+
 @pytest.fixture
 def tiny_preruns(tmp_path, monkeypatch):
     """Two fabricated preruns under a temp prerun root."""
@@ -70,7 +90,11 @@ def test_usable_factor_ids_drops_unregistered(tiny_preruns):
     service._SIGNAL_CACHE = {}
     if not TICKER_DATA.is_dir():
         pytest.skip("ticker_data not present")
-    panel = cf.load_panel_cached("ticker_data", N_TICKERS)
+    panel = cf.load_panel_cached(
+        "ticker_data", N_TICKERS,
+        tickers=_lobster_tickers(N_TICKERS),
+        data_overrides={"provider": "lobster"},
+    )
 
     real = cf.prerun_factor_ids("modelA")
     usable, dropped = cf.usable_factor_ids(real + ["__not_a_factor__"], panel)
@@ -98,9 +122,13 @@ def test_offline_comparison_end_to_end(tiny_preruns, tmp_path):
         preruns=tiny_preruns, models=["ridge", "lasso"], include_ensemble=True,
         run_downstream=False, target_horizon=6, ic_horizons=(1, 6, 60),
         n_tickers=N_TICKERS, output_root=str(tmp_path / "comparisons"),
-        comparison_id="utest",
+        comparison_id="utest", data_provider="lobster",
     )
-    panel = cf.load_panel_cached(cfg.data_dir, cfg.n_tickers)
+    panel = cf.load_panel_cached(
+        cfg.data_dir, cfg.n_tickers,
+        tickers=_lobster_tickers(N_TICKERS),
+        data_overrides=cfg.data_overrides(),
+    )
     names_map = cf.factor_names(tiny_preruns)
 
     results: dict = {"usability": {}, "prerun_models": {}}
@@ -150,3 +178,35 @@ def test_offline_comparison_end_to_end(tiny_preruns, tmp_path):
 
     after = hashlib.md5(global_db.read_bytes()).hexdigest() if global_db.exists() else None
     assert before == after, "global factor DB must not be mutated by a comparison"
+
+
+def test_comparison_panel_loads_yfinance_provider(monkeypatch, tmp_path):
+    """The comparison panel loader must honor API-provider settings, not ticker_data."""
+    from quant_fund_agent.comparison import factors as cf
+    from quant_fund_agent.data.providers.yfinance import YFinanceProvider
+    from quant_fund_agent.modeling import service
+
+    service._PANEL_CACHE = None
+    service._SIGNAL_CACHE = {}
+    monkeypatch.setattr(
+        YFinanceProvider, "_fetch",
+        lambda self, syms: {s: _synthetic_ohlcv(s) for s in syms},
+    )
+
+    panel = cf.load_panel_cached(
+        data_dir="ticker_data",
+        tickers=["AAA", "BBB"],
+        data_overrides={
+            "provider": "yfinance",
+            "asset_class": "equity",
+            "frequency": "1d",
+            "start": "2023-01-02",
+            "end": "2023-01-20",
+            "cache_dir": str(tmp_path),
+        },
+    )
+
+    assert list(panel["close"].columns) == ["AAA", "BBB"]
+    assert {"open", "high", "low", "close", "volume", "vwap", "returns"} <= set(panel)
+    assert "effSpread" not in panel
+    assert service._PANEL_CACHE is panel

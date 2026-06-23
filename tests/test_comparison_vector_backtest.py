@@ -222,9 +222,27 @@ def test_calendar_split_drives_is_and_oos():
     assert train_months <= {6, 7, 8}
 
 
+def test_split_date_drives_exact_cutoff():
+    tickers = ["A", "B", "C"]
+    panel, idx = _multi_month_panel(tickers)
+    cfg = _cfg(target_horizon=1, split_date="2024-08-15",
+               position_mode="sign", position_zscore_basis="none")
+
+    is_mask, oos_mask = cfg.split_masks(idx)
+    assert idx[is_mask].max() < pd.Timestamp("2024-08-15")
+    assert idx[oos_mask].min() >= pd.Timestamp("2024-08-15")
+
+    service._SIGNAL_CACHE = {"f1": panel["close"].pct_change()}
+    _, _, train, index, _, n_cols = bruteforce._pooled_features(["f1"], panel, cfg)
+    assert pd.DatetimeIndex(index[train // n_cols]).max() < pd.Timestamp("2024-08-15")
+
+
 def test_calendar_split_validation():
     idx = pd.date_range("2024-06-01", "2024-09-30 23:00", freq="h")
     with pytest.raises(ValueError, match="BOTH"):           # only one window given
         _cfg(is_window="2024-06").split_masks(idx)
     with pytest.raises(ValueError, match="overlap"):        # windows share August
         _cfg(is_window="2024-06:2024-08", oos_window="2024-08:2024-09").split_masks(idx)
+    with pytest.raises(ValueError, match="split-date"):
+        _cfg(split_date="2024-08-15", is_window="2024-06",
+             oos_window="2024-09").split_masks(idx)

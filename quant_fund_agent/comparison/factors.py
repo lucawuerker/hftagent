@@ -1,9 +1,9 @@
 """Load a prerun's factor ids and filter them to what's computable *now*.
 
-The whole comparison must run on the data that's available today (the 51-ticker
-LOBSTER sample) and re-run unchanged once the full LOBSTER universe / FMP
-fundamentals are downloaded.  A researched factor that declares a field the
-current panel doesn't have (e.g. ``peRatio``) simply can't be computed yet —
+The whole comparison must run on the active provider panel (LOBSTER, yfinance,
+FMP, AlphaVantage, ...).  A researched factor that declares a field the current
+panel doesn't have (e.g. ``peRatio`` on a plain OHLCV provider) simply can't be
+computed yet —
 :func:`usable_factor_ids` drops it (with a reason) instead of crashing, and the
 report shows the usable count per prerun.  When the data lands, the same factor
 lights up with no code change.
@@ -122,50 +122,50 @@ def load_panel_cached(
     tickers: list[str] | None = None,
     is_window: str | None = None,
     oos_window: str | None = None,
+    data_overrides: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Load (and cache) the factor panel the whole comparison shares.
-
-    # ── TODO: switch to quant.config.yaml once the full data is downloaded ──────
-    # Currently uses the direct LOBSTER/backtesting loader
-    # (``backtesting.data_loader.load_panel``) rather than the abstracted
-    # ``quant_fund_agent.data.load_panel`` (which respects ``quant.config.yaml``).
-    #
-    # Reason: the researcher factors were designed and IC-tested against the full
-    # LOBSTER microstructure panel (19 fields: orderFlow, effSpread, depth, …).
-    # The abstracted loader with a yfinance/FMP config only delivers 7 OHLCV fields,
-    # which causes every microstructure factor to fail the usability probe.
-    #
-    # When to switch: once ``quant.config.yaml`` points to the full LOBSTER dataset
-    # (or another provider that exposes the same microstructure fields), replace the
-    # ``_lobster_load`` call below with ``from quant_fund_agent.data import load_panel``
-    # and remove the direct import.  The rest of this function stays the same.
-    # ─────────────────────────────────────────────────────────────────────────────
 
     The loaded panel is injected into ``modeling.service._PANEL_CACHE`` so the
     brute-force track's ``evaluate_config`` / ``fit_and_backtest`` and the IC track's
     ``backtest_factor`` all use the same panel and universe.
     """
-    from quant_fund_agent.backtesting.data_loader import load_panel as _lobster_load
+    from quant_fund_agent.config import get_settings
+    from quant_fund_agent.data import load_panel
     from quant_fund_agent.factors import discover_factors
     from quant_fund_agent.modeling import service
 
-    dir_ = data_dir or os.getenv("DATA_DIR", "ticker_data")
-    if data_dir:
+    data_overrides = data_overrides or {}
+    settings = get_settings().with_data_overrides(**data_overrides)
+    dir_ = data_dir or settings.data.data_dir or os.getenv("DATA_DIR", "ticker_data")
+    if data_dir or settings.data.provider == "lobster":
         os.environ["DATA_DIR"] = dir_
         service.DATA_DIR = dir_
     # An explicit ticker list takes precedence over the count cap (and the latter
     # shared-with-the-architect env var only matters if the modeling cache is cold).
     if tickers is None and n_tickers is not None:
         os.environ["ARCHITECT_N_TICKERS"] = str(n_tickers)
+    if tickers:
+        os.environ["QF_DATA_TICKERS"] = ",".join(tickers)
 
     discover_factors()
 
-    # Load with the direct LOBSTER loader (full microstructure fields): pick the
-    # universe (explicit tickers else the n_tickers cap), restrict to the train∪OOS
-    # calendar windows if a date split is configured, uniformly stride to max_bars,
-    # then inject into the modeling-service cache so every downstream call reuses the
-    # same slim panel.
-    panel = _lobster_load(dir_, tickers=tickers, n_tickers=None if tickers else n_tickers)
+    log.info(
+        "loading comparison panel: provider=%s asset_class=%s frequency=%s "
+        "universe=%s start=%s end=%s",
+        settings.data.provider, settings.data.asset_class, settings.data.frequency,
+        settings.data.universe_preset or ("explicit" if tickers else "auto"),
+        settings.data.start, settings.data.end,
+    )
+    # Provider-aware load: LOBSTER still routes to its CSV provider, while API
+    # providers (yfinance/FMP/AlphaVantage) resolve universe + date range from the
+    # active settings / explicit overrides.
+    panel = load_panel(
+        dir_ if settings.data.provider == "lobster" else None,
+        tickers=tickers,
+        n_tickers=None if tickers else n_tickers,
+        settings=settings,
+    )
     if tickers:
         loaded = list(next(iter(panel.values())).columns) if panel else []
         missing = [t for t in tickers if t not in loaded]
