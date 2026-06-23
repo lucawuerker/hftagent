@@ -105,10 +105,18 @@ def vector_backtest(signal: pd.DataFrame, panel: dict[str, Any], cfg,
     pos = _positions(z, cfg)
     pnl = pos * forward_returns(close, horizon=cfg.target_horizon)
 
-    ratio = cfg.oos_split_ratio if oos_split_ratio is None else oos_split_ratio
-    cut = int(len(close.index) * (1.0 - ratio))
-    is_m = _slice_metrics(pnl.iloc[:cut], pos.iloc[:cut], sig.iloc[:cut], close.iloc[:cut], cfg)
-    oos_m = _slice_metrics(pnl.iloc[cut:], pos.iloc[cut:], sig.iloc[cut:], close.iloc[cut:], cfg)
+    # IS/OOS split: an explicit ``oos_split_ratio`` override keeps the contiguous
+    # tail split; otherwise defer to the config (calendar windows if set, else the
+    # ratio tail) so every track splits the panel identically.
+    if oos_split_ratio is not None:
+        cut = int(len(close.index) * (1.0 - oos_split_ratio))
+        is_mask = np.zeros(len(close.index), dtype=bool)
+        is_mask[:cut] = True
+        oos_mask = ~is_mask
+    else:
+        is_mask, oos_mask = cfg.split_masks(close.index)
+    is_m = _slice_metrics(pnl[is_mask], pos[is_mask], sig[is_mask], close[is_mask], cfg)
+    oos_m = _slice_metrics(pnl[oos_mask], pos[oos_mask], sig[oos_mask], close[oos_mask], cfg)
 
     return {
         "is_ic": is_m.get("ic_mean"), "oos_ic": oos_m.get("ic_mean"),

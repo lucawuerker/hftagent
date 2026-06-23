@@ -89,10 +89,39 @@ def _subsample_bars(panel: dict[str, Any], max_bars: int | None) -> dict[str, An
     return {k: df.loc[keep] for k, df in panel.items()}
 
 
+def _restrict_to_periods(
+    panel: dict[str, Any], is_window: str | None, oos_window: str | None,
+) -> dict[str, Any]:
+    """Restrict every field frame to the union of the train + OOS calendar windows.
+
+    When the comparison uses a date-based IS/OOS split, the whole comparison should
+    run on just those months (so the IC / analytics / brute-force tracks are all
+    scored on the same windowed data).  ``None`` for either window (the ratio-split
+    default) is a no-op.
+    """
+    if not panel or not (is_window and oos_window):
+        return panel
+    from quant_fund_agent.comparison.config import period_mask
+
+    index = next(iter(panel.values())).index
+    mask = period_mask(is_window, index) | period_mask(oos_window, index)
+    kept = int(mask.sum())
+    log.info("restricting panel to train∪OOS windows: %d → %d bars", len(index), kept)
+    if kept == 0:
+        log.warning("date windows select 0 bars — check the months lie within the data "
+                    "range (%s … %s); leaving the panel unrestricted.", index.min(), index.max())
+        return panel
+    return {k: df[mask] for k, df in panel.items()}
+
+
 def load_panel_cached(
     data_dir: str | None = None,
     n_tickers: int | None = None,
     max_bars: int | None = None,
+    *,
+    tickers: list[str] | None = None,
+    is_window: str | None = None,
+    oos_window: str | None = None,
 ) -> dict[str, Any]:
     """Load (and cache) the factor panel the whole comparison shares.
 
@@ -124,15 +153,26 @@ def load_panel_cached(
     if data_dir:
         os.environ["DATA_DIR"] = dir_
         service.DATA_DIR = dir_
-    if n_tickers is not None:
+    # An explicit ticker list takes precedence over the count cap (and the latter
+    # shared-with-the-architect env var only matters if the modeling cache is cold).
+    if tickers is None and n_tickers is not None:
         os.environ["ARCHITECT_N_TICKERS"] = str(n_tickers)
 
     discover_factors()
 
-    # Load with the direct LOBSTER loader (full microstructure fields), cap universe,
-    # uniformly stride to max_bars, then inject into the modeling-service cache so
-    # every downstream call reuses the same slim panel.
-    panel = _lobster_load(dir_, n_tickers=n_tickers)
+    # Load with the direct LOBSTER loader (full microstructure fields): pick the
+    # universe (explicit tickers else the n_tickers cap), restrict to the train∪OOS
+    # calendar windows if a date split is configured, uniformly stride to max_bars,
+    # then inject into the modeling-service cache so every downstream call reuses the
+    # same slim panel.
+    panel = _lobster_load(dir_, tickers=tickers, n_tickers=None if tickers else n_tickers)
+    if tickers:
+        loaded = list(next(iter(panel.values())).columns) if panel else []
+        missing = [t for t in tickers if t not in loaded]
+        log.info("explicit universe: %d/%d requested tickers loaded%s",
+                 len(loaded), len(tickers),
+                 f" (missing: {missing})" if missing else "")
+    panel = _restrict_to_periods(panel, is_window, oos_window)
     panel = _subsample_bars(panel, max_bars)
     service._PANEL_CACHE = panel
     service._SIGNAL_CACHE = {}   # flush stale signals from any prior run

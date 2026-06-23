@@ -31,6 +31,12 @@ Examples
     QF_USE_MCP=0 ./venv/bin/python run_model_comparison.py --all --no-downstream \
       --train-sample-frac 0.3 --n-tickers 25
 
+    # Pick the exact underlyings and a calendar IS/OOS split (train on 3 months,
+    # test on the next) instead of a row-count / tail-fraction split.
+    QF_USE_MCP=0 ./venv/bin/python run_model_comparison.py --all --no-downstream \
+      --tickers AAPL,MSFT,CORN \
+      --train-months 2024-06:2024-08 --oos-months 2024-09
+
     # Create the preruns first (spends research LLM), then compare.
     ./venv/bin/python run_model_comparison.py --research \
       --prerun-spec gpt4omini=gpt-4o-mini \
@@ -85,11 +91,25 @@ def _parse_args() -> argparse.Namespace:
                    help="Strategies built per prerun in the downstream track.")
     p.add_argument("--horizon", type=int, default=6,
                    help="Forecast horizon (bars) for brute-force + downstream.")
-    p.add_argument("--oos-ratio", type=float, default=0.2)
+    p.add_argument("--oos-ratio", type=float, default=0.2,
+                   help="Held-out tail fraction for the IS/OOS split (used unless "
+                        "--train-months/--oos-months give a calendar split instead).")
     p.add_argument("--n-tickers", type=int, default=None,
                    help="How many underlyings to use (caps the universe). Fewer tickers "
                         "→ a smaller panel that speeds up every model AND the IC track. "
                         "Default = all tickers in the data dir.")
+    p.add_argument("--tickers", default=None,
+                   help="Explicit comma-separated underlyings to use (e.g. 'AAPL,MSFT,CORN'); "
+                        "loads exactly these and OVERRIDES --n-tickers. Default = all tickers.")
+    # ── calendar IS/OOS split (replaces the --oos-ratio tail split when both given) ──
+    p.add_argument("--train-months", default=None, metavar="SPEC",
+                   help="Calendar IS/train window instead of the --oos-ratio tail: a comma "
+                        "list of months/dates ('2024-06,2024-07' or '2024-06-15') or an "
+                        "inclusive range ('2024-06:2024-08'). Requires --oos-months; the "
+                        "panel is restricted to train∪OOS so every track scores those months.")
+    p.add_argument("--oos-months", default=None, metavar="SPEC",
+                   help="Calendar OOS window (same format as --train-months); must be "
+                        "disjoint from --train-months.")
     # ── speed knobs (brute-force model training) ──
     p.add_argument("--fast", action="store_true",
                    help="Fast preset: subsample training rows (--train-sample-frac "
@@ -111,6 +131,12 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--no-checkpoint", action="store_true",
                    help="Disable persisting tables/figures after each track (crash-safety).")
     # ── ML-combined-signal vectorised backtest (brute-force track) ──
+    p.add_argument("--fit-scope", choices=["pooled", "per_underlying"], default=None,
+                   help="Fit ONE model across all underlyings ('pooled', the default) or "
+                        "a SEPARATE model per underlying ('per_underlying'). Pooled suits "
+                        "homogeneous, data-light universes (e.g. yfinance S&P100 stocks); "
+                        "per_underlying suits heterogeneous, data-rich ones (e.g. the "
+                        "LOBSTER ETFs across sectors, ~2340 bars/day each).")
     p.add_argument("--fit-standardize", choices=["per_underlying", "cross_sectional"], default=None,
                    help="How factors are standardised before the ML fit (default per_underlying).")
     p.add_argument("--position-mode", choices=["threshold", "sign", "continuous"], default=None,
@@ -242,6 +268,15 @@ def main() -> None:
         args.max_bars if args.max_bars is not None
         else (20_000 if args.fast else None)
     )
+    tickers = (
+        [t.strip().upper() for t in args.tickers.split(",") if t.strip()]
+        if args.tickers else None
+    )
+    if tickers and args.n_tickers is not None:
+        log.info("--tickers given (%d names) → ignoring --n-tickers=%d.", len(tickers), args.n_tickers)
+    if bool(args.train_months) != bool(args.oos_months):
+        raise SystemExit("--train-months and --oos-months must be given together "
+                         "(a calendar split needs both a train and an OOS window).")
 
     cfg = ComparisonConfig(
         preruns=prerun_names,
@@ -254,10 +289,12 @@ def main() -> None:
         target_horizon=args.horizon, ic_horizons=(1, args.horizon, 60),
         oos_split_ratio=args.oos_ratio, n_strategies=args.n_strategies,
         data_dir=args.data_dir, n_tickers=args.n_tickers, max_bars=max_bars,
+        tickers=tickers, is_window=args.train_months, oos_window=args.oos_months,
         fast=args.fast, train_sample_frac=train_sample_frac,
         checkpoint=not args.no_checkpoint,
         **({"analytics_max_rows": args.analytics_max_rows} if args.analytics_max_rows else {}),
         **({"corr_threshold": args.corr_threshold} if args.corr_threshold is not None else {}),
+        **({"fit_scope": args.fit_scope} if args.fit_scope else {}),
         **({"fit_standardize": args.fit_standardize} if args.fit_standardize else {}),
         **({"position_mode": args.position_mode} if args.position_mode else {}),
         **({"position_threshold": args.position_threshold} if args.position_threshold is not None else {}),
@@ -275,10 +312,25 @@ def main() -> None:
         log.info("speed: fast=%s  train_sample_frac=%.3g  n_tickers=%s  max_bars=%s  models=%s",
                  cfg.fast, cfg.train_sample_frac, cfg.n_tickers, cfg.max_bars,
                  cfg.models or "all")
+    if cfg.tickers:
+        log.info("universe: explicit tickers %s", cfg.tickers)
 
     # ── shared panel + per-prerun usable factor ids ──
-    panel = factors.load_panel_cached(cfg.data_dir, cfg.n_tickers, cfg.max_bars)
+    panel = factors.load_panel_cached(
+        cfg.data_dir, cfg.n_tickers, cfg.max_bars,
+        tickers=cfg.tickers, is_window=cfg.is_window, oos_window=cfg.oos_window)
     universe = next(iter(panel.values())).shape[1] if panel else 0
+    if cfg.is_window or cfg.oos_window:
+        idx = next(iter(panel.values())).index if panel else None
+        try:
+            im, om = cfg.split_masks(idx)
+        except ValueError as e:
+            raise SystemExit(str(e))
+        log.info("calendar IS/OOS split: IS=%d bars [%s], OOS=%d bars [%s]",
+                 int(im.sum()), cfg.is_window, int(om.sum()), cfg.oos_window)
+        if idx is not None and (im.sum() == 0 or om.sum() == 0):
+            log.warning("a calendar window selected 0 bars — check the months lie within the "
+                        "loaded data range (%s … %s).", idx.min(), idx.max())
     if universe < 2:
         log.warning("universe has %d ticker(s): this comparison is CROSS-SECTIONAL "
                     "(rank-IC, the ML fits and factor correlations all need ≥2 names), so "
@@ -376,6 +428,9 @@ def main() -> None:
     print("\n" + "=" * 80)
     print(f"Comparison '{cfg.comparison_id}' → {cfg.output_dir}")
     print(f"  preruns         : {prerun_names}")
+    print(f"  universe        : {cfg.tickers if cfg.tickers else f'{universe} tickers'}")
+    if cfg.is_window or cfg.oos_window:
+        print(f"  split           : IS=[{cfg.is_window}]  OOS=[{cfg.oos_window}]")
     print(f"  tracks          : "
           f"{'IC ' if cfg.run_ic else ''}{'analytics ' if cfg.run_analytics else ''}"
           f"{'brute-force ' if cfg.run_bruteforce else ''}"

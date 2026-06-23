@@ -127,3 +127,104 @@ def test_ml_track_recovers_predictive_factor(monkeypatch):
     assert "error" not in ridge
     assert ridge["oos_sharpe"] is not None
     assert ridge["oos_sharpe"] > 0.5           # the model should find the good factor
+
+
+# ── fit_scope: pooled (one model) vs per_underlying (a model per name) ────────
+
+def test_fit_scope_per_underlying_vs_pooled_diverge():
+    """Two names with OPPOSITE factor→return signs: a pooled fit cancels to ~0,
+    while a per-underlying fit recovers +1 for one name and -1 for the other."""
+    cols = pd.Index(["A", "B"])
+    n_cols, T = 2, 200
+    index = pd.date_range("2024-01-01", periods=T, freq="min")
+    rng = np.random.default_rng(0)
+
+    # Timestamp-major rows: row r → (t = r // n_cols, j = r % n_cols).  One feature;
+    # target is +x for A (j=0) and -x for B (j=1).
+    x = rng.standard_normal(T * n_cols)
+    X = x.reshape(-1, 1)
+    j = np.arange(T * n_cols) % n_cols
+    y = np.where(j == 0, x, -x)
+    t = np.arange(T * n_cols) // n_cols
+    train = np.flatnonzero(t < int(T * 0.7))            # IS rows
+
+    pooled = bruteforce._combined_signal(
+        "ridge", X, y, train, index, cols, n_cols, _cfg(fit_scope="pooled"))
+    per = bruteforce._combined_signal(
+        "ridge", X, y, train, index, cols, n_cols, _cfg(fit_scope="per_underlying"))
+
+    assert pooled.shape == per.shape == (T, n_cols)
+    xA, xB = x[0::2], x[1::2]
+    # per-underlying recovers the opposite signs per name …
+    assert np.corrcoef(per["A"].to_numpy(), xA)[0, 1] > 0.9
+    assert np.corrcoef(per["B"].to_numpy(), xB)[0, 1] < -0.9
+    # … while the single pooled model sees them cancel → a near-flat signal.
+    assert per["A"].std() > 5 * (pooled["A"].std() + 1e-12)
+
+
+def test_fit_scope_per_underlying_needs_enough_rows():
+    """A per-underlying fit with too few IS rows for every name raises (the caller
+    turns this into a degraded 'error' row rather than a crash)."""
+    cols = pd.Index(["A", "B"])
+    n_cols, T = 2, 50
+    index = pd.date_range("2024-01-01", periods=T, freq="min")
+    X = np.random.default_rng(1).standard_normal((T * n_cols, 1))
+    y = X.ravel()
+    train = np.arange(2 * n_cols)                       # 2 IS rows per name (< minimum)
+    with pytest.raises(ValueError, match="per-underlying fit"):
+        bruteforce._combined_signal(
+            "ridge", X, y, train, index, cols, n_cols, _cfg(fit_scope="per_underlying"))
+
+
+# ── calendar (date-window) IS/OOS split ──────────────────────────────────────
+
+def _multi_month_panel(tickers, seed=0):
+    """An hourly panel spanning Jun–Sep 2024 (so month-based splits are meaningful)."""
+    idx = pd.date_range("2024-06-01", "2024-09-30 23:00", freq="h")
+    rng = np.random.default_rng(seed)
+    rets = rng.standard_normal((len(idx), len(tickers))) * 0.01
+    close = pd.DataFrame(100 * np.cumprod(1 + rets, axis=0), index=idx, columns=tickers)
+    return {"close": close}, idx
+
+
+def test_period_mask_formats():
+    from quant_fund_agent.comparison.config import period_mask
+
+    idx = pd.date_range("2024-06-01", "2024-09-30 23:00", freq="h")
+    assert set(idx[period_mask("2024-06,2024-07", idx)].month) == {6, 7}
+    # a month at the END of a range expands to the whole month (all of August)
+    aug = idx[period_mask("2024-06:2024-08", idx)]
+    assert set(aug.month) == {6, 7, 8} and aug.max().day == 31
+    day = idx[period_mask("2024-09-01:2024-09-15", idx)]
+    assert day.min() == pd.Timestamp("2024-09-01 00:00")
+    assert day.max() == pd.Timestamp("2024-09-15 23:00")
+
+
+def test_calendar_split_drives_is_and_oos():
+    tickers = ["A", "B", "C", "D"]
+    panel, idx = _multi_month_panel(tickers)
+    cfg = _cfg(target_horizon=1, is_window="2024-06:2024-08", oos_window="2024-09",
+               position_mode="sign", position_zscore_basis="none")
+
+    is_mask, oos_mask = cfg.split_masks(idx)
+    assert set(idx[is_mask].month) == {6, 7, 8}
+    assert set(idx[oos_mask].month) == {9}
+    assert int((is_mask & oos_mask).sum()) == 0
+
+    # a clairvoyant signal still scores on the OOS (September) slice only
+    out = vb.vector_backtest(panel["close"].pct_change().shift(-1), panel, cfg)
+    assert out["oos_sharpe"] is not None and out["oos_sharpe"] > 1.0
+
+    # the model's pooled training rows fall exclusively in the IS months
+    service._SIGNAL_CACHE = {"f1": panel["close"].pct_change()}
+    X, y, train, index, cols, n_cols = bruteforce._pooled_features(["f1"], panel, cfg)
+    train_months = set(pd.DatetimeIndex(index[train // n_cols]).month)
+    assert train_months <= {6, 7, 8}
+
+
+def test_calendar_split_validation():
+    idx = pd.date_range("2024-06-01", "2024-09-30 23:00", freq="h")
+    with pytest.raises(ValueError, match="BOTH"):           # only one window given
+        _cfg(is_window="2024-06").split_masks(idx)
+    with pytest.raises(ValueError, match="overlap"):        # windows share August
+        _cfg(is_window="2024-06:2024-08", oos_window="2024-08:2024-09").split_masks(idx)

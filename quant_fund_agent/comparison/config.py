@@ -34,6 +34,50 @@ _FAST_MODEL_PARAMS: dict[str, dict[str, object]] = {
 }
 
 
+def _period_bound(token: str, *, end: bool):
+    """Parse a ``YYYY-MM`` or ``YYYY-MM-DD`` token into a boundary timestamp.
+
+    ``end=False`` → first instant of that month/day; ``end=True`` → last instant
+    (so a whole-month token expands to the entire month, a whole-day token to the
+    entire day — both inclusive of every intraday bar within).
+    """
+    import pandas as pd
+
+    token = token.strip()
+    parts = token.split("-")
+    if len(parts) == 2:  # YYYY-MM
+        start = pd.Timestamp(f"{token}-01")
+        if not end:
+            return start
+        return start + pd.offsets.MonthBegin(1) - pd.Timedelta(nanoseconds=1)
+    if len(parts) == 3:  # YYYY-MM-DD
+        day = pd.Timestamp(token)
+        return day if not end else day + pd.Timedelta(days=1) - pd.Timedelta(nanoseconds=1)
+    raise ValueError(f"Bad date token {token!r}; use YYYY-MM or YYYY-MM-DD.")
+
+
+def period_mask(spec: str, index) -> Any:
+    """Boolean numpy mask over a ``DatetimeIndex`` for a calendar period spec.
+
+    ``spec`` is either a comma-separated list of months/dates
+    (``"2024-06,2024-07"`` / ``"2024-06-15"``) or an inclusive range
+    ``START:END`` where each end is a month or date (a month at the END of a range
+    expands to the whole month, e.g. ``"2024-06:2024-08"`` covers all of August).
+    """
+    import numpy as np
+
+    spec = spec.strip()
+    if ":" in spec:
+        a, b = spec.split(":", 1)
+        lo, hi = _period_bound(a, end=False), _period_bound(b, end=True)
+        return np.asarray((index >= lo) & (index <= hi))
+    mask = np.zeros(len(index), dtype=bool)
+    for tok in (t.strip() for t in spec.split(",") if t.strip()):
+        lo, hi = _period_bound(tok, end=False), _period_bound(tok, end=True)
+        mask |= np.asarray((index >= lo) & (index <= hi))
+    return mask
+
+
 @dataclass
 class ComparisonConfig:
     """All knobs for one comparison of several preruns' factor sets."""
@@ -79,6 +123,11 @@ class ComparisonConfig:
     # (timestamp, underlying).  That signal is run through a *simple* per-underlying
     # vectorised backtest: position(signal) × the underlying's own forward return,
     # then aggregated.  Every modelling choice below is a changeable argument.
+    # `fit_scope` decides whether a model is fit ONCE across all underlyings'
+    # pooled rows ("pooled", the default — suits homogeneous, data-light universes
+    # like S&P100 stocks) or SEPARATELY per underlying ("per_underlying" — a model
+    # per name, suits heterogeneous, data-rich ones like the LOBSTER ETFs).
+    fit_scope: str = "pooled"                 # "pooled" | "per_underlying"
     fit_standardize: str = "per_underlying"   # "per_underlying" | "cross_sectional"
     position_mode: str = "threshold"          # "threshold" | "sign" | "continuous"
     position_threshold: float = 1.0           # ±t (in z units) for the threshold band
@@ -93,6 +142,17 @@ class ComparisonConfig:
     # ── data / universe ──
     data_dir: str = field(default_factory=lambda: os.getenv("DATA_DIR", "ticker_data"))
     n_tickers: int | None = None      # cap universe via ARCHITECT_N_TICKERS (None = all)
+    # Explicit universe — an exact ticker list (e.g. ["AAPL", "MSFT", "CORN"]).  Takes
+    # precedence over ``n_tickers`` when set; only these names are loaded.  None = all
+    # tickers in the data dir (optionally capped by ``n_tickers``).
+    tickers: list[str] | None = None
+    # Calendar IS/OOS split.  When BOTH are set, the held-out split is by *date*
+    # (these months/dates train, those test) instead of the ``oos_split_ratio`` tail
+    # fraction, and the loaded panel is restricted to their union.  Each is a comma
+    # list of months/dates ("2024-06,2024-07" / "2024-06-15") or an inclusive range
+    # ("2024-06:2024-08").  Must be disjoint.  Default None → the ratio tail split.
+    is_window: str | None = None      # train period spec
+    oos_window: str | None = None     # OOS period spec
     # Uniform timestamp subsample of the whole panel (None = keep every bar).  The
     # single biggest speed lever on the intraday LOBSTER panel (~1.4M bars/ticker):
     # striding the index to `max_bars` slims *every* track at once (IC, analytics,
@@ -159,6 +219,40 @@ class ComparisonConfig:
         if not self.fast:
             return None
         return _FAST_MODEL_PARAMS.get(model_type)
+
+    def split_masks(self, index) -> tuple[Any, Any]:
+        """``(is_mask, oos_mask)`` boolean arrays over a panel timestamp ``index``.
+
+        Calendar mode (``is_window``/``oos_window`` both set) selects the IS/OOS
+        rows by month/date and requires them disjoint; otherwise the default
+        contiguous tail split by ``oos_split_ratio`` (first ``1-ratio`` = IS).
+        """
+        import numpy as np
+
+        n = len(index)
+        if self.is_window or self.oos_window:
+            if not (self.is_window and self.oos_window):
+                raise ValueError(
+                    f"Calendar IS/OOS split needs BOTH a train and an OOS window "
+                    f"(got is_window={self.is_window!r}, oos_window={self.oos_window!r}).")
+            is_mask = period_mask(self.is_window, index)
+            oos_mask = period_mask(self.oos_window, index)
+            overlap = int((is_mask & oos_mask).sum())
+            if overlap:
+                raise ValueError(
+                    f"train and OOS windows overlap on {overlap} bars — they must be "
+                    f"disjoint (is_window={self.is_window!r}, oos_window={self.oos_window!r}).")
+            return is_mask, oos_mask
+        cut = int(n * (1.0 - self.oos_split_ratio))
+        is_mask = np.zeros(n, dtype=bool)
+        is_mask[:cut] = True
+        return is_mask, ~is_mask
+
+    def window_union_mask(self, index) -> Any | None:
+        """Boolean mask of the train∪OOS calendar windows (None if not in date mode)."""
+        if not (self.is_window and self.oos_window):
+            return None
+        return period_mask(self.is_window, index) | period_mask(self.oos_window, index)
 
     def to_dict(self) -> dict[str, Any]:
         d = asdict(self)

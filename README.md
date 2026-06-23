@@ -122,6 +122,14 @@ QF_USE_MCP=0 ./venv/bin/python run_model_comparison.py --all --no-downstream
 # disk as it finishes (status.json), so an interrupt never loses progress.
 ./venv/bin/python run_model_comparison.py --preruns gpt4omini,claude \
   --data-dir ticker_data --no-downstream --fast
+
+# Pick the exact underlyings and split IS/OOS by the calendar (train on three
+# months, test on the next) instead of by ticker-count / tail-fraction.  Each
+# window is a comma list of months/dates or an inclusive START:END range; they
+# must be disjoint, and the panel is restricted to their union.
+./venv/bin/python run_model_comparison.py --all --no-downstream \
+  --tickers AAPL,MSFT,CORN \
+  --train-months 2024-06:2024-08 --oos-months 2024-09
 ```
 
 The **factor-analytics** track (`comparison/analytics.py`) is near-free — it reuses

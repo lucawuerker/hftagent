@@ -39,7 +39,7 @@ log = logging.getLogger("populate_papers")
 
 PAPER_INDEX_PATH = Path(os.getenv("PAPER_INDEX_PATH", "data/papers/index.json"))
 
-SEARCH_QUERIES = [
+'''SEARCH_QUERIES = [
     # Stochastic Processes & Rough Path Theory
     "signature transforms limit order book alpha",
     "rough path theory high frequency price prediction",
@@ -75,6 +75,49 @@ SEARCH_QUERIES = [
     "market microstructure noise robust volatility estimation",
     "Hawkes processes cross-asset market impact tick data",
     "information asymmetry probability of informed trading PIN L2 data",
+]'''
+SEARCH_QUERIES = [
+    # Advanced Time-Series & Volatility Stochastics
+    "Rough volatility fractional Brownian motion OHLCV realized volatility estimation",
+    "GARCH-MIDAS mixed data sampling macroeconomic variables daily OHLCV",
+    "Fractional cointegration OHLCV data pairs trading statistical arbitrage",
+    "Non-linear state-space models stochastic volatility OHLCV time series",
+    "Multivariate Hawkes processes aggregated OHLCV volume-driven price jumps",
+
+    # Geometric, Topological, & Wavelet Signal Processing
+    "Topological Data Analysis persistence diagrams OHLCV regime switching",
+    "Continuous Wavelet Transform scalogram OHLCV multi-resolution alpha",
+    "Empirical Mode Decomposition Hilbert-Huang transform OHLCV trend extraction",
+    "Visibility graph network analysis OHLCV time series stock market",
+    "Fourier transform spectral density OHLCV cyclical intraday seasonality",
+
+    # Deep Learning & Sequential Architectures
+    "Temporal Fusion Transformer multi-horizon OHLCV forecasting attention",
+    "Neural Ordinary Differential Equations Neural ODEs OHLCV continuous time series",
+    "Informer Transformer long sequence time series forecasting OHLCV",
+    "WaveNet dilated causal convolutions autoregressive OHLCV alpha generation",
+    "Reservoir computing echo state networks multi-asset OHLCV pattern recognition",
+
+    # Volume-Price Structural Dynamics & Microstructure Proxies
+    "Volume-weighted average price VWAP deviations mean reversion OHLCV",
+    "Garman-Klass vs Yang-Zhang volatility estimators OHLCV efficiency comparison",
+    "Volume clock time-deformation OHLCV bar processing variance stabilization",
+    "Price-Volume power law scaling relationship financial time series",
+    "Information asymmetry proxies high-low spread estimator OHLCV data",
+
+    # Statistical Machine Learning & Regime Detection
+    "Hidden Markov Models Gaussian mixture regime switching OHLCV volatility",
+    "Optimal transport Wasserstein distance OHLCV distribution shift detection",
+    "Dynamic Time Warping DTW clustering cross-asset OHLCV lead-lag",
+    "Change-point detection algorithms structural breaks OHLCV trend reversals",
+    "Gradient boosted decision trees non-linear feature engineering OHLCV alpha",
+
+    # Mathematical Control & Systematic Execution Strategy
+    "Stochastic control Almgren-Chriss optimal liquidation OHLCV volume profile",
+    "Reinforcement learning Q-learning trend following OHLCV action space",
+    "Kelly criterion dynamic position sizing OHLCV regime filtering",
+    "Markov decision process automated portfolio rebalancing daily OHLCV",
+    "Bayesian structural time series BSTS counterfactual analysis OHLCV",
 ]
 
 LLM_MODEL = os.getenv("POPULATE_PAPERS_LLM_MODEL", "gpt-4o-mini")

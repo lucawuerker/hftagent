@@ -125,7 +125,7 @@ def test_offline_comparison_end_to_end(tiny_preruns, tmp_path):
     bf_rows: list = []
     for p in tiny_preruns:
         if usable[p]:
-            bf_rows += bruteforce.evaluate_prerun_models(p, usable[p], cfg)
+            bf_rows += bruteforce.evaluate_prerun_models(p, usable[p], panel, cfg)
     results["bruteforce_rows"] = bf_rows
     assert bf_rows
     models_seen = {r["model"] for r in bf_rows}

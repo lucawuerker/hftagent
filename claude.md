@@ -46,10 +46,21 @@ the underlying's own forward return`, OOS; `comparison/vector_backtest.py` +
 fund, single-pass OOS) — emitting presentation-ready figures, CSV/JSON tables, a
 `report.md` and a `comparison.ipynb` under `data/comparisons/<id>/`
 (`quant_fund_agent/comparison/`). The backtest's modelling choices are all CLI args (both
-sides implemented): `--position-mode {threshold,sign,continuous}` (default threshold band),
-`--position-zscore {expanding,full,rolling,none}`, `--aggregation {portfolio,per_underlying}`,
-`--fit-standardize {per_underlying,cross_sectional}` (default per-underlying time-series
-z-score on IS stats). Everything except the downstream track and `--research` is LLM-free. **Faster + crash-safe:** `--max-bars N` (default 20000 under `--fast`)
+sides implemented): `--fit-scope {pooled,per_underlying}` (default **pooled** — ONE model
+across all underlyings; `per_underlying` fits a separate model per name, for heterogeneous
+data-rich universes like the LOBSTER ETFs), `--position-mode {threshold,sign,continuous}`
+(default threshold band), `--position-zscore {expanding,full,rolling,none}`,
+`--aggregation {portfolio,per_underlying}`, `--fit-standardize {per_underlying,cross_sectional}`
+(default per-underlying time-series z-score on IS stats). Everything except the downstream
+track and `--research` is LLM-free.
+**Universe + split selection:** beyond `--n-tickers N` (a count) you can name the exact
+underlyings with `--tickers AAPL,MSFT,CORN` (overrides the count), and beyond `--oos-ratio`
+(a tail fraction) you can split IS/OOS by the *calendar* with `--train-months`/`--oos-months`
+— each a comma list of months/dates (`2024-06,2024-07` / `2024-06-15`) or an inclusive range
+(`2024-06:2024-08`); they must be disjoint, the panel is restricted to their union so every
+track scores those months, and the split seam is `ComparisonConfig.split_masks(index)` (used
+by the brute-force/vector-backtest tracks; the LLM downstream track keeps its ratio split).
+**Faster + crash-safe:** `--max-bars N` (default 20000 under `--fast`)
 uniformly strides the panel so *every* track is fast and the brute-force OOM is gone;
 the harness **checkpoints tables+figures after each track** (writing `status.json`),
 so an interrupted run never loses completed tracks. Factors needing fields the current

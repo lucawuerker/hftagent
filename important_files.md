@@ -27,11 +27,19 @@ Guided wizard that writes `quant.config.yaml` — required before running anythi
 | `--tickers` | — | Comma-separated tickers (overrides `--preset`) |
 | `--n-tickers` | — | Cap universe size |
 | `--data-dir` | `ticker_data` | LOBSTER provider only |
+| `--lobster-level` | `3` | LOBSTER only: order-book level the feed carries — `2` = order book + traded volume, `3` = adds the message-stream fields (trades / order-flow / hidden / auctions). |
+| `--fundamentals` | `yes` | Equity FMP / AlphaVantage only: use non-OHLCV fundamental / estimate / event data. |
 | `--cache-dir` | `data/market` | Parquet cache location |
 | `--assist "<text>"` | — | LLM drafts a config from plain English |
 | `--no-validate` | off | Skip validation fetch |
 | `--yes` / `-y` | off | Non-interactive: accept all defaults |
 | `--output` | `quant.config.yaml` | Output path |
+
+> **Data scope → Factor Researcher.** `--lobster-level` and `--fundamentals` are
+> written to `quant.config.yaml` and restrict the Factor Researcher to the fields
+> the configured feed can actually serve: its brainstorm/codegen data-context lists
+> only in-scope fields and any factor reading an out-of-scope field is dropped at
+> persist. Default `lobster_level: 3` → existing configs are unchanged.
 
 ---
 
@@ -113,28 +121,45 @@ One-shot migration: make `data/factors/factor_db.json` seed-only by moving resea
 ---
 
 ### `run_model_comparison.py`
-Compares factor sets from multiple research-LLM preruns on three axes: single-factor IC, brute-force ML, and the full downstream agent fund. Outputs figures, CSV/JSON tables, `report.md`, and `comparison.ipynb` under `data/comparisons/<id>/`.
+Compares factor sets from multiple research-LLM preruns on **four** tracks: single-factor IC, factor analytics (diversity/redundancy + deflation/importance), ML-combined-signal brute-force (catalog models + ensemble → per-underlying vectorised backtest), and the full downstream agent fund. Outputs figures, CSV/JSON tables, `report.md`, and `comparison.ipynb` under `data/comparisons/<id>/`; tables+figures are checkpointed after each track (`status.json`) so an interrupt never loses progress. Only the downstream track (and `--research`) spends LLM.
+
+**Data source:** provider-aware — the shared panel follows `quant.config.yaml`. With `provider: lobster` it uses the direct LOBSTER CSV loader (the full microstructure panel) and `--data-dir` points at the per-ticker CSV root; with an API provider (`yfinance` / `fmp` / `alphavantage`) it loads through the abstracted data layer (universe / timespan from the config) and `--data-dir` is ignored.
 
 | Flag | Default | Description |
 |------|---------|-------------|
 | `--preruns <a,b,…>` | — | Comma-separated prerun names to compare |
 | `--all` | off | Compare all existing preruns |
-| `--models <m1,m2,…>` | — | Filter to specific model types in brute-force track |
-| `--no-ensemble` | off | Skip ensemble model in brute-force track |
+| `--models <m1,m2,…>` | — | Filter to specific model types in the brute-force track |
+| `--no-ensemble` | off | Skip the equal-weight ensemble in the brute-force track |
 | `--include-seeds` | off | Include seed alphas alongside researched factors |
-| `--no-ic` | off | Skip single-factor IC track |
-| `--no-bruteforce` | off | Skip brute-force ML track |
-| `--no-downstream` | off | Skip downstream agent track (the only LLM-spending step) |
-| `--n-strategies` | `3` | Strategy attempts per prerun in downstream track |
-| `--horizon` | `6` | Forecast horizon in bars |
-| `--oos-ratio` | `0.2` | OOS fraction |
-| `--n-tickers` | all | Cap universe size |
-| `--fast` | off | Faster brute-force (fewer CV folds) |
-| `--train-sample-frac` | — | Subsample training data for speed |
-| `--data-dir` | `ticker_data` | Data directory |
+| `--no-ic` | off | Skip the single-factor IC track |
+| `--no-analytics` | off | Skip the factor-analytics track (diversity + deflation/importance) |
+| `--no-bruteforce` | off | Skip the brute-force ML track |
+| `--no-downstream` | off | Skip the downstream agent track (the only LLM-spending step) |
+| `--n-strategies` | `3` | Strategy attempts per prerun in the downstream track |
+| `--horizon` | `6` | Forecast horizon in bars (brute-force + downstream) |
+| `--oos-ratio` | `0.2` | OOS tail fraction — last N% of bars are OOS. **Ignored when `--train-months`/`--oos-months` are given** (calendar split takes over) for the LLM-free tracks; the downstream agent track always uses this ratio. |
+| `--train-months <spec>` | — | Calendar IS/train window instead of the `--oos-ratio` tail. A comma list of months/dates (`2024-06,2024-07` / `2024-06-15`) or an inclusive range (`2024-06:2024-08`). **Requires `--oos-months`** and must be disjoint from it; the panel is restricted to train∪OOS so every track scores those months. |
+| `--oos-months <spec>` | — | Calendar OOS window (same format as `--train-months`); must be disjoint from it. |
+| `--n-tickers` | all | Cap universe size by **count** (smaller panel = faster every track) |
+| `--tickers <a,b,…>` | all | Name the **exact** underlyings (e.g. `SPY,QQQ,CORN`); overrides `--n-tickers`. Missing names are logged, not fatal. |
+| `--fast` | off | Fast preset: subsample training rows (`--train-sample-frac` 0.1) + slim panel (`--max-bars` 20000) + lighter tree/boost params |
+| `--train-sample-frac` | `1.0` | Fraction (0–1] of training ROWS used to fit each model (0.1 under `--fast`) |
+| `--max-bars` | all | Uniformly stride the panel to ≤ N timestamps (biggest speed lever; 20000 under `--fast`) |
+| `--analytics-max-rows` | `50000` | Cap (timestamp×ticker) rows in the analytics correlation / importance fits |
+| `--corr-threshold` | `0.7` | \|corr\| ≥ τ groups factors into a redundancy cluster |
+| `--no-checkpoint` | off | Disable persisting tables/figures after each track |
+| `--fit-scope` | `pooled` | Fit ONE model across all underlyings (`pooled`, suits homogeneous/data-light universes e.g. yfinance S&P100) or a SEPARATE model per underlying (`per_underlying`, suits heterogeneous/data-rich ones e.g. the LOBSTER ETFs) |
+| `--fit-standardize` | `per_underlying` | Factor standardisation before the ML fit: `per_underlying` / `cross_sectional` |
+| `--position-mode` | `threshold` | Map combined signal → position: `threshold` / `sign` / `continuous` |
+| `--position-threshold` | `1.0` | ±t (z units) for the threshold band |
+| `--position-zscore` | `expanding` | Per-underlying z-score basis: `expanding` / `full` / `rolling` / `none` |
+| `--position-zscore-window` | `500` | Window for the `rolling` z-score basis |
+| `--aggregation` | `portfolio` | `portfolio` (one netted book) or `per_underlying` (mean/std across names) |
+| `--data-dir` | `ticker_data` | LOBSTER provider only (per-ticker CSV root); ignored for API providers |
 | `--out-dir` | auto | Override output folder |
 | `--research` | off | Mine preruns first before comparing |
-| `--prerun-spec name=model[:provider]` | — | With `--research`: define preruns to mine |
+| `--prerun-spec name=model[:provider]` | — | With `--research`: define preruns to mine (repeatable) |
 | `--target-factors` | `50` | Target factors per prerun when `--research` is used |
 | `--dedup-scope` | `prerun` | Dedup scope when `--research` is used |
 
