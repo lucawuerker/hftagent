@@ -28,6 +28,8 @@ class DynamicStrategy(BaseStrategy):
         max_positions: int = 20,
         equal_weight: bool = False,
         min_conviction: float = 0.0,
+        position_construction: str = "cross_sectional",
+        position_params: dict | None = None,
     ) -> None:
         self.strategy_id = strategy_id
         self.name = name
@@ -38,6 +40,8 @@ class DynamicStrategy(BaseStrategy):
         self.max_positions = max_positions
         self.equal_weight = equal_weight
         self.min_conviction = min_conviction
+        self.position_construction = position_construction
+        self.position_params = dict(position_params or {})
         self.model_params = {"weights": dict(weights)}
 
     def calc(

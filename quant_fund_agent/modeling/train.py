@@ -148,6 +148,8 @@ def fit_and_backtest(
     max_positions: int = 20,
     equal_weight: bool = False,
     min_conviction: float = 0.0,
+    position_construction: str = "cross_sectional",
+    position_params: dict[str, Any] | None = None,
     valid_ratio: float = 0.3,
     artifact_dir: str | Path | None = None,
     strategy_id: str | None = None,
@@ -173,6 +175,7 @@ def fit_and_backtest(
             factor_ids=fids, weights=w,
             holding_period=holding_period, max_positions=max_positions,
             equal_weight=equal_weight, min_conviction=min_conviction,
+            position_construction=position_construction, position_params=position_params,
         )
         result = backtest_strategy(strategy, factor_signals_is, data_is)
         return {
@@ -277,6 +280,7 @@ def fit_and_backtest(
         target_horizon=target_horizon,
         holding_period=holding_period, max_positions=max_positions,
         equal_weight=equal_weight, min_conviction=min_conviction,
+        position_construction=position_construction, position_params=position_params,
     )
     result = backtest_strategy(strategy, factor_signals_is, data_is)
 

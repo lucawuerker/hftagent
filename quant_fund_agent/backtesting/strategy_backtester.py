@@ -295,13 +295,37 @@ def backtest_strategy(
     """
     normed_signals = normalise_factor_signals(factor_signals)
     signal = strategy.calc(normed_signals, data)
-    positions = _signal_to_positions(
-        signal,
-        holding_period=strategy.holding_period,
-        max_positions=strategy.max_positions,
-        equal_weight=strategy.equal_weight,
-        min_conviction=strategy.min_conviction,
-    )
+    construction = getattr(strategy, "position_construction", "cross_sectional")
+    if construction == "per_underlying":
+        # Directional per-name book: standardise each underlying over its own
+        # history, go long/flat/short by a boundary, size each active name to
+        # 1/max_positions.  Not dollar-neutral (has net market exposure).
+        from quant_fund_agent.backtesting.positions import (
+            DEFAULT_POSITION_MODE,
+            DEFAULT_POSITION_THRESHOLD,
+            DEFAULT_ZSCORE_BASIS,
+            DEFAULT_ZSCORE_WINDOW,
+            per_underlying_positions,
+        )
+
+        pp = getattr(strategy, "position_params", None) or {}
+        positions = per_underlying_positions(
+            signal,
+            n_max_positions=strategy.max_positions,
+            holding_period=strategy.holding_period,
+            mode=pp.get("mode", DEFAULT_POSITION_MODE),
+            threshold=pp.get("threshold", DEFAULT_POSITION_THRESHOLD),
+            zscore_basis=pp.get("zscore_basis", DEFAULT_ZSCORE_BASIS),
+            zscore_window=pp.get("zscore_window", DEFAULT_ZSCORE_WINDOW),
+        )
+    else:
+        positions = _signal_to_positions(
+            signal,
+            holding_period=strategy.holding_period,
+            max_positions=strategy.max_positions,
+            equal_weight=strategy.equal_weight,
+            min_conviction=strategy.min_conviction,
+        )
     port_ret = _portfolio_returns(positions, data["close"])
     cum_ret = port_ret.cumsum()
     dd = _drawdown_series(cum_ret)

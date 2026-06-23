@@ -54,6 +54,8 @@ class ModelStrategy(BaseStrategy):
         max_positions: int = 20,
         equal_weight: bool = False,
         min_conviction: float = 0.0,
+        position_construction: str = "cross_sectional",
+        position_params: dict | None = None,
         artifact_path: str = "",
     ) -> None:
         self.strategy_id = strategy_id
@@ -68,6 +70,8 @@ class ModelStrategy(BaseStrategy):
         self.max_positions = max_positions
         self.equal_weight = equal_weight
         self.min_conviction = min_conviction
+        self.position_construction = position_construction
+        self.position_params = dict(position_params or {})
         self.model_params = {
             "model_type": model_type,
             "target_horizon": target_horizon,
@@ -86,8 +90,15 @@ class ModelStrategy(BaseStrategy):
         max_positions: int = 20,
         equal_weight: bool = False,
         min_conviction: float = 0.0,
+        position_construction: str = "cross_sectional",
+        position_params: dict | None = None,
     ) -> "ModelStrategy":
-        """Rebuild a runnable strategy from a persisted joblib artifact."""
+        """Rebuild a runnable strategy from a persisted joblib artifact.
+
+        The position-construction regime is NOT stored in the artifact (it is a
+        deployment choice, not part of the fitted model); callers pass it from the
+        persisted ``StrategyRecord`` so OOS / live reproduce the same positions.
+        """
         import joblib
 
         blob = joblib.load(artifact_path)
@@ -103,6 +114,8 @@ class ModelStrategy(BaseStrategy):
             max_positions=max_positions,
             equal_weight=equal_weight,
             min_conviction=min_conviction,
+            position_construction=position_construction,
+            position_params=position_params,
             artifact_path=str(artifact_path),
         )
 

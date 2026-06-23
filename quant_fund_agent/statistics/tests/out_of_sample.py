@@ -82,6 +82,8 @@ class OutOfSampleTest(BaseStatTest):
                 max_positions=spec.max_positions,
                 equal_weight=spec.equal_weight,
                 min_conviction=spec.min_conviction,
+                position_construction=spec.position_construction,
+                position_params=spec.position_params,
             )
         else:
             strategy = DynamicStrategy(
@@ -94,6 +96,8 @@ class OutOfSampleTest(BaseStatTest):
                 max_positions=spec.max_positions,
                 equal_weight=spec.equal_weight,
                 min_conviction=spec.min_conviction,
+                position_construction=spec.position_construction,
+                position_params=spec.position_params,
             )
         oos_result = backtest_strategy(strategy, signals_oos, data_oos)
 

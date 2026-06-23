@@ -39,6 +39,15 @@ class StrategySpec(BaseModel):
     equal_weight: bool = False
     min_conviction: float = 0.0
 
+    # How the composite signal becomes positions — NOT chosen by the LLM; set
+    # from the run's data type / override (see backtesting/positions.py) and
+    # stamped here so OOS + live reproduce the same book.  "cross_sectional"
+    # (dollar-neutral rank) or "per_underlying" (directional boundary, each
+    # active name sized 1/max_positions).  ``position_params`` carries the
+    # per_underlying knobs (mode/threshold/zscore_basis/zscore_window).
+    position_construction: str = "cross_sectional"
+    position_params: dict[str, Any] = Field(default_factory=dict)
+
     reasoning: str = ""
 
 
@@ -71,6 +80,11 @@ class ArchitectState(BaseModel):
     #    holding period and the IC evaluation horizon).  Config-driven, not
     #    chosen by the LLM, so the showcase can sweep horizons cleanly. ──
     target_horizon: int = 6
+
+    # ── position-construction regime for every strategy this run builds (resolved
+    #    upstream from the data type / override; threaded onto each StrategySpec).
+    position_construction: str = "cross_sectional"
+    position_params: dict[str, Any] = Field(default_factory=dict)
 
     # ── current iteration ──
     strategy_spec: StrategySpec = Field(default_factory=StrategySpec)

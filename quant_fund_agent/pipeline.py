@@ -236,6 +236,7 @@ def run_strategy_pipeline(
     target_horizon: int = 6,
     run_statistician: bool = True,
     cutoff_date: date | None = None,
+    position_construction: str | None = None,
 ) -> StrategyPipelineResult:
     """Selector → Architect → (optionally) Statistician, in one call.
 
@@ -247,12 +248,21 @@ def run_strategy_pipeline(
     Statistician only see panel data strictly **before** it — so a strategy
     designed at week *t* is never contaminated by the data it will be traded on.
     ``None`` → full history (the default / production behaviour).
+
+    ``position_construction`` selects how the composite signal becomes positions
+    for every strategy this pass builds: ``"cross_sectional"`` (dollar-neutral
+    rank) or ``"per_underlying"`` (directional boundary).  ``None`` → resolve from
+    the data type / ``QF_POSITION_CONSTRUCTION`` (LOBSTER → per_underlying, else
+    cross_sectional); ``"auto"`` is accepted too.
     """
     from quant_fund_agent.agents.architect.graph import architect_graph
     from quant_fund_agent.agents.selector.graph import selector_graph
     from quant_fund_agent.agents.statistician.graph import statistician_graph
+    from quant_fund_agent.backtesting.positions import resolve_position_construction
 
     as_of = cutoff_date.isoformat() if cutoff_date else None
+    construction = resolve_position_construction(position_construction)
+    log.info("Position construction: %s", construction)
 
     selector_result = selector_graph.invoke({})
     log.info("Selector hypothesis: %s", selector_result.get("hypothesis", "")[:120])
@@ -266,6 +276,7 @@ def run_strategy_pipeline(
         "oos_split_ratio": oos_ratio,
         "target_horizon": target_horizon,
         "as_of": as_of,
+        "position_construction": construction,
     })
 
 
@@ -380,6 +391,8 @@ def build_strategy_record(
             "max_positions": spec.max_positions,
             "equal_weight": spec.equal_weight,
             "min_conviction": spec.min_conviction,
+            "position_construction": spec.position_construction,
+            "position_params": dict(spec.position_params or {}),
         },
         holding_period=spec.holding_period,
         metadata={
@@ -450,6 +463,8 @@ def strategy_from_record(record: StrategyRecord):
             max_positions=p.get("max_positions", 20),
             equal_weight=p.get("equal_weight", False),
             min_conviction=p.get("min_conviction", 0.0),
+            position_construction=p.get("position_construction", "cross_sectional"),
+            position_params=p.get("position_params", {}),
         )
 
     return DynamicStrategy(
@@ -462,6 +477,8 @@ def strategy_from_record(record: StrategyRecord):
         max_positions=p.get("max_positions", 20),
         equal_weight=p.get("equal_weight", False),
         min_conviction=p.get("min_conviction", 0.0),
+        position_construction=p.get("position_construction", "cross_sectional"),
+        position_params=p.get("position_params", {}),
     )
 
 

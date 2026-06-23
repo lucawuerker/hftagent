@@ -225,6 +225,10 @@ def _parse_spec(parsed: dict, state: ArchitectState, fallback_name: str) -> Stra
         max_positions=_as_int(parsed.get("max_positions", 20), 20),
         equal_weight=bool(parsed.get("equal_weight", False)),
         min_conviction=_as_float(parsed.get("min_conviction", 0.0), 0.0),
+        # Position-construction regime is data-type/override driven, not chosen by
+        # the LLM — stamp it from the state so OOS + live reproduce the same book.
+        position_construction=state.position_construction,
+        position_params=dict(state.position_params or {}),
         reasoning=parsed.get("reasoning", ""),
     )
 
@@ -251,6 +255,10 @@ FORECAST HORIZON
 Fixed at {target_horizon} bars: the model predicts {target_horizon}-bar-ahead
 returns and positions are held ~{target_horizon} bars.  Choose the model and
 features for THIS horizon.
+
+POSITION CONSTRUCTION (fixed for this run — you do NOT choose it)
+----------------------------------------------------------------
+{position_note}
 
 Your task:
 Design a strategy that predicts forward returns from the factors using ONE model
@@ -288,6 +296,26 @@ Respond in JSON:
 """
 
 
+def _position_note(state: ArchitectState) -> str:
+    """Explain the active position-construction regime to the design LLM."""
+    if state.position_construction == "per_underlying":
+        return (
+            "Per-underlying (directional): each name is standardised over its own "
+            "history and traded long / flat / short by a fixed boundary on its "
+            "signal — NOT ranked against other names, NOT dollar-neutral.  Each "
+            "active position is sized 1/max_positions, so `max_positions` is the "
+            "equal-weight denominator (a single live signal commits 1/max_positions "
+            "of capital, the rest stays in cash).  `min_conviction` / `equal_weight` "
+            "are ignored in this regime."
+        )
+    return (
+        "Cross-sectional (dollar-neutral): the signal is ranked across names each "
+        "bar; the top `max_positions` by conviction are traded long/short and the "
+        "book is scaled to be dollar-neutral.  `min_conviction` zeroes weak |z| "
+        "signals; `equal_weight` makes surviving positions equal-sized."
+    )
+
+
 def design_model(state: ArchitectState) -> dict:
     """First iteration: the LLM picks a model and configures the strategy."""
     llm = _get_llm()
@@ -296,6 +324,7 @@ def design_model(state: ArchitectState) -> dict:
         factor_details=_factor_details_text(state),
         model_menu=_model_menu_text(),
         target_horizon=state.target_horizon,
+        position_note=_position_note(state),
     ))
     spec = _parse_spec(_parse_json(resp.content), state, fallback_name="unnamed")
     log.info("[design] model_type=%s features=%s", spec.model_type,
@@ -334,6 +363,8 @@ def fit_and_backtest(state: ArchitectState) -> dict:
             max_positions=spec.max_positions,
             equal_weight=spec.equal_weight,
             min_conviction=spec.min_conviction,
+            position_construction=spec.position_construction,
+            position_params=spec.position_params,
             oos_split_ratio=state.oos_split_ratio,
             strategy_id=f"arch_{uuid.uuid4().hex[:8]}",
             as_of=state.as_of,

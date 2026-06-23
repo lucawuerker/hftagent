@@ -158,6 +158,12 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--n-tickers", type=int, default=0,
                    help="Universe cap for the architect/statistician backtests "
                         "(sets ARCHITECT_N_TICKERS).  0 = full universe (default).")
+    p.add_argument("--position-construction", choices=["auto", "cross_sectional", "per_underlying"],
+                   default="auto",
+                   help="How a strategy's signal becomes positions: 'cross_sectional' "
+                        "(dollar-neutral rank long/short), 'per_underlying' (directional "
+                        "boundary per name, each sized 1/max_positions), or 'auto' "
+                        "(default: per_underlying for LOBSTER, cross_sectional otherwise).")
     p.add_argument("--no-committee", action="store_true",
                    help="Use a single balanced PM instead of a 3-PM committee.")
     p.add_argument("--voting",
@@ -301,6 +307,7 @@ def main() -> None:
             max_iterations=args.max_iterations,
             oos_ratio=args.oos_ratio,
             target_horizon=args.target_horizon,
+            position_construction=args.position_construction,
         )
         if not res.approved:
             print(f"  rejected at the {res.reject_stage} stage.")

@@ -59,6 +59,15 @@ class BaseStrategy(ABC):
     equal_weight: bool = False
     min_conviction: float = 0.0
 
+    # How the composite signal becomes positions (see backtesting/positions.py):
+    #   "cross_sectional" — rank the cross-section → dollar-neutral long/short
+    #                       (the default; uses max_positions/equal_weight/min_conviction);
+    #   "per_underlying"  — directional per-name boundary (long/flat/short), each
+    #                       active position sized 1/max_positions (uses position_params:
+    #                       mode/threshold/zscore_basis/zscore_window).
+    position_construction: str = "cross_sectional"
+    position_params: dict[str, Any] = {}
+
     # free-form dict for weights, sklearn model, hyper-params, etc.
     model_params: dict[str, Any] = {}
 

@@ -56,6 +56,7 @@ Full end-to-end single pass: optional factor research → Selector → Architect
 | `--oos-ratio` | `0.2` | Fraction of data held out for the Statistician |
 | `--target-horizon` | `6` | Forecast horizon in bars (1=10s, 6=1min, 60=10min) |
 | `--n-tickers` | all | Cap universe size |
+| `--position-construction` | `auto` | How a strategy's signal → positions: `cross_sectional` (dollar-neutral rank long/short), `per_underlying` (directional boundary per name, each sized 1/max_positions), or `auto` (per_underlying for LOBSTER, else cross_sectional). Also `QF_POSITION_CONSTRUCTION`. |
 | `--no-committee` | off | Single balanced PM instead of a 3-PM committee |
 | `--voting` | `simple_average` | Committee aggregation (`simple_average` / `weighted_average` / `llm_moderator`) |
 | `--fresh` | off | Ignore existing DBs and start from an empty book |

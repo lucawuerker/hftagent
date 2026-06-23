@@ -101,6 +101,8 @@ def run_fit_and_backtest(
     max_positions: int = 20,
     equal_weight: bool = False,
     min_conviction: float = 0.0,
+    position_construction: str = "cross_sectional",
+    position_params: dict[str, Any] | None = None,
     oos_split_ratio: float = 0.2,
     valid_ratio: float = 0.3,
     strategy_id: str | None = None,
@@ -149,6 +151,8 @@ def run_fit_and_backtest(
         max_positions=max_positions,
         equal_weight=equal_weight,
         min_conviction=min_conviction,
+        position_construction=position_construction,
+        position_params=position_params,
         valid_ratio=valid_ratio,
         strategy_id=strategy_id,
     )

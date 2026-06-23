@@ -16,7 +16,10 @@ A LangGraph multi-agent pipeline mirroring a quant fund's org chart:
   data-context lists only in-scope fields and any factor reading an out-of-scope
   field is dropped at persist (see the data-scope status note below).
 - **Selector** – picks factors for a hypothesis.
-- **Architect** – combines factors into a strategy via a refinement loop.
+- **Architect** – combines factors into a strategy via a refinement loop. The
+  fitted model maps (cross-sectionally normalised) factor signals → forward
+  returns; its prediction is the composite signal, turned into positions by the
+  configured **position-construction** regime (see the status note below).
 - **Statistician** – OOS tests, deflated Sharpe, accept/reject gate.
 - **Portfolio Manager** – screens, allocates capital, monitors/retires
   strategies (single PM or a committee).
@@ -87,6 +90,27 @@ DATA CONTEXT is built per-run by `agents/factor_research/prompts.build_data_cont
 (only in-scope fields, empty sections dropped, LOBSTER-vs-generic intro), and
 `filter_and_persist` drops any factor whose declared `inputs` fall outside the
 scope. Tests: `tests/test_factor_research_data_scope.py`.
+
+**Position construction — configurable, default by data type (done).** How a
+deployed strategy's composite signal becomes positions is now a regime, resolved
+once per run and **stamped on the StrategySpec/StrategyRecord** so the Architect
+IS-fit, the Statistician OOS test and live/PM all reproduce the same book:
+**`cross_sectional`** (the prior behaviour — cross-sectionally rank the signal,
+trade the top `max_positions`, scale to a dollar-neutral long/short book) vs
+**`per_underlying`** (standardise each name over its *own* history, go
+long/flat/short by a boundary — `position_mode` `threshold`/`sign`/`continuous`,
+`position_zscore_basis` default causal `expanding` — then size each active name
+to **`1/max_positions`** equal weight; directional, net market exposure, not
+dollar-neutral). Default is **provider-keyed**: `per_underlying` for LOBSTER
+(heterogeneous, data-rich ETFs), `cross_sectional` for the API/stock universes;
+override with `run_fund.py --position-construction {auto,cross_sectional,per_underlying}`
+or `QF_POSITION_CONSTRUCTION`. The two boundary primitives (`zscore_over_time`,
+`directional_positions`) live in `backtesting/positions.py` and are **shared**
+with the research comparison track (`comparison/vector_backtest.py`) so research
+and deployment can't drift. The model catalog is unchanged (linear gives factor
+weights; trees/boosting stay available). Equal-weight `1/max_positions` sizing is
+the v1; inverse-vol / other sizing is a documented future extension. Tests:
+`tests/test_position_construction.py`.
 
 **Pluggable data layer (Phases 0–6 done — milestone complete).** The fund no
 longer requires the author's LOBSTER CSVs: any panel load goes through

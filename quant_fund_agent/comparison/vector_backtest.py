@@ -25,37 +25,23 @@ import numpy as np
 import pandas as pd
 
 from quant_fund_agent.backtesting.data_loader import forward_returns
+from quant_fund_agent.backtesting.positions import (
+    directional_positions,
+    zscore_over_time,
+)
 from quant_fund_agent.backtesting.strategy_backtester import _compute_metrics
 
 log = logging.getLogger("comparison.vector_backtest")
 
 
 def _zscore(frame: pd.DataFrame, basis: str, window: int) -> pd.DataFrame:
-    """Per-underlying (per-column) standardisation of a signal over time."""
-    if basis == "none":
-        return frame
-    if basis == "full":  # uses whole-sample stats (mild look-ahead, simplest)
-        return (frame - frame.mean()) / frame.std().replace(0, np.nan)
-    if basis == "rolling":
-        m = frame.rolling(window, min_periods=max(2, window // 5)).mean()
-        s = frame.rolling(window, min_periods=max(2, window // 5)).std()
-        return (frame - m) / s.replace(0, np.nan)
-    # expanding (default): causal — only past+present inform each row.
-    m = frame.expanding(min_periods=2).mean()
-    s = frame.expanding(min_periods=2).std()
-    return (frame - m) / s.replace(0, np.nan)
+    """Per-underlying standardisation over time (shared with the deployed fund)."""
+    return zscore_over_time(frame, basis, window)
 
 
 def _positions(z: pd.DataFrame, cfg) -> pd.DataFrame:
-    """Map a (z-scored) signal to positions per the configured rule."""
-    if cfg.position_mode == "sign":
-        return np.sign(z).fillna(0.0)
-    if cfg.position_mode == "continuous":
-        return z.clip(-1.0, 1.0).fillna(0.0)
-    # threshold band (default): long above +t, short below −t, flat in between.
-    t = cfg.position_threshold
-    pos = pd.DataFrame(0.0, index=z.index, columns=z.columns)
-    return pos.mask(z > t, 1.0).mask(z < -t, -1.0)
+    """Map a (z-scored) signal to raw directional positions per the config's rule."""
+    return directional_positions(z, mode=cfg.position_mode, threshold=cfg.position_threshold)
 
 
 def _slice_metrics(pnl: pd.DataFrame, pos: pd.DataFrame, sig: pd.DataFrame,
