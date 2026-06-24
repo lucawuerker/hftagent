@@ -1,0 +1,13 @@
+{
+  "comparison_id": "2026-01",
+  "tracks": {
+    "ic": {
+      "status": "ok",
+      "seconds": 14.9
+    },
+    "analytics": {
+      "status": "ok",
+      "seconds": 111.2
+    }
+  }
+}

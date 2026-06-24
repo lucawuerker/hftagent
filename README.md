@@ -143,7 +143,9 @@ Single factors are scored by **IC**. By default (`--fit-standardize per_underlyi
 **per-underlying time-series IC** — the Spearman correlation of a factor's value vector with
 the underlying's *own* forward-return vector, pooled (concatenated) across underlyings — so it
 is meaningful for a single ticker and has *no cross-section* (pass `--fit-standardize
-cross_sectional` for the legacy across-tickers rank-IC). The analytics diversity/importance
+cross_sectional` for the legacy across-tickers rank-IC). Each factor is scored at *its own*
+`prediction_horizon` (the `ic_own`/`horizon_own` columns + a `mean_abs_ic_own` summary)
+alongside the shared 1/6/60-bar grid. The analytics diversity/importance
 track uses the same per-underlying standardisation. The **ML track** likewise
 treats a factor zoo as inputs to a model: each catalog model + an ensemble fits the factors
 (standardised per-underlying over time on the in-sample window) into **one combined signal**
@@ -154,8 +156,11 @@ a **staggered "tranche" book** (the live position is the rolling mean of the las
 `--holding-period` targets) and **marked to market on the 1-bar forward return**, rather
 than multiplying a raw position by an `h`-bar forward return — which overlaps `h−1` bars
 between adjacent rows and inflates the annualised return ~`h`× and the Sharpe ~`√h`×. This
-is the same non-overlapping convention the deployed backtester uses. Every modelling choice
-is a CLI argument: `--holding-period` (tranche length, default = `--horizon`),
+is the same non-overlapping convention the deployed backtester uses. The combined signal's
+forecast horizon is **derived from the constituent factors' own horizons** — the **mode** by
+default (`--combined-horizon-agg {mode,median,max,min,explicit}`); `--horizon` is now an
+*override* that forces it. Every other modelling choice is a CLI argument: `--holding-period`
+(tranche length, default = the derived horizon),
 `--position-mode {threshold,sign,continuous}` (default threshold band, `--position-threshold`),
 `--position-zscore {expanding,full,rolling,none}`, `--aggregation {portfolio,per_underlying}`,
 `--fit-standardize {per_underlying,cross_sectional}`.
@@ -227,7 +232,9 @@ Reads academic PDFs, proposes factor ideas, generates Python implementations, an
 
 **Graph:** `agents/factor_research/graph.py` — `load_papers` → `brainstorm` → `generate_code` → `backtest_factors` → `filter_and_persist`
 
-**Codegen:** `agents/factor_research/codegen.py` validates generated code (AST checks, import allow-list, smoke test on synthetic data) before registering factors.
+**Codegen:** `agents/factor_research/codegen.py` validates generated code (AST checks, import allow-list, a required positive-int `prediction_horizon`, smoke test on synthetic data) before registering factors.
+
+**Prediction horizon:** every factor carries its own forecast horizon (in *bars*) — `prediction_horizon` (+ optional `suggested_horizons`), chosen by the researcher (the prompts state the feed's bar size, inferred from the panel index, so it reasons in wall-clock time) and stamped on `FactorRecord`. Each factor's IC is anchored at *its own* horizon. Existing factors were backfilled to 6 (`scripts/backfill_horizons.py`).
 
 **Seed vs researcher factors:** seed alphas live under `quant_fund_agent/factors/` (version-controlled). Researcher output goes to `factors/researcher/` (gitignored) and is tagged `source=RESEARCHER` in the factor DB. `purge_researcher_factors()` clears researcher state between simulation runs.
 
@@ -245,7 +252,7 @@ Loads the factor catalog, asks an LLM to formulate a trading hypothesis, then se
 
 Turns the Selector's hypothesis into a tradable strategy in a **refinement loop**:
 
-1. **Design** — pick model type, hyperparameters, position settings from the modeling catalog.
+1. **Design** — pick model type, hyperparameters, position settings, and the **forecast horizon** from the modeling catalog. The Architect is shown each selected factor's own `prediction_horizon` and chooses `target_horizon` for the combined signal (default: the mode of those horizons); it persists across revise iterations.
 2. **Fit & backtest** — fit on an in-sample window (ML models use an internal train/valid split inside IS); metrics are never measured on fitting data.
 3. **Evaluate** — approve or revise based on metrics, fit diagnostics, and trial history.
 

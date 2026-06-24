@@ -170,6 +170,32 @@ weights; trees/boosting stay available). Equal-weight `1/max_positions` sizing i
 the v1; inverse-vol / other sizing is a documented future extension. Tests:
 `tests/test_position_construction.py`.
 
+**Per-factor prediction horizons — done.** A factor no longer borrows a single
+externally-passed horizon; it carries its own. `BaseFactor.prediction_horizon`
+(canonical, validated like `inputs`) + optional `suggested_horizons` (in *bars*)
+are stamped onto `FactorRecord` at persist (the dual of `required_inputs`). The
+Factor Researcher now *chooses* the horizon: the brainstorm/codegen prompts get a
+**bar-size-aware HORIZON CONTRACT** (seconds-per-bar inferred from the panel index
+via `data/frequency._median_bar_seconds`, surfaced by `build_data_context(...,
+seconds_per_bar)` — no hardcoded "10s"), and `codegen` requires a positive-int
+`prediction_horizon ≤ MAX_PREDICTION_HORIZON`. Existing factors were backfilled to
+**constant 6** (`FactorDatabase.backfill_prediction_horizons`,
+`scripts/backfill_horizons.py`; idempotent via a `metadata` sentinel; a
+`data_driven` best-`|IC-IR|` mode also exists). **IC** is now anchored at each
+factor's *own* horizon: `engine.backtest_factor(..., factor_horizon=)` unions it
+into the grid and headlines it (`factor_horizon=None` is byte-identical to the old
+path), and the comparison IC track emits `ic_own`/`icir_own`/`horizon_own` +
+`mean_abs_ic_own` alongside the shared grid. **Combined signal:** the brute-force
+track derives its forecast horizon as the **mode** of the constituent factors'
+horizons (`ComparisonConfig.resolve_target_horizon`, `combined_horizon_agg ∈
+{mode,median,max,min,explicit}`; `run_model_comparison.py --horizon` is now an
+*override* → `explicit`, `--combined-horizon-agg` sets the default); the
+**downstream Architect** is shown each factor's `prediction_horizon` and **chooses**
+`StrategySpec.target_horizon` (was config-fixed), persisting it across revise
+iterations. Tests: `tests/test_factor_horizon_codegen.py`,
+`tests/test_factor_horizon_backfill.py`, `tests/test_horizon_pipeline.py`,
+extended `tests/test_comparison.py`.
+
 **Pluggable data layer (Phases 0–6 done — milestone complete).** The fund no
 longer requires the author's LOBSTER CSVs: any panel load goes through
 `quant_fund_agent/data/` (provider abstraction + parquet cache + capability

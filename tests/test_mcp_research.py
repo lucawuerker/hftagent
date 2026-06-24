@@ -36,6 +36,7 @@ class McpParityProbe(BaseFactor):
     factor_id = "mcp_parity_probe"
     name = "MCP Parity Probe"
     inputs = ["close"]
+    prediction_horizon = 6
 
     def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:
         close = data["close"]
