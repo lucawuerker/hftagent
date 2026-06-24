@@ -35,6 +35,10 @@ def run_backtest(config: BacktestConfig) -> BacktestResults:
     """Run a walk-forward backtest and return the accumulated results."""
     # ── env must be set BEFORE the modeling service / panel are imported,
     #    because DATA_DIR is read at module import and the universe cap at call.
+    #    A data config (yfinance/FMP universe + timespan) must also be exported
+    #    before the panel loads so the right universe/dates are used.
+    if config.config_file:
+        os.environ["QF_CONFIG_FILE"] = config.config_file
     os.environ["DATA_DIR"] = config.data_dir
     if config.n_tickers is not None:
         os.environ["ARCHITECT_N_TICKERS"] = str(config.n_tickers)
@@ -69,12 +73,32 @@ def run_backtest(config: BacktestConfig) -> BacktestResults:
 
     config.output_dir.mkdir(parents=True, exist_ok=True)
 
+    # ── factor injection (prerun_inject mode): a pool of already-mined factors
+    #    that the loop draws from each research-due meeting instead of running the
+    #    LLM researcher.  Built once here; the run starts from seeds only.
+    inject_pool = None
+    if config.factor_source == "prerun_inject":
+        from quant_fund_agent.simulation.factor_injection import PrerunFactorPool
+
+        inject_pool = PrerunFactorPool(
+            config.inject_preruns,
+            config_name=config.inject_config_name,
+            seed=config.seed,
+        )
+
     # ── seed this run's factor DB.  Capture the permanent ids first so we can
     #    later tell which researcher factors were discovered by THIS run (to
     #    snapshot + purge their code).
     permanent_ids = factor_store.permanent_factor_ids(pipeline.FACTOR_DB_PATH)
     if config.fresh or not config.factor_db_path.exists():
-        if config.prerun:
+        if config.factor_source == "prerun_inject":
+            # Start from the seed alphas only (if requested); prerun factors then
+            # trickle in via injection over the walk-forward.
+            factor_store.seed_run_factor_db(
+                pipeline.FACTOR_DB_PATH, config.factor_db_path,
+                "session" if config.include_seeds else "none",
+            )
+        elif config.prerun:
             # A/B mode: seed from a named prerun's researcher factors (± seeds);
             # factor_universe is irrelevant here.
             if config.factor_universe != "all":
@@ -102,6 +126,19 @@ def run_backtest(config: BacktestConfig) -> BacktestResults:
         portfolio_db.load_from_json(config.portfolio_db_path)
 
     signals = SignalCache()
+
+    # Restrict the inject pool to factors actually computable on THIS panel (drop
+    # any needing a field the provider doesn't serve / yielding an all-NaN signal),
+    # so every injected factor is real.  Mirrors the comparison harness's gating.
+    if inject_pool is not None and inject_pool.total:
+        from quant_fund_agent.comparison.factors import usable_factor_ids
+
+        usable, dropped = usable_factor_ids(inject_pool.all_ids, signals.panel)
+        inject_pool.keep_only(set(usable))
+        log.info("inject pool: %d/%d factors computable on this panel%s",
+                 len(usable), len(usable) + len(dropped),
+                 f" ({len(dropped)} dropped)" if dropped else "")
+
     clock = TradingClock(signals.index, config)
     results = BacktestResults(config)
 
@@ -123,20 +160,33 @@ def run_backtest(config: BacktestConfig) -> BacktestResults:
             "pm": p.pm_due,
         }
 
-        # 1 ── research meeting ────────────────────────────────────────
+        # 1 ── research meeting (LLM) OR prerun factor injection ───────
         if p.research_due:
-            try:
-                # No global reset: the run already has its own seeded factor DB
-                # (FACTOR_DB_PATH), so the permanent library is never purged.
-                rs = pipeline.run_research_session(
-                    session_id=p.week_tag,
-                    cutoff_date=p.cutoff_date,
-                    n_tickers=config.n_tickers or 15,
-                )
-                meeting["kept_factor_ids"] = rs.get("kept_factor_ids", [])
-            except Exception as e:  # noqa: BLE001 — one bad meeting must not abort the run
-                log.warning("[%s] research meeting failed: %s", p.week_tag, e)
-                meeting["research_error"] = str(e)
+            if inject_pool is not None:
+                # Cheap, deterministic stand-in for LLM research: draw the next
+                # factors from the prerun pool and append them to the run catalog
+                # (read live by the Selector on the next strategy meeting).
+                drawn = inject_pool.draw(config.factors_per_inject)
+                if drawn:
+                    _append_factors(config.factor_db_path, drawn)
+                meeting["injected_factor_ids"] = [f.id for f in drawn]
+                meeting["pool_remaining"] = inject_pool.remaining
+                log.info("[%s] injected %d factor(s) %s — %d left in pool",
+                         p.week_tag, len(drawn), [f.id for f in drawn],
+                         inject_pool.remaining)
+            else:
+                try:
+                    # No global reset: the run already has its own seeded factor DB
+                    # (FACTOR_DB_PATH), so the permanent library is never purged.
+                    rs = pipeline.run_research_session(
+                        session_id=p.week_tag,
+                        cutoff_date=p.cutoff_date,
+                        n_tickers=config.n_tickers or 15,
+                    )
+                    meeting["kept_factor_ids"] = rs.get("kept_factor_ids", [])
+                except Exception as e:  # noqa: BLE001 — one bad meeting must not abort the run
+                    log.warning("[%s] research meeting failed: %s", p.week_tag, e)
+                    meeting["research_error"] = str(e)
 
         # 2 ── strategy meeting ────────────────────────────────────────
         if p.strategy_due:
@@ -228,6 +278,25 @@ def run_backtest(config: BacktestConfig) -> BacktestResults:
 
 
 # ── helpers ──────────────────────────────────────────────────────────────
+
+def _append_factors(factor_db_path, records) -> int:
+    """Append injected factor records to the run catalog on disk (idempotent).
+
+    The Selector reads ``FACTOR_DB_PATH`` (== ``factor_db_path``) fresh on every
+    meeting, so appending here makes the drawn factors visible from the next
+    strategy meeting onward — the same seam the LLM researcher writes through.
+    """
+    from quant_fund_agent.databases import FactorDatabase
+
+    db = FactorDatabase()
+    db.load_from_json(factor_db_path)
+    existing = {f.id for f in db.list_factors()}
+    for rec in records:
+        if rec.id not in existing:
+            db.add_factor(rec)
+    db.save_to_json(factor_db_path)
+    return len(records)
+
 
 def _allocation_weights(record) -> dict[str, float]:
     if record is None:

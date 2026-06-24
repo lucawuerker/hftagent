@@ -107,7 +107,8 @@ def _factor_details_text(state: ArchitectState) -> str:
     selected = {f.factor_id: f for f in state.factor_catalog
                 if f.factor_id in state.selected_factor_ids}
     return "\n".join(
-        f"- {f.factor_id} | {f.name} | cat={f.category}\n"
+        f"- {f.factor_id} | {f.name} | cat={f.category} | "
+        f"prediction_horizon={getattr(f, 'prediction_horizon', 6)} bars\n"
         f"  IC(10s)={f.ic_1} ICIR(10s)={f.icir_1} | "
         f"IC(1m)={f.ic_6} ICIR(1m)={f.icir_6} | "
         f"IC(10m)={f.ic_60} ICIR(10m)={f.icir_60}\n"
@@ -182,14 +183,42 @@ def _metrics_summary_text(metrics: dict) -> str:
 
 # ── spec parsing (shared by design + revise) ──────────────────────────
 
-def _parse_spec(parsed: dict, state: ArchitectState, fallback_name: str) -> StrategySpec:
+def _default_target_horizon(state: ArchitectState) -> int:
+    """Mode of the selected factors' own prediction horizons (fallback = state's).
+
+    Used when the architect LLM doesn't supply a ``target_horizon``: the strategy
+    defaults to the horizon most of its factors were designed for, rather than a
+    blind global constant.
+    """
+    sel = set(state.selected_factor_ids)
+    hs = [int(getattr(f, "prediction_horizon", 6) or 6)
+          for f in state.factor_catalog if f.factor_id in sel]
+    if not hs:
+        return int(state.target_horizon)
+    from collections import Counter
+    counts = Counter(hs)
+    return int(min(counts, key=lambda k: (-counts[k], k)))  # mode; ties → smaller
+
+
+def _parse_spec(parsed: dict, state: ArchitectState, fallback_name: str,
+                *, inherit_horizon: bool = False) -> StrategySpec:
     """Turn an LLM JSON response into a validated ``StrategySpec``.
 
     Model hyper-parameters are NOT validated here — the modeling service clamps
     them server-side against the catalog ranges.  We only validate the things
-    the architect owns: the model_type and the factor universe.
+    the architect owns: the model_type, the factor universe and the forecast
+    horizon (the architect now CHOOSES ``target_horizon``, informed by the
+    constituent factors' own horizons shown in the prompt).
+
+    The horizon is a design-time choice: on the first design (``inherit_horizon``
+    False) it defaults to the mode of the selected factors' horizons; on a revise
+    (``inherit_horizon`` True) it persists from the current spec, since the revise
+    step changes model/features, not the horizon.
     """
     valid_ids = set(state.selected_factor_ids)
+    default_h = (int(state.strategy_spec.target_horizon) if inherit_horizon
+                 else _default_target_horizon(state))
+    target_horizon = max(1, _as_int(parsed.get("target_horizon", default_h), default_h))
 
     model_type = (parsed.get("model_type") or STATIC_WEIGHTS).strip()
     if model_type not in available_model_types():
@@ -218,10 +247,10 @@ def _parse_spec(parsed: dict, state: ArchitectState, fallback_name: str) -> Stra
         model_type=model_type,
         model_params=model_params,
         factor_ids=factor_ids,
-        target_horizon=state.target_horizon,  # config-driven, not LLM-chosen
+        target_horizon=target_horizon,  # LLM-chosen, informed by the factors' horizons
         weights=weights,
-        holding_period=_as_int(parsed.get("holding_period", state.target_horizon),
-                               state.target_horizon),
+        holding_period=_as_int(parsed.get("holding_period", target_horizon),
+                               target_horizon),
         max_positions=_as_int(parsed.get("max_positions", 20), 20),
         equal_weight=bool(parsed.get("equal_weight", False)),
         min_conviction=_as_float(parsed.get("min_conviction", 0.0), 0.0),
@@ -252,9 +281,13 @@ MODEL TOOLBOX (choose exactly one model_type)
 
 FORECAST HORIZON
 ----------------
-Fixed at {target_horizon} bars: the model predicts {target_horizon}-bar-ahead
-returns and positions are held ~{target_horizon} bars.  Choose the model and
-features for THIS horizon.
+YOU choose the forecast horizon (in bars): the model predicts that-many-bars-ahead
+returns and positions are held ~that long.  Each factor above lists its own
+``prediction_horizon`` — the horizon at which its edge was designed to materialise.
+Pick a ``target_horizon`` consistent with the factors you actually use (a sensible
+default is the most common horizon among them, ~{target_horizon} bars here); don't
+combine a fast few-bar signal and a slow many-bar one at a horizon that suits
+neither.  Choose the model and features for THE horizon you pick.
 
 POSITION CONSTRUCTION (fixed for this run — you do NOT choose it)
 ----------------------------------------------------------------
@@ -275,8 +308,10 @@ Decide:
    Omit for static_weights.
 5. weights: ONLY for static_weights — {{"factor_id": weight, ...}} (a negative
    weight reverses that factor).
-6. holding_period: bars to hold before re-scoring.  Default to the forecast
-   horizon ({target_horizon} bars) unless you have a clear reason to differ.
+6. target_horizon: bars ahead to forecast, consistent with your chosen factors'
+   own prediction_horizons (default ~{target_horizon} bars).
+7. holding_period: bars to hold before re-scoring.  Default to your target_horizon
+   unless you have a clear reason to differ.
 8. max_positions: how many stocks to trade at once (default 20, max 50).
 9. equal_weight: true to give every selected position equal size.
 10. min_conviction: minimum absolute z-score of the combined signal to take a
@@ -288,6 +323,7 @@ Respond in JSON:
   "model_params": object,
   "factor_ids": [string, ...],
   "weights": object,
+  "target_horizon": int,
   "holding_period": int,
   "max_positions": int,
   "equal_weight": bool,
@@ -323,7 +359,7 @@ def design_model(state: ArchitectState) -> dict:
         hypothesis=state.hypothesis,
         factor_details=_factor_details_text(state),
         model_menu=_model_menu_text(),
-        target_horizon=state.target_horizon,
+        target_horizon=_default_target_horizon(state),  # mode of selected factors
         position_note=_position_note(state),
     ))
     spec = _parse_spec(_parse_json(resp.content), state, fallback_name="unnamed")
@@ -566,7 +602,8 @@ def revise_model(state: ArchitectState) -> dict:
         decision_reasoning=state.decision_reasoning,
     ))
     spec = _parse_spec(_parse_json(resp.content), state,
-                       fallback_name=state.strategy_spec.strategy_name)
+                       fallback_name=state.strategy_spec.strategy_name,
+                       inherit_horizon=True)
 
     new_iteration = state.iteration + 1
     log.info("[iter %d → %d] Revised: model_type=%s features=%s",

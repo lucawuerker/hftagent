@@ -139,20 +139,59 @@ ML track can't: is a zoo genuinely *diverse* or just redundant variants
 multiple-testing artefact (`deflated_best_ic`, `deflated_best_t`), plus which factors a
 model actually leans on (LASSO/GBM importance, `lasso_sparsity`).
 
-Single factors are scored by **IC** (cross-sectional rank-IC). The **ML track** instead
+Single factors are scored by **IC**. By default (`--fit-standardize per_underlying`) this is a
+**per-underlying time-series IC** — the Spearman correlation of a factor's value vector with
+the underlying's *own* forward-return vector, pooled (concatenated) across underlyings — so it
+is meaningful for a single ticker and has *no cross-section* (pass `--fit-standardize
+cross_sectional` for the legacy across-tickers rank-IC). The analytics diversity/importance
+track uses the same per-underlying standardisation. The **ML track** likewise
 treats a factor zoo as inputs to a model: each catalog model + an ensemble fits the factors
 (standardised per-underlying over time on the in-sample window) into **one combined signal**
-and that signal is run through a **simple per-underlying vectorised backtest** —
-`position(signal) × the underlying's own forward return`, fit on IS and evaluated OOS — *not*
-a cross-sectional ranking, so it works with any number of underlyings (even one). Every
-modelling choice is a CLI argument: `--position-mode {threshold,sign,continuous}`
-(default threshold band, `--position-threshold`), `--position-zscore {expanding,full,rolling,none}`,
-`--aggregation {portfolio,per_underlying}`, `--fit-standardize {per_underlying,cross_sectional}`.
+and that signal is run through a **simple per-underlying vectorised backtest**, fit on IS
+and evaluated OOS — *not* a cross-sectional ranking, so it works with any number of
+underlyings (even one). To keep the Sharpe unbiased, each bar's target position is held as
+a **staggered "tranche" book** (the live position is the rolling mean of the last
+`--holding-period` targets) and **marked to market on the 1-bar forward return**, rather
+than multiplying a raw position by an `h`-bar forward return — which overlaps `h−1` bars
+between adjacent rows and inflates the annualised return ~`h`× and the Sharpe ~`√h`×. This
+is the same non-overlapping convention the deployed backtester uses. Every modelling choice
+is a CLI argument: `--holding-period` (tranche length, default = `--horizon`),
+`--position-mode {threshold,sign,continuous}` (default threshold band, `--position-threshold`),
+`--position-zscore {expanding,full,rolling,none}`, `--aggregation {portfolio,per_underlying}`,
+`--fit-standardize {per_underlying,cross_sectional}`.
 
 Factors that need data not yet downloaded (e.g. fundamentals) are filtered and
 reported, so the comparison runs on the current data and re-runs unchanged once
 the full LOBSTER universe / FMP membership is in place.  `run_model_comparison.py
 --research --prerun-spec name=model[:provider] …` can also mine the preruns first.
+
+#### Rolling-window sweep over many tickers
+
+`run_rolling_comparison.py` automates the comparison **per ticker over a rolling
+IS/OOS month window** and aggregates everything. For each ticker under
+`ticker_data/` it runs `run_model_comparison.py` on 2 IS months + the next OOS
+month, stepping one month forward (the prior OOS month becomes the second IS
+month), comparing the preruns **per underlying**. Each (ticker, window) runs in
+its **own subprocess**, so memory is reclaimed between runs — no OOM on the large
+intraday panel — and the sweep is **resumable** (completed windows are skipped)
+and robust (a failed run is logged; the sweep continues).
+
+```bash
+# Whole sweep: all tickers, full resolution, all models (LLM-free).
+./venv/bin/python run_rolling_comparison.py
+
+# Quick smoke on one ticker, capped for speed.
+./venv/bin/python run_rolling_comparison.py --tickers CORN --max-bars 5000 --name smoke
+
+# Re-build combined tables + figures without re-running anything.
+./venv/bin/python run_rolling_comparison.py --name smoke --aggregate-only
+```
+
+Output under `data/comparisons/<batch>/`: `combined/{bruteforce,importance,
+diversity,ic}_all.csv` (every run, tagged with `ticker, oos_month, is_window`),
+`per_ticker/<ticker>/importance_over_months__<prerun>__<model>.csv` + heatmaps
+(how the **most important features change over the OOS months**) and
+`performance_<metric>__<model>.png`, plus `summary.md` and a `manifest.json`.
 
 ### Workspaces & books (modularisation by config + prerun)
 
@@ -310,7 +349,30 @@ agent code path runs in a backtest and in live trading.
 # Smoke run: shrink the warm-up so meetings fire on a short span.
 QF_USE_MCP=0 ./venv/bin/python run_backtest.py --start 2019-01-02 --end 2019-02-15 \
   --warmup 2W --initial-strategies 2 --n-strategies 1
+
+# yfinance S&P100 (static list), monthly meetings, NO LLM research — instead inject
+# 2 random factors/month from two preruns (seeds always available):
+./venv/bin/python run_backtest.py --config quant.config.sp100.yaml \
+  --start 2016-01-01 --end 2026-06-01 \
+  --warmup 12M --grid-freq 1M --research-every 1M --strategy-every 1M --pm-every 1M \
+  --factor-source prerun_inject \
+  --inject-preruns sp100-5.4-mini,sp100-4o-mini --factors-per-meeting 2 \
+  --fallback-spread-bps 2.0 --run-id sp100_inject
 ```
+
+**Factor source — LLM research vs. prerun injection** (`--factor-source`):
+
+| Mode | What fires on each `research-every` meeting |
+|------|---------------------------------------------|
+| `research` (default) | an LLM Factor-Researcher session invents factors as-of the cutoff |
+| `prerun_inject` | **no LLM** — draws `--factors-per-meeting` (default 2) factors from the union of `--inject-preruns` (pre-filtered to those computable on the live panel), appended to the run catalog; seeds stay available, the pool draws without replacement |
+
+`prerun_inject` reuses factors already mined into
+`data/workspaces/<config>/preruns/<prerun>/`, so a long backtest grows its factor
+universe over time exactly as periodic research would, but reproducibly and at zero
+LLM cost. API-provider backtests are **config-driven**: `--config
+quant.config.<x>.yaml` sets the provider / universe / timespan before the panel
+loads (`quant.config.sp100.yaml` ships a yfinance S&P100 config from 2016).
 
 **How it works** (all knobs live in `simulation/config.py::BacktestConfig`):
 
@@ -335,11 +397,16 @@ QF_USE_MCP=0 ./venv/bin/python run_backtest.py --start 2019-01-02 --end 2019-02-
 Costs are **spread-aware** (½ the quoted `effSpread` from the panel) **+ a fixed
 commission** (`--commission-bps`); there is no market-impact term.
 
-**Outputs** land in `data/backtests/<run_id>/`: `equity.csv` (fund return + drawdown),
-`fund_metrics.json` (Sharpe / Sortino / Calmar / maxDD / cost / turnover),
-`attribution.csv` (per-strategy contribution), `meetings.jsonl`, and the run's
-`config.json` + strategy/portfolio DBs (scoped to the run, so the live book is never
-clobbered). `fund_showcase.ipynb` §11 renders the latest run.
+**Outputs** land in `data/backtests/<run_id>/`: `equity.csv` (fund return, NAV,
+drawdown, gross exposure, names held), `fund_metrics.json` (Sharpe / Sortino /
+Calmar / maxDD / cost / turnover / % invested / final NAV), `attribution.csv`
+(per-strategy contribution), `meetings.jsonl` (each meeting's injected factors /
+approvals / allocation), the run's `config.json` + strategy/portfolio DBs (scoped to
+the run, so the live book is never clobbered), and a **`report/`** folder with
+presentation-ready figures (NAV + drawdown, cumulative return, percent invested &
+names held, rolling Sharpe, monthly returns, per-strategy attribution, catalog/
+strategy growth) and a `report.md` KPI table. `fund_showcase.ipynb` §11 renders the
+latest run.
 
 ## Data
 

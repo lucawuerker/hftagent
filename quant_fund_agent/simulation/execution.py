@@ -52,6 +52,8 @@ class ExecutionResult:
     strategy_returns: dict[str, pd.Series] = field(default_factory=dict)  # standalone net r_s (unweighted)
     book: pd.DataFrame | None = None        # the netted fund book (netted model only)
     netting_benefit: pd.Series | None = None  # netted_fund − pod_fund (cum. interpretable)
+    gross_exposure: pd.Series | None = None   # per-bar Σ|weight| of the traded book ("percent invested")
+    n_positions: pd.Series | None = None      # per-bar count of names with non-zero weight
     extra: dict[str, float] = field(default_factory=dict)
 
 
@@ -193,6 +195,16 @@ def realised_pod(
         turn_parts.append(w * t)
 
     fund = _sum_series(list(attribution.values()))
+    # Per-bar fund exposure = Σ_s |w_s · P_s| (each pod trades its own book, so the
+    # capital-weighted absolute positions sum to the fund's gross exposure).
+    expo_parts, npos_parts = [], []
+    for sid, P in positions.items():
+        w = weights.get(sid, 0.0)
+        if w == 0.0 or P is None or P.empty:
+            continue
+        absP = (P.fillna(0.0).abs() * abs(w))
+        expo_parts.append(absP.sum(axis=1))
+        npos_parts.append((P.fillna(0.0).abs() > 1e-12).sum(axis=1))
     return ExecutionResult(
         fund_returns=fund,
         gross_returns=_sum_series(gross_parts),
@@ -200,6 +212,10 @@ def realised_pod(
         turnover=_sum_series(turn_parts),
         attribution=attribution,
         strategy_returns=strategy_returns,
+        gross_exposure=_sum_series(expo_parts).reindex(fund.index).fillna(0.0)
+        if expo_parts else None,
+        n_positions=_sum_series(npos_parts).reindex(fund.index).fillna(0.0)
+        if npos_parts else None,
     )
 
 
@@ -228,6 +244,8 @@ def realised_netted(
     netting_benefit = net.subtract(pod.fund_returns.reindex(net.index).fillna(0.0))
 
     net.name = "fund_return"
+    gross_exposure = book.abs().sum(axis=1).reindex(net.index).fillna(0.0)
+    n_positions = (book.abs() > 1e-9).sum(axis=1).reindex(net.index).fillna(0.0)
     return ExecutionResult(
         fund_returns=net,
         gross_returns=gross,
@@ -237,6 +255,8 @@ def realised_netted(
         strategy_returns=pod.strategy_returns,
         book=book,
         netting_benefit=netting_benefit,
+        gross_exposure=gross_exposure,
+        n_positions=n_positions,
         extra={
             "gross_exposure_mean": float(book.abs().sum(axis=1).mean()),
             "net_exposure_mean": float(book.sum(axis=1).mean()),

@@ -40,16 +40,21 @@ def _feature_matrix(factor_ids: list[str], panel: dict[str, Any], cfg,
                     with_target: bool = False):
     """Pooled ``(obs × factors)`` matrix (+ optional forward-return target).
 
-    Every factor's *cached*, cross-sectionally z-scored signal is reindexed to the
-    shared ``close`` grid and flattened in the same row-major order, so column ``j``
-    of every factor lines up by ``(timestamp, ticker)``.  Rows are then subsampled
-    to ``cfg.analytics_max_rows`` (seeded, sorted to keep time order).
+    Every factor's *cached*, standardised signal is reindexed to the shared
+    ``close`` grid and flattened in the same row-major order, so column ``j`` of
+    every factor lines up by ``(timestamp, ticker)``.  Standardisation follows
+    ``cfg.fit_standardize``: ``per_underlying`` (the default) z-scores each factor
+    per column **over time** — non-cross-sectional, so diversity + importance are
+    well defined for a single ticker (and pool naturally across many);
+    ``cross_sectional`` keeps the legacy across-tickers z-score.  Rows are then
+    subsampled to ``cfg.analytics_max_rows`` (seeded, sorted to keep time order).
     """
     import numpy as np
     import pandas as pd
 
     from quant_fund_agent.backtesting.data_loader import forward_returns
     from quant_fund_agent.backtesting.strategy_backtester import normalise_factor_signals
+    from quant_fund_agent.comparison.standardize import per_underlying_zscore
     from quant_fund_agent.modeling.service import _factor_signal
 
     close = panel["close"]
@@ -59,7 +64,10 @@ def _feature_matrix(factor_ids: list[str], panel: dict[str, Any], cfg,
         return df.reindex(index=ref_index, columns=ref_cols).to_numpy(dtype=float).ravel()
 
     signals = {fid: _factor_signal(fid, panel) for fid in factor_ids}
-    signals = normalise_factor_signals(signals)  # cross-sectional z-score, same scale
+    if getattr(cfg, "fit_standardize", "per_underlying") == "cross_sectional":
+        signals = normalise_factor_signals(signals)  # across-tickers z-score
+    else:  # per-underlying time-series z-score (default; works for one ticker)
+        signals = {fid: per_underlying_zscore(s) for fid, s in signals.items()}
     cols = {fid: _ravel(signals[fid]) for fid in factor_ids}
     X = pd.DataFrame(cols, columns=list(factor_ids))
     y = pd.Series(_ravel(forward_returns(close, horizon=cfg.target_horizon))) if with_target else None

@@ -58,6 +58,7 @@ from quant_fund_agent.agents.factor_research.prompts import (
     BRAINSTORM_PROMPT,
     CODEGEN_PROMPT,
     EXAMPLE_FACTOR,
+    MAX_PREDICTION_HORIZON,
     OPERATOR_REFERENCE,
     RETRY_FEEDBACK,
     build_data_context,
@@ -100,6 +101,37 @@ def _get_llm(temperature: float = 0.6):
     from quant_fund_agent.llm import make_chat_llm
 
     return make_chat_llm(temperature=temperature, timeout=120, max_retries=4)
+
+
+def _coerce_horizon(raw, default: int) -> int:
+    """Best-effort coerce an LLM-supplied horizon to a valid bar count.
+
+    Falls back to ``default`` on anything non-numeric / non-positive and clamps
+    to the guardrail range.  The codegen validator re-checks the *class
+    attribute* (the source of truth); this only sanitises the prompt spec.
+    """
+    try:
+        h = int(raw)
+    except (TypeError, ValueError):
+        return default
+    if h <= 0:
+        return default
+    return min(h, MAX_PREDICTION_HORIZON)
+
+
+def _coerce_horizon_list(raw) -> list[int]:
+    """Coerce an LLM-supplied ``suggested_horizons`` list, dropping bad entries."""
+    if not isinstance(raw, (list, tuple)):
+        return []
+    out: list[int] = []
+    for el in raw:
+        try:
+            h = int(el)
+        except (TypeError, ValueError):
+            continue
+        if 0 < h <= MAX_PREDICTION_HORIZON:
+            out.append(h)
+    return out
 
 
 def _parse_json(content: str) -> dict:
@@ -326,7 +358,8 @@ def brainstorm(state: FactorResearcherState) -> dict:
 
     # Only describe the fields this run can actually supply, so brainstormed
     # ideas stay within the configured data scope (LOBSTER level / fundamentals).
-    data_context = build_data_context(state.allowed_fields)
+    # The bar size lets the LLM reason about prediction horizons in wall-clock time.
+    data_context = build_data_context(state.allowed_fields, state.seconds_per_bar)
 
     budget = state.n_factor_ideas
     papers = state.selected_papers
@@ -361,6 +394,10 @@ def brainstorm(state: FactorResearcherState) -> dict:
                 category=raw.get("category", "other"),
                 trading_idea=raw.get("trading_idea", ""),
                 description=raw.get("description", ""),
+                prediction_horizon=_coerce_horizon(
+                    raw.get("prediction_horizon"), state.ic_target_horizon),
+                suggested_horizons=_coerce_horizon_list(
+                    raw.get("suggested_horizons")),
                 # The idea came from this paper's call, so attribute it
                 # there authoritatively (knowledge-only: trust the model).
                 source_paper_ids=([paper.paper_id] if paper
@@ -393,6 +430,8 @@ def _codegen_prompt(idea: FactorIdea, data_context: str, feedback: str = "") -> 
         category=idea.category,
         trading_idea=idea.trading_idea,
         description=idea.description,
+        prediction_horizon=idea.prediction_horizon,
+        suggested_horizons=idea.suggested_horizons or [idea.prediction_horizon],
         feedback_block=feedback_block,
     )
 
@@ -438,7 +477,7 @@ def generate_code(state: FactorResearcherState) -> dict:
 
     # Same field-scoped context as brainstorm, so generated code only reads
     # fields this run can supply (out-of-scope factors are also gated at persist).
-    data_context = build_data_context(state.allowed_fields)
+    data_context = build_data_context(state.allowed_fields, state.seconds_per_bar)
 
     for idea in state.factor_ideas:
         code_path, error = _try_codegen_once(llm, idea, data_context)
@@ -569,6 +608,12 @@ def filter_and_persist(state: FactorResearcherState) -> dict:
 
         _cls = get_factor_class(fid) if cand.code_path else None
         _inputs = list(getattr(_cls, "inputs", ["close"]) or ["close"]) if _cls else ["close"]
+        # Prediction horizon: the validated class attribute is canonical; fall
+        # back to the idea's choice, then the session's reference horizon.
+        _horizon = int(getattr(_cls, "prediction_horizon", None)
+                       or cand.idea.prediction_horizon or state.ic_target_horizon)
+        _sug = list(getattr(_cls, "suggested_horizons", None)
+                    or cand.idea.suggested_horizons or [])
 
         # Out-of-scope gate: drop a factor that reads a field this run's data
         # feed cannot supply (e.g. a Level-3 microstructure field on a Level-2
@@ -606,6 +651,8 @@ def filter_and_persist(state: FactorResearcherState) -> dict:
                 code_path=cand.code_path,
                 required_inputs=_inputs,
                 required_tier=required_tier(_inputs),
+                prediction_horizon=_horizon,
+                suggested_horizons=_sug,
                 metadata={
                     "ic_target_horizon": state.ic_target_horizon,
                     "ic_at_target": ic,

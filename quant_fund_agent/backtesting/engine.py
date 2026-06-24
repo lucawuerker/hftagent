@@ -74,6 +74,7 @@ def backtest_factor(
     horizons: tuple[int, ...] = (1, 6, 60),
     *,
     signal: pd.DataFrame | None = None,
+    factor_horizon: int | None = None,
 ) -> BacktestMetrics:
     """Compute IC-based metrics for a single factor.
 
@@ -84,6 +85,10 @@ def backtest_factor(
         horizon: legacy single default horizon (kept for compatibility).
         horizons: set of forward-return horizons in bars to evaluate.
         signal: pre-computed factor signal; skips ``factor.calc(data)`` when provided.
+        factor_horizon: the factor's *own* prediction horizon.  When given, it is
+            measured (unioned into ``horizons``) and the headline IC + the
+            ``extra.horizon_bars`` are anchored at it instead of ``horizon``.
+            ``None`` reproduces the legacy behaviour byte-for-byte.
 
     Returns:
         BacktestMetrics with IC, IC std, ICIR, IC hit rate populated.
@@ -93,7 +98,10 @@ def backtest_factor(
         signal = factor.calc(data)
     ic_by_horizon: dict[str, dict[str, float | int | None]] = {}
 
-    for h in sorted(set(horizons)):
+    eval_horizons = set(horizons)
+    if factor_horizon is not None:
+        eval_horizons.add(int(factor_horizon))
+    for h in sorted(eval_horizons):
         fwd_ret_h = forward_returns(data["close"], horizon=h)
         ic_h = _ic_series(signal, fwd_ret_h)
         if ic_h.empty:
@@ -118,8 +126,12 @@ def backtest_factor(
             "n_timestamps": int(len(ic_h)),
         }
 
-    # keep top-level metrics anchored at default horizon for compatibility
-    default_h = str(horizon if horizon in set(horizons) else sorted(set(horizons))[0])
+    # Anchor the top-level metrics at the factor's own horizon when supplied,
+    # else the legacy default horizon (for byte-identical back-compat).
+    if factor_horizon is not None:
+        default_h = str(int(factor_horizon))
+    else:
+        default_h = str(horizon if horizon in set(horizons) else sorted(set(horizons))[0])
     default_metrics = ic_by_horizon.get(default_h, {})
 
     return BacktestMetrics(
@@ -131,6 +143,6 @@ def backtest_factor(
         extra={
             "n_timestamps": default_metrics.get("n_timestamps", 0),
             "horizon_bars": int(default_h),
-            "horizons_bars": sorted(set(horizons)),
+            "horizons_bars": sorted(eval_horizons),
         },
     )

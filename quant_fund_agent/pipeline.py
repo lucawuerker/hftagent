@@ -131,6 +131,29 @@ def _metrics_from_dict(d: dict | None) -> StrategyBacktestMetrics | None:
 # Stage 1 — Factor Researcher (optional, weekly)
 # ---------------------------------------------------------------------------
 
+def _infer_seconds_per_bar(data_dir: str) -> float | None:
+    """Cheap probe of the feed's bar size (seconds per bar) for the prompts.
+
+    Loads a *single* ticker's ``close`` column only, then takes the median
+    spacing of its index (see :func:`data.frequency._median_bar_seconds`).  Used
+    purely to tell the researcher how long a bar is so it can reason about
+    prediction horizons in wall-clock time.  Best-effort: any failure (no local
+    panel, API-only provider, …) returns ``None`` → feed-agnostic prompt wording.
+    """
+    try:
+        from quant_fund_agent.backtesting.data_loader import load_panel
+        from quant_fund_agent.data.frequency import _median_bar_seconds
+
+        panel = load_panel(data_dir, n_tickers=1, fields=["close"])
+        close = panel.get("close")
+        if close is None or close.empty:
+            return None
+        return _median_bar_seconds(close.index)
+    except Exception as e:  # noqa: BLE001 — never block research on a bar-size probe
+        log.warning("could not infer bar size (%s) — prompts feed-agnostic", e)
+        return None
+
+
 def run_research_session(
     session_id: str | None = None,
     cutoff_date: date | None = None,
@@ -189,6 +212,7 @@ def run_research_session(
         n_papers=n_papers,
         n_factor_ideas=n_ideas,
         ic_target_horizon=horizon,
+        seconds_per_bar=_infer_seconds_per_bar(data_dir),
         n_tickers=n_tickers,
         paper_sample_strategy=paper_sample_strategy,
         data_dir=data_dir,
@@ -233,7 +257,7 @@ class StrategyPipelineResult:
 def run_strategy_pipeline(
     max_iterations: int = 3,
     oos_ratio: float = 0.2,
-    target_horizon: int = 6,
+    target_horizon: int | None = None,
     run_statistician: bool = True,
     cutoff_date: date | None = None,
     position_construction: str | None = None,
@@ -274,7 +298,10 @@ def run_strategy_pipeline(
         "factor_catalog": selector_result["factor_catalog"],
         "max_iterations": max_iterations,
         "oos_split_ratio": oos_ratio,
-        "target_horizon": target_horizon,
+        # Fallback only: the Architect CHOOSES target_horizon from the selected
+        # factors' own prediction horizons (mode), so this is used only when no
+        # factor declares one.  An explicit value here is the fallback default.
+        "target_horizon": target_horizon if target_horizon is not None else 6,
         "as_of": as_of,
         "position_construction": construction,
     })

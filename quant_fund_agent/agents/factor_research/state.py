@@ -33,6 +33,12 @@ class FactorIdea(BaseModel):
     category: str = "other"
     trading_idea: str = ""
     description: str = ""
+    # The forward offset (in *bars*) at which this factor's edge is expected to
+    # peak, and optional alternatives worth measuring.  Chosen by the brainstorm
+    # LLM (told the feed's bar size); the materialised class attribute is the
+    # source of truth, this seeds the codegen spec.
+    prediction_horizon: int = 6
+    suggested_horizons: list[int] = Field(default_factory=list)
     source_paper_ids: list[str] = Field(default_factory=list)
     code: str = ""
 
@@ -60,6 +66,11 @@ class FactorResearcherState(BaseModel):
     # recorded* for reference.  It is no longer an accept/reject gate — every
     # successfully-backtested factor is kept regardless of IC magnitude.
     ic_target_horizon: int = 6  # 1-minute bars at 10-sec resolution
+    # Bar size (seconds per bar) of the configured feed, inferred once from the
+    # panel index (see ``data.frequency``).  Surfaced to the brainstorm/codegen
+    # prompts so the LLM can reason about prediction horizons in wall-clock time.
+    # ``None`` → feed-agnostic prompt wording (no assumed default).
+    seconds_per_bar: float | None = None
     paper_sample_strategy: str = "unread_first"  # or "random"
     # What new factor ids are de-duped against during brainstorm:
     #   "package" → every registered factor class (all code in the shared

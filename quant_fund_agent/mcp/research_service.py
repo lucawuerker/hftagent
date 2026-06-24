@@ -452,10 +452,14 @@ def backtest_factors(
                 results[fid] = {"ok": False, "error": f"gated: requires {tier} tier"}
                 continue
             t0 = time.time()
-            metrics = backtest_factor(factor, panel, horizon=horizon)
+            # Anchor the headline IC at the factor's *own* prediction horizon
+            # (still records the shared grid for reference).  Falls back to the
+            # session reference horizon for legacy factors that declare none.
+            fh = int(getattr(factor, "prediction_horizon", horizon) or horizon)
+            metrics = backtest_factor(factor, panel, horizon=horizon, factor_horizon=fh)
             log.info("[%s] backtest %.1fs IC@%d=%s ICIR@%d=%s", fid,
-                     time.time() - t0, horizon, metrics.information_coefficient,
-                     horizon, metrics.ic_ir)
+                     time.time() - t0, fh, metrics.information_coefficient,
+                     fh, metrics.ic_ir)
             results[fid] = {"ok": True, "metrics": metrics.model_dump(mode="json")}
         except Exception as e:  # noqa: BLE001 — one bad factor must not abort
             log.warning("[%s] backtest failed: %s", fid, e)

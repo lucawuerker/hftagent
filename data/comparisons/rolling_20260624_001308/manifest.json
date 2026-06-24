@@ -1,0 +1,1164 @@
+{
+  "preruns": [
+    "gpt4omini120650",
+    "gpt5.4mini120650",
+    "main"
+  ],
+  "is_len": 2,
+  "oos_len": 1,
+  "step": 1,
+  "runs": [
+    {
+      "ticker": "CORN",
+      "oos_month": "2024-03",
+      "is_window": "2024-01,2024-02",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CORN/2024-03",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CORN",
+      "oos_month": "2024-04",
+      "is_window": "2024-02,2024-03",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CORN/2024-04",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CORN",
+      "oos_month": "2024-05",
+      "is_window": "2024-03,2024-04",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CORN/2024-05",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CORN",
+      "oos_month": "2024-06",
+      "is_window": "2024-04,2024-05",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CORN/2024-06",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CORN",
+      "oos_month": "2024-07",
+      "is_window": "2024-05,2024-06",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CORN/2024-07",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CORN",
+      "oos_month": "2024-08",
+      "is_window": "2024-06,2024-07",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CORN/2024-08",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CORN",
+      "oos_month": "2024-09",
+      "is_window": "2024-07,2024-08",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CORN/2024-09",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CORN",
+      "oos_month": "2024-10",
+      "is_window": "2024-08,2024-09",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CORN/2024-10",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CORN",
+      "oos_month": "2024-11",
+      "is_window": "2024-09,2024-10",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CORN/2024-11",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CORN",
+      "oos_month": "2024-12",
+      "is_window": "2024-10,2024-11",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CORN/2024-12",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CORN",
+      "oos_month": "2025-01",
+      "is_window": "2024-11,2024-12",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CORN/2025-01",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CORN",
+      "oos_month": "2025-02",
+      "is_window": "2024-12,2025-01",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CORN/2025-02",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CORN",
+      "oos_month": "2025-03",
+      "is_window": "2025-01,2025-02",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CORN/2025-03",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CORN",
+      "oos_month": "2025-04",
+      "is_window": "2025-02,2025-03",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CORN/2025-04",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CORN",
+      "oos_month": "2025-05",
+      "is_window": "2025-03,2025-04",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CORN/2025-05",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CORN",
+      "oos_month": "2025-06",
+      "is_window": "2025-04,2025-05",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CORN/2025-06",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CORN",
+      "oos_month": "2025-07",
+      "is_window": "2025-05,2025-06",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CORN/2025-07",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CORN",
+      "oos_month": "2025-08",
+      "is_window": "2025-06,2025-07",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CORN/2025-08",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CORN",
+      "oos_month": "2025-09",
+      "is_window": "2025-07,2025-08",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CORN/2025-09",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CORN",
+      "oos_month": "2025-10",
+      "is_window": "2025-08,2025-09",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CORN/2025-10",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CORN",
+      "oos_month": "2025-11",
+      "is_window": "2025-09,2025-10",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CORN/2025-11",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CORN",
+      "oos_month": "2025-12",
+      "is_window": "2025-10,2025-11",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CORN/2025-12",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CORN",
+      "oos_month": "2026-01",
+      "is_window": "2025-11,2025-12",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CORN/2026-01",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CORN",
+      "oos_month": "2026-02",
+      "is_window": "2025-12,2026-01",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CORN/2026-02",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CORN",
+      "oos_month": "2026-03",
+      "is_window": "2026-01,2026-02",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CORN/2026-03",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CORN",
+      "oos_month": "2026-04",
+      "is_window": "2026-02,2026-03",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CORN/2026-04",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CORN",
+      "oos_month": "2026-05",
+      "is_window": "2026-03,2026-04",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CORN/2026-05",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CPER",
+      "oos_month": "2024-03",
+      "is_window": "2024-01,2024-02",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CPER/2024-03",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CPER",
+      "oos_month": "2024-04",
+      "is_window": "2024-02,2024-03",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CPER/2024-04",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CPER",
+      "oos_month": "2024-05",
+      "is_window": "2024-03,2024-04",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CPER/2024-05",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CPER",
+      "oos_month": "2024-06",
+      "is_window": "2024-04,2024-05",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CPER/2024-06",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CPER",
+      "oos_month": "2024-07",
+      "is_window": "2024-05,2024-06",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CPER/2024-07",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CPER",
+      "oos_month": "2024-08",
+      "is_window": "2024-06,2024-07",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CPER/2024-08",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CPER",
+      "oos_month": "2024-09",
+      "is_window": "2024-07,2024-08",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CPER/2024-09",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CPER",
+      "oos_month": "2024-10",
+      "is_window": "2024-08,2024-09",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CPER/2024-10",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CPER",
+      "oos_month": "2024-11",
+      "is_window": "2024-09,2024-10",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CPER/2024-11",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CPER",
+      "oos_month": "2024-12",
+      "is_window": "2024-10,2024-11",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CPER/2024-12",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CPER",
+      "oos_month": "2025-01",
+      "is_window": "2024-11,2024-12",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CPER/2025-01",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CPER",
+      "oos_month": "2025-02",
+      "is_window": "2024-12,2025-01",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CPER/2025-02",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CPER",
+      "oos_month": "2025-03",
+      "is_window": "2025-01,2025-02",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CPER/2025-03",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CPER",
+      "oos_month": "2025-04",
+      "is_window": "2025-02,2025-03",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CPER/2025-04",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CPER",
+      "oos_month": "2025-05",
+      "is_window": "2025-03,2025-04",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CPER/2025-05",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CPER",
+      "oos_month": "2025-06",
+      "is_window": "2025-04,2025-05",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CPER/2025-06",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CPER",
+      "oos_month": "2025-07",
+      "is_window": "2025-05,2025-06",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CPER/2025-07",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CPER",
+      "oos_month": "2025-08",
+      "is_window": "2025-06,2025-07",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CPER/2025-08",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CPER",
+      "oos_month": "2025-09",
+      "is_window": "2025-07,2025-08",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CPER/2025-09",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CPER",
+      "oos_month": "2025-10",
+      "is_window": "2025-08,2025-09",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CPER/2025-10",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CPER",
+      "oos_month": "2025-11",
+      "is_window": "2025-09,2025-10",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CPER/2025-11",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CPER",
+      "oos_month": "2025-12",
+      "is_window": "2025-10,2025-11",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CPER/2025-12",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CPER",
+      "oos_month": "2026-01",
+      "is_window": "2025-11,2025-12",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CPER/2026-01",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CPER",
+      "oos_month": "2026-02",
+      "is_window": "2025-12,2026-01",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CPER/2026-02",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CPER",
+      "oos_month": "2026-03",
+      "is_window": "2026-01,2026-02",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CPER/2026-03",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CPER",
+      "oos_month": "2026-04",
+      "is_window": "2026-02,2026-03",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CPER/2026-04",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CPER",
+      "oos_month": "2026-05",
+      "is_window": "2026-03,2026-04",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CPER/2026-05",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "CPER",
+      "oos_month": "2026-06",
+      "is_window": "2026-04,2026-05",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/CPER/2026-06",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXE",
+      "oos_month": "2024-03",
+      "is_window": "2024-01,2024-02",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXE/2024-03",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXE",
+      "oos_month": "2024-04",
+      "is_window": "2024-02,2024-03",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXE/2024-04",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXE",
+      "oos_month": "2024-05",
+      "is_window": "2024-03,2024-04",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXE/2024-05",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXE",
+      "oos_month": "2024-06",
+      "is_window": "2024-04,2024-05",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXE/2024-06",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXE",
+      "oos_month": "2024-07",
+      "is_window": "2024-05,2024-06",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXE/2024-07",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXE",
+      "oos_month": "2024-08",
+      "is_window": "2024-06,2024-07",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXE/2024-08",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXE",
+      "oos_month": "2024-09",
+      "is_window": "2024-07,2024-08",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXE/2024-09",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXE",
+      "oos_month": "2024-10",
+      "is_window": "2024-08,2024-09",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXE/2024-10",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXE",
+      "oos_month": "2024-11",
+      "is_window": "2024-09,2024-10",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXE/2024-11",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXE",
+      "oos_month": "2024-12",
+      "is_window": "2024-10,2024-11",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXE/2024-12",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXE",
+      "oos_month": "2025-01",
+      "is_window": "2024-11,2024-12",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXE/2025-01",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXE",
+      "oos_month": "2025-02",
+      "is_window": "2024-12,2025-01",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXE/2025-02",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXE",
+      "oos_month": "2025-03",
+      "is_window": "2025-01,2025-02",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXE/2025-03",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXE",
+      "oos_month": "2025-04",
+      "is_window": "2025-02,2025-03",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXE/2025-04",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXE",
+      "oos_month": "2025-05",
+      "is_window": "2025-03,2025-04",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXE/2025-05",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXE",
+      "oos_month": "2025-06",
+      "is_window": "2025-04,2025-05",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXE/2025-06",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXE",
+      "oos_month": "2025-07",
+      "is_window": "2025-05,2025-06",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXE/2025-07",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXE",
+      "oos_month": "2025-08",
+      "is_window": "2025-06,2025-07",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXE/2025-08",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXE",
+      "oos_month": "2025-09",
+      "is_window": "2025-07,2025-08",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXE/2025-09",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXE",
+      "oos_month": "2025-10",
+      "is_window": "2025-08,2025-09",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXE/2025-10",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXE",
+      "oos_month": "2025-11",
+      "is_window": "2025-09,2025-10",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXE/2025-11",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXE",
+      "oos_month": "2025-12",
+      "is_window": "2025-10,2025-11",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXE/2025-12",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXE",
+      "oos_month": "2026-01",
+      "is_window": "2025-11,2025-12",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXE/2026-01",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXE",
+      "oos_month": "2026-02",
+      "is_window": "2025-12,2026-01",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXE/2026-02",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXE",
+      "oos_month": "2026-03",
+      "is_window": "2026-01,2026-02",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXE/2026-03",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXE",
+      "oos_month": "2026-04",
+      "is_window": "2026-02,2026-03",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXE/2026-04",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXE",
+      "oos_month": "2026-05",
+      "is_window": "2026-03,2026-04",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXE/2026-05",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXE",
+      "oos_month": "2026-06",
+      "is_window": "2026-04,2026-05",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXE/2026-06",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXI",
+      "oos_month": "2024-03",
+      "is_window": "2024-01,2024-02",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXI/2024-03",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXI",
+      "oos_month": "2024-04",
+      "is_window": "2024-02,2024-03",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXI/2024-04",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXI",
+      "oos_month": "2024-05",
+      "is_window": "2024-03,2024-04",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXI/2024-05",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXI",
+      "oos_month": "2024-06",
+      "is_window": "2024-04,2024-05",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXI/2024-06",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXI",
+      "oos_month": "2024-07",
+      "is_window": "2024-05,2024-06",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXI/2024-07",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXI",
+      "oos_month": "2024-08",
+      "is_window": "2024-06,2024-07",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXI/2024-08",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXI",
+      "oos_month": "2024-09",
+      "is_window": "2024-07,2024-08",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXI/2024-09",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXI",
+      "oos_month": "2024-10",
+      "is_window": "2024-08,2024-09",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXI/2024-10",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXI",
+      "oos_month": "2024-11",
+      "is_window": "2024-09,2024-10",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXI/2024-11",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXI",
+      "oos_month": "2024-12",
+      "is_window": "2024-10,2024-11",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXI/2024-12",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXI",
+      "oos_month": "2025-01",
+      "is_window": "2024-11,2024-12",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXI/2025-01",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXI",
+      "oos_month": "2025-02",
+      "is_window": "2024-12,2025-01",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXI/2025-02",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXI",
+      "oos_month": "2025-03",
+      "is_window": "2025-01,2025-02",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXI/2025-03",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXI",
+      "oos_month": "2025-04",
+      "is_window": "2025-02,2025-03",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXI/2025-04",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXI",
+      "oos_month": "2025-05",
+      "is_window": "2025-03,2025-04",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXI/2025-05",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXI",
+      "oos_month": "2025-06",
+      "is_window": "2025-04,2025-05",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXI/2025-06",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXI",
+      "oos_month": "2025-07",
+      "is_window": "2025-05,2025-06",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXI/2025-07",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXI",
+      "oos_month": "2025-08",
+      "is_window": "2025-06,2025-07",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXI/2025-08",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXI",
+      "oos_month": "2025-09",
+      "is_window": "2025-07,2025-08",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXI/2025-09",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXI",
+      "oos_month": "2025-10",
+      "is_window": "2025-08,2025-09",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXI/2025-10",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXI",
+      "oos_month": "2025-11",
+      "is_window": "2025-09,2025-10",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXI/2025-11",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXI",
+      "oos_month": "2025-12",
+      "is_window": "2025-10,2025-11",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXI/2025-12",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXI",
+      "oos_month": "2026-01",
+      "is_window": "2025-11,2025-12",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXI/2026-01",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXI",
+      "oos_month": "2026-02",
+      "is_window": "2025-12,2026-01",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXI/2026-02",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXI",
+      "oos_month": "2026-03",
+      "is_window": "2026-01,2026-02",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXI/2026-03",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXI",
+      "oos_month": "2026-04",
+      "is_window": "2026-02,2026-03",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXI/2026-04",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXI",
+      "oos_month": "2026-05",
+      "is_window": "2026-03,2026-04",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXI/2026-05",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "FXI",
+      "oos_month": "2026-06",
+      "is_window": "2026-04,2026-05",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/FXI/2026-06",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "GLD",
+      "oos_month": "2024-03",
+      "is_window": "2024-01,2024-02",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/GLD/2024-03",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "GLD",
+      "oos_month": "2024-04",
+      "is_window": "2024-02,2024-03",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/GLD/2024-04",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "GLD",
+      "oos_month": "2024-05",
+      "is_window": "2024-03,2024-04",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/GLD/2024-05",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "GLD",
+      "oos_month": "2024-06",
+      "is_window": "2024-04,2024-05",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/GLD/2024-06",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "GLD",
+      "oos_month": "2024-07",
+      "is_window": "2024-05,2024-06",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/GLD/2024-07",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "GLD",
+      "oos_month": "2024-08",
+      "is_window": "2024-06,2024-07",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/GLD/2024-08",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "GLD",
+      "oos_month": "2024-09",
+      "is_window": "2024-07,2024-08",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/GLD/2024-09",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "GLD",
+      "oos_month": "2024-10",
+      "is_window": "2024-08,2024-09",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/GLD/2024-10",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "GLD",
+      "oos_month": "2024-11",
+      "is_window": "2024-09,2024-10",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/GLD/2024-11",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "GLD",
+      "oos_month": "2024-12",
+      "is_window": "2024-10,2024-11",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/GLD/2024-12",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "GLD",
+      "oos_month": "2025-01",
+      "is_window": "2024-11,2024-12",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/GLD/2025-01",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "GLD",
+      "oos_month": "2025-02",
+      "is_window": "2024-12,2025-01",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/GLD/2025-02",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "GLD",
+      "oos_month": "2025-03",
+      "is_window": "2025-01,2025-02",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/GLD/2025-03",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "GLD",
+      "oos_month": "2025-04",
+      "is_window": "2025-02,2025-03",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/GLD/2025-04",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "GLD",
+      "oos_month": "2025-05",
+      "is_window": "2025-03,2025-04",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/GLD/2025-05",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "GLD",
+      "oos_month": "2025-06",
+      "is_window": "2025-04,2025-05",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/GLD/2025-06",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "GLD",
+      "oos_month": "2025-07",
+      "is_window": "2025-05,2025-06",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/GLD/2025-07",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "GLD",
+      "oos_month": "2025-08",
+      "is_window": "2025-06,2025-07",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/GLD/2025-08",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "GLD",
+      "oos_month": "2025-09",
+      "is_window": "2025-07,2025-08",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/GLD/2025-09",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "GLD",
+      "oos_month": "2025-10",
+      "is_window": "2025-08,2025-09",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/GLD/2025-10",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "GLD",
+      "oos_month": "2025-11",
+      "is_window": "2025-09,2025-10",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/GLD/2025-11",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "GLD",
+      "oos_month": "2025-12",
+      "is_window": "2025-10,2025-11",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/GLD/2025-12",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "GLD",
+      "oos_month": "2026-01",
+      "is_window": "2025-11,2025-12",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/GLD/2026-01",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "GLD",
+      "oos_month": "2026-02",
+      "is_window": "2025-12,2026-01",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/GLD/2026-02",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "GLD",
+      "oos_month": "2026-03",
+      "is_window": "2026-01,2026-02",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/GLD/2026-03",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "GLD",
+      "oos_month": "2026-04",
+      "is_window": "2026-02,2026-03",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/GLD/2026-04",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "GLD",
+      "oos_month": "2026-05",
+      "is_window": "2026-03,2026-04",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/GLD/2026-05",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "GLD",
+      "oos_month": "2026-06",
+      "is_window": "2026-04,2026-05",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/GLD/2026-06",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "IEF",
+      "oos_month": "2024-03",
+      "is_window": "2024-01,2024-02",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/IEF/2024-03",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "IEF",
+      "oos_month": "2024-04",
+      "is_window": "2024-02,2024-03",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/IEF/2024-04",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "IEF",
+      "oos_month": "2024-05",
+      "is_window": "2024-03,2024-04",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/IEF/2024-05",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "IEF",
+      "oos_month": "2024-06",
+      "is_window": "2024-04,2024-05",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/IEF/2024-06",
+      "status": "ok",
+      "returncode": 0
+    },
+    {
+      "ticker": "IEF",
+      "oos_month": "2024-07",
+      "is_window": "2024-05,2024-06",
+      "out_dir": "data/comparisons/rolling_20260624_001308/runs/IEF/2024-07",
+      "status": "ok",
+      "returncode": 0
+    }
+  ]
+}

@@ -130,6 +130,7 @@ Compares factor sets from multiple research-LLM preruns on **four** tracks: sing
 |------|---------|-------------|
 | `--preruns <a,b,…>` | — | Comma-separated prerun names to compare |
 | `--all` | off | Compare all existing preruns |
+| `main` / `seed` / `seeds` | — | Special `--preruns` aliases for the built-in seed factor library (`data/factors/factor_db.json`) |
 | `--models <m1,m2,…>` | — | Filter to specific model types in the brute-force track |
 | `--no-ensemble` | off | Skip the equal-weight ensemble in the brute-force track |
 | `--include-seeds` | off | Include seed alphas alongside researched factors |
@@ -150,9 +151,10 @@ Compares factor sets from multiple research-LLM preruns on **four** tracks: sing
 | `--max-bars` | all | Uniformly stride the panel to ≤ N timestamps (biggest speed lever; 20000 under `--fast`) |
 | `--analytics-max-rows` | `50000` | Cap (timestamp×ticker) rows in the analytics correlation / importance fits |
 | `--corr-threshold` | `0.7` | \|corr\| ≥ τ groups factors into a redundancy cluster |
+| `--importance-top-n` | `10` | Top factors kept per (prerun, importance model) in `analytics_importance.csv`. Set ≥ the factor count to keep the **full** per-factor importance vector (needed for the rolling feature-importance study) |
 | `--no-checkpoint` | off | Disable persisting tables/figures after each track |
 | `--fit-scope` | `pooled` | Fit ONE model across all underlyings (`pooled`, suits homogeneous/data-light universes e.g. yfinance S&P100) or a SEPARATE model per underlying (`per_underlying`, suits heterogeneous/data-rich ones e.g. the LOBSTER ETFs) |
-| `--fit-standardize` | `per_underlying` | Factor standardisation before the ML fit: `per_underlying` / `cross_sectional` |
+| `--fit-standardize` | `per_underlying` | Standardisation for the **whole** comparison — `per_underlying` (default; time-series z-score, **no cross-section**: the IC track becomes a per-underlying time-series IC, analytics diversity/importance are per-underlying, and the brute-force fit + combined-signal IC are per-underlying) or `cross_sectional` (legacy across-tickers rank-IC + z-score). |
 | `--position-mode` | `threshold` | Map combined signal → position: `threshold` / `sign` / `continuous` |
 | `--position-threshold` | `1.0` | ±t (z units) for the threshold band |
 | `--position-zscore` | `expanding` | Per-underlying z-score basis: `expanding` / `full` / `rolling` / `none` |
@@ -171,6 +173,30 @@ Compares factor sets from multiple research-LLM preruns on **four** tracks: sing
 | `--prerun-spec name=model[:provider]` | — | With `--research`: define preruns to mine (repeatable) |
 | `--target-factors` | `50` | Target factors per prerun when `--research` is used |
 | `--dedup-scope` | `prerun` | Dedup scope when `--research` is used |
+
+---
+
+### `run_rolling_comparison.py`
+Automates `run_model_comparison.py` **per ticker over a rolling IS/OOS month window** and aggregates everything. For each ticker under `--data-dir` it discovers the available months (`bin{YYYYMM}.csv`), builds rolling windows (default 2 IS months + the next OOS month, stepping one month forward so the prior OOS month becomes the second IS month), and runs the LLM-free comparison **per underlying** (`--fit-scope per_underlying --fit-standardize per_underlying`). Each (ticker, window) runs in its **own subprocess** → memory is reclaimed between runs (no OOM on the large intraday panel); the sweep is **resumable** (a window whose `status.json` shows every track `ok` is skipped) and robust (a failed run is logged; the sweep continues). LLM-free (`QF_USE_MCP=0`, `--no-downstream`).
+
+**Output** under `data/comparisons/<batch>/`: `combined/{bruteforce,importance,diversity,ic}_all.csv` (every run, tagged with `ticker, oos_month, is_window`); `per_ticker/<ticker>/importance_over_months__<prerun>__<model>.csv` + heatmaps (the **most important features over the OOS months**) and `performance_<metric>__<model>.png`; `summary.md`; `manifest.json`; and each window's full per-run comparison under `runs/<ticker>/<oos_month>/`.
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--data-dir` | `ticker_data` | LOBSTER per-ticker CSV root |
+| `--tickers <a,b,…>` | all | Tickers to sweep (default: every dir with `bin*.csv` under `--data-dir`) |
+| `--preruns <a,b,…>` | `gpt4omini120650,gpt5.4mini120650,main` | Factor sets to compare (`main` = seed library) |
+| `--name <id>` | `rolling_<timestamp>` | Batch folder name under `--out-root` |
+| `--out-root` | `data/comparisons` | Root for the batch folder |
+| `--is-len` | `2` | In-sample months per window |
+| `--oos-len` | `1` | Out-of-sample months per window |
+| `--step` | `1` | Months to advance per window |
+| `--models <m1,…>` | all | Restrict the brute-force model catalog |
+| `--max-bars <N>` | full | Stride each window's panel to ≤ N bars (else full resolution) |
+| `--importance-top-n` | `200` | Top factors kept per (prerun, model) — high to keep the full per-factor importance vector |
+| `--jobs <N>` | `1` | Parallel windows (each a subprocess). >1 multiplies peak memory |
+| `--force` | off | Re-run windows even if already complete |
+| `--aggregate-only` | off | Skip running; just (re)build combined tables + per-ticker figures |
 
 ---
 
@@ -264,7 +290,13 @@ Walk-forward backtest: runs weekly research/strategy/PM meetings over a date ran
 | `--no-research` | off | Skip factor research meetings |
 | `--factor-universe` | `all` | `all` (global DB) or `session` (only this run's factors) |
 | `--prerun <name>` | — | Use a named prerun's factor set |
-| `--no-seeds` | off | Hide seed alphas (with `--prerun`) |
+| `--no-seeds` | off | Hide seed alphas (with `--prerun` or `--factor-source prerun_inject`) |
+| `--factor-source` | `research` | `research` (LLM Factor-Researcher each `--research-every`) or `prerun_inject` (no LLM: draw factors from preruns instead) |
+| `--inject-preruns <a,b>` | — | With `prerun_inject`: prerun names to pool factors from (e.g. `sp100-5.4-mini,sp100-4o-mini`) |
+| `--inject-config <name>` | derived | Workspace config scope the inject preruns live under (default: from the active data config, e.g. `yfinance_equity_sp100`) |
+| `--factors-per-meeting` | `2` | Factors drawn from the prerun pool per research-due meeting (`prerun_inject`) |
+| `--config <path>` | — | Path to a `quant.config.yaml` driving the data layer (provider/universe/timespan); required for yfinance/FMP. Sets `QF_CONFIG_FILE`. |
+| `--fallback-spread-bps` | `0.0` | Flat synthetic half-spread (bps) when the panel has no spread field (e.g. yfinance daily); ~`2.0` for realistic large-cap costs |
 | `--initial-strategies` | `5` | Strategies built at first meeting (bootstrap) |
 | `--n-strategies` | `2` | Strategies attempted per meeting after the first |
 | `--max-iterations` | `3` | Architect iterations per strategy |

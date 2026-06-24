@@ -102,9 +102,15 @@ class ComparisonConfig:
 
     # ── shared evaluation params ──
     ic_horizons: tuple[int, ...] = DEFAULT_IC_HORIZONS
-    target_horizon: int = 6           # brute-force / downstream forecast horizon
+    target_horizon: int = 6           # brute-force / downstream forecast horizon (fallback / override)
+    # How the brute-force combined-signal horizon is derived from the constituent
+    # factors' own prediction horizons: "mode" (default), "median", "max", "min",
+    # or "explicit" (always use ``target_horizon``).  ``--horizon`` sets this to
+    # "explicit" + ``target_horizon_overridden`` so derivation is skipped.
+    combined_horizon_agg: str = "mode"
+    target_horizon_overridden: bool = False
     oos_split_ratio: float = 0.2      # held-out tail fraction
-    holding_period: int | None = None  # None → target_horizon
+    holding_period: int | None = None  # tranche hold (bars) in the vector backtest; None → target_horizon
     max_positions: int = 20
 
     # ── speed knobs (brute-force track) ──
@@ -178,6 +184,11 @@ class ComparisonConfig:
     analytics_max_rows: int = 50_000  # cap (timestamp×ticker) rows for corr / model fit
     corr_threshold: float = 0.7       # |corr| ≥ τ groups factors into a redundancy cluster
     importance_models: tuple[str, ...] = ("lasso", "gradient_boosting")
+    # How many top factors per (prerun, importance model) the importance track
+    # emits.  The default 10 is fine for a report; a rolling/longitudinal study
+    # raises it past the factor count so the *complete* per-factor importance
+    # vector is kept (clean factor×period matrices).
+    importance_top_n: int = 10
 
     # ── persistence ──
     checkpoint: bool = True           # persist tables+figures after EACH track (crash-safe)
@@ -225,6 +236,39 @@ class ComparisonConfig:
             else:
                 out.append(m)
         return out
+
+    def resolve_target_horizon(self, factor_horizons, n_bars: int | None = None) -> int:
+        """Derive the combined-signal forecast horizon from the factors' horizons.
+
+        ``factor_horizons`` is the list of the constituent factors' own
+        ``prediction_horizon`` values.  Aggregated per ``combined_horizon_agg``
+        (default ``mode``); ``explicit`` or an active ``--horizon`` override returns
+        ``target_horizon`` unchanged.  Clamped to ``[1, n_bars-1]`` when ``n_bars``
+        is given (a horizon ≥ the panel length yields all-NaN forward returns).
+        Empty input falls back to ``target_horizon``.
+        """
+        agg = self.combined_horizon_agg
+        if self.target_horizon_overridden or agg == "explicit" or not factor_horizons:
+            h = int(self.target_horizon)
+        else:
+            hs = [int(x) for x in factor_horizons if x]
+            if not hs:
+                h = int(self.target_horizon)
+            elif agg == "median":
+                hs.sort()
+                h = int(hs[len(hs) // 2])
+            elif agg == "max":
+                h = int(max(hs))
+            elif agg == "min":
+                h = int(min(hs))
+            else:  # mode (default) — most common; ties broken by the smaller horizon
+                from collections import Counter
+                counts = Counter(hs)
+                h = int(min(counts, key=lambda k: (-counts[k], k)))
+        h = max(1, h)
+        if n_bars is not None and n_bars > 1:
+            h = min(h, n_bars - 1)
+        return h
 
     def fast_model_params(self, model_type: str) -> dict[str, Any] | None:
         """Lighter hyper-parameters for ``model_type`` under ``--fast`` (else None)."""

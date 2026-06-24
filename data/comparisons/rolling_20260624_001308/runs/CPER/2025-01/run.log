@@ -1,0 +1,252 @@
+02:12:14  INFO     run_model_comparison    Comparison '2025-01' over 3 prerun(s): ['gpt4omini120650', 'gpt5.4mini120650', 'main']
+02:12:14  INFO     run_model_comparison    universe: explicit tickers ['CPER']
+02:12:14  INFO     comparison.factors      loading comparison panel: provider=lobster asset_class=equity frequency=10s universe=sp100 start=2020-01-01 end=2026-06-22
+02:12:17  INFO     backtesting.data_loader  loaded 1 tickers, skipped 0
+02:12:18  INFO     comparison.factors      explicit universe: 1/1 requested tickers loaded
+02:12:18  INFO     comparison.factors      restricting panel to train∪OOS windows: 1409220 → 140580 bars
+02:12:18  INFO     run_model_comparison    calendar IS/OOS split: IS=93780 bars [2024-11,2024-12], OOS=46800 bars [2025-01]
+02:12:18  WARNING  run_model_comparison    universe has 1 ticker(s): this comparison is CROSS-SECTIONAL (rank-IC, the ML fits and factor correlations all need ≥2 names), so IC/brute-force will be degenerate. For speed prefer --max-bars over --n-tickers.
+02:12:18  INFO     comparison.factors      usable_factor_ids: probing 66 factors (computing signals) ...
+02:12:18  INFO     comparison.factors      usable_factor_ids: [1/66] ...
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/pandas/core/internals/blocks.py:347: RuntimeWarning: invalid value encountered in sqrt
+  result = func(self.values, **kwargs)
+02:12:18  INFO     comparison.factors      usable_factor_ids: [21/66] ...
+02:12:18  INFO     comparison.factors      usable_factor_ids: [41/66] ...
+02:12:18  INFO     comparison.factors      usable_factor_ids: [61/66] ...
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/pandas/core/internals/blocks.py:347: RuntimeWarning: invalid value encountered in log
+  result = func(self.values, **kwargs)
+02:12:18  INFO     run_model_comparison    prerun 'gpt4omini120650': 66/66 factors usable on current data
+02:12:18  INFO     comparison.factors      usable_factor_ids: probing 69 factors (computing signals) ...
+02:12:18  INFO     comparison.factors      usable_factor_ids: [1/69] ...
+02:12:42  INFO     comparison.factors      usable_factor_ids: [21/69] ...
+02:12:43  INFO     comparison.factors      usable_factor_ids: [41/69] ...
+02:12:44  INFO     comparison.factors      usable_factor_ids: [61/69] ...
+02:12:45  INFO     comparison.factors      usable_factor_ids: 68 usable, 1 dropped (intraday_safety_margin_pressure)
+02:12:45  INFO     run_model_comparison    prerun 'gpt5.4mini120650': 68/69 factors usable on current data
+02:12:45  INFO     comparison.factors      usable_factor_ids: probing 88 factors (computing signals) ...
+02:12:45  INFO     comparison.factors      usable_factor_ids: [1/88] ...
+02:12:45  INFO     comparison.factors      usable_factor_ids: [21/88] ...
+02:12:45  INFO     comparison.factors      usable_factor_ids: [41/88] ...
+02:12:46  WARNING  quant_fund_agent.factors.statistical_arbitrage.alpha_048  Alpha#48: data['subindustry'] not provided — skipping industry neutralisation.
+02:12:46  WARNING  quant_fund_agent.factors.momentum.alpha_056  Alpha#56: data['cap'] not provided — using volume as proxy.
+02:12:46  WARNING  quant_fund_agent.factors.statistical_arbitrage.alpha_058  Alpha#58: data['sector'] not provided — skipping neutralisation.
+02:12:46  WARNING  quant_fund_agent.factors.statistical_arbitrage.alpha_059  Alpha#59: data['industry'] not provided — skipping neutralisation.
+02:12:46  INFO     comparison.factors      usable_factor_ids: [61/88] ...
+02:12:47  INFO     comparison.factors      usable_factor_ids: [81/88] ...
+02:12:54  INFO     comparison.factors      usable_factor_ids: 77 usable, 11 dropped (alpha_002, alpha_003, alpha_015, alpha_029, alpha_044…)
+02:12:54  INFO     run_model_comparison    prerun 'main': 77/88 factors usable on current data
+02:12:55  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/factor_usability.png
+02:12:55  INFO     run_model_comparison    ── track 'ic' starting ──
+02:12:55  INFO     comparison.ic           IC: prerun 'gpt4omini120650' — 66 factors at horizons [1, 6, 60] (mode=per_underlying)
+02:12:55  INFO     comparison.ic           IC: prerun 'gpt4omini120650' [1/66] ...
+02:12:55  INFO     comparison.ic           IC: prerun 'gpt4omini120650' [11/66] ...
+02:12:56  INFO     comparison.ic           IC: prerun 'gpt4omini120650' [21/66] ...
+02:12:56  INFO     comparison.ic           IC: prerun 'gpt4omini120650' [31/66] ...
+02:12:56  INFO     comparison.ic           IC: prerun 'gpt4omini120650' [41/66] ...
+02:12:57  INFO     comparison.ic           IC: prerun 'gpt4omini120650' [51/66] ...
+02:12:57  INFO     comparison.ic           IC: prerun 'gpt4omini120650' [61/66] ...
+02:12:57  INFO     comparison.ic           IC: prerun 'gpt5.4mini120650' — 68 factors at horizons [1, 6, 60] (mode=per_underlying)
+02:12:57  INFO     comparison.ic           IC: prerun 'gpt5.4mini120650' [1/68] ...
+02:12:57  INFO     comparison.ic           IC: prerun 'gpt5.4mini120650' [11/68] ...
+02:12:58  INFO     comparison.ic           IC: prerun 'gpt5.4mini120650' [21/68] ...
+02:12:58  INFO     comparison.ic           IC: prerun 'gpt5.4mini120650' [31/68] ...
+02:12:58  INFO     comparison.ic           IC: prerun 'gpt5.4mini120650' [41/68] ...
+02:12:58  INFO     comparison.ic           IC: prerun 'gpt5.4mini120650' [51/68] ...
+02:12:58  INFO     comparison.ic           IC: prerun 'gpt5.4mini120650' [61/68] ...
+02:12:59  INFO     comparison.ic           IC: prerun 'main' — 77 factors at horizons [1, 6, 60] (mode=per_underlying)
+02:12:59  INFO     comparison.ic           IC: prerun 'main' [1/77] ...
+02:12:59  INFO     comparison.ic           IC: prerun 'main' [11/77] ...
+02:12:59  INFO     comparison.ic           IC: prerun 'main' [21/77] ...
+02:12:59  INFO     comparison.ic           IC: prerun 'main' [31/77] ...
+02:12:59  INFO     comparison.ic           IC: prerun 'main' [41/77] ...
+02:12:59  INFO     comparison.ic           IC: prerun 'main' [51/77] ...
+02:12:59  INFO     comparison.ic           IC: prerun 'main' [61/77] ...
+02:13:00  INFO     comparison.ic           IC: prerun 'main' [71/77] ...
+02:13:00  INFO     comparison.report       wrote table data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/ic_results.csv (211 rows)
+02:13:00  INFO     comparison.report       wrote table data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/ic_summary.csv (3 rows)
+02:13:00  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/factor_usability.png
+02:13:00  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/ic_distribution_h6.png
+02:13:00  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/ic_top_factors_h6.png
+02:13:00  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/ic_mean_by_horizon.png
+02:13:00  INFO     run_model_comparison    ── track 'analytics' starting ──
+02:13:00  INFO     comparison.analytics    diversity: prerun 'gpt4omini120650' — correlating 66 factors
+02:13:00  INFO     comparison.analytics    modelview: prerun 'gpt4omini120650' — importance on 49998 rows × 66 factors (lasso,gradient_boosting)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:1663: FutureWarning: 'n_alphas' was deprecated in 1.7 and will be removed in 1.9. 'alphas' now accepts an integer value which removes the need to pass 'n_alphas'. The default value of 'alphas' will change from None to 100 in 1.9. Pass an explicit value to 'alphas' and leave 'n_alphas' to its default value to silence this warning.
+  warnings.warn(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:701: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 5.324e+02, tolerance: 4.212e+00
+  model = cd_fast.enet_coordinate_descent_gram(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:701: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 1.992e+02, tolerance: 4.497e+00
+  model = cd_fast.enet_coordinate_descent_gram(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:701: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 1.457e+03, tolerance: 3.841e+00
+  model = cd_fast.enet_coordinate_descent_gram(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:701: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 3.561e+03, tolerance: 4.212e+00
+  model = cd_fast.enet_coordinate_descent_gram(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:701: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 3.196e+03, tolerance: 4.497e+00
+  model = cd_fast.enet_coordinate_descent_gram(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:701: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 4.260e+03, tolerance: 3.841e+00
+  model = cd_fast.enet_coordinate_descent_gram(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:701: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 5.963e+03, tolerance: 4.212e+00
+  model = cd_fast.enet_coordinate_descent_gram(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:701: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 5.759e+03, tolerance: 4.497e+00
+  model = cd_fast.enet_coordinate_descent_gram(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:701: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 6.314e+03, tolerance: 3.841e+00
+  model = cd_fast.enet_coordinate_descent_gram(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:701: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 7.541e+03, tolerance: 4.497e+00
+  model = cd_fast.enet_coordinate_descent_gram(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:701: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 7.769e+03, tolerance: 3.841e+00
+  model = cd_fast.enet_coordinate_descent_gram(
+02:13:13  INFO     comparison.analytics    diversity: prerun 'gpt5.4mini120650' — correlating 68 factors
+02:13:13  INFO     comparison.analytics    modelview: prerun 'gpt5.4mini120650' — importance on 49998 rows × 68 factors (lasso,gradient_boosting)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:1663: FutureWarning: 'n_alphas' was deprecated in 1.7 and will be removed in 1.9. 'alphas' now accepts an integer value which removes the need to pass 'n_alphas'. The default value of 'alphas' will change from None to 100 in 1.9. Pass an explicit value to 'alphas' and leave 'n_alphas' to its default value to silence this warning.
+  warnings.warn(
+02:13:23  INFO     comparison.analytics    diversity: prerun 'main' — correlating 77 factors
+02:13:23  INFO     comparison.analytics    modelview: prerun 'main' — importance on 49998 rows × 77 factors (lasso,gradient_boosting)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:1663: FutureWarning: 'n_alphas' was deprecated in 1.7 and will be removed in 1.9. 'alphas' now accepts an integer value which removes the need to pass 'n_alphas'. The default value of 'alphas' will change from None to 100 in 1.9. Pass an explicit value to 'alphas' and leave 'n_alphas' to its default value to silence this warning.
+  warnings.warn(
+02:13:28  INFO     comparison.report       wrote table data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/ic_results.csv (211 rows)
+02:13:28  INFO     comparison.report       wrote table data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/ic_summary.csv (3 rows)
+02:13:28  INFO     comparison.report       wrote table data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/analytics_diversity_summary.csv (3 rows)
+02:13:28  INFO     comparison.report       wrote table data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/analytics_diversity_factor.csv (211 rows)
+02:13:28  INFO     comparison.report       wrote table data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/analytics_modelview_summary.csv (3 rows)
+02:13:28  INFO     comparison.report       wrote table data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/analytics_importance.csv (422 rows)
+02:13:28  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/factor_usability.png
+02:13:28  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/ic_distribution_h6.png
+02:13:28  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/ic_top_factors_h6.png
+02:13:28  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/ic_mean_by_horizon.png
+02:13:28  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/effective_factors.png
+02:13:29  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/factor_correlation_gpt4omini120650.png
+02:13:29  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/factor_correlation_gpt5.4mini120650.png
+02:13:30  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/factor_correlation_main.png
+02:13:30  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/deflation.png
+02:13:30  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/feature_importance_lasso.png
+02:13:30  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/feature_importance_gradient_boosting.png
+02:13:30  INFO     run_model_comparison    ── track 'bruteforce' starting ──
+02:13:30  INFO     comparison.bruteforce   ML-combine: prerun 'gpt4omini120650' — 66 factors → 8 models (fit_scope=per_underlying, fit_standardize=per_underlying, position=threshold, aggregation=portfolio)
+02:13:30  INFO     comparison.bruteforce   ML-combine: prerun 'gpt4omini120650' fitting 'linear_regression' → combined signal ...
+02:13:30  INFO     comparison.bruteforce   ML-combine: prerun 'gpt4omini120650' fitting 'ridge' → combined signal ...
+02:13:31  INFO     comparison.bruteforce   ML-combine: prerun 'gpt4omini120650' fitting 'lasso' → combined signal ...
+02:13:31  INFO     comparison.bruteforce   ML-combine: prerun 'gpt4omini120650' fitting 'elastic_net' → combined signal ...
+02:13:32  INFO     comparison.bruteforce   ML-combine: prerun 'gpt4omini120650' fitting 'random_forest' → combined signal ...
+02:13:40  INFO     comparison.bruteforce   ML-combine: prerun 'gpt4omini120650' fitting 'gradient_boosting' → combined signal ...
+02:14:08  INFO     comparison.bruteforce   ML-combine: prerun 'gpt4omini120650' fitting 'xgboost' → combined signal ...
+02:14:09  INFO     comparison.bruteforce   ML-combine: prerun 'gpt4omini120650' fitting 'lightgbm' → combined signal ...
+02:14:10  INFO     comparison.bruteforce   ML-combine: prerun 'gpt4omini120650' building ensemble of 8 models ...
+02:14:10  INFO     comparison.bruteforce   ML-combine: prerun 'gpt5.4mini120650' — 68 factors → 8 models (fit_scope=per_underlying, fit_standardize=per_underlying, position=threshold, aggregation=portfolio)
+02:14:10  INFO     comparison.bruteforce   ML-combine: prerun 'gpt5.4mini120650' fitting 'linear_regression' → combined signal ...
+02:14:10  INFO     comparison.bruteforce   ML-combine: prerun 'gpt5.4mini120650' fitting 'ridge' → combined signal ...
+02:14:11  INFO     comparison.bruteforce   ML-combine: prerun 'gpt5.4mini120650' fitting 'lasso' → combined signal ...
+02:14:11  INFO     comparison.bruteforce   ML-combine: prerun 'gpt5.4mini120650' fitting 'elastic_net' → combined signal ...
+02:14:12  INFO     comparison.bruteforce   ML-combine: prerun 'gpt5.4mini120650' fitting 'random_forest' → combined signal ...
+02:14:18  INFO     comparison.bruteforce   ML-combine: prerun 'gpt5.4mini120650' fitting 'gradient_boosting' → combined signal ...
+02:14:39  INFO     comparison.bruteforce   ML-combine: prerun 'gpt5.4mini120650' fitting 'xgboost' → combined signal ...
+02:14:40  INFO     comparison.bruteforce   ML-combine: prerun 'gpt5.4mini120650' fitting 'lightgbm' → combined signal ...
+02:14:41  INFO     comparison.bruteforce   ML-combine: prerun 'gpt5.4mini120650' building ensemble of 8 models ...
+02:14:41  INFO     comparison.bruteforce   ML-combine: prerun 'main' — 77 factors → 8 models (fit_scope=per_underlying, fit_standardize=per_underlying, position=threshold, aggregation=portfolio)
+02:14:41  INFO     comparison.bruteforce   ML-combine: prerun 'main' fitting 'linear_regression' → combined signal ...
+02:14:41  INFO     comparison.bruteforce   ML-combine: prerun 'main' fitting 'ridge' → combined signal ...
+02:14:42  INFO     comparison.bruteforce   ML-combine: prerun 'main' fitting 'lasso' → combined signal ...
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:701: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 8.214e+01, tolerance: 7.969e+00
+  model = cd_fast.enet_coordinate_descent_gram(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:701: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 5.282e+02, tolerance: 3.915e+00
+  model = cd_fast.enet_coordinate_descent_gram(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:701: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 8.916e+02, tolerance: 8.352e+00
+  model = cd_fast.enet_coordinate_descent_gram(
+02:14:42  INFO     comparison.bruteforce   ML-combine: prerun 'main' fitting 'elastic_net' → combined signal ...
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:701: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 1.465e+02, tolerance: 3.915e+00
+  model = cd_fast.enet_coordinate_descent_gram(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:701: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 1.706e+01, tolerance: 7.969e+00
+  model = cd_fast.enet_coordinate_descent_gram(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:701: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 4.076e+02, tolerance: 8.352e+00
+  model = cd_fast.enet_coordinate_descent_gram(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:701: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 2.883e+02, tolerance: 3.915e+00
+  model = cd_fast.enet_coordinate_descent_gram(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:701: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 6.463e+02, tolerance: 8.352e+00
+  model = cd_fast.enet_coordinate_descent_gram(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:701: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 4.483e+02, tolerance: 3.915e+00
+  model = cd_fast.enet_coordinate_descent_gram(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:701: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 4.439e+01, tolerance: 7.969e+00
+  model = cd_fast.enet_coordinate_descent_gram(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:701: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 7.171e+01, tolerance: 7.969e+00
+  model = cd_fast.enet_coordinate_descent_gram(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:701: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 8.221e+02, tolerance: 8.352e+00
+  model = cd_fast.enet_coordinate_descent_gram(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:701: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 4.890e+02, tolerance: 3.915e+00
+  model = cd_fast.enet_coordinate_descent_gram(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:701: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 8.581e+02, tolerance: 8.352e+00
+  model = cd_fast.enet_coordinate_descent_gram(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:701: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 7.724e+01, tolerance: 7.969e+00
+  model = cd_fast.enet_coordinate_descent_gram(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:701: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 8.121e+01, tolerance: 7.969e+00
+  model = cd_fast.enet_coordinate_descent_gram(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:701: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 5.205e+02, tolerance: 3.915e+00
+  model = cd_fast.enet_coordinate_descent_gram(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:701: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 8.851e+02, tolerance: 8.352e+00
+  model = cd_fast.enet_coordinate_descent_gram(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:701: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 8.916e+02, tolerance: 8.352e+00
+  model = cd_fast.enet_coordinate_descent_gram(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:701: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 5.282e+02, tolerance: 3.915e+00
+  model = cd_fast.enet_coordinate_descent_gram(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:701: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 8.214e+01, tolerance: 7.969e+00
+  model = cd_fast.enet_coordinate_descent_gram(
+02:14:44  INFO     comparison.bruteforce   ML-combine: prerun 'main' fitting 'random_forest' → combined signal ...
+02:14:49  INFO     comparison.bruteforce   ML-combine: prerun 'main' fitting 'gradient_boosting' → combined signal ...
+02:15:01  INFO     comparison.bruteforce   ML-combine: prerun 'main' fitting 'xgboost' → combined signal ...
+02:15:02  INFO     comparison.bruteforce   ML-combine: prerun 'main' fitting 'lightgbm' → combined signal ...
+02:15:03  INFO     comparison.bruteforce   ML-combine: prerun 'main' building ensemble of 8 models ...
+02:15:03  INFO     comparison.report       wrote table data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/ic_results.csv (211 rows)
+02:15:03  INFO     comparison.report       wrote table data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/ic_summary.csv (3 rows)
+02:15:03  INFO     comparison.report       wrote table data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/analytics_diversity_summary.csv (3 rows)
+02:15:03  INFO     comparison.report       wrote table data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/analytics_diversity_factor.csv (211 rows)
+02:15:03  INFO     comparison.report       wrote table data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/analytics_modelview_summary.csv (3 rows)
+02:15:03  INFO     comparison.report       wrote table data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/analytics_importance.csv (422 rows)
+02:15:03  INFO     comparison.report       wrote table data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/bruteforce_results.csv (27 rows)
+02:15:03  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/factor_usability.png
+02:15:03  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/ic_distribution_h6.png
+02:15:03  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/ic_top_factors_h6.png
+02:15:03  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/ic_mean_by_horizon.png
+02:15:03  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/effective_factors.png
+02:15:03  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/factor_correlation_gpt4omini120650.png
+02:15:04  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/factor_correlation_gpt5.4mini120650.png
+02:15:04  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/factor_correlation_main.png
+02:15:04  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/deflation.png
+02:15:04  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/feature_importance_lasso.png
+02:15:04  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/feature_importance_gradient_boosting.png
+02:15:05  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/bruteforce_oos_sharpe.png
+02:15:05  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/bruteforce_ic_heatmap.png
+02:15:05  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/bruteforce_is_vs_oos.png
+02:15:05  INFO     comparison.report       wrote table data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/ic_results.csv (211 rows)
+02:15:05  INFO     comparison.report       wrote table data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/ic_summary.csv (3 rows)
+02:15:05  INFO     comparison.report       wrote table data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/analytics_diversity_summary.csv (3 rows)
+02:15:05  INFO     comparison.report       wrote table data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/analytics_diversity_factor.csv (211 rows)
+02:15:05  INFO     comparison.report       wrote table data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/analytics_modelview_summary.csv (3 rows)
+02:15:05  INFO     comparison.report       wrote table data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/analytics_importance.csv (422 rows)
+02:15:05  INFO     comparison.report       wrote table data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/bruteforce_results.csv (27 rows)
+02:15:05  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/factor_usability.png
+02:15:05  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/ic_distribution_h6.png
+02:15:05  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/ic_top_factors_h6.png
+02:15:05  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/ic_mean_by_horizon.png
+02:15:05  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/effective_factors.png
+02:15:05  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/factor_correlation_gpt4omini120650.png
+02:15:06  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/factor_correlation_gpt5.4mini120650.png
+02:15:06  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/factor_correlation_main.png
+02:15:06  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/deflation.png
+02:15:06  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/feature_importance_lasso.png
+02:15:07  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/feature_importance_gradient_boosting.png
+02:15:07  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/bruteforce_oos_sharpe.png
+02:15:07  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/bruteforce_ic_heatmap.png
+02:15:07  INFO     comparison.plots        wrote figure data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures/bruteforce_is_vs_oos.png
+02:15:07  INFO     comparison.report       wrote report data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/report.md
+02:15:07  INFO     comparison.report       wrote notebook data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/comparison.ipynb
+
+================================================================================
+Comparison '2025-01' → data/comparisons/rolling_20260624_001308/runs/CPER/2025-01
+  preruns         : ['gpt4omini120650', 'gpt5.4mini120650', 'main']
+  universe        : ['CPER']
+  split           : IS=[2024-11,2024-12]  OOS=[2025-01]
+tracks          : IC analytics brute-force
+  status          : {'ic': {'status': 'ok', 'seconds': 4.9}, 'analytics': {'status': 'ok', 'seconds': 28.0}, 'bruteforce': {'status': 'ok', 'seconds': 92.8}}
+  figures         : 14 → data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/figures
+  tables          : 12 CSV/JSON
+  report          : data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/report.md
+  notebook        : data/comparisons/rolling_20260624_001308/runs/CPER/2025-01/comparison.ipynb
+================================================================================

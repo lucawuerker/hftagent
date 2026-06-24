@@ -97,8 +97,19 @@ def _parse_args() -> argparse.Namespace:
                    help="Skip the (LLM-spending) downstream-agent track.")
     p.add_argument("--n-strategies", type=int, default=3,
                    help="Strategies built per prerun in the downstream track.")
-    p.add_argument("--horizon", type=int, default=6,
-                   help="Forecast horizon (bars) for brute-force + downstream.")
+    p.add_argument("--horizon", type=int, default=None,
+                   help="Override the forecast horizon (bars) for brute-force + downstream. "
+                        "When omitted, each prerun DERIVES it from its factors' own "
+                        "prediction horizons (see --combined-horizon-agg).")
+    p.add_argument("--combined-horizon-agg",
+                   choices=["mode", "median", "max", "min", "explicit"], default="mode",
+                   help="How the brute-force combined horizon is aggregated from the "
+                        "constituent factors' horizons (default: mode). Ignored when "
+                        "--horizon is given.")
+    p.add_argument("--holding-period", type=int, default=None,
+                   help="Bars to hold each tranche in the brute-force vectorised backtest "
+                        "(staggered 1/h book, marked to market on 1-bar returns → unbiased "
+                        "Sharpe). Default: --horizon.")
     p.add_argument("--oos-ratio", type=float, default=0.2,
                    help="Held-out tail fraction for the IS/OOS split (used unless "
                         "--split-date or --train-months/--oos-months give a date split).")
@@ -136,6 +147,11 @@ def _parse_args() -> argparse.Namespace:
                         "importance fits (default 50000).")
     p.add_argument("--corr-threshold", type=float, default=None,
                    help="|corr| ≥ τ groups factors into a redundancy cluster (default 0.7).")
+    p.add_argument("--importance-top-n", type=int, default=None,
+                   help="Top factors per (prerun, importance model) kept in the analytics "
+                        "importance table (default 10). Set ≥ the factor count to keep the "
+                        "FULL per-factor importance vector — needed for a longitudinal "
+                        "feature-importance study (e.g. run_rolling_comparison.py).")
     p.add_argument("--no-checkpoint", action="store_true",
                    help="Disable persisting tables/figures after each track (crash-safety).")
     # ── ML-combined-signal vectorised backtest (brute-force track) ──
@@ -289,7 +305,7 @@ def main() -> None:
         ic,
         report,
     )
-    from quant_fund_agent.comparison.config import ComparisonConfig
+    from quant_fund_agent.comparison.config import DEFAULT_IC_HORIZONS, ComparisonConfig
     from quant_fund_agent.factors import preruns
 
     # ── optional: mine the preruns first ──
@@ -324,6 +340,14 @@ def main() -> None:
     if args.split_date and (args.train_months or args.oos_months):
         raise SystemExit("--split-date cannot be combined with --train-months/--oos-months.")
 
+    # --horizon is an OVERRIDE: when given, force it everywhere (explicit) and
+    # widen the IC grid around it; when omitted, keep the default grid and let each
+    # prerun derive its combined horizon from its factors (--combined-horizon-agg).
+    horizon_overridden = args.horizon is not None
+    target_horizon = args.horizon if horizon_overridden else 6
+    ic_horizons = (1, args.horizon, 60) if horizon_overridden else DEFAULT_IC_HORIZONS
+    combined_horizon_agg = "explicit" if horizon_overridden else args.combined_horizon_agg
+
     cfg = ComparisonConfig(
         preruns=prerun_names,
         models=[m.strip() for m in args.models.split(",")] if args.models else None,
@@ -332,8 +356,11 @@ def main() -> None:
         run_ic=not args.no_ic, run_analytics=not args.no_analytics,
         run_bruteforce=not args.no_bruteforce,
         run_downstream=not args.no_downstream,
-        target_horizon=args.horizon, ic_horizons=(1, args.horizon, 60),
+        target_horizon=target_horizon, ic_horizons=ic_horizons,
+        combined_horizon_agg=combined_horizon_agg,
+        target_horizon_overridden=horizon_overridden,
         oos_split_ratio=args.oos_ratio, n_strategies=args.n_strategies,
+        **({"holding_period": args.holding_period} if args.holding_period else {}),
         data_dir=args.data_dir, n_tickers=args.n_tickers, max_bars=max_bars,
         tickers=tickers, is_window=args.train_months, oos_window=args.oos_months,
         split_date=args.split_date,
@@ -345,6 +372,7 @@ def main() -> None:
         checkpoint=not args.no_checkpoint,
         **({"analytics_max_rows": args.analytics_max_rows} if args.analytics_max_rows else {}),
         **({"corr_threshold": args.corr_threshold} if args.corr_threshold is not None else {}),
+        **({"importance_top_n": args.importance_top_n} if args.importance_top_n is not None else {}),
         **({"fit_scope": args.fit_scope} if args.fit_scope else {}),
         **({"fit_standardize": args.fit_standardize} if args.fit_standardize else {}),
         **({"position_mode": args.position_mode} if args.position_mode else {}),
@@ -402,7 +430,12 @@ def main() -> None:
                     "IC/brute-force will be degenerate. For speed prefer --max-bars over "
                     "--n-tickers.", universe)
     names_map = factors.factor_names(prerun_names)
-    prerun_models = {p: (preruns.read_manifest(p).get("llm_model", "?")) for p in prerun_names}
+    horizons_map = factors.prediction_horizons(prerun_names)
+    prerun_models = {
+        p: ("seed library" if factors.is_seed_baseline(p)
+            else preruns.read_manifest(p).get("llm_model", "?"))
+        for p in prerun_names
+    }
 
     usable: dict[str, list[str]] = {}
     usability: dict[str, dict] = {}
@@ -425,7 +458,8 @@ def main() -> None:
             ic_rows: list = []
             for p in prerun_names:
                 ic_rows += ic.evaluate_prerun_ic(p, usable[p], panel,
-                                                 tuple(cfg.ic_horizons), names_map)
+                                                 tuple(cfg.ic_horizons), names_map,
+                                                 cfg=cfg, horizons_by_factor=horizons_map)
             results["ic_rows"] = ic_rows
             results["ic_summary"] = ic.summarise_ic(ic_rows, tuple(cfg.ic_horizons))
         _run_track("ic", _ic, cfg, results, status)
@@ -441,7 +475,8 @@ def main() -> None:
                 s, f, corr = analytics.evaluate_prerun_diversity(p, usable[p], panel, cfg, names_map)
                 div_summary.append(s); div_factor += f; corr_mats[p] = corr
                 ms, ir = analytics.evaluate_prerun_modelview(
-                    p, usable[p], panel, cfg, ic_rows=results.get("ic_rows"), names=names_map)
+                    p, usable[p], panel, cfg, ic_rows=results.get("ic_rows"), names=names_map,
+                    top_n=cfg.importance_top_n)
                 mv_summary.append(ms); imp_rows += ir
             results["diversity_summary"] = div_summary
             results["diversity_factor"] = div_factor
@@ -458,7 +493,8 @@ def main() -> None:
                 if not usable[p]:
                     log.warning("prerun '%s' has no usable factors — skipping brute-force.", p)
                     continue
-                bf_rows += bruteforce.evaluate_prerun_models(p, usable[p], panel, cfg)
+                bf_rows += bruteforce.evaluate_prerun_models(
+                    p, usable[p], panel, cfg, horizons_by_factor=horizons_map)
             results["bruteforce_rows"] = bf_rows
         _run_track("bruteforce", _bf, cfg, results, status)
 

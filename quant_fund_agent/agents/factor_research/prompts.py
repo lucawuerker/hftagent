@@ -117,7 +117,67 @@ def _section(allowed, entries: dict[str, str]) -> list[str]:
     return [text for name, text in entries.items() if allowed is None or name in allowed]
 
 
-def build_data_context(allowed_fields=None) -> str:
+# Hard guardrail used by the codegen validator and quoted in the prompts: a
+# factor's prediction horizon must be a positive int no larger than this many
+# bars.  It only catches pathological values (e.g. a horizon of 1e9); the
+# *runtime* further clamps the effective horizon to the loaded panel length.
+MAX_PREDICTION_HORIZON: int = 2000
+
+
+def _bar_size_phrase(seconds_per_bar: float | None) -> str | None:
+    """A human bar-size noun phrase (without the trailing "bars").
+
+    ``10`` → ``"10-second"``, ``60`` → ``"1-minute"``, ``86400`` → ``"daily"``.
+    Returns ``None`` when the bar size is unknown so callers fall back to
+    feed-agnostic wording (we never assume a default such as 10s).
+    """
+    if not seconds_per_bar or seconds_per_bar <= 0:
+        return None
+    s = float(seconds_per_bar)
+
+    def _num(x: float) -> str:
+        return str(int(round(x))) if abs(x - round(x)) < 1e-6 else f"{x:.1f}"
+
+    if s < 60:
+        return f"{_num(s)}-second"
+    if s < 3600:
+        return f"{_num(s / 60)}-minute"
+    if s < 86400:
+        return f"{_num(s / 3600)}-hour"
+    days = s / 86400
+    return "daily" if abs(days - 1.0) < 1e-6 else f"{_num(days)}-day"
+
+
+def _horizon_contract(seconds_per_bar: float | None) -> str:
+    """The PREDICTION HORIZON contract appended to every data context.
+
+    Tells the LLM the bar size (so it can reason in wall-clock time), that the
+    horizon is expressed in *bars*, and the legal range — shared by the
+    brainstorm output schema and the codegen ``prediction_horizon`` requirement.
+    """
+    phrase = _bar_size_phrase(seconds_per_bar)
+    if phrase is not None:
+        unit = f"each bar spans **{phrase.replace('-', ' ')}** of wall-clock time"
+        example = (
+            f"a ``prediction_horizon`` of 6 means ~6 {phrase} bars ahead"
+        )
+    else:
+        unit = "the bar size is set by the configured feed"
+        example = "a ``prediction_horizon`` of 6 means 6 bars ahead"
+    return (
+        "PREDICTION HORIZON\n"
+        "------------------\n"
+        f"Every factor must declare the horizon at which its edge is expected to\n"
+        f"materialise, as an integer number of *bars* ({unit}).  This is the\n"
+        f"forward offset its signal predicts — {example}.  Pick the horizon your\n"
+        f"idea is actually about: a fast reversal / book-pressure signal is a few\n"
+        f"bars; a slower trend or value signal is many.  Optionally also list a\n"
+        f"few alternative ``suggested_horizons`` worth measuring.  Valid range:\n"
+        f"1 ≤ prediction_horizon ≤ {MAX_PREDICTION_HORIZON} bars."
+    )
+
+
+def build_data_context(allowed_fields=None, seconds_per_bar: float | None = None) -> str:
     """Assemble the DATA CONTEXT prose for the fields this run can supply.
 
     ``allowed_fields`` is the set the configured data feed actually serves (see
@@ -125,8 +185,14 @@ def build_data_context(allowed_fields=None) -> str:
     (full LOBSTER + fundamentals) — the historical, un-gated behaviour.  Only
     allowed fields are listed and empty sections are dropped, so the researcher
     is never told about data it cannot use.
+
+    ``seconds_per_bar`` is the data feed's bar size (inferred from the loaded
+    panel index, see :func:`quant_fund_agent.data.frequency`); it drives the
+    bar-size wording and the PREDICTION HORIZON contract.  ``None`` → feed-
+    agnostic wording (no assumed default).
     """
     allowed = set(allowed_fields) if allowed_fields is not None else None
+    bar_phrase = _bar_size_phrase(seconds_per_bar)
 
     price_lines = _section(allowed, _PRICE_ENTRIES)
     micro_lines = _section(allowed, _MICRO_ENTRIES)
@@ -139,22 +205,25 @@ def build_data_context(allowed_fields=None) -> str:
 
     parts: list[str] = []
     if is_lobster:
+        bar_note = (f"{bar_phrase} bars on the sampled feed" if bar_phrase
+                    else "a sampled order-book feed")
         parts.append(
-            "You are working with LOBSTER-derived microstructure bars (10-second\n"
-            "bars on the sampled feed).  When you write a factor, the ``data`` dict\n"
-            "passed to ``calc`` exposes the fields below as ``pd.DataFrame`` (index =\n"
-            "bar timestamps, columns = tickers).  Every field below is available —\n"
-            "pick whichever ones your idea actually needs; do NOT use any field that\n"
-            "is not listed (the factor would be rejected as out-of-scope)."
+            f"You are working with LOBSTER-derived microstructure bars ({bar_note}).\n"
+            "When you write a factor, the ``data`` dict passed to ``calc`` exposes the\n"
+            "fields below as ``pd.DataFrame`` (index = bar timestamps, columns =\n"
+            "tickers).  Every field below is available — pick whichever ones your idea\n"
+            "actually needs; do NOT use any field that is not listed (the factor would\n"
+            "be rejected as out-of-scope)."
         )
     else:
+        feed_note = (f"the configured market-data feed ({bar_phrase} bars)"
+                     if bar_phrase else "the configured market-data feed")
         parts.append(
-            "You are working with the configured market-data feed.  When you write a\n"
-            "factor, the ``data`` dict passed to ``calc`` exposes the fields below as\n"
-            "``pd.DataFrame`` (index = bar timestamps, columns = tickers).  Every\n"
-            "field below is available — pick whichever ones your idea actually needs;\n"
-            "do NOT use any field that is not listed (the factor would be rejected as\n"
-            "out-of-scope)."
+            f"You are working with {feed_note}.  When you write a factor, the ``data``\n"
+            "dict passed to ``calc`` exposes the fields below as ``pd.DataFrame``\n"
+            "(index = bar timestamps, columns = tickers).  Every field below is\n"
+            "available — pick whichever ones your idea actually needs; do NOT use any\n"
+            "field that is not listed (the factor would be rejected as out-of-scope)."
         )
 
     if price_lines:
@@ -188,6 +257,8 @@ def build_data_context(allowed_fields=None) -> str:
             + "\n".join(fund_lines)
         )
         parts.append(_FUNDAMENTAL_LOOKAHEAD)
+
+    parts.append(_horizon_contract(seconds_per_bar))
 
     return "\n\n".join(parts) + "\n"
 
@@ -331,6 +402,8 @@ class attributes, positional ops calls.
         )
         window_length = 60
         inputs = ["close", "volume"]
+        prediction_horizon = 6          # bars ahead the momentum edge peaks
+        suggested_horizons = [1, 6, 60]
 
         def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:
             close = data["close"]
@@ -375,6 +448,10 @@ Propose exactly {n_ideas} distinct factor ideas.  Each idea must:
   - state a clear `trading_idea` — the *why*, in 2-4 sentences
     grounded in market structure or behavioural finance, citing the
     source paper(s) if relevant;
+  - declare a `prediction_horizon` (positive integer number of bars) —
+    the forward offset at which the signal's edge is expected to
+    materialise (see the PREDICTION HORIZON note in the DATA CONTEXT);
+    optionally a few `suggested_horizons` worth measuring;
   - be cross-sectional (return a DataFrame indexed by time, columns =
     tickers, like the seed alphas);
   - be computable from the fields listed in the DATA CONTEXT above;
@@ -396,6 +473,8 @@ Respond with strict JSON:
       "category": "<one of the categories above>",
       "trading_idea": "<2-4 sentences: why this should have edge>",
       "description": "<1-2 sentences: what the signal computes>",
+      "prediction_horizon": <positive int: bars ahead the edge peaks>,
+      "suggested_horizons": [<int>, ...],
       "source_paper_ids": ["<paper_id>", ...]
     }},
     ...
@@ -425,6 +504,8 @@ name:             {name}
 category:         {category}
 trading_idea:     {trading_idea}
 description:      {description}
+prediction_horizon: {prediction_horizon}   (bars ahead the edge peaks)
+suggested_horizons: {suggested_horizons}
 
 STRICT REQUIREMENTS
 -------------------
@@ -445,6 +526,10 @@ STRICT REQUIREMENTS
        uses this list to decide which fields to load on the panel; if
        a field your code touches is not in ``inputs`` the validator
        will reject the file.
+     - ``prediction_horizon = {prediction_horizon}`` — a positive int
+       number of bars (the forward offset its edge predicts; see the
+       PREDICTION HORIZON note in DATA CONTEXT).  Optionally also
+       ``suggested_horizons = [...]`` (a list of positive ints).
 4. Implement ``def calc(self, data: dict[str, pd.DataFrame]) ->
    pd.DataFrame`` so the output:
      - has the SAME index and columns as ``data["close"]``;
@@ -494,6 +579,9 @@ Most common causes, in order of frequency:
 1. Forgot to declare ``inputs = [...]`` at the class level (or the
    list doesn't cover every ``data["X"]`` referenced in calc()).
    ``inputs`` MUST enumerate every data field your code reads.
+
+   Or forgot ``prediction_horizon = <positive int>`` at the class level
+   (a bar count; 1 ≤ it ≤ a few hundred for most signals).
 
 2. Tried to import a pandas DataFrame method from ``ops``
    (``from quant_fund_agent.factors.ops import fillna`` / ``where`` /

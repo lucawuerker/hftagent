@@ -32,20 +32,59 @@ scripts, and backtests all drive the agents identically.
 A working **MVP** of the full pipeline exists. Each stage and agent is
 intended to be advanced significantly in future work.
 
+**Walk-forward backtest: prerun factor-injection + rich analytics (done).** The
+walk-forward harness (`run_backtest.py` + `quant_fund_agent/simulation/`) now has
+a second **factor source** besides LLM research: `--factor-source prerun_inject`
+replaces the per-meeting LLM Factor-Researcher with a cheap, deterministic draw
+from one or more **preruns** — `--inject-preruns a,b` (under `--inject-config`,
+default the derived data-config scope e.g. `yfinance_equity_sp100`) pools their
+RESEARCHER factors (union, dedup), shuffles once with the run seed, pre-filters to
+those **computable on the live panel** (mirrors the comparison harness's gating),
+and injects `--factors-per-meeting` (default 2) onto the run catalog on each
+research-due meeting (seeds always available; the pool is exhausted once every
+factor has been injected). Factor *code* already lives in the shared
+`factors/researcher/` package so signals compute with no extra wiring; only the
+catalog *records* are moved (`simulation/factor_injection.py`). The harness is now
+**config-driven for API providers** — `run_backtest.py --config quant.config.<x>.yaml`
+exports `QF_CONFIG_FILE` before the panel loads, so a yfinance/FMP universe + date
+range (e.g. the static, survivorship-biased `sp100` list since 2016) drives the
+whole run; `quant.config.sp100.yaml` is the ready-made yfinance S&P100 config.
+**Analytics** are now presentation-ready: the execution layer tracks per-bar gross
+exposure + names held, `BacktestResults` adds a NAV path / % invested / drawdown to
+`equity.csv` + `fund_metrics.json`, and `simulation/report.py` renders a `report/`
+folder of figures (NAV+drawdown, cumulative return, percent invested & names held,
+rolling Sharpe, monthly returns, per-strategy attribution, catalog/strategy growth)
+plus a `report.md` KPI table. All meeting cadences (`--research-every`,
+`--strategy-every`, `--pm-every`, `--grid-freq`) are independent, so "monthly
+everything" is `--grid-freq 1M --research-every 1M --strategy-every 1M --pm-every 1M`.
+Tests: `tests/test_simulation_injection.py`.
+
 **Research-LLM comparison (done; extended with analytics + speed/reliability).**
 Named factor-research *preruns* (`run_factor_research.py --name <id> --model <llm>
 [--llm-provider <p>] --dedup-scope prerun`) mine N factors with a chosen research
 model into a self-contained `data/factors/preruns/<name>/`. `run_model_comparison.py`
 then compares several preruns' factor sets on **four** axes — **single-factor IC**
-(cross-sectional rank-IC, raw quality), **factor analytics** (LLM-free:
+(by default a **per-underlying time-series IC** — Spearman of a factor's value
+vector vs the underlying's *own* forward-return vector, pooled across underlyings,
+so it is well defined for a single ticker and has no cross-section;
+`--fit-standardize cross_sectional` switches back to cross-sectional rank-IC),
+**factor analytics** (LLM-free:
 *diversity/redundancy* — signal correlation, effective # of independent factors via the
 participation ratio, cluster count; and *deflation/importance* — best |IC| haircut for
 the number of factors tried, plus LASSO/GBM feature importance & sparsity), **ML-combined
 signal → per-underlying vectorised backtest** (each catalog model + ensemble combines the
 factors into ONE predicted signal, fit on IS; that combined signal is backtested *not*
-cross-sectionally but as a standalone directional bet per underlying — `position(signal) ×
-the underlying's own forward return`, OOS; `comparison/vector_backtest.py` +
-`bruteforce.py`), and **downstream agents** (the full Selector→Architect→Statistician→PM
+cross-sectionally but as a standalone directional bet per underlying, OOS;
+`comparison/vector_backtest.py` + `bruteforce.py`). To avoid the Sharpe bias from
+overlapping forward returns (a single `position × h-bar forward return` row overlaps
+`h−1` bars with its neighbour → annualised return inflated ~`h`× and Sharpe ~`√h`×),
+each bar's target is held as a **staggered "tranche" book** — the live position is the
+rolling mean of the last `holding_period` targets (`1/h` capital layered in per bar) —
+**marked to market on the 1-bar forward return** (`book[t] × forward_return(t→t+1)`),
+which is the same non-overlapping convention the deployed `strategy_backtester` uses, so
+research and deployment can't drift. `--holding-period` sets the tranche length
+(default = `--horizon`; the forecast/IC horizon stays `--horizon` regardless). Also
+**downstream agents** (the full Selector→Architect→Statistician→PM
 fund, single-pass OOS) — emitting presentation-ready figures, CSV/JSON tables, a
 `report.md` and a `comparison.ipynb` under `data/comparisons/<id>/`
 (`quant_fund_agent/comparison/`). The backtest's modelling choices are all CLI args (both
@@ -54,8 +93,15 @@ across all underlyings; `per_underlying` fits a separate model per name, for het
 data-rich universes like the LOBSTER ETFs), `--position-mode {threshold,sign,continuous}`
 (default threshold band), `--position-zscore {expanding,full,rolling,none}`,
 `--aggregation {portfolio,per_underlying}`, `--fit-standardize {per_underlying,cross_sectional}`
-(default per-underlying time-series z-score on IS stats). Everything except the downstream
-track and `--research` is LLM-free.
+(default per-underlying time-series z-score on IS stats). **`--fit-standardize` now governs
+the WHOLE comparison**: at the default `per_underlying` the IC track, the analytics
+diversity/importance fits (`comparison/analytics.py` `_feature_matrix`) and the brute-force
+fit + combined-signal IC are *all* per-underlying (shared
+`comparison/standardize.per_underlying_zscore`) — **no cross-section anywhere** — so every
+track is meaningful for a single ticker; `cross_sectional` restores the legacy across-tickers
+z-score + rank-IC. `--importance-top-n` (default 10) caps factors per (prerun, model) in the
+importance table; set it high to keep the full per-factor vector. Everything except the
+downstream track and `--research` is LLM-free.
 **Universe + split selection:** beyond `--n-tickers N` (a count) you can name the exact
 underlyings with `--tickers AAPL,MSFT,CORN` (overrides the count), and beyond `--oos-ratio`
 (a tail fraction) you can split IS/OOS by the *calendar* with `--train-months`/`--oos-months`
@@ -69,6 +115,18 @@ the harness **checkpoints tables+figures after each track** (writing `status.jso
 so an interrupted run never loses completed tracks. Factors needing fields the current
 data lacks are filtered (and reported), so it runs on today's LOBSTER sample now and
 re-runs unchanged once full LOBSTER / FMP data is downloaded.
+**Rolling-window sweep (`run_rolling_comparison.py` + `comparison/rolling.py`).** Automates
+the comparison **per ticker over a rolling IS/OOS month window** (default 2 IS months + the
+next OOS month, stepping one month forward so the prior OOS month becomes the second IS
+month) for every ticker under `ticker_data/`, comparing the preruns **per underlying**. Each
+(ticker, window) runs in its **own subprocess** — the OS reclaims its memory between runs, so
+the large intraday panel never accumulates (no OOM); the sweep is **resumable** (windows whose
+`status.json` is all-`ok` are skipped) and robust (a failed run is logged; the sweep
+continues). It then **aggregates** every run into `data/comparisons/<batch>/`:
+`combined/{bruteforce,importance,diversity,ic}_all.csv` (tagged `ticker,oos_month,is_window`),
+per-ticker `importance_over_months__<prerun>__<model>.csv` + heatmaps (the **most important
+features over the OOS months**) and `performance_<metric>__<model>.png`, plus `summary.md` and
+`manifest.json`. Tests: `tests/test_rolling_comparison.py`.
 
 **Researcher data-scope gating — done.** The setup wizard now asks which data
 the Factor Researcher may use, and that choice flows all the way through to the

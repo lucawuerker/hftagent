@@ -53,14 +53,17 @@ def seed_run_factor_db(
 
     ``universe="all"`` copies every factor; ``universe="session"`` copies only
     the SEED factors so the run starts from the deterministic baseline and the
-    Selector sees only seeds + this run's discoveries.  Returns the number of
-    factors written.
+    Selector sees only seeds + this run's discoveries; ``universe="none"`` writes
+    an empty DB (used by prerun-inject mode with seeds hidden).  Returns the
+    number of factors written.
     """
     src = FactorDatabase()
     src.load_from_json(global_db_path)
 
     out = FactorDatabase()
-    if universe == "session":
+    if universe == "none":
+        factors = []
+    elif universe == "session":
         factors = src.list_factors(source=FactorSource.SEED)
     else:  # "all"
         factors = src.list_factors()

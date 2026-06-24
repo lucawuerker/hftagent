@@ -162,6 +162,27 @@ class BacktestConfig:
     prerun: str | None = None
     include_seeds: bool = True
 
+    # ── factor source: LLM research vs. injecting prerun factors ──
+    # "research"      → hold an LLM Factor-Researcher meeting on ``research_every``
+    #                   (the default; ``run_research`` toggles it off entirely).
+    # "prerun_inject" → no LLM research: the run starts from seeds only and, on
+    #                   each research-due meeting, ``factors_per_inject`` factors are
+    #                   drawn (without replacement, deterministically) from the union
+    #                   of ``inject_preruns`` and appended to the run's catalog.  A
+    #                   cheap, reproducible stand-in for periodic research; the pool
+    #                   is exhausted once every prerun factor has been injected.
+    factor_source: str = "research"        # "research" | "prerun_inject"
+    inject_preruns: list[str] = field(default_factory=list)
+    inject_config_name: str | None = None  # workspace config scope for the preruns
+    factors_per_inject: int = 2            # factors added per research-due meeting
+
+    # ── data config (API providers) ──
+    # Path to a ``quant.config.yaml`` driving the whole data layer (provider /
+    # asset-class / universe / timespan).  Recorded for reproducibility; the
+    # simulator exports it as ``QF_CONFIG_FILE`` before the panel loads so a
+    # yfinance/FMP backtest reads the right universe + dates.
+    config_file: str | None = None
+
     # ── data / universe ──
     data_dir: str = "ticker_data"
     n_tickers: int | None = None    # caps the universe via ARCHITECT_N_TICKERS
@@ -273,4 +294,14 @@ class BacktestConfig:
             raise ValueError(
                 f"factor_universe must be 'all' or 'session', got "
                 f"{self.factor_universe!r}."
+            )
+        if self.factor_source not in ("research", "prerun_inject"):
+            raise ValueError(
+                f"factor_source must be 'research' or 'prerun_inject', got "
+                f"{self.factor_source!r}."
+            )
+        if self.factor_source == "prerun_inject" and not self.inject_preruns:
+            raise ValueError(
+                "factor_source='prerun_inject' requires inject_preruns to name at "
+                "least one prerun to draw factors from."
             )

@@ -1,0 +1,17 @@
+{
+  "comparison_id": "2026-04",
+  "tracks": {
+    "ic": {
+      "status": "ok",
+      "seconds": 8.5
+    },
+    "analytics": {
+      "status": "ok",
+      "seconds": 59.6
+    },
+    "bruteforce": {
+      "status": "ok",
+      "seconds": 171.3
+    }
+  }
+}

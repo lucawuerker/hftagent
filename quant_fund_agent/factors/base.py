@@ -36,6 +36,16 @@ class BaseFactor(ABC):
     window_length: int = 1
     inputs: list[str] = ["close"]
 
+    # prediction horizon -- in *bars* (the feed's bar size sets the wall-clock
+    # meaning: a LOBSTER 10s bar makes horizon 6 ≈ 1 minute; a daily feed makes
+    # it 6 trading days).  ``prediction_horizon`` is the bar offset at which this
+    # factor's edge is expected to peak; it drives the factor's headline IC and
+    # feeds the combined-signal horizon downstream.  ``suggested_horizons`` is an
+    # optional set of alternative horizons worth measuring (empty → just the
+    # default).  Default 6 keeps the historical global behaviour.
+    prediction_horizon: int = 6
+    suggested_horizons: list[int] = []
+
     @abstractmethod
     def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:
         """Compute the factor signal.

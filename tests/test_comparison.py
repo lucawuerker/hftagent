@@ -32,7 +32,7 @@ def _seed_ids_with_ic(n: int) -> list[str]:
     return ids[:n]
 
 
-def _make_prerun(root: Path, name: str, ids: list[str]) -> None:
+def _make_prerun(root: Path, name: str, ids: list[str], horizon: int = 6) -> None:
     db = FactorDatabase()
     for fid in ids:
         db.add_factor(FactorRecord(
@@ -40,6 +40,7 @@ def _make_prerun(root: Path, name: str, ids: list[str]) -> None:
             category=TradingIdeaCategory.MOMENTUM,
             source=FactorSource.RESEARCHER,
             research_session_id=f"prerun:{name}",
+            prediction_horizon=horizon,
             metadata={"llm_model": "test-model"},
         ))
     p = root / name / "factor_db.json"
@@ -76,8 +77,8 @@ def tiny_preruns(tmp_path, monkeypatch):
     seeds = _seed_ids_with_ic(6)
     if len(seeds) < 4:
         pytest.skip("not enough seed factors with recorded IC in the base DB")
-    _make_prerun(root, "modelA", seeds[:3])
-    _make_prerun(root, "modelB", seeds[3:6])
+    _make_prerun(root, "modelA", seeds[:3], horizon=6)
+    _make_prerun(root, "modelB", seeds[3:6], horizon=60)  # heterogeneous horizons
     return ["modelA", "modelB"]
 
 
@@ -142,13 +143,20 @@ def test_offline_comparison_end_to_end(tiny_preruns, tmp_path):
         results["prerun_models"][p] = "test-model"
     assert any(usable.values()), "expected at least one usable factor"
 
+    horizons_map = cf.prediction_horizons(tiny_preruns)
+    assert set(horizons_map.values()) == {6, 60}  # heterogeneous per prerun
+
     ic_rows: list = []
     for p in tiny_preruns:
-        ic_rows += ic.evaluate_prerun_ic(p, usable[p], panel, (1, 6, 60), names_map)
+        ic_rows += ic.evaluate_prerun_ic(p, usable[p], panel, (1, 6, 60), names_map,
+                                         horizons_by_factor=horizons_map)
     results["ic_rows"] = ic_rows
     results["ic_summary"] = ic.summarise_ic(ic_rows, (1, 6, 60))
     assert ic_rows and results["ic_summary"]
     assert all("ic_6" in r for r in ic_rows)
+    # each factor also scored at its OWN horizon
+    assert all("horizon_own" in r and "ic_own" in r for r in ic_rows)
+    assert all("mean_abs_ic_own" in s for s in results["ic_summary"])
 
     bf_rows: list = []
     for p in tiny_preruns:
@@ -210,3 +218,17 @@ def test_comparison_panel_loads_yfinance_provider(monkeypatch, tmp_path):
     assert {"open", "high", "low", "close", "volume", "vwap", "returns"} <= set(panel)
     assert "effSpread" not in panel
     assert service._PANEL_CACHE is panel
+
+
+def test_main_comparison_alias_is_seed_baseline():
+    """In comparison reports, 'main' means the seed library, not legacy/main."""
+    from quant_fund_agent.comparison import factors as cf
+
+    db = FactorDatabase()
+    db.load_from_json(preruns.BASE_FACTOR_DB)
+    expected = [f.id for f in db.list_factors(source=FactorSource.SEED)]
+
+    assert cf.is_seed_baseline("main")
+    assert cf.prerun_factor_ids("main") == expected
+    assert cf.prerun_factor_ids("seed") == expected
+    assert cf.factor_names(["main"])[expected[0]]

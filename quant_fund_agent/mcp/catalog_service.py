@@ -98,6 +98,7 @@ def load_factor_catalog() -> list[dict[str, Any]]:
             "category": f.get("category", ""),
             "description": f.get("description", ""),
             "required_tier": f.get("required_tier") or required_tier(resolve_required_inputs(f)),
+            "prediction_horizon": int(f.get("prediction_horizon") or 6),
             "ic_1": (by_h.get("1") or {}).get("ic"),
             "ic_6": (by_h.get("6") or {}).get("ic"),
             "ic_60": (by_h.get("60") or {}).get("ic"),

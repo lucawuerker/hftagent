@@ -48,6 +48,7 @@ def _standardised_features(
     leaks into the fit (it is later imputed to 0 = the per-underlying mean).
     """
     from quant_fund_agent.backtesting.strategy_backtester import normalise_factor_signals
+    from quant_fund_agent.comparison.standardize import per_underlying_zscore
     from quant_fund_agent.modeling.service import _factor_signal
 
     close = panel["close"]
@@ -59,9 +60,7 @@ def _standardised_features(
         if cfg.fit_standardize == "cross_sectional":
             feats[fid] = normalise_factor_signals({fid: sig})[fid]
         else:  # per-underlying over time, using IS-window stats (no OOS leakage)
-            mu = sig.loc[is_idx].mean()
-            sd = sig.loc[is_idx].std().replace(0, np.nan)
-            feats[fid] = (sig - mu) / sd
+            feats[fid] = per_underlying_zscore(sig, is_idx)
     return feats
 
 
@@ -146,14 +145,35 @@ def _combined_signal(model: str, X, y, train, index, cols, n_cols: int, cfg) -> 
 
 def evaluate_prerun_models(
     prerun: str, factor_ids: list[str], panel: dict[str, Any], cfg,
+    horizons_by_factor: dict[str, int] | None = None,
 ) -> list[dict[str, Any]]:
-    """One row per catalog model (+ ensemble): vectorised backtest of its combined signal."""
+    """One row per catalog model (+ ensemble): vectorised backtest of its combined signal.
+
+    The combined-signal forecast horizon is derived from the constituent factors'
+    own prediction horizons (``cfg.combined_horizon_agg``, default ``mode``) unless
+    ``--horizon`` overrode it; the resolved value drives the model target, the
+    holding period and the combined-signal IC (via a per-prerun config copy).
+    """
+    from dataclasses import replace
+
+    if horizons_by_factor is None:
+        from quant_fund_agent.comparison import factors as _factors
+        horizons_by_factor = _factors.prediction_horizons([prerun])
+    fhs = [horizons_by_factor.get(fid, cfg.target_horizon) for fid in factor_ids]
+    n_bars = len(panel["close"].index) if panel.get("close") is not None else None
+    eff_horizon = cfg.resolve_target_horizon(fhs, n_bars=n_bars)
+    if eff_horizon != cfg.target_horizon:
+        log.info("ML-combine: prerun '%s' — combined horizon = %d bars (%s of %d "
+                 "factor horizons)", prerun, eff_horizon, cfg.combined_horizon_agg,
+                 len(fhs))
+    cfg = replace(cfg, target_horizon=eff_horizon)
+
     rows: list[dict[str, Any]] = []
     models = cfg.resolved_models()
     log.info("ML-combine: prerun '%s' — %d factors → %d models (fit_scope=%s, "
-             "fit_standardize=%s, position=%s, aggregation=%s)", prerun, len(factor_ids),
-             len(models), cfg.fit_scope, cfg.fit_standardize, cfg.position_mode,
-             cfg.backtest_aggregation)
+             "fit_standardize=%s, position=%s, aggregation=%s, horizon=%d)",
+             prerun, len(factor_ids), len(models), cfg.fit_scope, cfg.fit_standardize,
+             cfg.position_mode, cfg.backtest_aggregation, cfg.target_horizon)
 
     X, y, train, index, cols, n_cols = _pooled_features(factor_ids, panel, cfg)
     if len(train) < 50:

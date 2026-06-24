@@ -189,6 +189,13 @@ class FactorRecord(BaseModel):
     # Empty on legacy records — the catalog falls back to the registry.
     required_inputs: list[str] = Field(default_factory=list)
     required_tier: str = ""
+    # Prediction horizon (in *bars*) — the dual of ``required_inputs``: mirrors
+    # the factor class's ``prediction_horizon`` / ``suggested_horizons``, stamped
+    # at persist time.  The bar offset at which the factor's edge is expected to
+    # peak; drives the headline IC and the combined-signal horizon.  Defaults make
+    # legacy records load as horizon-6 (unchanged behaviour) until backfilled.
+    prediction_horizon: int = 6
+    suggested_horizons: list[int] = Field(default_factory=list)
     created_at: datetime = Field(default_factory=datetime.utcnow)
     metadata: dict[str, Any] = Field(default_factory=dict)
 

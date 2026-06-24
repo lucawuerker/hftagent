@@ -13,6 +13,7 @@ class FactorSummary(BaseModel):
     name: str
     category: str
     description: str
+    prediction_horizon: int = 6  # the factor's own forecast horizon, in bars
     ic_1: float | None = None
     ic_6: float | None = None
     ic_60: float | None = None

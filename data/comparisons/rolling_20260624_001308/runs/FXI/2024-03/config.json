@@ -1,0 +1,76 @@
+{
+  "preruns": [
+    "gpt4omini120650",
+    "gpt5.4mini120650",
+    "main"
+  ],
+  "models": null,
+  "include_ensemble": true,
+  "include_seeds": false,
+  "run_ic": true,
+  "run_analytics": true,
+  "run_bruteforce": true,
+  "run_downstream": false,
+  "ic_horizons": [
+    1,
+    6,
+    60
+  ],
+  "target_horizon": 6,
+  "oos_split_ratio": 0.2,
+  "holding_period": null,
+  "max_positions": 20,
+  "fast": false,
+  "train_sample_frac": 1.0,
+  "fit_scope": "per_underlying",
+  "fit_standardize": "per_underlying",
+  "position_mode": "threshold",
+  "position_threshold": 1.0,
+  "position_zscore_basis": "expanding",
+  "position_zscore_window": 500,
+  "backtest_aggregation": "portfolio",
+  "n_strategies": 3,
+  "committee": true,
+  "data_dir": "ticker_data",
+  "n_tickers": null,
+  "tickers": [
+    "FXI"
+  ],
+  "is_window": "2024-01,2024-02",
+  "oos_window": "2024-03",
+  "split_date": null,
+  "data_provider": "lobster",
+  "data_asset_class": "equity",
+  "data_frequency": "10s",
+  "data_start": null,
+  "data_end": null,
+  "data_universe_preset": null,
+  "data_cache_dir": null,
+  "max_bars": null,
+  "analytics_max_rows": 50000,
+  "corr_threshold": 0.7,
+  "importance_models": [
+    "lasso",
+    "gradient_boosting"
+  ],
+  "importance_top_n": 200,
+  "checkpoint": true,
+  "comparison_id": "2024-03",
+  "output_root": "data/comparisons/rolling_20260624_001308/runs/FXI",
+  "seed": 7,
+  "resolved_preruns": [
+    "gpt4omini120650",
+    "gpt5.4mini120650",
+    "main"
+  ],
+  "resolved_models": [
+    "linear_regression",
+    "ridge",
+    "lasso",
+    "elastic_net",
+    "random_forest",
+    "gradient_boosting",
+    "xgboost",
+    "lightgbm"
+  ]
+}

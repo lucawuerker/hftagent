@@ -86,6 +86,53 @@ class FactorDatabase:
             updated += 1
         return updated
 
+    def backfill_prediction_horizons(
+        self,
+        *,
+        strategy: str = "constant",
+        value: int = 6,
+        fill_suggested: bool = False,
+        force: bool = False,
+    ) -> int:
+        """Stamp a ``prediction_horizon`` on records that have none yet.
+
+        Existing records load with the schema default (6) but cannot distinguish
+        "never set" from "intentionally 6", so a ``metadata["horizon_backfilled"]``
+        sentinel makes this migration idempotent: a record is touched only if it
+        lacks the sentinel (or ``force``).
+
+        ``strategy``:
+          * ``"constant"`` (default) → set ``prediction_horizon = value``.
+          * ``"data_driven"`` → pick the horizon maximising ``|ic_ir|`` (then
+            ``|ic|``) among the record's measured ``ic_by_horizon`` cells, falling
+            back to ``value`` when no finite metric exists.  NB this is an
+            *in-sample* horizon pick over the grid the metrics were measured on,
+            so it is optimistically biased — fine for seeding a default, not an
+            OOS-validated optimum.
+
+        ``fill_suggested`` also sets ``suggested_horizons`` to the sorted measured
+        grid (``ic_by_horizon`` keys) when available.  Returns the number of
+        records updated.
+        """
+        updated = 0
+        for rec in self._factors.values():
+            if rec.metadata.get("horizon_backfilled") and not force:
+                continue
+            by_h = (rec.backtest_metrics.ic_by_horizon
+                    if rec.backtest_metrics else None) or {}
+            if strategy == "data_driven" and by_h:
+                rec.prediction_horizon = _best_horizon(by_h, default=value)
+            else:
+                rec.prediction_horizon = value
+            if fill_suggested and by_h:
+                try:
+                    rec.suggested_horizons = sorted(int(k) for k in by_h)
+                except (TypeError, ValueError):
+                    pass
+            rec.metadata["horizon_backfilled"] = strategy
+            updated += 1
+        return updated
+
     def purge_researcher_factors(
         self,
         research_session_id: str | None = None,
@@ -153,3 +200,30 @@ class FactorDatabase:
         for raw in payload.get("trading_ideas", []):
             t = TradingIdea.model_validate(raw)
             self._trading_ideas[t.id] = t
+
+
+def _best_horizon(ic_by_horizon: dict, default: int) -> int:
+    """Pick the horizon key with the strongest |ic_ir| (then |ic|) signal.
+
+    ``ic_by_horizon`` maps a horizon (string) → a metrics cell.  Returns the
+    integer horizon maximising the absolute information ratio, breaking ties /
+    falling back on the absolute IC, and finally on ``default`` when nothing is
+    finite or parseable.
+    """
+    best_h: int | None = None
+    best_key: tuple[float, float] = (-1.0, -1.0)
+    for k, cell in ic_by_horizon.items():
+        try:
+            h = int(k)
+        except (TypeError, ValueError):
+            continue
+        cell = cell or {}
+        ir = cell.get("ic_ir")
+        ic = cell.get("ic")
+        key = (
+            abs(float(ir)) if isinstance(ir, (int, float)) else -1.0,
+            abs(float(ic)) if isinstance(ic, (int, float)) else -1.0,
+        )
+        if key > best_key:
+            best_key, best_h = key, h
+    return best_h if best_h is not None else default

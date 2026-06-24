@@ -93,6 +93,8 @@ class BacktestResults:
     _cost_parts: list[pd.Series] = field(default_factory=list)
     _turnover_parts: list[pd.Series] = field(default_factory=list)
     _netting_parts: list[pd.Series] = field(default_factory=list)
+    _exposure_parts: list[pd.Series] = field(default_factory=list)
+    _npos_parts: list[pd.Series] = field(default_factory=list)
     _attribution: dict[str, list[pd.Series]] = field(default_factory=dict)
     meetings: list[dict[str, Any]] = field(default_factory=list)
     portfolio_snapshots: list[dict[str, Any]] = field(default_factory=list)
@@ -109,6 +111,10 @@ class BacktestResults:
         self._turnover_parts.append(result.turnover)
         if result.netting_benefit is not None:
             self._netting_parts.append(result.netting_benefit)
+        if result.gross_exposure is not None:
+            self._exposure_parts.append(result.gross_exposure)
+        if result.n_positions is not None:
+            self._npos_parts.append(result.n_positions)
         for sid, contrib in result.attribution.items():
             self._attribution.setdefault(sid, []).append(contrib)
 
@@ -139,6 +145,27 @@ class BacktestResults:
         return self.fund_returns.cumsum()
 
     @property
+    def nav(self) -> pd.Series:
+        """Notional NAV path = ``capital · (1 + cumulative additive return)``."""
+        s = self.config.capital * (1.0 + self.fund_returns.cumsum())
+        s.name = "nav"
+        return s
+
+    @property
+    def gross_exposure(self) -> pd.Series:
+        """Per-bar gross exposure (Σ|weight|) of the traded book — % invested."""
+        s = self._concat(self._exposure_parts)
+        s.name = "gross_exposure"
+        return s
+
+    @property
+    def n_positions(self) -> pd.Series:
+        """Per-bar count of names held."""
+        s = self._concat(self._npos_parts)
+        s.name = "n_positions"
+        return s
+
+    @property
     def attribution(self) -> pd.DataFrame:
         cols = {sid: self._concat(parts) for sid, parts in self._attribution.items()}
         if not cols:
@@ -160,6 +187,16 @@ class BacktestResults:
         m["n_meetings"] = len(self.meetings)
         m["n_strategies_deployed"] = len(self._attribution)
         m["execution_model"] = self.config.execution_model.value
+        expo = self.gross_exposure
+        if len(expo):
+            m["pct_invested_mean"] = round(float(expo.mean()), 4)
+            m["pct_invested_max"] = round(float(expo.max()), 4)
+        npos = self.n_positions
+        if len(npos):
+            m["n_positions_mean"] = round(float(npos.mean()), 2)
+        nav = self.nav
+        if len(nav):
+            m["final_nav"] = round(float(nav.iloc[-1]), 2)
         if self._netting_parts:
             nb = self._concat(self._netting_parts)
             m["netting_benefit_total"] = round(float(nb.sum()), 6)
@@ -178,7 +215,10 @@ class BacktestResults:
         equity = pd.DataFrame({
             "fund_return": r,
             "cumulative_return": r.cumsum(),
+            "nav": self.nav.reindex(r.index),
             "drawdown": _drawdown_series(r.cumsum()),
+            "gross_exposure": self.gross_exposure.reindex(r.index),
+            "n_positions": self.n_positions.reindex(r.index),
         })
         equity.to_csv(out / "equity.csv", index_label="timestamp")
 
@@ -195,6 +235,15 @@ class BacktestResults:
         (out / "portfolio_snapshots.json").write_text(
             json.dumps(self.portfolio_snapshots, indent=2, default=str)
         )
+
+        # Presentation-ready figures + report.md (best-effort: never fail the run).
+        try:
+            from quant_fund_agent.simulation.report import render_report
+
+            render_report(self, out)
+        except Exception as e:  # noqa: BLE001 — reporting must not abort persistence
+            log.warning("could not render backtest report: %s", e)
+
         log.info("Backtest results written to %s", out)
         return out
 
@@ -209,6 +258,8 @@ class BacktestResults:
             f"  Sharpe / Sortino: {m.get('sharpe_ratio')} / {m.get('sortino_ratio')}",
             f"  Calmar / MaxDD  : {m.get('calmar_ratio')} / {m.get('max_drawdown')}",
             f"  ann. ret / vol  : {m.get('annualised_return')} / {m.get('annualised_volatility')}",
+            f"  final NAV       : {m.get('final_nav')}  (capital {self.config.capital:,.0f})",
+            f"  % invested mean : {m.get('pct_invested_mean')}  |  avg names held: {m.get('n_positions_mean')}",
             f"  total cost (ret): {m.get('total_cost')}  |  avg daily turnover: {m.get('avg_daily_turnover')}",
         ]
         if "netting_benefit_total" in m:

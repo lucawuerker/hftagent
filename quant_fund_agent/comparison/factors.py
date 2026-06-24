@@ -22,9 +22,25 @@ from quant_fund_agent.schemas import FactorRecord, FactorSource
 
 log = logging.getLogger("comparison.factors")
 
+SEED_BASELINE_NAMES = {"main", "seed", "seeds"}
+
+
+def is_seed_baseline(name: str) -> bool:
+    """True for comparison aliases that mean the built-in seed factor library."""
+    return name.strip().lower() in SEED_BASELINE_NAMES
+
+
+def seed_factor_records(base_db: Path | None = None) -> list[FactorRecord]:
+    """The hard-coded seed factors from the main factor DB."""
+    db = FactorDatabase()
+    db.load_from_json(base_db or preruns.BASE_FACTOR_DB)
+    return db.list_factors(source=FactorSource.SEED)
+
 
 def prerun_factor_records(name: str) -> list[FactorRecord]:
-    """The RESEARCHER FactorRecords held in a prerun's own factor DB."""
+    """FactorRecords for a comparison input: seed baseline or a prerun DB."""
+    if is_seed_baseline(name):
+        return seed_factor_records()
     db = FactorDatabase()
     db.load_from_json(preruns.db_path(name))
     return db.list_factors(source=FactorSource.RESEARCHER)
@@ -41,9 +57,7 @@ def prerun_factor_ids(
     """
     ids: list[str] = []
     if include_seeds:
-        base = FactorDatabase()
-        base.load_from_json(base_db or preruns.BASE_FACTOR_DB)
-        ids += [f.id for f in base.list_factors(source=FactorSource.SEED)]
+        ids += [f.id for f in seed_factor_records(base_db)]
     ids += [f.id for f in prerun_factor_records(name)]
 
     seen: set[str] = set()
@@ -61,6 +75,20 @@ def factor_names(names: list[str]) -> dict[str, str]:
     for name in names:
         for rec in prerun_factor_records(name):
             out.setdefault(rec.id, rec.name or rec.id)
+    return out
+
+
+def prediction_horizons(names: list[str]) -> dict[str, int]:
+    """Best-effort ``{factor_id: prediction_horizon}`` across the given preruns.
+
+    Drives the per-factor IC headline and the brute-force combined-signal horizon
+    (mode of these).  Records default to 6, so a prerun never seen by the horizon
+    migration still resolves to a sensible value.
+    """
+    out: dict[str, int] = {}
+    for name in names:
+        for rec in prerun_factor_records(name):
+            out.setdefault(rec.id, int(getattr(rec, "prediction_horizon", 6) or 6))
     return out
 
 

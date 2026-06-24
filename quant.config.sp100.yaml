@@ -1,0 +1,15 @@
+# yfinance daily, hard-coded (survivorship-biased) S&P100 list, since 2016.
+# Used by the walk-forward backtest: `run_backtest.py --config quant.config.sp100.yaml`.
+# The derived workspace scope name is `yfinance_equity_sp100` — matching the
+# preruns under data/workspaces/yfinance_equity_sp100/preruns/.
+# NOTE: no `membership:` key → the static data/universes/sp100.txt list is used
+# as-is (no point-in-time S&P 100 membership), i.e. survivorship bias is *not*
+# corrected, which is the intended baseline here.
+data:
+  provider: yfinance
+  asset_class: equity
+  frequency: 1d
+  start: '2016-01-01'
+  end: '2026-06-01'
+  cache_dir: data/market
+  universe_preset: sp100

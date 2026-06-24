@@ -1,0 +1,37 @@
+{
+  "gpt4omini120650": {
+    "n_total": 66,
+    "n_usable": 65,
+    "n_dropped": 1,
+    "dropped": {
+      "effective_spread_reversal_strength": "all-NaN signal on the current data"
+    }
+  },
+  "gpt5.4mini120650": {
+    "n_total": 69,
+    "n_usable": 68,
+    "n_dropped": 1,
+    "dropped": {
+      "intraday_safety_margin_pressure": "all-NaN signal on the current data"
+    }
+  },
+  "main": {
+    "n_total": 88,
+    "n_usable": 76,
+    "n_dropped": 12,
+    "dropped": {
+      "alpha_002": "all-NaN signal on the current data",
+      "alpha_003": "all-NaN signal on the current data",
+      "alpha_015": "all-NaN signal on the current data",
+      "alpha_029": "all-NaN signal on the current data",
+      "alpha_044": "all-NaN signal on the current data",
+      "alpha_050": "all-NaN signal on the current data",
+      "alpha_055": "all-NaN signal on the current data",
+      "alpha_058": "all-NaN signal on the current data",
+      "alpha_059": "all-NaN signal on the current data",
+      "alpha_092": "all-NaN signal on the current data",
+      "alpha_096": "all-NaN signal on the current data",
+      "alpha_098": "all-NaN signal on the current data"
+    }
+  }
+}

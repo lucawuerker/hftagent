@@ -35,6 +35,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from quant_fund_agent.agents.factor_research.prompts import MAX_PREDICTION_HORIZON
 from quant_fund_agent.factors.base import BaseFactor
 from quant_fund_agent.factors.registry import get_factor_class
 
@@ -196,6 +197,62 @@ def _extract_class_string_list(class_def: ast.ClassDef, attr: str) -> list[str] 
     return None
 
 
+def _extract_class_int(class_def: ast.ClassDef, attr: str) -> int | None:
+    """Read ``ClassName.attr = <int>`` from a ClassDef body.
+
+    Handles a plain int literal and a negated literal (``-5`` →
+    ``UnaryOp(USub, …)``) so the caller can report "must be positive" rather
+    than "missing".  Returns ``None`` if the attribute is absent or not an int
+    literal.  Used to read ``prediction_horizon`` from generated factor classes.
+    """
+    for stmt in class_def.body:
+        if (
+            isinstance(stmt, ast.Assign)
+            and len(stmt.targets) == 1
+            and isinstance(stmt.targets[0], ast.Name)
+            and stmt.targets[0].id == attr
+        ):
+            val = stmt.value
+            if isinstance(val, ast.Constant) and isinstance(val.value, int) \
+                    and not isinstance(val.value, bool):
+                return val.value
+            if (
+                isinstance(val, ast.UnaryOp)
+                and isinstance(val.op, ast.USub)
+                and isinstance(val.operand, ast.Constant)
+                and isinstance(val.operand.value, int)
+            ):
+                return -val.operand.value
+            return None
+    return None
+
+
+def _extract_class_int_list(class_def: ast.ClassDef, attr: str) -> list[int] | None:
+    """Read ``ClassName.attr = [1, 6, 60]`` from a ClassDef body.
+
+    Returns the list of int-literal element values (``None`` if the attribute is
+    absent or not a list).  Non-int elements are kept as ``None`` so the caller
+    can flag them.  Used to read ``suggested_horizons``.
+    """
+    for stmt in class_def.body:
+        if (
+            isinstance(stmt, ast.Assign)
+            and len(stmt.targets) == 1
+            and isinstance(stmt.targets[0], ast.Name)
+            and stmt.targets[0].id == attr
+            and isinstance(stmt.value, ast.List)
+        ):
+            out: list[int] = []
+            for el in stmt.value.elts:
+                if isinstance(el, ast.Constant) and isinstance(el.value, int) \
+                        and not isinstance(el.value, bool):
+                    out.append(el.value)
+                else:
+                    out.append(None)  # type: ignore[arg-type]
+            return out
+    return None
+
+
 def _data_field_references(class_def: ast.ClassDef) -> set[str]:
     """Collect every constant string ``X`` used as ``data["X"]`` inside
     the class body.
@@ -291,6 +348,31 @@ def _find_factor_class(tree: ast.Module, expected_factor_id: str) -> str:
             f"Add the missing field(s) to the `inputs` class attribute "
             f"so the agent loads them onto the panel."
         )
+
+    horizon = _extract_class_int(cls, "prediction_horizon")
+    if horizon is None:
+        raise CodeValidationError(
+            f"class {cls.name!r} is missing a positive-int class attribute "
+            f"`prediction_horizon = <bars>` — the forward offset (in bars) at "
+            f"which the factor's edge is expected to peak.  Declare it like the "
+            f"seed factors do."
+        )
+    if horizon <= 0 or horizon > MAX_PREDICTION_HORIZON:
+        raise CodeValidationError(
+            f"class {cls.name!r} has prediction_horizon={horizon}; it must be a "
+            f"positive integer ≤ {MAX_PREDICTION_HORIZON} bars."
+        )
+
+    suggested = _extract_class_int_list(cls, "suggested_horizons")
+    if suggested is not None:
+        bad = [h for h in suggested
+               if h is None or h <= 0 or h > MAX_PREDICTION_HORIZON]
+        if bad:
+            raise CodeValidationError(
+                f"class {cls.name!r} has an invalid `suggested_horizons` entry "
+                f"{bad}; every element must be a positive integer ≤ "
+                f"{MAX_PREDICTION_HORIZON} bars."
+            )
 
     return cls.name
 
