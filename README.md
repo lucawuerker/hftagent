@@ -196,7 +196,11 @@ Output under `data/comparisons/<batch>/`: `combined/{bruteforce,importance,
 diversity,ic}_all.csv` (every run, tagged with `ticker, oos_month, is_window`),
 `per_ticker/<ticker>/importance_over_months__<prerun>__<model>.csv` + heatmaps
 (how the **most important features change over the OOS months**) and
-`performance_<metric>__<model>.png`, plus `summary.md` and a `manifest.json`.
+`performance_<metric>__<model>.png`, **cross-ticker figures** under
+`cross_ticker/` (per factor set: OOS Sharpe / OOS IC / OOS÷IS-Sharpe ratio over
+the OOS months as **one coloured line per ETF**, plus a **mean-OOS-Sharpe vs
+average-daily-volume** scatter with one dot per ETF coloured by sector), plus
+`summary.md` and a `manifest.json`.
 
 ### Workspaces & books (modularisation by config + prerun)
 

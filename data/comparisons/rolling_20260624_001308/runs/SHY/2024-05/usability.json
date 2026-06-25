@@ -1,0 +1,32 @@
+{
+  "gpt4omini120650": {
+    "n_total": 66,
+    "n_usable": 66,
+    "n_dropped": 0,
+    "dropped": {}
+  },
+  "gpt5.4mini120650": {
+    "n_total": 69,
+    "n_usable": 69,
+    "n_dropped": 0,
+    "dropped": {}
+  },
+  "main": {
+    "n_total": 88,
+    "n_usable": 77,
+    "n_dropped": 11,
+    "dropped": {
+      "alpha_002": "all-NaN signal on the current data",
+      "alpha_003": "all-NaN signal on the current data",
+      "alpha_015": "all-NaN signal on the current data",
+      "alpha_029": "all-NaN signal on the current data",
+      "alpha_044": "all-NaN signal on the current data",
+      "alpha_050": "all-NaN signal on the current data",
+      "alpha_055": "all-NaN signal on the current data",
+      "alpha_066": "all-NaN signal on the current data",
+      "alpha_092": "all-NaN signal on the current data",
+      "alpha_096": "all-NaN signal on the current data",
+      "alpha_098": "all-NaN signal on the current data"
+    }
+  }
+}

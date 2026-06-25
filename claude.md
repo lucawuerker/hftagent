@@ -125,8 +125,12 @@ the large intraday panel never accumulates (no OOM); the sweep is **resumable** 
 continues). It then **aggregates** every run into `data/comparisons/<batch>/`:
 `combined/{bruteforce,importance,diversity,ic}_all.csv` (tagged `ticker,oos_month,is_window`),
 per-ticker `importance_over_months__<prerun>__<model>.csv` + heatmaps (the **most important
-features over the OOS months**) and `performance_<metric>__<model>.png`, plus `summary.md` and
-`manifest.json`. Tests: `tests/test_rolling_comparison.py`.
+features over the OOS months**) and `performance_<metric>__<model>.png`, plus **cross-ticker
+figures** (`cross_ticker/`, built by `run_rolling_comparison.build_cross_ticker_figures`): per
+factor set, OOS Sharpe / combined-signal OOS IC / OOS÷IS-Sharpe ratio over the OOS months with
+**one coloured line per ETF** (mean across models), and one **mean-OOS-Sharpe vs average-daily-
+volume** scatter (one dot per ETF, coloured by `TICKER_SECTORS` asset class; ADV from per-bar
+`trdLiq`), plus `summary.md` and `manifest.json`. Tests: `tests/test_rolling_comparison.py`.
 
 **Researcher data-scope gating — done.** The setup wizard now asks which data
 the Factor Researcher may use, and that choice flows all the way through to the

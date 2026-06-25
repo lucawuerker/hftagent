@@ -8,6 +8,10 @@
     "analytics": {
       "status": "ok",
       "seconds": 111.2
+    },
+    "bruteforce": {
+      "status": "ok",
+      "seconds": 325.0
     }
   }
 }

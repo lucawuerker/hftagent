@@ -1,0 +1,17 @@
+{
+  "comparison_id": "2024-10",
+  "tracks": {
+    "ic": {
+      "status": "ok",
+      "seconds": 6.2
+    },
+    "analytics": {
+      "status": "ok",
+      "seconds": 53.9
+    },
+    "bruteforce": {
+      "status": "ok",
+      "seconds": 172.8
+    }
+  }
+}
