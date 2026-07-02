@@ -39,6 +39,10 @@ class FactorIdea(BaseModel):
     # source of truth, this seeds the codegen spec.
     prediction_horizon: int = 6
     suggested_horizons: list[int] = Field(default_factory=list)
+    # Falsifiable direction claim (+1/-1) from the Hypothesis agent (evolution
+    # engine, P3+); feeds the harness's sign-consistency check.  ``None`` (the
+    # oneshot brainstorm) skips that check.
+    expected_sign: int | None = None
     source_paper_ids: list[str] = Field(default_factory=list)
     code: str = ""
 

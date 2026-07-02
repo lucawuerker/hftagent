@@ -81,6 +81,82 @@ def backtest_factors(
 
 
 @mcp.tool()
+def evaluate_fitness(
+    candidate: dict,
+    book: list[dict] | None = None,
+    jitter: list[dict] | None = None,
+    target_horizon: int = 6,
+    is_frac: float = 0.6,
+    val_frac: float = 0.2,
+    n_trials: int = 1,
+    cpcv_groups: int = 6,
+    cpcv_k: int = 2,
+    embargo: int = 0,
+    cutoff_date: str | None = None,
+    data_dir: str = "ticker_data",
+    n_tickers: int | None = 15,
+    fields: list[str] | None = None,
+) -> str:
+    """Deterministically score one candidate factor program against the book
+    (in-memory compile → research_eval harness).  Returns JSON
+    ``{"ok": bool, "fitness"?: {...}, "error"?: str}``.
+    """
+    return json.dumps(svc.evaluate_fitness(
+        candidate, book, jitter,
+        target_horizon=target_horizon, is_frac=is_frac, val_frac=val_frac,
+        n_trials=n_trials, cpcv_groups=cpcv_groups, cpcv_k=cpcv_k,
+        embargo=embargo, cutoff_date=cutoff_date, data_dir=data_dir,
+        n_tickers=n_tickers, fields=fields,
+    ))
+
+
+@mcp.tool()
+def evaluate_set_fitness(
+    programs: list[dict],
+    target_horizon: int = 6,
+    is_frac: float = 0.6,
+    val_frac: float = 0.2,
+    n_trials: int = 1,
+    cpcv_groups: int = 6,
+    cpcv_k: int = 2,
+    embargo: int = 0,
+    cutoff_date: str | None = None,
+    data_dir: str = "ticker_data",
+    n_tickers: int | None = 15,
+    fields: list[str] | None = None,
+    candidate_id: str = "set",
+) -> str:
+    """SET mode: score a whole factor set jointly (its own combined-model OOS
+    IC is the primary axis).  Returns JSON ``{"ok": bool, "fitness"?: {...}}``.
+    """
+    return json.dumps(svc.evaluate_set_fitness(
+        programs, target_horizon=target_horizon, is_frac=is_frac,
+        val_frac=val_frac, n_trials=n_trials, cpcv_groups=cpcv_groups,
+        cpcv_k=cpcv_k, embargo=embargo, cutoff_date=cutoff_date,
+        data_dir=data_dir, n_tickers=n_tickers, fields=fields,
+        candidate_id=candidate_id,
+    ))
+
+
+@mcp.tool()
+def score_book_oos(
+    book: list[dict],
+    start: str,
+    end: str | None = None,
+    target_horizon: int = 6,
+    data_dir: str = "ticker_data",
+    n_tickers: int | None = 15,
+    fields: list[str] | None = None,
+) -> str:
+    """Touch-once OOS scoring of a factor book on [start, end): combined-model
+    OOS IC + per-factor ICs + CSCV PBO.  Returns JSON."""
+    return json.dumps(svc.score_book_oos(
+        book, start=start, end=end, target_horizon=target_horizon,
+        data_dir=data_dir, n_tickers=n_tickers, fields=fields,
+    ))
+
+
+@mcp.tool()
 def persist_results(kept_records: list[dict], rejected: list[dict]) -> str:
     """Persist survivor FactorRecords and purge rejects.  Returns JSON
     ``{"kept_factor_ids": [...], "rejected_factor_ids": [...]}``.

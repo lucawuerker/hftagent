@@ -32,6 +32,68 @@ scripts, and backtests all drive the agents identically.
 A working **MVP** of the full pipeline exists. Each stage and agent is
 intended to be advanced significantly in future work.
 
+**Evolutionary factor researcher — P0–P5 BUILT (thesis runs pending).** The
+closed-loop, retrieval-grounded, overfitting-controlled evolutionary Factor
+Researcher designed in `docs/research-evolution/DESIGN.md` (FunSearch/AlphaEvolve
+spirit: **the LLM mutates, a deterministic harness scores** — the LLM never
+influences its own reward) is fully implemented. **P0** `research_eval/`:
+IS/VAL/TEST `three_way_split` (fit IS, burn VAL, touch TEST once), CPCV
+`cpcv_folds` (purge+embargo) + `walk_forward_folds`; **N_trials-aware**
+`deflated_ic`, Bailey–López de Prado `deflated_sharpe_ratio`, and **`pbo_cscv`**
+(CSCV Probability of Backtest Overfitting); the CORE Pareto `ObjectiveVector`
+{LOCO marginal ΔOOS-IC (primary), Δ-participation-ratio independence − max-|corr|
+penalty, CPCV `mean−λ·std` robustness + sign-consistency bonus − window-jitter
+**plateau penalty**, −AST-complexity parsimony} behind hard coverage/degradation/
+deflation gates; `evaluate_candidate` (signal-based, un-gameable) + `evaluate_set`
+(SET mode: the set's own combined-model OOS IC / internal PR / combined-signal
+robustness). **P1** `agents/factor_research/evolution/`: `genome.py`
+(`FactorProgram` + SINGLE/SET `Genome`, id-masked dedup fingerprint);
+`controller.py` — **constrained NSGA-II** (feasibility → #failed-gates →
+dominance), crowding distance, tournament parents, islands + ring migration,
+gate-passing **Pareto archive = the accepted book** (the SINGLE marginal-value
+reference), `N_trials` billed per *scored* candidate only, full lineage,
+save/load; `mutation.py` — AST window-jitter (mutation op AND plateau probe) +
+LLM mutation/crossover prompts fed the parent's reflection brief;
+`reflection.py` — **deterministic** diagnostics→NL mutation brief (rule-based
+advice; no LLM writes it); `loop.py` — seed via the existing brainstorm/codegen
+path → select/mutate/evaluate/insert with per-generation checkpoints
+(`state.json`/`lineage.jsonl`) and `persist_archive` through the oneshot
+materialise path (`metadata.evolution` provenance); entrypoint
+`run_factor_evolution.py` (each run a prerun under the workspace seam; the
+oneshot baseline `run_factor_research.py` is untouched). Candidates compile
+**in-memory** (`factors/inmem.py`: full validation, zero file/registry churn);
+evaluation is server-side via `mcp/research_*.evaluate_fitness` /
+`evaluate_set_fitness` / `score_book_oos` (cached panel + signal cache; identical
+in-process under `QF_USE_MCP=0`). **P2 RAG** `knowledge/embed_store.py`
+(whole-paper + chunk embeddings, cosine retrieval, cutoff-date gating —
+undated papers excluded, `verify_citations`; `openai`/`hash` embedders via
+`QF_EMBEDDER`) + `retrieval.py` cardinality modes `1toN`/`Nto1` (cross-paper
+synthesis; unverifiable grounding → idea dropped)/`NtoM` → `--retrieval rag`.
+**P3 agent split** `--debate on`: Hypothesis (structured idea incl.
+`expected_sign` + regime) → skeptic/moderator debate **before codegen** (≤1
+revision, fails open, transcript kept; crossover children get post-hoc
+accept/reject) → Codegen; per-role models via `{HYPOTHESIS,DEBATE,CODEGEN}_
+LLM_MODEL` / `--hypothesis-model --debate-model --codegen-model`. **P4 GraphRAG**
+(`knowledge/graph_store|graph_build|graph_query|empirical_edges.py`, networkx):
+LLM-extracted semantic layer (Paper→Mechanism→Factor→Field, slug
+canonicalisation, Louvain communities — leidenalg auto-used if installed) fused
+with computed factor-corr / field-usage edges; gap queries (`mechanism_gaps`,
+`computable_unexploited`, `under_covered_communities`, `island_focus`) steer
+`--retrieval graphrag`; ideas come back mechanism-tagged and surviving factors
+link back into the graph (provenance closes); build with
+`scripts/build_knowledge_graph.py`. **P5** `--evolution-unit set --set-size N`
+(structural add/drop/replace from the run-wide program pool + splice +
+member-jitter; all deterministic) and the **walk-forward final validation**
+(`evolution/walkforward.py`: `--walk-forward d0,d1,…` re-runs the WHOLE loop per
+fold with `cutoff_date=d_i` and touch-once scores each archive on `[d_i,d_{i+1})`
+via `score_book_oos` — combined OOS IC + per-factor ICs + PBO; validation only,
+nothing persisted). Tests (all green): `tests/test_research_eval_*.py`,
+`test_evolution_{controller,mutation,loop,debate,set_walkforward}.py`,
+`test_knowledge_{embed,graph}.py`. **Remaining is runs, not code**: build the
+knowledge graph, then the ablation matrix (oneshot → +evolution → +RAG →
++GraphRAG → +debate; single vs set) with the walk-forward pass for the results
+chapter. Live tracker: `docs/research-evolution/IMPLEMENTATION_PROGRESS.md`.
+
 **Walk-forward backtest: prerun factor-injection + rich analytics (done).** The
 walk-forward harness (`run_backtest.py` + `quant_fund_agent/simulation/`) now has
 a second **factor source** besides LLM research: `--factor-source prerun_inject`

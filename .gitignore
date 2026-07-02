@@ -52,3 +52,6 @@ GLD_2026-06-01_2026-06-11_3
 # never commit). All regenerated locally.
 data/lobster_raw/
 data/lobster_drop/
+
+literature.txt
+notes.txt

@@ -22,3 +22,4 @@ pytest-cov>=4.0.0    # coverage reporting (PYTHONPATH=. pytest --cov=quant_fund_
 # runtime is missing, so the rest of the toolbox works without them.
 xgboost>=2.0.0
 lightgbm>=4.0.0
+networkx>=3.0
