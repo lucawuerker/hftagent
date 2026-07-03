@@ -160,3 +160,22 @@ plus the `--walk-forward` pass.  Budget/schedule those runs separately.
   added to requirements.  Remaining work is *runs*, not code: build the
   knowledge graph (`scripts/build_knowledge_graph.py`), then the ablation
   matrix + walk-forward passes for the results chapter.
+- **2026-07-03** — Verification pass, no engine/design changes. Fresh
+  `pip install -r requirements.txt` + `python -m pytest tests/ -q` surfaced a
+  missing dependency (`matplotlib`, imported directly by
+  `comparison/plots.py`, absent from `requirements.txt`) that broke test
+  *collection* entirely — fixed by adding it. With that in, full suite: 387
+  passed, 5 skipped, 3 failed. The 3 failures
+  (`test_comparison_analytics.py::test_modelview_importance_returns_nonzero_subset`,
+  `test_modeling.py::test_fit_and_backtest_each_model[lasso|elastic_net]`) are
+  **pre-existing and unrelated** to this work — `modeling/catalog.py` (last
+  touched 2026-06-01, before P0) passes `n_alphas=` to `LassoCV`/
+  `ElasticNetCV`, a kwarg scikit-learn dropped in 1.5+; the environment here
+  has 1.9.0. `requirements.txt` pins `scikit-learn>=1.3.0` with no upper
+  bound. Left as-is (a modeling-catalog/sklearn-pin fix, orthogonal to the
+  evolutionary researcher's phasing) but flagged here so it isn't mistaken for
+  regression from this work. Confirms P0–P5 are still fully green:
+  `research_eval`, `evolution/*`, `knowledge/*` all pass. No further code
+  phase is outstanding — what remains is the thesis experiment execution
+  (knowledge-graph build + ablation matrix + walk-forward), which needs a
+  budget/schedule decision, not more building.
