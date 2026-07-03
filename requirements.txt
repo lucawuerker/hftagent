@@ -23,3 +23,4 @@ pytest-cov>=4.0.0    # coverage reporting (PYTHONPATH=. pytest --cov=quant_fund_
 xgboost>=2.0.0
 lightgbm>=4.0.0
 networkx>=3.0
+matplotlib>=3.7.0    # quant_fund_agent/comparison/plots.py (report figures)
