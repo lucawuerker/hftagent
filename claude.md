@@ -94,6 +94,34 @@ knowledge graph, then the ablation matrix (oneshot → +evolution → +RAG →
 +GraphRAG → +debate; single vs set) with the walk-forward pass for the results
 chapter. Live tracker: `docs/research-evolution/IMPLEMENTATION_PROGRESS.md`.
 
+**Evolutionary researcher — residual-IC + regime axes and two-stage curation
+(done).** The CORE Pareto vector is now **5 axes**. The **independence** axis is
+the candidate's **residual (orthogonalised) IC** (novel predictive content the
+book doesn't span — un-saturating, unlike the old Δ-participation-ratio, which
+stays selectable via `EvalParams.independence_metric` / `--independence-metric`),
+and a new **`regime_independence`** axis rewards *crash-complementarity*: the
+marginal ΔIC on the stress bars (`--regime-kind {drawdown,volatility}`,
+`--regime-quantile`; stress labelled over IS∪VAL only so it stays leak-free), so a
+factor strong exactly where the book is weak is non-dominated and survives even
+with worse values elsewhere. The LOCO **marginal-value combiner now defaults to a
+nonlinear model** (`gradient_boosting`; `EvalParams.marginal_model` /
+`--marginal-model`) so a *conditioning/state* factor — the canonical
+low-standalone-IC volatility factor, valuable only via `vol × momentum`-style
+interactions — scores a **positive** marginal value (a linear ridge sees only
+additive value and scores it ~0; residual-IC independence also can't reward pure
+conditioning value). **Two-stage curation (Lever 2)** decouples *what
+survives selection* from *what is kept*: `EvolutionController` accumulates a
+`kept_pool` of **every gate-passing factor**, and `--curation
+{archive,greedy,elastic_net}` (default `archive` = the one-stage Pareto behaviour)
+curates that pool **once at the end** (`--n-keep N` optional) — greedy
+forward-selection on combined VAL IC or elastic-net stability selection
+(`research_eval/curation.py`; MCP `curate_book` reusing the IS-fit/VAL-score dev
+panel), so a good factor is no longer discarded merely for being dominated. Both
+threaded through the harness/controller/loop/CLI + MCP seam; the Pareto archive
+still drives parent selection and marginal scoring. Tests:
+`tests/test_research_eval_curation.py`, extended
+`test_research_eval_{fitness,harness}.py`, `test_evolution_{controller,loop}.py`.
+
 **Walk-forward backtest: prerun factor-injection + rich analytics (done).** The
 walk-forward harness (`run_backtest.py` + `quant_fund_agent/simulation/`) now has
 a second **factor source** besides LLM research: `--factor-source prerun_inject`

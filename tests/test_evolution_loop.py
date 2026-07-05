@@ -57,6 +57,10 @@ MOM_BODY = 'close.pct_change().fillna(0.0)'
 VOL_BODY = 'stddev(close.pct_change(), 12).fillna(0.0)'
 CHILD_BODY_1 = 'ts_mean(close.pct_change(), 3).fillna(0.0)'
 CHILD_BODY_2 = '(ts_rank(close, 8) - 0.5).fillna(0.0)'
+TEST_BRANCH_BODY = (
+    '(1.0 if float(close.iloc[-1, 0]) < 1_000_000.0 else -1.0) '
+    '* close.pct_change().fillna(0.0)'
+)
 
 
 @pytest.fixture()
@@ -139,6 +143,54 @@ def _seeds() -> list[FactorProgram]:
     ]
 
 
+def test_evaluate_fitness_does_not_expose_test_rows_to_factor_calc(
+    synthetic_panel, monkeypatch
+):
+    from quant_fund_agent.mcp import research_service as svc
+    from quant_fund_agent.research_eval.splits import three_way_split
+
+    split = three_way_split(synthetic_panel["close"].index, is_frac=0.5, val_frac=0.25)
+    poisoned_panel = {"close": synthetic_panel["close"].copy()}
+    poisoned_panel["close"].iloc[split.test_mask] = 2_000_000.0
+
+    candidate = {
+        "factor_id": "test_branch_probe",
+        "code": _factor_code("test_branch_probe", TEST_BRANCH_BODY),
+        "expected_sign": 1,
+    }
+    kwargs = dict(
+        target_horizon=1,
+        is_frac=0.5,
+        val_frac=0.25,
+        cpcv_groups=4,
+        cpcv_k=1,
+        fields=["close"],
+        n_tickers=None,
+    )
+
+    monkeypatch.setattr(svc, "_panel_cache_key",
+                        lambda data_dir, fields, n_tickers: ("test-branch-panel",))
+    monkeypatch.setattr(svc, "_load_panel_cached",
+                        lambda data_dir, fields, n_tickers: synthetic_panel)
+    svc._SIGNAL_CACHE.clear()
+    clean = svc.evaluate_fitness(candidate, **kwargs)
+
+    monkeypatch.setattr(svc, "_load_panel_cached",
+                        lambda data_dir, fields, n_tickers: poisoned_panel)
+    svc._SIGNAL_CACHE.clear()
+    poisoned = svc.evaluate_fitness(candidate, **kwargs)
+
+    assert clean["ok"], clean.get("error")
+    assert poisoned["ok"], poisoned.get("error")
+    assert clean["fitness"] == poisoned["fitness"]
+    assert clean["fitness"]["raw"]["split_sizes"] == {"is": 240, "val": 120, "test": 0}
+    assert clean["fitness"]["raw"]["heldout_test_split_sizes"] == {
+        "is": 240,
+        "val": 120,
+        "test": 120,
+    }
+
+
 def test_full_loop_runs_and_checkpoints(wired_loop):
     loop, fake, tmp_path = wired_loop
     summary = loop.run(initial_programs=_seeds())
@@ -219,6 +271,37 @@ def test_persist_archive_uses_the_oneshot_path(wired_loop, monkeypatch):
     assert rec["metadata"]["engine"] == "evolution"
     evo = rec["metadata"]["evolution"]
     assert {"genome_id", "generation", "operator", "objective", "gates"} <= set(evo)
+
+
+def test_two_stage_curation_persists_the_curated_pool(wired_loop, monkeypatch):
+    loop, _, _ = wired_loop
+    loop.run(initial_programs=_seeds())
+    assert loop.controller.kept_pool, "gate-passers should accumulate in the pool"
+    pool_ids = {fid for fid, _ in loop.controller.kept_pool_programs()}
+
+    from quant_fund_agent.mcp import research_client
+
+    materialised: list[str] = []
+    persisted: dict = {}
+    monkeypatch.setattr(research_client, "materialise_factor",
+                        lambda fid, code: (materialised.append(fid)
+                                           or {"ok": True, "code_path": f"/tmp/{fid}.py"}))
+    monkeypatch.setattr(research_client, "backtest_factors",
+                        lambda factor_ids, **kw: {f: {"ok": False} for f in factor_ids})
+    monkeypatch.setattr(research_client, "persist_results",
+                        lambda kept, rej: (persisted.update(kept=kept)
+                                           or {"kept_factor_ids": [r["id"] for r in kept],
+                                               "rejected_factor_ids": []}))
+
+    # curate the pool (greedy) rather than persisting the Pareto archive
+    out = persist_archive(loop.controller, session_id="evolution:test:evo",
+                          target_horizon=1, curation="greedy",
+                          is_frac=0.6, val_frac=0.2,
+                          fields=["open", "high", "low", "close", "volume"])
+    kept = set(out["kept_factor_ids"])
+    assert kept and kept <= pool_ids                       # curated FROM the whole pool
+    assert set(materialised) == kept                       # only curated ids materialised
+    assert persisted["kept"][0]["metadata"]["evolution"]["curation"] == "greedy"
 
 
 def test_eval_failure_is_not_billed(wired_loop):

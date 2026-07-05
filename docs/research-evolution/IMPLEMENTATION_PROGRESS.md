@@ -7,6 +7,51 @@ test file.
 
 Legend: ✅ done & tested · 🚧 in progress · ⬜ not started
 
+**Post-P5 — residual-IC + regime axes and two-stage curation (Lever 2) — ✅ DONE.**
+The CORE objective vector is now **5 axes**. The independence axis is the
+candidate's **residual (orthogonalised) IC** — its predictive edge in the
+direction the book does *not* span (novel content that actually predicts, instead
+of the saturating Δ-participation-ratio, which stays available via
+`EvalParams.independence_metric` / `--independence-metric delta_participation`). A
+new **`regime_independence`** axis rewards *crash-complementarity*: the marginal
+ΔIC on the stress bars (`--regime-kind {drawdown,volatility}`, `--regime-quantile`,
+leak-safe — stress is labelled over IS∪VAL only), so a factor strong exactly where
+the rest of the book is weak is non-dominated and survives selection even with
+worse values elsewhere. The LOCO **marginal-value combiner now defaults to a
+**nonlinear** model (`gradient_boosting`; `EvalParams.marginal_model` /
+`--marginal-model {ridge,gradient_boosting,random_forest,…}`) — a *conditioning /
+state* factor (the canonical low-standalone-IC volatility factor, valuable only via
+`vol × momentum`-style interactions) then scores a **positive** marginal value; a
+linear ridge sees only additive value and scores it ~0 (as does residual IC — pure
+conditioning value is interaction value, which needs the nonlinear combiner).
+Separately, **two-stage curation** decouples *what survives
+selection* from *what is kept*: the controller accumulates a `kept_pool` of **every
+gate-passing factor**, and `--curation {archive,greedy,elastic_net}` (default
+`archive` = the one-stage Pareto behaviour) curates that pool **once at the end**
+(`--n-keep N` optional) — greedy forward-selection on combined VAL IC, or
+elastic-net stability selection (`research_eval/curation.py`; MCP `curate_book`) —
+so a good factor is no longer discarded merely for being Pareto-dominated. Tests:
+`tests/test_research_eval_curation.py`, extended `test_research_eval_{fitness,harness}.py`,
+`test_evolution_{controller,loop}.py`.
+
+**Learning the system:** `notebooks/evolutionary_factor_researcher_walkthrough.ipynb`
+runs every component below in isolation on synthetic data (offline, no API key) —
+splits/CPCV/deflation, the Pareto fitness harness, genome + mutation operators, the
+reflection brief, the NSGA-II controller, RAG retrieval, the hybrid GraphRAG graph,
+and a fully-offline "mini loop" that turns the real controller + harness + jitter
+operator end-to-end. Read it alongside this tracker to see what each phase *does*.
+
+**Seeing it run for real:** `notebooks/evolutionary_factor_researcher_live_run.ipynb`
+is the live counterpart — a tiny end-to-end run on real S&P-100 daily bars (served
+offline from the yfinance parquet cache) with the **LLM calls switched on** and the
+**ML fitting real**: brainstorm → codegen → the `research_eval` reward channel
+(Ridge combines the book into one forecast; LOCO marginal OOS-IC + gates) →
+deterministic reflection brief → LLM mutation, then the whole `EvolutionLoop`
+turning for two generations. Shows the actual intermediate I/O at every stage
+(idea JSON, generated factor code, the objective vector + gate verdict, the mutation
+brief, the parent→child jump, the Pareto archive). Needs `OPENAI_API_KEY`; makes a
+few dozen cheap `gpt-4o-mini` calls (~1 min).
+
 ---
 
 ## P0 — Foundation (overfitting-control seam) — ✅ DONE

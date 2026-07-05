@@ -178,3 +178,21 @@ def test_state_roundtrip(tmp_path):
     assert loaded.is_duplicate(_genome("g1"))
     # loaded fitness objects still sort identically
     assert len(loaded.population()) == 2
+
+
+def test_kept_pool_accumulates_gate_passers_and_roundtrips(tmp_path):
+    ctrl = EvolutionController(ControllerConfig(population_size=8, seed=0))
+    ctrl.insert(_eg("a", mv=2, ind=2, rob=2, par=2))            # passes → pool + archive
+    ctrl.insert(_eg("b", mv=1, ind=1, rob=1, par=1))            # dominated by a, still gate-passing
+    ctrl.insert(_eg("fail", mv=9, passed=False))               # gate-fail → NOT in pool
+    # the pool keeps every gate-passer (even the dominated b), unlike the archive
+    assert {eg.genome.genome_id for eg in ctrl.kept_pool} == {"a", "b"}
+    assert {eg.genome.genome_id for eg in ctrl.archive} == {"a"}
+    assert dict(ctrl.kept_pool_programs()).keys() == {"a", "b"}
+
+    path = tmp_path / "state.json"
+    ctrl.save(path)
+    loaded = EvolutionController.load(path)
+    assert {eg.genome.genome_id for eg in loaded.kept_pool} == {"a", "b"}
+    # a legacy state file (no kept_pool) falls back to the archive
+    assert loaded.kept_pool_programs()

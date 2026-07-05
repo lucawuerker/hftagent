@@ -96,6 +96,10 @@ def evaluate_fitness(
     data_dir: str = "ticker_data",
     n_tickers: int | None = 15,
     fields: list[str] | None = None,
+    independence_metric: str = "residual_ic",
+    regime_kind: str = "drawdown",
+    regime_quantile: float = 0.2,
+    marginal_model: str = "gradient_boosting",
 ) -> str:
     """Deterministically score one candidate factor program against the book
     (in-memory compile → research_eval harness).  Returns JSON
@@ -107,6 +111,8 @@ def evaluate_fitness(
         n_trials=n_trials, cpcv_groups=cpcv_groups, cpcv_k=cpcv_k,
         embargo=embargo, cutoff_date=cutoff_date, data_dir=data_dir,
         n_tickers=n_tickers, fields=fields,
+        independence_metric=independence_metric, regime_kind=regime_kind,
+        regime_quantile=regime_quantile, marginal_model=marginal_model,
     ))
 
 
@@ -125,6 +131,9 @@ def evaluate_set_fitness(
     n_tickers: int | None = 15,
     fields: list[str] | None = None,
     candidate_id: str = "set",
+    regime_kind: str = "drawdown",
+    regime_quantile: float = 0.2,
+    marginal_model: str = "gradient_boosting",
 ) -> str:
     """SET mode: score a whole factor set jointly (its own combined-model OOS
     IC is the primary axis).  Returns JSON ``{"ok": bool, "fitness"?: {...}}``.
@@ -134,7 +143,8 @@ def evaluate_set_fitness(
         val_frac=val_frac, n_trials=n_trials, cpcv_groups=cpcv_groups,
         cpcv_k=cpcv_k, embargo=embargo, cutoff_date=cutoff_date,
         data_dir=data_dir, n_tickers=n_tickers, fields=fields,
-        candidate_id=candidate_id,
+        candidate_id=candidate_id, regime_kind=regime_kind,
+        regime_quantile=regime_quantile, marginal_model=marginal_model,
     ))
 
 
@@ -153,6 +163,36 @@ def score_book_oos(
     return json.dumps(svc.score_book_oos(
         book, start=start, end=end, target_horizon=target_horizon,
         data_dir=data_dir, n_tickers=n_tickers, fields=fields,
+    ))
+
+
+@mcp.tool()
+def curate_book(
+    book: list[dict],
+    mode: str = "greedy",
+    n_keep: int | None = None,
+    target_horizon: int = 6,
+    is_frac: float = 0.6,
+    val_frac: float = 0.2,
+    cutoff_date: str | None = None,
+    data_dir: str = "ticker_data",
+    n_tickers: int | None = 15,
+    fields: list[str] | None = None,
+    marginal_model: str = "gradient_boosting",
+    en_threshold: float = 0.5,
+    en_l1_ratio: float = 0.5,
+    seed: int = 0,
+) -> str:
+    """Curate a pool of gate-passing factors into the final book (two-stage
+    Lever 2): ``greedy`` forward-selection or ``elastic_net`` stability
+    selection, ``n_keep`` optional.  Returns JSON
+    ``{"ok": bool, "kept_factor_ids": [...], ...}``."""
+    return json.dumps(svc.curate_book(
+        book, mode=mode, n_keep=n_keep, target_horizon=target_horizon,
+        is_frac=is_frac, val_frac=val_frac, cutoff_date=cutoff_date,
+        data_dir=data_dir, n_tickers=n_tickers, fields=fields,
+        marginal_model=marginal_model, en_threshold=en_threshold,
+        en_l1_ratio=en_l1_ratio, seed=seed,
     ))
 
 

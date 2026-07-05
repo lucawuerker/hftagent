@@ -130,6 +130,39 @@ def _parse_args() -> argparse.Namespace:
                         "WHOLE loop per fold (evolve < d_i, touch-once score on "
                         "[d_i, d_{i+1})).  Validation only — nothing is "
                         "persisted to the prerun's factor DB.")
+
+    # ── fitness axes ──
+    p.add_argument("--independence-metric",
+                   choices=["residual_ic", "delta_participation"],
+                   default="residual_ic",
+                   help="Independence axis basis: residual (orthogonalised) IC "
+                        "(default; novel predictive content) or the legacy "
+                        "Δ-participation-ratio − max-|corr| penalty.")
+    p.add_argument("--regime-kind", choices=["drawdown", "volatility"],
+                   default="drawdown",
+                   help="Stress bars for the regime axis: worst market-return "
+                        "'drawdown' bars (default) or top-volatility bars.")
+    p.add_argument("--regime-quantile", type=float, default=0.2,
+                   help="Tail fraction of dev bars labelled 'stress' (default 0.2).")
+    p.add_argument("--marginal-model", default="gradient_boosting",
+                   help="Estimator that combines the book for the marginal-value "
+                        "(LOCO) axis. Default 'gradient_boosting' is NONLINEAR so "
+                        "conditioning/interaction factors (e.g. a volatility state "
+                        "variable, valuable only via vol×momentum) score a positive "
+                        "marginal value; 'ridge' = additive-only (an ablation). Any "
+                        "modeling.catalog id works (random_forest, xgboost, …).")
+
+    # ── two-stage curation (Lever 2) ──
+    p.add_argument("--curation", choices=["archive", "greedy", "elastic_net"],
+                   default="archive",
+                   help="How the final book is chosen. 'archive' (default): the "
+                        "Pareto archive (one-stage, old behaviour). 'greedy' / "
+                        "'elastic_net': keep every gate-passing factor during the "
+                        "search, then curate the pool once at the end (two-stage).")
+    p.add_argument("--n-keep", type=int, default=None,
+                   help="Target number of factors to keep at curation "
+                        "(default: auto-sized — greedy stops on no marginal gain, "
+                        "elastic-net keeps those above the stability threshold).")
     return p.parse_args()
 
 
@@ -200,6 +233,12 @@ def main() -> None:
         cpcv_k=args.cpcv_k,
         embargo=args.embargo,
         cutoff_date=args.cutoff_date,
+        independence_metric=args.independence_metric,
+        regime_kind=args.regime_kind,
+        regime_quantile=args.regime_quantile,
+        marginal_model=args.marginal_model,
+        curation=args.curation,
+        n_keep=args.n_keep,
         data_dir=args.data_dir,
         n_tickers=args.n_tickers,
         out_dir=str(scope.dir / "evolution"),
@@ -228,8 +267,12 @@ def main() -> None:
     persisted = persist_archive(
         loop.controller, session_id=session_id,
         target_horizon=args.horizon, cutoff_date=args.cutoff_date,
-        data_dir=args.data_dir, n_tickers=args.n_tickers)
+        data_dir=args.data_dir, n_tickers=args.n_tickers,
+        curation=args.curation, n_keep=args.n_keep,
+        is_frac=args.is_frac, val_frac=args.val_frac, fields=loop.fields,
+        marginal_model=args.marginal_model)
     summary["persisted_factor_ids"] = persisted["kept_factor_ids"]
+    summary["curation"] = args.curation
 
     scope.write_manifest(
         llm_model=model, llm_provider=provider, engine="evolution",

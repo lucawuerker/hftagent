@@ -108,6 +108,21 @@ class EvolutionRunConfig:
     plateau_scales: tuple[float, ...] = (0.9, 1.1)
     cutoff_date: str | None = None
 
+    # ── fitness axes (P0+): independence basis + the crash-regime axis ──
+    independence_metric: str = "residual_ic"   # "residual_ic" | "delta_participation"
+    regime_kind: str = "drawdown"              # "drawdown" | "volatility"
+    regime_quantile: float = 0.2
+    # nonlinear LOCO combiner so conditioning/interaction value (e.g. a volatility
+    # state variable) scores a positive marginal value; "ridge" = additive-only.
+    marginal_model: str = "gradient_boosting"
+
+    # ── two-stage curation (Lever 2): keep every gate-passer, curate once ──
+    # "archive": the one-stage default — persist the Pareto archive (old behaviour).
+    # "greedy"/"elastic_net": persist the curated kept-pool instead, so the final
+    # book is not limited to the domination-pruned front.
+    curation: str = "archive"
+    n_keep: int | None = None                  # target book size (None → auto-sized)
+
     # ── data ──
     data_dir: str = "ticker_data"
     n_tickers: int | None = 15
@@ -496,6 +511,10 @@ class EvolutionLoop:
             data_dir=self.cfg.data_dir,
             n_tickers=self.cfg.n_tickers,
             fields=self.fields,
+            independence_metric=self.cfg.independence_metric,
+            regime_kind=self.cfg.regime_kind,
+            regime_quantile=self.cfg.regime_quantile,
+            marginal_model=self.cfg.marginal_model,
         )
         if not res.get("ok"):
             log.info("[%s] evaluation failed: %s", program.factor_id, res.get("error"))
@@ -524,6 +543,9 @@ class EvolutionLoop:
             n_tickers=self.cfg.n_tickers,
             fields=self.fields,
             candidate_id=candidate_id,
+            regime_kind=self.cfg.regime_kind,
+            regime_quantile=self.cfg.regime_quantile,
+            marginal_model=self.cfg.marginal_model,
         )
         if not res.get("ok"):
             log.info("[%s] set evaluation failed: %s", candidate_id, res.get("error"))
@@ -917,14 +939,24 @@ class EvolutionLoop:
 def persist_archive(controller: EvolutionController, *, session_id: str,
                     target_horizon: int, cutoff_date: str | None = None,
                     data_dir: str = "ticker_data", n_tickers: int | None = 15,
+                    curation: str = "archive", n_keep: int | None = None,
+                    is_frac: float = 0.6, val_frac: float = 0.2,
+                    fields: Sequence[str] | None = None,
+                    marginal_model: str = "gradient_boosting",
                     ) -> dict[str, list[str]]:
-    """Materialise the final Pareto archive into real factor files + DB records.
+    """Materialise the final book into real factor files + DB records.
 
     Uses the *same* materialise / IC-backtest / persist path as the oneshot
     engine, so an evolution prerun is indistinguishable downstream (comparison
     harness, fund runs) from any other prerun.  Records carry the evolution
     provenance (generation, operator, parents, objective vector, gates) in
     ``metadata.evolution``.
+
+    Two-stage curation (Lever 2): with ``curation == "archive"`` (the default)
+    the persisted book is the Pareto **archive** — today's behaviour.  With
+    ``greedy`` / ``elastic_net`` the book is instead the **curated kept-pool**
+    (every gate-passing factor, then curated to a chosen set / ``n_keep`` size),
+    so a good factor is no longer dropped merely for being dominated.
     """
     from quant_fund_agent.llm import resolve_research_model, resolve_research_provider
     from quant_fund_agent.mcp import research_client
@@ -936,19 +968,45 @@ def persist_archive(controller: EvolutionController, *, session_id: str,
         TradingIdeaCategory,
     )
 
-    materialised: list[tuple[EvaluatedGenome, FactorProgram, str]] = []
-    seen: set[str] = set()  # SET-mode archives can share members across genomes
-    for eg in controller.archive:
+    # ── choose the source book (archive vs the full kept-pool) ──
+    use_pool = curation != "archive" and bool(controller.kept_pool)
+    source = controller.kept_pool if use_pool else controller.archive
+    prog_by_fid: dict[str, tuple[EvaluatedGenome, FactorProgram]] = {}
+    for eg in source:
         for prog in eg.genome.programs:
-            if prog.factor_id in seen:
-                continue
-            seen.add(prog.factor_id)
-            res = research_client.materialise_factor(prog.factor_id, prog.code)
-            if res.get("ok"):
-                materialised.append((eg, prog, res["code_path"]))
-            else:
-                log.warning("[persist:%s] materialise failed: %s",
-                            prog.factor_id, res.get("error"))
+            prog_by_fid.setdefault(prog.factor_id, (eg, prog))
+
+    kept_ids = list(prog_by_fid)
+    curation_info: dict[str, Any] | None = None
+    if use_pool and prog_by_fid:
+        pool = [{"factor_id": fid, "code": prog.code}
+                for fid, (_, prog) in prog_by_fid.items()]
+        res = research_client.curate_book(
+            pool, mode=curation, n_keep=n_keep, target_horizon=target_horizon,
+            is_frac=is_frac, val_frac=val_frac, cutoff_date=cutoff_date,
+            data_dir=data_dir, n_tickers=n_tickers,
+            fields=list(fields) if fields else None, marginal_model=marginal_model)
+        if res.get("ok"):
+            kept_ids = [fid for fid in res.get("kept_factor_ids", [])
+                        if fid in prog_by_fid] or kept_ids
+            curation_info = {k: res[k] for k in
+                             ("mode", "combined_ic", "selection_frequency", "n_pool")
+                             if k in res}
+            log.info("curation (%s) kept %d/%d factors from the pool",
+                     curation, len(kept_ids), len(prog_by_fid))
+        else:
+            log.warning("curation (%s) failed: %s — persisting the full pool",
+                        curation, res.get("error"))
+
+    materialised: list[tuple[EvaluatedGenome, FactorProgram, str]] = []
+    for fid in kept_ids:
+        eg, prog = prog_by_fid[fid]
+        res = research_client.materialise_factor(prog.factor_id, prog.code)
+        if res.get("ok"):
+            materialised.append((eg, prog, res["code_path"]))
+        else:
+            log.warning("[persist:%s] materialise failed: %s",
+                        prog.factor_id, res.get("error"))
 
     ids = [prog.factor_id for _, prog, _ in materialised]
     metrics = research_client.backtest_factors(
@@ -1004,6 +1062,7 @@ def persist_archive(controller: EvolutionController, *, session_id: str,
                     "objective": eg.fitness.objective.to_dict(),
                     "gates": eg.fitness.gates.to_dict(),
                     "n_trials_at_eval": eg.fitness.diagnostics.get("n_trials"),
+                    "curation": curation,
                 },
             },
         )

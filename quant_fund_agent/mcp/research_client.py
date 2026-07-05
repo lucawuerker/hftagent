@@ -93,6 +93,10 @@ def evaluate_fitness(
     data_dir: str = "ticker_data",
     n_tickers: int | None = 15,
     fields: list[str] | None = None,
+    independence_metric: str = "residual_ic",
+    regime_kind: str = "drawdown",
+    regime_quantile: float = 0.2,
+    marginal_model: str = "gradient_boosting",
 ) -> dict[str, Any]:
     """Deterministic evolutionary fitness of one candidate program vs the book.
 
@@ -103,6 +107,8 @@ def evaluate_fitness(
         n_trials=n_trials, cpcv_groups=cpcv_groups, cpcv_k=cpcv_k,
         embargo=embargo, cutoff_date=cutoff_date, data_dir=data_dir,
         n_tickers=n_tickers, fields=fields,
+        independence_metric=independence_metric, regime_kind=regime_kind,
+        regime_quantile=regime_quantile, marginal_model=marginal_model,
     )
     if not _use_mcp():
         from quant_fund_agent.mcp import research_service as svc
@@ -127,6 +133,9 @@ def evaluate_set_fitness(
     n_tickers: int | None = 15,
     fields: list[str] | None = None,
     candidate_id: str = "set",
+    regime_kind: str = "drawdown",
+    regime_quantile: float = 0.2,
+    marginal_model: str = "gradient_boosting",
 ) -> dict[str, Any]:
     """SET-mode fitness of a whole factor set (one genome).
 
@@ -137,6 +146,8 @@ def evaluate_set_fitness(
         n_trials=n_trials, cpcv_groups=cpcv_groups, cpcv_k=cpcv_k,
         embargo=embargo, cutoff_date=cutoff_date, data_dir=data_dir,
         n_tickers=n_tickers, fields=fields, candidate_id=candidate_id,
+        regime_kind=regime_kind, regime_quantile=regime_quantile,
+        marginal_model=marginal_model,
     )
     if not _use_mcp():
         from quant_fund_agent.mcp import research_service as svc
@@ -170,3 +181,38 @@ def score_book_oos(
     args: dict[str, Any] = {"book": book}
     args.update({k: v for k, v in kwargs.items() if v is not None})
     return _bridge().call("score_book_oos", args)
+
+
+def curate_book(
+    book: list[dict[str, Any]],
+    *,
+    mode: str = "greedy",
+    n_keep: int | None = None,
+    target_horizon: int = 6,
+    is_frac: float = 0.6,
+    val_frac: float = 0.2,
+    cutoff_date: str | None = None,
+    data_dir: str = "ticker_data",
+    n_tickers: int | None = 15,
+    fields: list[str] | None = None,
+    marginal_model: str = "gradient_boosting",
+    en_threshold: float = 0.5,
+    en_l1_ratio: float = 0.5,
+    seed: int = 0,
+) -> dict[str, Any]:
+    """Curate a pool of gate-passing factors into the final book (Lever 2).
+
+    See :func:`quant_fund_agent.mcp.research_service.curate_book`.
+    """
+    kwargs: dict[str, Any] = dict(
+        mode=mode, n_keep=n_keep, target_horizon=target_horizon, is_frac=is_frac,
+        val_frac=val_frac, cutoff_date=cutoff_date, data_dir=data_dir,
+        n_tickers=n_tickers, fields=fields, marginal_model=marginal_model,
+        en_threshold=en_threshold, en_l1_ratio=en_l1_ratio, seed=seed,
+    )
+    if not _use_mcp():
+        from quant_fund_agent.mcp import research_service as svc
+        return svc.curate_book(book, **kwargs)
+    args: dict[str, Any] = {"book": book}
+    args.update({k: v for k, v in kwargs.items() if v is not None})
+    return _bridge().call("curate_book", args)

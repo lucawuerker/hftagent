@@ -410,6 +410,11 @@ def _slice_panel_to_cutoff(panel: dict[str, Any], cutoff: date | None) -> dict[s
     return {k: df.loc[df.index < cutoff_ts] for k, df in panel.items()}
 
 
+def _slice_panel_to_mask(panel: dict[str, Any], mask: Any) -> dict[str, Any]:
+    """Row-slice every DataFrame in ``panel`` by the same boolean mask."""
+    return {k: df.loc[mask] for k, df in panel.items()}
+
+
 def backtest_factors(
     factor_ids: list[str],
     horizon: int = 6,
@@ -486,12 +491,26 @@ def _code_fingerprint(code: str) -> str:
     return hashlib.sha256(normalised.encode()).hexdigest()[:16]
 
 
+def _panel_window_key(panel: dict[str, Any]) -> tuple[Any, ...]:
+    """Cache key suffix for the exact row window a signal was computed on."""
+    close = panel["close"]
+    idx = close.index
+    if len(idx) == 0:
+        return (0, None, None, tuple(close.columns))
+    return (len(idx), str(idx[0]), str(idx[-1]), tuple(close.columns))
+
+
 def _cached_signal(program: dict[str, Any], panel: dict[str, Any],
                    panel_key: tuple, cutoff_date: str | None):
     """Compile ``{"factor_id", "code"}`` in-memory and compute its signal, cached."""
     from quant_fund_agent.factors.inmem import compile_factor, compute_signal
 
-    key = (panel_key, cutoff_date, _code_fingerprint(program["code"]))
+    key = (
+        panel_key,
+        cutoff_date,
+        _panel_window_key(panel),
+        _code_fingerprint(program["code"]),
+    )
     if key in _SIGNAL_CACHE:
         return _SIGNAL_CACHE[key]
 
@@ -548,6 +567,10 @@ def evaluate_fitness(
     data_dir: str = "ticker_data",
     n_tickers: int | None = 15,
     fields: list[str] | None = None,
+    independence_metric: str = "residual_ic",
+    regime_kind: str = "drawdown",
+    regime_quantile: float = 0.2,
+    marginal_model: str = "gradient_boosting",
 ) -> dict[str, Any]:
     """Deterministically score one candidate program against the current book.
 
@@ -568,7 +591,7 @@ def evaluate_fitness(
     """
     from quant_fund_agent.comparison.config import ComparisonConfig
     from quant_fund_agent.research_eval.harness import EvalParams, evaluate_candidate
-    from quant_fund_agent.research_eval.splits import three_way_split
+    from quant_fund_agent.research_eval.splits import ThreeWaySplit, three_way_split
 
     book = book or []
     jitter = jitter or []
@@ -578,16 +601,27 @@ def evaluate_fitness(
     panel_key = _panel_cache_key(data_dir, sorted(fields), n_tickers)
     panel_full = _load_panel_cached(data_dir, sorted(fields), n_tickers=n_tickers)
     panel = _slice_panel_to_cutoff(panel_full, _parse_cutoff(cutoff_date))
+    full_split = three_way_split(panel["close"].index, is_frac=is_frac, val_frac=val_frac)
+    dev_mask = full_split.is_val_mask
+    # During evolution the held-out TEST rows should be as unavailable as future
+    # live data.  Compute every candidate/book/jitter signal on IS∪VAL only, so a
+    # generated factor cannot accidentally use TEST feature values in calc().
+    panel_dev = _slice_panel_to_mask(panel, dev_mask)
+    split = ThreeWaySplit(
+        is_mask=full_split.is_mask[dev_mask],
+        val_mask=full_split.val_mask[dev_mask],
+        test_mask=full_split.test_mask[dev_mask],
+    )
 
     try:
-        cand_sig = _cached_signal(candidate, panel, panel_key, cutoff_date)
+        cand_sig = _cached_signal(candidate, panel_dev, panel_key, cutoff_date)
     except Exception as e:  # noqa: BLE001 — candidate failure is a scored outcome
         return {"ok": False, "error": f"candidate signal failed: {e}"}
 
     book_sigs = []
     for prog in book:
         try:
-            book_sigs.append(_cached_signal(prog, panel, panel_key, cutoff_date))
+            book_sigs.append(_cached_signal(prog, panel_dev, panel_key, cutoff_date))
         except Exception as e:  # noqa: BLE001
             log.warning("[evaluate_fitness] book member %s failed (%s) — skipped",
                         prog.get("factor_id"), e)
@@ -595,23 +629,25 @@ def evaluate_fitness(
     jitter_sigs = []
     for prog in jitter:
         try:
-            jitter_sigs.append(_cached_signal(prog, panel, panel_key, cutoff_date))
+            jitter_sigs.append(_cached_signal(prog, panel_dev, panel_key, cutoff_date))
         except Exception as e:  # noqa: BLE001
             log.warning("[evaluate_fitness] jitter probe %s failed (%s) — skipped",
                         prog.get("factor_id"), e)
 
     cfg = ComparisonConfig(preruns=["evolution"], target_horizon=target_horizon,
                            fit_standardize="per_underlying", seed=0)
-    split = three_way_split(panel["close"].index, is_frac=is_frac, val_frac=val_frac)
     params = EvalParams(n_trials=max(1, int(n_trials)), cpcv_groups=cpcv_groups,
-                        cpcv_k=cpcv_k, embargo=embargo)
+                        cpcv_k=cpcv_k, embargo=embargo,
+                        independence_metric=independence_metric,
+                        regime_kind=regime_kind, regime_quantile=regime_quantile,
+                        marginal_model=marginal_model)
 
     sign_raw = candidate.get("expected_sign")
     expected_sign = int(sign_raw) if sign_raw in (1, -1, "1", "-1") else None
 
     try:
         result = evaluate_candidate(
-            cand_sig, book_sigs, panel, cfg, split,
+            cand_sig, book_sigs, panel_dev, cfg, split,
             params=params,
             candidate_code=candidate.get("code"),
             expected_sign=expected_sign,
@@ -620,6 +656,7 @@ def evaluate_fitness(
         )
     except Exception as e:  # noqa: BLE001 — surface, don't crash the loop
         return {"ok": False, "error": f"evaluation failed: {e}"}
+    result.raw["heldout_test_split_sizes"] = full_split.sizes
     return {"ok": True, "fitness": _json_safe(result.to_dict())}
 
 
@@ -638,6 +675,9 @@ def evaluate_set_fitness(
     n_tickers: int | None = 15,
     fields: list[str] | None = None,
     candidate_id: str = "set",
+    regime_kind: str = "drawdown",
+    regime_quantile: float = 0.2,
+    marginal_model: str = "gradient_boosting",
 ) -> dict[str, Any]:
     """SET mode: deterministically score a whole factor set as one genome.
 
@@ -647,20 +687,28 @@ def evaluate_set_fitness(
     """
     from quant_fund_agent.comparison.config import ComparisonConfig
     from quant_fund_agent.research_eval.harness import EvalParams, evaluate_set
-    from quant_fund_agent.research_eval.splits import three_way_split
+    from quant_fund_agent.research_eval.splits import ThreeWaySplit, three_way_split
 
     if fields is None:
         fields = ["open", "high", "low", "close", "volume"]
     panel_key = _panel_cache_key(data_dir, sorted(fields), n_tickers)
     panel_full = _load_panel_cached(data_dir, sorted(fields), n_tickers=n_tickers)
     panel = _slice_panel_to_cutoff(panel_full, _parse_cutoff(cutoff_date))
+    full_split = three_way_split(panel["close"].index, is_frac=is_frac, val_frac=val_frac)
+    dev_mask = full_split.is_val_mask
+    panel_dev = _slice_panel_to_mask(panel, dev_mask)
+    split = ThreeWaySplit(
+        is_mask=full_split.is_mask[dev_mask],
+        val_mask=full_split.val_mask[dev_mask],
+        test_mask=full_split.test_mask[dev_mask],
+    )
 
     member_signals: dict[str, Any] = {}
     member_codes: dict[str, str] = {}
     for prog in programs:
         fid = prog.get("factor_id", "?")
         try:
-            member_signals[fid] = _cached_signal(prog, panel, panel_key, cutoff_date)
+            member_signals[fid] = _cached_signal(prog, panel_dev, panel_key, cutoff_date)
             member_codes[fid] = prog.get("code", "")
         except Exception as e:  # noqa: BLE001
             log.warning("[evaluate_set] member %s failed (%s) — dropped", fid, e)
@@ -669,14 +717,16 @@ def evaluate_set_fitness(
 
     cfg = ComparisonConfig(preruns=["evolution"], target_horizon=target_horizon,
                            fit_standardize="per_underlying", seed=0)
-    split = three_way_split(panel["close"].index, is_frac=is_frac, val_frac=val_frac)
     params = EvalParams(n_trials=max(1, int(n_trials)), cpcv_groups=cpcv_groups,
-                        cpcv_k=cpcv_k, embargo=embargo)
+                        cpcv_k=cpcv_k, embargo=embargo,
+                        regime_kind=regime_kind, regime_quantile=regime_quantile,
+                        marginal_model=marginal_model)
     try:
-        result = evaluate_set(member_signals, panel, cfg, split, params=params,
+        result = evaluate_set(member_signals, panel_dev, cfg, split, params=params,
                               member_codes=member_codes, candidate_id=candidate_id)
     except Exception as e:  # noqa: BLE001
         return {"ok": False, "error": f"set evaluation failed: {e}"}
+    result.raw["heldout_test_split_sizes"] = full_split.sizes
     return {"ok": True, "fitness": _json_safe(result.to_dict()),
             "surviving_members": list(member_signals)}
 
@@ -773,6 +823,76 @@ def score_book_oos(
         "pbo": {"pbo": pbo["pbo"], "n_splits": pbo["n_splits"]},
         "n_factors_scored": len(signals),
     })
+
+
+def curate_book(
+    book: list[dict[str, Any]],
+    *,
+    mode: str = "greedy",
+    n_keep: int | None = None,
+    target_horizon: int = 6,
+    is_frac: float = 0.6,
+    val_frac: float = 0.2,
+    cutoff_date: str | None = None,
+    data_dir: str = "ticker_data",
+    n_tickers: int | None = 15,
+    fields: list[str] | None = None,
+    marginal_model: str = "gradient_boosting",
+    en_threshold: float = 0.5,
+    en_l1_ratio: float = 0.5,
+    seed: int = 0,
+) -> dict[str, Any]:
+    """Curate a pool of gate-passing factors into the final book (Lever 2).
+
+    Compiles every ``book`` member's signal on the **development** panel (IS∪VAL,
+    TEST sliced off exactly as in :func:`evaluate_fitness`), then runs the chosen
+    deterministic curator (``greedy`` / ``elastic_net``) on the same IS-fit /
+    VAL-score seam the fitness harness uses.  Returns
+    ``{"ok": True, "kept_factor_ids": [...], ...}`` or ``{"ok": False, "error"}``.
+    """
+    from quant_fund_agent.comparison.config import ComparisonConfig
+    from quant_fund_agent.research_eval import curation
+    from quant_fund_agent.research_eval.splits import ThreeWaySplit, three_way_split
+
+    if fields is None:
+        fields = ["open", "high", "low", "close", "volume"]
+    if not book:
+        return {"ok": True, "kept_factor_ids": [], "mode": mode}
+
+    panel_key = _panel_cache_key(data_dir, sorted(fields), n_tickers)
+    panel_full = _load_panel_cached(data_dir, sorted(fields), n_tickers=n_tickers)
+    panel = _slice_panel_to_cutoff(panel_full, _parse_cutoff(cutoff_date))
+    full_split = three_way_split(panel["close"].index, is_frac=is_frac, val_frac=val_frac)
+    dev_mask = full_split.is_val_mask
+    panel_dev = _slice_panel_to_mask(panel, dev_mask)
+    split = ThreeWaySplit(
+        is_mask=full_split.is_mask[dev_mask],
+        val_mask=full_split.val_mask[dev_mask],
+        test_mask=full_split.test_mask[dev_mask],
+    )
+
+    signals: dict[str, Any] = {}
+    for prog in book:
+        fid = prog.get("factor_id", "?")
+        try:
+            signals[fid] = _cached_signal(prog, panel_dev, panel_key, cutoff_date)
+        except Exception as e:  # noqa: BLE001 — a broken member is dropped, not fatal
+            log.warning("[curate_book] %s failed (%s) — skipped", fid, e)
+    if not signals:
+        return {"ok": False, "error": "no book member produced a signal"}
+
+    cfg = ComparisonConfig(preruns=["evolution"], target_horizon=target_horizon,
+                           fit_standardize="per_underlying", seed=0)
+    try:
+        res = curation.curate(
+            mode, signals, panel_dev["close"], cfg, split, n_keep=n_keep,
+            model=marginal_model, threshold=en_threshold, l1_ratio=en_l1_ratio,
+            seed=seed)
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "error": f"curation failed: {e}"}
+    res["ok"] = True
+    res["n_pool"] = len(signals)
+    return _json_safe(res)
 
 
 # ---------------------------------------------------------------------------

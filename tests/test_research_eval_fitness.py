@@ -24,10 +24,13 @@ def _result(cid, mv, indep, rob, par, *, passed=True):
 # ── objective vector ──────────────────────────────────────────────────────────
 
 def test_objective_none_is_worst():
-    v = ObjectiveVector(marginal_value=None, independence=1.0, robustness=2.0, parsimony=-3.0)
+    v = ObjectiveVector(marginal_value=None, independence=1.0, robustness=2.0,
+                        parsimony=-3.0, regime_independence=0.5)
     t = v.as_tuple()
     assert t[0] == float("-inf")
-    assert t[1:] == (1.0, 2.0, -3.0)
+    assert t[1:] == (1.0, 2.0, -3.0, 0.5)
+    # an unmeasured (None) regime axis is likewise the worst value
+    assert ObjectiveVector(1.0, 1.0, 1.0, 1.0).as_tuple()[4] == float("-inf")
 
 
 # ── dominance ─────────────────────────────────────────────────────────────────

@@ -71,20 +71,31 @@ def mutation_brief(fitness: FitnessResult, *, book_size: int | None = None) -> s
         + (f", book size={book_size}" if book_size is not None else "") + ").")
     lines.append(
         f"Standalone IC at the target horizon: {_fmt(d.get('standalone_ic'))} "
-        f"(IS={_fmt(d.get('is_ic'))}, VAL={_fmt(d.get('val_ic'))}); residual IC "
-        f"after regressing out the book: {_fmt(d.get('residual_ic'))}.")
+        f"(IS={_fmt(d.get('is_ic'))}, VAL={_fmt(d.get('val_ic'))}).")
     decay = _decay_line(d.get("ic_decay"))
     if decay:
         lines.append(decay)
+    metric = d.get("independence_metric", "residual_ic")
     lines.append(
-        f"Independence: Δ participation ratio {_fmt(d.get('delta_participation'))} "
-        f"(book effective factors {_fmt(d.get('pr_before'), 2)} → "
+        f"Independence (axis = {metric}): residual IC after regressing out the "
+        f"book {_fmt(d.get('residual_ic'))} — the edge the book does NOT already "
+        f"span; Δ participation ratio {_fmt(d.get('delta_participation'))} (book "
+        f"effective factors {_fmt(d.get('pr_before'), 2)} → "
         f"{_fmt(d.get('pr_after'), 2)}); max |corr| to an existing factor: "
         f"{_fmt(d.get('max_abs_corr'))}.")
     lines.append(
         f"Robustness: CPCV IC mean {_fmt(d.get('cpcv_ic_mean'))} ± "
         f"{_fmt(d.get('cpcv_ic_std'))} over {d.get('cpcv_n_folds', 0)} purged "
         f"folds; OOS/IS degradation ratio {_fmt(d.get('degradation_ratio'))}.")
+    if d.get("regime_independence") is not None or d.get("stress_ic_with") is not None:
+        lines.append(
+            f"Regime (crash-complementarity): marginal ΔIC on the "
+            f"{d.get('regime_kind', 'drawdown')} stress bars "
+            f"{_fmt(d.get('regime_independence'))} "
+            f"(book-with={_fmt(d.get('stress_ic_with'))}, "
+            f"book-only={_fmt(d.get('stress_ic_base'))}, "
+            f"n_stress={d.get('n_stress_obs', 0)}) — edge added exactly where the "
+            f"book is weakest.")
     if d.get("plateau_penalty") is not None:
         lines.append(
             f"Parameter sensitivity: jittering the window constants ±10% moved "
@@ -119,6 +130,13 @@ def mutation_brief(fitness: FitnessResult, *, book_size: int | None = None) -> s
             "Low standalone IC but positive marginal value: it works as a "
             "conditioning/state variable in combination.  Lean into that — "
             "sharpen what it conditions on rather than chasing standalone IC.")
+    regime = obj.regime_independence
+    if regime is not None and regime > 0 and (mv is None or regime > 2 * abs(mv or 0)):
+        advice.append(
+            "This is a regime specialist: it adds most of its edge in the "
+            f"{d.get('regime_kind', 'drawdown')} stress bars, where the rest of "
+            "the book is weak.  That is valuable diversification — preserve the "
+            "crash mechanism; do not water it down to lift the calm-period IC.")
     deg = d.get("degradation_ratio")
     if deg is not None and deg < 0.5:
         advice.append(

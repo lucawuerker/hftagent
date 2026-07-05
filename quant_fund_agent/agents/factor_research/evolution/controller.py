@@ -179,6 +179,13 @@ class EvolutionController:
         self.islands: list[list[EvaluatedGenome]] = [
             [] for _ in range(max(1, self.config.n_islands))]
         self.archive: list[EvaluatedGenome] = []
+        # Two-stage curation (Lever 2): every gate-passing genome ever evaluated,
+        # regardless of whether it survives the Pareto archive.  When curation is
+        # enabled this pool — not the (domination-pruned) archive — is what gets
+        # curated into the final book, so a factor is never discarded merely for
+        # being dominated.  Always populated; only *used* when curation != archive.
+        self.kept_pool: list[EvaluatedGenome] = []
+        self._pool_fingerprints: set[str] = set()
         self.n_trials: int = 0
         self.generation: int = 0
         self.lineage: list[dict[str, Any]] = []
@@ -219,6 +226,11 @@ class EvolutionController:
             self.islands[island_idx] = [island[i] for _, _, i in keep]
 
         self._update_archive(evaluated)
+        if evaluated.selectable:
+            fp = genome.code_fingerprint()
+            if fp not in self._pool_fingerprints:
+                self._pool_fingerprints.add(fp)
+                self.kept_pool.append(evaluated)
         self.lineage.append({
             "genome_id": genome.genome_id,
             "factor_ids": genome.factor_ids,
@@ -323,6 +335,19 @@ class EvolutionController:
                 seen.setdefault(p.factor_id, p.code)
         return list(seen.items())
 
+    def kept_pool_programs(self) -> list[tuple[str, str]]:
+        """Every gate-passing factor ever evaluated as ``(factor_id, code)`` pairs.
+
+        The two-stage curation input (Lever 2): de-duplicated by factor id across
+        all kept genomes (SET genomes may share members).  Falls back to the
+        archive when the pool is empty (e.g. a legacy state file).
+        """
+        seen: dict[str, str] = {}
+        for eg in (self.kept_pool or self.archive):
+            for p in eg.genome.programs:
+                seen.setdefault(p.factor_id, p.code)
+        return list(seen.items())
+
     # ── persistence (resumability + thesis audit) ──
 
     def state_dict(self) -> dict[str, Any]:
@@ -338,6 +363,7 @@ class EvolutionController:
             "generation": self.generation,
             "islands": [[eg.to_dict() for eg in isl] for isl in self.islands],
             "archive": [eg.to_dict() for eg in self.archive],
+            "kept_pool": [eg.to_dict() for eg in self.kept_pool],
             "fingerprints": sorted(self._fingerprints),
         }
 
@@ -368,5 +394,8 @@ class EvolutionController:
         if not ctrl.islands:
             ctrl.islands = [[]]
         ctrl.archive = [_eg(d) for d in payload.get("archive", [])]
+        ctrl.kept_pool = [_eg(d) for d in payload.get("kept_pool", [])]
+        ctrl._pool_fingerprints = {
+            eg.genome.code_fingerprint() for eg in ctrl.kept_pool}
         ctrl._fingerprints = set(payload.get("fingerprints", []))
         return ctrl
