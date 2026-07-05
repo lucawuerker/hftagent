@@ -64,6 +64,10 @@ def _parse_args() -> argparse.Namespace:
                    help="Purge this prerun's factors + evolution state first.")
     p.add_argument("--data-dir", default=os.getenv("DATA_DIR", "ticker_data"))
     p.add_argument("--n-tickers", type=int, default=15)
+    p.add_argument("--fixed-book", default=None,
+                   help="JSON prebook to condition SINGLE-mode fitness on without "
+                        "inserting those factors into the archive, e.g. a Lasso "
+                        "prebook built by scripts/build_lasso_prebook.py.")
 
     # ── search shape ──
     p.add_argument("--evolution-unit", choices=["single", "set"], default="single",
@@ -189,6 +193,7 @@ def main() -> None:
     from quant_fund_agent.config import default_config_name, get_settings
     from quant_fund_agent.llm import resolve_research_model, resolve_research_provider
     from quant_fund_agent.workspace import Scope
+    from quant_fund_agent.research_eval.prebook import book_entries, load_prebook
 
     settings = get_settings()
     config_name = args.config_name or default_config_name(settings.data)
@@ -207,6 +212,10 @@ def main() -> None:
     provider = resolve_research_provider(model)
     log.info("Evolution run into scope '%s' (model=%s, provider=%s)",
              scope.label, model, provider)
+    fixed_book = book_entries(load_prebook(args.fixed_book)) if args.fixed_book else []
+    if fixed_book:
+        log.info("Conditioning fitness on fixed book: %d factor(s) from %s",
+                 len(fixed_book), args.fixed_book)
 
     cfg = EvolutionRunConfig(
         generations=args.generations,
@@ -241,6 +250,7 @@ def main() -> None:
         n_keep=args.n_keep,
         data_dir=args.data_dir,
         n_tickers=args.n_tickers,
+        fixed_book=fixed_book,
         out_dir=str(scope.dir / "evolution"),
     )
 

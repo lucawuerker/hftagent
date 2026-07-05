@@ -126,6 +126,7 @@ class EvolutionRunConfig:
     # ── data ──
     data_dir: str = "ticker_data"
     n_tickers: int | None = 15
+    fixed_book: list[dict[str, Any]] = field(default_factory=list)
 
     # ── output ──
     out_dir: str = "data/evolution"    # overridden by the entrypoint to the scope dir
@@ -435,6 +436,21 @@ class EvolutionLoop:
         self.failures: list[dict[str, Any]] = []
         self._llms: dict[str, Any] = {}    # role → chat model (built lazily)
         self._program_pool: dict[str, FactorProgram] = {}  # every program ever admitted
+        self.fixed_book = self._dedupe_fixed_book(cfg.fixed_book)
+
+    @staticmethod
+    def _dedupe_fixed_book(book: Sequence[dict[str, Any]] | None) -> list[dict[str, Any]]:
+        """A run-constant conditioning book, never inserted into the archive."""
+        seen: set[str] = set()
+        out: list[dict[str, Any]] = []
+        for row in book or []:
+            fid = str(row.get("factor_id") or "").strip()
+            code = str(row.get("code") or "")
+            if not fid or not code or fid in seen:
+                continue
+            seen.add(fid)
+            out.append({**row, "factor_id": fid, "code": code})
+        return out
 
     def _role_llm(self, role: str, temperature: float) -> Any:
         if role not in self._llms:
@@ -471,6 +487,7 @@ class EvolutionLoop:
         except Exception as e:  # noqa: BLE001
             log.warning("could not load existing factor ids (%s)", e)
             self.known_ids = set()
+        self.known_ids.update(b["factor_id"] for b in self.fixed_book)
 
     def _unique_id(self, base: str) -> str:
         base = (base or "factor").strip().lower()[:48] or "factor"
@@ -489,9 +506,17 @@ class EvolutionLoop:
         """Score one program via the MCP seam.  Returns None on eval failure."""
         from quant_fund_agent.mcp import research_client
 
-        book = [{"factor_id": fid, "code": code}
-                for fid, code in self.controller.archive_programs()
-                if fid != program.factor_id]
+        book = [
+            {"factor_id": b["factor_id"], "code": b["code"]}
+            for b in self.fixed_book
+            if b["factor_id"] != program.factor_id
+        ]
+        fixed_ids = {b["factor_id"] for b in book}
+        book.extend(
+            {"factor_id": fid, "code": code}
+            for fid, code in self.controller.archive_programs()
+            if fid != program.factor_id and fid not in fixed_ids
+        )
         probes = [{"factor_id": pid, "code": pcode}
                   for pid, pcode in jitter_variants(program, self.cfg.plateau_scales)]
 
@@ -594,19 +619,36 @@ class EvolutionLoop:
             self.known_ids.add(p.factor_id)
             self._program_pool.setdefault(p.factor_id, p)
         self.briefs[genome.genome_id] = mutation_brief(
-            fitness, book_size=len(self.controller.archive))
+            fitness, book_size=self._book_size())
         return eg
 
     # ── operators ──
 
     def _brief_for(self, eg: EvaluatedGenome) -> str:
         return self.briefs.get(eg.genome.genome_id) or mutation_brief(
-            eg.fitness, book_size=len(self.controller.archive))
+            eg.fitness, book_size=self._book_size())
+
+    def _book_size(self) -> int:
+        archive_ids = {fid for fid, _ in self.controller.archive_programs()}
+        fixed_ids = {b["factor_id"] for b in self.fixed_book}
+        return len(archive_ids | fixed_ids)
 
     def _book_entries(self) -> list[dict[str, Any]]:
         """The accepted book as hypothesis summaries (the debate skeptic's view)."""
-        return [_idea_payload(p) for eg in self.controller.archive
-                for p in eg.genome.programs]
+        fixed = [{
+            "factor_id": b["factor_id"],
+            "name": b.get("name", b["factor_id"]),
+            "category": b.get("category", "other"),
+            "trading_idea": b.get("trading_idea", ""),
+            "description": b.get("description", ""),
+            "prediction_horizon": b.get("prediction_horizon", self.cfg.target_horizon),
+            "suggested_horizons": b.get("suggested_horizons", []),
+            "expected_sign": b.get("expected_sign"),
+            "source_paper_ids": b.get("source_paper_ids", []),
+        } for b in self.fixed_book]
+        archive = [_idea_payload(p) for eg in self.controller.archive
+                   for p in eg.genome.programs]
+        return fixed + archive
 
     def _child_llm_semantic(self, llm: Any, island: int,
                             ) -> tuple[FactorProgram, list[str]] | None:
@@ -920,6 +962,7 @@ class EvolutionLoop:
             "generations": self.controller.generation,
             "n_trials": self.controller.n_trials,
             "population": len(self.controller.population()),
+            "fixed_book_size": len(self.fixed_book),
             "archive": [
                 {"factor_ids": eg.genome.factor_ids,
                  "genome_id": eg.genome.genome_id,

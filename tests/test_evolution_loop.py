@@ -238,6 +238,49 @@ def test_duplicate_children_are_not_rebilled(wired_loop):
         {eg.genome.genome_id for eg in loop.controller.population()})
 
 
+def test_fixed_book_is_passed_to_single_candidate_evaluator(tmp_path, monkeypatch):
+    from quant_fund_agent.mcp import research_client
+    from quant_fund_agent.research_eval.fitness import (
+        FitnessResult,
+        GateResults,
+        ObjectiveVector,
+    )
+
+    fixed = {"factor_id": "fixed_mom", "code": _factor_code("fixed_mom", MOM_BODY)}
+    cfg = EvolutionRunConfig(
+        target_horizon=1,
+        fixed_book=[fixed],
+        out_dir=str(tmp_path / "evolution"),
+    )
+    loop = EvolutionLoop(cfg, data_context="CTX", fields=["close"])
+    captured: dict = {}
+
+    def fake_evaluate_fitness(candidate, book, jitter, **kwargs):
+        captured["candidate"] = candidate
+        captured["book"] = book
+        captured["kwargs"] = kwargs
+        fitness = FitnessResult(
+            candidate_id=candidate["factor_id"],
+            objective=ObjectiveVector(marginal_value=0.1, independence=0.2),
+            gates=GateResults(coverage_ok=True, degradation_ok=None,
+                              deflation_ok=True),
+            diagnostics={"n_trials": kwargs["n_trials"]},
+        )
+        return {"ok": True, "fitness": fitness.to_dict()}
+
+    monkeypatch.setattr(research_client, "evaluate_fitness", fake_evaluate_fitness)
+
+    result = loop.evaluate_program(
+        FactorProgram(factor_id="candidate_mom",
+                      code=_factor_code("candidate_mom", MOM_BODY))
+    )
+
+    assert result is not None
+    assert captured["candidate"]["factor_id"] == "candidate_mom"
+    assert captured["book"] == [{"factor_id": "fixed_mom", "code": fixed["code"]}]
+    assert loop.fixed_book[0]["factor_id"] == "fixed_mom"
+
+
 def test_persist_archive_uses_the_oneshot_path(wired_loop, monkeypatch):
     loop, _, _ = wired_loop
     loop.run(initial_programs=_seeds())
