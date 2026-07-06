@@ -74,3 +74,50 @@ def test_bad_suggested_horizon_rejected():
 def test_suggested_horizons_optional():
     code = _GOOD.replace("    suggested_horizons = [1, 12, 60]\n", "")
     assert validate_code(code, "hz_factor") == "HzFactor"
+
+
+def test_deterministic_helper_code_allowed():
+    code = _GOOD.replace(
+        "import pandas as pd\n",
+        """import pandas as pd
+import numpy as np
+from scipy import stats
+
+def _paper_transform(x):
+    # A paper-specific deterministic transform is fine when it is trailing-only.
+    return np.log1p(x.abs()).rolling(3, min_periods=3).sum()
+
+""",
+    ).replace(
+        "return data[\"close\"]",
+        "close = data[\"close\"]\n        return _paper_transform(close).fillna(0.0)",
+    )
+    assert validate_code(code, "hz_factor") == "HzFactor"
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        'return data["close"].shift(-1)',
+        'return data["close"].diff(periods=-1)',
+        'return data["close"].pct_change(-1)',
+        'return data["close"].rolling(5, center=True).mean()',
+    ],
+)
+def test_temporal_leakage_patterns_rejected(body):
+    code = _GOOD.replace("return data[\"close\"]", body)
+    with pytest.raises(CodeValidationError, match="look-ahead"):
+        validate_code(code, "hz_factor")
+
+
+def test_full_panel_fit_rejected():
+    code = _GOOD.replace(
+        "import pandas as pd\n",
+        "import pandas as pd\nfrom sklearn.linear_model import LinearRegression\n",
+    ).replace(
+        "return data[\"close\"]",
+        "model = LinearRegression().fit(data[\"close\"].fillna(0.0), data[\"close\"].fillna(0.0))\n"
+        "        return data[\"close\"]",
+    )
+    with pytest.raises(CodeValidationError, match="fit"):
+        validate_code(code, "hz_factor")

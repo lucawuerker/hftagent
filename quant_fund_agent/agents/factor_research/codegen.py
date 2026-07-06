@@ -175,6 +175,67 @@ def _check_imports(tree: ast.Module) -> None:
                         )
 
 
+def _is_negative_literal(node: ast.AST) -> bool:
+    if isinstance(node, ast.Constant) and isinstance(node.value, (int, float)):
+        return node.value < 0
+    return (
+        isinstance(node, ast.UnaryOp)
+        and isinstance(node.op, ast.USub)
+        and isinstance(node.operand, ast.Constant)
+        and isinstance(node.operand.value, (int, float))
+        and node.operand.value > 0
+    )
+
+
+def _is_true_literal(node: ast.AST) -> bool:
+    return isinstance(node, ast.Constant) and node.value is True
+
+
+def _check_temporal_leakage(tree: ast.Module) -> None:
+    """Reject common future-looking constructs in generated factor code.
+
+    This is deliberately a small static net, not a proof of causality.  It catches
+    the patterns LLMs most often reach for when they accidentally turn the target
+    into a feature: negative shifts/diffs/pct-changes, centered rolling windows,
+    and fitting a learner inside ``calc`` on the full panel.
+    """
+    future_attrs = {"shift", "diff", "pct_change"}
+    fit_attrs = {"fit", "fit_transform", "partial_fit"}
+
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        func = node.func
+        if not isinstance(func, ast.Attribute):
+            continue
+        attr = func.attr
+
+        if attr in future_attrs:
+            if node.args and _is_negative_literal(node.args[0]):
+                raise CodeValidationError(
+                    f"look-ahead risk: `{attr}` called with a negative period"
+                )
+            for kw in node.keywords:
+                if kw.arg in {"periods", "lag"} and _is_negative_literal(kw.value):
+                    raise CodeValidationError(
+                        f"look-ahead risk: `{attr}` called with negative {kw.arg}"
+                    )
+
+        if attr == "rolling":
+            for kw in node.keywords:
+                if kw.arg == "center" and _is_true_literal(kw.value):
+                    raise CodeValidationError(
+                        "look-ahead risk: centered rolling windows are not allowed"
+                    )
+
+        if attr in fit_attrs:
+            raise CodeValidationError(
+                f"look-ahead risk: `{attr}()` inside a factor can fit on the full "
+                "panel.  Use deterministic trailing transforms in calc(); learned "
+                "models need an explicit fit/predict interface."
+            )
+
+
 def _extract_class_string_list(class_def: ast.ClassDef, attr: str) -> list[str] | None:
     """Read ``ClassName.attr = [\"x\", \"y\"]`` from a ClassDef body.
 
@@ -389,6 +450,7 @@ def validate_code(code: str, expected_factor_id: str) -> str:
     except SyntaxError as e:
         raise CodeValidationError(f"syntax error: {e}") from e
     _check_imports(tree)
+    _check_temporal_leakage(tree)
     return _find_factor_class(tree, expected_factor_id)
 
 

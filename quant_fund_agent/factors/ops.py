@@ -214,6 +214,80 @@ def decay_linear(df: pd.DataFrame, n: int) -> pd.DataFrame:
     return _apply_window_reduce(df, n, lambda w: w @ weights)
 
 
+def ts_zscore(df: pd.DataFrame, n: int) -> pd.DataFrame:
+    """Trailing z-score using only the last ``n`` observations."""
+    mu = ts_mean(df, n)
+    sigma = stddev(df, n).replace(0.0, np.nan)
+    return (df - mu) / sigma
+
+
+def rolling_beta(y: pd.DataFrame, x: pd.DataFrame, n: int) -> pd.DataFrame:
+    """Trailing OLS beta of ``y`` on ``x`` over ``n`` bars."""
+    var_x = (stddev(x, n) ** 2).replace(0.0, np.nan)
+    return covariance(y, x, n) / var_x
+
+
+def rolling_residual(y: pd.DataFrame, x: pd.DataFrame, n: int) -> pd.DataFrame:
+    """Current residual from a trailing OLS fit of ``y`` on ``x``."""
+    beta = rolling_beta(y, x, n)
+    alpha = ts_mean(y, n) - beta * ts_mean(x, n)
+    return y - (alpha + beta * x)
+
+
+def rolling_autocorr(df: pd.DataFrame, n: int, lag: int = 1) -> pd.DataFrame:
+    """Trailing autocorrelation against a positive lag."""
+    if lag < 1:
+        raise ValueError("lag must be positive")
+    return correlation(df, delay(df, lag), n)
+
+
+def signed_area(x: pd.DataFrame, y: pd.DataFrame, n: int) -> pd.DataFrame:
+    """Trailing two-channel path signed area over the last ``n`` observations.
+
+    The increment at time ``t`` uses only ``t-1`` and ``t``.  The returned value at
+    ``t`` is the rolling sum of those increments over the trailing window, so it is
+    causal despite representing an ordered path shape.
+    """
+    if n < 2:
+        return pd.DataFrame(np.nan, index=x.index, columns=x.columns)
+    increment = delay(x, 1) * y - delay(y, 1) * x
+    return 0.5 * increment.rolling(n - 1, min_periods=n - 1).sum()
+
+
+def path_length(x: pd.DataFrame, y: pd.DataFrame, n: int) -> pd.DataFrame:
+    """Trailing Euclidean path length for two aligned channels."""
+    if n < 2:
+        return pd.DataFrame(np.nan, index=x.index, columns=x.columns)
+    step = np.sqrt(delta(x, 1) ** 2 + delta(y, 1) ** 2)
+    return step.rolling(n - 1, min_periods=n - 1).sum()
+
+
+def tail_ratio(df: pd.DataFrame, n: int, q: float = 0.9) -> pd.DataFrame:
+    """Trailing upper-tail magnitude divided by lower-tail magnitude."""
+    q = min(0.99, max(0.51, float(q)))
+    upper = df.rolling(n, min_periods=n).quantile(q).abs()
+    lower = df.rolling(n, min_periods=n).quantile(1.0 - q).abs()
+    return upper / lower.replace(0.0, np.nan)
+
+
+def sign_entropy(df: pd.DataFrame, n: int) -> pd.DataFrame:
+    """Trailing entropy of positive / negative / zero signs, scaled to [0, 1]."""
+    valid = df.notna()
+    count = valid.astype(float).rolling(n, min_periods=n).sum()
+
+    probs = []
+    for mask in (df > 0, df < 0, df == 0):
+        hits = mask.where(valid, False).astype(float).rolling(n, min_periods=n).sum()
+        probs.append(hits / count.replace(0.0, np.nan))
+
+    entropy = pd.DataFrame(0.0, index=df.index, columns=df.columns)
+    for p in probs:
+        positive = p.where(p > 0.0, 0.0)
+        safe = p.where(p > 0.0, 1.0)
+        entropy = entropy - positive * np.log(safe)
+    return (entropy / np.log(3.0)).where(count.notna())
+
+
 def power(df: pd.DataFrame, a: float) -> pd.DataFrame:
     """Element-wise exponentiation: df ** a."""
     return df ** a

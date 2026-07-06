@@ -397,6 +397,7 @@ STRICT REQUIREMENTS
 # with CODEGEN_PROMPT's STRICT REQUIREMENTS — same validator enforces both).
 STRICT_REQUIREMENTS = """\
 1. Only import from: ``pandas`` (as pd), ``numpy`` (as np),
+   ``scipy`` / ``statsmodels`` for deterministic paper math,
    ``quant_fund_agent.factors.base`` (BaseFactor),
    ``quant_fund_agent.factors.registry`` (register_factor),
    ``quant_fund_agent.factors.ops`` (the helper operators), ``__future__``.
@@ -409,7 +410,11 @@ STRICT_REQUIREMENTS = """\
    columns as ``data["close"]``; guard sparse fields defensively.
 5. Every ``ops`` helper is positional-only — ``ts_sum(x, 5)``, never
    ``ts_sum(x, n=5)``.  Pandas methods are called on the DataFrame directly.
-6. No I/O, no network, no ``os``/``open``/``eval``/``exec``/``__import__``."""
+6. If the paper/mechanism needs a transform not in ``ops``, implement a small
+   deterministic helper in the file.  It must be causal: trailing windows,
+   positive lags, no centered rolling, no negative shifts, and no full-panel
+   sklearn/statsmodels ``fit`` inside ``calc``.
+7. No I/O, no network, no ``os``/``open``/``eval``/``exec``/``__import__``."""
 
 
 def build_mutation_prompt(parent: FactorProgram, brief: str, data_context: str,

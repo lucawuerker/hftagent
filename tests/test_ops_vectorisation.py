@@ -102,3 +102,47 @@ def test_window_larger_than_frame_all_nan():
     out = ops.ts_rank(df, 10)  # n > T
     assert out.shape == df.shape
     assert out.isna().all().all()
+
+
+def test_research_method_regression_primitives():
+    x = pd.DataFrame({"a": np.arange(8.0)})
+    y = 1.5 + 2.0 * x
+
+    beta = ops.rolling_beta(y, x, 4)
+    resid = ops.rolling_residual(y, x, 4)
+
+    assert np.allclose(beta["a"].dropna(), 2.0)
+    assert np.allclose(resid["a"].dropna(), 0.0, atol=1e-12)
+
+
+def test_research_method_path_primitives_are_trailing():
+    x = pd.DataFrame({"a": [0.0, 1.0, 1.0, 2.0]})
+    y = pd.DataFrame({"a": [0.0, 0.0, 1.0, 1.0]})
+
+    area = ops.signed_area(x, y, 3)
+    length = ops.path_length(x, y, 3)
+
+    assert np.isnan(area.loc[0, "a"])
+    assert np.isnan(area.loc[1, "a"])
+    assert area.loc[2, "a"] == pytest.approx(0.5)
+    assert area.loc[3, "a"] == pytest.approx(0.0)
+    assert length.loc[2, "a"] == pytest.approx(2.0)
+    assert length.loc[3, "a"] == pytest.approx(2.0)
+
+
+def test_research_method_distribution_primitives():
+    df = pd.DataFrame({"a": [-1.0, 0.0, 1.0, -2.0, 2.0]})
+
+    ent = ops.sign_entropy(df, 3)
+    assert ent.loc[2, "a"] == pytest.approx(1.0)
+
+    z = ops.ts_zscore(df, 3)
+    ref_z = (df - df.rolling(3, min_periods=3).mean()) / df.rolling(3, min_periods=3).std()
+    _assert_equivalent(z, ref_z)
+
+    tail = ops.tail_ratio(df.abs(), 5, q=0.8)
+    ref_tail = (
+        df.abs().rolling(5, min_periods=5).quantile(0.8).abs()
+        / df.abs().rolling(5, min_periods=5).quantile(0.2).abs()
+    )
+    _assert_equivalent(tail, ref_tail)

@@ -325,6 +325,16 @@ Pairwise / math:
     scale(df)                row-normalise so sum(|values|) == 1
     indneutralize(df, groups)  subtract per-group row mean
 
+Research-method primitives (causal trailing-window building blocks):
+    ts_zscore(df, n)         trailing z-score using the last n bars
+    rolling_beta(y, x, n)    trailing OLS beta of y on x
+    rolling_residual(y, x, n) current residual from trailing OLS y~x
+    rolling_autocorr(df, n, lag) trailing autocorr; use lag=1 unless justified
+    signed_area(x, y, n)     two-channel trailing path signed area
+    path_length(x, y, n)     two-channel trailing path length
+    tail_ratio(df, n, q)     upper-tail magnitude / lower-tail magnitude
+    sign_entropy(df, n)      entropy of positive / negative / zero signs
+
 Import them like::
 
     from quant_fund_agent.factors.ops import (
@@ -332,16 +342,18 @@ Import them like::
         ts_min, ts_max, ts_argmax, ts_argmin, ts_rank,
         correlation, covariance, signed_power, log, abs_,
         sign, adv, product, scale, decay_linear, power,
-        returns, vwap, indneutralize,
+        returns, vwap, indneutralize, ts_zscore,
+        rolling_beta, rolling_residual, rolling_autocorr,
+        signed_area, path_length, tail_ratio, sign_entropy,
     )
 
 == SURFACE B: pandas / numpy methods (called on the DataFrame) ==
 
 For everything else — defensive NaN handling, conditional masks,
-elementwise arithmetic — use the pandas DataFrame method or numpy
-function DIRECTLY.  Do NOT import them from ``ops``.
-If using external libraries like numpy, pandas etc. make sure to import
-them properly.
+elementwise arithmetic, and paper-specific deterministic transforms — use
+the pandas DataFrame method, numpy/scipy/statsmodels function, or a small
+helper function DIRECTLY.  Do NOT import them from ``ops``.
+If using external libraries, import them properly.
 
     df.fillna(0.0)               # fill NaN
     df.replace(0, np.nan)        # replace a value
@@ -353,6 +365,22 @@ them properly.
     df.rolling(n, min_periods=n).std()    # equivalent to stddev(df, n)
     np.log1p(df), np.sqrt(df), np.exp(df) # math
     pd.concat([a, b], axis=1)             # joining
+
+You are allowed to implement a method from a paper directly when the
+operator library does not already contain it, as long as the computation is:
+trailing-window / causal, vectorized over the panel, deterministic, and
+returns a DataFrame aligned to ``data["close"]``.  Do not water a paper down
+into a generic rank/mean/delta formula if its actual mechanism needs a richer
+transform.
+
+LEAKAGE RULES:
+    - no negative shifts/diffs/pct_change periods;
+    - no centered rolling windows;
+    - no fitting sklearn/statsmodels estimators inside ``calc`` on the full
+      panel.  Learned models need an explicit fit/predict interface outside
+      this factor class.  Approximate learned-paper ideas with causal trailing
+      statistics here, or state the mechanism in the hypothesis for a later
+      learned-factor extension.
 
 WRONG — these will all be rejected by the validator:
     from quant_fund_agent.factors.ops import fillna        # NO
@@ -375,8 +403,10 @@ EXAMPLE_FACTOR = '''\
 EXAMPLE OF A VALID FACTOR FILE
 ------------------------------
 This is a real factor that lives in ``factors/momentum/alpha_007.py``.
-Match this shape exactly: imports, ``@register_factor`` decorator,
-class attributes, positional ops calls.
+Match this file structure exactly: imports, ``@register_factor`` decorator,
+class attributes, and a ``calc`` method returning an aligned DataFrame.  The
+mechanism does NOT need to look like this example; use richer helper functions
+when the paper calls for them.
 
     """Alpha#7: signed-power of trailing close delta on high-volume bars."""
 
@@ -435,6 +465,16 @@ in the data we actually have.
 
 {papers_block}
 
+PAPER-TO-FACTOR STANDARD
+------------------------
+Read the paper like a researcher implementing a mechanism, not like a prompt
+asking for a familiar formula.  Extract the paper's actual object of interest
+(state variable, event process, path shape, residual, tail behaviour, regime,
+or interaction), map it to the fields available here, and implement the closest
+causal approximation.  You are not limited to minor recombinations of the
+existing seed alphas; creative, method-faithful transforms are welcome when
+they remain computable and leak-free.
+
 WHAT TO PRODUCE
 ---------------
 Propose exactly {n_ideas} distinct factor ideas.  Each idea must:
@@ -446,8 +486,8 @@ Propose exactly {n_ideas} distinct factor ideas.  Each idea must:
     volatility, microstructure, statistical_arbitrage, carry, sentiment,
     or other;
   - state a clear `trading_idea` — the *why*, in 2-4 sentences
-    grounded in market structure or behavioural finance, citing the
-    source paper(s) if relevant;
+    grounded in market structure, behavioural finance, or the scientific
+    method in the paper, citing the source paper(s) if relevant;
   - declare a `prediction_horizon` (positive integer number of bars) —
     the forward offset at which the signal's edge is expected to
     materialise (see the PREDICTION HORIZON note in the DATA CONTEXT);
@@ -456,7 +496,8 @@ Propose exactly {n_ideas} distinct factor ideas.  Each idea must:
     tickers, like the seed alphas);
   - be computable from the fields listed in the DATA CONTEXT above;
   - be reasonably diverse — do not propose two ideas that are minor
-    variations of the same signal.
+    variations of the same signal, and do not merely rename a standard
+    rolling mean/rank/correlation as a sophisticated paper concept.
 
 EXISTING FACTOR IDS (do NOT reuse)
 ----------------------------------
@@ -511,11 +552,13 @@ STRICT REQUIREMENTS
 -------------------
 1. Only import from these modules:
      - ``pandas`` (as pd) and ``numpy`` (as np) if needed
+     - ``scipy`` and ``statsmodels`` if needed for deterministic paper math
      - ``quant_fund_agent.factors.base``  (for BaseFactor)
      - ``quant_fund_agent.factors.registry`` (for register_factor)
      - ``quant_fund_agent.factors.ops`` (for the helper operators)
      - ``__future__`` annotations
-   Any other import will be rejected.
+   Scikit-learn model fitting is not allowed inside a factor ``calc``; learned
+   models require a separate fit/predict interface.
 2. Define exactly ONE class subclassing ``BaseFactor``, decorated with
    ``@register_factor``.
 3. The class MUST set the following class attributes:
@@ -546,9 +589,14 @@ STRICT REQUIREMENTS
    ``df.replace(0, np.nan)``, etc.  These are NOT in ``ops``.  Trying
    to ``from quant_fund_agent.factors.ops import fillna`` will be
    rejected by the validator.
-7. No I/O, no network, no ``os``, no ``open``, no ``eval``/``exec``,
+7. If the paper needs a transform not in ``ops``, implement it as a small
+   deterministic helper function in this file using pandas/numpy/scipy/
+   statsmodels.  It must use only information available at time t: trailing
+   windows, positive lags, no centered windows, no negative shifts, and no
+   full-panel model fitting.
+8. No I/O, no network, no ``os``, no ``open``, no ``eval``/``exec``,
    no ``__import__``.  No filesystem access.
-8. Add a short docstring at the top of the file with the trading idea
+9. Add a short docstring at the top of the file with the trading idea
    verbatim, and a one-line description at the top of the class.
 
 {feedback_block}
@@ -595,6 +643,10 @@ Most common causes, in order of frequency:
 
 4. Referenced a ``data[...]`` field that does not exist.  Only the
    fields listed in DATA CONTEXT are available.
+
+5. Used a future-looking construct (negative ``shift`` / ``diff`` /
+   ``pct_change`` period, centered rolling window, or a ``fit()`` call inside
+   ``calc``).  Rewrite it as a trailing-window deterministic transform.
 
 Re-read OPERATOR REFERENCE and DATA CONTEXT carefully, fix the
 specific issue named in the error message above, and produce the

@@ -38,6 +38,11 @@ hypothesis below.  Attack it on exactly these dimensions:
 4. REDUNDANCY — is it materially the same signal as something already in the
    book (listed below)?
 
+Do not penalize an idea merely because it is unfamiliar, nonlinear, or requires
+a non-standard deterministic transform.  Attack novelty only when the mechanism
+is incoherent, uncomputable from the data scope, leaky, or just a renamed common
+factor.
+
 DATA SCOPE (fields available this run)
 --------------------------------------
 {data_context}
