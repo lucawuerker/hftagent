@@ -97,21 +97,120 @@ def test_predictive_candidate_beats_noise():
     assert good_r.objective.marginal_value > 0
 
 
-def test_predictive_candidate_passes_gates_noise_fails_under_many_trials():
+def test_deflation_is_a_diagnostic_not_a_search_gate():
+    """WS1: N_trials deflation is no longer a per-candidate *search* gate — it is a
+    diagnostic here (``deflation_ok is None``) and is enforced once, at publish time
+    (``research_eval.publish``).  A lucky-noise factor therefore stays *search*-
+    selectable (the discovery half of the two modes), but its deflated t-stat under a
+    large trial count is not positive, so the publish filter will drop it."""
     panel, rng = _panel()
     cfg = _cfg()
     fwd = panel["close"].pct_change().shift(-1)
     good = fwd + 0.002 * rng.standard_normal((N_BARS, len(TICKERS)))
     noise = _noise(rng)
 
-    # under a large trial count the deflation gate should reject a lucky-noise factor
     params = EvalParams(n_trials=5000)
     good_r = evaluate_candidate(good, [], panel, cfg, params=params)
     noise_r = evaluate_candidate(noise, [], panel, cfg, params=params)
 
-    assert good_r.gates.deflation_ok is True
+    # deflation never gates search eligibility any more
+    assert good_r.gates.deflation_ok is None
+    assert noise_r.gates.deflation_ok is None
+    # but the deflated t-stat is still computed (teacher channel) and separates them
+    assert good_r.diagnostics["deflation"]["deflated_t"] > 0
+    assert (good_r.diagnostics["deflation"]["deflated_t"]
+            > noise_r.diagnostics["deflation"]["deflated_t"])
+    # the predictive factor still clears the *search* gates (coverage + degradation)
     assert good_r.selectable
-    assert not noise_r.selectable        # fails deflation and/or degradation
+
+
+# ── P5 economic reward (WS3): cost gate + perturbation robustness probe ────────
+
+def test_cost_gate_is_off_by_default_and_rejects_high_turnover_when_enabled():
+    panel, rng = _panel(seed=3)
+    cfg = _cfg()
+    fast = _frame(rng.standard_normal((N_BARS, len(TICKERS))))  # fast, high-turnover
+    # off by default → cost_ok not evaluated, but turnover is still a diagnostic
+    r_off = evaluate_candidate(fast, [], panel, cfg, params=EvalParams())
+    assert r_off.gates.cost_ok is None
+    assert r_off.diagnostics["turnover"] is not None
+    assert r_off.diagnostics["net_ret"] is not None
+    # enabled with a strict floor → the high-turnover factor is rejected
+    r_on = evaluate_candidate(fast, [], panel, cfg,
+                              params=EvalParams(gate_turnover=0.01))
+    assert r_on.gates.cost_ok is False
+    assert not r_on.selectable
+
+
+def test_perturbation_probe_only_lowers_robustness_when_enabled():
+    panel, rng = _panel(seed=4)
+    cfg = _cfg()
+    fwd = panel["close"].pct_change().shift(-1)
+    good = fwd + 0.01 * rng.standard_normal((N_BARS, len(TICKERS)))
+    base = evaluate_candidate(good, [], panel, cfg, params=EvalParams())
+    pert = evaluate_candidate(
+        good, [], panel, cfg,
+        params=EvalParams(perturbation_weight=5.0, perturbation_sigma=1.0))
+    # the probe is a penalty: it can only lower (or leave) robustness, never raise it
+    assert pert.objective.robustness <= base.objective.robustness + 1e-9
+    assert pert.diagnostics["perturbation_penalty"] is not None
+    assert pert.diagnostics["perturbation_penalty"] >= 0.0
+    # default run leaves the baseline arm untouched (no perturbation term)
+    assert base.diagnostics["perturbation_penalty"] is None
+
+
+# ── WS4: factor-zoo dedup novelty diagnostic (DIAG only, no gate) ──────────────
+
+def test_zoo_dedup_flags_a_rediscovered_factor():
+    panel, rng = _panel(seed=5)
+    cfg = _cfg()
+    fwd = panel["close"].pct_change().shift(-1)
+    known = fwd + 0.01 * rng.standard_normal((N_BARS, len(TICKERS)))
+    near_copy = known + 0.001 * rng.standard_normal((N_BARS, len(TICKERS)))
+    novel = _frame(rng.standard_normal((N_BARS, len(TICKERS))))  # orthogonal to `known`
+
+    ref_ids = ["known_alpha"]
+    # a near-copy of a reference factor → high max-|corr| (rediscovery flag)
+    r_copy = evaluate_candidate(near_copy, [], panel, cfg,
+                                reference_signals=[known], reference_ids=ref_ids,
+                                reference_codes=["x = close.pct_change()"],
+                                candidate_code="x = close.pct_change()")
+    assert r_copy.diagnostics["zoo_max_abs_corr"] > 0.8
+    assert r_copy.diagnostics["zoo_nearest"] == "known_alpha"
+    assert r_copy.diagnostics["zoo_min_code_distance"] == 0.0  # identical source
+    # a genuinely novel factor → low correlation to the reference
+    r_novel = evaluate_candidate(novel, [], panel, cfg,
+                                 reference_signals=[known], reference_ids=ref_ids,
+                                 candidate_code="y = volume.rolling(20).std()",
+                                 reference_codes=["x = close.pct_change()"])
+    assert r_novel.diagnostics["zoo_max_abs_corr"] < 0.3
+    # it is a DIAGNOSTIC, never a gate — novelty does not change selectability
+    assert r_copy.gates.to_dict()["passed"] == r_copy.selectable
+    # default (no reference) leaves the keys None
+    r_off = evaluate_candidate(novel, [], panel, cfg)
+    assert r_off.diagnostics["zoo_max_abs_corr"] is None
+
+
+# ── WS2: QD behavior descriptors (computed, but NOT scored) ────────────────────
+
+def test_behavior_descriptors_present_and_separate_from_objective():
+    from quant_fund_agent.research_eval.fitness import ObjectiveVector
+
+    panel, rng = _panel(seed=6)
+    cfg = _cfg()
+    fwd = panel["close"].pct_change().shift(-1)
+    sig = fwd + 0.01 * rng.standard_normal((N_BARS, len(TICKERS)))
+    r = evaluate_candidate(sig, [], panel, cfg)
+    # behavior descriptors are produced …
+    assert set(r.behavior) >= {"trend_reversal", "signal_speed", "stress_activation"}
+    assert r.behavior["signal_speed"] is not None
+    # … but they are NOT part of the scored objective vector (still exactly 5 axes)
+    assert ObjectiveVector.AXES == (
+        "marginal_value", "independence", "robustness", "parsimony",
+        "regime_independence")
+    assert "trend_reversal" not in ObjectiveVector.AXES
+    # round-trips through the MCP/state serialisation
+    assert r.to_dict()["behavior"]["signal_speed"] == r.behavior["signal_speed"]
 
 
 # ── independence axis (residual predictive content) ───────────────────────────

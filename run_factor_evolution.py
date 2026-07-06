@@ -64,6 +64,15 @@ def _parse_args() -> argparse.Namespace:
                    help="Purge this prerun's factors + evolution state first.")
     p.add_argument("--data-dir", default=os.getenv("DATA_DIR", "ticker_data"))
     p.add_argument("--n-tickers", type=int, default=15)
+    p.add_argument("--reference-book", default=None,
+                   help="Prebook file of reference factors (e.g. the ~86 base "
+                        "factors) for the novelty DIAG: the candidate's max-|corr| "
+                        "and code distance vs this set (WS4). Diagnostic only, no gate.")
+    p.add_argument("--memory", action="store_true",
+                   help="Enable the per-config cross-run experience memory (WS5): "
+                        "accumulate survivors + per-mechanism attempt/survival tallies "
+                        "across runs; steer next-run seeding away from exhausted "
+                        "mechanisms and feed the teacher channel.")
     p.add_argument("--fixed-book", default=None,
                    help="JSON prebook to condition SINGLE-mode fitness on without "
                         "inserting those factors into the archive, e.g. a Lasso "
@@ -81,6 +90,23 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--islands", type=int, default=1)
     p.add_argument("--migration-every", type=int, default=5)
     p.add_argument("--seed", type=int, default=0, help="RNG seed for the controller.")
+    # ── selection: NSGA-II Pareto vs QD behavior grid (WS2) ──
+    p.add_argument("--selection", choices=["nsga2", "qd"], default="nsga2",
+                   help="Parent-selection / archive mode. 'nsga2' (default): the "
+                        "Pareto archive drives selection. 'qd': a MAP-Elites behavior "
+                        "grid (trend_reversal × signal_speed) fills a diverse library "
+                        "while keeping the SAME 5-axis Pareto as per-cell quality.")
+    p.add_argument("--grid-dims", type=int, choices=[2, 3], default=2,
+                   help="QD behavior-grid dimensionality: 2 (trend×speed, default) or "
+                        "3 (+ stress_activation).")
+    p.add_argument("--cell-capacity", type=int, default=3,
+                   help="QD mini-Pareto elites kept per behavior cell (default 3).")
+    p.add_argument("--depth-gamma", type=float, default=0.0,
+                   help="P7 depth penalty (1-γ)^depth on QD parent sampling "
+                        "(0 = off; AlphaPROBE-style anti-overfit bias).")
+    p.add_argument("--reuse-omega", type=float, default=0.0,
+                   help="P7 parent-reuse penalty (1-ω)^reuse on QD parent sampling "
+                        "(0 = off; anti mode-collapse bias).")
 
     # ── operator mix ──
     p.add_argument("--p-llm", type=float, default=0.6, help="P(llm_semantic).")
@@ -155,6 +181,23 @@ def _parse_args() -> argparse.Namespace:
                         "variable, valuable only via vol×momentum) score a positive "
                         "marginal value; 'ridge' = additive-only (an ablation). Any "
                         "modeling.catalog id works (random_forest, xgboost, …).")
+    # ── economic realism (P5, WS3): folded in, no new axis; all default OFF ──
+    p.add_argument("--gate-turnover", type=float, default=None,
+                   help="Enable the cost_ok gate: reject a factor whose per-bar "
+                        "turnover (mean |Δposition|, ∈[0,2]) exceeds this floor. "
+                        "Default off — turnover/net-cost are still reported as "
+                        "diagnostics regardless.")
+    p.add_argument("--cost-rate", type=float, default=5e-4,
+                   help="Per-unit-turnover cost (≈5 bps) for the net-of-cost "
+                        "diagnostics (default 0.0005).")
+    p.add_argument("--perturbation-weight", type=float, default=0.0,
+                   help="Weight of the perturbation-fidelity probe folded into the "
+                        "robustness axis (0 = off, the baseline arm). >0 docks "
+                        "robustness by the sign-aligned VAL-IC drop under a Gaussian "
+                        "signal shock.")
+    p.add_argument("--perturbation-sigma", type=float, default=0.5,
+                   help="Stdev (in signal z-units) of the perturbation shock "
+                        "(default 0.5).")
 
     # ── two-stage curation (Lever 2) ──
     p.add_argument("--curation", choices=["archive", "greedy", "elastic_net"],
@@ -167,6 +210,14 @@ def _parse_args() -> argparse.Namespace:
                    help="Target number of factors to keep at curation "
                         "(default: auto-sized — greedy stops on no marginal gain, "
                         "elastic-net keeps those above the stability threshold).")
+    # ── selection-time deflation (WS1): multiple-testing honesty, moved off the
+    # per-candidate search gate onto the final published book ──
+    p.add_argument("--selection-deflation", choices=["off", "on"], default="off",
+                   help="Deflate the final book's COMBINED OOS IC for the run's "
+                        "N_trials at publish. 'off' (default): discovery mode — keep "
+                        "everything, deflation reported not enforced. 'on': validation "
+                        "mode — narrow the book (pruning by marginal contribution) to "
+                        "what beats selection luck.")
     return p.parse_args()
 
 
@@ -216,6 +267,11 @@ def main() -> None:
     if fixed_book:
         log.info("Conditioning fitness on fixed book: %d factor(s) from %s",
                  len(fixed_book), args.fixed_book)
+    reference_book = (book_entries(load_prebook(args.reference_book))
+                      if args.reference_book else [])
+    if reference_book:
+        log.info("Novelty diagnostic vs reference book: %d factor(s) from %s",
+                 len(reference_book), args.reference_book)
 
     cfg = EvolutionRunConfig(
         generations=args.generations,
@@ -224,6 +280,11 @@ def main() -> None:
         n_islands=args.islands,
         migration_every=args.migration_every,
         seed=args.seed,
+        selection=args.selection,
+        grid_dims=args.grid_dims,
+        cell_capacity=args.cell_capacity,
+        depth_gamma=args.depth_gamma,
+        reuse_omega=args.reuse_omega,
         unit=args.evolution_unit,
         set_size=args.set_size,
         p_llm_semantic=args.p_llm,
@@ -246,11 +307,19 @@ def main() -> None:
         regime_kind=args.regime_kind,
         regime_quantile=args.regime_quantile,
         marginal_model=args.marginal_model,
+        gate_turnover=args.gate_turnover,
+        cost_rate=args.cost_rate,
+        perturbation_weight=args.perturbation_weight,
+        perturbation_sigma=args.perturbation_sigma,
         curation=args.curation,
         n_keep=args.n_keep,
+        selection_deflation=args.selection_deflation,
         data_dir=args.data_dir,
         n_tickers=args.n_tickers,
         fixed_book=fixed_book,
+        reference_book=reference_book,
+        memory=args.memory,
+        memory_config=config_name,
         out_dir=str(scope.dir / "evolution"),
     )
 
@@ -280,9 +349,11 @@ def main() -> None:
         data_dir=args.data_dir, n_tickers=args.n_tickers,
         curation=args.curation, n_keep=args.n_keep,
         is_frac=args.is_frac, val_frac=args.val_frac, fields=loop.fields,
-        marginal_model=args.marginal_model)
+        marginal_model=args.marginal_model,
+        selection_deflation=args.selection_deflation)
     summary["persisted_factor_ids"] = persisted["kept_factor_ids"]
     summary["curation"] = args.curation
+    summary["selection_deflation"] = args.selection_deflation
 
     scope.write_manifest(
         llm_model=model, llm_provider=provider, engine="evolution",

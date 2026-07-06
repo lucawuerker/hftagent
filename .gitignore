@@ -55,3 +55,8 @@ data/lobster_drop/
 
 literature.txt
 notes.txt
+
+# Local research notes & external-source attribution log (competitive-landscape
+# reports, deep-research syntheses). Working documents, not part of the shipped
+# codebase, so left untracked.
+research_docs/

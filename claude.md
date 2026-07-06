@@ -122,6 +122,39 @@ still drives parent selection and marginal scoring. Tests:
 `tests/test_research_eval_curation.py`, extended
 `test_research_eval_{fitness,harness}.py`, `test_evolution_{controller,loop}.py`.
 
+**Evolutionary researcher — QD grid, selection-time deflation, economic reward,
+experience memory (done).** Five additions from a competitive-landscape review
+(`research_docs/`, gitignored; source attribution log in `research_docs/SOURCES.md`,
+which must be updated whenever an external idea is implemented). **(WS1) Deflation
+moved off the per-candidate search gate onto a shared *publish* filter**
+(`research_eval/publish.py`) run once at materialise over **every** book source
+(archive / kept-pool / greedy-elastic / QD elites); it deflates the **combined-book /
+marginal (LOCO)** statistic (never standalone `|val_ic|`, which would kill
+complementary factors) and prunes by marginal contribution. Search vs publish
+eligibility is now explicit (`search_selectable` = gates minus deflation;
+`publish_selectable` decided at the end). `--selection-deflation {off=discovery,
+on=validation}`. **(WS2) A Quality-Diversity behavior grid** (`evolution/qd.py`
+`QDArchive`, `--selection {nsga2,qd}`, default nsga2) fills a *diverse* library where
+NSGA-II converges: cells keyed by leak-free behavior descriptors — `trend_reversal`
+(fade↔momentum), `signal_speed` (slow↔fast), `stress_activation` (3rd axis at
+`--grid-dims 3`) — computed by the harness onto `FitnessResult.behavior` (NOT scored;
+the 5-axis Pareto is untouched). Each cell is a capped mini-Pareto (`--cell-capacity`)
+pruned by the existing crowding/dominance; parent selection samples cell→elite with an
+optional **AlphaPROBE depth/parent-reuse bias** (`--depth-gamma --reuse-omega`);
+fixed/frozen bin edges (never rebinned). **(WS3) Economic reward folded in, no new
+axis**: a `cost_ok` turnover gate via an explicit shared position construction
+(`backtesting/positions.py`, not `vector_backtest`) + a **perturbation-fidelity**
+robustness probe (`--gate-turnover --cost-rate --perturbation-weight`); all default OFF
+so baseline arms are byte-identical. **(WS4) Factor-zoo dedup DIAG** (`_zoo_dedup`):
+candidate max-|corr| + code distance + nearest id vs a `--reference-book` (~86 base
+factors), diagnostic only. **(WS5) Per-config cross-run experience memory**
+(`knowledge/experience.py`, `--memory`): stamps survivor performance AND per-mechanism
+attempt/survival tallies (negative evidence → exhaustion detectable), steering next-run
+seeding away from exhausted mechanisms and splicing a summary into the teacher. Tests:
+`tests/test_research_eval_publish.py`, `test_evolution_qd.py`, `test_knowledge_memory.py`,
+extended `test_research_eval_harness.py` + `test_evolution_loop.py`. Notebooks updated
+(`notebooks/…_walkthrough.ipynb` §10, `…_live_run.ipynb`).
+
 **Walk-forward backtest: prerun factor-injection + rich analytics (done).** The
 walk-forward harness (`run_backtest.py` + `quant_fund_agent/simulation/`) now has
 a second **factor source** besides LLM research: `--factor-source prerun_inject`

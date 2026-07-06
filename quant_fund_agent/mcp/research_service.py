@@ -555,6 +555,7 @@ def evaluate_fitness(
     candidate: dict[str, Any],
     book: list[dict[str, Any]] | None = None,
     jitter: list[dict[str, Any]] | None = None,
+    reference: list[dict[str, Any]] | None = None,
     *,
     target_horizon: int = 6,
     is_frac: float = 0.6,
@@ -571,6 +572,10 @@ def evaluate_fitness(
     regime_kind: str = "drawdown",
     regime_quantile: float = 0.2,
     marginal_model: str = "gradient_boosting",
+    gate_turnover: float | None = None,
+    cost_rate: float = 5e-4,
+    perturbation_weight: float = 0.0,
+    perturbation_sigma: float = 0.5,
 ) -> dict[str, Any]:
     """Deterministically score one candidate program against the current book.
 
@@ -634,13 +639,29 @@ def evaluate_fitness(
             log.warning("[evaluate_fitness] jitter probe %s failed (%s) — skipped",
                         prog.get("factor_id"), e)
 
+    # reference "factor zoo" for the novelty diagnostic (WS4) — DIAG only
+    ref_sigs: list[Any] = []
+    ref_ids: list[str] = []
+    ref_codes: list[str] = []
+    for prog in (reference or []):
+        try:
+            ref_sigs.append(_cached_signal(prog, panel_dev, panel_key, cutoff_date))
+            ref_ids.append(prog.get("factor_id", "?"))
+            ref_codes.append(prog.get("code", ""))
+        except Exception as e:  # noqa: BLE001
+            log.warning("[evaluate_fitness] reference %s failed (%s) — skipped",
+                        prog.get("factor_id"), e)
+
     cfg = ComparisonConfig(preruns=["evolution"], target_horizon=target_horizon,
                            fit_standardize="per_underlying", seed=0)
     params = EvalParams(n_trials=max(1, int(n_trials)), cpcv_groups=cpcv_groups,
                         cpcv_k=cpcv_k, embargo=embargo,
                         independence_metric=independence_metric,
                         regime_kind=regime_kind, regime_quantile=regime_quantile,
-                        marginal_model=marginal_model)
+                        marginal_model=marginal_model,
+                        gate_turnover=gate_turnover, cost_rate=cost_rate,
+                        perturbation_weight=perturbation_weight,
+                        perturbation_sigma=perturbation_sigma)
 
     sign_raw = candidate.get("expected_sign")
     expected_sign = int(sign_raw) if sign_raw in (1, -1, "1", "-1") else None
@@ -653,6 +674,9 @@ def evaluate_fitness(
             expected_sign=expected_sign,
             candidate_id=candidate.get("factor_id", "candidate"),
             jitter_signals=jitter_sigs or None,
+            reference_signals=ref_sigs or None,
+            reference_ids=ref_ids or None,
+            reference_codes=ref_codes or None,
         )
     except Exception as e:  # noqa: BLE001 — surface, don't crash the loop
         return {"ok": False, "error": f"evaluation failed: {e}"}
@@ -678,6 +702,10 @@ def evaluate_set_fitness(
     regime_kind: str = "drawdown",
     regime_quantile: float = 0.2,
     marginal_model: str = "gradient_boosting",
+    gate_turnover: float | None = None,
+    cost_rate: float = 5e-4,
+    perturbation_weight: float = 0.0,
+    perturbation_sigma: float = 0.5,
 ) -> dict[str, Any]:
     """SET mode: deterministically score a whole factor set as one genome.
 
@@ -720,7 +748,10 @@ def evaluate_set_fitness(
     params = EvalParams(n_trials=max(1, int(n_trials)), cpcv_groups=cpcv_groups,
                         cpcv_k=cpcv_k, embargo=embargo,
                         regime_kind=regime_kind, regime_quantile=regime_quantile,
-                        marginal_model=marginal_model)
+                        marginal_model=marginal_model,
+                        gate_turnover=gate_turnover, cost_rate=cost_rate,
+                        perturbation_weight=perturbation_weight,
+                        perturbation_sigma=perturbation_sigma)
     try:
         result = evaluate_set(member_signals, panel_dev, cfg, split, params=params,
                               member_codes=member_codes, candidate_id=candidate_id)
@@ -890,6 +921,73 @@ def curate_book(
             seed=seed)
     except Exception as e:  # noqa: BLE001
         return {"ok": False, "error": f"curation failed: {e}"}
+    res["ok"] = True
+    res["n_pool"] = len(signals)
+    return _json_safe(res)
+
+
+def publish_book(
+    book: list[dict[str, Any]],
+    *,
+    n_trials: int = 1,
+    mode: str = "on",
+    target_horizon: int = 6,
+    is_frac: float = 0.6,
+    val_frac: float = 0.2,
+    cutoff_date: str | None = None,
+    data_dir: str = "ticker_data",
+    n_tickers: int | None = 15,
+    fields: list[str] | None = None,
+    marginal_model: str = "gradient_boosting",
+) -> dict[str, Any]:
+    """Apply the selection-time deflation *publish* filter to a final book (WS1).
+
+    Compiles every ``book`` member's signal on the **development** panel (IS∪VAL,
+    TEST sliced off exactly as in :func:`curate_book`), then runs
+    :func:`quant_fund_agent.research_eval.publish.publish_filter` — deflating the
+    book's **combined** OOS IC for ``n_trials`` and, in ``mode='on'``, narrowing the
+    book (pruning by marginal contribution) to what beats selection luck.  Returns
+    ``{"ok": True, "kept_factor_ids": [...], "passed", "deflated", ...}``.
+    """
+    from quant_fund_agent.comparison.config import ComparisonConfig
+    from quant_fund_agent.research_eval import publish
+    from quant_fund_agent.research_eval.splits import ThreeWaySplit, three_way_split
+
+    if fields is None:
+        fields = ["open", "high", "low", "close", "volume"]
+    if not book:
+        return {"ok": True, "kept_factor_ids": [], "passed": True, "mode": mode}
+
+    panel_key = _panel_cache_key(data_dir, sorted(fields), n_tickers)
+    panel_full = _load_panel_cached(data_dir, sorted(fields), n_tickers=n_tickers)
+    panel = _slice_panel_to_cutoff(panel_full, _parse_cutoff(cutoff_date))
+    full_split = three_way_split(panel["close"].index, is_frac=is_frac, val_frac=val_frac)
+    dev_mask = full_split.is_val_mask
+    panel_dev = _slice_panel_to_mask(panel, dev_mask)
+    split = ThreeWaySplit(
+        is_mask=full_split.is_mask[dev_mask],
+        val_mask=full_split.val_mask[dev_mask],
+        test_mask=full_split.test_mask[dev_mask],
+    )
+
+    signals: dict[str, Any] = {}
+    for prog in book:
+        fid = prog.get("factor_id", "?")
+        try:
+            signals[fid] = _cached_signal(prog, panel_dev, panel_key, cutoff_date)
+        except Exception as e:  # noqa: BLE001 — a broken member is dropped, not fatal
+            log.warning("[publish_book] %s failed (%s) — skipped", fid, e)
+    if not signals:
+        return {"ok": False, "error": "no book member produced a signal"}
+
+    cfg = ComparisonConfig(preruns=["evolution"], target_horizon=target_horizon,
+                           fit_standardize="per_underlying", seed=0)
+    try:
+        res = publish.publish_filter(
+            signals, panel_dev["close"], cfg, split, n_trials,
+            mode=mode, marginal_model=marginal_model)
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "error": f"publish filter failed: {e}"}
     res["ok"] = True
     res["n_pool"] = len(signals)
     return _json_safe(res)

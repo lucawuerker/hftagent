@@ -85,6 +85,7 @@ def evaluate_fitness(
     candidate: dict,
     book: list[dict] | None = None,
     jitter: list[dict] | None = None,
+    reference: list[dict] | None = None,
     target_horizon: int = 6,
     is_frac: float = 0.6,
     val_frac: float = 0.2,
@@ -100,19 +101,25 @@ def evaluate_fitness(
     regime_kind: str = "drawdown",
     regime_quantile: float = 0.2,
     marginal_model: str = "gradient_boosting",
+    gate_turnover: float | None = None,
+    cost_rate: float = 5e-4,
+    perturbation_weight: float = 0.0,
+    perturbation_sigma: float = 0.5,
 ) -> str:
     """Deterministically score one candidate factor program against the book
     (in-memory compile → research_eval harness).  Returns JSON
     ``{"ok": bool, "fitness"?: {...}, "error"?: str}``.
     """
     return json.dumps(svc.evaluate_fitness(
-        candidate, book, jitter,
+        candidate, book, jitter, reference,
         target_horizon=target_horizon, is_frac=is_frac, val_frac=val_frac,
         n_trials=n_trials, cpcv_groups=cpcv_groups, cpcv_k=cpcv_k,
         embargo=embargo, cutoff_date=cutoff_date, data_dir=data_dir,
         n_tickers=n_tickers, fields=fields,
         independence_metric=independence_metric, regime_kind=regime_kind,
         regime_quantile=regime_quantile, marginal_model=marginal_model,
+        gate_turnover=gate_turnover, cost_rate=cost_rate,
+        perturbation_weight=perturbation_weight, perturbation_sigma=perturbation_sigma,
     ))
 
 
@@ -134,6 +141,10 @@ def evaluate_set_fitness(
     regime_kind: str = "drawdown",
     regime_quantile: float = 0.2,
     marginal_model: str = "gradient_boosting",
+    gate_turnover: float | None = None,
+    cost_rate: float = 5e-4,
+    perturbation_weight: float = 0.0,
+    perturbation_sigma: float = 0.5,
 ) -> str:
     """SET mode: score a whole factor set jointly (its own combined-model OOS
     IC is the primary axis).  Returns JSON ``{"ok": bool, "fitness"?: {...}}``.
@@ -145,6 +156,8 @@ def evaluate_set_fitness(
         data_dir=data_dir, n_tickers=n_tickers, fields=fields,
         candidate_id=candidate_id, regime_kind=regime_kind,
         regime_quantile=regime_quantile, marginal_model=marginal_model,
+        gate_turnover=gate_turnover, cost_rate=cost_rate,
+        perturbation_weight=perturbation_weight, perturbation_sigma=perturbation_sigma,
     ))
 
 
@@ -193,6 +206,32 @@ def curate_book(
         data_dir=data_dir, n_tickers=n_tickers, fields=fields,
         marginal_model=marginal_model, en_threshold=en_threshold,
         en_l1_ratio=en_l1_ratio, seed=seed,
+    ))
+
+
+@mcp.tool()
+def publish_book(
+    book: list[dict],
+    n_trials: int = 1,
+    mode: str = "on",
+    target_horizon: int = 6,
+    is_frac: float = 0.6,
+    val_frac: float = 0.2,
+    cutoff_date: str | None = None,
+    data_dir: str = "ticker_data",
+    n_tickers: int | None = 15,
+    fields: list[str] | None = None,
+    marginal_model: str = "gradient_boosting",
+) -> str:
+    """Selection-time deflation publish filter (WS1): deflate the book's combined
+    OOS IC for ``n_trials`` and, in ``mode='on'``, narrow the book (pruning by
+    marginal contribution) to what beats selection luck.  Returns JSON
+    ``{"ok": bool, "kept_factor_ids": [...], "passed": bool, "deflated": {...}}``."""
+    return json.dumps(svc.publish_book(
+        book, n_trials=n_trials, mode=mode, target_horizon=target_horizon,
+        is_frac=is_frac, val_frac=val_frac, cutoff_date=cutoff_date,
+        data_dir=data_dir, n_tickers=n_tickers, fields=fields,
+        marginal_model=marginal_model,
     ))
 
 

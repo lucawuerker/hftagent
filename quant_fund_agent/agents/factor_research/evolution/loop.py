@@ -77,6 +77,13 @@ class EvolutionRunConfig:
     unit: str = "single"               # "single" | "set"
     set_size: int = 3                  # initial members per SET genome
 
+    # ── selection: NSGA-II Pareto vs QD behavior grid (WS2) ──
+    selection: str = "nsga2"           # "nsga2" (default) | "qd" (MAP-Elites grid)
+    grid_dims: int = 2                 # QD grid dims: 2 (trend×speed) | 3 (+stress)
+    cell_capacity: int = 3             # QD mini-Pareto elites per cell
+    depth_gamma: float = 0.0           # P7 depth penalty on QD parent sampling (0 = off)
+    reuse_omega: float = 0.0           # P7 parent-reuse penalty on QD parent sampling
+
     # ── operator mix (probabilities; renormalised) ──
     p_llm_semantic: float = 0.6
     p_crossover: float = 0.25
@@ -116,6 +123,13 @@ class EvolutionRunConfig:
     # state variable) scores a positive marginal value; "ridge" = additive-only.
     marginal_model: str = "gradient_boosting"
 
+    # ── economic realism (P5, WS3) — folded in, no new axis; all default OFF so the
+    # baseline arm is unchanged, enabled as an ablation dimension ──
+    gate_turnover: float | None = None         # cost_ok gate floor (None = off)
+    cost_rate: float = 5e-4                     # net-of-cost DIAG cost per unit turnover
+    perturbation_weight: float = 0.0           # robustness perturbation probe weight (0 = off)
+    perturbation_sigma: float = 0.5            # perturbation shock stdev (z-units)
+
     # ── two-stage curation (Lever 2): keep every gate-passer, curate once ──
     # "archive": the one-stage default — persist the Pareto archive (old behaviour).
     # "greedy"/"elastic_net": persist the curated kept-pool instead, so the final
@@ -123,10 +137,24 @@ class EvolutionRunConfig:
     curation: str = "archive"
     n_keep: int | None = None                  # target book size (None → auto-sized)
 
+    # ── selection-time deflation (WS1): the multiple-testing honesty control, moved
+    # off the per-candidate search gate onto the final published book.  "off"
+    # (default) = discovery mode (keep everything, deflation reported not enforced);
+    # "on" = validation mode (narrow the book, pruning by marginal contribution, to
+    # what beats selection luck for the run's N_trials). ──
+    selection_deflation: str = "off"
+
     # ── data ──
     data_dir: str = "ticker_data"
     n_tickers: int | None = 15
     fixed_book: list[dict[str, Any]] = field(default_factory=list)
+    # reference "factor zoo" (e.g. the ~86 base factors) for the novelty DIAG (WS4);
+    # {"factor_id","code"} dicts.  Empty = novelty diagnostic off.
+    reference_book: list[dict[str, Any]] = field(default_factory=list)
+
+    # ── cross-run experience memory (P6, WS5) — per-config, opt-in ──
+    memory: bool = False               # accumulate survivors + attempt tallies across runs
+    memory_config: str | None = None   # config name → memory file path (per-config keyed)
 
     # ── output ──
     out_dir: str = "data/evolution"    # overridden by the entrypoint to the scope dir
@@ -427,6 +455,11 @@ class EvolutionLoop:
             n_islands=cfg.n_islands,
             migration_every=cfg.migration_every,
             seed=cfg.seed,
+            selection=cfg.selection,
+            grid_dims=cfg.grid_dims,
+            cell_capacity=cfg.cell_capacity,
+            depth_gamma=cfg.depth_gamma,
+            reuse_omega=cfg.reuse_omega,
         ))
         self.briefs: dict[str, str] = {}      # genome_id → reflection brief
         self.fields = fields                   # run-constant field set (panel cache key)
@@ -434,6 +467,30 @@ class EvolutionLoop:
         self.out_dir = Path(cfg.out_dir)
         self.known_ids: set[str] = set()
         self.failures: list[dict[str, Any]] = []
+
+        # ── experience memory (WS5): load the per-config graph, read the exhausted /
+        # summary steering signals up front (they reflect PRIOR runs) ──
+        self.memory = None
+        self._memory_path = None
+        self._exhausted_mechs: list[str] = []
+        self._memory_brief: str = ""
+        self._mech_by_genome: dict[str, str] = {}   # genome_id → mechanism (child inherit)
+        if cfg.memory:
+            from quant_fund_agent.knowledge import experience
+            self._memory_path = experience.memory_graph_path(
+                cfg.memory_config or "default")
+            self.memory = experience.load_or_new(self._memory_path)
+            self._exhausted_mechs = experience.exhausted_mechanisms(self.memory)
+            self._memory_brief = experience.memory_summary(self.memory)
+            log.info("experience memory: %s (exhausted: %s)",
+                     self._memory_path, self._exhausted_mechs or "none")
+            # READ seam: steer seeding/codegen away from exhausted mechanisms.
+            if self._exhausted_mechs:
+                self.data_context = (
+                    self.data_context
+                    + "\n\nEXPERIENCE MEMORY — AVOID these exhausted mechanisms (many "
+                      "prior attempts, little OOS edge); prefer novel angles: "
+                    + ", ".join(self._exhausted_mechs) + ".")
         self._llms: dict[str, Any] = {}    # role → chat model (built lazily)
         self._program_pool: dict[str, FactorProgram] = {}  # every program ever admitted
         self.fixed_book = self._dedupe_fixed_book(cfg.fixed_book)
@@ -520,11 +577,16 @@ class EvolutionLoop:
         probes = [{"factor_id": pid, "code": pcode}
                   for pid, pcode in jitter_variants(program, self.cfg.plateau_scales)]
 
+        reference = [{"factor_id": r["factor_id"], "code": r["code"]}
+                     for r in self.cfg.reference_book
+                     if r.get("factor_id") != program.factor_id]
+
         res = research_client.evaluate_fitness(
             candidate={"factor_id": program.factor_id, "code": program.code,
                        "expected_sign": program.expected_sign},
             book=book,
             jitter=probes,
+            reference=reference or None,
             target_horizon=self.cfg.target_horizon,
             is_frac=self.cfg.is_frac,
             val_frac=self.cfg.val_frac,
@@ -540,6 +602,10 @@ class EvolutionLoop:
             regime_kind=self.cfg.regime_kind,
             regime_quantile=self.cfg.regime_quantile,
             marginal_model=self.cfg.marginal_model,
+            gate_turnover=self.cfg.gate_turnover,
+            cost_rate=self.cfg.cost_rate,
+            perturbation_weight=self.cfg.perturbation_weight,
+            perturbation_sigma=self.cfg.perturbation_sigma,
         )
         if not res.get("ok"):
             log.info("[%s] evaluation failed: %s", program.factor_id, res.get("error"))
@@ -571,6 +637,10 @@ class EvolutionLoop:
             regime_kind=self.cfg.regime_kind,
             regime_quantile=self.cfg.regime_quantile,
             marginal_model=self.cfg.marginal_model,
+            gate_turnover=self.cfg.gate_turnover,
+            cost_rate=self.cfg.cost_rate,
+            perturbation_weight=self.cfg.perturbation_weight,
+            perturbation_sigma=self.cfg.perturbation_sigma,
         )
         if not res.get("ok"):
             log.info("[%s] set evaluation failed: %s", candidate_id, res.get("error"))
@@ -618,15 +688,71 @@ class EvolutionLoop:
         for p in genome.programs:
             self.known_ids.add(p.factor_id)
             self._program_pool.setdefault(p.factor_id, p)
-        self.briefs[genome.genome_id] = mutation_brief(
-            fitness, book_size=self._book_size())
+        # WS5: tally this scored candidate against its mechanism — survivors AND
+        # failures (the negative evidence that makes exhaustion detectable).
+        if self.memory is not None:
+            from quant_fund_agent.knowledge import experience
+            topic = self._memory_topic(genome)
+            if topic:
+                genome.metadata["mechanism"] = topic
+                self._mech_by_genome[genome.genome_id] = topic
+            experience.record_attempt(
+                self.memory, topic, survived=eg.selectable,
+                marginal=eg.fitness.objective.marginal_value,
+                generation=genome.generation)
+        self.briefs[genome.genome_id] = self._with_memory(
+            mutation_brief(fitness, book_size=self._book_size()))
         return eg
+
+    def _memory_topic(self, genome: Genome) -> str | None:
+        """Mechanism-like key for the memory: an explicit mechanism tag (GraphRAG)
+        if present, else inherited from a parent, else the factor's category."""
+        m = genome.metadata.get("mechanism")
+        if m:
+            return m
+        for pid in genome.parent_ids:
+            pm = self._mech_by_genome.get(pid)
+            if pm:
+                return pm
+        for p in genome.programs:
+            if p.category:
+                return p.category
+        return None
+
+    def _with_memory(self, brief: str) -> str:
+        """Splice the experience-memory summary into a teacher brief (WS5)."""
+        return f"{brief}\n\n{self._memory_brief}" if self._memory_brief else brief
+
+    def _write_memory(self) -> None:
+        """Writeback: stamp survivors' realized performance + refresh mechanism
+        coverage, then persist the per-config memory graph (WS5)."""
+        if self.memory is None or self._memory_path is None:
+            return
+        from quant_fund_agent.knowledge import experience
+        from quant_fund_agent.knowledge.empirical_edges import refresh_mechanism_coverage
+
+        factor_ics: dict[str, float | None] = {}
+        for eg in self.controller.accepted_book():
+            topic = self._memory_topic(eg.genome)
+            for p in eg.genome.programs:
+                experience.record_survivor(
+                    self.memory, p.factor_id,
+                    objective=eg.fitness.objective.to_dict(),
+                    val_ic=eg.fitness.diagnostics.get("val_ic"),
+                    marginal_value=eg.fitness.objective.marginal_value,
+                    generation=eg.genome.generation, verdict="kept",
+                    mechanism_name=topic)
+                factor_ics[p.factor_id] = eg.fitness.diagnostics.get("val_ic")
+        refresh_mechanism_coverage(self.memory, factor_ics)
+        self.memory.save(self._memory_path)
+        log.info("experience memory saved → %s (%s)", self._memory_path,
+                 self.memory.summary())
 
     # ── operators ──
 
     def _brief_for(self, eg: EvaluatedGenome) -> str:
-        return self.briefs.get(eg.genome.genome_id) or mutation_brief(
-            eg.fitness, book_size=self._book_size())
+        return self.briefs.get(eg.genome.genome_id) or self._with_memory(
+            mutation_brief(eg.fitness, book_size=self._book_size()))
 
     def _book_size(self) -> int:
         archive_ids = {fid for fid, _ in self.controller.archive_programs()}
@@ -955,6 +1081,7 @@ class EvolutionLoop:
                      gen, made, cfg.children_per_generation,
                      len(self.controller.archive), self.controller.n_trials)
 
+        self._write_memory()   # WS5: persist survivors + attempt tallies for the next run
         return self.summary(time.time() - t0)
 
     def summary(self, elapsed: float) -> dict[str, Any]:
@@ -986,6 +1113,7 @@ def persist_archive(controller: EvolutionController, *, session_id: str,
                     is_frac: float = 0.6, val_frac: float = 0.2,
                     fields: Sequence[str] | None = None,
                     marginal_model: str = "gradient_boosting",
+                    selection_deflation: str = "off",
                     ) -> dict[str, list[str]]:
     """Materialise the final book into real factor files + DB records.
 
@@ -1011,9 +1139,12 @@ def persist_archive(controller: EvolutionController, *, session_id: str,
         TradingIdeaCategory,
     )
 
-    # ── choose the source book (archive vs the full kept-pool) ──
+    # ── choose the source book (archive/QD-cell-elites vs the full kept-pool) ──
+    # `accepted_book()` returns the QD behavior-grid cell elites in QD mode, else the
+    # Pareto archive — so the default (curation="archive") persist path is the union
+    # of cell elites under QD, exactly as designed.
     use_pool = curation != "archive" and bool(controller.kept_pool)
-    source = controller.kept_pool if use_pool else controller.archive
+    source = controller.kept_pool if use_pool else controller.accepted_book()
     prog_by_fid: dict[str, tuple[EvaluatedGenome, FactorProgram]] = {}
     for eg in source:
         for prog in eg.genome.programs:
@@ -1040,6 +1171,32 @@ def persist_archive(controller: EvolutionController, *, session_id: str,
         else:
             log.warning("curation (%s) failed: %s — persisting the full pool",
                         curation, res.get("error"))
+
+    # ── WS1: selection-time deflation publish filter (runs for EVERY source —
+    #        archive, curated kept-pool, or QD cell elites — before materialise) ──
+    publish_info: dict[str, Any] | None = None
+    if selection_deflation == "on" and kept_ids:
+        pub_book = [{"factor_id": fid, "code": prog_by_fid[fid][1].code}
+                    for fid in kept_ids]
+        pres = research_client.publish_book(
+            pub_book, n_trials=controller.n_trials, mode=selection_deflation,
+            target_horizon=target_horizon, is_frac=is_frac, val_frac=val_frac,
+            cutoff_date=cutoff_date, data_dir=data_dir, n_tickers=n_tickers,
+            fields=list(fields) if fields else None, marginal_model=marginal_model)
+        if pres.get("ok"):
+            pub_kept = [fid for fid in pres.get("kept_factor_ids", [])
+                        if fid in prog_by_fid]
+            publish_info = {k: pres.get(k) for k in
+                            ("passed", "combined_ic", "deflated", "n_trials",
+                             "dropped", "mode") if k in pres}
+            log.info("publish deflation (N_trials=%d) kept %d/%d (passed=%s, dropped=%s)",
+                     controller.n_trials, len(pub_kept), len(kept_ids),
+                     pres.get("passed"), pres.get("dropped"))
+            if pub_kept:
+                kept_ids = pub_kept
+        else:
+            log.warning("publish deflation failed: %s — persisting un-deflated book",
+                        pres.get("error"))
 
     materialised: list[tuple[EvaluatedGenome, FactorProgram, str]] = []
     for fid in kept_ids:
@@ -1106,6 +1263,8 @@ def persist_archive(controller: EvolutionController, *, session_id: str,
                     "gates": eg.fitness.gates.to_dict(),
                     "n_trials_at_eval": eg.fitness.diagnostics.get("n_trials"),
                     "curation": curation,
+                    "selection_deflation": selection_deflation,
+                    "publish": publish_info,
                 },
             },
         )

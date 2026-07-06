@@ -168,6 +168,15 @@ class ControllerConfig:
     migration_every: int = 5           # generations between elite migrations
     migration_k: int = 1               # elites moved per island per migration
     seed: int = 0
+    # ── QD selection (WS2) ──
+    # "nsga2" (default): the Pareto archive drives parent selection (existing arm).
+    # "qd": a MAP-Elites behavior grid drives parent selection + the accepted book,
+    # keeping the SAME 5-axis Pareto as the per-cell quality (a clean ablation arm).
+    selection: str = "nsga2"
+    grid_dims: int = 2                 # QD behavior-grid dimensionality (2 or 3)
+    cell_capacity: int = 3             # QD mini-Pareto elites per cell
+    depth_gamma: float = 0.0           # P7 depth penalty on QD parent sampling (0 = off)
+    reuse_omega: float = 0.0           # P7 parent-reuse penalty on QD parent sampling
 
 
 class EvolutionController:
@@ -190,6 +199,21 @@ class EvolutionController:
         self.generation: int = 0
         self.lineage: list[dict[str, Any]] = []
         self._fingerprints: set[str] = set()
+        # ── QD selection (WS2): a behavior grid alongside the Pareto archive ──
+        self.qd = None
+        if self.config.selection == "qd":
+            from quant_fund_agent.agents.factor_research.evolution.qd import (
+                QDArchive,
+                QDConfig,
+            )
+            self.qd = QDArchive(QDConfig(
+                grid_dims=self.config.grid_dims,
+                cell_capacity=self.config.cell_capacity,
+                depth_gamma=self.config.depth_gamma,
+                reuse_omega=self.config.reuse_omega,
+            ))
+        # P7: how many times each genome has been drawn as a parent (QD sampling bias)
+        self.parent_reuse: dict[str, int] = {}
 
     # ── trials / dedup ──
 
@@ -226,6 +250,8 @@ class EvolutionController:
             self.islands[island_idx] = [island[i] for _, _, i in keep]
 
         self._update_archive(evaluated)
+        if self.qd is not None:
+            self.qd.insert(evaluated)   # QD behavior grid (only gate-passers occupy cells)
         if evaluated.selectable:
             fp = genome.code_fingerprint()
             if fp not in self._pool_fingerprints:
@@ -279,13 +305,27 @@ class EvolutionController:
         tournaments — the classic NSGA-II parent-selection pressure: mostly the
         front, but diverse and occasionally an underdog.
         """
+        # ── QD parent selection: sample an occupied cell → one elite (P7-biased) ──
+        if self.qd is not None and self.qd.n_cells() > 0:
+            parents: list[EvaluatedGenome] = []
+            for _ in range(k):
+                eg = self.qd.sample_parent(self.rng, reuse_counts=self.parent_reuse)
+                if eg is None:
+                    break
+                self.parent_reuse[eg.genome.genome_id] = \
+                    self.parent_reuse.get(eg.genome.genome_id, 0) + 1
+                parents.append(eg)
+            if parents:
+                return parents
+            # QD grid still empty (gen 0 before any gate-passer) → fall through to NSGA
+
         pop = self.population(island)
         if not pop:
             return []
         keyed = _rank_population(pop)
         rank_of = {i: (rank, neg_crowd) for rank, neg_crowd, i in keyed}
 
-        parents: list[EvaluatedGenome] = []
+        parents = []
         for _ in range(k):
             i, j = self.rng.integers(0, len(pop), size=2)
             winner = i if rank_of[int(i)] <= rank_of[int(j)] else j
@@ -323,14 +363,24 @@ class EvolutionController:
 
     # ── the book the harness scores against ──
 
+    def accepted_book(self) -> list[EvaluatedGenome]:
+        """The genomes that form the accepted book — the QD cell elites in QD mode,
+        else the Pareto archive.  This is the SINGLE marginal-value reference and the
+        default persist source, so the two selection modes share one seam."""
+        if self.qd is not None:
+            return self.qd.elites()
+        return self.archive
+
     def archive_programs(self) -> list[tuple[str, str]]:
         """The accepted book as ``(factor_id, code)`` pairs (SINGLE marginal ref).
 
         De-duplicated by factor id — in SET mode archive genomes may share
-        members; the book is the union of member programs.
+        members; the book is the union of member programs.  In QD mode the book is
+        the union of the behavior-grid cell elites (the diverse archive), keeping the
+        non-stationary LOCO marginal-value semantics vs a *diverse* reference.
         """
         seen: dict[str, str] = {}
-        for eg in self.archive:
+        for eg in self.accepted_book():
             for p in eg.genome.programs:
                 seen.setdefault(p.factor_id, p.code)
         return list(seen.items())
@@ -358,6 +408,11 @@ class EvolutionController:
                 "migration_every": self.config.migration_every,
                 "migration_k": self.config.migration_k,
                 "seed": self.config.seed,
+                "selection": self.config.selection,
+                "grid_dims": self.config.grid_dims,
+                "cell_capacity": self.config.cell_capacity,
+                "depth_gamma": self.config.depth_gamma,
+                "reuse_omega": self.config.reuse_omega,
             },
             "n_trials": self.n_trials,
             "generation": self.generation,
@@ -365,6 +420,8 @@ class EvolutionController:
             "archive": [eg.to_dict() for eg in self.archive],
             "kept_pool": [eg.to_dict() for eg in self.kept_pool],
             "fingerprints": sorted(self._fingerprints),
+            "parent_reuse": dict(self.parent_reuse),
+            "qd": self.qd.to_dict() if self.qd is not None else None,
         }
 
     def save(self, path: str | Path) -> None:
@@ -382,6 +439,11 @@ class EvolutionController:
             migration_every=cfgd.get("migration_every", 5),
             migration_k=cfgd.get("migration_k", 1),
             seed=cfgd.get("seed", 0),
+            selection=cfgd.get("selection", "nsga2"),
+            grid_dims=cfgd.get("grid_dims", 2),
+            cell_capacity=cfgd.get("cell_capacity", 3),
+            depth_gamma=cfgd.get("depth_gamma", 0.0),
+            reuse_omega=cfgd.get("reuse_omega", 0.0),
         ))
 
         def _eg(d: dict[str, Any]) -> EvaluatedGenome:
@@ -398,4 +460,9 @@ class EvolutionController:
         ctrl._pool_fingerprints = {
             eg.genome.code_fingerprint() for eg in ctrl.kept_pool}
         ctrl._fingerprints = set(payload.get("fingerprints", []))
+        ctrl.parent_reuse = dict(payload.get("parent_reuse", {}))
+        qd_payload = payload.get("qd")
+        if qd_payload is not None:
+            from quant_fund_agent.agents.factor_research.evolution.qd import QDArchive
+            ctrl.qd = QDArchive.from_dict(qd_payload)
         return ctrl

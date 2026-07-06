@@ -358,3 +358,42 @@ def test_eval_failure_is_not_billed(wired_loop):
     assert loop.evaluate_program(broken) is None
     assert loop.controller.n_trials == before
     assert loop.failures and "trade" in loop.failures[0]["error"]
+
+
+def test_experience_memory_is_written_across_a_run(synthetic_panel, tmp_path,
+                                                   monkeypatch):
+    """WS5: a run with --memory records per-mechanism attempt tallies + survivors to
+    a per-config memory graph, so a later run can read them."""
+    monkeypatch.setenv("QF_USE_MCP", "0")
+    from quant_fund_agent.mcp import research_service as svc
+
+    monkeypatch.setattr(svc, "_load_panel_cached",
+                        lambda data_dir, fields, n_tickers: synthetic_panel)
+    monkeypatch.setattr(svc, "_panel_cache_key",
+                        lambda data_dir, fields, n_tickers: ("test-panel",))
+    svc._SIGNAL_CACHE.clear()
+
+    import quant_fund_agent.agents.factor_research.evolution.loop as loop_mod
+    from quant_fund_agent.knowledge import experience
+    from quant_fund_agent.knowledge.graph_store import KnowledgeGraph
+
+    monkeypatch.setattr(loop_mod, "_get_llm", lambda temperature, role=None: FakeLLM())
+    mem_path = tmp_path / "mem" / "graph.json"
+    monkeypatch.setattr(experience, "memory_graph_path", lambda cfg: mem_path)
+
+    cfg = EvolutionRunConfig(
+        generations=1, population_size=4, children_per_generation=2, seed=5,
+        target_horizon=1, cpcv_groups=4, cpcv_k=1, n_tickers=None,
+        out_dir=str(tmp_path / "evo"), memory=True, memory_config="testcfg")
+    loop = EvolutionLoop(cfg, data_context="CTX",
+                         fields=["open", "high", "low", "close", "volume"])
+    loop._load_known_ids = lambda: None
+    seeds = [FactorProgram(factor_id="s_mom",
+                           code=_factor_code("s_mom", MOM_BODY), name="m",
+                           category="momentum", expected_sign=1, prediction_horizon=1)]
+    loop.run(initial_programs=seeds)
+
+    assert mem_path.exists()                       # writeback happened
+    g = KnowledgeGraph.load(mem_path)
+    mid = KnowledgeGraph.mechanism_id("momentum")
+    assert g.g.nodes[mid]["n_attempts"] >= 1       # attempt tally recorded (topic=category)

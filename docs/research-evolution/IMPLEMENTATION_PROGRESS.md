@@ -34,6 +34,40 @@ so a good factor is no longer discarded merely for being Pareto-dominated. Tests
 `tests/test_research_eval_curation.py`, extended `test_research_eval_{fitness,harness}.py`,
 `test_evolution_{controller,loop}.py`.
 
+**Post-P5 (round 2) — QD grid, publish-time deflation, economic reward, experience
+memory — ✅ DONE (2026-07-05).** Five additions from a competitive-landscape review
+(`research_docs/competitive-landscape-2026.md`; every borrowed idea is logged in
+`research_docs/SOURCES.md` — keep it current). **WS1 — deflation → shared publish filter.**
+The N_trials deflated-IC *gate* is removed from `harness.evaluate_candidate`/`evaluate_set`
+(`deflation_ok` now always `None`; `deflated_ic` stays a diagnostic). A new
+`research_eval/publish.py::publish_filter` (MCP `publish_book`) is run once at
+`persist_archive` over whichever source produced the book (archive / kept-pool /
+greedy-elastic / QD elites), deflating the **combined-book / marginal (LOCO)** statistic —
+never standalone `|val_ic|` — and pruning by marginal contribution; `--selection-deflation
+{off=discovery,on=validation}`. Search vs publish eligibility is explicit. **WS2 — QD
+behavior grid.** `evolution/qd.py::QDArchive` (`--selection {nsga2,qd}`, default nsga2):
+cells keyed by leak-free harness-computed descriptors (`trend_reversal`, `signal_speed`,
+`stress_activation` at `--grid-dims 3`) on `FitnessResult.behavior` (NOT an objective axis —
+the 5-axis Pareto is byte-identical); capped mini-Pareto per cell via the existing
+crowding/`constrained_dominates`; parent sampling cell→elite with an optional AlphaPROBE
+`(1−γ)^depth·(1−ω)^reuse` bias (`--depth-gamma --reuse-omega`); fixed/frozen bin edges;
+`accepted_book()`/`archive_programs()` = union of cell elites. **WS3 — economic reward, no
+new axis.** `cost_ok` turnover gate via `harness._turnover_netcost` (explicit
+`backtesting/positions.py` construction, not `vector_backtest`) + a perturbation-fidelity
+probe inside `_robustness`; `--gate-turnover --cost-rate --perturbation-weight
+--perturbation-sigma`, all default OFF. **WS4 — factor-zoo dedup DIAG.** `harness._zoo_dedup`
+→ max-|corr| + code distance + nearest id vs a `--reference-book`, diagnostic only.
+**WS5 — per-config experience memory.** `knowledge/experience.py` (`--memory`): survivor
+performance + per-mechanism attempt/survival tallies (negative evidence → exhaustion
+detectable); steers seeding away from exhausted mechanisms + splices a summary into the
+reflection teacher. Threaded through harness/controller/loop/CLI + MCP seam. Tests (all
+green): `tests/test_research_eval_publish.py`, `test_evolution_qd.py`,
+`test_knowledge_memory.py`, extended `test_research_eval_harness.py`,
+`test_evolution_loop.py`. Notebooks: `…_walkthrough.ipynb` §10, `…_live_run.ipynb` §10.5.
+**Still to run (billable, needs an API key):** the CLI end-to-end smoke on real S&P-100
+(discovery vs validation modes) and the two-run memory experiment — the whole loop is
+verified offline via the test suite, but a live LLM run is the author's to trigger.
+
 **Learning the system:** `notebooks/evolutionary_factor_researcher_walkthrough.ipynb`
 runs every component below in isolation on synthetic data (offline, no API key) —
 splits/CPCV/deflation, the Pareto fitness harness, genome + mutation operators, the

@@ -96,6 +96,23 @@ class EvalParams:
     regime_quantile: float = 0.2      # tail fraction of dev bars labelled "stress"
     regime_vol_window: int = 20       # rolling window (bars) for the volatility regime
     regime_min_obs: int = 20          # min scored (date,ticker) cells for a valid regime IC
+    # ── economic realism (P5, WS3) — folded in, NO new Pareto axis ──
+    # cost_ok gate: reject a factor whose per-bar turnover exceeds this floor.  None
+    # (default) = gate not evaluated, so the baseline arm is byte-identical; a value
+    # (mean |Δposition| in [0, 2]) activates it.  Turnover / net-of-cost are always
+    # computed as diagnostics regardless of the gate.
+    gate_turnover: float | None = None
+    cost_rate: float = 5e-4                     # ≈5 bps per unit turnover (net-of-cost DIAG)
+    turnover_position_mode: str = "threshold"   # shared position primitive for the measure
+    turnover_position_threshold: float = 1.0
+    turnover_zscore_basis: str = "expanding"    # causal, leak-free per-underlying z-score
+    # perturbation-fidelity probe (AlphaEval) folded into the robustness axis: dock
+    # robustness by the sign-aligned VAL-IC drop under a Gaussian signal shock.  Weight
+    # 0.0 (default) = off (baseline arm unchanged); > 0 activates the extra probe (one
+    # more robustness term, like the plateau penalty — not a new axis).
+    perturbation_weight: float = 0.0
+    perturbation_sigma: float = 0.5            # shock stdev in signal z-units
+    perturbation_draws: int = 3
 
 
 # ── low-level IC / prediction helpers (signal-based, leak-aware) ──────────────
@@ -439,6 +456,29 @@ def _robustness(candidate: pd.DataFrame, panel, cfg, split: ThreeWaySplit, param
             if robustness is not None:
                 robustness -= params.plateau_weight * plateau_penalty
 
+    # Perturbation-fidelity probe (AlphaEval), folded into robustness like the plateau
+    # penalty: shock the signal with Gaussian noise (in z-units) and measure the
+    # sign-aligned VAL-IC retained.  A knife-edge / noise-sensitive factor loses its
+    # edge under the shock and is docked; a robust one keeps it.  Off when weight == 0.
+    perturbation_penalty = None
+    if params.perturbation_weight > 0 and overall_ic is not None and robustness is not None:
+        rng = np.random.default_rng(0)  # fixed seed → deterministic, un-gameable
+        s = candidate.reindex(index=close.index, columns=close.columns)
+        # noise scale from the DEV window only (leak-free — never reads TEST rows)
+        dev = s.to_numpy(dtype=float)[np.asarray(split.is_val_mask, dtype=bool)]
+        col_std = np.nanstd(dev, axis=0) if dev.size else np.zeros(s.shape[1])
+        col_std = np.where(np.isfinite(col_std) & (col_std > 0), col_std, np.nan)
+        pert_ics: list[float] = []
+        for _ in range(max(1, int(params.perturbation_draws))):
+            noise = rng.standard_normal(s.shape) * params.perturbation_sigma * col_std
+            pic = _pooled_ic(s + noise, close, h, split.val_mask, split.is_mask,
+                             split.is_val_mask)[0]
+            if pic is not None:
+                pert_ics.append(pic * sign)
+        if pert_ics:
+            perturbation_penalty = max(0.0, float(overall_ic * sign - np.mean(pert_ics)))
+            robustness -= params.perturbation_weight * perturbation_penalty
+
     sign_consistency = None
     if expected_sign is not None and overall_ic is not None:
         realized = 1 if overall_ic >= 0 else -1
@@ -448,7 +488,60 @@ def _robustness(candidate: pd.DataFrame, panel, cfg, split: ThreeWaySplit, param
 
     return {"robustness": robustness, "cpcv_ic_mean": cpcv_mean, "cpcv_ic_std": cpcv_std,
             "cpcv_n_folds": len(ics), "sign_consistency": sign_consistency,
-            "plateau_penalty": plateau_penalty, "jitter_ics": jitter_ics}
+            "plateau_penalty": plateau_penalty, "jitter_ics": jitter_ics,
+            "perturbation_penalty": perturbation_penalty}
+
+
+def _behavior_descriptors(sig: pd.DataFrame, close: pd.DataFrame, h: int,
+                          split: ThreeWaySplit, params: EvalParams) -> dict[str, Any]:
+    """QD behavior descriptors (WS2) — the candidate's *behavioral* coordinates.
+
+    These are NOT fitness axes (they never enter the objective vector or a gate); they
+    place the candidate in the MAP-Elites grid so the search fills a diverse library.
+    All computed on the development window (IS∪VAL) only, so they are leak-free:
+
+    * ``trend_reversal`` — Spearman(signal, *trailing* h-bar return).  Negative ⇒
+      mean-reversion / fade, positive ⇒ momentum / continuation.  (Trailing, not
+      forward — a behavioral property, not predictive power.)
+    * ``signal_speed`` — ``1 − lag-1 autocorr`` of the per-underlying z-signal.  Low ⇒
+      slow / state-like, high ⇒ fast / reactive.
+    * ``stress_activation`` — ``mean(|z| on stress bars) / mean(|z| on normal bars)``:
+      how much more the factor "fires" in crashes.  Metadata at ``grid_dims=2``.
+    """
+    dev = np.asarray(split.is_val_mask, dtype=bool)
+    dev_idx = close.index[dev]
+    z = per_underlying_zscore(sig.reindex(index=close.index, columns=close.columns), dev_idx)
+    zt = z.to_numpy(dtype=float)
+
+    # trend_reversal: signal vs trailing h-bar return (past return, leak-free)
+    trailing = close.pct_change(max(1, int(h))).to_numpy(dtype=float)
+    tr = _spearman(zt[dev].ravel(), trailing[dev].ravel())[0]
+
+    # signal_speed: 1 − mean per-underlying lag-1 autocorr over the dev window
+    acs: list[float] = []
+    for j in range(zt.shape[1]):
+        col = zt[dev, j]
+        col = col[np.isfinite(col)]
+        if len(col) > 10 and np.std(col) > 0:
+            ac = float(np.corrcoef(col[:-1], col[1:])[0, 1])
+            if np.isfinite(ac):
+                acs.append(ac)
+    signal_speed = (1.0 - float(np.mean(acs))) if acs else None
+
+    # stress_activation: |z| firing in stress vs normal dev bars
+    stress = _stress_mask(close, params, split.is_val_mask)
+    zabs = np.abs(zt)
+    s_rows = dev & np.asarray(stress, dtype=bool)
+    n_rows = dev & ~np.asarray(stress, dtype=bool)
+    sa = None
+    if s_rows.any() and n_rows.any():
+        s_mean = np.nanmean(zabs[s_rows])
+        n_mean = np.nanmean(zabs[n_rows])
+        if np.isfinite(s_mean) and np.isfinite(n_mean) and n_mean > 0:
+            sa = float(s_mean / n_mean)
+
+    return {"trend_reversal": tr, "signal_speed": signal_speed,
+            "stress_activation": sa}
 
 
 def _coverage(sig: pd.DataFrame, close: pd.DataFrame, mask: np.ndarray) -> float:
@@ -457,6 +550,101 @@ def _coverage(sig: pd.DataFrame, close: pd.DataFrame, mask: np.ndarray) -> float
     if s.size == 0:
         return 0.0
     return float(np.isfinite(s).mean())
+
+
+def _turnover_netcost(sig: pd.DataFrame, close: pd.DataFrame, h: int,
+                      mask: np.ndarray, params: EvalParams) -> dict[str, Any]:
+    """Factor-level turnover + net-of-cost P&L via an EXPLICIT position construction.
+
+    Positions come from the SHARED per-underlying primitives
+    (``backtesting.positions``: causal per-underlying z-score → directional
+    long/flat/short band), so "turnover" means byte-identically the same thing here,
+    in the comparison track and in the deployed fund.  Deliberately *not*
+    ``vector_backtest`` (whose IS/OOS split + internal position choices are heavier
+    and implicit).  Returns per-bar turnover (mean ``|Δposition|``) and the gross /
+    net-of-cost mean P&L over ``mask`` (net = ``position·fwd − cost_rate·|Δposition|``).
+    """
+    from quant_fund_agent.backtesting.positions import (
+        directional_positions,
+        zscore_over_time,
+    )
+
+    s = sig.reindex(index=close.index, columns=close.columns)
+    z = zscore_over_time(s, params.turnover_zscore_basis, 500)
+    pos = directional_positions(z, mode=params.turnover_position_mode,
+                                threshold=params.turnover_position_threshold)
+    dpos = pos.diff().abs()
+    fwd = forward_returns(close, horizon=h)
+    m = np.asarray(mask, dtype=bool)
+    pos_a = pos.to_numpy(dtype=float)
+    dp_a = np.where(np.isfinite(dpos.to_numpy(dtype=float)), dpos.to_numpy(dtype=float), 0.0)
+    fwd_a = fwd.to_numpy(dtype=float)
+
+    # Turnover is a causal, position-only property → over the whole dev window ``m``
+    # (the expanding z-score never reads future rows, so this is leak-free).
+    tpos = pos_a[m]
+    tdp = dp_a[m]
+    turnover = (float(np.mean(tdp[np.isfinite(tpos)]))
+                if np.isfinite(tpos).any() else None)
+
+    # P&L uses forward-return labels → drop rows whose ``t+h`` label leaves the dev
+    # window (else the last ``h`` VAL rows would consume held-out TEST prices), exactly
+    # like every other scored axis.
+    label_ok = m & _label_available_mask(m, h)
+    ppos, pdp, pfwd = pos_a[label_ok], dp_a[label_ok], fwd_a[label_ok]
+    finite = np.isfinite(ppos) & np.isfinite(pfwd)
+    if not finite.any():
+        return {"turnover": turnover, "gross_ret": None, "net_ret": None,
+                "net_gross_ratio": None}
+    gross = ppos[finite] * pfwd[finite]
+    net = gross - params.cost_rate * pdp[finite]
+    gross_m = float(np.mean(gross))
+    net_m = float(np.mean(net))
+    ratio = (net_m / gross_m) if gross_m not in (0.0,) else None
+    return {"turnover": turnover, "gross_ret": gross_m, "net_ret": net_m,
+            "net_gross_ratio": ratio}
+
+
+def _zoo_dedup(candidate: pd.DataFrame, candidate_code: str | None,
+               reference_signals: Sequence[pd.DataFrame] | None,
+               reference_ids: Sequence[str] | None,
+               reference_codes: Sequence[str] | None,
+               close: pd.DataFrame, mask: np.ndarray) -> dict[str, Any]:
+    """Novelty vs a REFERENCE factor zoo (e.g. the 86 base factors) — DIAG only.
+
+    Reports the candidate's max ``|signal correlation|`` to any reference factor (the
+    "did we just rediscover a known alpha?" flag, à la AlphaAgent's AST-originality)
+    and the minimum normalised code distance (``1 − difflib ratio``; 0 = identical
+    source).  Deliberately **not a gate** yet — a diagnostic the author can point at a
+    chosen reference set (the ~86 base factors) and later promote to a penalty/gate.
+    """
+    out: dict[str, Any] = {"zoo_max_abs_corr": None, "zoo_nearest": None,
+                           "zoo_min_code_distance": None}
+    if reference_signals:
+        cand = _flat_z(candidate, close, stat_mask=mask, row_mask=mask)
+        best_corr: float | None = None
+        best_idx: int | None = None
+        for i, ref in enumerate(reference_signals):
+            r = _flat_z(ref, close, stat_mask=mask, row_mask=mask)
+            ok = np.isfinite(cand) & np.isfinite(r)
+            if ok.sum() < 10 or np.std(cand[ok]) == 0 or np.std(r[ok]) == 0:
+                continue
+            c = abs(float(np.corrcoef(cand[ok], r[ok])[0, 1]))
+            if best_corr is None or c > best_corr:
+                best_corr, best_idx = c, i
+        out["zoo_max_abs_corr"] = best_corr
+        if best_idx is not None:
+            out["zoo_nearest"] = (reference_ids[best_idx]
+                                  if reference_ids and best_idx < len(reference_ids)
+                                  else int(best_idx))
+    if candidate_code and reference_codes:
+        import difflib
+        cc = "".join(candidate_code.split())
+        dists = [1.0 - difflib.SequenceMatcher(None, cc, "".join((rc or "").split())).ratio()
+                 for rc in reference_codes if rc and rc.strip()]
+        if dists:
+            out["zoo_min_code_distance"] = float(min(dists))
+    return out
 
 
 # ── the orchestrator ──────────────────────────────────────────────────────────
@@ -473,6 +661,9 @@ def evaluate_candidate(
     expected_sign: int | None = None,
     candidate_id: str = "candidate",
     jitter_signals: Sequence[pd.DataFrame] | None = None,
+    reference_signals: Sequence[pd.DataFrame] | None = None,
+    reference_ids: Sequence[str] | None = None,
+    reference_codes: Sequence[str] | None = None,
 ) -> FitnessResult:
     """Score one candidate signal against the current book → a :class:`FitnessResult`.
 
@@ -545,6 +736,10 @@ def evaluate_candidate(
     # ── parsimony axis ──
     parsimony = -float(complexity(candidate_code)) if candidate_code is not None else None
 
+    # ── factor-zoo dedup (WS4) — novelty vs a reference book, DIAG only ──
+    zoo = _zoo_dedup(candidate_signal, candidate_code, reference_signals,
+                     reference_ids, reference_codes, close, split.is_val_mask)
+
     # ── hard gates ──
     coverage = _coverage(candidate_signal, close, split.is_val_mask)
     reasons: dict[str, str] = {}
@@ -564,19 +759,27 @@ def evaluate_candidate(
         if not degradation_ok:
             reasons["degradation"] = f"OOS/IS={deg_ratio:.3f} < τ={params.gate_degradation}"
 
-    # Deflated-IC t-stat > 0 for the current N_trials (the multiple-testing gate).
+    # N_trials-aware deflation is computed as a DIAGNOSTIC only (teacher channel).
+    # It is deliberately NOT a per-candidate *search* gate any more: deflation is a
+    # *selection*-time control applied ONCE, on the combined-book statistic, by
+    # ``research_eval.publish`` (WS1).  Keeping it out of the search gates means a
+    # candidate that would fail deflation in isolation still stays ``search_selectable``
+    # (a valid parent / archive member) — the "discovery" half of the two modes —
+    # while multiple-testing honesty is enforced at publish (the "validation" half).
+    # ``deflation_ok`` therefore stays ``None`` (does not count against the candidate).
     defl = deflation.deflated_ic(abs(val_ic) if val_ic is not None else None,
                                  int(val_n), params.n_trials)
-    deflation_ok: bool | None
-    if defl["deflated_t"] is None:
-        deflation_ok = None
-    else:
-        deflation_ok = bool(defl["deflated_t"] > 0)
-        if not deflation_ok:
-            reasons["deflation"] = f"deflated_t={defl['deflated_t']} ≤ 0 (N_trials={params.n_trials})"
+
+    # ── economic-realism gate (P5, WS3): turnover / net-of-cost, folded in ──
+    tc = _turnover_netcost(candidate_signal, close, h, split.is_val_mask, params)
+    cost_ok: bool | None = None
+    if params.gate_turnover is not None and tc["turnover"] is not None:
+        cost_ok = bool(tc["turnover"] <= params.gate_turnover)
+        if not cost_ok:
+            reasons["cost"] = f"turnover={tc['turnover']:.3f} > τ={params.gate_turnover}"
 
     gates = GateResults(coverage_ok=coverage_ok, degradation_ok=degradation_ok,
-                        deflation_ok=deflation_ok, cost_ok=None, reasons=reasons)
+                        deflation_ok=None, cost_ok=cost_ok, reasons=reasons)
 
     objective = ObjectiveVector(
         marginal_value=marg["marginal_value"],
@@ -601,6 +804,14 @@ def evaluate_candidate(
         "sign_consistency": robust["sign_consistency"],
         "plateau_penalty": robust["plateau_penalty"],
         "jitter_ics": robust["jitter_ics"],
+        "perturbation_penalty": robust.get("perturbation_penalty"),
+        "turnover": tc["turnover"],
+        "gross_ret": tc["gross_ret"],
+        "net_ret": tc["net_ret"],
+        "net_gross_ratio": tc["net_gross_ratio"],
+        "zoo_max_abs_corr": zoo["zoo_max_abs_corr"],
+        "zoo_nearest": zoo["zoo_nearest"],
+        "zoo_min_code_distance": zoo["zoo_min_code_distance"],
         "regime_independence": regime["regime_independence"],
         "regime_kind": params.regime_kind,
         "stress_ic_with": regime["stress_ic_with"],
@@ -613,8 +824,11 @@ def evaluate_candidate(
         "complexity": (complexity(candidate_code) if candidate_code is not None else None),
     }
 
+    behavior = _behavior_descriptors(candidate_signal, close, h, split, params)
+
     return FitnessResult(candidate_id=candidate_id, objective=objective, gates=gates,
-                         diagnostics=diagnostics, raw={"split_sizes": split.sizes})
+                         diagnostics=diagnostics, behavior=behavior,
+                         raw={"split_sizes": split.sizes})
 
 
 # ── SET mode (P5): evaluate a whole "alpha program" jointly ───────────────────
@@ -721,20 +935,24 @@ def evaluate_set(
         if not degradation_ok:
             reasons["degradation"] = f"OOS/IS={deg_ratio:.3f} < τ={params.gate_degradation}"
 
+    # DIAG only — deflation is a selection-time control (research_eval.publish, WS1),
+    # not a per-candidate search gate.  ``deflation_ok`` stays ``None``.
     defl = deflation.deflated_ic(
         abs(combined_val_ic) if combined_val_ic is not None else None,
         int(val_n), params.n_trials)
-    deflation_ok: bool | None
-    if defl["deflated_t"] is None:
-        deflation_ok = None
-    else:
-        deflation_ok = bool(defl["deflated_t"] > 0)
-        if not deflation_ok:
-            reasons["deflation"] = (f"deflated_t={defl['deflated_t']} ≤ 0 "
-                                    f"(N_trials={params.n_trials})")
+
+    # economic-realism gate on the SET's combined signal (P5, WS3)
+    tc = (_turnover_netcost(pred, close, h, split.is_val_mask, params)
+          if pred is not None else
+          {"turnover": None, "gross_ret": None, "net_ret": None, "net_gross_ratio": None})
+    cost_ok: bool | None = None
+    if params.gate_turnover is not None and tc["turnover"] is not None:
+        cost_ok = bool(tc["turnover"] <= params.gate_turnover)
+        if not cost_ok:
+            reasons["cost"] = f"turnover={tc['turnover']:.3f} > τ={params.gate_turnover}"
 
     gates = GateResults(coverage_ok=coverage_ok, degradation_ok=degradation_ok,
-                        deflation_ok=deflation_ok, cost_ok=None, reasons=reasons)
+                        deflation_ok=None, cost_ok=cost_ok, reasons=reasons)
     objective = ObjectiveVector(
         marginal_value=combined_val_ic,
         independence=independence,
@@ -755,10 +973,19 @@ def evaluate_set(
         "regime_independence": regime_independence,
         "regime_kind": params.regime_kind,
         "stress_ic_with": stress_ic, "n_stress_obs": int(n_stress),
+        "perturbation_penalty": robust.get("perturbation_penalty"),
+        "turnover": tc["turnover"], "net_ret": tc["net_ret"],
+        "net_gross_ratio": tc["net_gross_ratio"],
         "coverage": coverage,
         "degradation_ratio": (float(deg_ratio) if deg_ratio is not None else None),
         "deflation": defl,
         "n_trials": params.n_trials,
     }
+    behavior = (_behavior_descriptors(pred, close, h, split, params)
+                if pred is not None
+                else {"trend_reversal": None, "signal_speed": None,
+                      "stress_activation": None})
+
     return FitnessResult(candidate_id=candidate_id, objective=objective, gates=gates,
-                         diagnostics=diagnostics, raw={"split_sizes": split.sizes})
+                         diagnostics=diagnostics, behavior=behavior,
+                         raw={"split_sizes": split.sizes})

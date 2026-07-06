@@ -121,6 +121,12 @@ class FitnessResult:
     gates: GateResults
     diagnostics: dict[str, Any] = field(default_factory=dict)
     raw: dict[str, Any] = field(default_factory=dict)
+    # QD behavior descriptors (WS2): the candidate's *behavioral* coordinates used to
+    # place it in the MAP-Elites grid.  DELIBERATELY separate from ``objective`` — these
+    # organise the archive for diversity, they are NOT scored on.  Keys:
+    # ``trend_reversal`` (fade↔momentum), ``signal_speed`` (slow↔fast),
+    # ``stress_activation`` (metadata at grid_dims=2, a 3rd bin axis at grid_dims=3).
+    behavior: dict[str, Any] = field(default_factory=dict)
 
     @property
     def selectable(self) -> bool:
@@ -134,6 +140,7 @@ class FitnessResult:
             "gates": self.gates.to_dict(),
             "selectable": self.selectable,
             "diagnostics": self.diagnostics,
+            "behavior": self.behavior,
             "raw": self.raw,
         }
 
@@ -145,6 +152,7 @@ class FitnessResult:
             objective=ObjectiveVector.from_dict(d.get("objective", {})),
             gates=GateResults.from_dict(d.get("gates", {})),
             diagnostics=d.get("diagnostics", {}),
+            behavior=d.get("behavior", {}),
             raw=d.get("raw", {}),
         )
 
