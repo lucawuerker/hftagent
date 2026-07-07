@@ -33,8 +33,13 @@ from quant_fund_agent.factors.base import BaseFactor
 log = logging.getLogger("factors.inmem")
 
 
-def compile_factor(code: str, factor_id: str, *,
-                   smoke: bool = False) -> type[BaseFactor]:
+def compile_factor(
+    code: str,
+    factor_id: str,
+    *,
+    smoke: bool = False,
+    expected_prediction_horizon: int | None = None,
+) -> type[BaseFactor]:
     """Validate + exec factor source and return the class, leaving no trace.
 
     Runs the exact static checks the persist path runs (imports allow-list,
@@ -53,7 +58,7 @@ def compile_factor(code: str, factor_id: str, *,
     )
     from quant_fund_agent.factors.registry import _FACTOR_REGISTRY
 
-    class_name = validate_code(code, factor_id)
+    class_name = validate_code(code, factor_id, expected_prediction_horizon)
 
     prior = _FACTOR_REGISTRY.pop(factor_id, None)  # let re-registration through
     namespace: dict = {"__name__": f"<inmem:{factor_id}>"}

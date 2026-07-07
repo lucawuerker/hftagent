@@ -255,6 +255,11 @@ def _split_text_by_tokens(text: str, max_tokens: int) -> list[str]:
             for i in range(0, len(tokens), max_tokens)]
 
 
+def _fixed_horizon(state: FactorResearcherState) -> int | None:
+    """Run-level horizon if this session forces one, otherwise ``None``."""
+    return int(state.ic_target_horizon) if state.force_prediction_horizon else None
+
+
 def _render_brainstorm_prompt(
     paper: PaperSnippet | None,
     n_ideas: int,
@@ -359,7 +364,8 @@ def brainstorm(state: FactorResearcherState) -> dict:
     # Only describe the fields this run can actually supply, so brainstormed
     # ideas stay within the configured data scope (LOBSTER level / fundamentals).
     # The bar size lets the LLM reason about prediction horizons in wall-clock time.
-    data_context = build_data_context(state.allowed_fields, state.seconds_per_bar)
+    data_context = build_data_context(
+        state.allowed_fields, state.seconds_per_bar, _fixed_horizon(state))
 
     budget = state.n_factor_ideas
     papers = state.selected_papers
@@ -388,16 +394,22 @@ def brainstorm(state: FactorResearcherState) -> dict:
                 continue
             seen.add(fid)
             known_ids.add(fid)  # so later papers don't reuse it
+            forced_h = _fixed_horizon(state)
             ideas.append(FactorIdea(
                 factor_id=fid,
                 name=raw.get("name", fid),
                 category=raw.get("category", "other"),
                 trading_idea=raw.get("trading_idea", ""),
                 description=raw.get("description", ""),
-                prediction_horizon=_coerce_horizon(
-                    raw.get("prediction_horizon"), state.ic_target_horizon),
-                suggested_horizons=_coerce_horizon_list(
-                    raw.get("suggested_horizons")),
+                prediction_horizon=(
+                    forced_h if forced_h is not None else
+                    _coerce_horizon(raw.get("prediction_horizon"),
+                                    state.ic_target_horizon)
+                ),
+                suggested_horizons=(
+                    [forced_h] if forced_h is not None else
+                    _coerce_horizon_list(raw.get("suggested_horizons"))
+                ),
                 # The idea came from this paper's call, so attribute it
                 # there authoritatively (knowledge-only: trust the model).
                 source_paper_ids=([paper.paper_id] if paper
@@ -441,6 +453,7 @@ def _try_codegen_once(
     idea: FactorIdea,
     data_context: str,
     feedback: str = "",
+    expected_prediction_horizon: int | None = None,
 ) -> tuple[str | None, str]:
     """One LLM round-trip + materialise.
 
@@ -456,7 +469,9 @@ def _try_codegen_once(
         return None, f"codegen LLM call failed: {e}"
 
     idea.code = code  # keep for audit even if materialise fails
-    result = research_client.materialise_factor(idea.factor_id, code)
+    result = research_client.materialise_factor(
+        idea.factor_id, code,
+        expected_prediction_horizon=expected_prediction_horizon)
     if not result.get("ok"):
         return None, result.get("error", "materialisation failed")
     return result["code_path"], ""
@@ -477,16 +492,21 @@ def generate_code(state: FactorResearcherState) -> dict:
 
     # Same field-scoped context as brainstorm, so generated code only reads
     # fields this run can supply (out-of-scope factors are also gated at persist).
-    data_context = build_data_context(state.allowed_fields, state.seconds_per_bar)
+    data_context = build_data_context(
+        state.allowed_fields, state.seconds_per_bar, _fixed_horizon(state))
+    expected_horizon = _fixed_horizon(state)
 
     for idea in state.factor_ideas:
-        code_path, error = _try_codegen_once(llm, idea, data_context)
+        code_path, error = _try_codegen_once(
+            llm, idea, data_context,
+            expected_prediction_horizon=expected_horizon)
         attempts = 1
         while code_path is None and attempts <= max_retries:
             log.info("[%s] codegen attempt %d failed (%s) — retrying with feedback",
                      idea.factor_id, attempts, error)
             code_path, error = _try_codegen_once(
-                llm, idea, data_context, feedback=error)
+                llm, idea, data_context, feedback=error,
+                expected_prediction_horizon=expected_horizon)
             attempts += 1
 
         if code_path is None:

@@ -148,7 +148,10 @@ def _bar_size_phrase(seconds_per_bar: float | None) -> str | None:
     return "daily" if abs(days - 1.0) < 1e-6 else f"{_num(days)}-day"
 
 
-def _horizon_contract(seconds_per_bar: float | None) -> str:
+def _horizon_contract(
+    seconds_per_bar: float | None,
+    fixed_prediction_horizon: int | None = None,
+) -> str:
     """The PREDICTION HORIZON contract appended to every data context.
 
     Tells the LLM the bar size (so it can reason in wall-clock time), that the
@@ -156,6 +159,26 @@ def _horizon_contract(seconds_per_bar: float | None) -> str:
     brainstorm output schema and the codegen ``prediction_horizon`` requirement.
     """
     phrase = _bar_size_phrase(seconds_per_bar)
+    if fixed_prediction_horizon is not None:
+        h = int(fixed_prediction_horizon)
+        if phrase is not None:
+            unit = f"each bar spans **{phrase.replace('-', ' ')}** of wall-clock time"
+            example = f"so this run is fixed at ~{h} {phrase} bars ahead"
+        else:
+            unit = "the bar size is set by the configured feed"
+            example = f"so this run is fixed at {h} bars ahead"
+        return (
+            "PREDICTION HORIZON\n"
+            "------------------\n"
+            f"This run uses ONE fixed forecast horizon for every factor: "
+            f"``prediction_horizon = {h}`` bars ({unit}; {example}).\n"
+            f"Do not choose a separate horizon for the idea.  Every brainstormed "
+            f"idea and every generated factor class must declare exactly "
+            f"``prediction_horizon = {h}``; set ``suggested_horizons`` to "
+            f"``[{h}]`` or omit it.  Valid range: "
+            f"1 ≤ prediction_horizon ≤ {MAX_PREDICTION_HORIZON} bars."
+        )
+
     if phrase is not None:
         unit = f"each bar spans **{phrase.replace('-', ' ')}** of wall-clock time"
         example = (
@@ -177,7 +200,11 @@ def _horizon_contract(seconds_per_bar: float | None) -> str:
     )
 
 
-def build_data_context(allowed_fields=None, seconds_per_bar: float | None = None) -> str:
+def build_data_context(
+    allowed_fields=None,
+    seconds_per_bar: float | None = None,
+    fixed_prediction_horizon: int | None = None,
+) -> str:
     """Assemble the DATA CONTEXT prose for the fields this run can supply.
 
     ``allowed_fields`` is the set the configured data feed actually serves (see
@@ -190,6 +217,9 @@ def build_data_context(allowed_fields=None, seconds_per_bar: float | None = None
     panel index, see :func:`quant_fund_agent.data.frequency`); it drives the
     bar-size wording and the PREDICTION HORIZON contract.  ``None`` → feed-
     agnostic wording (no assumed default).
+
+    ``fixed_prediction_horizon`` pins every generated factor to one run-level
+    horizon instead of letting the researcher choose per idea.
     """
     allowed = set(allowed_fields) if allowed_fields is not None else None
     bar_phrase = _bar_size_phrase(seconds_per_bar)
@@ -258,7 +288,7 @@ def build_data_context(allowed_fields=None, seconds_per_bar: float | None = None
         )
         parts.append(_FUNDAMENTAL_LOOKAHEAD)
 
-    parts.append(_horizon_contract(seconds_per_bar))
+    parts.append(_horizon_contract(seconds_per_bar, fixed_prediction_horizon))
 
     return "\n\n".join(parts) + "\n"
 

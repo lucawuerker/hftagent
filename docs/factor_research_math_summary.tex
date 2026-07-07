@@ -1,0 +1,531 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{enumitem}
+
+\newcommand{\IC}{\operatorname{IC}}
+\newcommand{\PR}{\operatorname{PR}}
+\newcommand{\rank}{\operatorname{rank}}
+\newcommand{\sgn}{\operatorname{sgn}}
+\newcommand{\finite}{\operatorname{finite}}
+\newcommand{\corr}{\operatorname{corr}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\E}{\operatorname{E}}
+\newcommand{\ind}{\mathbf{1}}
+
+\title{Factor Research Evolution: Mathematical Summary}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section*{Core Objects}
+
+Let \(P_{t,a}\) be close price for time \(t=1,\dots,T\) and asset
+\(a\in\mathcal A\).  A candidate factor signal is \(x_{t,a}\); the current
+accepted book is \(B=\{b_1,\dots,b_m\}\).  The target horizon is
+\(h=\texttt{cfg.target\_horizon}\).  Forward returns are
+\[
+  r^{(h)}_{t,a}=\frac{P_{t+h,a}}{P_{t,a}}-1.
+\]
+The temporal split is \(I\) = in-sample, \(V\) = validation, \(H\) = final test,
+and \(D=I\cup V\).  The search fitness uses \(I\) and \(V\); \(H\) is not used
+inside \(\texttt{evaluate\_candidate}\) or \(\texttt{evaluate\_set}\).
+
+For any row mask \(M\), the label-availability mask used by the code is
+\[
+  L_h(M)_t = M_t \land M_{t+h},
+\]
+with out-of-range indices treated as false.  This prevents validation labels
+from consuming final-test prices.
+
+Per-underlying z-scoring over statistic rows \(R\) is
+\[
+  z^R(x)_{t,a}=\frac{x_{t,a}-\mu^R_a(x)}{\sigma^R_a(x)},\qquad
+  \mu^R_a(x)=\frac{1}{|R_a|}\sum_{u\in R}x_{u,a},
+\]
+with \(\sigma^R_a(x)\) the sample standard deviation; zero standard deviations
+and infinities become missing.
+
+The pooled Spearman IC used throughout is
+\[
+  \IC_h(x;M,R,A)
+  =
+  \rho_S\!\left(
+    \operatorname{vec}_{t\in M\cap L_h(A),a}\, z^R(x)_{t,a},
+    \operatorname{vec}_{t\in M\cap L_h(A),a}\, r^{(h)}_{t,a}
+  \right),
+\]
+where for finite paired vectors \(u,v\),
+\[
+  \rho_S(u,v)=
+  \frac{\sum_i(\rank(u_i)-\overline{\rank u})(\rank(v_i)-\overline{\rank v})}
+       {\sqrt{\sum_i(\rank(u_i)-\overline{\rank u})^2}
+        \sqrt{\sum_i(\rank(v_i)-\overline{\rank v})^2}},
+\]
+and the result is undefined if fewer than three finite pairs exist.
+
+For a book \(B\), the combined predictor \(\widehat y_B\) is obtained by fitting
+the configured estimator \(\mathcal M\) on IS rows:
+\[
+  \widehat f_B
+  =
+  \mathcal M\!\left(
+    \{z^I(b_j)_{t,a}\}_{j=1}^m,\ r^{(h)}_{t,a}
+  \right)_{t\in I\cap L_h(I),a},
+  \qquad
+  \widehat y_B(t,a)=\widehat f_B\!\left(z^I(b_1)_{t,a},\dots,z^I(b_m)_{t,a}\right).
+\]
+The default \(\mathcal M\) is \(\texttt{gradient\_boosting}\).  Missing and
+infinite features are imputed to zero before fitting/prediction.
+
+\section*{SINGLE-Mode Reward Vector}
+
+For one candidate \(x\), define
+\[
+  \IC_{\mathrm{IS}}(x)=\IC_h(x;I,I,I),\qquad
+  \IC_{\mathrm{VAL}}(x)=\IC_h(x;V,I,D).
+\]
+The Pareto objective is
+\[
+  F(x)=
+  \bigl(F_1,F_2,F_3,F_4,F_5\bigr),
+  \qquad \text{all axes are maximized}.
+\]
+
+\paragraph{1. Marginal value.}
+Let \(B_x=B\cup\{x\}\).  If \(B\neq\varnothing\),
+\[
+  F_1(x)
+  =
+  \IC_h(\widehat y_{B_x};V,I,D)
+  -
+  \IC_h(\widehat y_B;V,I,D).
+\]
+If \(B=\varnothing\), the base IC is set to \(0\), so
+\[
+  F_1(x)=\IC_h(\widehat y_{\{x\}};V,I,D).
+\]
+
+\paragraph{2. Independence, default: residual IC.}
+Let \(c=\operatorname{vec} z^I(x)\) and
+\[
+  Z_B=\begin{bmatrix}
+  \operatorname{vec} z^I(b_1) & \cdots & \operatorname{vec} z^I(b_m)
+  \end{bmatrix}.
+\]
+For \(m>0\), fit on finite IS cells
+\[
+  c=\alpha\mathbf 1 + Z_B\beta+\varepsilon.
+\]
+Then
+\[
+  F_2(x)=
+  \rho_S\!\left(
+    \varepsilon_{t\in V\cap L_h(D),a},
+    r^{(h)}_{t\in V\cap L_h(D),a}
+  \right).
+\]
+If \(B=\varnothing\), this reduces to
+\[
+  F_2(x)=\IC_h(x;V,I,D).
+\]
+
+\paragraph{2b. Optional legacy independence: delta participation.}
+When \(\texttt{independence\_metric}=\texttt{delta\_participation}\),
+\[
+  \PR(C)=\frac{\left(\sum_i\lambda_i(C)\right)^2}{\sum_i\lambda_i(C)^2},
+\]
+where \(\lambda_i(C)\) are clipped nonnegative eigenvalues of the signal
+correlation matrix \(C\).  Using flattened \(z^D(\cdot)\) over \(D\),
+\[
+  \Delta\PR=\PR(C_{B\cup x})-\PR(C_B),\qquad
+  \rho_{\max}=\max_{b\in B}\left|\corr(z^D(x),z^D(b))\right|,
+\]
+\[
+  F_2(x)=\Delta\PR-\lambda_{\mathrm{corr}}\rho_{\max},
+  \qquad \lambda_{\mathrm{corr}}=0.5.
+\]
+For an empty book the implementation returns \(F_2=1\).
+
+\paragraph{3. Robustness.}
+Let
+\[
+  m_x=F_1(x),\qquad
+  s_m=\begin{cases}
+    +1, & m_x\text{ is undefined or }m_x\ge 0,\\
+    -1, & m_x<0.
+  \end{cases}
+\]
+CPCV partitions \(D\) into \(G\) contiguous groups and tests every
+\(k\)-group combination; defaults are \(G=6,k=2\), so \(\binom{6}{2}=15\)
+folds.  For fold \(f\) with purged/embargoed train mask \(A_f\) and test mask
+\(T_f\), fit fresh combined predictors on \(A_f\):
+\[
+  \widehat y^{(f)}_{B_x}
+  =
+  \mathcal M(B\cup\{x\};A_f),
+  \qquad
+  \widehat y^{(f)}_{B}
+  =
+  \mathcal M(B;A_f).
+\]
+The scored CPCV value is fold-refit LOCO marginal IC:
+\[
+  q_f
+  =
+  s_m\left[
+    \IC_h(\widehat y^{(f)}_{B_x};T_f,A_f,D)
+    -
+    \IC_h(\widehat y^{(f)}_{B};T_f,A_f,D)
+  \right],
+\]
+with base \(0\) when \(B=\varnothing\).  The previous standalone CPCV stability
+probe is still reported as a diagnostic:
+\[
+  u_f=s_x\,\IC_h(x;T_f,A_f,D),\qquad
+  s_x=\sgn_{\mathrm{impl}}(\IC_{\mathrm{VAL}}(x)).
+\]
+If at least two \(q_f\) values exist,
+\[
+  \bar q=\frac{1}{|\mathcal F|}\sum_{f\in\mathcal F}q_f,\qquad
+  \sigma_q=\sqrt{\frac{1}{|\mathcal F|}\sum_{f\in\mathcal F}(q_f-\bar q)^2}.
+\]
+For window-jitter variants \(x^{(j)}\),
+\[
+  P_{\mathrm{plateau}}
+  =
+  \max\left(
+    0,\,
+    s_x\IC_{\mathrm{VAL}}(x)
+    -
+    \frac{1}{J}\sum_{j=1}^J s_x\IC_h(x^{(j)};V,I,D)
+  \right).
+\]
+If perturbation is enabled, with deterministic Gaussian shocks
+\(\xi^{(d)}_{t,a}\sim N(0,\sigma_{\xi}^2\,\hat\sigma^2_{D,a}(x))\),
+\[
+  P_{\xi}
+  =
+  \max\left(
+    0,\,
+    s_x\IC_{\mathrm{VAL}}(x)
+    -
+    \frac{1}{D_\xi}\sum_{d=1}^{D_\xi}
+      s_x\IC_h(x+\xi^{(d)};V,I,D)
+  \right).
+\]
+The sign bonus is
+\[
+  B_{\mathrm{sign}}
+  =
+  \begin{cases}
+    +b, & \sgn_{\mathrm{impl}}(\IC_{\mathrm{VAL}}(x))=\sgn(e),\\
+    -b, & \sgn_{\mathrm{impl}}(\IC_{\mathrm{VAL}}(x))\neq\sgn(e),\\
+    0, & e\text{ or }\IC_{\mathrm{VAL}}\text{ is undefined},
+  \end{cases}
+  \qquad b=0.02,
+\]
+where \(e\) is the expected sign and
+\(\sgn_{\mathrm{impl}}(u)=+1\) for \(u\ge 0\), else \(-1\).  Thus
+\[
+  F_3(x)
+  =
+  \bar q-\lambda_{\mathrm{std}}\sigma_q
+  -w_pP_{\mathrm{plateau}}
+  -w_\xi P_\xi
+  +B_{\mathrm{sign}}.
+\]
+Defaults: \(\lambda_{\mathrm{std}}=1\), \(w_p=1\), \(w_\xi=0\).
+
+\paragraph{4. Parsimony.}
+Let \(C(\text{code})\) count AST complexity:
+binary ops, unary ops, calls, numeric constants each count \(1\);
+a boolean op counts \(\max(1,n_{\mathrm{values}}-1)\);
+a comparison counts its number of comparison operators;
+syntax error gives \(10{,}000\).  Then
+\[
+  F_4(x)=-C(\text{code}_x).
+\]
+
+\paragraph{5. Regime independence.}
+For default \(\texttt{regime\_kind}=\texttt{drawdown}\), define market return
+\[
+  m_t=\frac{1}{|\mathcal A|}\sum_{a\in\mathcal A}\left(\frac{P_{t,a}}{P_{t-1,a}}-1\right),
+\]
+and stress rows
+\[
+  S_t=D_t\land
+  m_t\le Q_{\alpha}\left(\{m_u:u\in D,\ m_u\ \mathrm{finite}\}\right),
+  \qquad \alpha=0.2.
+\]
+For \(\texttt{regime\_kind}=\texttt{volatility}\), \(m_t\) is replaced by a rolling
+standard deviation \(v_t=\operatorname{sd}(m_{t-w+1:t})\), \(w=20\), and
+\(S_t=D_t\land v_t\ge Q_{1-\alpha}(v)\).  The regime axis is
+\[
+  F_5(x)
+  =
+  \IC_h(\widehat y_{B_x};V\cap S,I,D)
+  -
+  \IC_h(\widehat y_B;V\cap S,I,D),
+\]
+with base \(0\) when \(B=\varnothing\).  The axis is undefined unless at least
+\(\texttt{regime\_min\_obs}=20\) scored cells exist.
+
+\section*{SET-Mode Reward Vector}
+
+For a genome containing member signals \(M=\{x_1,\dots,x_K\}\), fit the combined
+predictor \(\widehat y_M\) on those members only.  The five axes are
+\[
+  F_1(M)=\IC_h(\widehat y_M;V,I,D),
+\]
+\[
+  F_2(M)=
+  \begin{cases}
+    \PR(C_M)/K, & K\ge 2,\\
+    1, & K=1,
+  \end{cases}
+\]
+where \(C_M\) is the correlation matrix of flattened \(z^D(x_i)\);
+\[
+  F_3(M)=\text{the same fold-refit robustness formula applied to }M
+  \text{ as a self-contained combined model},
+\]
+\[
+  F_4(M)=
+  -\frac{1}{K}\sum_{i=1}^{K} C(\text{code}_{x_i}),
+\]
+\[
+  F_5(M)=\IC_h(\widehat y_M;V\cap S,I,D).
+\]
+SET mode does not compute LOCO against an external archive; the set is scored as
+a self-contained alpha program.
+
+\section*{Hard Gates and Diagnostics}
+
+Coverage over \(D\) is
+\[
+  \operatorname{cov}(x)=
+  \frac{\sum_{t\in D,a}\ind[\finite(x_{t,a})]}
+       {\sum_{t\in D,a}1}.
+\]
+The coverage gate is
+\[
+  g_{\mathrm{cov}}=\ind[\operatorname{cov}(x)\ge \tau_{\mathrm{cov}}],
+  \qquad \tau_{\mathrm{cov}}=0.5.
+\]
+
+The degradation ratio is evaluated only if
+\(\IC_{\mathrm{IS}},\IC_{\mathrm{VAL}}\) exist and
+\(|\IC_{\mathrm{IS}}|\ge\texttt{min\_is\_ic}=0.005\):
+\[
+  d(x)=
+  \frac{\IC_{\mathrm{VAL}}(x)\,\sgn(\IC_{\mathrm{IS}}(x))}
+       {|\IC_{\mathrm{IS}}(x)|},
+  \qquad
+  g_{\mathrm{deg}}=\ind[d(x)\ge \tau_{\mathrm{deg}}],
+  \qquad \tau_{\mathrm{deg}}=0.5.
+\]
+If the ratio is not evaluable, \(g_{\mathrm{deg}}\) is \(\texttt{None}\), not a
+failure.
+
+Deflation is currently diagnostic during search, not a per-candidate hard gate:
+\[
+  \texttt{deflation\_ok}=\texttt{None}.
+\]
+For \(n\) scored validation observations and \(N=\texttt{n\_trials}\),
+\[
+  \ell_{\IC}(n,N)=
+  \begin{cases}
+    0, & N\le 1 \text{ or } n\le 1,\\
+    \sqrt{\frac{2\ln N}{n}}, & \text{otherwise},
+  \end{cases}
+\]
+\[
+  \IC_{\mathrm{deflated}}
+  =
+  \max\left(|\IC_{\mathrm{VAL}}|-\ell_{\IC}(n,N),0\right),
+  \qquad
+  t_{\mathrm{deflated}}
+  =
+  |\IC_{\mathrm{VAL}}|\sqrt n-\sqrt{2\ln N}.
+\]
+At publish time, when \(\texttt{selection\_deflation}=\texttt{on}\), the same
+formula is applied to the final book's combined validation IC, and the book
+passes iff \(t_{\mathrm{deflated}}>0\).
+
+The optional turnover gate uses the explicit position primitive.  With default
+threshold mode and causal expanding z-score,
+\[
+  p_{t,a}=
+  \begin{cases}
+    +1, & \tilde z_{t,a}>\theta,\\
+    -1, & \tilde z_{t,a}<-\theta,\\
+    0, & \text{otherwise},
+  \end{cases}
+  \qquad \theta=1.
+\]
+Then
+\[
+  \operatorname{turnover}(x)=
+  \frac{1}{|D||\mathcal A|}
+  \sum_{t\in D,a}|p_{t,a}-p_{t-1,a}|,
+\]
+\[
+  \operatorname{gross}
+  =
+  \operatorname{mean}_{t\in D\cap L_h(D),a}(p_{t,a}r^{(h)}_{t,a}),
+  \qquad
+  \operatorname{net}
+  =
+  \operatorname{mean}_{t\in D\cap L_h(D),a}
+  \left(p_{t,a}r^{(h)}_{t,a}-c|p_{t,a}-p_{t-1,a}|\right),
+\]
+with \(c=\texttt{cost\_rate}=5\cdot 10^{-4}\).  If
+\(\tau_{\mathrm{turn}}\) is configured,
+\[
+  g_{\mathrm{cost}}=\ind[\operatorname{turnover}(x)\le \tau_{\mathrm{turn}}],
+\]
+otherwise \(g_{\mathrm{cost}}=\texttt{None}\).
+
+A candidate is search-selectable iff every evaluated gate is true:
+\[
+  \operatorname{selectable}(x)
+  =
+  \bigwedge_{g\in\{g_{\mathrm{cov}},g_{\mathrm{deg}},g_{\mathrm{cost}}\},\ g\neq\texttt{None}} g.
+\]
+
+\section*{Selection: NSGA-II and QD}
+
+For objective vectors \(F(x),F(y)\), treating undefined axes as \(-\infty\),
+\[
+  x\succ_P y
+  \iff
+  \left[\forall j,\ F_j(x)\ge F_j(y)\right]
+  \land
+  \left[\exists j,\ F_j(x)>F_j(y)\right].
+\]
+Constrained dominance is
+\[
+  x\succ_C y
+  \iff
+  \begin{cases}
+    \text{true}, & \operatorname{selectable}(x)\land\neg\operatorname{selectable}(y),\\
+    \text{false}, & \neg\operatorname{selectable}(x)\land\operatorname{selectable}(y),\\
+    n_{\mathrm{fail}}(x)<n_{\mathrm{fail}}(y),
+      & \neg\operatorname{selectable}(x),\neg\operatorname{selectable}(y),
+        n_{\mathrm{fail}}(x)\ne n_{\mathrm{fail}}(y),\\
+    x\succ_P y, & \text{otherwise}.
+  \end{cases}
+\]
+The NSGA population is sorted by constrained nondominated fronts.  Within one
+front, crowding distance for candidate \(i\) is
+\[
+  CD_i=\sum_{j=1}^{5}
+  \frac{F_j(i_j^+)-F_j(i_j^-)}
+       {\max_{\ell\in\mathrm{front}}F_j(\ell)-\min_{\ell\in\mathrm{front}}F_j(\ell)},
+\]
+with boundary points assigned \(CD_i=\infty\).  Parent selection is binary
+tournament on lower front rank, then higher crowding distance.
+
+In QD mode the objective vector is unchanged.  The behavior descriptors are
+\[
+  d_1(x)=
+  \rho_S\!\left(
+    \operatorname{vec}_{t\in D,a}z^D(x)_{t,a},
+    \operatorname{vec}_{t\in D,a}\left(\frac{P_{t,a}}{P_{t-h,a}}-1\right)
+  \right),
+\]
+\[
+  d_2(x)=
+  1-
+  \frac{1}{|\mathcal A'|}
+  \sum_{a\in\mathcal A'}
+  \corr\!\left(z^D(x)_{1:T-1,a},z^D(x)_{2:T,a}\right),
+\]
+\[
+  d_3(x)=
+  \frac{\operatorname{mean}_{t\in D\cap S,a}|z^D(x)_{t,a}|}
+       {\operatorname{mean}_{t\in D\setminus S,a}|z^D(x)_{t,a}|}.
+\]
+They are bucketed by
+\[
+  \operatorname{bucket}(v;e_1,\dots,e_q)=\sum_{r=1}^{q}\ind[v\ge e_r],
+\]
+with edges
+\[
+  d_1:\ (-0.33,0.33),\qquad
+  d_2:\ (0.5,1.0),\qquad
+  d_3:\ (0.9,1.3).
+\]
+The default QD cell is
+\[
+  \left(\operatorname{bucket}(d_1),\operatorname{bucket}(d_2)\right),
+\]
+and 3D QD adds \(\operatorname{bucket}(d_3)\).  Only selectable candidates enter
+cells.  Each cell stores at most \(K=\texttt{cell\_capacity}=3\) elites, pruned by
+the same constrained NSGA ranking.  Parent sampling chooses an occupied cell
+uniformly, then an elite uniformly unless the optional weight
+\[
+  w_i=(1-\gamma)^{\operatorname{depth}_i}(1-\omega)^{\operatorname{reuse}_i}
+\]
+is enabled.  The reported QD score proxy is
+\[
+  \operatorname{QDScore}=\sum_{\mathrm{cell}}\max_{x\in\mathrm{cell}} F_1(x).
+\]
+
+\section*{End-of-Run Book Curation and Publish Filter}
+
+Default persistence uses \(\texttt{accepted\_book}\): the Pareto archive for NSGA,
+or the union of QD cell elites for QD.  If curation is enabled, it instead starts
+from \(\texttt{kept\_pool}\), every gate-passing genome ever evaluated.
+
+Greedy curation forward-selects the factor with largest combined validation IC:
+\[
+  x^*=\arg\max_{x\in R}\IC_h(\widehat y_{S\cup\{x\}};V,I,D),
+  \qquad
+  \Delta=\IC_h(\widehat y_{S\cup\{x^*\}};V,I,D)-\IC_h(\widehat y_S;V,I,D).
+\]
+It stops when the requested size is reached or, if size is free, once
+\(\Delta\le\texttt{min\_gain}\) after at least one factor is selected.
+
+Elastic-net curation fits repeated subsample elastic-net models on development
+rows \(D\cap L_h(D)\).  With \(R\) successful resamples,
+\[
+  \pi_j=\frac{1}{R}\sum_{r=1}^{R}\ind[|\widehat\beta^{(r)}_j|>10^{-8}],
+\]
+and keeps either the top \(\texttt{n\_keep}\) factors by \(\pi_j\), or all
+factors with \(\pi_j\ge 0.6\), falling back to the top one.
+
+Publish-time deflation, when on, repeatedly drops the member with smallest LOCO
+contribution
+\[
+  \Delta_j=
+  \IC_h(\widehat y_K;V,I,D)
+  -
+  \IC_h(\widehat y_{K\setminus\{j\}};V,I,D)
+\]
+until the final combined book has \(t_{\mathrm{deflated}}>0\), reaches the
+minimum size, or every remaining member has positive marginal contribution.
+
+\section*{Search Budget}
+
+The evolution loop is generation-capped, not quality-targeted:
+\[
+  N_{\mathrm{attempts}}
+  \le
+  N_{\mathrm{seed\ evals}}
+  +
+  \texttt{generations}\cdot\texttt{children\_per\_generation}.
+\]
+\(\texttt{n\_trials}\) increments only for successful, non-duplicate evaluations.
+Default CLI values are
+\[
+  \texttt{generations}=5,\quad
+  \texttt{population}=10,\quad
+  \texttt{children\_per\_gen}=8,\quad
+  \texttt{seed\_ideas}=8,\quad
+  \texttt{islands}=1.
+\]
+
+\end{document}

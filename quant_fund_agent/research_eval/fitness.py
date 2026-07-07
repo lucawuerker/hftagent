@@ -12,7 +12,8 @@ CORE objective vector (all *maximised*):
      content).  Rewards independence that actually predicts, not orthogonal noise.
      The legacy Δ-participation-ratio − soft max-|corr| penalty stays available as
      a diagnostic / ``EvalParams.independence_metric`` option.
-  3. ``robustness``      — ``mean_cpcv(IC) − λ·std_cpcv(IC) − plateau + sign_bonus``.
+  3. ``robustness``      — fold-refit CPCV combined/LOCO IC
+     ``mean − λ·std − plateau + sign_bonus``.
   4. ``parsimony``       — ``−complexity`` (operator + constant count from the AST).
   5. ``regime_independence`` — the candidate's marginal ΔIC measured **only on
      stress/crash bars**: how much it improves the book exactly where the book is

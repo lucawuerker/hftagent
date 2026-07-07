@@ -169,3 +169,6 @@ def test_data_context_bar_size_and_horizon_contract():
     ctx_none = build_data_context(fields, seconds_per_bar=None)
     assert "PREDICTION HORIZON" in ctx_none
     assert "10-second" not in ctx_none
+    fixed = build_data_context(fields, seconds_per_bar=10, fixed_prediction_horizon=12)
+    assert "prediction_horizon = 12" in fixed
+    assert "Do not choose a separate horizon" in fixed

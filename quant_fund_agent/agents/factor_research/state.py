@@ -70,6 +70,9 @@ class FactorResearcherState(BaseModel):
     # recorded* for reference.  It is no longer an accept/reject gate — every
     # successfully-backtested factor is kept regardless of IC magnitude.
     ic_target_horizon: int = 6  # 1-minute bars at 10-sec resolution
+    # When True, brainstorm/codegen must use ``ic_target_horizon`` as the factor's
+    # declared ``prediction_horizon`` instead of choosing per idea.
+    force_prediction_horizon: bool = False
     # Bar size (seconds per bar) of the configured feed, inferred once from the
     # panel index (see ``data.frequency``).  Surfaced to the brainstorm/codegen
     # prompts so the LLM can reason about prediction horizons in wall-clock time.

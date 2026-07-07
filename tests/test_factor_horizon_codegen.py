@@ -36,6 +36,12 @@ class HzFactor(BaseFactor):
 
 def test_valid_horizon_passes():
     assert validate_code(_GOOD, "hz_factor") == "HzFactor"
+    assert validate_code(_GOOD, "hz_factor", expected_prediction_horizon=12) == "HzFactor"
+
+
+def test_fixed_run_horizon_mismatch_rejected():
+    with pytest.raises(CodeValidationError, match="fixed|6"):
+        validate_code(_GOOD, "hz_factor", expected_prediction_horizon=6)
 
 
 def test_missing_horizon_rejected():

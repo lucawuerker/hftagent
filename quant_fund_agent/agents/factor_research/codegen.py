@@ -339,7 +339,11 @@ def _data_field_references(class_def: ast.ClassDef) -> set[str]:
     return fields
 
 
-def _find_factor_class(tree: ast.Module, expected_factor_id: str) -> str:
+def _find_factor_class(
+    tree: ast.Module,
+    expected_factor_id: str,
+    expected_prediction_horizon: int | None = None,
+) -> str:
     """Return the (single) class name that subclasses BaseFactor.
 
     In addition to checking the class shape and ``factor_id`` match,
@@ -423,6 +427,15 @@ def _find_factor_class(tree: ast.Module, expected_factor_id: str) -> str:
             f"class {cls.name!r} has prediction_horizon={horizon}; it must be a "
             f"positive integer ≤ {MAX_PREDICTION_HORIZON} bars."
         )
+    if (
+        expected_prediction_horizon is not None
+        and horizon != int(expected_prediction_horizon)
+    ):
+        raise CodeValidationError(
+            f"class {cls.name!r} has prediction_horizon={horizon}; this run fixes "
+            f"the researcher horizon at {int(expected_prediction_horizon)} bars, "
+            f"so declare `prediction_horizon = {int(expected_prediction_horizon)}`."
+        )
 
     suggested = _extract_class_int_list(cls, "suggested_horizons")
     if suggested is not None:
@@ -438,7 +451,11 @@ def _find_factor_class(tree: ast.Module, expected_factor_id: str) -> str:
     return cls.name
 
 
-def validate_code(code: str, expected_factor_id: str) -> str:
+def validate_code(
+    code: str,
+    expected_factor_id: str,
+    expected_prediction_horizon: int | None = None,
+) -> str:
     """Run all static checks, return the discovered class name."""
     if not code or not code.strip():
         raise CodeValidationError("empty code")
@@ -451,7 +468,7 @@ def validate_code(code: str, expected_factor_id: str) -> str:
         raise CodeValidationError(f"syntax error: {e}") from e
     _check_imports(tree)
     _check_temporal_leakage(tree)
-    return _find_factor_class(tree, expected_factor_id)
+    return _find_factor_class(tree, expected_factor_id, expected_prediction_horizon)
 
 
 # ---------------------------------------------------------------------------
@@ -564,7 +581,11 @@ def smoke_test(factor_id: str) -> None:
 # All-in-one
 # ---------------------------------------------------------------------------
 
-def materialise(factor_id: str, code: str) -> Path:
+def materialise(
+    factor_id: str,
+    code: str,
+    expected_prediction_horizon: int | None = None,
+) -> Path:
     """Validate, write, import, smoke-test.  Returns the file path on success.
 
     On any post-write failure (import error, smoke-test crash) we:
@@ -578,7 +599,7 @@ def materialise(factor_id: str, code: str) -> Path:
     """
     from quant_fund_agent.factors.registry import _FACTOR_REGISTRY, get_factor_class
 
-    class_name = validate_code(code, factor_id)
+    class_name = validate_code(code, factor_id, expected_prediction_horizon)
     log.info("validated %s (class %s)", factor_id, class_name)
     # Never overwrite an already-registered factor's code (e.g. another prerun's
     # under dedup_scope="prerun"): fail cleanly so the clash is dropped instead of

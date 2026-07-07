@@ -113,9 +113,12 @@ gate); **[GATE]** = hard pre-filter; **[DIAG]** = computed and shown to the LLM
 ### Family 1 — Standalone predictive power
 - IC / rank-IC at the factor's own horizon — **[DIAG]** (demoted from reward;
   this is the trap the volatility example warns against). `ic_own` already exists.
-- IC-IR (IC mean / IC std) — **[CORE]** robustness input; stability beats magnitude.
-- IC decay curve across horizons — **[DIAG]**; lets the LLM re-pick the horizon
-  and distinguishes one-bar microstructure noise from durable edge.
+- Raw-signal IC stability / IC-IR — **[DIAG]**; useful teacher-channel evidence,
+  but not the main robustness reward because conditioning factors can have weak
+  standalone IC.
+- IC decay curve across horizons — **[DIAG]**; in free-horizon mode it can suggest
+  re-anchoring, while in fixed-horizon mode it tells the LLM whether to redesign
+  the mechanism for the required offset.
 - Quantile-spread monotonicity — **[DIAG]**.
 
 ### Family 2 — Marginal / incremental value  *(the heart of the reward)*
@@ -151,9 +154,11 @@ gate); **[GATE]** = hard pre-filter; **[DIAG]** = computed and shown to the LLM
 ### Family 4 — Robustness / overfitting resistance  *(this is F, inside the fitness)*
 - **OOS/IS degradation ratio** (`ICIR_oos / ICIR_is`, same sign) — **[GATE]**.
   You already track OOS÷IS-Sharpe in the rolling comparison.
-- **CPCV IC distribution** — **[CORE]**. Reward high `mean − λ·std` over the
-  combinatorial purged folds, not a single split. The variance is itself an
-  overfit signal.
+- **Fold-refit CPCV distribution** — **[CORE]**. For each purged fold, refit the
+  combined model on that fold's train mask and score fold-test OOS IC. In SINGLE
+  mode the fold score is LOCO `with candidate − book only`; in SET mode it is the
+  set's own combined OOS IC. Reward high `mean − λ·std`; the variance is itself
+  an overfit signal. Raw standalone CPCV remains a diagnostic.
 - **Parameter-sensitivity / plateau test** — **[CORE, underused]**. Jitter the
   factor's integer windows (±10%) and measure IC stability. Overfit factors are
   knife-edge spikes; real ones sit on plateaus. *The same jitter doubles as a
@@ -185,8 +190,8 @@ tried 3 variants of this." This is where experience-RAG / GraphRAG feeds the LLM
 ### The CORE objective vector (Pareto axes)
 1. **Marginal contribution to the combined model** (primary),
 2. **Independence** (Δ participation ratio; soft max-corr penalty),
-3. **Robustness** (`mean_cpcv(IC) − λ·std_cpcv(IC) − plateau_penalty +
-   sign_consistency_bonus`),
+3. **Robustness** (`mean_cpcv(fold-refit combined/LOCO IC) − λ·std_cpcv −
+   plateau_penalty + sign_consistency_bonus`),
 4. **Parsimony** (`−complexity`).
 
 **Hard gates** (all must pass, else the candidate is treated as dominated):
@@ -205,9 +210,9 @@ up one level. The protocol is explicit and non-negotiable:
   survivors only.
 - **CPCV over IS∪VAL** (`research_eval/splits.py`): combinatorial train/test
   groups with **purging** (drop train labels whose horizon overlaps a test block)
-  and **embargo** (a buffer after each test block). Output = a *distribution* of
-  OOS IC per candidate, not a point. This is the development-time fitness engine
-  (decision 2).
+  and **embargo** (a buffer after each test block). The scored output is a
+  fold-refit distribution of OOS combined/LOCO IC per candidate, not a point.
+  This is the development-time fitness engine (decision 2).
 - **Walk-forward wrapper.** Re-run the *entire* evolutionary loop period-by-period
   inside the existing walk-forward harness for the thesis results chapter — every
   discovery is OOS to the next period. Used once, not every iteration (decision 2).
@@ -268,7 +273,7 @@ Per-role model selection: `--hypothesis-model`, `--debate-model`,
   | --- | --- | --- |
   | 1. Marginal value (primary) | ΔOOS-IC of the combined model from adding the factor to the **Pareto archive** (LOCO, CPCV-averaged) | the set's **own** combined-model OOS-IC/Sharpe directly |
   | 2. Independence | Δ participation ratio; soft max-corr penalty | internal participation ratio of the set |
-  | 3. Robustness | `mean_cpcv(IC) − λ·std − plateau + sign_consistency` | same, on the combined signal |
+  | 3. Robustness | fold-refit CPCV LOCO `mean(ΔIC) − λ·std − plateau + sign_consistency` | fold-refit CPCV of the set's own combined signal |
   | 4. Parsimony | `−(n_ops + n_constants)` from AST | `−(total_complexity / size)` |
 
 - **Selection** — NSGA-II: non-dominated sort into Pareto fronts + crowding

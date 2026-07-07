@@ -166,6 +166,7 @@ def run_research_session(
     data_dir: str = "ticker_data",
     dedup_scope: str = "package",
     allowed_fields: list[str] | None = None,
+    force_prediction_horizon: bool = False,
 ) -> dict[str, Any]:
     """Run one Factor Researcher session and persist any kept factors.
 
@@ -212,6 +213,7 @@ def run_research_session(
         n_papers=n_papers,
         n_factor_ideas=n_ideas,
         ic_target_horizon=horizon,
+        force_prediction_horizon=force_prediction_horizon,
         seconds_per_bar=_infer_seconds_per_bar(data_dir),
         n_tickers=n_tickers,
         paper_sample_strategy=paper_sample_strategy,
@@ -220,8 +222,9 @@ def run_research_session(
         allowed_fields=allowed_fields,
     )
     log.info("Factor research session '%s' (papers=%d, ideas=%d, IC@%d recorded, "
-             "not gated; %s data fields in scope)",
+             "not gated; prediction horizon %s; %s data fields in scope)",
              state.session_id, n_papers, n_ideas, horizon,
+             f"fixed at {horizon}" if force_prediction_horizon else "free",
              len(allowed_fields) if allowed_fields is not None else "all")
     return factor_research_graph.invoke(state)
 

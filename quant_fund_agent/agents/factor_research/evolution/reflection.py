@@ -43,7 +43,12 @@ def _decay_line(ic_decay: dict[str, float | None] | None) -> str | None:
     return line
 
 
-def mutation_brief(fitness: FitnessResult, *, book_size: int | None = None) -> str:
+def mutation_brief(
+    fitness: FitnessResult,
+    *,
+    book_size: int | None = None,
+    fixed_prediction_horizon: int | None = None,
+) -> str:
     """Render one candidate's dashboard into the NL brief for the mutating LLM.
 
     Sections: verdict (gates), the four Pareto axes with their raw ingredients,
@@ -83,10 +88,20 @@ def mutation_brief(fitness: FitnessResult, *, book_size: int | None = None) -> s
         f"effective factors {_fmt(d.get('pr_before'), 2)} → "
         f"{_fmt(d.get('pr_after'), 2)}); max |corr| to an existing factor: "
         f"{_fmt(d.get('max_abs_corr'))}.")
+    score_kind = d.get("cpcv_score_kind") or "cpcv"
+    model = d.get("cpcv_model")
+    model_txt = f" via {model}" if model else ""
     lines.append(
-        f"Robustness: CPCV IC mean {_fmt(d.get('cpcv_ic_mean'))} ± "
-        f"{_fmt(d.get('cpcv_ic_std'))} over {d.get('cpcv_n_folds', 0)} purged "
-        f"folds; OOS/IS degradation ratio {_fmt(d.get('degradation_ratio'))}.")
+        f"Robustness (axis = {score_kind}{model_txt}): CPCV mean "
+        f"{_fmt(d.get('cpcv_ic_mean'))} ± {_fmt(d.get('cpcv_ic_std'))} over "
+        f"{d.get('cpcv_n_folds', 0)} purged refit folds; OOS/IS degradation "
+        f"ratio {_fmt(d.get('degradation_ratio'))}.")
+    if d.get("standalone_cpcv_ic_mean") is not None:
+        lines.append(
+            f"Standalone temporal stability diagnostic: raw-signal CPCV IC mean "
+            f"{_fmt(d.get('standalone_cpcv_ic_mean'))} ± "
+            f"{_fmt(d.get('standalone_cpcv_ic_std'))} over "
+            f"{d.get('standalone_cpcv_n_folds', 0)} folds.")
     if d.get("regime_independence") is not None or d.get("stress_ic_with") is not None:
         lines.append(
             f"Regime (crash-complementarity): marginal ΔIC on the "
@@ -155,13 +170,24 @@ def mutation_brief(fitness: FitnessResult, *, book_size: int | None = None) -> s
             "Do not just flip the sign; explain why the true direction holds.")
     ic_decay = d.get("ic_decay") or {}
     finite = {h: ic for h, ic in ic_decay.items() if ic is not None}
-    if finite and st is not None:
+    if finite and st is not None and fixed_prediction_horizon is None:
         best_h = max(finite, key=lambda h: abs(finite[h]))
         if abs(finite[best_h]) > 1.5 * abs(st):
             advice.append(
                 f"The edge is materially stronger at a {best_h}-bar horizon than "
                 f"at the declared one — consider re-anchoring prediction_horizon "
                 f"to {best_h}.")
+    elif finite and st is not None and fixed_prediction_horizon is not None:
+        best_h = max(finite, key=lambda h: abs(finite[h]))
+        if (
+            int(best_h) != int(fixed_prediction_horizon)
+            and abs(finite[best_h]) > 1.5 * abs(st)
+        ):
+            advice.append(
+                f"The edge is stronger away from the fixed "
+                f"{fixed_prediction_horizon}-bar horizon, but this run pins the "
+                "forecast offset.  Do not re-anchor the declared horizon; change "
+                "the mechanism so it works at the fixed offset.")
     cov = d.get("coverage")
     if cov is not None and cov < 0.7:
         advice.append(

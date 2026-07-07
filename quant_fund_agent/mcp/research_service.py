@@ -326,7 +326,11 @@ def existing_factor_ids(scope: str = "package") -> list[str]:
 # Codegen materialisation
 # ---------------------------------------------------------------------------
 
-def materialise_factor(factor_id: str, code: str) -> dict[str, Any]:
+def materialise_factor(
+    factor_id: str,
+    code: str,
+    expected_prediction_horizon: int | None = None,
+) -> dict[str, Any]:
     """Validate, write, import and smoke-test LLM-generated factor code.
 
     Returns ``{"ok": True, "code_path": str}`` on success or
@@ -338,7 +342,7 @@ def materialise_factor(factor_id: str, code: str) -> dict[str, Any]:
     )
 
     try:
-        path = materialise(factor_id, code)
+        path = materialise(factor_id, code, expected_prediction_horizon)
     except CodeValidationError as e:
         return {"ok": False, "error": f"validation failed: {e}"}
     except Exception as e:  # noqa: BLE001 — surface any failure to the retry prompt
@@ -564,6 +568,8 @@ def evaluate_fitness(
     cpcv_groups: int = 6,
     cpcv_k: int = 2,
     embargo: int = 0,
+    cpcv_model: str | None = None,
+    cpcv_fast: bool = True,
     cutoff_date: str | None = None,
     data_dir: str = "ticker_data",
     n_tickers: int | None = 15,
@@ -656,6 +662,7 @@ def evaluate_fitness(
                            fit_standardize="per_underlying", seed=0)
     params = EvalParams(n_trials=max(1, int(n_trials)), cpcv_groups=cpcv_groups,
                         cpcv_k=cpcv_k, embargo=embargo,
+                        cpcv_model=cpcv_model, cpcv_fast=cpcv_fast,
                         independence_metric=independence_metric,
                         regime_kind=regime_kind, regime_quantile=regime_quantile,
                         marginal_model=marginal_model,
@@ -694,6 +701,8 @@ def evaluate_set_fitness(
     cpcv_groups: int = 6,
     cpcv_k: int = 2,
     embargo: int = 0,
+    cpcv_model: str | None = None,
+    cpcv_fast: bool = True,
     cutoff_date: str | None = None,
     data_dir: str = "ticker_data",
     n_tickers: int | None = 15,
@@ -747,6 +756,7 @@ def evaluate_set_fitness(
                            fit_standardize="per_underlying", seed=0)
     params = EvalParams(n_trials=max(1, int(n_trials)), cpcv_groups=cpcv_groups,
                         cpcv_k=cpcv_k, embargo=embargo,
+                        cpcv_model=cpcv_model, cpcv_fast=cpcv_fast,
                         regime_kind=regime_kind, regime_quantile=regime_quantile,
                         marginal_model=marginal_model,
                         gate_turnover=gate_turnover, cost_rate=cost_rate,

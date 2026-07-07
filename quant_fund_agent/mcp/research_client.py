@@ -41,11 +41,21 @@ def existing_factor_ids(scope: str = "package") -> list[str]:
     return _bridge().call("existing_factor_ids", {"scope": scope})
 
 
-def materialise_factor(factor_id: str, code: str) -> dict[str, Any]:
+def materialise_factor(
+    factor_id: str,
+    code: str,
+    expected_prediction_horizon: int | None = None,
+) -> dict[str, Any]:
+    args = {
+        "factor_id": factor_id,
+        "code": code,
+        "expected_prediction_horizon": expected_prediction_horizon,
+    }
     if not _use_mcp():
         from quant_fund_agent.mcp import research_service as svc
-        return svc.materialise_factor(factor_id, code)
-    return _bridge().call("materialise_factor", {"factor_id": factor_id, "code": code})
+        return svc.materialise_factor(**args)
+    return _bridge().call(
+        "materialise_factor", {k: v for k, v in args.items() if v is not None})
 
 
 def backtest_factors(
@@ -90,6 +100,8 @@ def evaluate_fitness(
     cpcv_groups: int = 6,
     cpcv_k: int = 2,
     embargo: int = 0,
+    cpcv_model: str | None = None,
+    cpcv_fast: bool = True,
     cutoff_date: str | None = None,
     data_dir: str = "ticker_data",
     n_tickers: int | None = 15,
@@ -110,7 +122,8 @@ def evaluate_fitness(
     kwargs: dict[str, Any] = dict(
         target_horizon=target_horizon, is_frac=is_frac, val_frac=val_frac,
         n_trials=n_trials, cpcv_groups=cpcv_groups, cpcv_k=cpcv_k,
-        embargo=embargo, cutoff_date=cutoff_date, data_dir=data_dir,
+        embargo=embargo, cpcv_model=cpcv_model, cpcv_fast=cpcv_fast,
+        cutoff_date=cutoff_date, data_dir=data_dir,
         n_tickers=n_tickers, fields=fields,
         independence_metric=independence_metric, regime_kind=regime_kind,
         regime_quantile=regime_quantile, marginal_model=marginal_model,
@@ -136,6 +149,8 @@ def evaluate_set_fitness(
     cpcv_groups: int = 6,
     cpcv_k: int = 2,
     embargo: int = 0,
+    cpcv_model: str | None = None,
+    cpcv_fast: bool = True,
     cutoff_date: str | None = None,
     data_dir: str = "ticker_data",
     n_tickers: int | None = 15,
@@ -156,7 +171,8 @@ def evaluate_set_fitness(
     kwargs: dict[str, Any] = dict(
         target_horizon=target_horizon, is_frac=is_frac, val_frac=val_frac,
         n_trials=n_trials, cpcv_groups=cpcv_groups, cpcv_k=cpcv_k,
-        embargo=embargo, cutoff_date=cutoff_date, data_dir=data_dir,
+        embargo=embargo, cpcv_model=cpcv_model, cpcv_fast=cpcv_fast,
+        cutoff_date=cutoff_date, data_dir=data_dir,
         n_tickers=n_tickers, fields=fields, candidate_id=candidate_id,
         regime_kind=regime_kind, regime_quantile=regime_quantile,
         marginal_model=marginal_model,

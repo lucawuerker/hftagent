@@ -11,6 +11,7 @@ import pandas as pd
 import pytest
 
 from quant_fund_agent.comparison.config import ComparisonConfig
+from quant_fund_agent.research_eval import harness as harness_mod
 from quant_fund_agent.research_eval.harness import (
     EvalParams,
     evaluate_candidate,
@@ -302,6 +303,35 @@ def test_conditioning_factor_scores_positive_marginal_under_nonlinear_default():
     assert nonlinear.objective.marginal_value > 0.01                 # conditioning value captured
     assert abs(linear.objective.marginal_value) < 0.01              # linear misses it
     assert nonlinear.objective.marginal_value > linear.objective.marginal_value
+
+
+def test_cpcv_robustness_refits_marginal_model_per_fold(monkeypatch):
+    """The scored robustness axis is fold-refit LOCO, not raw-signal CPCV."""
+    panel, f1, f2, _ = _two_driver_panel()
+    cfg = _cfg()
+    split = three_way_split(panel["close"].index, is_frac=0.6, val_frac=0.2)
+    params = EvalParams(cpcv_groups=4, cpcv_k=1, cpcv_model="ridge",
+                        cpcv_fast=False)
+    calls: list[tuple[int, tuple[int, ...]]] = []
+    original = harness_mod._combined_prediction
+
+    def spy(signals, close, is_mask, cfg, model):
+        calls.append((len(signals), tuple(np.flatnonzero(is_mask))))
+        return original(signals, close, is_mask, cfg, model)
+
+    monkeypatch.setattr(harness_mod, "_combined_prediction", spy)
+    r = evaluate_candidate(f2, [f1], panel, cfg, split=split,
+                           params=params, candidate_id="fresh")
+
+    fold_trains = {
+        mask for n_signals, mask in calls
+        if n_signals == 2 and mask != tuple(np.flatnonzero(split.is_mask))
+    }
+    assert r.diagnostics["cpcv_score_kind"] == "refit_marginal_delta"
+    assert r.diagnostics["cpcv_model"] == "ridge"
+    assert r.diagnostics["cpcv_n_folds"] >= 2
+    assert r.diagnostics["standalone_cpcv_n_folds"] >= 2
+    assert len(fold_trains) >= 2
 
 
 def test_regime_axis_rewards_crash_specialist():

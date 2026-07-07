@@ -152,6 +152,21 @@ def _parse_args() -> argparse.Namespace:
                    help="CPCV group count (C(N,k) folds).")
     p.add_argument("--cpcv-k", type=int, default=2)
     p.add_argument("--embargo", type=int, default=0)
+    p.add_argument("--cpcv-model", default=None,
+                   help="Estimator used for fold-refit CPCV robustness. Default: "
+                        "reuse --marginal-model. Keep this nonlinear "
+                        "(e.g. gradient_boosting/lightgbm) if you want "
+                        "conditioning factors to pass robustness.")
+    p.add_argument("--no-cpcv-fast", action="store_true",
+                   help="Disable the lightweight tree/boosting preset for repeated "
+                        "CPCV refits. By default CPCV refits use fast model params "
+                        "because they run once per fold.")
+    p.add_argument("--prediction-horizon-mode", choices=["fixed", "free"],
+                   default="fixed",
+                   help="fixed (default): force every generated factor to declare "
+                        "--horizon as prediction_horizon. free: let the researcher "
+                        "declare per-factor horizons, while fitness still scores at "
+                        "--horizon.")
     p.add_argument("--cutoff-date", default=None,
                    help="ISO date: evaluate only bars strictly before this "
                         "(walk-forward wrapping).")
@@ -302,7 +317,10 @@ def main() -> None:
         cpcv_groups=args.cpcv_groups,
         cpcv_k=args.cpcv_k,
         embargo=args.embargo,
+        cpcv_model=args.cpcv_model,
+        cpcv_fast=not args.no_cpcv_fast,
         cutoff_date=args.cutoff_date,
+        force_prediction_horizon=(args.prediction_horizon_mode == "fixed"),
         independence_metric=args.independence_metric,
         regime_kind=args.regime_kind,
         regime_quantile=args.regime_quantile,

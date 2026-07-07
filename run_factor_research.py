@@ -80,7 +80,15 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--max-sessions", type=int, default=12,
                    help="Hard cap on the number of research sessions.")
     p.add_argument("--horizon", type=int, default=6,
-                   help="Bars at which each factor's IC is recorded (not gated).")
+                   help="Run-level forecast horizon in bars. In fixed-horizon mode, "
+                        "every generated factor must declare this as its "
+                        "prediction_horizon; IC is recorded here and not gated.")
+    p.add_argument("--prediction-horizon-mode", choices=["fixed", "free"],
+                   default="fixed",
+                   help="fixed (default): force every researched factor to use "
+                        "--horizon as prediction_horizon. free: let the researcher "
+                        "declare per-factor horizons while still recording IC at "
+                        "--horizon.")
     p.add_argument("--n-tickers", type=int, default=15,
                    help="Universe cap for the research-time IC backtest.")
     p.add_argument("--sample", choices=["random", "unread_first"], default="random",
@@ -166,6 +174,7 @@ def main() -> None:
                 n_papers=args.papers_per_session,
                 n_ideas=args.ideas_per_session,
                 horizon=args.horizon,
+                force_prediction_horizon=(args.prediction_horizon_mode == "fixed"),
                 n_tickers=args.n_tickers,
                 paper_sample_strategy=args.sample,
                 data_dir=args.data_dir,

@@ -112,8 +112,11 @@ class EvolutionRunConfig:
     cpcv_groups: int = 6
     cpcv_k: int = 2
     embargo: int = 0
+    cpcv_model: str | None = None
+    cpcv_fast: bool = True
     plateau_scales: tuple[float, ...] = (0.9, 1.1)
     cutoff_date: str | None = None
+    force_prediction_horizon: bool = True
 
     # ── fitness axes (P0+): independence basis + the crash-regime axis ──
     independence_metric: str = "residual_ic"   # "residual_ic" | "delta_participation"
@@ -190,7 +193,12 @@ def _invoke(llm: Any, prompt: str) -> str:
 
 # ── seeding via the existing brainstorm/codegen path ──────────────────────────
 
-def _codegen_program(llm: Any, idea: Any, data_context: str) -> FactorProgram | None:
+def _codegen_program(
+    llm: Any,
+    idea: Any,
+    data_context: str,
+    expected_prediction_horizon: int | None = None,
+) -> FactorProgram | None:
     """One idea → validated (in-memory) FactorProgram, with one feedback retry.
 
     Mirrors the oneshot ``generate_code`` node but compiles in-memory instead of
@@ -207,7 +215,9 @@ def _codegen_program(llm: Any, idea: Any, data_context: str) -> FactorProgram | 
         try:
             content = _invoke(llm, _codegen_prompt(idea, data_context, feedback=feedback))
             code = _parse_json(content).get("code", "")
-            compile_factor(code, idea.factor_id, smoke=True)
+            compile_factor(
+                code, idea.factor_id, smoke=True,
+                expected_prediction_horizon=expected_prediction_horizon)
             return FactorProgram(
                 factor_id=idea.factor_id,
                 code=code,
@@ -321,7 +331,8 @@ def seed_programs(cfg: EvolutionRunConfig, data_context: str,
     for raw in raw_ideas:
         if len(ideas) >= cfg.n_seed_ideas:
             break
-        idea = coerce_idea(raw, cfg.target_horizon)
+        idea = coerce_idea(
+            raw, cfg.target_horizon, force_horizon=cfg.force_prediction_horizon)
         if idea is None or idea.factor_id in seen or idea.factor_id in known:
             continue
         seen.add(idea.factor_id)
@@ -341,14 +352,19 @@ def seed_programs(cfg: EvolutionRunConfig, data_context: str,
             if verdict == "reject":
                 log.info("[seed:%s] rejected in debate", idea.factor_id)
                 continue
-            surviving.append(_apply_idea_revision(idea, final, cfg.target_horizon))
+            surviving.append(_apply_idea_revision(
+                idea, final, cfg.target_horizon,
+                force_horizon=cfg.force_prediction_horizon))
         log.info("debate kept %d/%d seed idea(s)", len(surviving), len(ideas))
         ideas = surviving
 
     codegen_llm = _get_llm(temperature=0.2, role="codegen")
     programs = []
+    fixed_horizon = cfg.target_horizon if cfg.force_prediction_horizon else None
     for idea in ideas:
-        prog = _codegen_program(codegen_llm, idea, data_context)
+        prog = _codegen_program(
+            codegen_llm, idea, data_context,
+            expected_prediction_horizon=fixed_horizon)
         if prog is not None:
             programs.append(prog)
     log.info("seeded %d/%d program(s) from %d idea(s)",
@@ -382,7 +398,12 @@ def seed_programs(cfg: EvolutionRunConfig, data_context: str,
     return programs
 
 
-def coerce_idea(raw: dict[str, Any], default_horizon: int) -> "Any | None":
+def coerce_idea(
+    raw: dict[str, Any],
+    default_horizon: int,
+    *,
+    force_horizon: bool = False,
+) -> "Any | None":
     """Raw idea dict (brainstorm / hypothesis / debate revision) → FactorIdea."""
     from quant_fund_agent.agents.factor_research.graph import (
         _coerce_horizon,
@@ -398,15 +419,21 @@ def coerce_idea(raw: dict[str, Any], default_horizon: int) -> "Any | None":
         sign = int(np.sign(int(sign_raw))) or None if sign_raw is not None else None
     except (TypeError, ValueError):
         sign = None
+    horizon = (
+        int(default_horizon) if force_horizon
+        else _coerce_horizon(raw.get("prediction_horizon"), default_horizon)
+    )
     return FactorIdea(
         factor_id=fid,
         name=raw.get("name", fid),
         category=raw.get("category", "other"),
         trading_idea=raw.get("trading_idea", ""),
         description=raw.get("description", ""),
-        prediction_horizon=_coerce_horizon(raw.get("prediction_horizon"),
-                                           default_horizon),
-        suggested_horizons=_coerce_horizon_list(raw.get("suggested_horizons")),
+        prediction_horizon=horizon,
+        suggested_horizons=(
+            [horizon] if force_horizon
+            else _coerce_horizon_list(raw.get("suggested_horizons"))
+        ),
         expected_sign=sign,
         source_paper_ids=list(raw.get("source_paper_ids", []) or []),
     )
@@ -427,9 +454,15 @@ def _idea_payload(idea: Any) -> dict[str, Any]:
     }
 
 
-def _apply_idea_revision(idea: Any, final: dict[str, Any], default_horizon: int) -> Any:
+def _apply_idea_revision(
+    idea: Any,
+    final: dict[str, Any],
+    default_horizon: int,
+    *,
+    force_horizon: bool = False,
+) -> Any:
     """Fold a debate revision back into the idea (keeping the id if unchanged)."""
-    revised = coerce_idea(final, default_horizon)
+    revised = coerce_idea(final, default_horizon, force_horizon=force_horizon)
     if revised is None:
         return idea
     if not revised.trading_idea:
@@ -534,7 +567,8 @@ class EvolutionLoop:
             spb = _infer_seconds_per_bar(self.cfg.data_dir)
         except Exception:  # noqa: BLE001
             pass
-        return build_data_context(allowed, spb)
+        fixed = self.cfg.target_horizon if self.cfg.force_prediction_horizon else None
+        return build_data_context(allowed, spb, fixed_prediction_horizon=fixed)
 
     def _load_known_ids(self) -> None:
         from quant_fund_agent.mcp import research_client
@@ -594,6 +628,8 @@ class EvolutionLoop:
             cpcv_groups=self.cfg.cpcv_groups,
             cpcv_k=self.cfg.cpcv_k,
             embargo=self.cfg.embargo,
+            cpcv_model=self.cfg.cpcv_model,
+            cpcv_fast=self.cfg.cpcv_fast,
             cutoff_date=self.cfg.cutoff_date,
             data_dir=self.cfg.data_dir,
             n_tickers=self.cfg.n_tickers,
@@ -629,6 +665,8 @@ class EvolutionLoop:
             cpcv_groups=self.cfg.cpcv_groups,
             cpcv_k=self.cfg.cpcv_k,
             embargo=self.cfg.embargo,
+            cpcv_model=self.cfg.cpcv_model,
+            cpcv_fast=self.cfg.cpcv_fast,
             cutoff_date=self.cfg.cutoff_date,
             data_dir=self.cfg.data_dir,
             n_tickers=self.cfg.n_tickers,
@@ -701,7 +739,13 @@ class EvolutionLoop:
                 marginal=eg.fitness.objective.marginal_value,
                 generation=genome.generation)
         self.briefs[genome.genome_id] = self._with_memory(
-            mutation_brief(fitness, book_size=self._book_size()))
+            mutation_brief(
+                fitness, book_size=self._book_size(),
+                fixed_prediction_horizon=(
+                    self.cfg.target_horizon if self.cfg.force_prediction_horizon
+                    else None
+                ),
+            ))
         return eg
 
     def _memory_topic(self, genome: Genome) -> str | None:
@@ -752,7 +796,13 @@ class EvolutionLoop:
 
     def _brief_for(self, eg: EvaluatedGenome) -> str:
         return self.briefs.get(eg.genome.genome_id) or self._with_memory(
-            mutation_brief(eg.fitness, book_size=self._book_size()))
+            mutation_brief(
+                eg.fitness, book_size=self._book_size(),
+                fixed_prediction_horizon=(
+                    self.cfg.target_horizon if self.cfg.force_prediction_horizon
+                    else None
+                ),
+            ))
 
     def _book_size(self) -> int:
         archive_ids = {fid for fid, _ in self.controller.archive_programs()}
@@ -818,12 +868,17 @@ class EvolutionLoop:
             log.info("[%s] child hypothesis rejected in debate", raw.get("factor_id"))
             return None
 
-        idea = coerce_idea(final, self.cfg.target_horizon)
+        idea = coerce_idea(
+            final, self.cfg.target_horizon,
+            force_horizon=self.cfg.force_prediction_horizon)
         if idea is None:
             return None
         idea.factor_id = self._unique_id(idea.factor_id)
-        prog = _codegen_program(self._role_llm("codegen", 0.2), idea,
-                                self.data_context)
+        fixed_horizon = (
+            self.cfg.target_horizon if self.cfg.force_prediction_horizon else None)
+        prog = _codegen_program(
+            self._role_llm("codegen", 0.2), idea, self.data_context,
+            expected_prediction_horizon=fixed_horizon)
         if prog is not None and not prog.source_paper_ids:
             prog.source_paper_ids = list(parent.genome.program.source_paper_ids)
         return prog
@@ -879,12 +934,21 @@ class EvolutionLoop:
         for attempt in range(2):
             try:
                 program = parse_child_response(_invoke(llm, current_prompt))
+                expected_horizon = (
+                    self.cfg.target_horizon
+                    if self.cfg.force_prediction_horizon else None
+                )
+                if expected_horizon is not None:
+                    program.prediction_horizon = expected_horizon
+                    program.suggested_horizons = [expected_horizon]
                 fid = self._unique_id(program.factor_id)
                 if fid != program.factor_id:
                     program.code = rewrite_factor_id(program.code,
                                                      program.factor_id, fid)
                     program.factor_id = fid
-                compile_factor(program.code, program.factor_id, smoke=True)
+                compile_factor(
+                    program.code, program.factor_id, smoke=True,
+                    expected_prediction_horizon=expected_horizon)
                 break
             except Exception as e:  # noqa: BLE001 — feed the error back once
                 program = None
