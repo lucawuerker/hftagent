@@ -189,7 +189,7 @@ def fit_and_backtest(
     # ── ML model: select on held-out IS-valid, then refit on the FULL IS ──
     #
     # 1. fit on the IS-train sub-window and score predictions on the held-out
-    #    IS-valid sub-window (rank-IC = the trial *selection* signal; train/valid
+    #    IS-valid sub-window (IC = the trial *selection* signal; train/valid
     #    R^2 = the overfitting diagnostic);
     # 2. refit a fresh model on the FULL in-sample window, persist it, and report
     #    its FULL-IS backtest — so the metrics handed to the Statistician are a
@@ -230,7 +230,7 @@ def fit_and_backtest(
     X_tr_fit, y_tr_fit = _subsample_rows(X_tr, y_tr, train_sample_frac)
     trial_estimator.fit(X_tr_fit, y_tr_fit)
 
-    # Held-out validation rank-IC: the robust, leakage-free trial selection score.
+    # Held-out validation IC: the robust, leakage-free trial selection score.
     close_va = close.iloc[cut:]
     valid_pred = predict_to_signal(
         trial_estimator, _slice_signals(normed_is, cut, n_rows), fids,

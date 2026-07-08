@@ -9,7 +9,7 @@ It is deliberately *signal-oriented* (it takes DataFrames, not factor ids or LLM
 output), so it is fully testable on a synthetic panel and can never be influenced by
 an LLM.  It is mostly **orchestration** of trusted code that already exists —
 ``comparison/standardize`` (per-underlying z-score), ``comparison/ic`` (pooled
-Spearman IC), ``comparison/analytics`` (participation ratio), ``modeling/catalog``
+Pearson IC), ``comparison/analytics`` (participation ratio), ``modeling/catalog``
 (estimators), ``backtesting/data_loader`` (forward returns) — glued to the split /
 deflation seams in this package.
 
@@ -43,7 +43,7 @@ import numpy as np
 import pandas as pd
 
 from quant_fund_agent.backtesting.data_loader import forward_returns
-from quant_fund_agent.comparison.ic import _spearman
+from quant_fund_agent.comparison.ic import _pearson
 from quant_fund_agent.comparison.standardize import per_underlying_zscore
 from quant_fund_agent.research_eval import deflation
 from quant_fund_agent.research_eval.fitness import (
@@ -128,7 +128,7 @@ def _pooled_ic(
     row_mask: np.ndarray | None = None, stat_mask: np.ndarray | None = None,
     available_mask: np.ndarray | None = None,
 ) -> tuple[float | None, int]:
-    """Pooled per-underlying time-series Spearman IC of ``sig`` vs its forward return.
+    """Pooled per-underlying time-series Pearson IC of ``sig`` vs its forward return.
 
     ``row_mask`` selects the rows scored; ``stat_mask`` selects the rows whose stats
     standardise the signal (pass the IS window to keep an OOS score leak-free).  The
@@ -147,7 +147,7 @@ def _pooled_ic(
         row_mask = valid if row_mask is None else (np.asarray(row_mask) & valid)
     if row_mask is not None:
         x, y = x[row_mask], y[row_mask]
-    return _spearman(x.ravel(), y.ravel())
+    return _pearson(x.ravel(), y.ravel())
 
 
 def _combined_prediction(
@@ -465,7 +465,7 @@ def _residual_ic(
     """Orthogonalised (residual) IC — the candidate's edge beyond the book's span.
 
     Regress the candidate on the book using ``fit_mask`` only, then
-    Spearman-correlate the residual with forward returns on ``score_mask``.
+    Pearson-correlate the residual with forward returns on ``score_mask``.
     ``available_mask`` prevents a score near the development boundary from using
     held-out TEST prices as forward-return labels.
     """
@@ -496,7 +496,7 @@ def _residual_ic(
     label_rows = _label_available_mask(available_mask, h)
     score_rows = np.repeat(np.asarray(score_mask) & label_rows, n_cols)
     finite_score = score_rows & np.isfinite(resid) & np.isfinite(y_fwd)
-    return _spearman(resid[finite_score], y_fwd[finite_score])[0]
+    return _pearson(resid[finite_score], y_fwd[finite_score])[0]
 
 
 def _independence(candidate: pd.DataFrame, book: Sequence[pd.DataFrame], panel, cfg,
@@ -664,7 +664,7 @@ def _behavior_descriptors(sig: pd.DataFrame, close: pd.DataFrame, h: int,
     place the candidate in the MAP-Elites grid so the search fills a diverse library.
     All computed on the development window (IS∪VAL) only, so they are leak-free:
 
-    * ``trend_reversal`` — Spearman(signal, *trailing* h-bar return).  Negative ⇒
+    * ``trend_reversal`` — Pearson(signal, *trailing* h-bar return).  Negative ⇒
       mean-reversion / fade, positive ⇒ momentum / continuation.  (Trailing, not
       forward — a behavioral property, not predictive power.)
     * ``signal_speed`` — ``1 − lag-1 autocorr`` of the per-underlying z-signal.  Low ⇒
@@ -679,7 +679,7 @@ def _behavior_descriptors(sig: pd.DataFrame, close: pd.DataFrame, h: int,
 
     # trend_reversal: signal vs trailing h-bar return (past return, leak-free)
     trailing = close.pct_change(max(1, int(h))).to_numpy(dtype=float)
-    tr = _spearman(zt[dev].ravel(), trailing[dev].ravel())[0]
+    tr = _pearson(zt[dev].ravel(), trailing[dev].ravel())[0]
 
     # signal_speed: 1 − mean per-underlying lag-1 autocorr over the dev window
     acs: list[float] = []

@@ -470,7 +470,7 @@ Respond in JSON:
 def _trial_score(t: TrialRecord) -> float | None:
     """Leakage-free selection score for a trial.
 
-    Prefer the held-out **validation rank-IC** (computed inside the IS window on
+    Prefer the held-out **validation IC** (computed inside the IS window on
     data the model wasn't fitted on); fall back to in-sample Sharpe for the
     static-weights baseline, which has no fitted model / validation score.
     """

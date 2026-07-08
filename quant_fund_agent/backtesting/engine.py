@@ -1,7 +1,7 @@
 """Backtesting engine — IC / ICIR computation for single factors.
 
 The core metric is the **Information Coefficient (IC)**: the
-cross-sectional Spearman rank correlation between the factor signal
+cross-sectional Pearson correlation between the factor signal
 at time *t* and the realised forward return over the next *horizon*
 bars.  This is computed for every timestamp, giving an IC time series.
 
@@ -28,12 +28,11 @@ def _ic_series(
     fwd_ret: pd.DataFrame,
     min_assets: int = 5,
 ) -> pd.Series:
-    """Cross-sectional Spearman rank-IC per timestamp (vectorised).
+    """Cross-sectional Pearson IC per timestamp (vectorised).
 
-    Ranks both matrices cross-sectionally, demeans each row, then
-    computes Pearson correlation of ranks row-by-row using the
-    ``cov(x,y) / (std(x)*std(y))`` formula — fully vectorised with
-    no Python-level row loop.
+    Demeans each row, then computes Pearson correlation row-by-row using the
+    ``cov(x,y) / (std(x)*std(y))`` formula — fully vectorised with no Python-level
+    row loop.
     """
     common_idx = signal.index.intersection(fwd_ret.index)
     common_cols = signal.columns.intersection(fwd_ret.columns)
@@ -43,17 +42,14 @@ def _ic_series(
     valid = sig.notna() & ret.notna()
     n_valid = valid.sum(axis=1)
 
-    sig_r = sig.rank(axis=1, na_option="keep")
-    ret_r = ret.rank(axis=1, na_option="keep")
+    sig = sig.where(valid)
+    ret = ret.where(valid)
 
-    sig_r = sig_r.where(valid)
-    ret_r = ret_r.where(valid)
+    sig_mean = sig.mean(axis=1)
+    ret_mean = ret.mean(axis=1)
 
-    sig_mean = sig_r.mean(axis=1)
-    ret_mean = ret_r.mean(axis=1)
-
-    sig_dm = sig_r.sub(sig_mean, axis=0)
-    ret_dm = ret_r.sub(ret_mean, axis=0)
+    sig_dm = sig.sub(sig_mean, axis=0)
+    ret_dm = ret.sub(ret_mean, axis=0)
 
     cov = (sig_dm * ret_dm).sum(axis=1)
     sig_std = (sig_dm ** 2).sum(axis=1).pow(0.5)

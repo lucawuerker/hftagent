@@ -194,12 +194,12 @@ def write_report_md(cfg, results: dict[str, Any], figures: dict[str, Path]) -> P
         _ic_kind = ("per-underlying time-series" if getattr(cfg, "fit_standardize", "per_underlying")
                     != "cross_sectional" else "cross-sectional")
         lines.append("## 1. Single-factor IC (raw factor quality)\n")
-        lines.append(f"{_ic_kind.capitalize()} Spearman rank-IC of every researched factor, "
+        lines.append(f"{_ic_kind.capitalize()} Pearson IC of every researched factor, "
                      "recomputed on the shared panel at horizons "
                      + ", ".join(f"h={h}" for h in cfg.ic_horizons) + ". The "
                      "per-underlying IC correlates each factor's value vector with the "
                      "underlying's own forward-return vector (pooled across underlyings); "
-                     "the cross-sectional IC ranks across underlyings per timestamp.\n")
+                     "the cross-sectional IC correlates across underlyings per timestamp.\n")
         lines.append(_md_table(results["ic_summary"],
                                ["prerun", "n_factors", "mean_abs_ic_1", "mean_abs_ic_6",
                                 "mean_abs_ic_60", "mean_abs_icir_6", "best_factor_h6", "best_abs_ic_h6"]))

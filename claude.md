@@ -187,10 +187,10 @@ Named factor-research *preruns* (`run_factor_research.py --name <id> --model <ll
 [--llm-provider <p>] --dedup-scope prerun`) mine N factors with a chosen research
 model into a self-contained `data/factors/preruns/<name>/`. `run_model_comparison.py`
 then compares several preruns' factor sets on **four** axes — **single-factor IC**
-(by default a **per-underlying time-series IC** — Spearman of a factor's value
+(by default a **per-underlying time-series IC** — Pearson correlation of a factor's value
 vector vs the underlying's *own* forward-return vector, pooled across underlyings,
 so it is well defined for a single ticker and has no cross-section;
-`--fit-standardize cross_sectional` switches back to cross-sectional rank-IC),
+`--fit-standardize cross_sectional` switches back to cross-sectional IC),
 **factor analytics** (LLM-free:
 *diversity/redundancy* — signal correlation, effective # of independent factors via the
 participation ratio, cluster count; and *deflation/importance* — best |IC| haircut for
@@ -222,7 +222,7 @@ diversity/importance fits (`comparison/analytics.py` `_feature_matrix`) and the 
 fit + combined-signal IC are *all* per-underlying (shared
 `comparison/standardize.per_underlying_zscore`) — **no cross-section anywhere** — so every
 track is meaningful for a single ticker; `cross_sectional` restores the legacy across-tickers
-z-score + rank-IC. `--importance-top-n` (default 10) caps factors per (prerun, model) in the
+z-score + IC. `--importance-top-n` (default 10) caps factors per (prerun, model) in the
 importance table; set it high to keep the full per-factor vector. Everything except the
 downstream track and `--research` is LLM-free.
 **Universe + split selection:** beyond `--n-tickers N` (a count) you can name the exact

@@ -141,10 +141,10 @@ multiple-testing artefact (`deflated_best_ic`, `deflated_best_t`), plus which fa
 model actually leans on (LASSO/GBM importance, `lasso_sparsity`).
 
 Single factors are scored by **IC**. By default (`--fit-standardize per_underlying`) this is a
-**per-underlying time-series IC** — the Spearman correlation of a factor's value vector with
+**per-underlying time-series IC** — the Pearson correlation of a factor's value vector with
 the underlying's *own* forward-return vector, pooled (concatenated) across underlyings — so it
 is meaningful for a single ticker and has *no cross-section* (pass `--fit-standardize
-cross_sectional` for the legacy across-tickers rank-IC). Each factor is scored at *its own*
+cross_sectional` for the legacy across-tickers IC). Each factor is scored at *its own*
 `prediction_horizon` (the `ic_own`/`horizon_own` columns + a `mean_abs_ic_own` summary)
 alongside the shared 1/6/60-bar grid. The analytics diversity/importance
 track uses the same per-underlying standardisation. The **ML track** likewise

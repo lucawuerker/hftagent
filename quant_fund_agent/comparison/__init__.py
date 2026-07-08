@@ -5,7 +5,7 @@ factor research mined by a chosen LLM.  This package evaluates and compares the
 factor sets of several preruns on three increasingly-integrated axes:
 
 1. **single-factor IC** (:mod:`~quant_fund_agent.comparison.ic`) — the raw
-   cross-sectional rank-IC of every researched factor on a shared panel
+   Pearson IC of every researched factor on a shared panel
    (``backtesting/engine.py``); "how good is each factor on its own?";
 2. **brute-force ML** (:mod:`~quant_fund_agent.comparison.bruteforce`) — the
    factors fed straight into the model catalog (+ an ensemble), no agents;

@@ -111,7 +111,7 @@ gate); **[GATE]** = hard pre-filter; **[DIAG]** = computed and shown to the LLM
 (teacher channel) but *not* selected on.
 
 ### Family 1 — Standalone predictive power
-- IC / rank-IC at the factor's own horizon — **[DIAG]** (demoted from reward;
+- IC at the factor's own horizon — **[DIAG]** (demoted from reward;
   this is the trap the volatility example warns against). `ic_own` already exists.
 - Raw-signal IC stability / IC-IR — **[DIAG]**; useful teacher-channel evidence,
   but not the main robustness reward because conditioning factors can have weak

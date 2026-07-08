@@ -154,7 +154,7 @@ Compares factor sets from multiple research-LLM preruns on **four** tracks: sing
 | `--importance-top-n` | `10` | Top factors kept per (prerun, importance model) in `analytics_importance.csv`. Set ≥ the factor count to keep the **full** per-factor importance vector (needed for the rolling feature-importance study) |
 | `--no-checkpoint` | off | Disable persisting tables/figures after each track |
 | `--fit-scope` | `pooled` | Fit ONE model across all underlyings (`pooled`, suits homogeneous/data-light universes e.g. yfinance S&P100) or a SEPARATE model per underlying (`per_underlying`, suits heterogeneous/data-rich ones e.g. the LOBSTER ETFs) |
-| `--fit-standardize` | `per_underlying` | Standardisation for the **whole** comparison — `per_underlying` (default; time-series z-score, **no cross-section**: the IC track becomes a per-underlying time-series IC, analytics diversity/importance are per-underlying, and the brute-force fit + combined-signal IC are per-underlying) or `cross_sectional` (legacy across-tickers rank-IC + z-score). |
+| `--fit-standardize` | `per_underlying` | Standardisation for the **whole** comparison — `per_underlying` (default; time-series z-score, **no cross-section**: the IC track becomes a per-underlying time-series Pearson IC, analytics diversity/importance are per-underlying, and the brute-force fit + combined-signal IC are per-underlying) or `cross_sectional` (legacy across-tickers Pearson IC + z-score). |
 | `--position-mode` | `threshold` | Map combined signal → position: `threshold` / `sign` / `continuous` |
 | `--position-threshold` | `1.0` | ±t (z units) for the threshold band |
 | `--position-zscore` | `expanding` | Per-underlying z-score basis: `expanding` / `full` / `rolling` / `none` |

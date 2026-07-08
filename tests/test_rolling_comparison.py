@@ -66,12 +66,12 @@ def test_completed_status_gate(tmp_path):
 
 # ── per-underlying time-series IC on a single ticker (the key regression) ──────
 
-def test_per_underlying_ic_single_ticker_is_finite_and_matches_spearman():
+def test_per_underlying_ic_single_ticker_is_finite_and_matches_pearson():
     idx = pd.date_range("2024-01-01", periods=300, freq="min")
     rng = np.random.default_rng(0)
     close = pd.DataFrame({"AAA": 100 + np.cumsum(rng.normal(0, 1, 300))}, index=idx)
     fwd1 = close.shift(-1) / close - 1.0
-    # A factor genuinely (rank-)related to the next-bar return, plus noise.
+    # A factor genuinely linearly related to the next-bar return, plus noise.
     sig = pd.DataFrame({"AAA": fwd1["AAA"].fillna(0.0) + rng.normal(0, 5e-4, 300)}, index=idx)
     panel = {"close": close}
 
@@ -79,11 +79,11 @@ def test_per_underlying_ic_single_ticker_is_finite_and_matches_spearman():
     assert row["ic_1"] is not None and np.isfinite(row["ic_1"])
     assert row["n_timestamps"] > 100
 
-    # Independent check: Spearman of the (monotone-transformed) factor vs forward return.
+    # Independent check: Pearson of the standardised factor vs forward return.
     x = per_underlying_zscore(sig)["AAA"]
     y = fwd1["AAA"]
     m = x.notna() & y.notna()
-    expected = x[m].corr(y[m], method="spearman")
+    expected = x[m].corr(y[m], method="pearson")
     assert abs(row["ic_1"] - expected) < 1e-9
     assert row["ic_1"] > 0.5  # the planted relationship is strong
 

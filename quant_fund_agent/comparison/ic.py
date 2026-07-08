@@ -5,13 +5,13 @@ underlying's *own forward return* — **not** cross-sectionally.  Concretely, th
 factor's value vector and the matching forward-return vector are taken per
 underlying, the factor is standardised per underlying over time so the magnitudes
 are comparable, the pairs are **concatenated across underlyings into one vector**,
-and the IC is the Spearman rank correlation of that pooled vector.  With a single
+and the IC is the Pearson correlation of that pooled vector.  With a single
 ticker this reduces to exactly "one vector of factor values, one of forward
 returns, compute the IC"; with many tickers it pools them (treats the universe as
 one underlying), so there is no cross-section anywhere.
 
 This is selected by ``cfg.fit_standardize == "per_underlying"`` (the default).
-``cross_sectional`` keeps the legacy cross-sectional rank-IC (``engine.backtest_factor``)
+``cross_sectional`` keeps the legacy cross-sectional IC (``engine.backtest_factor``)
 for users who still want a cross-sectional comparison.
 """
 
@@ -26,17 +26,16 @@ log = logging.getLogger("comparison.ic")
 
 # ── pooled per-underlying time-series IC primitives ──────────────────────────
 
-def _spearman(x, y) -> tuple[float | None, int]:
-    """Spearman rank correlation of two 1-D arrays over their finite-paired rows."""
+def _pearson(x, y) -> tuple[float | None, int]:
+    """Pearson correlation of two 1-D arrays over their finite-paired rows."""
     import numpy as np
-    import pandas as pd
 
     mask = np.isfinite(x) & np.isfinite(y)
     n = int(mask.sum())
     if n < 3:
         return None, n
-    xr = pd.Series(x[mask]).rank().to_numpy()
-    yr = pd.Series(y[mask]).rank().to_numpy()
+    xr = np.asarray(x[mask], dtype=float)
+    yr = np.asarray(y[mask], dtype=float)
     xr = xr - xr.mean()
     yr = yr - yr.mean()
     denom = math.sqrt(float((xr ** 2).sum()) * float((yr ** 2).sum()))
@@ -59,7 +58,7 @@ def _block_ir(x, y, n_blocks: int = 20) -> float | None:
         return None
     ics = []
     for xb, yb in zip(np.array_split(x, n_blocks), np.array_split(y, n_blocks)):
-        ic, _ = _spearman(xb, yb)
+        ic, _ = _pearson(xb, yb)
         if ic is not None:
             ics.append(ic)
     if len(ics) < 3:
@@ -97,8 +96,7 @@ def _per_underlying_ic_row(
     close = panel["close"]
     sig = sig.reindex(index=close.index, columns=close.columns)
     # Per-underlying time-series z-score makes the columns comparable so they can be
-    # pooled; it is monotonic within a name, so a single ticker's Spearman is the
-    # raw factor-vs-return rank correlation.
+    # pooled into one Pearson correlation across names.
     x = per_underlying_zscore(sig).to_numpy(dtype=float).ravel()
 
     row: dict[str, Any] = {"prerun": prerun, "factor_id": fid, "name": names.get(fid, fid)}
@@ -106,7 +104,7 @@ def _per_underlying_ic_row(
 
     def _ic_at(h: int) -> tuple[float | None, float | None, float | None, int]:
         y = forward_returns(close, horizon=h).to_numpy(dtype=float).ravel()
-        ic, n = _spearman(x, y)
+        ic, n = _pearson(x, y)
         return ic, _block_ir(x, y), _hit_rate(x, y), n
 
     for h in horizons:
@@ -149,7 +147,7 @@ def evaluate_prerun_ic(
 
     ``cfg.fit_standardize`` selects the IC definition: ``per_underlying`` (the
     default, also used when ``cfg`` is None) → pooled per-underlying time-series
-    Spearman IC; ``cross_sectional`` → legacy cross-sectional rank-IC.
+    Pearson IC; ``cross_sectional`` → legacy cross-sectional IC.
 
     ``horizons_by_factor`` maps factor id → its own prediction horizon; when
     given, each row also carries the factor's IC *at its own horizon*
@@ -188,7 +186,7 @@ def _cross_sectional_ic_row(
     prerun: str, fid: str, sig, panel, horizons, names: dict[str, str],
     factor_horizon: int | None = None,
 ) -> dict[str, Any]:
-    """Legacy cross-sectional rank-IC row (engine.backtest_factor)."""
+    """Legacy cross-sectional Pearson IC row (engine.backtest_factor)."""
     from quant_fund_agent.backtesting.engine import backtest_factor
 
     metrics = backtest_factor(

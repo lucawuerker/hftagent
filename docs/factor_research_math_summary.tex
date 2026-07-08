@@ -47,21 +47,21 @@ Per-underlying z-scoring over statistic rows \(R\) is
 with \(\sigma^R_a(x)\) the sample standard deviation; zero standard deviations
 and infinities become missing.
 
-The pooled Spearman IC used throughout is
+The pooled Pearson IC used throughout is
 \[
   \IC_h(x;M,R,A)
   =
-  \rho_S\!\left(
+  \rho\!\left(
     \operatorname{vec}_{t\in M\cap L_h(A),a}\, z^R(x)_{t,a},
     \operatorname{vec}_{t\in M\cap L_h(A),a}\, r^{(h)}_{t,a}
   \right),
 \]
 where for finite paired vectors \(u,v\),
 \[
-  \rho_S(u,v)=
-  \frac{\sum_i(\rank(u_i)-\overline{\rank u})(\rank(v_i)-\overline{\rank v})}
-       {\sqrt{\sum_i(\rank(u_i)-\overline{\rank u})^2}
-        \sqrt{\sum_i(\rank(v_i)-\overline{\rank v})^2}},
+  \rho(u,v)=
+  \frac{\sum_i(u_i-\overline u)(v_i-\overline v)}
+       {\sqrt{\sum_i(u_i-\overline u)^2}
+        \sqrt{\sum_i(v_i-\overline v)^2}},
 \]
 and the result is undefined if fewer than three finite pairs exist.
 
@@ -121,7 +121,7 @@ For \(m>0\), fit on finite IS cells
 Then
 \[
   F_2(x)=
-  \rho_S\!\left(
+  \rho\!\left(
     \varepsilon_{t\in V\cap L_h(D),a},
     r^{(h)}_{t\in V\cap L_h(D),a}
   \right).
@@ -431,7 +431,7 @@ tournament on lower front rank, then higher crowding distance.
 In QD mode the objective vector is unchanged.  The behavior descriptors are
 \[
   d_1(x)=
-  \rho_S\!\left(
+  \rho\!\left(
     \operatorname{vec}_{t\in D,a}z^D(x)_{t,a},
     \operatorname{vec}_{t\in D,a}\left(\frac{P_{t,a}}{P_{t-h,a}}-1\right)
   \right),
