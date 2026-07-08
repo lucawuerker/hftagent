@@ -3,12 +3,11 @@
 For each researched factor we measure how well its *value* predicts the
 underlying's *own forward return* — **not** cross-sectionally.  Concretely, the
 factor's value vector and the matching forward-return vector are taken per
-underlying, the factor is standardised per underlying over time so the magnitudes
-are comparable, the pairs are **concatenated across underlyings into one vector**,
-and the IC is the Pearson correlation of that pooled vector.  With a single
+underlying, the Pearson IC is computed separately per underlying, and the panel IC
+is the valid-observation-weighted mean of those per-underlying ICs.  With a single
 ticker this reduces to exactly "one vector of factor values, one of forward
-returns, compute the IC"; with many tickers it pools them (treats the universe as
-one underlying), so there is no cross-section anywhere.
+returns, compute the IC"; with many tickers each name keeps its own correlation
+estimate, so there is no cross-section anywhere.
 
 This is selected by ``cfg.fit_standardize == "per_underlying"`` (the default).
 ``cross_sectional`` keeps the legacy cross-sectional IC (``engine.backtest_factor``)
@@ -24,7 +23,7 @@ from typing import Any
 log = logging.getLogger("comparison.ic")
 
 
-# ── pooled per-underlying time-series IC primitives ──────────────────────────
+# ── weighted per-underlying time-series IC primitives ────────────────────────
 
 def _pearson(x, y) -> tuple[float | None, int]:
     """Pearson correlation of two 1-D arrays over their finite-paired rows."""
@@ -44,21 +43,48 @@ def _pearson(x, y) -> tuple[float | None, int]:
     return float((xr * yr).sum() / denom), n
 
 
-def _block_ir(x, y, n_blocks: int = 20) -> float | None:
-    """IC information ratio = mean/std of the IC across contiguous time blocks.
+def _weighted_asset_pearson(x, y) -> tuple[float | None, int]:
+    """Observation-weighted mean of per-column Pearson ICs.
 
-    The pooled vectors are timestamp-major, so a contiguous slice is a contiguous
-    time window (pooling whatever underlyings are present in it).  A best-effort
-    stability proxy — ``None`` if too few blocks carry a finite IC.
+    ``x`` and ``y`` are aligned ``(time, asset)`` arrays.  For each asset column we
+    compute Pearson correlation over finite paired rows; assets with fewer than
+    three pairs or zero variance are skipped.  The returned IC is weighted by each
+    asset's valid-pair count, so short/noisy histories contribute less.
     """
     import numpy as np
 
-    n = len(x)
+    xa = np.asarray(x, dtype=float)
+    ya = np.asarray(y, dtype=float)
+    if xa.ndim == 1:
+        return _pearson(xa, ya)
+    if xa.shape != ya.shape:
+        raise ValueError(f"IC arrays must have the same shape, got {xa.shape} and {ya.shape}")
+    vals: list[tuple[float, int]] = []
+    for j in range(xa.shape[1]):
+        ic, n = _pearson(xa[:, j], ya[:, j])
+        if ic is not None:
+            vals.append((ic, n))
+    if not vals:
+        return None, 0
+    total = sum(n for _, n in vals)
+    return float(sum(ic * n for ic, n in vals) / total), int(total)
+
+
+def _block_ir(x, y, n_blocks: int = 20) -> float | None:
+    """IC information ratio = mean/std of the IC across contiguous time blocks.
+
+    Splits the matrix by time into contiguous blocks and recomputes the weighted
+    per-underlying IC in each block.  A best-effort stability proxy — ``None`` if
+    too few blocks carry a finite IC.
+    """
+    import numpy as np
+
+    n = np.asarray(x).shape[0]
     if n < n_blocks * 3:
         return None
     ics = []
     for xb, yb in zip(np.array_split(x, n_blocks), np.array_split(y, n_blocks)):
-        ic, _ = _pearson(xb, yb)
+        ic, _ = _weighted_asset_pearson(xb, yb)
         if ic is not None:
             ics.append(ic)
     if len(ics) < 3:
@@ -82,7 +108,7 @@ def _per_underlying_ic_row(
     prerun: str, fid: str, sig, panel, horizons, names: dict[str, str],
     factor_horizon: int | None = None,
 ) -> dict[str, Any]:
-    """One IC row for a factor: pooled per-underlying time-series IC per horizon.
+    """One IC row for a factor: weighted per-underlying time-series IC per horizon.
 
     When ``factor_horizon`` is given, the factor's IC at its *own* horizon is also
     emitted as ``ic_own`` / ``icir_own`` / ``ic_hit_own`` / ``horizon_own`` — the
@@ -91,20 +117,16 @@ def _per_underlying_ic_row(
     import numpy as np
 
     from quant_fund_agent.backtesting.data_loader import forward_returns
-    from quant_fund_agent.comparison.standardize import per_underlying_zscore
-
     close = panel["close"]
     sig = sig.reindex(index=close.index, columns=close.columns)
-    # Per-underlying time-series z-score makes the columns comparable so they can be
-    # pooled into one Pearson correlation across names.
-    x = per_underlying_zscore(sig).to_numpy(dtype=float).ravel()
+    x = sig.to_numpy(dtype=float)
 
     row: dict[str, Any] = {"prerun": prerun, "factor_id": fid, "name": names.get(fid, fid)}
     n_obs = 0
 
     def _ic_at(h: int) -> tuple[float | None, float | None, float | None, int]:
-        y = forward_returns(close, horizon=h).to_numpy(dtype=float).ravel()
-        ic, n = _pearson(x, y)
+        y = forward_returns(close, horizon=h).to_numpy(dtype=float)
+        ic, n = _weighted_asset_pearson(x, y)
         return ic, _block_ir(x, y), _hit_rate(x, y), n
 
     for h in horizons:
@@ -146,7 +168,7 @@ def evaluate_prerun_ic(
     """Per-factor IC rows for one prerun (one row per usable factor).
 
     ``cfg.fit_standardize`` selects the IC definition: ``per_underlying`` (the
-    default, also used when ``cfg`` is None) → pooled per-underlying time-series
+    default, also used when ``cfg`` is None) → weighted per-underlying time-series
     Pearson IC; ``cross_sectional`` → legacy cross-sectional IC.
 
     ``horizons_by_factor`` maps factor id → its own prediction horizon; when

@@ -47,23 +47,42 @@ Per-underlying z-scoring over statistic rows \(R\) is
 with \(\sigma^R_a(x)\) the sample standard deviation; zero standard deviations
 and infinities become missing.
 
-The pooled Pearson IC used throughout is
+The panel IC used throughout is the observation-weighted mean of per-underlying
+Pearson ICs.  For each asset \(a\), let
 \[
-  \IC_h(x;M,R,A)
+  T_a^{(h)}(M,A)
+  =
+  \{t\in M\cap L_h(A): x_{t,a}\text{ and }r^{(h)}_{t,a}
+    \text{ are finite}\},
+  \qquad n_a=|T_a^{(h)}(M,A)|.
+\]
+For \(n_a\ge 3\), define
+\[
+  \IC_h^a(x;M,A)
   =
   \rho\!\left(
-    \operatorname{vec}_{t\in M\cap L_h(A),a}\, z^R(x)_{t,a},
-    \operatorname{vec}_{t\in M\cap L_h(A),a}\, r^{(h)}_{t,a}
+    (x_{t,a})_{t\in T_a^{(h)}(M,A)},
+    (r^{(h)}_{t,a})_{t\in T_a^{(h)}(M,A)}
   \right),
 \]
-where for finite paired vectors \(u,v\),
+where
 \[
   \rho(u,v)=
   \frac{\sum_i(u_i-\overline u)(v_i-\overline v)}
        {\sqrt{\sum_i(u_i-\overline u)^2}
-        \sqrt{\sum_i(v_i-\overline v)^2}},
+        \sqrt{\sum_i(v_i-\overline v)^2}}.
 \]
-and the result is undefined if fewer than three finite pairs exist.
+The panel IC is
+\[
+  \IC_h(x;M,R,A)
+  =
+  \frac{\sum_{a\in\mathcal A_h} n_a\,\IC_h^a(x;M,A)}
+       {\sum_{a\in\mathcal A_h} n_a},
+\]
+where \(\mathcal A_h\) contains assets for which the per-underlying correlation is
+defined.  The argument \(R\) is retained in the notation because model-based
+predictors are standardised on statistic rows \(R\), although raw-factor IC itself
+is computed within each asset and therefore needs no cross-asset standardisation.
 
 For a book \(B\), the combined predictor \(\widehat y_B\) is obtained by fitting
 the configured estimator \(\mathcal M\) on IS rows:

@@ -55,16 +55,15 @@ def _positions(z: pd.DataFrame, cfg) -> pd.DataFrame:
 def _per_underlying_ic(sig: pd.DataFrame, close: pd.DataFrame, h: int) -> float | None:
     """Pooled per-underlying IC of the combined signal vs its h-bar forward return.
 
-    Non-cross-sectional (matches the IC track): standardise the signal per
-    underlying over time, concatenate across underlyings, and Pearson-correlate
-    with the forward return — so it is defined for a single ticker.
+    Non-cross-sectional (matches the IC track): compute one Pearson IC per
+    underlying, then take the valid-observation-weighted mean — so it is defined
+    for a single ticker without letting short histories dominate.
     """
-    from quant_fund_agent.comparison.ic import _pearson
-    from quant_fund_agent.comparison.standardize import per_underlying_zscore
+    from quant_fund_agent.comparison.ic import _weighted_asset_pearson
 
-    x = per_underlying_zscore(sig).to_numpy(dtype=float).ravel()
-    y = forward_returns(close, horizon=h).to_numpy(dtype=float).ravel()
-    ic, _ = _pearson(x, y)
+    x = sig.reindex(index=close.index, columns=close.columns).to_numpy(dtype=float)
+    y = forward_returns(close, horizon=h).to_numpy(dtype=float)
+    ic, _ = _weighted_asset_pearson(x, y)
     return ic
 
 

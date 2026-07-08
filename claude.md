@@ -187,9 +187,10 @@ Named factor-research *preruns* (`run_factor_research.py --name <id> --model <ll
 [--llm-provider <p>] --dedup-scope prerun`) mine N factors with a chosen research
 model into a self-contained `data/factors/preruns/<name>/`. `run_model_comparison.py`
 then compares several preruns' factor sets on **four** axes — **single-factor IC**
-(by default a **per-underlying time-series IC** — Pearson correlation of a factor's value
-vector vs the underlying's *own* forward-return vector, pooled across underlyings,
-so it is well defined for a single ticker and has no cross-section;
+(by default a **per-underlying time-series IC** — one Pearson correlation per asset
+between a factor's value vector and that asset's *own* forward-return vector,
+aggregated as a valid-observation-weighted mean, so it is well defined for a
+single ticker and has no cross-section;
 `--fit-standardize cross_sectional` switches back to cross-sectional IC),
 **factor analytics** (LLM-free:
 *diversity/redundancy* — signal correlation, effective # of independent factors via the

@@ -23,7 +23,6 @@ import pytest
 from quant_fund_agent.comparison import ic as cic
 from quant_fund_agent.comparison import rolling
 from quant_fund_agent.comparison.config import ComparisonConfig
-from quant_fund_agent.comparison.standardize import per_underlying_zscore
 
 
 # ── window generation ─────────────────────────────────────────────────────────
@@ -79,13 +78,34 @@ def test_per_underlying_ic_single_ticker_is_finite_and_matches_pearson():
     assert row["ic_1"] is not None and np.isfinite(row["ic_1"])
     assert row["n_timestamps"] > 100
 
-    # Independent check: Pearson of the standardised factor vs forward return.
-    x = per_underlying_zscore(sig)["AAA"]
+    # Independent check: Pearson of the raw factor vs forward return.
+    x = sig["AAA"]
     y = fwd1["AAA"]
     m = x.notna() & y.notna()
     expected = x[m].corr(y[m], method="pearson")
     assert abs(row["ic_1"] - expected) < 1e-9
     assert row["ic_1"] > 0.5  # the planted relationship is strong
+
+
+def test_per_underlying_ic_is_observation_weighted_across_tickers():
+    idx = pd.date_range("2024-01-01", periods=20, freq="min")
+    close = pd.DataFrame({
+        "LONG": np.arange(1.0, 21.0),
+        "SHORT": np.arange(101.0, 121.0),
+    }, index=idx)
+    fwd1 = close.shift(-1) / close - 1.0
+    sig = pd.DataFrame(index=idx, columns=close.columns, dtype=float)
+    sig["LONG"] = fwd1["LONG"]
+    sig["SHORT"] = -fwd1["SHORT"]
+    sig.loc[idx[5:], "SHORT"] = np.nan  # only 4 valid SHORT pairs after fwd-return NaN
+
+    row = cic._per_underlying_ic_row("p", "f", sig, {"close": close}, (1,), {})
+    long_n = int((sig["LONG"].notna() & fwd1["LONG"].notna()).sum())
+    short_n = int((sig["SHORT"].notna() & fwd1["SHORT"].notna()).sum())
+    expected = (long_n * 1.0 + short_n * -1.0) / (long_n + short_n)
+
+    assert row["n_timestamps"] == long_n + short_n
+    assert abs(row["ic_1"] - expected) < 1e-9
 
 
 def test_evaluate_prerun_ic_uses_per_underlying_when_cfg_per_underlying(monkeypatch):

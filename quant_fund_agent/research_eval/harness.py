@@ -8,8 +8,8 @@ and a rich diagnostics dict (the teacher channel handed to Reflection / the LLM)
 It is deliberately *signal-oriented* (it takes DataFrames, not factor ids or LLM
 output), so it is fully testable on a synthetic panel and can never be influenced by
 an LLM.  It is mostly **orchestration** of trusted code that already exists —
-``comparison/standardize`` (per-underlying z-score), ``comparison/ic`` (pooled
-Pearson IC), ``comparison/analytics`` (participation ratio), ``modeling/catalog``
+``comparison/standardize`` (per-underlying z-score), ``comparison/ic`` (weighted
+per-underlying Pearson IC), ``comparison/analytics`` (participation ratio), ``modeling/catalog``
 (estimators), ``backtesting/data_loader`` (forward returns) — glued to the split /
 deflation seams in this package.
 
@@ -43,7 +43,7 @@ import numpy as np
 import pandas as pd
 
 from quant_fund_agent.backtesting.data_loader import forward_returns
-from quant_fund_agent.comparison.ic import _pearson
+from quant_fund_agent.comparison.ic import _weighted_asset_pearson
 from quant_fund_agent.comparison.standardize import per_underlying_zscore
 from quant_fund_agent.research_eval import deflation
 from quant_fund_agent.research_eval.fitness import (
@@ -128,26 +128,25 @@ def _pooled_ic(
     row_mask: np.ndarray | None = None, stat_mask: np.ndarray | None = None,
     available_mask: np.ndarray | None = None,
 ) -> tuple[float | None, int]:
-    """Pooled per-underlying time-series Pearson IC of ``sig`` vs its forward return.
+    """Observation-weighted mean per-underlying Pearson IC of ``sig`` vs forward returns.
 
-    ``row_mask`` selects the rows scored; ``stat_mask`` selects the rows whose stats
-    standardise the signal (pass the IS window to keep an OOS score leak-free).  The
-    forward return is taken from ``close`` after optionally applying
-    ``available_mask``: if a row's ``t+horizon`` price is outside the available
-    development window, that row is dropped so a validation score can never consume
-    held-out TEST prices.
+    ``row_mask`` selects the rows scored.  ``stat_mask`` is accepted for API
+    symmetry with callers that also fit models; the raw-factor IC itself does not
+    need cross-asset standardisation because Pearson correlation is computed within
+    each asset.  The forward return is taken from ``close`` after optionally
+    applying ``available_mask``: if a row's ``t+horizon`` price is outside the
+    available development window, that row is dropped so a validation score can
+    never consume held-out TEST prices.
     """
     s = sig.reindex(index=close.index, columns=close.columns)
-    stat_idx = close.index[stat_mask] if stat_mask is not None else None
-    z = per_underlying_zscore(s, stat_idx)
-    x = z.to_numpy(dtype=float)
+    x = s.to_numpy(dtype=float)
     y = forward_returns(close, horizon=horizon).to_numpy(dtype=float)
     if available_mask is not None:
         valid = _label_available_mask(available_mask, horizon)
         row_mask = valid if row_mask is None else (np.asarray(row_mask) & valid)
     if row_mask is not None:
         x, y = x[row_mask], y[row_mask]
-    return _pearson(x.ravel(), y.ravel())
+    return _weighted_asset_pearson(x, y)
 
 
 def _combined_prediction(
@@ -465,7 +464,8 @@ def _residual_ic(
     """Orthogonalised (residual) IC — the candidate's edge beyond the book's span.
 
     Regress the candidate on the book using ``fit_mask`` only, then
-    Pearson-correlate the residual with forward returns on ``score_mask``.
+    Pearson-correlate each asset's residual with its forward returns on ``score_mask``
+    and return the observation-weighted mean.
     ``available_mask`` prevents a score near the development boundary from using
     held-out TEST prices as forward-return labels.
     """
@@ -496,7 +496,12 @@ def _residual_ic(
     label_rows = _label_available_mask(available_mask, h)
     score_rows = np.repeat(np.asarray(score_mask) & label_rows, n_cols)
     finite_score = score_rows & np.isfinite(resid) & np.isfinite(y_fwd)
-    return _pearson(resid[finite_score], y_fwd[finite_score])[0]
+    resid_mat = resid.reshape(close.shape)
+    y_mat = y_fwd.reshape(close.shape)
+    score_mat = finite_score.reshape(close.shape)
+    resid_mat = np.where(score_mat, resid_mat, np.nan)
+    y_mat = np.where(score_mat, y_mat, np.nan)
+    return _weighted_asset_pearson(resid_mat, y_mat)[0]
 
 
 def _independence(candidate: pd.DataFrame, book: Sequence[pd.DataFrame], panel, cfg,
@@ -664,7 +669,7 @@ def _behavior_descriptors(sig: pd.DataFrame, close: pd.DataFrame, h: int,
     place the candidate in the MAP-Elites grid so the search fills a diverse library.
     All computed on the development window (IS∪VAL) only, so they are leak-free:
 
-    * ``trend_reversal`` — Pearson(signal, *trailing* h-bar return).  Negative ⇒
+    * ``trend_reversal`` — weighted per-asset Pearson(signal, *trailing* h-bar return).  Negative ⇒
       mean-reversion / fade, positive ⇒ momentum / continuation.  (Trailing, not
       forward — a behavioral property, not predictive power.)
     * ``signal_speed`` — ``1 − lag-1 autocorr`` of the per-underlying z-signal.  Low ⇒
@@ -679,7 +684,7 @@ def _behavior_descriptors(sig: pd.DataFrame, close: pd.DataFrame, h: int,
 
     # trend_reversal: signal vs trailing h-bar return (past return, leak-free)
     trailing = close.pct_change(max(1, int(h))).to_numpy(dtype=float)
-    tr = _pearson(zt[dev].ravel(), trailing[dev].ravel())[0]
+    tr = _weighted_asset_pearson(zt[dev], trailing[dev])[0]
 
     # signal_speed: 1 − mean per-underlying lag-1 autocorr over the dev window
     acs: list[float] = []

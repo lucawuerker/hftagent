@@ -1,15 +1,16 @@
 """Shared standardisation helpers for the comparison tracks.
 
 The **per-underlying (time-series) z-score** is the non-cross-sectional
-standardiser used across the brute-force, IC and analytics tracks whenever
+standardiser used across the brute-force and analytics tracks whenever
 ``ComparisonConfig.fit_standardize == "per_underlying"`` (the default): each
 factor signal is standardised *per column over its own history* — optionally
 using only the in-sample window's statistics so there is no out-of-sample leakage
 — rather than cross-sectionally across tickers at each timestamp.
 
-Centralising it here guarantees the three tracks can't drift, and makes every
-track work with a *single* underlying (a cross-sectional z-score over one name is
-all-NaN; a per-underlying time-series z-score is well defined).
+Centralising it here guarantees the model-facing tracks can't drift, and makes
+them work with a *single* underlying (a cross-sectional z-score over one name is
+all-NaN; a per-underlying time-series z-score is well defined).  Raw factor IC is
+computed per underlying and therefore does not need this standardisation step.
 """
 
 from __future__ import annotations
