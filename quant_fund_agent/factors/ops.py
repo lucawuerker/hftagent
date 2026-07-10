@@ -321,3 +321,42 @@ def indneutralize(
             row_mean = df[cols].mean(axis=1)
             result[cols] = df[cols].sub(row_mean, axis=0)
     return result
+
+
+# ---------------------------------------------------------------------------
+# Base-grammar tag  (the boundary the non-LLM GP benchmark is confined to)
+# ---------------------------------------------------------------------------
+#
+# ``BASE_OPS`` is the *explicit* set of primitive operators that make up the
+# **base grammar** — the WorldQuant-style formula language every seed alpha and
+# every generated factor may draw from.  It exists so the non-LLM
+# genetic-programming benchmark (``agents/factor_research/gp/``) can be built
+# from a **fixed, auditable allowlist** rather than ``dir(ops)``.
+#
+# The distinction matters for the thesis: an LLM factor researcher is *not*
+# bound to this grammar — a generated factor may define its own helper
+# functions inline and call arbitrary ``numpy``/``pandas``/``scipy``/
+# ``statsmodels``/``sklearn`` primitives (see ``codegen.validate_code``'s import
+# allow-list), i.e. it can **extend** the operator vocabulary on demand.  The GP
+# benchmark, by contrast, must stay grammar-bound: its grammar op-names are
+# asserted ⊆ ``BASE_OPS`` in the tests.
+#
+# INVARIANT: new operators added to this module are **opt-in** to ``BASE_OPS``
+# (add the name below deliberately).  Anything the LLM/framework introduces
+# later — whether an inline helper or a future addition to this module that is
+# left out of this set — is therefore off-limits to the GP by construction.
+BASE_OPS: frozenset[str] = frozenset({
+    # data helpers
+    "returns", "vwap",
+    # cross-sectional
+    "rank", "scale", "indneutralize",
+    # time-series (window-parameterised)
+    "delta", "delay", "ts_sum", "ts_mean", "stddev", "ts_min", "ts_max",
+    "ts_argmax", "ts_argmin", "ts_rank", "product", "decay_linear", "ts_zscore",
+    # pairwise / rolling relationships
+    "correlation", "covariance", "rolling_beta", "rolling_residual",
+    "rolling_autocorr", "signed_area", "path_length",
+    # math / shape
+    "signed_power", "power", "log", "abs_", "sign", "adv",
+    "tail_ratio", "sign_entropy",
+})

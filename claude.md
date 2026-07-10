@@ -155,6 +155,42 @@ seeding away from exhausted mechanisms and splicing a summary into the teacher. 
 extended `test_research_eval_harness.py` + `test_evolution_loop.py`. Notebooks updated
 (`notebooks/…_walkthrough.ipynb` §10, `…_live_run.ipynb`).
 
+**GP factor-mining benchmark — non-LLM baseline (done).** A deterministic
+**genetic-programming** alpha miner (AutoAlpha spirit: hierarchical evolutionary
+mining of formulaic alphas; AlphaGen's "score a combined set" folded in) that serves
+as a no-LLM benchmark for the evolutionary researcher. It reuses the LLM arm's
+LLM-agnostic machinery **verbatim** — the NSGA-II `EvolutionController` (selection /
+Pareto archive / N_trials-deflation / islands / lineage / checkpoint), the
+`research_client.evaluate_fitness` scoring seam (in-process under `QF_USE_MCP=0`,
+byte-identical), and `persist_archive` — and swaps only the *operator layer*, so it is
+apples-to-apples: LLM arm vs GP arm differ in exactly *how children are proposed* over
+the same grammar/data/splits/fitness/selection/persistence. New package
+`agents/factor_research/gp/`: `grammar.py` (typed expression trees — SERIES/WINDOW/CONST
+nodes, an operator table, ramped-half-and-half `random_tree`), `render.py` (tree →
+validator-passing `BaseFactor` module; id-independent class name so structural dedup
+holds; protected division), `operators.py` (typed subtree crossover + subtree/point/hoist
+mutation, depth-capped), `loop.py` (`GPRunConfig` + `GPLoop` — random-tree seeding →
+**hierarchical depth-schedule growth** `--depth-schedule 3,5,7` → per-generation
+select/operate/render/**smoke+non-degeneracy filter**/admit; `evaluate_program` kept in
+sync with `EvolutionLoop`). Entrypoint `run_gp_factor_mining.py` (mirrors
+`run_factor_evolution.py`; `scope.activate()` so persist writes into the **prerun**, not
+main). **The GP is confined to the base grammar**: its operators come only from the new
+explicit `factors.ops.BASE_OPS` tag (never `dir(ops)`), asserted `used_ops(tree) ⊆
+BASE_OPS` — the LLM arm may *extend* the grammar (inline helpers / scipy·sklearn·
+statsmodels·numpy·pandas via `codegen.validate_code`'s import allow-list), a deliberate
+agentic advantage the GP is denied; new ops are opt-in to `BASE_OPS`. Synergy comes free
+in SINGLE mode (each candidate scored by its **LOCO marginal contribution to the evolving
+Pareto archive** = AlphaGen's combined-set reward). One additive, default-preserving edit
+to `persist_archive` (`engine="evolution"`, `model_label=None` kwargs) so GP preruns stamp
+honest provenance (`engine=gp`). Output is a standard prerun
+(`data/workspaces/<config>/preruns/<name>/`, `source=researcher`, `engine=gp`; main seed
+DB untouched) that `run_model_comparison.py --preruns <gp>,<llm>` ingests unchanged — the
+non-LLM row of the ablation matrix. SET-mode joint scoring, a canonical single-objective
+IC arm, `indneutralize`/cross-sectional terminals, and PCA-directed seeding are documented
+extensions. Design: `docs/research-evolution/GP_BENCHMARK.md`; sources logged in
+`research_docs/SOURCES.md` (AutoAlpha IJCAI 2020, AlphaGen KDD 2023). Tests:
+`tests/test_gp_grammar.py`, `tests/test_gp_loop.py`.
+
 **Walk-forward backtest: prerun factor-injection + rich analytics (done).** The
 walk-forward harness (`run_backtest.py` + `quant_fund_agent/simulation/`) now has
 a second **factor source** besides LLM research: `--factor-source prerun_inject`

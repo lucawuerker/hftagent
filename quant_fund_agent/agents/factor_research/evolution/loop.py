@@ -1178,6 +1178,8 @@ def persist_archive(controller: EvolutionController, *, session_id: str,
                     fields: Sequence[str] | None = None,
                     marginal_model: str = "gradient_boosting",
                     selection_deflation: str = "off",
+                    engine: str = "evolution",
+                    model_label: str | None = None,
                     ) -> dict[str, list[str]]:
     """Materialise the final book into real factor files + DB records.
 
@@ -1277,8 +1279,14 @@ def persist_archive(controller: EvolutionController, *, session_id: str,
         factor_ids=ids, horizon=target_horizon, cutoff_date=cutoff_date,
         data_dir=data_dir, n_tickers=n_tickers) if ids else {}
 
-    llm_model = resolve_research_model()
-    llm_provider = resolve_research_provider(llm_model)
+    # ``model_label``/``engine`` let a non-LLM engine (e.g. the GP benchmark)
+    # stamp honest provenance instead of the research-LLM defaults.
+    if model_label:
+        llm_model = model_label
+        llm_provider = "none"
+    else:
+        llm_model = resolve_research_model()
+        llm_provider = resolve_research_provider(llm_model)
 
     def _cat(raw: str) -> TradingIdeaCategory:
         try:
@@ -1316,7 +1324,7 @@ def persist_archive(controller: EvolutionController, *, session_id: str,
             metadata={
                 "llm_model": llm_model,
                 "llm_provider": llm_provider,
-                "engine": "evolution",
+                "engine": engine,
                 "evolution": {
                     "genome_id": eg.genome.genome_id,
                     "generation": eg.genome.generation,
