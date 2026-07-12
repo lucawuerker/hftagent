@@ -291,6 +291,9 @@ class StrategyRecord(BaseModel):
     model_type: str = ""
     model_params: dict[str, Any] = Field(default_factory=dict)
     holding_period: int = 1
+    # E4: registered executor program that builds this strategy's book
+    # (None = legacy position_construction regime; see execution/base.py).
+    executor_id: str | None = None
 
     # ── PM-layer fields ──
     pm_status: PMStatus = PMStatus.NOT_DEPLOYED

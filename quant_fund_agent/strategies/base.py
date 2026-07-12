@@ -68,6 +68,12 @@ class BaseStrategy(ABC):
     position_construction: str = "cross_sectional"
     position_params: dict[str, Any] = {}
 
+    # E4: when set, the book is built by this REGISTERED executor program
+    # (execution/base.py registry) instead of the two hardcoded regimes above —
+    # stamped once on the StrategySpec/StrategyRecord so Architect IS-fit,
+    # Statistician OOS and live reproduce the identical book.  None = legacy.
+    executor_id: str | None = None
+
     # free-form dict for weights, sklearn model, hyper-params, etc.
     model_params: dict[str, Any] = {}
 

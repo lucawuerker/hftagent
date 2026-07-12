@@ -23,6 +23,9 @@ Feedback families implemented (tags per ``docs/research-evolution/DESIGN.md``):
 * Family 4 (robustness, ``[CORE]``): fold-refit CPCV combined/LOCO IC
   distribution, plus the OOS/IS degradation and deflation diagnostics.
 * Family 5 (realism): coverage gate + hypothesis sign-consistency.
+* Family 6 (structural novelty, ``[CORE]``): minimum normalised code-edit distance
+  to any archive member (AlphaAgent-style AST originality, promoted from diagnostic
+  to first-class Pareto axis).  Zoo distance kept as a secondary diagnostic.
 
 * Family 4 also includes the parameter-sensitivity **plateau penalty** when the
   caller supplies ``jitter_signals`` (signals of window-jittered variants of the
@@ -97,11 +100,14 @@ class EvalParams:
     # content; the default — un-saturating, rewards independence that *predicts*).
     # "delta_participation": the legacy Δ-participation-ratio − max-|corr| penalty.
     independence_metric: str = "residual_ic"
-    # ── regime (5th axis): reward edge in stress/crash bars where the book is weak ──
+    # ── regime / QD stress behavior descriptor (NOT a Pareto axis) ──
+    # These parameters drive the QD grid's ``stress_activation`` behavior cell
+    # (``_behavior_descriptors`` → ``_stress_mask``).  The stress-complementarity
+    # Pareto axis was replaced by ``structural_novelty`` (AST-based originality).
     regime_kind: str = "drawdown"     # "drawdown" (worst market-return bars) | "volatility"
     regime_quantile: float = 0.2      # tail fraction of dev bars labelled "stress"
     regime_vol_window: int = 20       # rolling window (bars) for the volatility regime
-    regime_min_obs: int = 20          # min scored (date,ticker) cells for a valid regime IC
+    regime_min_obs: int = 20          # kept for backwards compat; unused by scorer
     # ── economic realism (P5, WS3) — folded in, NO new Pareto axis ──
     # cost_ok gate: reject a factor whose per-bar turnover exceeds this floor.  None
     # (default) = gate not evaluated, so the baseline arm is byte-identical; a value
@@ -112,6 +118,13 @@ class EvalParams:
     turnover_position_mode: str = "threshold"   # shared position primitive for the measure
     turnover_position_threshold: float = 1.0
     turnover_zscore_basis: str = "expanding"    # causal, leak-free per-underlying z-score
+    # ── J3 coupling (joint layer): executor-aware cost gate, default OFF ──
+    # When set ({"executor_id", "code"} of the SOTA executor), _turnover_netcost
+    # builds the candidate's positions THROUGH that executor instead of the
+    # explicit z-score/threshold construction, cost_ok additionally requires
+    # net-of-cost-through-executor > 0, and a `net_capture_sota` diagnostic
+    # feeds the reflection brief.  None → byte-identical baseline behaviour.
+    cost_executor: dict[str, Any] | None = None
     # perturbation-fidelity probe (AlphaEval) folded into the robustness axis: dock
     # robustness by the sign-aligned VAL-IC drop under a Gaussian signal shock.  Weight
     # 0.0 (default) = off (baseline arm unchanged); > 0 activates the extra probe (one
@@ -417,39 +430,59 @@ def _stress_mask(close: pd.DataFrame, params: EvalParams,
     return np.asarray(stress) & finite
 
 
-def _regime_complementarity(
-    marg: dict[str, Any], close: pd.DataFrame, h: int,
-    val_mask: np.ndarray, stress_mask: np.ndarray, is_mask: np.ndarray,
-    available_mask: np.ndarray, has_book: bool, params: EvalParams,
+def _structural_novelty(
+    candidate_code: str | None,
+    book_codes: Sequence[str | None],
+    reference_codes: Sequence[str | None] | None = None,
 ) -> dict[str, Any]:
-    """Marginal ΔIC of the combined model on the VAL∩stress bars (crash edge).
+    """Structural novelty of the candidate vs the archive (primary) and zoo (diagnostic).
 
-    Reuses the ``with``/``base`` predictions already fitted for the marginal-value
-    axis, re-scored on the stress bars only.  Positive & large ⇒ the candidate
-    improves the book's predictions exactly where the book is weakest.  Empty book
-    ⇒ the candidate's own crash-period IC.  ``None`` when there are too few stress
-    observations to trust the IC.
+    Minimum normalised code-edit distance (1 − SequenceMatcher ratio) to the nearest
+    archive member.  Range [0, 1]: 0 = exact structural clone of a kept factor,
+    1 = maximally novel code structure.  Falls back to the zoo min-distance when the
+    book is empty and reference codes are provided (same metric as ``_zoo_dedup``'s
+    ``zoo_min_code_distance``).  Returns ``None`` when no codes are available to
+    compare against, so unmeasured candidates tie at ``−inf`` rather than polluting
+    early-run selection.
+
+    Whitespace is collapsed before matching so formatting differences do not inflate
+    the distance.  AlphaAgent uses AST common-subtree overlap; SequenceMatcher on
+    the normalised code string is a cheap, dependency-free proxy that captures the
+    same structural similarity at operator/identifier level.
     """
-    with_pred = marg.get("with_pred")
-    base_pred = marg.get("base_pred")
-    empty = {"regime_independence": None, "stress_ic_with": None,
-             "stress_ic_base": None, "n_stress_obs": 0}
-    if with_pred is None:
-        return empty
-    val_stress = np.asarray(val_mask, dtype=bool) & np.asarray(stress_mask, dtype=bool)
-    if not val_stress.any():
-        return empty
-    sw, n_with = _pooled_ic(with_pred, close, h, val_stress, is_mask, available_mask)
-    if sw is None or n_with < params.regime_min_obs:
-        return {"regime_independence": None, "stress_ic_with": sw,
-                "stress_ic_base": None, "n_stress_obs": int(n_with or 0)}
-    if has_book and base_pred is not None:
-        sb = _pooled_ic(base_pred, close, h, val_stress, is_mask, available_mask)[0]
-    else:
-        sb = 0.0  # empty book → the candidate is the whole crash edge
-    regime = sw - (sb if sb is not None else 0.0)
-    return {"regime_independence": regime, "stress_ic_with": sw,
-            "stress_ic_base": sb, "n_stress_obs": int(n_with)}
+    import difflib
+
+    out: dict[str, Any] = {
+        "structural_novelty": None,
+        "novelty_min_book_distance": None,
+        "novelty_min_zoo_distance": None,
+        "novelty_nearest_book_idx": None,
+    }
+    if not candidate_code or not candidate_code.strip():
+        return out
+
+    cc = "".join(candidate_code.split())
+
+    def _dist(other: str | None) -> float | None:
+        if not other or not other.strip():
+            return None
+        return 1.0 - difflib.SequenceMatcher(None, cc, "".join(other.split())).ratio()
+
+    book_dists = [d for d in (_dist(c) for c in book_codes) if d is not None]
+    zoo_dists = [d for d in (_dist(c) for c in (reference_codes or [])) if d is not None]
+
+    min_book = float(min(book_dists)) if book_dists else None
+    min_zoo = float(min(zoo_dists)) if zoo_dists else None
+
+    out["novelty_min_book_distance"] = min_book
+    out["novelty_min_zoo_distance"] = min_zoo
+    if min_book is not None and book_dists:
+        out["novelty_nearest_book_idx"] = int(
+            min(range(len(book_dists)), key=lambda i: book_dists[i]))
+
+    # Axis value: book distance is primary; fall back to zoo when book is empty.
+    out["structural_novelty"] = min_book if min_book is not None else min_zoo
+    return out
 
 
 def _residual_ic(
@@ -739,9 +772,31 @@ def _turnover_netcost(sig: pd.DataFrame, close: pd.DataFrame, h: int,
     )
 
     s = sig.reindex(index=close.index, columns=close.columns)
-    z = zscore_over_time(s, params.turnover_zscore_basis, 500)
-    pos = directional_positions(z, mode=params.turnover_position_mode,
-                                threshold=params.turnover_position_threshold)
+    pos = None
+    if params.cost_executor:
+        # J3: build positions THROUGH the SOTA executor so the factor arm's
+        # economic gate reflects how the book is actually traded.  A broken
+        # executor falls back to the explicit construction (logged) — the
+        # factor arm must never crash because the exec arm's SOTA did.
+        try:
+            from quant_fund_agent.execution.base import run_executor
+            from quant_fund_agent.execution.codegen import compile_executor_inmem
+            from quant_fund_agent.execution.state import build_state_frames
+
+            spec = params.cost_executor
+            cls = compile_executor_inmem(spec["code"], spec["executor_id"],
+                                         smoke=False)
+            state = build_state_frames({"close": close}, s)
+            pos = run_executor(cls(), s, state, close).fillna(0.0)
+        except Exception as e:  # noqa: BLE001
+            log.warning("cost_executor %s failed (%s) — falling back to the "
+                        "explicit construction",
+                        (params.cost_executor or {}).get("executor_id"), e)
+            pos = None
+    if pos is None:
+        z = zscore_over_time(s, params.turnover_zscore_basis, 500)
+        pos = directional_positions(z, mode=params.turnover_position_mode,
+                                    threshold=params.turnover_position_threshold)
     dpos = pos.diff().abs()
     fwd = forward_returns(close, horizon=h)
     m = np.asarray(mask, dtype=bool)
@@ -827,6 +882,7 @@ def evaluate_candidate(
     *,
     params: EvalParams | None = None,
     candidate_code: str | None = None,
+    book_codes: Sequence[str | None] | None = None,
     expected_sign: int | None = None,
     candidate_id: str = "candidate",
     jitter_signals: Sequence[pd.DataFrame] | None = None,
@@ -841,9 +897,10 @@ def evaluate_candidate(
     search), CPCV runs over **IS∪VAL**, and TEST is never touched here.  ``None``
     derives a default 60/20/20 fraction split.  ``params`` carries the deterministic
     scoring knobs (including ``n_trials`` for deflation); ``candidate_code`` feeds the
-    parsimony axis; ``expected_sign`` (from the Hypothesis agent, later phases) feeds
-    the sign-consistency check; ``jitter_signals`` (signals of window-jittered
-    variants of the candidate) feeds the plateau penalty inside robustness.
+    parsimony and structural-novelty axes; ``book_codes`` is the source code of every
+    current archive member (for the structural-novelty axis); ``expected_sign`` feeds
+    the sign-consistency check; ``jitter_signals`` feeds the plateau penalty inside
+    robustness.
     """
     params = params or EvalParams()
     close = panel["close"]
@@ -901,16 +958,14 @@ def evaluate_candidate(
         standalone_overall_ic=val_ic,
     )
 
-    # ── regime axis (CORE) — marginal ΔIC on the crash bars (book-conditioned) ──
-    stress_mask = _stress_mask(close, params, split.is_val_mask)
-    regime = _regime_complementarity(
-        marg, close, h, val_mask, stress_mask, is_mask, split.is_val_mask,
-        bool(book), params)
-
     # ── parsimony axis ──
     parsimony = -float(complexity(candidate_code)) if candidate_code is not None else None
 
-    # ── factor-zoo dedup (WS4) — novelty vs a reference book, DIAG only ──
+    # ── structural novelty axis (CORE) — AST-based originality vs the archive ──
+    novelty = _structural_novelty(candidate_code, book_codes or [],
+                                  reference_codes)
+
+    # ── factor-zoo dedup (WS4) — signal-level novelty vs a reference book, DIAG ──
     zoo = _zoo_dedup(candidate_signal, candidate_code, reference_signals,
                      reference_ids, reference_codes, close, split.is_val_mask)
 
@@ -951,6 +1006,15 @@ def evaluate_candidate(
         cost_ok = bool(tc["turnover"] <= params.gate_turnover)
         if not cost_ok:
             reasons["cost"] = f"turnover={tc['turnover']:.3f} > τ={params.gate_turnover}"
+    if params.cost_executor is not None and tc.get("net_ret") is not None:
+        # J3: with a SOTA executor wired in, cost_ok additionally means the
+        # candidate SURVIVES being traded by it (net-of-cost return > 0).
+        net_positive = bool(tc["net_ret"] > 0)
+        cost_ok = net_positive if cost_ok is None else bool(cost_ok and net_positive)
+        if not net_positive:
+            reasons["cost_executor"] = (
+                f"net-of-cost return through SOTA executor "
+                f"{(params.cost_executor or {}).get('executor_id')} ≤ 0")
 
     gates = GateResults(coverage_ok=coverage_ok, degradation_ok=degradation_ok,
                         deflation_ok=None, cost_ok=cost_ok, reasons=reasons)
@@ -960,7 +1024,7 @@ def evaluate_candidate(
         independence=independence_axis,
         robustness=robust["robustness"],
         parsimony=parsimony,
-        regime_independence=regime["regime_independence"],
+        structural_novelty=novelty["structural_novelty"],
     )
 
     diagnostics = {
@@ -996,17 +1060,20 @@ def evaluate_candidate(
         "zoo_max_abs_corr": zoo["zoo_max_abs_corr"],
         "zoo_nearest": zoo["zoo_nearest"],
         "zoo_min_code_distance": zoo["zoo_min_code_distance"],
-        "regime_independence": regime["regime_independence"],
-        "regime_kind": params.regime_kind,
-        "stress_ic_with": regime["stress_ic_with"],
-        "stress_ic_base": regime["stress_ic_base"],
-        "n_stress_obs": regime["n_stress_obs"],
+        "structural_novelty": novelty["structural_novelty"],
+        "novelty_min_book_distance": novelty["novelty_min_book_distance"],
+        "novelty_min_zoo_distance": novelty["novelty_min_zoo_distance"],
+        "novelty_nearest_book_idx": novelty["novelty_nearest_book_idx"],
         "coverage": coverage,
         "degradation_ratio": (float(deg_ratio) if deg_ratio is not None else None),
         "deflation": defl,
         "n_trials": params.n_trials,
         "complexity": (complexity(candidate_code) if candidate_code is not None else None),
     }
+
+    if params.cost_executor is not None:
+        diagnostics["net_capture_sota"] = tc["net_gross_ratio"]
+        diagnostics["cost_executor_id"] = params.cost_executor.get("executor_id")
 
     behavior = _behavior_descriptors(candidate_signal, close, h, split, params)
 
@@ -1092,17 +1159,26 @@ def evaluate_set(
                "standalone_cpcv_ic_mean": None, "standalone_cpcv_ic_std": None,
                "standalone_cpcv_n_folds": 0})
 
-    # ── regime axis: the set's own combined-model IC on the crash bars ──
-    stress_mask = _stress_mask(close, params, split.is_val_mask)
-    val_stress = np.asarray(val_mask, dtype=bool) & stress_mask
-    if pred is not None and val_stress.any():
-        stress_ic, n_stress = _pooled_ic(pred, close, h, val_stress, is_mask,
-                                         split.is_val_mask)
-        regime_independence = (stress_ic if (stress_ic is not None
-                                             and n_stress >= params.regime_min_obs)
-                               else None)
-    else:
-        stress_ic, n_stress, regime_independence = None, 0, None
+    # ── axis 5: structural novelty — average pairwise min code distance ──
+    # For a SET genome the axis measures internal diversity: how different are the
+    # member programs from each other (their average nearest-neighbour code distance).
+    set_novelty: float | None = None
+    if member_codes and len(ids) >= 2:
+        import difflib
+        raw_codes = ["".join((member_codes.get(i, "") or "").split()) for i in ids]
+        pairwise: list[float] = []
+        for j, cc in enumerate(raw_codes):
+            if not cc:
+                continue
+            dists = [
+                1.0 - difflib.SequenceMatcher(None, cc, oc).ratio()
+                for k, oc in enumerate(raw_codes) if k != j and oc
+            ]
+            if dists:
+                pairwise.append(float(min(dists)))
+        set_novelty = float(np.mean(pairwise)) if pairwise else None
+    elif member_codes and len(ids) == 1:
+        set_novelty = 1.0  # singleton: trivially maximally novel (no comparator)
 
     # ── axis 4: parsimony per member ──
     parsimony = None
@@ -1143,6 +1219,15 @@ def evaluate_set(
         cost_ok = bool(tc["turnover"] <= params.gate_turnover)
         if not cost_ok:
             reasons["cost"] = f"turnover={tc['turnover']:.3f} > τ={params.gate_turnover}"
+    if params.cost_executor is not None and tc.get("net_ret") is not None:
+        # J3: with a SOTA executor wired in, cost_ok additionally means the
+        # candidate SURVIVES being traded by it (net-of-cost return > 0).
+        net_positive = bool(tc["net_ret"] > 0)
+        cost_ok = net_positive if cost_ok is None else bool(cost_ok and net_positive)
+        if not net_positive:
+            reasons["cost_executor"] = (
+                f"net-of-cost return through SOTA executor "
+                f"{(params.cost_executor or {}).get('executor_id')} ≤ 0")
 
     gates = GateResults(coverage_ok=coverage_ok, degradation_ok=degradation_ok,
                         deflation_ok=None, cost_ok=cost_ok, reasons=reasons)
@@ -1151,7 +1236,7 @@ def evaluate_set(
         independence=independence,
         robustness=robust["robustness"],
         parsimony=parsimony,
-        regime_independence=regime_independence,
+        structural_novelty=set_novelty,
     )
     diagnostics = {
         "set_members": ids,
@@ -1173,9 +1258,7 @@ def evaluate_set(
         "standalone_cpcv_ic_std": robust["standalone_cpcv_ic_std"],
         "standalone_cpcv_n_folds": robust["standalone_cpcv_n_folds"],
         "sign_consistency": robust["sign_consistency"],
-        "regime_independence": regime_independence,
-        "regime_kind": params.regime_kind,
-        "stress_ic_with": stress_ic, "n_stress_obs": int(n_stress),
+        "structural_novelty": set_novelty,
         "perturbation_penalty": robust.get("perturbation_penalty"),
         "turnover": tc["turnover"], "net_ret": tc["net_ret"],
         "net_gross_ratio": tc["net_gross_ratio"],

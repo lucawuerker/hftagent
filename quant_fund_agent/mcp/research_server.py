@@ -112,6 +112,7 @@ def evaluate_fitness(
     cost_rate: float = 5e-4,
     perturbation_weight: float = 0.0,
     perturbation_sigma: float = 0.5,
+    cost_executor: dict | None = None,
 ) -> str:
     """Deterministically score one candidate factor program against the book
     (in-memory compile → research_eval harness).  Returns JSON
@@ -127,6 +128,7 @@ def evaluate_fitness(
         regime_quantile=regime_quantile, marginal_model=marginal_model,
         gate_turnover=gate_turnover, cost_rate=cost_rate,
         perturbation_weight=perturbation_weight, perturbation_sigma=perturbation_sigma,
+        cost_executor=cost_executor,
     ))
 
 
@@ -154,6 +156,7 @@ def evaluate_set_fitness(
     cost_rate: float = 5e-4,
     perturbation_weight: float = 0.0,
     perturbation_sigma: float = 0.5,
+    cost_executor: dict | None = None,
 ) -> str:
     """SET mode: score a whole factor set jointly (its own combined-model OOS
     IC is the primary axis).  Returns JSON ``{"ok": bool, "fitness"?: {...}}``.
@@ -168,6 +171,7 @@ def evaluate_set_fitness(
         regime_quantile=regime_quantile, marginal_model=marginal_model,
         gate_turnover=gate_turnover, cost_rate=cost_rate,
         perturbation_weight=perturbation_weight, perturbation_sigma=perturbation_sigma,
+        cost_executor=cost_executor,
     ))
 
 
@@ -251,6 +255,117 @@ def persist_results(kept_records: list[dict], rejected: list[dict]) -> str:
     ``{"kept_factor_ids": [...], "rejected_factor_ids": [...]}``.
     """
     return json.dumps(svc.persist_results(kept_records, rejected))
+
+
+@mcp.tool()
+def freeze_signals(
+    book: list[dict],
+    out_dir: str,
+    version: int = 1,
+    target_horizon: int = 6,
+    is_frac: float = 0.6,
+    val_frac: float = 0.2,
+    cutoff_date: str | None = None,
+    data_dir: str = "ticker_data",
+    n_tickers: int | None = 15,
+    fields: list[str] | None = None,
+    specs: list[dict] | None = None,
+) -> str:
+    """Freeze the K evaluation signals from a factor book (the execution arm's
+    interface artifact).  Returns JSON
+    ``{"ok": bool, "manifest_path"?: str, "manifest"?: {...}, "error"?: str}``.
+    """
+    return json.dumps(svc.freeze_signals(
+        book, out_dir=out_dir, version=version, target_horizon=target_horizon,
+        is_frac=is_frac, val_frac=val_frac, cutoff_date=cutoff_date,
+        data_dir=data_dir, n_tickers=n_tickers, fields=fields, specs=specs,
+    ))
+
+
+@mcp.tool()
+def evaluate_executor_fitness(
+    candidate: dict,
+    signals_manifest: str,
+    jitter: list[dict] | None = None,
+    archive: list[dict] | None = None,
+    n_trials: int = 1,
+    is_frac: float = 0.6,
+    val_frac: float = 0.2,
+    cutoff_date: str | None = None,
+    data_dir: str = "ticker_data",
+    n_tickers: int | None = 15,
+    fields: list[str] | None = None,
+    cost_rate: float = 5e-4,
+    lambda_dispersion: float = 0.5,
+    gate_turnover: float | None = None,
+    gate_degradation: float = 0.5,
+    min_activity: float = 0.05,
+    selection_deflation: str = "off",
+) -> str:
+    """Deterministically score one executor program against the frozen
+    evaluation signals (in-memory compile → exec harness).  Returns JSON
+    ``{"ok": bool, "fitness"?: {...}, "error"?: str}``.
+    """
+    return json.dumps(svc.evaluate_executor_fitness(
+        candidate, signals_manifest, jitter, archive,
+        n_trials=n_trials, is_frac=is_frac, val_frac=val_frac,
+        cutoff_date=cutoff_date, data_dir=data_dir, n_tickers=n_tickers,
+        fields=fields, cost_rate=cost_rate, lambda_dispersion=lambda_dispersion,
+        gate_turnover=gate_turnover, gate_degradation=gate_degradation,
+        min_activity=min_activity, selection_deflation=selection_deflation,
+    ))
+
+
+@mcp.tool()
+def score_joint_state(
+    book: list[dict],
+    executor: dict | None = None,
+    n_joint_looks: int = 1,
+    target_horizon: int = 6,
+    is_frac: float = 0.6,
+    val_frac: float = 0.2,
+    cutoff_date: str | None = None,
+    data_dir: str = "ticker_data",
+    n_tickers: int | None = 15,
+    fields: list[str] | None = None,
+    model: str = "ridge",
+    cost_rate: float = 5e-4,
+    baseline_executor_id: str = "zscore_threshold_equal_weight",
+) -> str:
+    """The joint objective J: deflated net VAL Sharpe of book → SOTA executor →
+    cost layer (block-boundary scoring for the joint outer layer).  Returns JSON
+    ``{"ok": bool, "J"?: float, ...}``.
+    """
+    return json.dumps(svc.score_joint_state(
+        book, executor, n_joint_looks=n_joint_looks,
+        target_horizon=target_horizon, is_frac=is_frac, val_frac=val_frac,
+        cutoff_date=cutoff_date, data_dir=data_dir, n_tickers=n_tickers,
+        fields=fields, model=model, cost_rate=cost_rate,
+        baseline_executor_id=baseline_executor_id,
+    ))
+
+
+@mcp.tool()
+def score_joint_oos(
+    book: list[dict],
+    executor: dict | None = None,
+    start: str = "",
+    end: str | None = None,
+    target_horizon: int = 6,
+    data_dir: str = "ticker_data",
+    n_tickers: int | None = 15,
+    fields: list[str] | None = None,
+    model: str = "ridge",
+    cost_rate: float = 5e-4,
+    baseline_executor_id: str = "zscore_threshold_equal_weight",
+) -> str:
+    """Touch-once OOS scoring of a (book, executor) pair on [start, end)
+    (the J4 walk-forward's per-fold scorer).  Returns JSON."""
+    return json.dumps(svc.score_joint_oos(
+        book, executor, start=start, end=end, target_horizon=target_horizon,
+        data_dir=data_dir, n_tickers=n_tickers, fields=fields, model=model,
+        cost_rate=cost_rate, baseline_executor_id=baseline_executor_id,
+    ))
 
 
 def main() -> None:

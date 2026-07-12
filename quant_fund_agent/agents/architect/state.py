@@ -48,6 +48,10 @@ class StrategySpec(BaseModel):
     position_construction: str = "cross_sectional"
     position_params: dict[str, Any] = Field(default_factory=dict)
 
+    # E4: optional registered executor program replacing the hardcoded regime
+    # (like position_construction: resolved per run, never chosen by the LLM).
+    executor_id: str | None = None
+
     reasoning: str = ""
 
 
@@ -85,6 +89,7 @@ class ArchitectState(BaseModel):
     #    upstream from the data type / override; threaded onto each StrategySpec).
     position_construction: str = "cross_sectional"
     position_params: dict[str, Any] = Field(default_factory=dict)
+    executor_id: str | None = None
 
     # ── current iteration ──
     strategy_spec: StrategySpec = Field(default_factory=StrategySpec)

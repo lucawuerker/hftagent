@@ -1,13 +1,22 @@
 # Evolutionary Execution Researcher — Design & Architecture
 
-Updated: 2026-07-05 (accordance pass vs the factor-evolution leak-tightening
-changes of 2026-07-04/05 — see §Leak-free evaluation conventions, inherited)
+Updated: 2026-07-11 (**layered-architecture pass** — this document is now
+**INNER LOOP 2** of the joint factor×execution framework designed in
+`docs/joint-evolution/DESIGN.md`: phases renumbered P0–P5 → **E0–E5**, the
+frozen-signal seam reworked into a versioned `FrozenSignalSet` interface
+artifact, and a new §Block/session interface added. Previous update:
+2026-07-05 accordance pass vs the factor-evolution leak-tightening changes —
+see §Leak-free evaluation conventions, inherited)
 Status: **AGREED — ready to build (nothing implemented yet).** All design
 forks were resolved with the author on 2026-07-03 (see §Locked decisions and
-§Resolved questions). This document is the implementation-anchor *prompt* for
-the build — the same role `docs/research-evolution/DESIGN.md` played for the
-factor researcher; a companion `IMPLEMENTATION_PROGRESS.md` will track the
-phases once the build starts.
+§Resolved questions); the layered joint-framework decision was locked on
+2026-07-11 (see `docs/joint-evolution/DESIGN.md` §Decision record). This
+document is the implementation-anchor *prompt* for the build — the same role
+`docs/research-evolution/DESIGN.md` played for the factor researcher; a
+companion `IMPLEMENTATION_PROGRESS.md` will track the phases once the build
+starts. The loop specified here remains **fully runnable standalone** — a
+standalone run is exactly the degenerate one-block schedule of the joint
+layer.
 
 ## Purpose
 
@@ -35,6 +44,17 @@ The LLM is again the mutation operator, this time over **execution programs**
 time), and a deterministic, cost-aware, walk-forward harness is again the
 fitness function. The thesis contribution stays *agent methodology*: one
 search paradigm demonstrated at two levels of a quant fund's stack.
+
+**Joint-framework role (added 2026-07-11).** This loop is also the second
+*arm* of the block-coordinate joint optimisation designed in
+`docs/joint-evolution/DESIGN.md` (RD-Agent(Q)-style alternation — Li et al.,
+arXiv:2505.15155, NeurIPS 2025): an outer layer alternates *blocks* of factor
+evolution and execution evolution against each other's frozen SOTA state,
+with a scheduler (sequential / round-robin / random / bandit) allocating
+blocks and a shared cross-arm `N_trials` ledger keeping the multiple-testing
+accounting honest. Everything in this document is written so the standalone
+run and the joint-arm run are the same code path; the joint-specific seams
+are collected in §Block/session interface below.
 
 ### Why program synthesis and not the alternatives (surveyed 2026-07)
 
@@ -211,6 +231,31 @@ table, turnover decomposition, cost drag, drawdown profile, exposure
 timeline, which gate failed and by how much, plateau/jitter table, nearest
 archived executor by behavioural correlation (books it builds vs theirs).
 
+**Implementation note — `ObjectiveVector` slot mapping (2026-07-11).** The
+execution harness reuses `research_eval/fitness.py`'s `ObjectiveVector` /
+`GateResults` / `FitnessResult` **verbatim** — the controller,
+dominance/crowding, QD, lineage and every persistence round-trip key off
+those slots, so renaming them would fork ~6 files for cosmetics. The mapping
+(honest names live in `diagnostics` and this table):
+
+| Slot | Factor meaning | Execution meaning |
+| --- | --- | --- |
+| `marginal_value` *(primary)* | LOCO marginal ΔOOS-IC | net-of-cost deflated VAL Sharpe |
+| `independence` | residual (orthogonalised) IC | cross-signal generalisation (mean − λ·dispersion) |
+| `robustness` | CPCV mean−λ·std + sign bonus − plateau | cost efficiency (net÷gross capture) |
+| `parsimony` | −AST complexity | −AST complexity |
+| `structural_novelty` | min code-edit distance to nearest archive member | same, vs the archived executors (reuses `harness._structural_novelty`) |
+| `coverage_ok` | coverage floor | validity + min-activity floor |
+| `degradation_ok` | IS→VAL IC degradation | IS→VAL net-Sharpe degradation |
+| `deflation_ok` | deflated IC at `N_trials` | deflated Sharpe at family `n_trials` |
+| `cost_ok` | turnover/net-cost gate | turnover ceiling + causality probe |
+
+Executor fitness therefore round-trips as the standard `FitnessResult` dict —
+block re-scoring and joint lineage need no parallel persistence path. Under
+the joint layer, the deflation gate's `n_trials` is the **executor family
+count** (`n_exec`) from the shared ledger, injected per block; run
+standalone, it is the controller's own counter — byte-identical behaviour.
+
 ## Leak-free evaluation conventions (inherited, 2026-07 update)
 
 Since this design was written, the factor reward channel was hardened
@@ -246,7 +291,7 @@ any looser phrasing elsewhere in this doc:
    must include a `(len, first_ts, last_ts, columns)` window key
    (`_panel_window_key` pattern) — the same program evaluated on different
    slices (dev vs walk-forward folds vs TEST pass) must never collide.
-5. **Poison-invariance tests are the acceptance criterion.** P0 ships the
+5. **Poison-invariance tests are the acceptance criterion.** E0 ships the
    execution twin of the factor tests: corrupt every TEST row of the panel,
    signals and state → every candidate's full fitness dict must be
    bit-identical. This, not code review, is what proves gates 1–2.
@@ -268,17 +313,56 @@ arguments — the exec harness consumes the updated signatures):
   matrix (PBO finally gets its natural input here: N candidate *return
   streams*).
 * **Cross-signal axis** (above) — the layer-specific defence: K evaluation
-  signals are fixed per run (frozen list of strategy/prerun signals), so
-  every candidate faces the identical panel of alphas. **Freeze = materialise:**
-  the K signals are computed **once** at run start (models fit on IS only,
-  with the label-availability discipline above, on the dev window only) and
-  persisted as frames with the run checkpoint — never refit inside the loop.
-  Each frozen frame gets the poison-invariance audit once at freeze time; a
-  leaky evaluation signal would silently launder look-ahead into *every*
-  executor score, which is the worst leak available at this layer.
+  signals are frozen, so every candidate faces the identical panel of alphas.
+  **Freeze = materialise, as a first-class interface artifact:** the K
+  signals are produced by a dedicated module `execution/signal_freeze.py` →
+  `FrozenSignalSet` — a versioned bundle (`frozen_signals/v<k>/`) of parquet
+  frames plus a manifest (book hash, model ids + hyperparams, IS-fit
+  provenance, panel window key, poison-audit result). Models are fit on IS
+  only, with the label-availability discipline above, on the dev window only.
+  Each frozen frame gets the poison-invariance audit at freeze time; a leaky
+  evaluation signal would silently launder look-ahead into *every* executor
+  score, which is the worst leak available at this layer. Signals are **never
+  refit inside a block**: a standalone run freezes once at run start (`v1` —
+  semantics identical to the original design); under the joint layer the
+  outer loop re-freezes at factor-block boundaries (`v2`, `v3`, …, always
+  IS-only, always re-audited) and the executor archive is deterministically
+  **re-scored** against the new set — re-scores bill the joint ledger's
+  *look count*, never the executor *family count* (see
+  `docs/joint-evolution/DESIGN.md` §Shared N_trials ledger).
 * The **cost model itself is a held constant** across all candidates; a
   sensitivity re-score at ±50% cost is reported as a diagnostic so cost-model
   gaming is visible.
+
+## Block/session interface (joint-layer seams)
+
+The joint layer (`docs/joint-evolution/DESIGN.md`) drives this loop in
+*blocks* — G additional generations at a time — and consumes exactly four
+seams, all of which the standalone entrypoint also uses:
+
+1. **Resumable, incremental runs.**
+   `ExecEvolutionLoop.run(initial_programs=None, *, resume=False,
+   n_generations=None)` — with `resume=True` the loop reloads
+   `out_dir/state.json` (controller archive, islands, `n_trials` and the
+   generation counter all persist via `EvolutionController.save/load`), skips
+   seeding, and runs `n_generations` more generations. The factor
+   `EvolutionLoop.run()` gains the **same additive kwargs** in E1 (default
+   path byte-identical) so both arms present one block API.
+2. **SOTA-executor selection.** `ExecEvolutionLoop.sota_executor() -> dict |
+   None` — the gate-passing archive member with the maximum primary axis
+   (net deflated VAL Sharpe); ties broken by cost efficiency, then parsimony,
+   then lowest `genome_id` (deterministic). This is what the factor arm's
+   coupling seam (`EvalParams.cost_executor`) receives.
+3. **Archive re-scoring after a re-freeze.**
+   `ExecEvolutionLoop.rescore_archive(frozen: FrozenSignalSet)` —
+   deterministically re-evaluates every archived executor against the new
+   frozen signals (fitness dicts replaced in place, lineage annotated).
+   Bills joint *looks*, not the executor family count.
+4. **Frozen signals as the only signal input.** The evaluation harness takes
+   signals exclusively through a `FrozenSignalSet` manifest
+   (`--eval-signals manifest:<path>`); the entrypoint's convenience spec
+   (`--eval-signals <strategy/prerun spec>`) just *builds* a v1 manifest
+   first. There is no unfrozen signal path.
 
 ## Agent pipeline (one generation)
 
@@ -319,8 +403,9 @@ quant_fund_agent/
     seeds.py             # today's two pipelines re-expressed as seed executors
     state.py             # causal state-frame builders (vol, ADV, drawdown, signal age)
     codegen.py           # validator (allowlist imports, contract checks) + in-memory compile (reuse factors/inmem pattern)
+    signal_freeze.py     # freeze_eval_signals(...) -> FrozenSignalSet (versioned manifest + parquet frames + poison audit)
   research_eval/
-    exec_harness.py      # evaluate_executor(program, signals[K], panel, split) → FitnessResult
+    exec_harness.py      # evaluate_executor(program, frozen, split, params, n_trials) → FitnessResult
                          #   (reuses splits/deflation/fitness/ObjectiveVector/GateResults as-is)
   agents/execution_research/
     evolution/           # thin: genome shim + mutation prompts; controller/loop REUSED from
@@ -328,20 +413,28 @@ quant_fund_agent/
 run_execution_evolution.py   # entrypoint; each run persists into the workspace Scope seam
 ```
 
+**MCP seam** (same client→server→service pattern as the factor arm,
+in-process under `QF_USE_MCP=0`): `mcp/research_service.py::{freeze_signals,
+evaluate_executor_fitness, score_executor_oos}`, mirrored in
+`research_server.py` / `research_client.py` with the usual flat-kwargs
+threading.
+
 **Deployment seam:** `StrategySpec`/`StrategyRecord` gains an `executor_id`
 (exactly like `position_construction` today — stamped once, reproduced
 identically by Architect-IS-fit, Statistician-OOS and the walk-forward trade
 loop). The default remains the baseline executor, so nothing changes for
 existing runs; an evolved executor is opt-in per strategy or per run
 (`run_fund.py --executor <id>` / `QF_EXECUTOR`). The three divergent
-signal→position implementations are unified onto `execution/` in P0 — that
+signal→position implementations are unified onto `execution/` in E0 — that
 consolidation is valuable even if evolution never runs.
 
 ## Configuration / mode switches
 
 ```
 --engine {baseline,evolution}
---eval-signals <spec>          # K frozen composite signals (strategies/preruns) for the cross-signal axis
+--eval-signals <spec>          # K frozen composite signals (strategies/preruns) for the cross-signal axis,
+                               #   or manifest:<path> to consume an existing FrozenSignalSet (the joint layer's path)
+--resume                       # continue from out_dir/state.json (block mode; used by the joint layer)
 --generations N --population N --islands K
 --debate {on,off}  --retrieval {none,rag,graphrag}
 --turnover-ceiling X  --cost-sensitivity {on,off}
@@ -363,26 +456,46 @@ Headline metrics, **OOS only**: net-of-cost deflated Sharpe, PBO over the
 candidate P&L matrix, net÷gross capture, turnover, max drawdown — each
 compared against the baseline executor on the identical signals.
 
+The joint-framework arms (sequential / round-robin / random / bandit /
+±coupling / GP-factor-arm) extend this matrix one level up — see
+`docs/joint-evolution/DESIGN.md` §Experiment matrix.
+
 ## Phasing
 
-* **P0 — Execution seam + deterministic harness (build first).** `execution/`
+Phases are numbered **E0–E5** (execution arm; renumbered from P0–P5 on
+2026-07-11) so the joint layer's **J0–J4** (`docs/joint-evolution/DESIGN.md`
+§Phasing) read unambiguously. The agreed build interleaving is
+**E0 → E1 → E2 → J0 → J1 → E4 → J3 → J2 → E3 → E5+J4** — the outer layer is
+de-risked as soon as a jitter-only exec loop exists; E3 (debate/RAG) is the
+first cut if time compresses.
+
+* **E0 — Execution seam + deterministic harness (build first).** `execution/`
   package: `BaseExecutor`, the two seed executors (with equivalence tests
   proving byte-identical books to the current pipelines), causal state
-  builders, validator; `research_eval/exec_harness.py` with all gates incl.
+  builders, validator, **and `signal_freeze.py` — built interface-first as a
+  standalone module producing the versioned `FrozenSignalSet` manifest (a
+  joint-layer requirement; do NOT inline the freeze in the entrypoint)**;
+  `research_eval/exec_harness.py` with all gates incl.
   the truncation-replay causality probe **and the §Leak-free conventions
   baked in from the first commit** (dev-slice, boundary-bar drop,
   window-keyed caches, poison-invariance tests — the exec twins of
   `test_research_eval_harness.py`'s leak tests); cost-aware scoring through
   the existing execution layer. No LLM. *This alone removes the
   research/deployment drift and is independently useful.*
-* **P1 — Minimal loop.** Reuse the evolution controller; jitter-only mutation
-  over seed params (also validates the plateau probe here); prove the search
-  beats hand-tuned defaults on VAL without any LLM.
-* **P2 — LLM-semantic mutation + reflection briefs** (execution prompts).
-* **P3 — Debate + RAG grounding** (execution/microstructure literature).
-* **P4 — Deployment integration**: `executor_id` on StrategySpec, walk-forward
+* **E1 — Minimal loop + resume support (both loops).** Reuse the evolution
+  controller; jitter-only mutation over seed params (also validates the
+  plateau probe here); prove the search beats hand-tuned defaults on VAL
+  without any LLM. **Build the block API here, not retrofitted:**
+  `run(resume=…, n_generations=…)` on `ExecEvolutionLoop` *and* (additively,
+  default-identical) on the factor `EvolutionLoop`; `sota_executor()`;
+  `rescore_archive(frozen)` (§Block/session interface).
+* **E2 — LLM-semantic mutation + reflection briefs** (execution prompts).
+* **E3 — Debate + RAG grounding** (execution/microstructure literature).
+* **E4 — Deployment integration**: `executor_id` on StrategySpec, walk-forward
   backtest consuming evolved executors, Statistician TEST pass.
-* **P5 — Walk-forward final validation + the ablation matrix** for the thesis.
+* **E5 — Walk-forward final validation + the ablation matrix** for the
+  standalone execution arm; the joint-framework arms live in
+  `docs/joint-evolution/DESIGN.md` §Experiment matrix (J4).
 
 Documentation convention (adopted from the factor build, 2026-07): each
 finished phase-group gains a **walkthrough notebook** (every component in
@@ -432,6 +545,9 @@ under `notebooks/`, referenced from `IMPLEMENTATION_PROGRESS.md`.
 ## References
 
 - DeepMind — *FunSearch* (Nature 2024); *AlphaEvolve* (2025).
+- Li et al. — *R&D-Agent-Quant: A Multi-Agent Framework for Data-Centric
+  Factors and Model Joint Optimization* (NeurIPS 2025, arXiv:2505.15155) —
+  the anchor for the outer joint layer; see `docs/joint-evolution/DESIGN.md`.
 - Bailey & López de Prado — *Deflated Sharpe* (2014); *PBO* (2016).
 - Almgren & Chriss — *Optimal Execution of Portfolio Transactions* (2000).
 - Gârleanu & Pedersen — *Dynamic Trading with Predictable Returns and

@@ -191,6 +191,61 @@ extensions. Design: `docs/research-evolution/GP_BENCHMARK.md`; sources logged in
 `research_docs/SOURCES.md` (AutoAlpha IJCAI 2020, AlphaGen KDD 2023). Tests:
 `tests/test_gp_grammar.py`, `tests/test_gp_loop.py`.
 
+**Evolutionary execution researcher + joint factor×execution framework —
+BUILT 2026-07-12 (E0–E5 + J0–J4 all done; thesis RUNS pending).** The layered
+architecture resolved 2026-07-11 is fully implemented. **Inner loop 2** — the
+evolutionary Execution Researcher: `quant_fund_agent/execution/` (`BaseExecutor`
+stepwise `step(t, signal_row, state_row, book)` + optional vectorised
+`target_weights`; registry; `validate_weights`; `BookState`; causal
+`state.py` frames {vol, adv, drawdown, signal_age}; `codegen.py` validator +
+in-memory compile; `signal_freeze.py` → versioned `FrozenSignalSet` with a
+**poison audit** — poison VAL rows → IS-row predictions must be bit-identical),
+`research_eval/exec_harness.py` (`evaluate_executor` — slot mapping:
+marginal_value:=mean net VAL Sharpe across the K frozen signals,
+independence:=mean−λ·dispersion, robustness:=net÷gross capture,
+parsimony:=−complexity, structural_novelty vs archived executors; gates incl.
+the **truncation-replay causality probe**, last-dev-bar drop, ±50%
+cost-sensitivity diagnostic), `agents/execution_research/evolution/`
+(ExecutionProgram via `Genome(program_type="executor")`; param-jitter AST
+operator = mutation AND plateau probe; E2 LLM mutation/crossover with
+deterministic `exec_mutation_brief`; E3 skeptic debate (fails open, ≤1
+revision, rejects never billed) + RAG splice), `run_execution_evolution.py`
+(`--eval-signals manifest:|prebook:`, `--resume`, `--p-llm --debate
+--retrieval`). Both arm loops gained `run(resume=…, n_generations=…)`
+(additive, default byte-identical). **E4 deployment**: `executor_id` on
+StrategySpec/ArchitectState/StrategyRecord, threaded architect→modeling
+MCP→ModelStrategy/DynamicStrategy→`backtest_strategy` (registry executor
+builds the book; `position_params["executor_overrides"]`)→statistician OOS;
+`run_fund.py --executor` / `QF_EXECUTOR` (`execution.base.resolve_executor`;
+None = legacy, byte-identical). **Outer layer** `quant_fund_agent/
+joint_evolution/` + `run_joint_evolution.py`: `SOTAState` under
+`Scope.joint_dir`, `TrialsLedger` (family counts + joint look count incl.
+re-scores + `bill_look` for boundary J-scores; invariant `n_joint_looks ≥
+n_factor+n_exec`), block protocol (arm's own `n_trials` = family count;
+per-block delta billed), audit-gated re-freeze + exec-archive rescore
+(`FrozenSignalAuditError` hard-aborts on a leaky freeze), MCP
+`score_joint_state` (J = per-bar VAL net Sharpe of book→ridge→executor→costs
+− `√(2·ln n_looks)/√n_obs` haircut) + touch-once `score_joint_oos`,
+schedulers `{sequential, round_robin(default), random, bandit}` (contextual
+TS, per-arm Bayesian ridge, warmup, posterior persisted, `--bandit-context
+off` = non-contextual), **J3 coupling** (`EvalParams.cost_executor` — factor
+`cost_ok` = net-of-cost-through-SOTA-executor > 0 + `net_capture_sota`
+reflection rule; None byte-identical, test-enforced), and the **J4 joint
+walk-forward** (`walkforward.py::run_joint_walk_forward` — fresh loop per
+fold with `cutoff_date=d_i`, touch-once scoring on `[d_i,d_{i+1})`;
+`--walk-forward d0,d1,…`). Block 0 is always factor. Key regression:
+`test_joint_loop.py::test_sequential_factor_block_equals_standalone_run`.
+Tests (all green, ~90 new): `test_execution_{base,seeds,signal_freeze}.py`,
+`test_research_eval_exec_harness.py`, `test_exec_evolution_{loop,mutation,
+debate}.py`, `test_executor_deployment.py`, `test_joint_{state,scheduler,
+loop,walkforward}.py`, + J3 tests in `test_research_eval_harness.py` + resume
+test in `test_evolution_loop.py`. Notebooks (executed, outputs baked in):
+`notebooks/execution_evolution_{walkthrough,live_run}.ipynb`,
+`notebooks/joint_evolution_walkthrough.ipynb`. Trackers:
+`docs/{execution-evolution,joint-evolution}/IMPLEMENTATION_PROGRESS.md`.
+**Remaining is runs, not code**: the ablation matrix (§Experiments of
+`docs/joint-evolution/DESIGN.md`) + walk-forward passes for the thesis.
+
 **Walk-forward backtest: prerun factor-injection + rich analytics (done).** The
 walk-forward harness (`run_backtest.py` + `quant_fund_agent/simulation/`) now has
 a second **factor source** besides LLM research: `--factor-source prerun_inject`

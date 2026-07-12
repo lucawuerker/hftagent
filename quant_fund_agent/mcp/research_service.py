@@ -582,6 +582,7 @@ def evaluate_fitness(
     cost_rate: float = 5e-4,
     perturbation_weight: float = 0.0,
     perturbation_sigma: float = 0.5,
+    cost_executor: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Deterministically score one candidate program against the current book.
 
@@ -645,6 +646,9 @@ def evaluate_fitness(
             log.warning("[evaluate_fitness] jitter probe %s failed (%s) — skipped",
                         prog.get("factor_id"), e)
 
+    # book codes for the structural-novelty axis (5th Pareto axis)
+    book_codes: list[str] = [prog.get("code", "") for prog in book]
+
     # reference "factor zoo" for the novelty diagnostic (WS4) — DIAG only
     ref_sigs: list[Any] = []
     ref_ids: list[str] = []
@@ -668,7 +672,8 @@ def evaluate_fitness(
                         marginal_model=marginal_model,
                         gate_turnover=gate_turnover, cost_rate=cost_rate,
                         perturbation_weight=perturbation_weight,
-                        perturbation_sigma=perturbation_sigma)
+                        perturbation_sigma=perturbation_sigma,
+                        cost_executor=cost_executor)
 
     sign_raw = candidate.get("expected_sign")
     expected_sign = int(sign_raw) if sign_raw in (1, -1, "1", "-1") else None
@@ -678,6 +683,7 @@ def evaluate_fitness(
             cand_sig, book_sigs, panel_dev, cfg, split,
             params=params,
             candidate_code=candidate.get("code"),
+            book_codes=book_codes or None,
             expected_sign=expected_sign,
             candidate_id=candidate.get("factor_id", "candidate"),
             jitter_signals=jitter_sigs or None,
@@ -715,6 +721,7 @@ def evaluate_set_fitness(
     cost_rate: float = 5e-4,
     perturbation_weight: float = 0.0,
     perturbation_sigma: float = 0.5,
+    cost_executor: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """SET mode: deterministically score a whole factor set as one genome.
 
@@ -761,7 +768,8 @@ def evaluate_set_fitness(
                         marginal_model=marginal_model,
                         gate_turnover=gate_turnover, cost_rate=cost_rate,
                         perturbation_weight=perturbation_weight,
-                        perturbation_sigma=perturbation_sigma)
+                        perturbation_sigma=perturbation_sigma,
+                        cost_executor=cost_executor)
     try:
         result = evaluate_set(member_signals, panel_dev, cfg, split, params=params,
                               member_codes=member_codes, candidate_id=candidate_id)
@@ -1057,3 +1065,375 @@ def persist_results(
     log.info("research session persisted: %d kept, %d rejected",
              len(kept_ids), len(rejected_ids))
     return {"kept_factor_ids": kept_ids, "rejected_factor_ids": rejected_ids}
+
+
+# ---------------------------------------------------------------------------
+# Execution-evolution backends (E0): frozen signals + executor fitness
+# ---------------------------------------------------------------------------
+
+def _dev_slice(is_frac: float, val_frac: float, cutoff_date: str | None,
+               data_dir: str, n_tickers: int | None,
+               fields: list[str] | None) -> tuple[dict[str, Any], Any, Any]:
+    """Shared dev-slice prologue: (dev panel, dev-relative split, full split).
+
+    Identical convention to :func:`evaluate_fitness`: the panel is sliced to
+    IS∪VAL *before* any candidate code runs, so TEST is physically absent at
+    research time; the split masks are re-expressed inside the dev window.
+    """
+    from quant_fund_agent.research_eval.splits import ThreeWaySplit, three_way_split
+
+    if fields is None:
+        fields = ["open", "high", "low", "close", "volume"]
+    panel_full = _load_panel_cached(data_dir, sorted(fields), n_tickers=n_tickers)
+    panel = _slice_panel_to_cutoff(panel_full, _parse_cutoff(cutoff_date))
+    full_split = three_way_split(panel["close"].index, is_frac=is_frac,
+                                 val_frac=val_frac)
+    dev_mask = full_split.is_val_mask
+    panel_dev = _slice_panel_to_mask(panel, dev_mask)
+    split = ThreeWaySplit(
+        is_mask=full_split.is_mask[dev_mask],
+        val_mask=full_split.val_mask[dev_mask],
+        test_mask=full_split.test_mask[dev_mask],
+    )
+    return panel_dev, split, full_split
+
+
+def freeze_signals(
+    book: list[dict[str, Any]],
+    *,
+    out_dir: str,
+    version: int = 1,
+    target_horizon: int = 6,
+    is_frac: float = 0.6,
+    val_frac: float = 0.2,
+    cutoff_date: str | None = None,
+    data_dir: str = "ticker_data",
+    n_tickers: int | None = 15,
+    fields: list[str] | None = None,
+    specs: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    """Freeze the K evaluation signals from a factor book (E0 interface artifact).
+
+    ``book[i]`` = ``{"factor_id", "code"}``.  Fits are IS-only on the dev-sliced
+    panel; frames + manifest (incl. the poison audit) are written under
+    ``<out_dir>/frozen_signals/v<version>/``.  Returns
+    ``{"ok": True, "manifest_path": str, "manifest": {...}}`` or
+    ``{"ok": False, "error": str}``.
+    """
+    from quant_fund_agent.execution.signal_freeze import freeze_eval_signals
+
+    try:
+        panel_dev, split, _full = _dev_slice(is_frac, val_frac, cutoff_date,
+                                             data_dir, n_tickers, fields)
+        fs = freeze_eval_signals(book, panel_dev, split, out_dir=out_dir,
+                                 version=version, target_horizon=target_horizon,
+                                 specs=specs)
+    except Exception as e:  # noqa: BLE001 — surface, don't crash the caller
+        return {"ok": False, "error": f"freeze failed: {e}"}
+    return {"ok": True, "manifest_path": str(fs.manifest_path),
+            "manifest": _json_safe(fs.manifest)}
+
+
+def evaluate_executor_fitness(
+    candidate: dict[str, Any],
+    signals_manifest: str,
+    jitter: list[dict[str, Any]] | None = None,
+    archive: list[dict[str, Any]] | None = None,
+    *,
+    n_trials: int = 1,
+    is_frac: float = 0.6,
+    val_frac: float = 0.2,
+    cutoff_date: str | None = None,
+    data_dir: str = "ticker_data",
+    n_tickers: int | None = 15,
+    fields: list[str] | None = None,
+    cost_rate: float = 5e-4,
+    lambda_dispersion: float = 0.5,
+    gate_turnover: float | None = None,
+    gate_degradation: float = 0.5,
+    min_activity: float = 0.05,
+    selection_deflation: str = "off",
+) -> dict[str, Any]:
+    """Deterministically score one executor program against the frozen signals.
+
+    ``candidate`` / ``jitter[i]`` are ``{"executor_id", "code"}`` dicts,
+    compiled **in-memory** (validated exactly like the persist path, registry
+    untouched).  ``signals_manifest`` points at a
+    :class:`~quant_fund_agent.execution.signal_freeze.FrozenSignalSet`
+    manifest.  The panel is dev-sliced with the same convention as
+    :func:`evaluate_fitness`.  Returns ``{"ok": True, "fitness": ...}`` or
+    ``{"ok": False, "error": str}``.
+    """
+    from quant_fund_agent.execution.codegen import compile_executor_inmem
+    from quant_fund_agent.execution.signal_freeze import FrozenSignalSet
+    from quant_fund_agent.research_eval.exec_harness import (
+        ExecEvalParams,
+        evaluate_executor,
+    )
+
+    try:
+        fs = FrozenSignalSet.from_manifest(signals_manifest)
+        frozen = fs.load()
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "error": f"frozen signals unavailable: {e}"}
+
+    panel_dev, split, full_split = _dev_slice(is_frac, val_frac, cutoff_date,
+                                              data_dir, n_tickers, fields)
+
+    try:
+        cls = compile_executor_inmem(candidate["code"], candidate["executor_id"])
+        instance = cls()
+    except Exception as e:  # noqa: BLE001 — candidate failure is a scored outcome
+        return {"ok": False, "error": f"candidate executor failed: {e}"}
+
+    jitter_instances = []
+    for prog in (jitter or []):
+        try:
+            jcls = compile_executor_inmem(prog["code"], prog["executor_id"])
+            jitter_instances.append(jcls())
+        except Exception as e:  # noqa: BLE001
+            log.warning("[evaluate_executor_fitness] jitter %s failed (%s) — skipped",
+                        prog.get("executor_id"), e)
+
+    params = ExecEvalParams(
+        n_trials=max(1, int(n_trials)), cost_rate=cost_rate,
+        lambda_dispersion=lambda_dispersion, gate_turnover=gate_turnover,
+        gate_degradation=gate_degradation, min_activity=min_activity,
+        selection_deflation=selection_deflation,
+    )
+    try:
+        result = evaluate_executor(
+            instance, frozen, panel_dev, split, params=params,
+            candidate_code=candidate.get("code"),
+            candidate_id=candidate.get("executor_id", "executor"),
+            jitter_executors=jitter_instances or None,
+            archive_codes=[p.get("code", "") for p in (archive or [])] or None,
+        )
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "error": f"executor evaluation failed: {e}"}
+    result.raw["heldout_test_split_sizes"] = full_split.sizes
+    result.raw["frozen_signals_version"] = fs.version
+    return {"ok": True, "fitness": _json_safe(result.to_dict())}
+
+
+def score_joint_state(
+    book: list[dict[str, Any]],
+    executor: dict[str, Any] | None = None,
+    *,
+    n_joint_looks: int = 1,
+    target_horizon: int = 6,
+    is_frac: float = 0.6,
+    val_frac: float = 0.2,
+    cutoff_date: str | None = None,
+    data_dir: str = "ticker_data",
+    n_tickers: int | None = 15,
+    fields: list[str] | None = None,
+    model: str = "ridge",
+    cost_rate: float = 5e-4,
+    baseline_executor_id: str = "zscore_threshold_equal_weight",
+) -> dict[str, Any]:
+    """The joint objective J: deflated net VAL Sharpe of book → executor → costs.
+
+    Deterministically scores the WHOLE pipeline the joint state represents:
+    fit ``model`` on IS over the book's factor signals → composite signal →
+    run the SOTA ``executor`` (or the baseline registry executor when None) →
+    net-of-cost book P&L → per-bar VAL Sharpe, **deflated for the ledger's
+    joint look count** via the ``√(2·ln N)/√n_obs`` haircut (the per-bar
+    Sharpe's null std is ≈ 1/√n_obs, so the IC haircut applies verbatim).
+    Called at every block boundary (after the re-freeze) so consecutive values
+    are like-for-like; ΔJ across a block is the scheduler's reward.
+    """
+    from quant_fund_agent.comparison.config import ComparisonConfig
+    from quant_fund_agent.execution.base import get_executor, run_executor
+    from quant_fund_agent.execution.state import build_state_frames
+    from quant_fund_agent.research_eval import deflation
+    from quant_fund_agent.research_eval.exec_harness import _book_pnl, _sharpe
+    from quant_fund_agent.research_eval.harness import _combined_prediction
+
+    if not book:
+        return {"ok": False, "error": "empty book — nothing to score"}
+    panel_dev, split, _full = _dev_slice(is_frac, val_frac, cutoff_date,
+                                         data_dir, n_tickers, fields)
+    panel_key = _panel_cache_key(data_dir, sorted(fields or
+                                 ["open", "high", "low", "close", "volume"]),
+                                 n_tickers)
+    close = panel_dev["close"]
+
+    signals = []
+    for prog in book:
+        try:
+            signals.append(_cached_signal(prog, panel_dev, panel_key, cutoff_date))
+        except Exception as e:  # noqa: BLE001
+            log.warning("[score_joint_state] book member %s failed (%s) — skipped",
+                        prog.get("factor_id"), e)
+    if not signals:
+        return {"ok": False, "error": "no book signal could be computed"}
+
+    cfg = ComparisonConfig(preruns=["joint"], target_horizon=target_horizon,
+                           fit_standardize="per_underlying", seed=0)
+    import numpy as np
+    composite = _combined_prediction(signals, close,
+                                     np.asarray(split.is_mask, dtype=bool),
+                                     cfg, model)
+    if composite is None:
+        return {"ok": False, "error": "combined model could not fit"}
+
+    if executor is not None:
+        from quant_fund_agent.execution.codegen import compile_executor_inmem
+        try:
+            instance = compile_executor_inmem(executor["code"],
+                                              executor["executor_id"])()
+            executor_id = executor["executor_id"]
+        except Exception as e:  # noqa: BLE001
+            return {"ok": False, "error": f"SOTA executor failed to compile: {e}"}
+    else:
+        instance = get_executor(baseline_executor_id)()
+        executor_id = baseline_executor_id
+
+    try:
+        state = build_state_frames(panel_dev, composite)
+        weights = run_executor(instance, composite, state, close)
+        pnl = _book_pnl(weights, close, cost_rate)
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "error": f"joint pipeline failed: {e}"}
+
+    val_mask = np.asarray(split.val_mask, dtype=bool)
+    sr, n_obs = _sharpe(pnl["net"], val_mask)
+    gross_sr, _ = _sharpe(pnl["gross"], val_mask)
+    if sr is None:
+        return {"ok": False, "error": "VAL Sharpe undefined (degenerate book)"}
+    haircut = deflation.ic_haircut(n_obs, max(1, int(n_joint_looks)))
+    dsr = deflation.deflated_sharpe_ratio(
+        sr, n_obs=n_obs, sr_variance=1.0 / max(2, n_obs),
+        n_trials=max(1, int(n_joint_looks)))
+    turnover = pnl["turnover"].to_numpy(dtype=float)[val_mask]
+    return _json_safe({
+        "ok": True,
+        "J": float(sr - haircut),
+        "val_net_sharpe": sr,
+        "val_gross_sharpe": gross_sr,
+        "haircut": haircut,
+        "dsr_prob": dsr,
+        "n_obs": int(n_obs),
+        "n_joint_looks": int(n_joint_looks),
+        "executor_id": executor_id,
+        "model": model,
+        "n_book": len(signals),
+        "mean_turnover": (float(np.nanmean(turnover)) if len(turnover) else None),
+    })
+
+
+def score_joint_oos(
+    book: list[dict[str, Any]],
+    executor: dict[str, Any] | None = None,
+    *,
+    start: str,
+    end: str | None = None,
+    target_horizon: int = 6,
+    data_dir: str = "ticker_data",
+    n_tickers: int | None = 15,
+    fields: list[str] | None = None,
+    model: str = "ridge",
+    cost_rate: float = 5e-4,
+    baseline_executor_id: str = "zscore_threshold_equal_weight",
+) -> dict[str, Any]:
+    """Touch-once OOS scoring of a (book, executor) pair on ``[start, end)``.
+
+    The J4 walk-forward's per-fold scorer: the combined model fits on all data
+    STRICTLY BEFORE ``start`` (with the label-availability discipline), the
+    executor builds the book over the whole window, and only the
+    ``[start, end)`` bars are scored — net/gross per-bar Sharpe, composite OOS
+    IC at the target horizon, net÷gross capture, turnover, max drawdown.
+    Validation only: nothing is persisted, no caches beyond the panel's.
+    """
+    import numpy as np
+
+    from quant_fund_agent.comparison.config import ComparisonConfig
+    from quant_fund_agent.execution.base import get_executor, run_executor
+    from quant_fund_agent.execution.state import build_state_frames
+    from quant_fund_agent.research_eval.exec_harness import _book_pnl, _sharpe
+    from quant_fund_agent.research_eval.harness import (
+        _combined_prediction,
+        _pooled_ic,
+    )
+
+    if not book:
+        return {"ok": False, "error": "empty book — nothing to score"}
+    if fields is None:
+        fields = ["open", "high", "low", "close", "volume"]
+    panel_full = _load_panel_cached(data_dir, sorted(fields), n_tickers=n_tickers)
+    start_ts = datetime.fromisoformat(start)
+    window_mask = panel_full["close"].index >= panel_full["close"].index[0]
+    if end is not None:
+        end_ts = datetime.fromisoformat(end)
+        window_mask &= np.asarray(panel_full["close"].index < end_ts)
+    panel = {k: df.loc[window_mask] for k, df in panel_full.items()}
+    close = panel["close"]
+    is_mask = np.asarray(close.index < start_ts)
+    oos_mask = ~is_mask
+    if not is_mask.any() or not oos_mask.any():
+        return {"ok": False, "error": f"degenerate window around start={start}"}
+
+    panel_key = _panel_cache_key(data_dir, sorted(fields), n_tickers)
+    signals = []
+    for prog in book:
+        try:
+            signals.append(_cached_signal(prog, panel, panel_key, end))
+        except Exception as e:  # noqa: BLE001
+            log.warning("[score_joint_oos] book member %s failed (%s) — skipped",
+                        prog.get("factor_id"), e)
+    if not signals:
+        return {"ok": False, "error": "no book signal could be computed"}
+
+    cfg = ComparisonConfig(preruns=["joint-oos"], target_horizon=target_horizon,
+                           fit_standardize="per_underlying", seed=0)
+    composite = _combined_prediction(signals, close, is_mask, cfg, model)
+    if composite is None:
+        return {"ok": False, "error": "combined model could not fit"}
+
+    if executor is not None:
+        from quant_fund_agent.execution.codegen import compile_executor_inmem
+        try:
+            instance = compile_executor_inmem(executor["code"],
+                                              executor["executor_id"])()
+            executor_id = executor["executor_id"]
+        except Exception as e:  # noqa: BLE001
+            return {"ok": False, "error": f"executor failed to compile: {e}"}
+    else:
+        instance = get_executor(baseline_executor_id)()
+        executor_id = baseline_executor_id
+
+    try:
+        state = build_state_frames(panel, composite)
+        weights = run_executor(instance, composite, state, close)
+        pnl = _book_pnl(weights, close, cost_rate)
+    except Exception as e:  # noqa: BLE001
+        return {"ok": False, "error": f"joint pipeline failed: {e}"}
+
+    net_sr, n_obs = _sharpe(pnl["net"], oos_mask)
+    gross_sr, _ = _sharpe(pnl["gross"], oos_mask)
+    oos_ic, ic_n = _pooled_ic(composite, close, target_horizon, oos_mask,
+                              is_mask, window_mask[window_mask])
+    net = pnl["net"].to_numpy(dtype=float)[oos_mask]
+    gross = pnl["gross"].to_numpy(dtype=float)[oos_mask]
+    fin = np.isfinite(net) & np.isfinite(gross)
+    capture = None
+    if fin.any() and float(np.mean(gross[fin])) > 0:
+        capture = float(np.mean(net[fin]) / np.mean(gross[fin]))
+    cum = np.cumsum(np.where(fin, net, 0.0))
+    dd = float(np.min(cum - np.maximum.accumulate(cum))) if len(cum) else None
+    turnover = pnl["turnover"].to_numpy(dtype=float)[oos_mask]
+    return _json_safe({
+        "ok": True,
+        "oos_net_sharpe": net_sr,
+        "oos_gross_sharpe": gross_sr,
+        "oos_ic": oos_ic,
+        "oos_ic_n_obs": int(ic_n),
+        "capture": capture,
+        "max_drawdown": dd,
+        "mean_turnover": (float(np.nanmean(turnover)) if len(turnover) else None),
+        "n_oos_bars": int(n_obs),
+        "executor_id": executor_id,
+        "start": start, "end": end,
+        "n_book": len(signals),
+    })

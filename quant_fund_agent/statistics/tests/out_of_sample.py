@@ -84,6 +84,7 @@ class OutOfSampleTest(BaseStatTest):
                 min_conviction=spec.min_conviction,
                 position_construction=spec.position_construction,
                 position_params=spec.position_params,
+                executor_id=spec.executor_id,
             )
         else:
             strategy = DynamicStrategy(
@@ -98,6 +99,7 @@ class OutOfSampleTest(BaseStatTest):
                 min_conviction=spec.min_conviction,
                 position_construction=spec.position_construction,
                 position_params=spec.position_params,
+                executor_id=spec.executor_id,
             )
         oos_result = backtest_strategy(strategy, signals_oos, data_oos)
 

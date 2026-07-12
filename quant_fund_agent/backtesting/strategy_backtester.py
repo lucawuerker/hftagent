@@ -295,8 +295,26 @@ def backtest_strategy(
     """
     normed_signals = normalise_factor_signals(factor_signals)
     signal = strategy.calc(normed_signals, data)
+    executor_id = getattr(strategy, "executor_id", None)
     construction = getattr(strategy, "position_construction", "cross_sectional")
-    if construction == "per_underlying":
+    if executor_id:
+        # E4: the book is built by a REGISTERED executor program (the single
+        # signal→positions seam the execution evolution optimises).  The
+        # executor is self-contained — its own ``params`` (baked into evolved
+        # code) size the book; ``position_params["executor_overrides"]`` may
+        # override seed params explicitly.  Same causal state frames as the
+        # research harness, so research and deployment cannot drift.
+        from quant_fund_agent.execution.base import get_executor, run_executor
+        from quant_fund_agent.execution.state import build_state_frames
+
+        ex = get_executor(executor_id)()
+        overrides = (getattr(strategy, "position_params", None) or {}).get(
+            "executor_overrides")
+        if overrides:
+            ex.overrides = dict(overrides)
+        state_frames = build_state_frames(data, signal)
+        positions = run_executor(ex, signal, state_frames, data["close"])
+    elif construction == "per_underlying":
         # Directional per-name book: standardise each underlying over its own
         # history, go long/flat/short by a boundary, size each active name to
         # 1/max_positions.  Not dollar-neutral (has net market exposure).

@@ -264,6 +264,7 @@ def run_strategy_pipeline(
     run_statistician: bool = True,
     cutoff_date: date | None = None,
     position_construction: str | None = None,
+    executor: str | None = None,
 ) -> StrategyPipelineResult:
     """Selector → Architect → (optionally) Statistician, in one call.
 
@@ -286,6 +287,7 @@ def run_strategy_pipeline(
     from quant_fund_agent.agents.selector.graph import selector_graph
     from quant_fund_agent.agents.statistician.graph import statistician_graph
     from quant_fund_agent.backtesting.positions import resolve_position_construction
+    from quant_fund_agent.execution.base import resolve_executor as _resolve_executor
 
     as_of = cutoff_date.isoformat() if cutoff_date else None
     construction = resolve_position_construction(position_construction)
@@ -307,6 +309,8 @@ def run_strategy_pipeline(
         "target_horizon": target_horizon if target_horizon is not None else 6,
         "as_of": as_of,
         "position_construction": construction,
+        # E4: optional registered executor program (override > QF_EXECUTOR > None)
+        "executor_id": _resolve_executor(executor),
     })
 
 
@@ -423,6 +427,7 @@ def build_strategy_record(
             "min_conviction": spec.min_conviction,
             "position_construction": spec.position_construction,
             "position_params": dict(spec.position_params or {}),
+            "executor_id": spec.executor_id,
         },
         holding_period=spec.holding_period,
         metadata={
@@ -495,6 +500,7 @@ def strategy_from_record(record: StrategyRecord):
             min_conviction=p.get("min_conviction", 0.0),
             position_construction=p.get("position_construction", "cross_sectional"),
             position_params=p.get("position_params", {}),
+            executor_id=p.get("executor_id"),
         )
 
     return DynamicStrategy(
@@ -509,6 +515,7 @@ def strategy_from_record(record: StrategyRecord):
         min_conviction=p.get("min_conviction", 0.0),
         position_construction=p.get("position_construction", "cross_sectional"),
         position_params=p.get("position_params", {}),
+        executor_id=p.get("executor_id"),
     )
 
 

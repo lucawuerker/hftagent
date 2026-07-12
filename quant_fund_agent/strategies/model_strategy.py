@@ -56,6 +56,7 @@ class ModelStrategy(BaseStrategy):
         min_conviction: float = 0.0,
         position_construction: str = "cross_sectional",
         position_params: dict | None = None,
+        executor_id: str | None = None,
         artifact_path: str = "",
     ) -> None:
         self.strategy_id = strategy_id
@@ -72,6 +73,7 @@ class ModelStrategy(BaseStrategy):
         self.min_conviction = min_conviction
         self.position_construction = position_construction
         self.position_params = dict(position_params or {})
+        self.executor_id = executor_id
         self.model_params = {
             "model_type": model_type,
             "target_horizon": target_horizon,
@@ -92,6 +94,7 @@ class ModelStrategy(BaseStrategy):
         min_conviction: float = 0.0,
         position_construction: str = "cross_sectional",
         position_params: dict | None = None,
+        executor_id: str | None = None,
     ) -> "ModelStrategy":
         """Rebuild a runnable strategy from a persisted joblib artifact.
 
@@ -116,6 +119,7 @@ class ModelStrategy(BaseStrategy):
             min_conviction=min_conviction,
             position_construction=position_construction,
             position_params=position_params,
+            executor_id=executor_id,
             artifact_path=str(artifact_path),
         )
 

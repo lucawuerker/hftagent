@@ -128,7 +128,10 @@ class EvolutionRunConfig:
 
     # ── economic realism (P5, WS3) — folded in, no new axis; all default OFF so the
     # baseline arm is unchanged, enabled as an ablation dimension ──
-    gate_turnover: float | None = None         # cost_ok gate floor (None = off)
+    gate_turnover: float | None = None          # cost_ok gate floor (None = off)
+    # J3 (joint layer): the SOTA executor spec ({"executor_id","code"}) the
+    # cost gate trades candidates through.  None = baseline (byte-identical).
+    sota_executor: dict[str, Any] | None = None
     cost_rate: float = 5e-4                     # net-of-cost DIAG cost per unit turnover
     perturbation_weight: float = 0.0           # robustness perturbation probe weight (0 = off)
     perturbation_sigma: float = 0.5            # perturbation shock stdev (z-units)
@@ -642,6 +645,7 @@ class EvolutionLoop:
             cost_rate=self.cfg.cost_rate,
             perturbation_weight=self.cfg.perturbation_weight,
             perturbation_sigma=self.cfg.perturbation_sigma,
+            cost_executor=self.cfg.sota_executor,
         )
         if not res.get("ok"):
             log.info("[%s] evaluation failed: %s", program.factor_id, res.get("error"))
@@ -679,6 +683,7 @@ class EvolutionLoop:
             cost_rate=self.cfg.cost_rate,
             perturbation_weight=self.cfg.perturbation_weight,
             perturbation_sigma=self.cfg.perturbation_sigma,
+            cost_executor=self.cfg.sota_executor,
         )
         if not res.get("ok"):
             log.info("[%s] set evaluation failed: %s", candidate_id, res.get("error"))
@@ -1050,40 +1055,78 @@ class EvolutionLoop:
 
     # ── main drive ──
 
-    def run(self, initial_programs: Sequence[FactorProgram] | None = None,
+    def run(self, initial_programs: Sequence[FactorProgram] | None = None, *,
+            resume: bool = False, n_generations: int | None = None,
             ) -> dict[str, Any]:
         """Run the whole evolutionary search; returns a summary dict.
 
         ``initial_programs`` (mostly for tests / resumed runs) bypasses the LLM
         seed brainstorm.
+
+        **Block mode (E1, used by the joint outer layer):** ``resume=True``
+        reloads ``out_dir/state.json`` (controller archive, islands,
+        ``n_trials`` and the generation counter all persist), skips gen-0
+        seeding, and runs ``n_generations`` more generations from where the
+        checkpoint stopped.  ``n_generations`` (default ``cfg.generations``)
+        bounds the *incremental* generations either way.  The default call
+        (``resume=False, n_generations=None``) is byte-identical to the
+        original behaviour.
         """
         cfg = self.cfg
         t0 = time.time()
         self._load_known_ids()
+        self._n_trials_at_entry = 0   # block accounting (joint layer)
 
-        # ── generation 0: seed ──
-        programs = list(initial_programs) if initial_programs is not None else \
-            seed_programs(cfg, self.data_context, self.known_ids, self.fields)
-        for prog in programs:  # the pool SET-structural ops draw from
-            self._program_pool.setdefault(prog.factor_id, prog)
-        if cfg.unit == "set":
-            # Partition the seed pool into initial sets of ~set_size (round-robin
-            # chunks, so every seed program appears in exactly one set).
-            size = max(1, cfg.set_size)
-            for k in range(0, len(programs), size):
-                chunk = programs[k:k + size]
-                if chunk:
-                    self._admit_set(chunk, generation=0,
-                                    island=(k // size) % max(1, cfg.n_islands),
-                                    operator="seed", parent_ids=[])
+        if resume:
+            # ── block mode: continue from the checkpoint, no re-seeding ──
+            state_path = self.out_dir / "state.json"
+            self.controller = EvolutionController.load(state_path)
+            self._n_trials_at_entry = self.controller.n_trials
+            for isl in self.controller.islands:
+                for eg in isl:
+                    for p in eg.genome.programs:
+                        self._program_pool.setdefault(p.factor_id, p)
+                        self.known_ids.add(p.factor_id)
+            for eg in [*self.controller.archive, *self.controller.kept_pool]:
+                for p in eg.genome.programs:
+                    self._program_pool.setdefault(p.factor_id, p)
+                    self.known_ids.add(p.factor_id)
+            # controller state deliberately excludes lineage (it lives in
+            # lineage.jsonl); preload it so the next checkpoint appends, not wipes.
+            lineage_path = self.out_dir / "lineage.jsonl"
+            if lineage_path.exists():
+                self.controller.lineage = [
+                    json.loads(line)
+                    for line in lineage_path.read_text().splitlines() if line.strip()
+                ]
+            log.info("resumed from %s: generation=%d, population=%d, archive=%d, "
+                     "n_trials=%d", state_path, self.controller.generation,
+                     len(self.controller.population()),
+                     len(self.controller.archive), self.controller.n_trials)
         else:
-            for k, prog in enumerate(programs):
-                self._admit(prog, generation=0, island=k % max(1, cfg.n_islands),
-                            operator="seed", parent_ids=[])
-        self._checkpoint()
-        log.info("generation 0: population=%d, archive=%d, n_trials=%d",
-                 len(self.controller.population()), len(self.controller.archive),
-                 self.controller.n_trials)
+            # ── generation 0: seed ──
+            programs = list(initial_programs) if initial_programs is not None else \
+                seed_programs(cfg, self.data_context, self.known_ids, self.fields)
+            for prog in programs:  # the pool SET-structural ops draw from
+                self._program_pool.setdefault(prog.factor_id, prog)
+            if cfg.unit == "set":
+                # Partition the seed pool into initial sets of ~set_size (round-robin
+                # chunks, so every seed program appears in exactly one set).
+                size = max(1, cfg.set_size)
+                for k in range(0, len(programs), size):
+                    chunk = programs[k:k + size]
+                    if chunk:
+                        self._admit_set(chunk, generation=0,
+                                        island=(k // size) % max(1, cfg.n_islands),
+                                        operator="seed", parent_ids=[])
+            else:
+                for k, prog in enumerate(programs):
+                    self._admit(prog, generation=0, island=k % max(1, cfg.n_islands),
+                                operator="seed", parent_ids=[])
+            self._checkpoint()
+            log.info("generation 0: population=%d, archive=%d, n_trials=%d",
+                     len(self.controller.population()), len(self.controller.archive),
+                     self.controller.n_trials)
         if not self.controller.population():
             log.warning("empty seed population — aborting run")
             return self.summary(time.time() - t0)
@@ -1104,7 +1147,10 @@ class EvolutionLoop:
         op_names = [n for n, _ in ops]
         op_probs = [p / total_p for _, p in ops]
 
-        for gen in range(1, cfg.generations + 1):
+        start_gen = self.controller.generation + 1
+        end_gen = self.controller.generation + (
+            n_generations if n_generations is not None else cfg.generations)
+        for gen in range(start_gen, end_gen + 1):
             self.controller.generation = gen
             made = 0
             for k in range(cfg.children_per_generation):

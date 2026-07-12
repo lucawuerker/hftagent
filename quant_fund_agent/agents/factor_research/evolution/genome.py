@@ -50,6 +50,25 @@ class FactorProgram:
         return cls(**{k: v for k, v in d.items() if k in known})
 
 
+# ── pluggable program types (E1) ──────────────────────────────────────────────
+# The Genome container is domain-agnostic; what varies between evolution arms is
+# the *program* dataclass it holds.  ``Genome.program_type`` names the entry here
+# so a checkpoint round-trips through ``EvolutionController.save/load`` with the
+# right dataclass (an executor genome must not come back as a FactorProgram).
+# Default "factor" keeps every existing dict byte-identical.
+PROGRAM_TYPES: dict[str, type] = {"factor": FactorProgram}
+
+
+def register_program_type(kind: str, cls: type) -> None:
+    """Register a program dataclass for :meth:`Genome.from_dict` round-trips.
+
+    ``cls`` must expose ``factor_id`` (attribute or property — the lineage /
+    dedup key), ``code``, and ``to_dict``/``from_dict`` like
+    :class:`FactorProgram`.
+    """
+    PROGRAM_TYPES[kind] = cls
+
+
 @dataclass
 class Genome:
     """A member of the evolving population.
@@ -67,6 +86,7 @@ class Genome:
     parent_ids: list[str] = field(default_factory=list)
     operator: str = "seed"                  # "seed" | "llm_semantic" | "jitter" | "crossover" | ...
     metadata: dict[str, Any] = field(default_factory=dict)
+    program_type: str = "factor"            # PROGRAM_TYPES key (e.g. "executor")
 
     def __post_init__(self) -> None:
         if self.unit not in ("single", "set"):
@@ -111,6 +131,7 @@ class Genome:
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> "Genome":
         d = dict(d)
-        d["programs"] = [FactorProgram.from_dict(p) for p in d.get("programs", [])]
+        ptype = PROGRAM_TYPES.get(d.get("program_type", "factor"), FactorProgram)
+        d["programs"] = [ptype.from_dict(p) for p in d.get("programs", [])]
         known = {f for f in cls.__dataclass_fields__}
         return cls(**{k: v for k, v in d.items() if k in known})

@@ -397,3 +397,30 @@ def test_experience_memory_is_written_across_a_run(synthetic_panel, tmp_path,
     g = KnowledgeGraph.load(mem_path)
     mid = KnowledgeGraph.mechanism_id("momentum")
     assert g.g.nodes[mid]["n_attempts"] >= 1       # attempt tally recorded (topic=category)
+
+
+def test_resume_continues_generations_and_trials(wired_loop):
+    """E1 block API: resume=True reloads state.json and runs MORE generations,
+    preserving n_trials, the archive and the lineage file (append, not wipe)."""
+    loop, fake, tmp_path = wired_loop
+    s1 = loop.run(initial_programs=_seeds())
+    assert s1["generations"] == 2
+    lineage_before = (tmp_path / "evolution" / "lineage.jsonl").read_text().splitlines()
+
+    resumed = EvolutionLoop(loop.cfg, data_context="TEST DATA CONTEXT",
+                            fields=["open", "high", "low", "close", "volume"])
+    resumed._load_known_ids = lambda: None
+    s2 = resumed.run(resume=True, n_generations=1)
+
+    assert s2["generations"] == 3                       # 2 + 1 more
+    assert s2["n_trials"] >= s1["n_trials"]             # counter carried over
+    archive_ids = {fid for a in s2["archive"] for fid in a["factor_ids"]}
+    assert "seed_mom" in archive_ids                    # archive survived the reload
+
+    lineage_after = (tmp_path / "evolution" / "lineage.jsonl").read_text().splitlines()
+    assert len(lineage_after) >= len(lineage_before)    # old rows kept
+    assert lineage_after[: len(lineage_before)] == lineage_before
+    # gen-0 seeds were NOT re-admitted on resume
+    seed_rows = [json.loads(l) for l in lineage_after
+                 if json.loads(l)["operator"] == "seed"]
+    assert len(seed_rows) == 2

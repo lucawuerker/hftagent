@@ -158,6 +158,10 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--n-tickers", type=int, default=0,
                    help="Universe cap for the architect/statistician backtests "
                         "(sets ARCHITECT_N_TICKERS).  0 = full universe (default).")
+    p.add_argument("--executor", default=None,
+                   help="registered executor program building every strategy's "
+                        "book (E4; default: legacy position-construction regimes; "
+                        "env: QF_EXECUTOR)")
     p.add_argument("--position-construction", choices=["auto", "cross_sectional", "per_underlying"],
                    default="auto",
                    help="How a strategy's signal becomes positions: 'cross_sectional' "
@@ -308,6 +312,7 @@ def main() -> None:
             oos_ratio=args.oos_ratio,
             target_horizon=args.target_horizon,
             position_construction=args.position_construction,
+            executor=args.executor,
         )
         if not res.approved:
             print(f"  rejected at the {res.reject_stage} stage.")

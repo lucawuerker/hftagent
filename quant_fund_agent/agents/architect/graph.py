@@ -258,6 +258,7 @@ def _parse_spec(parsed: dict, state: ArchitectState, fallback_name: str,
         # the LLM — stamp it from the state so OOS + live reproduce the same book.
         position_construction=state.position_construction,
         position_params=dict(state.position_params or {}),
+        executor_id=state.executor_id,
         reasoning=parsed.get("reasoning", ""),
     )
 
@@ -401,6 +402,7 @@ def fit_and_backtest(state: ArchitectState) -> dict:
             min_conviction=spec.min_conviction,
             position_construction=spec.position_construction,
             position_params=spec.position_params,
+            executor_id=spec.executor_id,
             oos_split_ratio=state.oos_split_ratio,
             strategy_id=f"arch_{uuid.uuid4().hex[:8]}",
             as_of=state.as_of,

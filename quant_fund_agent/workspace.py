@@ -116,6 +116,11 @@ class Scope:
     def read_log_path(self) -> Path:
         return self.dir / "papers_read.json"
 
+    @property
+    def joint_dir(self) -> Path:
+        """The joint factor×execution evolution run's home (J0)."""
+        return self.dir / "joint"
+
     # factors
     @property
     def factor_db_path(self) -> Path:

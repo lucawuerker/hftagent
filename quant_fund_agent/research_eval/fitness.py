@@ -5,21 +5,22 @@ over four axes (no arbitrary scalar weights, which can themselves overfit), behi
 set of **hard gates** a candidate must clear before it competes at all:
 
 CORE objective vector (all *maximised*):
-  1. ``marginal_value``  — ΔOOS-IC the candidate adds to the combined model (LOCO
+  1. ``marginal_value``     — ΔOOS-IC the candidate adds to the combined model (LOCO
      against the Pareto archive).  The primary axis.
-  2. ``independence``    — the candidate's **residual (orthogonalised) IC**: its
+  2. ``independence``       — the candidate's **residual (orthogonalised) IC**: its
      predictive edge in the direction the book does *not* span (novel predictive
      content).  Rewards independence that actually predicts, not orthogonal noise.
      The legacy Δ-participation-ratio − soft max-|corr| penalty stays available as
      a diagnostic / ``EvalParams.independence_metric`` option.
-  3. ``robustness``      — fold-refit CPCV combined/LOCO IC
+  3. ``robustness``         — fold-refit CPCV combined/LOCO IC
      ``mean − λ·std − plateau + sign_bonus``.
-  4. ``parsimony``       — ``−complexity`` (operator + constant count from the AST).
-  5. ``regime_independence`` — the candidate's marginal ΔIC measured **only on
-     stress/crash bars**: how much it improves the book exactly where the book is
-     weakest.  A regime specialist (strong in crashes when the rest of the book is
-     not) is non-dominated on this axis, so it survives selection even with worse
-     values elsewhere.  Empty book → its own crash-period IC.
+  4. ``parsimony``          — ``−complexity`` (operator + constant count from the AST).
+  5. ``structural_novelty`` — minimum normalised code-edit distance (1 − SequenceMatcher
+     ratio) to the nearest archive member.  0 = structural clone of something already
+     kept, 1 = maximally novel code structure.  Falls back to the zoo reference distance
+     when the archive is empty.  Promotes AlphaAgent-style AST-originality from a
+     diagnostic to a first-class selection axis: a near-clone of an archive member is
+     non-dominated only if it is strictly better on every quality axis.
 
 Hard gates (all must pass, else the candidate is treated as dominated):
   coverage ≥ τ; OOS/IS degradation ≥ τ with matching sign; deflated-IC t-stat > 0
@@ -41,7 +42,7 @@ from typing import Any, Sequence
 
 @dataclass
 class ObjectiveVector:
-    """The four Pareto axes for one candidate — every axis *maximised*.
+    """The five Pareto axes for one candidate — every axis *maximised*.
 
     ``None`` on an axis means "not measured / not applicable"; it is treated as the
     worst possible value in dominance comparisons so an unmeasured candidate never
@@ -52,10 +53,10 @@ class ObjectiveVector:
     independence: float | None = None
     robustness: float | None = None
     parsimony: float | None = None
-    regime_independence: float | None = None
+    structural_novelty: float | None = None
 
     AXES = ("marginal_value", "independence", "robustness", "parsimony",
-            "regime_independence")
+            "structural_novelty")
 
     def as_tuple(self) -> tuple[float, ...]:
         """The axes as floats (``None`` → ``-inf``, the worst value)."""
