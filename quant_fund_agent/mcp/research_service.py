@@ -645,6 +645,9 @@ def evaluate_fitness(
             log.warning("[evaluate_fitness] jitter probe %s failed (%s) — skipped",
                         prog.get("factor_id"), e)
 
+    # book codes for the structural-novelty axis (5th Pareto axis)
+    book_codes: list[str] = [prog.get("code", "") for prog in book]
+
     # reference "factor zoo" for the novelty diagnostic (WS4) — DIAG only
     ref_sigs: list[Any] = []
     ref_ids: list[str] = []
@@ -678,6 +681,7 @@ def evaluate_fitness(
             cand_sig, book_sigs, panel_dev, cfg, split,
             params=params,
             candidate_code=candidate.get("code"),
+            book_codes=book_codes or None,
             expected_sign=expected_sign,
             candidate_id=candidate.get("factor_id", "candidate"),
             jitter_signals=jitter_sigs or None,

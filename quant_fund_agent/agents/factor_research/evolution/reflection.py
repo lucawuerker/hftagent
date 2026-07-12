@@ -102,15 +102,13 @@ def mutation_brief(
             f"{_fmt(d.get('standalone_cpcv_ic_mean'))} ± "
             f"{_fmt(d.get('standalone_cpcv_ic_std'))} over "
             f"{d.get('standalone_cpcv_n_folds', 0)} folds.")
-    if d.get("regime_independence") is not None or d.get("stress_ic_with") is not None:
+    if d.get("structural_novelty") is not None:
         lines.append(
-            f"Regime (crash-complementarity): marginal ΔIC on the "
-            f"{d.get('regime_kind', 'drawdown')} stress bars "
-            f"{_fmt(d.get('regime_independence'))} "
-            f"(book-with={_fmt(d.get('stress_ic_with'))}, "
-            f"book-only={_fmt(d.get('stress_ic_base'))}, "
-            f"n_stress={d.get('n_stress_obs', 0)}) — edge added exactly where the "
-            f"book is weakest.")
+            f"Structural novelty (5th axis): code-edit distance to nearest archive "
+            f"member {_fmt(d.get('structural_novelty'))} "
+            f"(book={_fmt(d.get('novelty_min_book_distance'))}, "
+            f"zoo={_fmt(d.get('novelty_min_zoo_distance'))}) — "
+            f"0 = structural clone, 1 = maximally novel code structure.")
     if d.get("plateau_penalty") is not None:
         lines.append(
             f"Parameter sensitivity: jittering the window constants ±10% moved "
@@ -145,13 +143,13 @@ def mutation_brief(
             "Low standalone IC but positive marginal value: it works as a "
             "conditioning/state variable in combination.  Lean into that — "
             "sharpen what it conditions on rather than chasing standalone IC.")
-    regime = obj.regime_independence
-    if regime is not None and regime > 0 and (mv is None or regime > 2 * abs(mv or 0)):
+    novelty = obj.structural_novelty
+    if novelty is not None and novelty < 0.2:
         advice.append(
-            "This is a regime specialist: it adds most of its edge in the "
-            f"{d.get('regime_kind', 'drawdown')} stress bars, where the rest of "
-            "the book is weak.  That is valuable diversification — preserve the "
-            "crash mechanism; do not water it down to lift the calm-period IC.")
+            f"Low structural novelty ({novelty:.2f}): this factor is a near-structural "
+            "clone of something already in the archive.  Change the MECHANISM — "
+            "different fields, different conditioning logic, different operator "
+            "pattern — not just the numeric constants.")
     deg = d.get("degradation_ratio")
     if deg is not None and deg < 0.5:
         advice.append(

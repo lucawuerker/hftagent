@@ -208,7 +208,7 @@ def test_behavior_descriptors_present_and_separate_from_objective():
     # … but they are NOT part of the scored objective vector (still exactly 5 axes)
     assert ObjectiveVector.AXES == (
         "marginal_value", "independence", "robustness", "parsimony",
-        "regime_independence")
+        "structural_novelty")
     assert "trend_reversal" not in ObjectiveVector.AXES
     # round-trips through the MCP/state serialisation
     assert r.to_dict()["behavior"]["signal_speed"] == r.behavior["signal_speed"]
@@ -269,7 +269,70 @@ def test_independence_metric_delta_participation_is_selectable():
     assert fresh_r.objective.independence > dup_r.objective.independence
 
 
-# ── regime axis (crash-complementarity) ───────────────────────────────────────
+# ── structural novelty axis (AST-based originality) ──────────────────────────
+
+def test_structural_novelty_rewards_novel_code():
+    """A factor with structurally different code scores higher novelty than a clone."""
+    panel, rng = _panel(seed=5)
+    cfg = _cfg()
+    fwd = panel["close"].pct_change().shift(-1)
+    sig = _frame(fwd.to_numpy(dtype=float) + 0.01 * rng.standard_normal((N_BARS, len(TICKERS))))
+
+    book_code = (
+        "def calc(self):\n"
+        "    return (self.close - self.close.shift(5)) / self.close.shift(5)"
+    )
+    # structural clone: same pattern, only the window constant changed
+    clone_code = (
+        "def calc(self):\n"
+        "    return (self.close - self.close.shift(10)) / self.close.shift(10)"
+    )
+    # genuinely novel: different fields, different operator structure
+    novel_code = (
+        "def calc(self):\n"
+        "    vol = self.volume.rolling(20).mean()\n"
+        "    return (vol - vol.shift(1)) / (vol.shift(1) + 1e-8)"
+    )
+
+    clone_r = evaluate_candidate(sig, [], panel, cfg,
+                                 candidate_code=clone_code,
+                                 book_codes=[book_code])
+    novel_r = evaluate_candidate(sig, [], panel, cfg,
+                                 candidate_code=novel_code,
+                                 book_codes=[book_code])
+
+    # Both have non-None structural_novelty (book is non-empty)
+    assert clone_r.objective.structural_novelty is not None
+    assert novel_r.objective.structural_novelty is not None
+    # The novel factor is structurally further from the book than the clone
+    assert novel_r.objective.structural_novelty > clone_r.objective.structural_novelty
+    # Diagnostic keys are present
+    assert "novelty_min_book_distance" in clone_r.diagnostics
+    assert "novelty_min_zoo_distance" in clone_r.diagnostics
+
+
+def test_structural_novelty_none_when_no_code():
+    """Structural novelty is None (unmeasured) when no candidate code is provided."""
+    panel, rng = _panel(seed=6)
+    cfg = _cfg()
+    r = evaluate_candidate(_noise(rng), [], panel, cfg)
+    assert r.objective.structural_novelty is None
+
+
+def test_structural_novelty_falls_back_to_zoo():
+    """When book is empty, structural novelty falls back to the zoo reference."""
+    panel, rng = _panel(seed=7)
+    cfg = _cfg()
+    code = "def calc(self):\n    return self.close.pct_change()"
+    zoo_code = "def calc(self):\n    return self.close.pct_change()"  # identical
+    # With an identical zoo reference, novelty should be near 0
+    r = evaluate_candidate(_noise(rng), [], panel, cfg,
+                           candidate_code=code,
+                           book_codes=[],
+                           reference_codes=[zoo_code])
+    assert r.objective.structural_novelty is not None
+    assert r.objective.structural_novelty < 0.1  # near-zero distance → low novelty
+
 
 def test_conditioning_factor_scores_positive_marginal_under_nonlinear_default():
     """A volatility-style *conditioning* factor (valuable only via an interaction,
@@ -332,42 +395,6 @@ def test_cpcv_robustness_refits_marginal_model_per_fold(monkeypatch):
     assert r.diagnostics["cpcv_n_folds"] >= 2
     assert r.diagnostics["standalone_cpcv_n_folds"] >= 2
     assert len(fold_trains) >= 2
-
-
-def test_regime_axis_rewards_crash_specialist():
-    """A factor whose edge lives in the crash bars scores higher on the regime
-    axis than one whose (equal-strength) edge lives only in the calm bars."""
-    from quant_fund_agent.backtesting.data_loader import forward_returns
-    from quant_fund_agent.research_eval.harness import _stress_mask
-
-    rng = np.random.default_rng(5)
-    idx = pd.date_range("2024-01-01", periods=N_BARS, freq="min")
-    # a common market factor (defines which bars are "crashes") + idiosyncratic noise
-    mkt = rng.standard_normal(N_BARS) * 0.01
-    ret = mkt[:, None] + rng.standard_normal((N_BARS, len(TICKERS))) * 0.01
-    close = pd.DataFrame(100 * np.cumprod(1 + ret, axis=0), index=idx, columns=TICKERS)
-    panel = {"close": close}
-    cfg = _cfg()
-    split = three_way_split(idx, is_frac=0.5, val_frac=0.25)
-    p = EvalParams(regime_kind="drawdown", regime_quantile=0.2, regime_min_obs=5)
-
-    # build the two specialists directly off the harness's OWN crash labelling, so
-    # "active in crashes" means exactly the bars the regime axis scores on.
-    stress = _stress_mask(close, p, split.is_val_mask)              # (T,) bool
-    stress_b = np.broadcast_to(stress[:, None], (N_BARS, len(TICKERS)))
-    fwd = forward_returns(close, cfg.target_horizon).to_numpy(dtype=float)
-    noise = rng.standard_normal((N_BARS, len(TICKERS)))
-    crash_vals = np.where(stress_b, fwd, 1e-3 * noise)   # tracks fwd only in crashes
-    calm_vals = np.where(stress_b, 1e-3 * noise, fwd)    # tracks fwd only in calm bars
-
-    crash_r = evaluate_candidate(_frame(crash_vals), [], panel, cfg, split=split, params=p)
-    calm_r = evaluate_candidate(_frame(calm_vals), [], panel, cfg, split=split, params=p)
-
-    assert crash_r.objective.regime_independence is not None
-    assert crash_r.objective.regime_independence > calm_r.objective.regime_independence
-    # ...even though the crash specialist is the WEAKER factor overall (its edge is
-    # confined to the 20% tail), which is exactly the point of a separate axis.
-    assert crash_r.objective.marginal_value < calm_r.objective.marginal_value
 
 
 # ── parsimony + sign consistency plumbing ─────────────────────────────────────
@@ -457,3 +484,76 @@ def test_set_evaluation_ignores_test_rows_and_boundary_labels():
     )
 
     _assert_nested_close(clean.to_dict(), poisoned.to_dict())
+
+
+# ── J3: executor-aware cost gate (coupling) ────────────────────────────────────
+
+SOTA_EXEC_CODE = '''\
+"""Coupling-test executor."""
+
+from __future__ import annotations
+
+import numpy as np
+import pandas as pd
+
+from quant_fund_agent.execution.base import BaseExecutor, register_executor
+
+
+@register_executor
+class CouplingTestExec(BaseExecutor):
+    executor_id = "coupling_test_exec"
+    name = "sign 1/n"
+    regime = "per_underlying"
+    inputs = ["signal"]
+    params = {"n_max": 5.0}
+
+    def target_weights(self, signal, state):
+        return np.sign(signal).fillna(0.0) / 5.0
+'''
+
+
+def test_cost_executor_none_is_byte_identical():
+    """THE load-bearing J3 regression: coupling off == pre-J3 behaviour."""
+    panel, rng = _panel()
+    candidate = _noise(rng)
+    split = three_way_split(panel["close"].index)
+
+    base = evaluate_candidate(candidate, [], panel, _cfg(), split,
+                              params=EvalParams(), candidate_id="c")
+    explicit = evaluate_candidate(candidate, [], panel, _cfg(), split,
+                                  params=EvalParams(cost_executor=None),
+                                  candidate_id="c")
+    _assert_nested_close(base.to_dict(), explicit.to_dict())
+    assert "net_capture_sota" not in base.diagnostics
+
+
+def test_cost_executor_gates_and_diagnoses():
+    panel, rng = _panel()
+    candidate = _noise(rng)
+    split = three_way_split(panel["close"].index)
+    sota = {"executor_id": "coupling_test_exec", "code": SOTA_EXEC_CODE}
+
+    res = evaluate_candidate(candidate, [], panel, _cfg(), split,
+                             params=EvalParams(cost_executor=sota),
+                             candidate_id="c")
+    # the coupling diagnostics are present and the gate was EVALUATED
+    assert "net_capture_sota" in res.diagnostics
+    assert res.diagnostics["cost_executor_id"] == "coupling_test_exec"
+    assert res.gates.cost_ok is not None
+    # a pure-noise candidate traded through an executor at 5 bps: net ≤ 0
+    if res.gates.cost_ok is False:
+        assert "cost_executor" in res.gates.reasons
+
+
+def test_cost_executor_failure_falls_back_not_crashes():
+    panel, rng = _panel()
+    candidate = _noise(rng)
+    split = three_way_split(panel["close"].index)
+    broken = {"executor_id": "broken_exec", "code": "this is not python ("}
+
+    res = evaluate_candidate(candidate, [], panel, _cfg(), split,
+                             params=EvalParams(cost_executor=broken),
+                             candidate_id="c")
+    # fell back to the explicit construction; run completed; diagnostics stamped
+    assert res.diagnostics["turnover"] is not None
+    assert "net_capture_sota" in res.diagnostics
