@@ -334,6 +334,65 @@ def test_structural_novelty_falls_back_to_zoo():
     assert r.objective.structural_novelty < 0.1  # near-zero distance → low novelty
 
 
+def test_structural_novelty_is_ast_based_not_character_edit():
+    """A pure window-constant change is a canonical-AST clone (distance 0),
+    which a character-edit proxy would have scored as *different* code."""
+    panel, rng = _panel(seed=8)
+    cfg = _cfg()
+    book_code = ("def calc(self):\n"
+                 "    return (self.close - self.close.shift(5)) / self.close.shift(5)")
+    window_only = ("def calc(self):\n"
+                   "    return (self.close - self.close.shift(200)) / self.close.shift(200)")
+    r = evaluate_candidate(_noise(rng), [], panel, cfg,
+                           candidate_code=window_only, book_codes=[book_code])
+    assert r.objective.structural_novelty == 0.0
+    assert r.diagnostics["novelty_metric"] == "canonical_ast_weighted_subtree_jaccard"
+    assert r.diagnostics["novelty_nearest_book_similarity"] == 1.0
+    assert r.diagnostics["novelty_candidate_ast_nodes"] > 0
+    assert r.diagnostics["novelty_candidate_unique_subtrees"] > 0
+
+
+def test_structural_novelty_nearest_book_idx_survives_skipped_codes():
+    """The nearest-book index must refer to the ORIGINAL book position even when
+    earlier book codes are empty/invalid and skipped (regression for the fix)."""
+    panel, rng = _panel(seed=9)
+    cfg = _cfg()
+    candidate = "def calc(self):\n    return self.volume.rolling(20).std()"
+    # index 0 and 1 are unmeasurable; index 2 is the true structural clone
+    book_codes = ["", "not valid python (",
+                  "def calc(self):\n    return self.volume.rolling(50).std()"]
+    r = evaluate_candidate(_noise(rng), [], panel, cfg,
+                           candidate_code=candidate, book_codes=book_codes)
+    assert r.diagnostics["novelty_nearest_book_idx"] == 2      # not 0
+    assert r.diagnostics["novelty_min_book_distance"] == 0.0   # window-only clone
+
+
+def test_set_structural_novelty_mean_nearest_neighbour_and_singleton():
+    """SET-mode structural novelty = mean nearest-neighbour canonical-AST distance;
+    a singleton set scores 1.0; no measurable member codes → None."""
+    panel, rng = _panel(seed=10)
+    cfg = _cfg()
+    members = {"a": _noise(rng), "b": _noise(rng), "c": _noise(rng)}
+    # a and b are canonical clones (window only); c is structurally different
+    codes = {
+        "a": "def calc(self):\n    return self.close - self.close.shift(5)",
+        "b": "def calc(self):\n    return self.close - self.close.shift(9)",
+        "c": "def calc(self):\n    return self.volume.rolling(20).mean()",
+    }
+    r = evaluate_set(members, panel, cfg, member_codes=codes, candidate_id="set")
+    nov = r.objective.structural_novelty
+    assert nov is not None and 0.0 < nov < 1.0
+    # a↔b nearest-neighbour is 0 (clones); c's nearest is > 0 → mean strictly positive
+    assert r.diagnostics["structural_novelty"] == nov
+
+    single = evaluate_set({"a": members["a"]}, panel, cfg,
+                          member_codes={"a": codes["a"]}, candidate_id="one")
+    assert single.objective.structural_novelty == 1.0
+
+    no_codes = evaluate_set(members, panel, cfg, candidate_id="none")
+    assert no_codes.objective.structural_novelty is None
+
+
 def test_conditioning_factor_scores_positive_marginal_under_nonlinear_default():
     """A volatility-style *conditioning* factor (valuable only via an interaction,
     ~0 direct IC) must score a POSITIVE marginal value under the default nonlinear

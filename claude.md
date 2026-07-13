@@ -122,6 +122,38 @@ still drives parent selection and marginal scoring. Tests:
 `tests/test_research_eval_curation.py`, extended
 `test_research_eval_{fitness,harness}.py`, `test_evolution_{controller,loop}.py`.
 
+**Evolutionary researcher — `structural_novelty` axis + genuine canonical-AST
+metric (done).** The 5th CORE Pareto axis is now **`structural_novelty`**, which
+**replaced the `regime_independence` axis** (crash-complementarity stress lives on
+as the QD grid's leak-free `stress_activation` behavior descriptor, not a scored
+axis). `structural_novelty` = the minimum **canonical AST weighted-subtree
+distance** to the nearest archive member (falling back to the reference-zoo when
+the book is empty); 0 = structural clone (same canonical computation), 1 = no
+shared canonical subtree. The measure is a dedicated module
+(`research_eval/ast_novelty.py`: `canonical_factor_tree`, `subtree_profile`,
+`ast_subtree_similarity/distance`) that **replaced the old whitespace-stripped
+`difflib.SequenceMatcher` character proxy** everywhere structural code distance is
+used (the axis, `_zoo_dedup`'s `zoo_min_code_distance`, and SET-mode internal
+diversity). It parses the `calc` body (best-effort module-body fallback),
+canonicalises it (strip locations/docstrings/`pass`; alpha-rename local
+variables + params; inline safe straight-line temporaries; **numeric literals →
+typed placeholders** so a 20- vs 21-bar window is a *clone*; commutative `Add`/
+`Mult` operand reorder — while preserving data-field names, operator/attribute/
+function names and `data["close"]` string keys), fingerprints every subtree with
+SHA-256 into an immutable multiset profile (`@lru_cache`d by source), and scores
+two programs with a **weighted multiset Jaccard** (`w(h)=1+log(1+size(h))`).
+Inspired by AlphaAgent's common-subtree originality criterion but a normalised
+weighted overlap over *all* subtrees (not the size-biased single largest common
+subtree); **not** exact tree-edit distance. Invariant to formatting, comments,
+docstrings, factor ids, class names, imports and variable names; sensitive to
+changed fields/operators. Faster than the old proxy for archive comparison
+(cached profiles + fingerprint-counter Jaccard, no O(n²) character match per
+pair). New diagnostics: `novelty_metric`, `novelty_nearest_book_similarity`,
+`novelty_candidate_ast_nodes`, `novelty_candidate_unique_subtrees`; the
+nearest-book index now points at the original book position even when empty/invalid
+codes are skipped. Tests: `tests/test_ast_novelty.py`, extended
+`tests/test_research_eval_harness.py`.
+
 **Evolutionary researcher — QD grid, selection-time deflation, economic reward,
 experience memory (done).** Five additions from a competitive-landscape review
 (`research_docs/`, gitignored; source attribution log in `research_docs/SOURCES.md`,

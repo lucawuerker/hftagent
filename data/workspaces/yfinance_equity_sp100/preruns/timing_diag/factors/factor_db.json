@@ -1,0 +1,1141 @@
+{
+  "factors": [
+    {
+      "id": "open_close_spread",
+      "name": "Open-Close Spread",
+      "class_name": "",
+      "description": "The factor computes the absolute difference between the open and close prices for each bar, highlighting potential reversion points.",
+      "formula": "",
+      "trading_idea": "The open-close spread indicates potential mean reversion opportunities based on the difference between the opening and closing prices of the bar. A larger spread might suggest overextension, while a smaller spread indicates potential for price correction back towards the mean.",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.020007,
+        "ic_std": 0.299103,
+        "ic_ir": -0.066892,
+        "ic_hit_rate": 0.4703,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.008242,
+            "ic_std": 0.296258,
+            "ic_ir": -0.027819,
+            "ic_hit_rate": 0.4904,
+            "n_timestamps": 2616
+          },
+          "6": {
+            "ic": -0.020007,
+            "ic_std": 0.299103,
+            "ic_ir": -0.066892,
+            "ic_hit_rate": 0.4703,
+            "n_timestamps": 2611
+          },
+          "60": {
+            "ic": -0.072844,
+            "ic_std": 0.288356,
+            "ic_ir": -0.252617,
+            "ic_hit_rate": 0.3864,
+            "n_timestamps": 2557
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 2611,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "timing:yfinance_equity_sp100:timing_diag",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/open_close_spread.py",
+      "required_inputs": [
+        "open",
+        "close"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-07-12T14:45:18.232088",
+      "metadata": {
+        "llm_model": "gpt-4o-mini",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g0-open_close_spread-5eb4d7",
+          "generation": 0,
+          "operator": "seed",
+          "parent_ids": [],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": 0.018463152341881863,
+            "independence": -0.04827140022883759,
+            "robustness": -0.00018167504262131193,
+            "parsimony": -8.0,
+            "structural_novelty": null
+          },
+          "gates": {
+            "coverage_ok": true,
+            "degradation_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 4,
+          "curation": "archive",
+          "selection_deflation": "off",
+          "publish": null
+        },
+        "provenance": {
+          "scope": "yfinance_equity_sp100/timing_diag",
+          "config_hash": "3b0bf158bdf4",
+          "provider": "yfinance",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": "sp100",
+          "timespan": [
+            "2016-01-01",
+            "2026-06-01"
+          ],
+          "stamped_at": "2026-07-12T14:45:18+00:00"
+        }
+      }
+    },
+    {
+      "id": "open_close_momentum_reversion",
+      "name": "Open-Close Momentum Reversion",
+      "class_name": "",
+      "description": "The factor computes the absolute difference between the open and close prices, conditioned on the momentum of closing prices over the last six bars. It highlights potential reversion points when there is positive momentum following a significant open-close spread.",
+      "formula": "",
+      "trading_idea": "This factor captures potential mean reversion opportunities by assessing the open-close spread in the context of momentum. When the open-close spread indicates overextension, and there is a positive momentum in closing prices, it suggests a strong potential for price correction back towards the mean.",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.008919,
+        "ic_std": 0.302961,
+        "ic_ir": -0.029438,
+        "ic_hit_rate": 0.4776,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.001133,
+            "ic_std": 0.306691,
+            "ic_ir": -0.003693,
+            "ic_hit_rate": 0.4888,
+            "n_timestamps": 2549
+          },
+          "6": {
+            "ic": -0.008919,
+            "ic_std": 0.302961,
+            "ic_ir": -0.029438,
+            "ic_hit_rate": 0.4776,
+            "n_timestamps": 2544
+          },
+          "60": {
+            "ic": -0.048627,
+            "ic_std": 0.290359,
+            "ic_ir": -0.167474,
+            "ic_hit_rate": 0.4117,
+            "n_timestamps": 2492
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 2544,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "timing:yfinance_equity_sp100:timing_diag",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/open_close_momentum_reversion.py",
+      "required_inputs": [
+        "open",
+        "close"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-07-12T14:45:18.240342",
+      "metadata": {
+        "llm_model": "gpt-4o-mini",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g1-open_close_momentum_reversion-14278c",
+          "generation": 1,
+          "operator": "crossover",
+          "parent_ids": [
+            "g0-open_close_spread-5eb4d7",
+            "g0-closing_price_momentum-0e0274"
+          ],
+          "expected_sign": -1,
+          "objective": {
+            "marginal_value": -0.024691518235578802,
+            "independence": 0.006954690581532663,
+            "robustness": 0.017695925790759844,
+            "parsimony": -14.0,
+            "structural_novelty": 0.696058091286307
+          },
+          "gates": {
+            "coverage_ok": true,
+            "degradation_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 7,
+          "curation": "archive",
+          "selection_deflation": "off",
+          "publish": null
+        },
+        "provenance": {
+          "scope": "yfinance_equity_sp100/timing_diag",
+          "config_hash": "3b0bf158bdf4",
+          "provider": "yfinance",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": "sp100",
+          "timespan": [
+            "2016-01-01",
+            "2026-06-01"
+          ],
+          "stamped_at": "2026-07-12T14:45:18+00:00"
+        }
+      }
+    },
+    {
+      "id": "high_low_volume_weighted_signal",
+      "name": "High-Low Volume Weighted Signal",
+      "class_name": "",
+      "description": "The factor computes the volume-weighted ratio of the intra-bar high to the intra-bar low, capturing the extent of volatility adjusted for trading activity.",
+      "formula": "",
+      "trading_idea": "This factor capitalizes on the relationship between intra-bar volatility (high-low range) and trading volume. A higher ratio of the high-low range weighted by volume indicates stronger price movement potential, suggesting that significant volume accompanying volatility can signal imminent price trends.",
+      "trading_idea_ids": [],
+      "category": "volatility",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.030064,
+        "ic_std": 0.304348,
+        "ic_ir": -0.098781,
+        "ic_hit_rate": 0.4672,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.009573,
+            "ic_std": 0.316785,
+            "ic_ir": -0.030218,
+            "ic_hit_rate": 0.4782,
+            "n_timestamps": 2597
+          },
+          "6": {
+            "ic": -0.030064,
+            "ic_std": 0.304348,
+            "ic_ir": -0.098781,
+            "ic_hit_rate": 0.4672,
+            "n_timestamps": 2592
+          },
+          "60": {
+            "ic": -0.087101,
+            "ic_std": 0.291995,
+            "ic_ir": -0.298296,
+            "ic_hit_rate": 0.3743,
+            "n_timestamps": 2538
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 2592,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "timing:yfinance_equity_sp100:timing_diag",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/high_low_volume_weighted_signal.py",
+      "required_inputs": [
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-07-12T14:45:18.240439",
+      "metadata": {
+        "llm_model": "gpt-4o-mini",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g1-high_low_volume_weighted_signal-d549d6",
+          "generation": 1,
+          "operator": "llm_semantic",
+          "parent_ids": [
+            "g0-high_low_volatility_ratio-9b074c"
+          ],
+          "expected_sign": 1,
+          "objective": {
+            "marginal_value": 0.023554129484732324,
+            "independence": 0.006681126401164876,
+            "robustness": -0.026613551328692774,
+            "parsimony": -13.0,
+            "structural_novelty": 0.7066800602712204
+          },
+          "gates": {
+            "coverage_ok": true,
+            "degradation_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 9,
+          "curation": "archive",
+          "selection_deflation": "off",
+          "publish": null
+        },
+        "provenance": {
+          "scope": "yfinance_equity_sp100/timing_diag",
+          "config_hash": "3b0bf158bdf4",
+          "provider": "yfinance",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": "sp100",
+          "timespan": [
+            "2016-01-01",
+            "2026-06-01"
+          ],
+          "stamped_at": "2026-07-12T14:45:18+00:00"
+        }
+      }
+    },
+    {
+      "id": "open_close_momentum_conditioned",
+      "name": "Open-Close Momentum Conditioned",
+      "class_name": "",
+      "description": "The factor computes the absolute difference between the open and close prices, scaled by the momentum of closing prices over the last six bars. This allows for a more nuanced interpretation of price movements in the context of momentum.",
+      "formula": "",
+      "trading_idea": "This factor integrates the open-close spread with closing price momentum to identify potential reversions. When the open-close spread indicates overextension and there is positive momentum in closing prices, it suggests that the price may correct back towards the mean, providing a robust signal for potential reversal trades.",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.001484,
+        "ic_std": 0.295868,
+        "ic_ir": 0.005017,
+        "ic_hit_rate": 0.4971,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.001183,
+            "ic_std": 0.317603,
+            "ic_ir": 0.003726,
+            "ic_hit_rate": 0.4881,
+            "n_timestamps": 2264
+          },
+          "6": {
+            "ic": 0.001484,
+            "ic_std": 0.295868,
+            "ic_ir": 0.005017,
+            "ic_hit_rate": 0.4971,
+            "n_timestamps": 2259
+          },
+          "60": {
+            "ic": -0.019829,
+            "ic_std": 0.284379,
+            "ic_ir": -0.069728,
+            "ic_hit_rate": 0.4415,
+            "n_timestamps": 2215
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 2259,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "timing:yfinance_equity_sp100:timing_diag",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/open_close_momentum_conditioned.py",
+      "required_inputs": [
+        "open",
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-07-12T14:45:18.240922",
+      "metadata": {
+        "llm_model": "gpt-4o-mini",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g1-open_close_momentum_conditioned-a8451d",
+          "generation": 1,
+          "operator": "crossover",
+          "parent_ids": [
+            "g1-open_close_momentum_reversion-14278c",
+            "g0-closing_price_momentum-0e0274"
+          ],
+          "expected_sign": -1,
+          "objective": {
+            "marginal_value": -0.0175979387499921,
+            "independence": -0.0060844486884096115,
+            "robustness": 0.015664811700953664,
+            "parsimony": -21.0,
+            "structural_novelty": 0.412989588497769
+          },
+          "gates": {
+            "coverage_ok": true,
+            "degradation_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 10,
+          "curation": "archive",
+          "selection_deflation": "off",
+          "publish": null
+        },
+        "provenance": {
+          "scope": "yfinance_equity_sp100/timing_diag",
+          "config_hash": "3b0bf158bdf4",
+          "provider": "yfinance",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": "sp100",
+          "timespan": [
+            "2016-01-01",
+            "2026-06-01"
+          ],
+          "stamped_at": "2026-07-12T14:45:18+00:00"
+        }
+      }
+    },
+    {
+      "id": "volume_momentum_signal",
+      "name": "Volume Momentum Signal",
+      "class_name": "",
+      "description": "The factor computes the rate of change in volume while modulating it by the volume-weighted price change. This identifies momentum signals that are reinforced by high trading volumes, indicating stronger market conviction.",
+      "formula": "",
+      "trading_idea": "This factor leverages both the rate of change in trading volume and the conviction of price movements, creating a momentum signal that reacts to high trading activity. By conditioning the rate of volume change on the volume-weighted price change, it captures the strength of price movements supported by significant trading volume, enhancing predictive power.",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.005155,
+        "ic_std": 0.279761,
+        "ic_ir": 0.018426,
+        "ic_hit_rate": 0.5012,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.004679,
+            "ic_std": 0.289809,
+            "ic_ir": 0.016146,
+            "ic_hit_rate": 0.4983,
+            "n_timestamps": 2609
+          },
+          "6": {
+            "ic": 0.005155,
+            "ic_std": 0.279761,
+            "ic_ir": 0.018426,
+            "ic_hit_rate": 0.5012,
+            "n_timestamps": 2604
+          },
+          "60": {
+            "ic": 0.004827,
+            "ic_std": 0.280316,
+            "ic_ir": 0.017219,
+            "ic_hit_rate": 0.5137,
+            "n_timestamps": 2550
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 2604,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "timing:yfinance_equity_sp100:timing_diag",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/volume_momentum_signal.py",
+      "required_inputs": [
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-07-12T14:45:18.241350",
+      "metadata": {
+        "llm_model": "gpt-4o-mini",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g1-volume_momentum_signal-12c008",
+          "generation": 1,
+          "operator": "crossover",
+          "parent_ids": [
+            "g0-volume_change_rate-a0c312",
+            "g0-volume_weighted_price_change-29ef5c"
+          ],
+          "expected_sign": 1,
+          "objective": {
+            "marginal_value": 0.000737729315401974,
+            "independence": 0.007707065525618161,
+            "robustness": 0.012711889689715913,
+            "parsimony": -22.0,
+            "structural_novelty": 0.6755994358251058
+          },
+          "gates": {
+            "coverage_ok": true,
+            "degradation_ok": null,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 11,
+          "curation": "archive",
+          "selection_deflation": "off",
+          "publish": null
+        },
+        "provenance": {
+          "scope": "yfinance_equity_sp100/timing_diag",
+          "config_hash": "3b0bf158bdf4",
+          "provider": "yfinance",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": "sp100",
+          "timespan": [
+            "2016-01-01",
+            "2026-06-01"
+          ],
+          "stamped_at": "2026-07-12T14:45:18+00:00"
+        }
+      }
+    },
+    {
+      "id": "open_close_mean_reversion",
+      "name": "Open-Close Mean Reversion",
+      "class_name": "",
+      "description": "This factor computes the absolute difference between the open and close prices, scaled by the volume of the bar. A larger spread with high volume indicates stronger potential for mean reversion.",
+      "formula": "",
+      "trading_idea": "The open-close spread can indicate potential mean reversion opportunities. A larger spread may suggest overextension, while a smaller spread indicates a potential price correction. By incorporating the volume of the bar, we can assess the strength of the price action and enhance the predictive power of the spread.",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.030327,
+        "ic_std": 0.269758,
+        "ic_ir": -0.112422,
+        "ic_hit_rate": 0.4464,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.013969,
+            "ic_std": 0.271902,
+            "ic_ir": -0.051375,
+            "ic_hit_rate": 0.4717,
+            "n_timestamps": 2597
+          },
+          "6": {
+            "ic": -0.030327,
+            "ic_std": 0.269758,
+            "ic_ir": -0.112422,
+            "ic_hit_rate": 0.4464,
+            "n_timestamps": 2592
+          },
+          "60": {
+            "ic": -0.081695,
+            "ic_std": 0.282821,
+            "ic_ir": -0.288856,
+            "ic_hit_rate": 0.3696,
+            "n_timestamps": 2538
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 2592,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "timing:yfinance_equity_sp100:timing_diag",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/open_close_mean_reversion.py",
+      "required_inputs": [
+        "open",
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-07-12T14:45:18.242360",
+      "metadata": {
+        "llm_model": "gpt-4o-mini",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g2-open_close_mean_reversion-27f4f6",
+          "generation": 2,
+          "operator": "llm_semantic",
+          "parent_ids": [
+            "g0-open_close_spread-5eb4d7"
+          ],
+          "expected_sign": -1,
+          "objective": {
+            "marginal_value": 0.0106705998427412,
+            "independence": -0.06284192763259147,
+            "robustness": 0.02507732352165473,
+            "parsimony": -13.0,
+            "structural_novelty": 0.5177993527508091
+          },
+          "gates": {
+            "coverage_ok": true,
+            "degradation_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 13,
+          "curation": "archive",
+          "selection_deflation": "off",
+          "publish": null
+        },
+        "provenance": {
+          "scope": "yfinance_equity_sp100/timing_diag",
+          "config_hash": "3b0bf158bdf4",
+          "provider": "yfinance",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": "sp100",
+          "timespan": [
+            "2016-01-01",
+            "2026-06-01"
+          ],
+          "stamped_at": "2026-07-12T14:45:18+00:00"
+        }
+      }
+    },
+    {
+      "id": "open_close_mean_reversion_j",
+      "name": "Open-Close Mean Reversion (jitter)",
+      "class_name": "",
+      "description": "This factor computes the absolute difference between the open and close prices, scaled by the volume of the bar. A larger spread with high volume indicates stronger potential for mean reversion.",
+      "formula": "",
+      "trading_idea": "The open-close spread can indicate potential mean reversion opportunities. A larger spread may suggest overextension, while a smaller spread indicates a potential price correction. By incorporating the volume of the bar, we can assess the strength of the price action and enhance the predictive power of the spread.",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.030375,
+        "ic_std": 0.269422,
+        "ic_ir": -0.112741,
+        "ic_hit_rate": 0.446,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.013851,
+            "ic_std": 0.271582,
+            "ic_ir": -0.051002,
+            "ic_hit_rate": 0.471,
+            "n_timestamps": 2599
+          },
+          "6": {
+            "ic": -0.030375,
+            "ic_std": 0.269422,
+            "ic_ir": -0.112741,
+            "ic_hit_rate": 0.446,
+            "n_timestamps": 2594
+          },
+          "60": {
+            "ic": -0.081668,
+            "ic_std": 0.282597,
+            "ic_ir": -0.288991,
+            "ic_hit_rate": 0.3693,
+            "n_timestamps": 2540
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 2594,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "timing:yfinance_equity_sp100:timing_diag",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/open_close_mean_reversion_j.py",
+      "required_inputs": [
+        "open",
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-07-12T14:45:18.242647",
+      "metadata": {
+        "llm_model": "gpt-4o-mini",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g2-open_close_mean_reversion_j-423960",
+          "generation": 2,
+          "operator": "jitter",
+          "parent_ids": [
+            "g2-open_close_mean_reversion-27f4f6"
+          ],
+          "expected_sign": -1,
+          "objective": {
+            "marginal_value": -0.0015688999579117394,
+            "independence": 0.0020786360344346435,
+            "robustness": 0.015815294416608176,
+            "parsimony": -13.0,
+            "structural_novelty": 0.12086659064994298
+          },
+          "gates": {
+            "coverage_ok": true,
+            "degradation_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 15,
+          "curation": "archive",
+          "selection_deflation": "off",
+          "publish": null
+        },
+        "provenance": {
+          "scope": "yfinance_equity_sp100/timing_diag",
+          "config_hash": "3b0bf158bdf4",
+          "provider": "yfinance",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": "sp100",
+          "timespan": [
+            "2016-01-01",
+            "2026-06-01"
+          ],
+          "stamped_at": "2026-07-12T14:45:18+00:00"
+        }
+      }
+    },
+    {
+      "id": "open_close_spread_mean_reversion",
+      "name": "Open-Close Spread Mean Reversion",
+      "class_name": "",
+      "description": "This factor computes the z-score of the absolute difference between the opening and closing prices, normalized by the trailing standard deviation of the spread over a defined window. The result highlights potential mean reversion opportunities based on the spread's deviation from its historical norm.",
+      "formula": "",
+      "trading_idea": "The open-close spread can indicate overbought or oversold conditions, especially when combined with volume dynamics. A larger spread relative to the average spread over a recent period might suggest a temporary price distortion, creating an opportunity for mean reversion as prices are expected to correct back towards the mean.",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.005657,
+        "ic_std": 0.288832,
+        "ic_ir": 0.019585,
+        "ic_hit_rate": 0.5015,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.001012,
+            "ic_std": 0.29825,
+            "ic_ir": 0.003392,
+            "ic_hit_rate": 0.4948,
+            "n_timestamps": 2597
+          },
+          "6": {
+            "ic": 0.005657,
+            "ic_std": 0.288832,
+            "ic_ir": 0.019585,
+            "ic_hit_rate": 0.5015,
+            "n_timestamps": 2592
+          },
+          "60": {
+            "ic": 0.00092,
+            "ic_std": 0.287958,
+            "ic_ir": 0.003195,
+            "ic_hit_rate": 0.4901,
+            "n_timestamps": 2538
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 2592,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "timing:yfinance_equity_sp100:timing_diag",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/open_close_spread_mean_reversion.py",
+      "required_inputs": [
+        "open",
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-07-12T14:45:18.242821",
+      "metadata": {
+        "llm_model": "gpt-4o-mini",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g2-open_close_spread_mean_reversion-b1890e",
+          "generation": 2,
+          "operator": "llm_semantic",
+          "parent_ids": [
+            "g0-open_close_spread-5eb4d7"
+          ],
+          "expected_sign": -1,
+          "objective": {
+            "marginal_value": 0.01011413808264012,
+            "independence": 0.0636157797219314,
+            "robustness": 0.012939071827390883,
+            "parsimony": -12.0,
+            "structural_novelty": 0.3885839736553238
+          },
+          "gates": {
+            "coverage_ok": true,
+            "degradation_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 17,
+          "curation": "archive",
+          "selection_deflation": "off",
+          "publish": null
+        },
+        "provenance": {
+          "scope": "yfinance_equity_sp100/timing_diag",
+          "config_hash": "3b0bf158bdf4",
+          "provider": "yfinance",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": "sp100",
+          "timespan": [
+            "2016-01-01",
+            "2026-06-01"
+          ],
+          "stamped_at": "2026-07-12T14:45:18+00:00"
+        }
+      }
+    },
+    {
+      "id": "open_close_mean_reversion_1",
+      "name": "Open-Close Mean Reversion",
+      "class_name": "",
+      "description": "This factor computes the z-score of the trailing average of the absolute open-close spread, indicating potential mean reversion opportunities based on historical price behavior.",
+      "formula": "",
+      "trading_idea": "The difference between the opening and closing prices can indicate overextension in price movements. A larger open-close spread suggests that the price may revert to the mean, while a smaller spread indicates potential continuation of the trend. By analyzing the average open-close spread over a period, we can identify stocks that are likely to revert to their mean price.",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.005657,
+        "ic_std": 0.288832,
+        "ic_ir": 0.019585,
+        "ic_hit_rate": 0.5015,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.001012,
+            "ic_std": 0.29825,
+            "ic_ir": 0.003392,
+            "ic_hit_rate": 0.4948,
+            "n_timestamps": 2597
+          },
+          "6": {
+            "ic": 0.005657,
+            "ic_std": 0.288832,
+            "ic_ir": 0.019585,
+            "ic_hit_rate": 0.5015,
+            "n_timestamps": 2592
+          },
+          "60": {
+            "ic": 0.00092,
+            "ic_std": 0.287958,
+            "ic_ir": 0.003195,
+            "ic_hit_rate": 0.4901,
+            "n_timestamps": 2538
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 2592,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "timing:yfinance_equity_sp100:timing_diag",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/open_close_mean_reversion_1.py",
+      "required_inputs": [
+        "open",
+        "close"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-07-12T14:45:18.242895",
+      "metadata": {
+        "llm_model": "gpt-4o-mini",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g3-open_close_mean_reversion_1-d25df3",
+          "generation": 3,
+          "operator": "llm_semantic",
+          "parent_ids": [
+            "g0-open_close_spread-5eb4d7"
+          ],
+          "expected_sign": -1,
+          "objective": {
+            "marginal_value": -0.001440432608833024,
+            "independence": 0.033458368554481886,
+            "robustness": 0.015667770659662836,
+            "parsimony": -12.0,
+            "structural_novelty": 0.2666274278987639
+          },
+          "gates": {
+            "coverage_ok": true,
+            "degradation_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 18,
+          "curation": "archive",
+          "selection_deflation": "off",
+          "publish": null
+        },
+        "provenance": {
+          "scope": "yfinance_equity_sp100/timing_diag",
+          "config_hash": "3b0bf158bdf4",
+          "provider": "yfinance",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": "sp100",
+          "timespan": [
+            "2016-01-01",
+            "2026-06-01"
+          ],
+          "stamped_at": "2026-07-12T14:45:18+00:00"
+        }
+      }
+    },
+    {
+      "id": "open_close_spread_mean_reversion_1",
+      "name": "Open-Close Spread Mean Reversion",
+      "class_name": "",
+      "description": "This factor computes the mean-reversion potential of the absolute difference between the opening and closing prices, adjusted by a decay function over recent bars, indicating the likelihood of price correction.",
+      "formula": "",
+      "trading_idea": "The open-close spread can indicate overreactions in price movements. When the spread is large, it suggests that the market may have overextended itself, creating a potential for mean reversion as prices correct back towards the average. By applying a decay function to this spread over a short timeframe, we can capture the momentum of price correction.",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.022276,
+        "ic_std": 0.307879,
+        "ic_ir": 0.072354,
+        "ic_hit_rate": 0.5249,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.008522,
+            "ic_std": 0.30229,
+            "ic_ir": 0.02819,
+            "ic_hit_rate": 0.5201,
+            "n_timestamps": 2611
+          },
+          "6": {
+            "ic": 0.022276,
+            "ic_std": 0.307879,
+            "ic_ir": 0.072354,
+            "ic_hit_rate": 0.5249,
+            "n_timestamps": 2606
+          },
+          "60": {
+            "ic": 0.09548,
+            "ic_std": 0.290865,
+            "ic_ir": 0.328264,
+            "ic_hit_rate": 0.6199,
+            "n_timestamps": 2552
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 2606,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "timing:yfinance_equity_sp100:timing_diag",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/open_close_spread_mean_reversion_1.py",
+      "required_inputs": [
+        "open",
+        "close"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-07-12T14:45:18.243287",
+      "metadata": {
+        "llm_model": "gpt-4o-mini",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g3-open_close_spread_mean_reversion_1-1297ef",
+          "generation": 3,
+          "operator": "llm_semantic",
+          "parent_ids": [
+            "g0-open_close_spread-5eb4d7"
+          ],
+          "expected_sign": -1,
+          "objective": {
+            "marginal_value": 0.019986803095576232,
+            "independence": 0.008340683964823207,
+            "robustness": -0.032405395319597116,
+            "parsimony": -11.0,
+            "structural_novelty": 0.2400711321873148
+          },
+          "gates": {
+            "coverage_ok": true,
+            "degradation_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 20,
+          "curation": "archive",
+          "selection_deflation": "off",
+          "publish": null
+        },
+        "provenance": {
+          "scope": "yfinance_equity_sp100/timing_diag",
+          "config_hash": "3b0bf158bdf4",
+          "provider": "yfinance",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": "sp100",
+          "timespan": [
+            "2016-01-01",
+            "2026-06-01"
+          ],
+          "stamped_at": "2026-07-12T14:45:18+00:00"
+        }
+      }
+    }
+  ],
+  "trading_ideas": []
+}

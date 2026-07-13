@@ -15,12 +15,16 @@ CORE objective vector (all *maximised*):
   3. ``robustness``         — fold-refit CPCV combined/LOCO IC
      ``mean − λ·std − plateau + sign_bonus``.
   4. ``parsimony``          — ``−complexity`` (operator + constant count from the AST).
-  5. ``structural_novelty`` — minimum normalised code-edit distance (1 − SequenceMatcher
-     ratio) to the nearest archive member.  0 = structural clone of something already
-     kept, 1 = maximally novel code structure.  Falls back to the zoo reference distance
-     when the archive is empty.  Promotes AlphaAgent-style AST-originality from a
-     diagnostic to a first-class selection axis: a near-clone of an archive member is
-     non-dominated only if it is strictly better on every quality axis.
+  5. ``structural_novelty`` — minimum **canonical AST weighted-subtree distance**
+     (``research_eval.ast_novelty``) to the nearest archive member.  0 = structural
+     clone (same canonical computation) of something already kept, 1 = no shared
+     canonical subtree.  Falls back to the zoo reference distance when the archive is
+     empty.  Inspired by AlphaAgent's common-subtree originality criterion but computed
+     as a normalised weighted multiset overlap across all canonical subtrees (invariant
+     to formatting, comments, ids, local variable names and numeric window constants;
+     not exact tree-edit distance).  Promotes structural originality from a diagnostic
+     to a first-class selection axis: a near-clone of an archive member is non-dominated
+     only if it is strictly better on every quality axis.
 
 Hard gates (all must pass, else the candidate is treated as dominated):
   coverage ≥ τ; OOS/IS degradation ≥ τ with matching sign; deflated-IC t-stat > 0

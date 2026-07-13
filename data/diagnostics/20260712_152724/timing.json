@@ -1,0 +1,185 @@
+{
+  "config": {
+    "config_file": "quant.config.sp100.yaml",
+    "config_name": null,
+    "name": "timing_diag",
+    "n_tickers": 8,
+    "generations": 1,
+    "population": 8,
+    "children_per_gen": 2,
+    "seed_ideas": 3,
+    "seed_papers": 0,
+    "horizon": 6,
+    "cpcv_groups": 6,
+    "cpcv_k": 2,
+    "marginal_model": "gradient_boosting",
+    "model": "gpt-4o-mini",
+    "max_cost_usd": 3.0,
+    "no_persist": true
+  },
+  "wall_sec": 71.9750816669548,
+  "phases": {
+    "panel_load_sec": 0.945202416041866,
+    "seed_sec": 34.91902870789636,
+    "evaluate_total_sec": 11.265793040860444,
+    "generations": 1,
+    "n_trials": 5,
+    "n_eval_failures": 0,
+    "archive_size": 3
+  },
+  "llm": {
+    "total_cost_usd": 0.006760349999999999,
+    "budget_usd": 3.0,
+    "total_calls": 7,
+    "by_role": {
+      "brainstorm": {
+        "calls": 1.0,
+        "seconds": 8.019772582920268,
+        "input_tokens": 3306.0,
+        "output_tokens": 542.0,
+        "cost": 0.0008211
+      },
+      "codegen": {
+        "calls": 3.0,
+        "seconds": 24.20803570887074,
+        "input_tokens": 9468.0,
+        "output_tokens": 1261.0,
+        "cost": 0.0021767999999999996
+      },
+      "crossover": {
+        "calls": 1.0,
+        "seconds": 9.805084082996473,
+        "input_tokens": 6772.0,
+        "output_tokens": 654.0,
+        "cost": 0.0014081999999999999
+      },
+      "mutate": {
+        "calls": 2.0,
+        "seconds": 13.466067083994858,
+        "input_tokens": 11719.0,
+        "output_tokens": 994.0,
+        "cost": 0.0023542499999999996
+      }
+    }
+  },
+  "evaluation": {
+    "n_candidates_scored": 5,
+    "model_fits_total": 124,
+    "model_fits_per_candidate": 24.8,
+    "mean_eval_sec_per_candidate": 2.2531586081720887,
+    "self_time_sum_sec": 10.222373124910519,
+    "metrics": [
+      {
+        "metric": "_combined_prediction",
+        "self_sec": 9.97170600562822,
+        "inclusive_sec": 9.97170600562822,
+        "count": 124,
+        "mean_ms": 80.41698391635661
+      },
+      {
+        "metric": "_pooled_ic",
+        "self_sec": 0.10827500664163381,
+        "inclusive_sec": 0.10827500664163381,
+        "count": 249,
+        "mean_ms": 0.434839384102947
+      },
+      {
+        "metric": "_independence",
+        "self_sec": 0.07684300001710653,
+        "inclusive_sec": 0.07684300001710653,
+        "count": 5,
+        "mean_ms": 15.368600003421307
+      },
+      {
+        "metric": "_behavior_descriptors",
+        "self_sec": 0.020002166973426938,
+        "inclusive_sec": 0.026925292098894715,
+        "count": 5,
+        "mean_ms": 5.385058419778943
+      },
+      {
+        "metric": "_turnover_netcost",
+        "self_sec": 0.016054458916187286,
+        "inclusive_sec": 0.016054458916187286,
+        "count": 5,
+        "mean_ms": 3.2108917832374573
+      },
+      {
+        "metric": "_stress_mask",
+        "self_sec": 0.006923125125467777,
+        "inclusive_sec": 0.006923125125467777,
+        "count": 5,
+        "mean_ms": 1.3846250250935555
+      },
+      {
+        "metric": "_structural_novelty",
+        "self_sec": 0.00614041683729738,
+        "inclusive_sec": 0.00614041683729738,
+        "count": 5,
+        "mean_ms": 1.228083367459476
+      },
+      {
+        "metric": "_residual_ic",
+        "self_sec": 0.005794791039079428,
+        "inclusive_sec": 0.006815457949414849,
+        "count": 5,
+        "mean_ms": 1.3630915898829699
+      },
+      {
+        "metric": "evaluate_candidate",
+        "self_sec": 0.005508703761734068,
+        "inclusive_sec": 10.222373124910519,
+        "count": 5,
+        "mean_ms": 2044.4746249821035
+      },
+      {
+        "metric": "_refit_cpcv_scores",
+        "self_sec": 0.0026490367017686367,
+        "inclusive_sec": 7.029450583970174,
+        "count": 5,
+        "mean_ms": 1405.8901167940348
+      },
+      {
+        "metric": "_robustness",
+        "self_sec": 0.0015421275747939944,
+        "inclusive_sec": 7.060187709983438,
+        "count": 5,
+        "mean_ms": 1412.0375419966877
+      },
+      {
+        "metric": "_coverage",
+        "self_sec": 0.00056245899759233,
+        "inclusive_sec": 0.00056245899759233,
+        "count": 5,
+        "mean_ms": 0.112491799518466
+      },
+      {
+        "metric": "_standalone_cpcv_ics",
+        "self_sec": 0.0002267436357215047,
+        "inclusive_sec": 0.02518562413752079,
+        "count": 5,
+        "mean_ms": 5.037124827504158
+      },
+      {
+        "metric": "_marginal_value",
+        "self_sec": 0.00014020712114870548,
+        "inclusive_sec": 3.0091485420707613,
+        "count": 5,
+        "mean_ms": 601.8297084141523
+      },
+      {
+        "metric": "_zoo_dedup",
+        "self_sec": 4.875939339399338e-06,
+        "inclusive_sec": 4.875939339399338e-06,
+        "count": 5,
+        "mean_ms": 0.0009751878678798674
+      }
+    ],
+    "scaling_by_book_size": {
+      "00-04": {
+        "n": 5,
+        "mean_sec": 2.2531961417989805
+      }
+    }
+  }
+}

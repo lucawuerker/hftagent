@@ -23,9 +23,11 @@ Feedback families implemented (tags per ``docs/research-evolution/DESIGN.md``):
 * Family 4 (robustness, ``[CORE]``): fold-refit CPCV combined/LOCO IC
   distribution, plus the OOS/IS degradation and deflation diagnostics.
 * Family 5 (realism): coverage gate + hypothesis sign-consistency.
-* Family 6 (structural novelty, ``[CORE]``): minimum normalised code-edit distance
-  to any archive member (AlphaAgent-style AST originality, promoted from diagnostic
-  to first-class Pareto axis).  Zoo distance kept as a secondary diagnostic.
+* Family 6 (structural novelty, ``[CORE]``): minimum **canonical AST weighted-subtree
+  distance** to any archive member (``research_eval.ast_novelty`` — inspired by
+  AlphaAgent's common-subtree originality criterion, but a normalised weighted
+  multiset overlap across all canonical subtrees; promoted from diagnostic to
+  first-class Pareto axis).  Zoo distance kept as a secondary diagnostic.
 
 * Family 4 also includes the parameter-sensitivity **plateau penalty** when the
   caller supplies ``jitter_signals`` (signals of window-jittered variants of the
@@ -437,51 +439,71 @@ def _structural_novelty(
 ) -> dict[str, Any]:
     """Structural novelty of the candidate vs the archive (primary) and zoo (diagnostic).
 
-    Minimum normalised code-edit distance (1 − SequenceMatcher ratio) to the nearest
-    archive member.  Range [0, 1]: 0 = exact structural clone of a kept factor,
-    1 = maximally novel code structure.  Falls back to the zoo min-distance when the
+    Minimum **canonical AST weighted-subtree distance** (``ast_novelty.
+    ast_subtree_distance``) to the nearest archive member.  Range [0, 1]:
+    0 = exact structural clone of a kept factor (same canonical computation),
+    1 = no shared canonical subtree.  Falls back to the zoo min-distance when the
     book is empty and reference codes are provided (same metric as ``_zoo_dedup``'s
-    ``zoo_min_code_distance``).  Returns ``None`` when no codes are available to
-    compare against, so unmeasured candidates tie at ``−inf`` rather than polluting
+    ``zoo_min_code_distance``).  Returns ``None`` on that axis when no codes are
+    measurable, so unmeasured candidates tie at ``−inf`` rather than polluting
     early-run selection.
 
-    Whitespace is collapsed before matching so formatting differences do not inflate
-    the distance.  AlphaAgent uses AST common-subtree overlap; SequenceMatcher on
-    the normalised code string is a cheap, dependency-free proxy that captures the
-    same structural similarity at operator/identifier level.
+    The metric is inspired by AlphaAgent's common-subtree originality criterion but
+    uses a normalised weighted multiset overlap across *all* canonical subtrees (see
+    ``research_eval.ast_novelty``), so it is invariant to formatting, comments,
+    docstrings, factor ids, class names, local variable names and numeric window
+    constants — a genuine structural measure, not the old whitespace/SequenceMatcher
+    character proxy.  It is not exact tree-edit distance.
     """
-    import difflib
+    from quant_fund_agent.research_eval.ast_novelty import (
+        NOVELTY_METRIC,
+        ast_subtree_distance,
+        subtree_profile,
+    )
 
     out: dict[str, Any] = {
         "structural_novelty": None,
         "novelty_min_book_distance": None,
         "novelty_min_zoo_distance": None,
         "novelty_nearest_book_idx": None,
+        "novelty_metric": NOVELTY_METRIC,
+        "novelty_nearest_book_similarity": None,
+        "novelty_candidate_ast_nodes": None,
+        "novelty_candidate_unique_subtrees": None,
     }
     if not candidate_code or not candidate_code.strip():
         return out
+    prof = subtree_profile(candidate_code)
+    if prof is None:
+        return out  # candidate code unparseable → axis unmeasured
+    out["novelty_candidate_ast_nodes"] = int(prof.n_nodes)
+    out["novelty_candidate_unique_subtrees"] = int(prof.n_unique)
 
-    cc = "".join(candidate_code.split())
+    # Keep the ORIGINAL book index alongside each distance so the nearest-member
+    # index stays correct even when some book codes are empty/invalid and skipped.
+    book_dists: list[tuple[int, float]] = []
+    for i, code in enumerate(book_codes):
+        d = ast_subtree_distance(candidate_code, code) if code else None
+        if d is not None:
+            book_dists.append((i, d))
+    zoo_dists = [
+        d for code in (reference_codes or [])
+        if code and (d := ast_subtree_distance(candidate_code, code)) is not None
+    ]
 
-    def _dist(other: str | None) -> float | None:
-        if not other or not other.strip():
-            return None
-        return 1.0 - difflib.SequenceMatcher(None, cc, "".join(other.split())).ratio()
-
-    book_dists = [d for d in (_dist(c) for c in book_codes) if d is not None]
-    zoo_dists = [d for d in (_dist(c) for c in (reference_codes or [])) if d is not None]
-
-    min_book = float(min(book_dists)) if book_dists else None
+    min_book = min((d for _, d in book_dists), default=None)
     min_zoo = float(min(zoo_dists)) if zoo_dists else None
 
-    out["novelty_min_book_distance"] = min_book
+    out["novelty_min_book_distance"] = float(min_book) if min_book is not None else None
     out["novelty_min_zoo_distance"] = min_zoo
-    if min_book is not None and book_dists:
-        out["novelty_nearest_book_idx"] = int(
-            min(range(len(book_dists)), key=lambda i: book_dists[i]))
+    if book_dists:
+        nearest_idx, nearest_dist = min(book_dists, key=lambda t: t[1])
+        out["novelty_nearest_book_idx"] = int(nearest_idx)
+        out["novelty_nearest_book_similarity"] = float(1.0 - nearest_dist)
 
     # Axis value: book distance is primary; fall back to zoo when book is empty.
-    out["structural_novelty"] = min_book if min_book is not None else min_zoo
+    out["structural_novelty"] = (
+        out["novelty_min_book_distance"] if min_book is not None else min_zoo)
     return out
 
 
@@ -838,9 +860,11 @@ def _zoo_dedup(candidate: pd.DataFrame, candidate_code: str | None,
 
     Reports the candidate's max ``|signal correlation|`` to any reference factor (the
     "did we just rediscover a known alpha?" flag, à la AlphaAgent's AST-originality)
-    and the minimum normalised code distance (``1 − difflib ratio``; 0 = identical
-    source).  Deliberately **not a gate** yet — a diagnostic the author can point at a
-    chosen reference set (the ~86 base factors) and later promote to a penalty/gate.
+    and the minimum **canonical AST weighted-subtree distance** (``ast_novelty``; the
+    same structural metric the ``structural_novelty`` axis uses — 0 = identical
+    canonical computation).  Deliberately **not a gate** yet — a diagnostic the author
+    can point at a chosen reference set (the ~86 base factors) and later promote to a
+    penalty/gate.
     """
     out: dict[str, Any] = {"zoo_max_abs_corr": None, "zoo_nearest": None,
                            "zoo_min_code_distance": None}
@@ -862,10 +886,11 @@ def _zoo_dedup(candidate: pd.DataFrame, candidate_code: str | None,
                                   if reference_ids and best_idx < len(reference_ids)
                                   else int(best_idx))
     if candidate_code and reference_codes:
-        import difflib
-        cc = "".join(candidate_code.split())
-        dists = [1.0 - difflib.SequenceMatcher(None, cc, "".join((rc or "").split())).ratio()
-                 for rc in reference_codes if rc and rc.strip()]
+        from quant_fund_agent.research_eval.ast_novelty import ast_subtree_distance
+        dists = [
+            d for rc in reference_codes
+            if rc and (d := ast_subtree_distance(candidate_code, rc)) is not None
+        ]
         if dists:
             out["zoo_min_code_distance"] = float(min(dists))
     return out
@@ -1064,6 +1089,10 @@ def evaluate_candidate(
         "novelty_min_book_distance": novelty["novelty_min_book_distance"],
         "novelty_min_zoo_distance": novelty["novelty_min_zoo_distance"],
         "novelty_nearest_book_idx": novelty["novelty_nearest_book_idx"],
+        "novelty_metric": novelty["novelty_metric"],
+        "novelty_nearest_book_similarity": novelty["novelty_nearest_book_similarity"],
+        "novelty_candidate_ast_nodes": novelty["novelty_candidate_ast_nodes"],
+        "novelty_candidate_unique_subtrees": novelty["novelty_candidate_unique_subtrees"],
         "coverage": coverage,
         "degradation_ratio": (float(deg_ratio) if deg_ratio is not None else None),
         "deflation": defl,
@@ -1161,18 +1190,23 @@ def evaluate_set(
 
     # ── axis 5: structural novelty — average pairwise min code distance ──
     # For a SET genome the axis measures internal diversity: how different are the
-    # member programs from each other (their average nearest-neighbour code distance).
+    # member programs from each other (their average nearest-neighbour canonical AST
+    # weighted-subtree distance — the same structural metric the SINGLE axis uses).
     set_novelty: float | None = None
     if member_codes and len(ids) >= 2:
-        import difflib
-        raw_codes = ["".join((member_codes.get(i, "") or "").split()) for i in ids]
+        from quant_fund_agent.research_eval.ast_novelty import (
+            ast_subtree_distance,
+            subtree_profile,
+        )
+        codes = [member_codes.get(i, "") for i in ids]
         pairwise: list[float] = []
-        for j, cc in enumerate(raw_codes):
-            if not cc:
-                continue
+        for j, code_j in enumerate(codes):
+            if not code_j or subtree_profile(code_j) is None:
+                continue  # unmeasurable member — no valid canonical computation
             dists = [
-                1.0 - difflib.SequenceMatcher(None, cc, oc).ratio()
-                for k, oc in enumerate(raw_codes) if k != j and oc
+                d for k, code_k in enumerate(codes)
+                if k != j and code_k
+                and (d := ast_subtree_distance(code_j, code_k)) is not None
             ]
             if dists:
                 pairwise.append(float(min(dists)))

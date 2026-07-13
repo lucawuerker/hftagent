@@ -104,11 +104,12 @@ def mutation_brief(
             f"{d.get('standalone_cpcv_n_folds', 0)} folds.")
     if d.get("structural_novelty") is not None:
         lines.append(
-            f"Structural novelty (5th axis): code-edit distance to nearest archive "
-            f"member {_fmt(d.get('structural_novelty'))} "
+            f"Structural novelty (5th axis): canonical AST weighted-subtree distance "
+            f"to nearest archive member {_fmt(d.get('structural_novelty'))} "
             f"(book={_fmt(d.get('novelty_min_book_distance'))}, "
             f"zoo={_fmt(d.get('novelty_min_zoo_distance'))}) — "
-            f"0 = structural clone, 1 = maximally novel code structure.")
+            f"0 = structural clone (same canonical computation), 1 = no shared "
+            f"canonical subtree.")
     if d.get("plateau_penalty") is not None:
         lines.append(
             f"Parameter sensitivity: jittering the window constants ±10% moved "
@@ -146,10 +147,11 @@ def mutation_brief(
     novelty = obj.structural_novelty
     if novelty is not None and novelty < 0.2:
         advice.append(
-            f"Low structural novelty ({novelty:.2f}): this factor is a near-structural "
-            "clone of something already in the archive.  Change the MECHANISM — "
+            f"Low structural novelty ({novelty:.2f}): its canonical AST barely differs "
+            "from a factor already in the archive.  Change the MECHANISM — "
             "different fields, different conditioning logic, different operator "
-            "pattern — not just the numeric constants.")
+            "pattern — not just the numeric window constants (those are canonicalised "
+            "away, so re-tuning them will not register as novel).")
     deg = d.get("degradation_ratio")
     if deg is not None and deg < 0.5:
         advice.append(
