@@ -1,7 +1,7 @@
 """Walk-forward final validation: re-run the WHOLE evolutionary loop per period.
 
-The thesis results pass (design §overfit protocol, decision 2): CPCV is the
-*development-time* fitness engine; for the results chapter the **entire loop**
+The thesis results pass (design §overfit protocol, decision 2): blocked validation
+stability is the *development-time* robustness engine; for the results chapter the **entire loop**
 is re-run period-by-period so every discovery is out-of-sample to the next
 period.  For each boundary date ``d_i`` in the schedule:
 

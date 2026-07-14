@@ -54,7 +54,7 @@ def wired(ar1_panel, tmp_path, monkeypatch):
     cfg = GPRunConfig(
         generations=2, population_size=6, children_per_generation=4,
         seed=11, depth_schedule=(3,), target_horizon=1,
-        is_frac=0.5, val_frac=0.25, cpcv_groups=4, cpcv_k=1,
+        is_frac=0.5, val_frac=0.25, stability_blocks=4,
         marginal_model="ridge", n_tickers=None,
         out_dir=str(tmp_path / "gp"),
     )
@@ -126,7 +126,7 @@ def test_random_seeding_path_runs(wired, tmp_path):
     cfg = GPRunConfig(
         generations=1, population_size=6, children_per_generation=3,
         seed=1, seed_pop=10, depth_schedule=(3,), target_horizon=1,
-        is_frac=0.5, val_frac=0.25, cpcv_groups=4, cpcv_k=1,
+        is_frac=0.5, val_frac=0.25, stability_blocks=4,
         marginal_model="ridge", n_tickers=None, out_dir=str(tmp_path / "gp2"),
     )
     fresh = GPLoop(cfg, allowed_fields=["close"])

@@ -123,7 +123,7 @@ def wired_loop(synthetic_panel, tmp_path, monkeypatch):
 
     cfg = EvolutionRunConfig(
         generations=2, population_size=6, children_per_generation=4,
-        seed=11, target_horizon=1, cpcv_groups=4, cpcv_k=1,
+        seed=11, target_horizon=1, stability_blocks=4,
         n_tickers=None, out_dir=str(tmp_path / "evolution"),
     )
     loop = EvolutionLoop(cfg, data_context="TEST DATA CONTEXT",
@@ -162,8 +162,7 @@ def test_evaluate_fitness_does_not_expose_test_rows_to_factor_calc(
         target_horizon=1,
         is_frac=0.5,
         val_frac=0.25,
-        cpcv_groups=4,
-        cpcv_k=1,
+        stability_blocks=4,
         fields=["close"],
         n_tickers=None,
     )
@@ -383,7 +382,7 @@ def test_experience_memory_is_written_across_a_run(synthetic_panel, tmp_path,
 
     cfg = EvolutionRunConfig(
         generations=1, population_size=4, children_per_generation=2, seed=5,
-        target_horizon=1, cpcv_groups=4, cpcv_k=1, n_tickers=None,
+        target_horizon=1, stability_blocks=4, n_tickers=None,
         out_dir=str(tmp_path / "evo"), memory=True, memory_config="testcfg")
     loop = EvolutionLoop(cfg, data_context="CTX",
                          fields=["open", "high", "low", "close", "volume"])

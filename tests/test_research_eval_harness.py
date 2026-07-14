@@ -86,7 +86,7 @@ def test_predictive_candidate_beats_noise():
     noise = _noise(rng)
     book = [_noise(rng)]
 
-    params = EvalParams(n_trials=1, cpcv_groups=6, cpcv_k=2)
+    params = EvalParams(n_trials=1, stability_blocks=4)
     good_r = evaluate_candidate(good, book, panel, cfg, params=params, candidate_id="good")
     noise_r = evaluate_candidate(noise, book, panel, cfg, params=params, candidate_id="noise")
 
@@ -427,13 +427,12 @@ def test_conditioning_factor_scores_positive_marginal_under_nonlinear_default():
     assert nonlinear.objective.marginal_value > linear.objective.marginal_value
 
 
-def test_cpcv_robustness_refits_marginal_model_per_fold(monkeypatch):
-    """The scored robustness axis is fold-refit LOCO, not raw-signal CPCV."""
+def test_blocked_robustness_reuses_marginal_predictions_without_refit(monkeypatch):
+    """Robustness re-scores the two marginal fits and never fits per block."""
     panel, f1, f2, _ = _two_driver_panel()
     cfg = _cfg()
     split = three_way_split(panel["close"].index, is_frac=0.6, val_frac=0.2)
-    params = EvalParams(cpcv_groups=4, cpcv_k=1, cpcv_model="ridge",
-                        cpcv_fast=False)
+    params = EvalParams(stability_blocks=4, marginal_model="ridge")
     calls: list[tuple[int, tuple[int, ...]]] = []
     original = harness_mod._combined_prediction
 
@@ -445,15 +444,15 @@ def test_cpcv_robustness_refits_marginal_model_per_fold(monkeypatch):
     r = evaluate_candidate(f2, [f1], panel, cfg, split=split,
                            params=params, candidate_id="fresh")
 
-    fold_trains = {
-        mask for n_signals, mask in calls
-        if n_signals == 2 and mask != tuple(np.flatnonzero(split.is_mask))
-    }
-    assert r.diagnostics["cpcv_score_kind"] == "refit_marginal_delta"
-    assert r.diagnostics["cpcv_model"] == "ridge"
-    assert r.diagnostics["cpcv_n_folds"] >= 2
-    assert r.diagnostics["standalone_cpcv_n_folds"] >= 2
-    assert len(fold_trains) >= 2
+    assert calls == [
+        (2, tuple(np.flatnonzero(split.is_mask))),
+        (1, tuple(np.flatnonzero(split.is_mask))),
+    ]
+    assert r.diagnostics["stability_score_kind"] == "fixed_marginal_delta"
+    assert r.diagnostics["stability_model"] == "ridge"
+    assert r.diagnostics["stability_n_blocks"] == 4
+    assert r.diagnostics["standalone_n_blocks"] == 4
+    assert len(r.diagnostics["stability_block_deltas"]) == 4
 
 
 # ── parsimony + sign consistency plumbing ─────────────────────────────────────
@@ -484,15 +483,15 @@ def test_explicit_split_is_respected():
     split = three_way_split(panel["close"].index, is_frac=0.5, val_frac=0.25)
     r = evaluate_candidate(_noise(rng), [], panel, cfg, split=split)
     assert r.raw["split_sizes"] == {"is": 300, "val": 150, "test": 150}
-    # TEST is never scored: the CPCV folds live entirely within IS∪VAL
-    assert r.diagnostics["cpcv_n_folds"] >= 2
+    # TEST is never scored: robustness uses contiguous blocks inside VAL only.
+    assert r.diagnostics["stability_n_blocks"] >= 2
 
 
 def test_candidate_evaluation_ignores_test_rows_and_boundary_labels():
     panel, rng = _panel(seed=12)
     cfg = _cfg(target_horizon=12)
     split = three_way_split(panel["close"].index, is_frac=0.5, val_frac=0.25)
-    params = EvalParams(cpcv_groups=4, cpcv_k=1)
+    params = EvalParams(stability_blocks=4)
 
     candidate = _noise(rng)
     book = [_noise(rng)]
@@ -522,7 +521,7 @@ def test_set_evaluation_ignores_test_rows_and_boundary_labels():
     panel, rng = _panel(seed=21)
     cfg = _cfg(target_horizon=12)
     split = three_way_split(panel["close"].index, is_frac=0.5, val_frac=0.25)
-    params = EvalParams(cpcv_groups=4, cpcv_k=1)
+    params = EvalParams(stability_blocks=4)
 
     members = {"a": _noise(rng), "b": _noise(rng)}
     clean = evaluate_set(

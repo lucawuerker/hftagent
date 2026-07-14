@@ -6,8 +6,8 @@ even opinionated prose the LLM reads when mutating a parent.  It is rendered
 never drift into flattery or self-reinforcement, and identical diagnostics
 always produce the identical brief (reproducible prompts, cacheable runs).
 
-The numbers quoted are all out-of-sample statistics (VAL-window ICs, CPCV fold
-dispersion, correlations), never raw labels — the LLM sees *how* the candidate
+The numbers quoted are all out-of-sample statistics (VAL-window ICs, blocked
+stability dispersion, correlations), never raw labels — the LLM sees *how* the candidate
 failed, not the data it failed on, so the reward stays un-gameable.
 """
 
@@ -88,20 +88,21 @@ def mutation_brief(
         f"effective factors {_fmt(d.get('pr_before'), 2)} → "
         f"{_fmt(d.get('pr_after'), 2)}); max |corr| to an existing factor: "
         f"{_fmt(d.get('max_abs_corr'))}.")
-    score_kind = d.get("cpcv_score_kind") or "cpcv"
-    model = d.get("cpcv_model")
+    score_kind = d.get("stability_score_kind") or "fixed_marginal_delta"
+    model = d.get("stability_model")
     model_txt = f" via {model}" if model else ""
     lines.append(
-        f"Robustness (axis = {score_kind}{model_txt}): CPCV mean "
-        f"{_fmt(d.get('cpcv_ic_mean'))} ± {_fmt(d.get('cpcv_ic_std'))} over "
-        f"{d.get('cpcv_n_folds', 0)} purged refit folds; OOS/IS degradation "
+        f"Robustness (axis = {score_kind}{model_txt}): fixed-prediction blockwise "
+        f"mean {_fmt(d.get('stability_ic_mean'))} ± "
+        f"{_fmt(d.get('stability_ic_std'))} over "
+        f"{d.get('stability_n_blocks', 0)} contiguous VAL blocks; OOS/IS degradation "
         f"ratio {_fmt(d.get('degradation_ratio'))}.")
-    if d.get("standalone_cpcv_ic_mean") is not None:
+    if d.get("standalone_block_ic_mean") is not None:
         lines.append(
-            f"Standalone temporal stability diagnostic: raw-signal CPCV IC mean "
-            f"{_fmt(d.get('standalone_cpcv_ic_mean'))} ± "
-            f"{_fmt(d.get('standalone_cpcv_ic_std'))} over "
-            f"{d.get('standalone_cpcv_n_folds', 0)} folds.")
+            f"Standalone temporal stability diagnostic: raw-signal block IC mean "
+            f"{_fmt(d.get('standalone_block_ic_mean'))} ± "
+            f"{_fmt(d.get('standalone_block_ic_std'))} over "
+            f"{d.get('standalone_n_blocks', 0)} VAL blocks.")
     if d.get("structural_novelty") is not None:
         lines.append(
             f"Structural novelty (5th axis): canonical AST weighted-subtree distance "

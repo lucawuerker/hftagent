@@ -168,47 +168,38 @@ correlation matrix \(C\).  Using flattened \(z^D(\cdot)\) over \(D\),
 For an empty book the implementation returns \(F_2=1\).
 
 \paragraph{3. Robustness.}
+The robustness axis reuses the fixed predictions fitted once for the marginal-value
+axis,
+\[
+  \widehat y_{B_x}=\mathcal M(B\cup\{x\};I),
+  \qquad
+  \widehat y_B=\mathcal M(B;I).
+\]
+No additional model is fitted.  After removing validation rows whose forward label
+would leave the development sample, partition the remaining validation index into
+\(K\) contiguous, non-overlapping blocks \(V_1,\ldots,V_K\); the default is
+\(K=4\).  For each block define the fixed-prediction LOCO contribution
+\[
+  q_k
+  =
+  \IC_h(\widehat y_{B_x};V_k,I,D)
+  -
+  \IC_h(\widehat y_B;V_k,I,D),
+\]
+with the second term defined as \(0\) when \(B=\varnothing\).  The raw factor's
+blockwise IC
+\[
+  u_k=\IC_h(x;V_k,I,D)
+\]
+is reported separately as a model-free temporal-stability diagnostic.  If at least
+two valid block scores exist,
+\[
+  \bar q=\frac{1}{K}\sum_{k=1}^Kq_k,\qquad
+  \sigma_q=\sqrt{\frac{1}{K}\sum_{k=1}^K(q_k-\bar q)^2}.
+\]
 Let
 \[
-  m_x=F_1(x),\qquad
-  s_m=\begin{cases}
-    +1, & m_x\text{ is undefined or }m_x\ge 0,\\
-    -1, & m_x<0.
-  \end{cases}
-\]
-CPCV partitions \(D\) into \(G\) contiguous groups and tests every
-\(k\)-group combination; defaults are \(G=6,k=2\), so \(\binom{6}{2}=15\)
-folds.  For fold \(f\) with purged/embargoed train mask \(A_f\) and test mask
-\(T_f\), fit fresh combined predictors on \(A_f\):
-\[
-  \widehat y^{(f)}_{B_x}
-  =
-  \mathcal M(B\cup\{x\};A_f),
-  \qquad
-  \widehat y^{(f)}_{B}
-  =
-  \mathcal M(B;A_f).
-\]
-The scored CPCV value is fold-refit LOCO marginal IC:
-\[
-  q_f
-  =
-  s_m\left[
-    \IC_h(\widehat y^{(f)}_{B_x};T_f,A_f,D)
-    -
-    \IC_h(\widehat y^{(f)}_{B};T_f,A_f,D)
-  \right],
-\]
-with base \(0\) when \(B=\varnothing\).  The previous standalone CPCV stability
-probe is still reported as a diagnostic:
-\[
-  u_f=s_x\,\IC_h(x;T_f,A_f,D),\qquad
   s_x=\sgn_{\mathrm{impl}}(\IC_{\mathrm{VAL}}(x)).
-\]
-If at least two \(q_f\) values exist,
-\[
-  \bar q=\frac{1}{|\mathcal F|}\sum_{f\in\mathcal F}q_f,\qquad
-  \sigma_q=\sqrt{\frac{1}{|\mathcal F|}\sum_{f\in\mathcal F}(q_f-\bar q)^2}.
 \]
 For window-jitter variants \(x^{(j)}\),
 \[
@@ -307,8 +298,8 @@ predictor \(\widehat y_M\) on those members only.  The five axes are
 \]
 where \(C_M\) is the correlation matrix of flattened \(z^D(x_i)\);
 \[
-  F_3(M)=\text{the same fold-refit robustness formula applied to }M
-  \text{ as a self-contained combined model},
+  F_3(M)=\text{the same blocked-validation stability formula applied to the fixed}
+  \text{ IS-fitted combined prediction of }M,
 \]
 \[
   F_4(M)=

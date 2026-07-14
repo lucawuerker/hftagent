@@ -209,7 +209,7 @@ def debate_loop(monkeypatch, tmp_path):
                             lambda temperature, role=None: fake)
         cfg = EvolutionRunConfig(
             generations=1, population_size=6, children_per_generation=3,
-            seed=5, target_horizon=1, cpcv_groups=4, cpcv_k=1,
+            seed=5, target_horizon=1, stability_blocks=4,
             debate="on", p_llm_semantic=1.0, p_crossover=0.0, p_jitter=0.0,
             n_tickers=None, out_dir=str(tmp_path / "evo"))
         loop = EvolutionLoop(cfg, data_context="CTX",

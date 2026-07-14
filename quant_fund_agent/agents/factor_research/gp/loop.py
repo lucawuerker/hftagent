@@ -93,11 +93,7 @@ class GPRunConfig:
     target_horizon: int = 6
     is_frac: float = 0.6
     val_frac: float = 0.2
-    cpcv_groups: int = 6
-    cpcv_k: int = 2
-    embargo: int = 0
-    cpcv_model: str | None = None
-    cpcv_fast: bool = True
+    stability_blocks: int = 4
     plateau_scales: tuple[float, ...] = (0.9, 1.1)
     cutoff_date: str | None = None
 
@@ -313,11 +309,7 @@ class GPLoop:
             is_frac=self.cfg.is_frac,
             val_frac=self.cfg.val_frac,
             n_trials=self.controller.n_trials + 1,  # bill this look, commit on success
-            cpcv_groups=self.cfg.cpcv_groups,
-            cpcv_k=self.cfg.cpcv_k,
-            embargo=self.cfg.embargo,
-            cpcv_model=self.cfg.cpcv_model,
-            cpcv_fast=self.cfg.cpcv_fast,
+            stability_blocks=self.cfg.stability_blocks,
             cutoff_date=self.cfg.cutoff_date,
             data_dir=self.cfg.data_dir,
             n_tickers=self.cfg.n_tickers,

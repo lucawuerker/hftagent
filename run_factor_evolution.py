@@ -3,7 +3,7 @@
 The ``--engine evolution`` counterpart to ``run_factor_research.py`` (which stays
 the ``oneshot`` baseline arm).  The LLM mutates Pareto-selected parents; the
 deterministic ``research_eval`` harness scores every candidate out-of-sample
-(IS fit / VAL fitness / TEST untouched, CPCV robustness, N_trials-aware
+(IS fit / VAL fitness / TEST untouched, blocked validation stability, N_trials-aware
 deflation); the controller keeps a gate-passing Pareto archive which *is* the
 accepted book.  See ``docs/research-evolution/DESIGN.md``.
 
@@ -148,19 +148,10 @@ def _parse_args() -> argparse.Namespace:
                    help="Combined-model forecast horizon (bars).")
     p.add_argument("--is-frac", type=float, default=0.6)
     p.add_argument("--val-frac", type=float, default=0.2)
-    p.add_argument("--cpcv-folds", type=int, default=6, dest="cpcv_groups",
-                   help="CPCV group count (C(N,k) folds).")
-    p.add_argument("--cpcv-k", type=int, default=2)
-    p.add_argument("--embargo", type=int, default=0)
-    p.add_argument("--cpcv-model", default=None,
-                   help="Estimator used for fold-refit CPCV robustness. Default: "
-                        "reuse --marginal-model. Keep this nonlinear "
-                        "(e.g. gradient_boosting/lightgbm) if you want "
-                        "conditioning factors to pass robustness.")
-    p.add_argument("--no-cpcv-fast", action="store_true",
-                   help="Disable the lightweight tree/boosting preset for repeated "
-                        "CPCV refits. By default CPCV refits use fast model params "
-                        "because they run once per fold.")
+    p.add_argument("--stability-blocks", type=int, default=4,
+                   help="Number of contiguous VAL blocks used to measure the "
+                        "stability of the fixed marginal predictions (default 4; "
+                        "the marginal models are not refitted).")
     p.add_argument("--prediction-horizon-mode", choices=["fixed", "free"],
                    default="fixed",
                    help="fixed (default): force every generated factor to declare "
@@ -185,7 +176,7 @@ def _parse_args() -> argparse.Namespace:
                         "Δ-participation-ratio − max-|corr| penalty.")
     p.add_argument("--regime-kind", choices=["drawdown", "volatility"],
                    default="drawdown",
-                   help="Stress bars for the regime axis: worst market-return "
+                   help="Stress bars for the QD descriptor: worst market-return "
                         "'drawdown' bars (default) or top-volatility bars.")
     p.add_argument("--regime-quantile", type=float, default=0.2,
                    help="Tail fraction of dev bars labelled 'stress' (default 0.2).")
@@ -314,11 +305,7 @@ def main() -> None:
         target_horizon=args.horizon,
         is_frac=args.is_frac,
         val_frac=args.val_frac,
-        cpcv_groups=args.cpcv_groups,
-        cpcv_k=args.cpcv_k,
-        embargo=args.embargo,
-        cpcv_model=args.cpcv_model,
-        cpcv_fast=not args.no_cpcv_fast,
+        stability_blocks=args.stability_blocks,
         cutoff_date=args.cutoff_date,
         force_prediction_horizon=(args.prediction_horizon_mode == "fixed"),
         independence_metric=args.independence_metric,

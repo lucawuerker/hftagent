@@ -64,10 +64,10 @@ These four forks were decided with the author and are binding for the build:
    over `{marginal value, independence, robustness, parsimony}`; candidates must
    first pass hard OOS-robustness / coverage / deflation gates. No arbitrary
    scalar weights (weights can themselves overfit and bias the search).
-2. **Overfit control — both CPCV and walk-forward.** Iterate fast with
-   Combinatorial Purged Cross-Validation (CPCV) during development; run one full
-   walk-forward pass for the thesis results chapter, so every discovery is OOS to
-   the next period.
+2. **Overfit control — blocked validation stability and walk-forward.** During
+   development, split VAL into contiguous blocks and re-score the fixed IS-fitted
+   marginal predictions without refitting. Run the complete evolutionary process
+   walk-forward for the thesis results, so every discovery is OOS to the next period.
 3. **GraphRAG — custom hybrid graph.** Own store (NetworkX) fusing an
    LLM-extracted *semantic* graph (papers → mechanisms → factors) with a
    *computed quantitative* graph (factor↔factor correlation, factor→field usage).
@@ -154,11 +154,11 @@ gate); **[GATE]** = hard pre-filter; **[DIAG]** = computed and shown to the LLM
 ### Family 4 — Robustness / overfitting resistance  *(this is F, inside the fitness)*
 - **OOS/IS degradation ratio** (`ICIR_oos / ICIR_is`, same sign) — **[GATE]**.
   You already track OOS÷IS-Sharpe in the rolling comparison.
-- **Fold-refit CPCV distribution** — **[CORE]**. For each purged fold, refit the
-  combined model on that fold's train mask and score fold-test OOS IC. In SINGLE
-  mode the fold score is LOCO `with candidate − book only`; in SET mode it is the
-  set's own combined OOS IC. Reward high `mean − λ·std`; the variance is itself
-  an overfit signal. Raw standalone CPCV remains a diagnostic.
+- **Blocked validation distribution** — **[CORE]**. Reuse the exact IS-fitted
+  `book + candidate` and `book only` predictions from marginal-value scoring and
+  compute their LOCO IC difference on contiguous, non-overlapping VAL blocks.
+  Reward high `mean − λ·std`. No model is refitted for this axis. Raw standalone
+  block IC remains a model-free diagnostic.
 - **Parameter-sensitivity / plateau test** — **[CORE, underused]**. Jitter the
   factor's integer windows (±10%) and measure IC stability. Overfit factors are
   knife-edge spikes; real ones sit on plateaus. *The same jitter doubles as a
@@ -190,13 +190,14 @@ tried 3 variants of this." This is where experience-RAG / GraphRAG feeds the LLM
 ### The CORE objective vector (Pareto axes)
 1. **Marginal contribution to the combined model** (primary),
 2. **Independence** (Δ participation ratio; soft max-corr penalty),
-3. **Robustness** (`mean_cpcv(fold-refit combined/LOCO IC) − λ·std_cpcv −
+3. **Robustness** (`mean_block(fixed-prediction LOCO IC) − λ·std_block −
    plateau_penalty + sign_consistency_bonus`),
 4. **Parsimony** (`−complexity`).
 
 **Hard gates** (all must pass, else the candidate is treated as dominated):
-coverage ≥ τ_cov; OOS/IS degradation ≥ τ_deg with matching sign; deflated-IC
-t-stat > 0 given current `N_trials`; (optional, costed) net-of-cost IC > 0.
+coverage ≥ τ_cov; OOS/IS degradation ≥ τ_deg with matching sign; and an optional
+cost gate. Trial-count deflation is applied to the selected combined book at
+publish time, not as a per-candidate gate.
 
 ## Overfitting / multiple-testing protocol (build FIRST)
 
@@ -208,11 +209,10 @@ up one level. The protocol is explicit and non-negotiable:
   scoring. VALIDATION → compute fitness; *this set is deliberately burned by the
   search.* TEST → touched **once**, by the Statistician, on the final Pareto
   survivors only.
-- **CPCV over IS∪VAL** (`research_eval/splits.py`): combinatorial train/test
-  groups with **purging** (drop train labels whose horizon overlaps a test block)
-  and **embargo** (a buffer after each test block). The scored output is a
-  fold-refit distribution of OOS combined/LOCO IC per candidate, not a point.
-  This is the development-time fitness engine (decision 2).
+- **Blocked validation stability.** Fit the two marginal models once on IS, then
+  divide VAL into contiguous blocks and compute a distribution of fixed-prediction
+  LOCO IC contributions. This tests whether the measured contribution is spread
+  through the validation period without conflating it with model-refit instability.
 - **Walk-forward wrapper.** Re-run the *entire* evolutionary loop period-by-period
   inside the existing walk-forward harness for the thesis results chapter — every
   discovery is OOS to the next period. Used once, not every iteration (decision 2).
@@ -271,9 +271,9 @@ Per-role model selection: `--hypothesis-model`, `--debate-model`,
 
   | Pareto axis | SINGLE (factor) | SET (alpha program) |
   | --- | --- | --- |
-  | 1. Marginal value (primary) | ΔOOS-IC of the combined model from adding the factor to the **Pareto archive** (LOCO, CPCV-averaged) | the set's **own** combined-model OOS-IC/Sharpe directly |
+  | 1. Marginal value (primary) | ΔOOS-IC of the combined model from adding the factor to the **Pareto archive** (LOCO) | the set's **own** combined-model OOS-IC/Sharpe directly |
   | 2. Independence | Δ participation ratio; soft max-corr penalty | internal participation ratio of the set |
-  | 3. Robustness | fold-refit CPCV LOCO `mean(ΔIC) − λ·std − plateau + sign_consistency` | fold-refit CPCV of the set's own combined signal |
+  | 3. Robustness | fixed-prediction blocked-VAL LOCO `mean(ΔIC) − λ·std − plateau + sign_consistency` | blocked-VAL stability of the set's fixed combined prediction |
   | 4. Parsimony | `−(n_ops + n_constants)` from AST | `−(total_complexity / size)` |
 
 - **Selection** — NSGA-II: non-dominated sort into Pareto fronts + crowding
@@ -377,7 +377,7 @@ that already exists.
 --retrieval {none,rag,graphrag}
 --retrieval-cardinality {1toN,Nto1,NtoM}
 --generations N  --population N  --islands K  --budget-tokens N
---cpcv-folds N  --embargo N  --split <IS/VAL/TEST spec>
+--stability-blocks N  --split <IS/VAL/TEST spec>
 --hypothesis-model M  --debate-model M  --codegen-model M
 ```
 
@@ -426,9 +426,8 @@ effective # independent factors, turnover/capacity.
 
 ## Key risks
 
-- **Marginal-value compute cost** — LOCO re-fits per candidate × CPCV folds.
-  Mitigate with incremental/approximate refits and by scoring against the Pareto
-  archive only (not the full book).
+- **Marginal-value compute cost** — two LOCO fits per candidate when the book is
+  non-empty. Robustness reuses these predictions and adds no model fit.
 - **Fitness gaming** — keep the reward deterministic; the LLM never sees VAL/TEST
   labels.
 - **GraphRAG extraction noise** — mechanism nodes can be inconsistent; needs a

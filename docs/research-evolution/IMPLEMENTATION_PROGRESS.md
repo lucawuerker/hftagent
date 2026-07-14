@@ -99,20 +99,21 @@ The riskiest-to-get-wrong layer, built first. Deterministic, no LLM. Lives in
 | `research_eval/splits.py` | ✅ | IS/VAL/TEST `three_way_split`; CPCV `cpcv_folds` (purge + embargo); `walk_forward_folds` (anchored/rolling); `n_cpcv_paths` | `tests/test_research_eval_splits.py` |
 | `research_eval/deflation.py` | ✅ | `deflated_ic` + `ic_haircut` (N_trials haircut); `expected_max_sharpe` + `deflated_sharpe_ratio` (Bailey–López de Prado DSR); norm helpers | `tests/test_research_eval_deflation.py` |
 | `research_eval/fitness.py` | ✅ | `ObjectiveVector` (4 CORE axes), `GateResults`, `FitnessResult`; `dominates` + `non_dominated_front` (gate-aware); `participation_ratio`, `complexity` (AST) | `tests/test_research_eval_fitness.py` |
-| `research_eval/harness.py` | ✅ | `evaluate_candidate` — signal-based deterministic fitness: Families 1–5 (standalone IC + decay diagnostics, LOCO marginal ΔOOS-IC, residual IC, Δ participation ratio + max-corr penalty, fold-refit CPCV robustness with standalone CPCV kept as DIAG, coverage/degradation/deflation diagnostics, sign consistency, parsimony). `EvalParams` knobs. Reuses `comparison/`, `backtesting/`, `modeling/`. | `tests/test_research_eval_harness.py` |
+| `research_eval/harness.py` | ✅ | `evaluate_candidate` — signal-based deterministic fitness: Families 1–5 (standalone IC + decay diagnostics, LOCO marginal ΔOOS-IC, residual IC, Δ participation ratio + max-corr penalty, blocked validation stability of the fixed marginal predictions with standalone block IC kept as DIAG, coverage/degradation/deflation diagnostics, sign consistency, parsimony). `EvalParams` knobs. Reuses `comparison/`, `backtesting/`, `modeling/`. | `tests/test_research_eval_harness.py` |
 
 **Design-faithful choices made in P0**
 - The harness is **signal-oriented** (takes DataFrames, not factor ids / LLM output)
   so it is fully testable and can never be influenced by an LLM (the core principle).
 - Split seam mirrors the deployed `cutoff_date` seam: fit on **IS**, score fitness on
-  **VAL** (burned by the search), CPCV over **IS∪VAL**, **TEST** untouched here.
+  **VAL** (burned by the search), and leave **TEST** untouched here.
 - Marginal value (primary axis) = LOCO ΔOOS-IC of a combined model (default `gradient_boosting`)
   with vs without the candidate, measured on VAL. Empty book → the candidate is the
   whole edge.
-- Robustness (axis) = CPCV fold-refit combined-model IC: SINGLE scores the LOCO
-  distribution (`book+candidate` minus `book`) with a fresh fit on each fold train
-  mask; SET scores the set's own combined signal with the same fold refits. The
-  old raw-signal CPCV stability measure remains a diagnostic.
+- Robustness (axis) = blocked validation stability of the fixed IS-fitted combined
+  predictions: SINGLE scores the LOCO distribution (`book+candidate` minus `book`)
+  across contiguous VAL blocks; SET scores the set's fixed combined prediction.
+  The exact marginal-value predictions are reused, so robustness adds no fit. Raw
+  standalone block IC remains a diagnostic.
 - Deflation is **N_trials-aware** (the search count), generalising the
   `comparison/analytics` haircut from "zoo size" to "trials run".
 
@@ -120,8 +121,8 @@ The riskiest-to-get-wrong layer, built first. Deterministic, no LLM. Lives in
 - Parameter-sensitivity **plateau penalty** in robustness (needs the factor's parsed
   integer windows → arrives with the jitter mutation operator in P1).
 - **Transaction-cost gate** (`cost_ok`) — left `None`; wire in P5 with the costed backtest.
-- Robustness currently uses **CPCV** only; the **walk-forward wrapper** exists in
-  `splits.py` but is only invoked for the thesis results pass (P5).
+- Candidate robustness uses fixed-prediction blocked validation; the complete
+  **walk-forward wrapper** remains the process-level thesis validation (P5).
 
 ---
 
@@ -194,7 +195,7 @@ per-role model seam, completing the design's agent pipeline.
 
 | Module | Status | What it provides | Tests |
 | --- | --- | --- | --- |
-| `research_eval/harness.py::evaluate_set` | ✅ | SET fitness per the design table: axis 1 = the set's **own** combined-model OOS IC (no LOCO), axis 2 = internal participation ratio ÷ size, axis 3 = fold-refit CPCV robustness of the set's combined signal, axis 4 = −(total complexity / size); same gates on the combined signal; reuses every SINGLE-path helper so the modes can't drift | `tests/test_evolution_set_walkforward.py` |
+| `research_eval/harness.py::evaluate_set` | ✅ | SET fitness per the design table: axis 1 = the set's **own** combined-model OOS IC (no LOCO), axis 2 = internal participation ratio ÷ size, axis 3 = blocked validation stability of its fixed IS-fitted combined prediction, axis 4 = −(total complexity / size); same gates on the combined signal; reuses every SINGLE-path helper so the modes cannot drift | `tests/test_evolution_set_walkforward.py` |
 | `mcp/research_{service,server,client}.evaluate_set_fitness` | ✅ | SET evaluation seam (failed members dropped with a log; empty set = eval failure) | `tests/test_evolution_set_walkforward.py` |
 | loop SET mode | ✅ | `--evolution-unit set --set-size N`: gen-0 seed pool partitioned into sets; **structural operators** (add/drop/replace member from the run-wide program pool), **splice** (union-sample two parents) and **member_jitter** — all programmatic/deterministic (LLM creativity enters via gen-0 members; member-level LLM mutation is a documented extension); `persist_archive` dedups shared members | `tests/test_evolution_set_walkforward.py` |
 | `research_eval/deflation.py::pbo_cscv` | ✅ | Probability of Backtest Overfitting (Bailey et al. 2016 CSCV): balanced block splits, IS-winner's OOS relative rank, logit distribution + PBO | `tests/test_evolution_set_walkforward.py` |

@@ -81,7 +81,7 @@ def test_evaluate_set_axes_and_gates():
              "noise": "def calc():\n    return a * b * c + 1\n"}
 
     r = evaluate_set({"mom": mom, "noise": noise}, panel, cfg,
-                     params=EvalParams(cpcv_groups=4, cpcv_k=1),
+                     params=EvalParams(stability_blocks=4),
                      member_codes=codes, candidate_id="pair")
     # axis 1: the set's OWN combined OOS IC (momentum member carries it)
     assert r.objective.marginal_value is not None
@@ -95,12 +95,12 @@ def test_evaluate_set_axes_and_gates():
 
     # a singleton set is trivially non-redundant
     r1 = evaluate_set({"mom": mom}, panel, cfg,
-                      params=EvalParams(cpcv_groups=4, cpcv_k=1))
+                      params=EvalParams(stability_blocks=4))
     assert r1.objective.independence == 1.0
 
     # a redundant pair scores lower on independence than the diverse pair
     r_dup = evaluate_set({"mom": mom, "mom2": mom * 1.0001}, panel, cfg,
-                         params=EvalParams(cpcv_groups=4, cpcv_k=1))
+                         params=EvalParams(stability_blocks=4))
     assert r_dup.objective.independence < r.objective.independence
 
 
@@ -127,7 +127,7 @@ def set_loop(monkeypatch, tmp_path):
     cfg = EvolutionRunConfig(
         generations=3, population_size=5, children_per_generation=4,
         seed=17, unit="set", set_size=2, target_horizon=1,
-        cpcv_groups=4, cpcv_k=1, n_tickers=None,
+        stability_blocks=4, n_tickers=None,
         out_dir=str(tmp_path / "evo_set"))
     loop = EvolutionLoop(cfg, data_context="CTX",
                          fields=["open", "high", "low", "close", "volume"])
@@ -199,7 +199,7 @@ def test_walk_forward_validation(monkeypatch, tmp_path):
     # jitter-only children → the whole pass is LLM-free
     cfg = EvolutionRunConfig(
         generations=1, population_size=4, children_per_generation=2,
-        seed=2, target_horizon=1, cpcv_groups=4, cpcv_k=1, n_tickers=None,
+        seed=2, target_horizon=1, stability_blocks=4, n_tickers=None,
         p_llm_semantic=0.0, p_crossover=0.0, p_jitter=1.0,
         out_dir=str(tmp_path / "evo"))
 

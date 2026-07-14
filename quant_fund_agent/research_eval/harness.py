@@ -20,8 +20,9 @@ Feedback families implemented (tags per ``docs/research-evolution/DESIGN.md``):
   adding the candidate to the book; residual (orthogonalised) IC as a diagnostic.
 * Family 3 (independence, ``[CORE]``): residual IC by default (legacy
   Δ participation ratio − soft max-|corr| is still selectable).
-* Family 4 (robustness, ``[CORE]``): fold-refit CPCV combined/LOCO IC
-  distribution, plus the OOS/IS degradation and deflation diagnostics.
+* Family 4 (robustness, ``[CORE]``): blocked validation stability of the fixed
+  combined-model/LOCO predictions already fitted for the marginal-value axis,
+  plus the OOS/IS degradation and deflation diagnostics.
 * Family 5 (realism): coverage gate + hypothesis sign-consistency.
 * Family 6 (structural novelty, ``[CORE]``): minimum **canonical AST weighted-subtree
   distance** to any archive member (``research_eval.ast_novelty`` — inspired by
@@ -41,7 +42,7 @@ Not yet wired (documented for later phases): the transaction-cost gate (P5).
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass, field, replace
+from dataclasses import dataclass, field
 from typing import Any, Sequence
 
 import numpy as np
@@ -58,7 +59,7 @@ from quant_fund_agent.research_eval.fitness import (
     complexity,
     participation_ratio,
 )
-from quant_fund_agent.research_eval.splits import ThreeWaySplit, cpcv_folds, three_way_split
+from quant_fund_agent.research_eval.splits import ThreeWaySplit, three_way_split
 
 log = logging.getLogger("research_eval.harness")
 
@@ -72,7 +73,7 @@ class EvalParams:
     """
 
     n_trials: int = 1                 # candidates evaluated so far (drives deflation)
-    lambda_std: float = 1.0           # robustness penalty on CPCV IC dispersion
+    lambda_std: float = 1.0           # robustness penalty on blockwise ΔIC dispersion
     corr_penalty: float = 0.5         # weight of the soft max-|corr| independence penalty
     sign_bonus: float = 0.02          # ± robustness bonus for hypothesis sign (mis)match
     # Estimator combining the book's factors for the LOCO marginal-value axis.
@@ -85,14 +86,10 @@ class EvalParams:
     # additive-only behaviour); any `modeling.catalog` model id is accepted.
     marginal_model: str = "gradient_boosting"
     plateau_weight: float = 1.0       # weight of the window-jitter plateau penalty
-    cpcv_groups: int = 6
-    cpcv_k: int = 2
-    embargo: int = 0
-    # Main robustness axis: refit a combined model on each CPCV fold's train mask
-    # and score its OOS fold-test IC.  ``None`` reuses ``marginal_model``; a caller
-    # can set e.g. ``lightgbm`` for faster nonlinear refits when available.
-    cpcv_model: str | None = None
-    cpcv_fast: bool = True             # use ComparisonConfig's lightweight tree params
+    # Split VAL into contiguous blocks and re-score the *same* IS-fitted
+    # with-candidate and book-only predictions produced by the marginal-value axis.
+    # No model is refitted for robustness.
+    stability_blocks: int = 4
     gate_coverage: float = 0.5        # τ_cov: min non-NaN (date,ticker) fraction
     gate_degradation: float = 0.5     # τ_deg: min OOS/IS IC ratio (same sign)
     min_is_ic: float = 0.005          # |IS IC| below this → degradation gate not evaluated
@@ -286,114 +283,100 @@ def _marginal_value(
 
 
 def _distribution_stats(values: Sequence[float]) -> tuple[float | None, float | None]:
-    """Mean/std pair for a fold-score distribution, requiring at least two folds."""
+    """Mean/std pair for a score distribution, requiring at least two values."""
     if len(values) < 2:
         return None, None
     return float(np.mean(values)), float(np.std(values))
 
 
-def _cpcv_fit_cfg(cfg: Any, params: EvalParams) -> Any:
-    """Config used for repeated CPCV refits.
+def _validation_block_masks(
+    val_mask: np.ndarray,
+    available_mask: np.ndarray,
+    horizon: int,
+    n_blocks: int,
+) -> list[np.ndarray]:
+    """Contiguous, non-overlapping VAL blocks with available forward labels."""
+    eligible = np.asarray(val_mask, dtype=bool) & _label_available_mask(
+        available_mask, horizon)
+    active = np.flatnonzero(eligible)
+    if len(active) < 2:
+        return []
+    groups = np.array_split(active, min(max(2, int(n_blocks)), len(active)))
+    masks: list[np.ndarray] = []
+    for group in groups:
+        if len(group) == 0:
+            continue
+        mask = np.zeros(len(val_mask), dtype=bool)
+        mask[group] = True
+        masks.append(mask)
+    return masks
 
-    CPCV now refits one model per fold, so by default it flips the existing
-    comparison ``fast`` preset on for tree/boosting models.  The one-shot
-    marginal-value axis still uses the caller's original config unchanged.
-    """
-    if not params.cpcv_fast:
-        return cfg
-    try:
-        return replace(cfg, fast=True)
-    except Exception:  # non-dataclass config-like object; fall back quietly
-        return cfg
 
-
-def _standalone_cpcv_ics(
-    signal: pd.DataFrame,
+def _blocked_prediction_scores(
+    with_pred: pd.DataFrame,
+    base_pred: pd.DataFrame | None,
+    standalone_signal: pd.DataFrame,
     close: pd.DataFrame,
     h: int,
-    folds,
+    val_mask: np.ndarray,
+    is_mask: np.ndarray,
     available_mask: np.ndarray,
-    sign: float,
-) -> list[float]:
-    """Raw-signal CPCV IC stability diagnostic (no model fit)."""
-    ics: list[float] = []
-    for fold in folds:
-        ic, _ = _pooled_ic(signal, close, h, fold.test, fold.train, available_mask)
-        if ic is not None:
-            ics.append(ic * sign)
-    return ics
-
-
-def _refit_cpcv_scores(
-    signals_with: Sequence[pd.DataFrame],
-    signals_base: Sequence[pd.DataFrame],
-    close: pd.DataFrame,
-    cfg: Any,
-    params: EvalParams,
-    folds,
-    h: int,
-    available_mask: np.ndarray,
-    sign: float,
+    n_blocks: int,
 ) -> dict[str, Any]:
-    """Fold-refit combined-model CPCV scores.
+    """Re-score fixed IS-fitted predictions on contiguous validation blocks.
 
-    For SINGLE mode ``signals_with`` is ``book + candidate`` and
-    ``signals_base`` is ``book``; each fold score is LOCO ``with_ic - base_ic``.
-    For SET mode ``signals_base`` is empty; each fold score is the set's own
-    combined-model fold-test IC.  Base predictions are cached per fold inside the
-    candidate evaluation so the same base model is not fitted twice.
+    SINGLE mode passes both prediction panels and receives blockwise LOCO deltas.
+    With no base panel (empty book or SET mode), the base IC is zero and the block
+    score is the combined prediction's own IC.  The raw candidate's blockwise IC
+    is retained as a model-free temporal-stability diagnostic.
     """
-    model = params.cpcv_model or params.marginal_model
-    fit_cfg = _cpcv_fit_cfg(cfg, params)
-    scores: list[float] = []
+    deltas: list[float] = []
     with_ics: list[float] = []
     base_ics: list[float] = []
-    base_pred_cache: dict[tuple[int, ...], pd.DataFrame | None] = {}
-
-    for fold in folds:
-        with_pred = _combined_prediction(signals_with, close, fold.train, fit_cfg, model)
-        if with_pred is None:
-            continue
-        with_ic = _pooled_ic(with_pred, close, h, fold.test, fold.train,
-                             available_mask)[0]
+    standalone_ics: list[float] = []
+    for block in _validation_block_masks(
+        val_mask, available_mask, h, n_blocks
+    ):
+        with_ic = _pooled_ic(
+            with_pred, close, h, block, is_mask, available_mask
+        )[0]
         if with_ic is None:
             continue
-
-        if signals_base:
-            key = tuple(fold.test_groups)
-            if key not in base_pred_cache:
-                base_pred_cache[key] = _combined_prediction(
-                    signals_base, close, fold.train, fit_cfg, model)
-            base_pred = base_pred_cache[key]
-            base_ic = (_pooled_ic(base_pred, close, h, fold.test, fold.train,
-                                  available_mask)[0]
-                       if base_pred is not None else None)
-            score = with_ic - (base_ic if base_ic is not None else 0.0)
-            if base_ic is not None:
-                base_ics.append(base_ic * sign)
+        if base_pred is None:
+            base_ic = 0.0
         else:
-            base_ic = None
-            score = with_ic
+            base_ic = _pooled_ic(
+                base_pred, close, h, block, is_mask, available_mask
+            )[0]
+            if base_ic is None:
+                continue
+            base_ics.append(float(base_ic))
+        standalone_ic = _pooled_ic(
+            standalone_signal, close, h, block, is_mask, available_mask
+        )[0]
+        if standalone_ic is not None:
+            standalone_ics.append(float(standalone_ic))
+        with_ics.append(float(with_ic))
+        deltas.append(float(with_ic - base_ic))
 
-        with_ics.append(with_ic * sign)
-        scores.append(score * sign)
-
-    mean, std = _distribution_stats(scores)
+    mean, std = _distribution_stats(deltas)
     with_mean, with_std = _distribution_stats(with_ics)
     base_mean, base_std = _distribution_stats(base_ics)
-    kind = "refit_marginal_delta" if signals_base else "refit_combined"
+    standalone_mean, standalone_std = _distribution_stats(standalone_ics)
     return {
-        "scores": scores,
+        "scores": deltas,
         "mean": mean,
         "std": std,
-        "n_folds": len(scores),
+        "n_blocks": len(deltas),
         "with_ic_mean": with_mean,
         "with_ic_std": with_std,
         "base_ic_mean": base_mean,
         "base_ic_std": base_std,
-        "score_kind": kind,
-        "model": model,
-        "fast": bool(params.cpcv_fast),
+        "standalone_ic_mean": standalone_mean,
+        "standalone_ic_std": standalone_std,
+        "standalone_n_blocks": len(standalone_ics),
+        "score_kind": "fixed_marginal_delta" if base_pred is not None
+                      else "fixed_combined_ic",
     }
 
 
@@ -592,63 +575,38 @@ def _independence(candidate: pd.DataFrame, book: Sequence[pd.DataFrame], panel, 
 
 def _robustness(
     candidate: pd.DataFrame,
+    with_pred: pd.DataFrame,
+    base_pred: pd.DataFrame | None,
     panel,
     cfg,
     split: ThreeWaySplit,
     params: EvalParams,
-    overall_ic: float | None,
     expected_sign: int | None,
     jitter_signals: Sequence[pd.DataFrame] | None = None,
     *,
-    refit_signals: Sequence[pd.DataFrame] | None = None,
-    refit_base_signals: Sequence[pd.DataFrame] | None = None,
     standalone_overall_ic: float | None = None,
 ) -> dict[str, Any]:
-    """CPCV robustness axis + raw-signal stability diagnostic.
+    """Blocked stability of the fixed predictions used by marginal value.
 
-    The scored axis refits a combined model on every CPCV fold train mask and
-    scores the fold test mask.  The previous raw-signal CPCV distribution is
-    retained as a diagnostic because it is still useful temporal-stability
-    evidence, but it no longer drives Pareto robustness in the fitted-book path.
+    ``with_pred`` and ``base_pred`` are exactly the IS-fitted panels returned by
+    :func:`_marginal_value`; this function performs no model fit.  It divides VAL
+    into contiguous blocks, computes the LOCO IC contribution on each block and
+    scores its lower-confidence value ``mean - lambda_std * std``.  The raw
+    candidate's blockwise IC distribution remains a model-free diagnostic.
     """
     close = panel["close"]
     h = cfg.target_horizon
-    sign = 1.0 if (overall_ic is None or overall_ic >= 0) else -1.0
-    standalone_ref = standalone_overall_ic if standalone_overall_ic is not None else overall_ic
+    standalone_ref = standalone_overall_ic
     standalone_sign = 1.0 if (standalone_ref is None or standalone_ref >= 0) else -1.0
 
-    folds = cpcv_folds(close.index, n_groups=params.cpcv_groups, k_test=params.cpcv_k,
-                       horizon=h, embargo=params.embargo, mask=split.is_val_mask)
-    standalone_ics = _standalone_cpcv_ics(
-        candidate, close, h, folds, split.is_val_mask, standalone_sign)
-    standalone_mean, standalone_std = _distribution_stats(standalone_ics)
-
-    if refit_signals:
-        refit = _refit_cpcv_scores(
-            refit_signals, refit_base_signals or [], close, cfg, params, folds, h,
-            split.is_val_mask, sign)
-    else:
-        # Defensive fallback for legacy/direct callers: still return a usable
-        # robustness axis even if no fit context was supplied.
-        refit = {
-            "scores": standalone_ics,
-            "mean": standalone_mean,
-            "std": standalone_std,
-            "n_folds": len(standalone_ics),
-            "with_ic_mean": standalone_mean,
-            "with_ic_std": standalone_std,
-            "base_ic_mean": None,
-            "base_ic_std": None,
-            "score_kind": "standalone_ic",
-            "model": None,
-            "fast": False,
-        }
-
-    cpcv_mean = refit["mean"]
-    cpcv_std = refit["std"]
+    blocked = _blocked_prediction_scores(
+        with_pred, base_pred, candidate, close, h, split.val_mask, split.is_mask,
+        split.is_val_mask, params.stability_blocks)
+    stability_mean = blocked["mean"]
+    stability_std = blocked["std"]
     robustness = (
-        None if cpcv_mean is None or cpcv_std is None
-        else cpcv_mean - params.lambda_std * cpcv_std
+        None if stability_mean is None or stability_std is None
+        else stability_mean - params.lambda_std * stability_std
     )
 
     # Parameter-sensitivity plateau test: score each window-jittered variant on
@@ -701,19 +659,23 @@ def _robustness(
         if robustness is not None:
             robustness += params.sign_bonus if sign_consistency else -params.sign_bonus
 
-    return {"robustness": robustness, "cpcv_ic_mean": cpcv_mean, "cpcv_ic_std": cpcv_std,
-            "cpcv_n_folds": refit["n_folds"], "sign_consistency": sign_consistency,
+    return {"robustness": robustness,
+            "stability_ic_mean": stability_mean,
+            "stability_ic_std": stability_std,
+            "stability_n_blocks": blocked["n_blocks"],
+            "stability_block_deltas": blocked["scores"],
+            "sign_consistency": sign_consistency,
             "plateau_penalty": plateau_penalty, "jitter_ics": jitter_ics,
             "perturbation_penalty": perturbation_penalty,
-            "cpcv_score_kind": refit["score_kind"], "cpcv_model": refit["model"],
-            "cpcv_fast": refit["fast"],
-            "cpcv_with_ic_mean": refit["with_ic_mean"],
-            "cpcv_with_ic_std": refit["with_ic_std"],
-            "cpcv_base_ic_mean": refit["base_ic_mean"],
-            "cpcv_base_ic_std": refit["base_ic_std"],
-            "standalone_cpcv_ic_mean": standalone_mean,
-            "standalone_cpcv_ic_std": standalone_std,
-            "standalone_cpcv_n_folds": len(standalone_ics)}
+            "stability_score_kind": blocked["score_kind"],
+            "stability_model": params.marginal_model,
+            "stability_with_ic_mean": blocked["with_ic_mean"],
+            "stability_with_ic_std": blocked["with_ic_std"],
+            "stability_base_ic_mean": blocked["base_ic_mean"],
+            "stability_base_ic_std": blocked["base_ic_std"],
+            "standalone_block_ic_mean": blocked["standalone_ic_mean"],
+            "standalone_block_ic_std": blocked["standalone_ic_std"],
+            "standalone_n_blocks": blocked["standalone_n_blocks"]}
 
 
 def _behavior_descriptors(sig: pd.DataFrame, close: pd.DataFrame, h: int,
@@ -918,8 +880,8 @@ def evaluate_candidate(
     """Score one candidate signal against the current book → a :class:`FitnessResult`.
 
     ``split`` is the IS/VAL/TEST seam: the combined model fits on **IS**, the fitness
-    (marginal value, gates) is measured on **VAL** (deliberately burned by the
-    search), CPCV runs over **IS∪VAL**, and TEST is never touched here.  ``None``
+    (marginal value, blocked stability, gates) is measured on **VAL** (deliberately
+    burned by the search), and TEST is never touched here.  ``None``
     derives a default 60/20/20 fraction split.  ``params`` carries the deterministic
     scoring knobs (including ``n_trials`` for deflation); ``candidate_code`` feeds the
     parsimony and structural-novelty axes; ``book_codes`` is the source code of every
@@ -975,12 +937,27 @@ def evaluate_candidate(
     )
 
     # ── Family 4 — robustness (CORE) ──
-    robust = _robustness(
-        candidate_signal, panel, cfg, split, params, marg["marginal_value"],
-        expected_sign, jitter_signals,
-        refit_signals=[*book, candidate_signal],
-        refit_base_signals=book,
-        standalone_overall_ic=val_ic,
+    # Reuse the exact two IS-fitted prediction panels from `_marginal_value`.
+    # Robustness only re-scores them on contiguous VAL blocks; no refit occurs.
+    robust = (
+        _robustness(
+            candidate_signal, marg["with_pred"], marg["base_pred"], panel, cfg,
+            split, params, expected_sign, jitter_signals,
+            standalone_overall_ic=val_ic,
+        )
+        if marg["with_pred"] is not None else {
+            "robustness": None,
+            "stability_ic_mean": None, "stability_ic_std": None,
+            "stability_n_blocks": 0, "stability_block_deltas": [],
+            "sign_consistency": None, "plateau_penalty": None,
+            "jitter_ics": [], "perturbation_penalty": None,
+            "stability_score_kind": "fixed_marginal_delta",
+            "stability_model": params.marginal_model,
+            "stability_with_ic_mean": None, "stability_with_ic_std": None,
+            "stability_base_ic_mean": None, "stability_base_ic_std": None,
+            "standalone_block_ic_mean": None, "standalone_block_ic_std": None,
+            "standalone_n_blocks": 0,
+        }
     )
 
     # ── parsimony axis ──
@@ -1062,18 +1039,19 @@ def evaluate_candidate(
         "max_abs_corr": indep["max_abs_corr"],
         "delta_participation": indep["delta_participation"],
         "pr_before": indep["pr_before"], "pr_after": indep["pr_after"],
-        "cpcv_ic_mean": robust["cpcv_ic_mean"], "cpcv_ic_std": robust["cpcv_ic_std"],
-        "cpcv_n_folds": robust["cpcv_n_folds"],
-        "cpcv_score_kind": robust["cpcv_score_kind"],
-        "cpcv_model": robust["cpcv_model"],
-        "cpcv_fast": robust["cpcv_fast"],
-        "cpcv_with_ic_mean": robust["cpcv_with_ic_mean"],
-        "cpcv_with_ic_std": robust["cpcv_with_ic_std"],
-        "cpcv_base_ic_mean": robust["cpcv_base_ic_mean"],
-        "cpcv_base_ic_std": robust["cpcv_base_ic_std"],
-        "standalone_cpcv_ic_mean": robust["standalone_cpcv_ic_mean"],
-        "standalone_cpcv_ic_std": robust["standalone_cpcv_ic_std"],
-        "standalone_cpcv_n_folds": robust["standalone_cpcv_n_folds"],
+        "stability_ic_mean": robust["stability_ic_mean"],
+        "stability_ic_std": robust["stability_ic_std"],
+        "stability_n_blocks": robust["stability_n_blocks"],
+        "stability_block_deltas": robust["stability_block_deltas"],
+        "stability_score_kind": robust["stability_score_kind"],
+        "stability_model": robust["stability_model"],
+        "stability_with_ic_mean": robust["stability_with_ic_mean"],
+        "stability_with_ic_std": robust["stability_with_ic_std"],
+        "stability_base_ic_mean": robust["stability_base_ic_mean"],
+        "stability_base_ic_std": robust["stability_base_ic_std"],
+        "standalone_block_ic_mean": robust["standalone_block_ic_mean"],
+        "standalone_block_ic_std": robust["standalone_block_ic_std"],
+        "standalone_n_blocks": robust["standalone_n_blocks"],
         "sign_consistency": robust["sign_consistency"],
         "plateau_penalty": robust["plateau_penalty"],
         "jitter_ics": robust["jitter_ics"],
@@ -1134,8 +1112,8 @@ def evaluate_set(
     2. ``independence`` — the set's *internal* participation ratio (effective
        number of independent members), normalised by size to ``[0, 1]`` so sets
        of different sizes compare fairly.
-    3. ``robustness`` — the same ``mean − λ·std`` CPCV formula, computed on the
-       **combined signal**.
+    3. ``robustness`` — the same blocked-validation ``mean − λ·std`` formula,
+       computed from the fixed IS-fitted **combined prediction**.
     4. ``parsimony`` — ``−(total member complexity / set size)``.
 
     Gates (coverage / degradation / deflation) also apply to the combined
@@ -1171,22 +1149,23 @@ def evaluate_set(
     else:
         independence = 1.0  # a singleton set is trivially non-redundant
 
-    # ── axis 3: robustness of the COMBINED signal ──
-    robust = (_robustness(pred, panel, cfg, split, params, combined_val_ic,
-                          expected_sign, refit_signals=signals,
-                          refit_base_signals=None,
-                          standalone_overall_ic=combined_val_ic)
+    # ── axis 3: blocked stability of the fixed COMBINED prediction ──
+    robust = (_robustness(pred, pred, None, panel, cfg, split, params,
+                          expected_sign, standalone_overall_ic=combined_val_ic)
               if pred is not None else
-              {"robustness": None, "cpcv_ic_mean": None, "cpcv_ic_std": None,
-               "cpcv_n_folds": 0, "sign_consistency": None,
+              {"robustness": None,
+               "stability_ic_mean": None, "stability_ic_std": None,
+               "stability_n_blocks": 0, "stability_block_deltas": [],
+               "sign_consistency": None,
                "plateau_penalty": None, "jitter_ics": [],
-               "cpcv_score_kind": "refit_combined",
-               "cpcv_model": params.cpcv_model or params.marginal_model,
-               "cpcv_fast": bool(params.cpcv_fast),
-               "cpcv_with_ic_mean": None, "cpcv_with_ic_std": None,
-               "cpcv_base_ic_mean": None, "cpcv_base_ic_std": None,
-               "standalone_cpcv_ic_mean": None, "standalone_cpcv_ic_std": None,
-               "standalone_cpcv_n_folds": 0})
+               "perturbation_penalty": None,
+               "stability_score_kind": "fixed_combined_ic",
+               "stability_model": params.marginal_model,
+               "stability_with_ic_mean": None, "stability_with_ic_std": None,
+               "stability_base_ic_mean": None, "stability_base_ic_std": None,
+               "standalone_block_ic_mean": None,
+               "standalone_block_ic_std": None,
+               "standalone_n_blocks": 0})
 
     # ── axis 5: structural novelty — average pairwise min code distance ──
     # For a SET genome the axis measures internal diversity: how different are the
@@ -1279,18 +1258,19 @@ def evaluate_set(
         "val_n_obs": int(val_n),
         "internal_participation_ratio": (
             independence * len(ids) if independence is not None else None),
-        "cpcv_ic_mean": robust["cpcv_ic_mean"], "cpcv_ic_std": robust["cpcv_ic_std"],
-        "cpcv_n_folds": robust["cpcv_n_folds"],
-        "cpcv_score_kind": robust["cpcv_score_kind"],
-        "cpcv_model": robust["cpcv_model"],
-        "cpcv_fast": robust["cpcv_fast"],
-        "cpcv_with_ic_mean": robust["cpcv_with_ic_mean"],
-        "cpcv_with_ic_std": robust["cpcv_with_ic_std"],
-        "cpcv_base_ic_mean": robust["cpcv_base_ic_mean"],
-        "cpcv_base_ic_std": robust["cpcv_base_ic_std"],
-        "standalone_cpcv_ic_mean": robust["standalone_cpcv_ic_mean"],
-        "standalone_cpcv_ic_std": robust["standalone_cpcv_ic_std"],
-        "standalone_cpcv_n_folds": robust["standalone_cpcv_n_folds"],
+        "stability_ic_mean": robust["stability_ic_mean"],
+        "stability_ic_std": robust["stability_ic_std"],
+        "stability_n_blocks": robust["stability_n_blocks"],
+        "stability_block_deltas": robust["stability_block_deltas"],
+        "stability_score_kind": robust["stability_score_kind"],
+        "stability_model": robust["stability_model"],
+        "stability_with_ic_mean": robust["stability_with_ic_mean"],
+        "stability_with_ic_std": robust["stability_with_ic_std"],
+        "stability_base_ic_mean": robust["stability_base_ic_mean"],
+        "stability_base_ic_std": robust["stability_base_ic_std"],
+        "standalone_block_ic_mean": robust["standalone_block_ic_mean"],
+        "standalone_block_ic_std": robust["standalone_block_ic_std"],
+        "standalone_n_blocks": robust["standalone_n_blocks"],
         "sign_consistency": robust["sign_consistency"],
         "structural_novelty": set_novelty,
         "perturbation_penalty": robust.get("perturbation_penalty"),

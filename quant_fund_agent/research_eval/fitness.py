@@ -12,8 +12,8 @@ CORE objective vector (all *maximised*):
      content).  Rewards independence that actually predicts, not orthogonal noise.
      The legacy Δ-participation-ratio − soft max-|corr| penalty stays available as
      a diagnostic / ``EvalParams.independence_metric`` option.
-  3. ``robustness``         — fold-refit CPCV combined/LOCO IC
-     ``mean − λ·std − plateau + sign_bonus``.
+  3. ``robustness``         — blocked validation stability of the fixed IS-fitted
+     combined/LOCO predictions, ``mean − λ·std − plateau + sign_bonus``.
   4. ``parsimony``          — ``−complexity`` (operator + constant count from the AST).
   5. ``structural_novelty`` — minimum **canonical AST weighted-subtree distance**
      (``research_eval.ast_novelty``) to the nearest archive member.  0 = structural
