@@ -34,7 +34,7 @@ def _eg(gid, behavior, *, mv=0.1, passed=True) -> EvaluatedGenome:
     fit = FitnessResult(
         candidate_id=gid,
         objective=ObjectiveVector(marginal_value=mv, independence=0.0,
-                                  robustness=0.0, parsimony=0.0),
+                                  parsimony=0.0),
         gates=gates, behavior=behavior)
     genome = Genome(genome_id=gid,
                     programs=[FactorProgram(factor_id=gid, code=f"x = {gid!r}\n")])

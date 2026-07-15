@@ -1,0 +1,82 @@
+{
+  "started_at": "2026-07-15T10:31:26+00:00",
+  "git_commit": "7ff6f9bc70bc92f091a7066b75cbbc94ac436778",
+  "scope": "yfinance_equity_sp100/lodestar_demo",
+  "prerun": "lodestar_demo",
+  "config_name": "yfinance_equity_sp100",
+  "n_strategies": 8,
+  "max_iterations": 6,
+  "oos_ratio": 0.2,
+  "no_seeds": false,
+  "universe": {
+    "provider": "yfinance",
+    "asset_class": "equity",
+    "universe": "sp100",
+    "frequency": "1d",
+    "timespan": [
+      "2020-01-01",
+      "2026-06-22"
+    ],
+    "n_tickers_cap": "25"
+  },
+  "models": {
+    "architect": "gpt-4o-mini",
+    "selector": "gpt-4o-mini",
+    "statistician": "gpt-4o-mini"
+  },
+  "env": {
+    "ARCHITECT_N_TICKERS": "25",
+    "QF_USE_MCP": "0"
+  },
+  "attempts": [
+    {
+      "attempt": 10,
+      "approved": false,
+      "reject_stage": "statistician",
+      "strategy_id": null
+    },
+    {
+      "attempt": 11,
+      "approved": false,
+      "reject_stage": "statistician",
+      "strategy_id": null
+    },
+    {
+      "attempt": 12,
+      "approved": false,
+      "reject_stage": "statistician",
+      "strategy_id": null
+    },
+    {
+      "attempt": 13,
+      "approved": true,
+      "reject_stage": null,
+      "strategy_id": "enhanced_mean_reversion_and_momentum_strategy_645543ed"
+    },
+    {
+      "attempt": 14,
+      "approved": false,
+      "reject_stage": "statistician",
+      "strategy_id": null
+    },
+    {
+      "attempt": 15,
+      "approved": false,
+      "reject_stage": "statistician",
+      "strategy_id": null
+    },
+    {
+      "attempt": 16,
+      "approved": false,
+      "reject_stage": "statistician",
+      "strategy_id": null
+    },
+    {
+      "attempt": 17,
+      "approved": true,
+      "reject_stage": null,
+      "strategy_id": "enhanced_mean_reversion_and_momentum_strategy_fb1964fe"
+    }
+  ],
+  "finished_at": "2026-07-15T10:40:51+00:00"
+}

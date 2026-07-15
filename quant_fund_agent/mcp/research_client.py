@@ -96,6 +96,8 @@ def evaluate_fitness(
     target_horizon: int = 6,
     is_frac: float = 0.6,
     val_frac: float = 0.2,
+    is_end: str | None = None,
+    val_end: str | None = None,
     n_trials: int = 1,
     stability_blocks: int = 4,
     cutoff_date: str | None = None,
@@ -113,10 +115,13 @@ def evaluate_fitness(
 ) -> dict[str, Any]:
     """Deterministic evolutionary fitness of one candidate program vs the book.
 
+    ``is_end``/``val_end`` (progressive reveal) select a calendar split when both are
+    given; otherwise the fraction split is used, byte-identically to before.
     See :func:`quant_fund_agent.mcp.research_service.evaluate_fitness`.
     """
     kwargs: dict[str, Any] = dict(
         target_horizon=target_horizon, is_frac=is_frac, val_frac=val_frac,
+        is_end=is_end, val_end=val_end,
         n_trials=n_trials, stability_blocks=stability_blocks,
         cutoff_date=cutoff_date, data_dir=data_dir,
         n_tickers=n_tickers, fields=fields,
@@ -140,6 +145,8 @@ def evaluate_set_fitness(
     target_horizon: int = 6,
     is_frac: float = 0.6,
     val_frac: float = 0.2,
+    is_end: str | None = None,
+    val_end: str | None = None,
     n_trials: int = 1,
     stability_blocks: int = 4,
     cutoff_date: str | None = None,
@@ -161,6 +168,7 @@ def evaluate_set_fitness(
     """
     kwargs: dict[str, Any] = dict(
         target_horizon=target_horizon, is_frac=is_frac, val_frac=val_frac,
+        is_end=is_end, val_end=val_end,
         n_trials=n_trials, stability_blocks=stability_blocks,
         cutoff_date=cutoff_date, data_dir=data_dir,
         n_tickers=n_tickers, fields=fields, candidate_id=candidate_id,
@@ -186,6 +194,7 @@ def score_book_oos(
     data_dir: str = "ticker_data",
     n_tickers: int | None = 15,
     fields: list[str] | None = None,
+    marginal_model: str = "ridge",
 ) -> dict[str, Any]:
     """Touch-once OOS scoring of a factor book on ``[start, end)``.
 
@@ -194,6 +203,7 @@ def score_book_oos(
     kwargs: dict[str, Any] = dict(
         start=start, end=end, target_horizon=target_horizon,
         data_dir=data_dir, n_tickers=n_tickers, fields=fields,
+        marginal_model=marginal_model,
     )
     if not _use_mcp():
         from quant_fund_agent.mcp import research_service as svc
@@ -201,6 +211,26 @@ def score_book_oos(
     args: dict[str, Any] = {"book": book}
     args.update({k: v for k, v in kwargs.items() if v is not None})
     return _bridge().call("score_book_oos", args)
+
+
+def panel_timeline(
+    data_dir: str = "ticker_data",
+    n_tickers: int | None = 15,
+    fields: list[str] | None = None,
+    cutoff_date: str | None = None,
+) -> dict[str, Any]:
+    """The cutoff-sliced panel index as ISO timestamps (progressive-reveal schedule).
+
+    See :func:`quant_fund_agent.mcp.research_service.panel_timeline`.
+    """
+    kwargs: dict[str, Any] = dict(
+        data_dir=data_dir, n_tickers=n_tickers, fields=fields, cutoff_date=cutoff_date,
+    )
+    if not _use_mcp():
+        from quant_fund_agent.mcp import research_service as svc
+        return svc.panel_timeline(**kwargs)
+    return _bridge().call(
+        "panel_timeline", {k: v for k, v in kwargs.items() if v is not None})
 
 
 def curate_book(

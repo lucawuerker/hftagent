@@ -94,6 +94,8 @@ def evaluate_fitness(
     target_horizon: int = 6,
     is_frac: float = 0.6,
     val_frac: float = 0.2,
+    is_end: str | None = None,
+    val_end: str | None = None,
     n_trials: int = 1,
     stability_blocks: int = 4,
     cutoff_date: str | None = None,
@@ -116,6 +118,7 @@ def evaluate_fitness(
     return json.dumps(svc.evaluate_fitness(
         candidate, book, jitter, reference,
         target_horizon=target_horizon, is_frac=is_frac, val_frac=val_frac,
+        is_end=is_end, val_end=val_end,
         n_trials=n_trials, stability_blocks=stability_blocks,
         cutoff_date=cutoff_date, data_dir=data_dir, n_tickers=n_tickers, fields=fields,
         independence_metric=independence_metric, regime_kind=regime_kind,
@@ -131,6 +134,8 @@ def evaluate_set_fitness(
     target_horizon: int = 6,
     is_frac: float = 0.6,
     val_frac: float = 0.2,
+    is_end: str | None = None,
+    val_end: str | None = None,
     n_trials: int = 1,
     stability_blocks: int = 4,
     cutoff_date: str | None = None,
@@ -151,7 +156,8 @@ def evaluate_set_fitness(
     """
     return json.dumps(svc.evaluate_set_fitness(
         programs, target_horizon=target_horizon, is_frac=is_frac,
-        val_frac=val_frac, n_trials=n_trials, stability_blocks=stability_blocks,
+        val_frac=val_frac, is_end=is_end, val_end=val_end,
+        n_trials=n_trials, stability_blocks=stability_blocks,
         cutoff_date=cutoff_date, data_dir=data_dir,
         n_tickers=n_tickers, fields=fields,
         candidate_id=candidate_id, regime_kind=regime_kind,
@@ -170,12 +176,29 @@ def score_book_oos(
     data_dir: str = "ticker_data",
     n_tickers: int | None = 15,
     fields: list[str] | None = None,
+    marginal_model: str = "ridge",
 ) -> str:
     """Touch-once OOS scoring of a factor book on [start, end): combined-model
     OOS IC + per-factor ICs + CSCV PBO.  Returns JSON."""
     return json.dumps(svc.score_book_oos(
         book, start=start, end=end, target_horizon=target_horizon,
         data_dir=data_dir, n_tickers=n_tickers, fields=fields,
+        marginal_model=marginal_model,
+    ))
+
+
+@mcp.tool()
+def panel_timeline(
+    data_dir: str = "ticker_data",
+    n_tickers: int | None = 15,
+    fields: list[str] | None = None,
+    cutoff_date: str | None = None,
+) -> str:
+    """The cutoff-sliced panel index as ISO timestamps (progressive-reveal
+    schedule seam).  Returns JSON ``{"ok": bool, "index": [...]}``."""
+    return json.dumps(svc.panel_timeline(
+        data_dir=data_dir, n_tickers=n_tickers, fields=fields,
+        cutoff_date=cutoff_date,
     ))
 
 

@@ -505,13 +505,21 @@ def _panel_window_key(panel: dict[str, Any]) -> tuple[Any, ...]:
 
 
 def _cached_signal(program: dict[str, Any], panel: dict[str, Any],
-                   panel_key: tuple, cutoff_date: str | None):
-    """Compile ``{"factor_id", "code"}`` in-memory and compute its signal, cached."""
+                   panel_key: tuple, cutoff_date: str | None,
+                   dev_frontier: str | None = None):
+    """Compile ``{"factor_id", "code"}`` in-memory and compute its signal, cached.
+
+    ``dev_frontier`` (the progressive-reveal ``val_end``) is folded into the key so a
+    signal computed on an earlier, shorter dev window is never reused for a later,
+    longer one.  ``_panel_window_key`` already distinguishes the windows (the sliced
+    panel's length / bounds differ), but keying on the frontier is explicit and free.
+    """
     from quant_fund_agent.factors.inmem import compile_factor, compute_signal
 
     key = (
         panel_key,
         cutoff_date,
+        dev_frontier,
         _panel_window_key(panel),
         _code_fingerprint(program["code"]),
     )
@@ -555,6 +563,41 @@ def _json_safe(obj: Any) -> Any:
     return obj
 
 
+def _resolve_split(index, is_frac: float, val_frac: float,
+                   is_end: str | None = None, val_end: str | None = None):
+    """The IS/VAL/TEST split: calendar mode when both bounds are given, else fractions.
+
+    Progressive reveal threads ``is_end``/``val_end`` (the per-generation frontier);
+    legacy runs leave them ``None`` and get the fraction split, byte-identically.
+    """
+    from quant_fund_agent.research_eval.splits import three_way_split
+
+    if is_end is not None and val_end is not None:
+        return three_way_split(index, is_end=is_end, val_end=val_end)
+    return three_way_split(index, is_frac=is_frac, val_frac=val_frac)
+
+
+def panel_timeline(
+    data_dir: str = "ticker_data",
+    n_tickers: int | None = 15,
+    fields: list[str] | None = None,
+    cutoff_date: str | None = None,
+) -> dict[str, Any]:
+    """The cutoff-sliced panel's index as ISO timestamps — the reveal-schedule seam.
+
+    Returns exactly the timeline every :func:`evaluate_fitness` call builds its split
+    on (same cached panel, same cutoff slice), so the progressive-reveal loop can
+    compute its per-generation frontier schedule once at startup without loading a
+    panel itself.
+    """
+    if fields is None:
+        fields = ["open", "high", "low", "close", "volume"]
+    panel_full = _load_panel_cached(data_dir, sorted(fields), n_tickers=n_tickers)
+    panel = _slice_panel_to_cutoff(panel_full, _parse_cutoff(cutoff_date))
+    idx = panel["close"].index
+    return {"ok": True, "index": [str(t) for t in idx]}
+
+
 def evaluate_fitness(
     candidate: dict[str, Any],
     book: list[dict[str, Any]] | None = None,
@@ -564,6 +607,8 @@ def evaluate_fitness(
     target_horizon: int = 6,
     is_frac: float = 0.6,
     val_frac: float = 0.2,
+    is_end: str | None = None,
+    val_end: str | None = None,
     n_trials: int = 1,
     stability_blocks: int = 4,
     cutoff_date: str | None = None,
@@ -608,11 +653,13 @@ def evaluate_fitness(
     panel_key = _panel_cache_key(data_dir, sorted(fields), n_tickers)
     panel_full = _load_panel_cached(data_dir, sorted(fields), n_tickers=n_tickers)
     panel = _slice_panel_to_cutoff(panel_full, _parse_cutoff(cutoff_date))
-    full_split = three_way_split(panel["close"].index, is_frac=is_frac, val_frac=val_frac)
+    full_split = _resolve_split(panel["close"].index, is_frac, val_frac, is_end, val_end)
     dev_mask = full_split.is_val_mask
     # During evolution the held-out TEST rows should be as unavailable as future
     # live data.  Compute every candidate/book/jitter signal on IS∪VAL only, so a
-    # generated factor cannot accidentally use TEST feature values in calc().
+    # generated factor cannot accidentally use TEST feature values in calc().  Under
+    # progressive reveal IS∪VAL is the *revealed* dev prefix, so unrevealed data is
+    # physically absent from `panel_dev` too — TEST-invisibility extends to it for free.
     panel_dev = _slice_panel_to_mask(panel, dev_mask)
     split = ThreeWaySplit(
         is_mask=full_split.is_mask[dev_mask],
@@ -621,14 +668,15 @@ def evaluate_fitness(
     )
 
     try:
-        cand_sig = _cached_signal(candidate, panel_dev, panel_key, cutoff_date)
+        cand_sig = _cached_signal(candidate, panel_dev, panel_key, cutoff_date, val_end)
     except Exception as e:  # noqa: BLE001 — candidate failure is a scored outcome
         return {"ok": False, "error": f"candidate signal failed: {e}"}
 
     book_sigs = []
     for prog in book:
         try:
-            book_sigs.append(_cached_signal(prog, panel_dev, panel_key, cutoff_date))
+            book_sigs.append(
+                _cached_signal(prog, panel_dev, panel_key, cutoff_date, val_end))
         except Exception as e:  # noqa: BLE001
             log.warning("[evaluate_fitness] book member %s failed (%s) — skipped",
                         prog.get("factor_id"), e)
@@ -636,12 +684,13 @@ def evaluate_fitness(
     jitter_sigs = []
     for prog in jitter:
         try:
-            jitter_sigs.append(_cached_signal(prog, panel_dev, panel_key, cutoff_date))
+            jitter_sigs.append(
+                _cached_signal(prog, panel_dev, panel_key, cutoff_date, val_end))
         except Exception as e:  # noqa: BLE001
             log.warning("[evaluate_fitness] jitter probe %s failed (%s) — skipped",
                         prog.get("factor_id"), e)
 
-    # book codes for the structural-novelty axis (5th Pareto axis)
+    # book codes for the structural-novelty axis (Pareto axis 4)
     book_codes: list[str] = [prog.get("code", "") for prog in book]
 
     # reference "factor zoo" for the novelty diagnostic (WS4) — DIAG only
@@ -650,7 +699,8 @@ def evaluate_fitness(
     ref_codes: list[str] = []
     for prog in (reference or []):
         try:
-            ref_sigs.append(_cached_signal(prog, panel_dev, panel_key, cutoff_date))
+            ref_sigs.append(
+                _cached_signal(prog, panel_dev, panel_key, cutoff_date, val_end))
             ref_ids.append(prog.get("factor_id", "?"))
             ref_codes.append(prog.get("code", ""))
         except Exception as e:  # noqa: BLE001
@@ -696,6 +746,8 @@ def evaluate_set_fitness(
     target_horizon: int = 6,
     is_frac: float = 0.6,
     val_frac: float = 0.2,
+    is_end: str | None = None,
+    val_end: str | None = None,
     n_trials: int = 1,
     stability_blocks: int = 4,
     cutoff_date: str | None = None,
@@ -726,7 +778,7 @@ def evaluate_set_fitness(
     panel_key = _panel_cache_key(data_dir, sorted(fields), n_tickers)
     panel_full = _load_panel_cached(data_dir, sorted(fields), n_tickers=n_tickers)
     panel = _slice_panel_to_cutoff(panel_full, _parse_cutoff(cutoff_date))
-    full_split = three_way_split(panel["close"].index, is_frac=is_frac, val_frac=val_frac)
+    full_split = _resolve_split(panel["close"].index, is_frac, val_frac, is_end, val_end)
     dev_mask = full_split.is_val_mask
     panel_dev = _slice_panel_to_mask(panel, dev_mask)
     split = ThreeWaySplit(
@@ -740,7 +792,8 @@ def evaluate_set_fitness(
     for prog in programs:
         fid = prog.get("factor_id", "?")
         try:
-            member_signals[fid] = _cached_signal(prog, panel_dev, panel_key, cutoff_date)
+            member_signals[fid] = _cached_signal(
+                prog, panel_dev, panel_key, cutoff_date, val_end)
             member_codes[fid] = prog.get("code", "")
         except Exception as e:  # noqa: BLE001
             log.warning("[evaluate_set] member %s failed (%s) — dropped", fid, e)

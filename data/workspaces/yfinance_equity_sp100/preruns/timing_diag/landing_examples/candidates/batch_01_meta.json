@@ -1,0 +1,40 @@
+{
+  "started_at": "2026-07-15T00:08:21+00:00",
+  "git_commit": "7ff6f9bc70bc92f091a7066b75cbbc94ac436778",
+  "scope": "yfinance_equity_sp100/timing_diag",
+  "prerun": "timing_diag",
+  "config_name": "yfinance_equity_sp100",
+  "n_strategies": 1,
+  "max_iterations": 2,
+  "oos_ratio": 0.2,
+  "no_seeds": false,
+  "universe": {
+    "provider": "yfinance",
+    "asset_class": "equity",
+    "universe": "sp100",
+    "frequency": "1d",
+    "timespan": [
+      "2020-01-01",
+      "2026-06-22"
+    ],
+    "n_tickers_cap": "15"
+  },
+  "models": {
+    "architect": "gpt-4o-mini",
+    "selector": "gpt-4o-mini",
+    "statistician": "gpt-4o-mini"
+  },
+  "env": {
+    "ARCHITECT_N_TICKERS": "15",
+    "QF_USE_MCP": "0"
+  },
+  "attempts": [
+    {
+      "attempt": 1,
+      "approved": false,
+      "reject_stage": "statistician",
+      "strategy_id": null
+    }
+  ],
+  "finished_at": "2026-07-15T00:08:44+00:00"
+}

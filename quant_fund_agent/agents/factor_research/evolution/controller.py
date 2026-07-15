@@ -199,6 +199,11 @@ class EvolutionController:
         self.generation: int = 0
         self.lineage: list[dict[str, Any]] = []
         self._fingerprints: set[str] = set()
+        # Progressive reveal: fingerprints of gate-FAILING genomes and how many times
+        # each has been released for a retry.  On newly-revealed data a genome that
+        # failed a gate before may honestly pass, so its fingerprint is freed once (cap
+        # = 1 retry) so an identical genome isn't re-tried every reveal forever.
+        self._failed_fingerprints: dict[str, int] = {}
         # ── QD selection (WS2): a behavior grid alongside the Pareto archive ──
         self.qd = None
         if self.config.selection == "qd":
@@ -249,6 +254,10 @@ class EvolutionController:
             keep = _rank_population(island)[: self.config.population_size]
             self.islands[island_idx] = [island[i] for _, _, i in keep]
 
+        if not evaluated.selectable:
+            # track gate-failers so progressive reveal can retry them on new data
+            self._failed_fingerprints.setdefault(genome.code_fingerprint(), 0)
+
         self._update_archive(evaluated)
         if self.qd is not None:
             self.qd.insert(evaluated)   # QD behavior grid (only gate-passers occupy cells)
@@ -288,6 +297,52 @@ class EvolutionController:
         for eg in pool:
             if not any(dominates(o.fitness.objective, eg.fitness.objective)
                        for o in pool if o is not eg):
+                new_archive.append(eg)
+        self.archive = new_archive
+
+    # ── progressive reveal: retry gate-failers + re-score the archive ──
+
+    def release_failed_fingerprints(self, max_retries: int = 1) -> int:
+        """Free gate-failing fingerprints so identical genomes can be re-evaluated.
+
+        On newly-revealed data a previously gate-failing genome may honestly pass, so
+        its fingerprint is discarded from the dedup set (making it non-duplicate
+        again).  Each fingerprint is released at most ``max_retries`` times so the same
+        genome cannot be re-tried on every reveal forever.  Returns how many were
+        released.
+        """
+        released = 0
+        for fp, count in list(self._failed_fingerprints.items()):
+            if count < max_retries:
+                self._fingerprints.discard(fp)
+                self._failed_fingerprints[fp] = count + 1
+                released += 1
+        return released
+
+    def rescore_archive(
+        self, new_fitness_by_genome_id: dict[str, FitnessResult],
+    ) -> None:
+        """Replace archive members' fitnesses with freshly-computed ones and re-prune.
+
+        Progressive reveal calls this after the frontier advances: every archive
+        member is re-scored on the new (larger) window, its fitness replaced in place,
+        and the archive rebuilt as the gate-passing non-dominated set of the re-scored
+        members.  Members that drop out stay in ``kept_pool`` (end-of-run curation
+        refits on the final window anyway).  Deliberately does **not** touch
+        ``n_trials`` (re-scores are not new trials) or the QD grid (a diversity
+        library, not the marginal reference).
+        """
+        from quant_fund_agent.research_eval.fitness import dominates
+
+        for eg in self.archive:
+            newf = new_fitness_by_genome_id.get(eg.genome.genome_id)
+            if newf is not None:
+                eg.fitness = newf
+        passing = [eg for eg in self.archive if eg.selectable]
+        new_archive: list[EvaluatedGenome] = []
+        for eg in passing:
+            if not any(dominates(o.fitness.objective, eg.fitness.objective)
+                       for o in passing if o is not eg):
                 new_archive.append(eg)
         self.archive = new_archive
 
@@ -420,6 +475,7 @@ class EvolutionController:
             "archive": [eg.to_dict() for eg in self.archive],
             "kept_pool": [eg.to_dict() for eg in self.kept_pool],
             "fingerprints": sorted(self._fingerprints),
+            "failed_fingerprints": dict(self._failed_fingerprints),
             "parent_reuse": dict(self.parent_reuse),
             "qd": self.qd.to_dict() if self.qd is not None else None,
         }
@@ -460,6 +516,8 @@ class EvolutionController:
         ctrl._pool_fingerprints = {
             eg.genome.code_fingerprint() for eg in ctrl.kept_pool}
         ctrl._fingerprints = set(payload.get("fingerprints", []))
+        ctrl._failed_fingerprints = {
+            k: int(v) for k, v in payload.get("failed_fingerprints", {}).items()}
         ctrl.parent_reuse = dict(payload.get("parent_reuse", {}))
         qd_payload = payload.get("qd")
         if qd_payload is not None:

@@ -15,8 +15,9 @@ from quant_fund_agent.research_eval.fitness import (
 )
 
 
-def _result(cid, mv, indep, rob, par, *, passed=True):
-    obj = ObjectiveVector(marginal_value=mv, independence=indep, robustness=rob, parsimony=par)
+def _result(cid, mv, indep, par, nov=None, *, passed=True):
+    obj = ObjectiveVector(marginal_value=mv, independence=indep, parsimony=par,
+                          structural_novelty=nov)
     gates = GateResults(coverage_ok=passed, degradation_ok=passed, deflation_ok=passed)
     return FitnessResult(candidate_id=cid, objective=obj, gates=gates)
 
@@ -24,13 +25,26 @@ def _result(cid, mv, indep, rob, par, *, passed=True):
 # ── objective vector ──────────────────────────────────────────────────────────
 
 def test_objective_none_is_worst():
-    v = ObjectiveVector(marginal_value=None, independence=1.0, robustness=2.0,
+    v = ObjectiveVector(marginal_value=None, independence=1.0,
                         parsimony=-3.0, structural_novelty=0.5)
     t = v.as_tuple()
     assert t[0] == float("-inf")
-    assert t[1:] == (1.0, 2.0, -3.0, 0.5)
+    assert t[1:] == (1.0, -3.0, 0.5)
     # an unmeasured (None) structural_novelty axis is likewise the worst value
-    assert ObjectiveVector(1.0, 1.0, 1.0, 1.0).as_tuple()[4] == float("-inf")
+    assert ObjectiveVector(1.0, 1.0, -1.0).as_tuple()[3] == float("-inf")
+
+
+def test_axes_are_four_and_from_dict_ignores_legacy_robustness():
+    # the objective vector is now 4 axes (the PSR robustness axis was removed)
+    assert ObjectiveVector.AXES == (
+        "marginal_value", "independence", "parsimony", "structural_novelty")
+    # old checkpoints / state files carry a 5th "robustness" key — loading ignores it
+    legacy = {"marginal_value": 1.0, "independence": 0.5, "robustness": 0.9,
+              "parsimony": -2.0, "structural_novelty": 0.3}
+    v = ObjectiveVector.from_dict(legacy)
+    assert not hasattr(v, "robustness")
+    assert v.to_dict() == {"marginal_value": 1.0, "independence": 0.5,
+                           "parsimony": -2.0, "structural_novelty": 0.3}
 
 
 # ── dominance ─────────────────────────────────────────────────────────────────
@@ -53,11 +67,11 @@ def test_gates_passed_semantics():
 # ── non-dominated front honours the gates ─────────────────────────────────────
 
 def test_front_prefers_gate_passers():
-    good = _result("g", 1.0, 1.0, 1.0, -1.0, passed=True)
-    dominated = _result("d", 0.1, 0.1, 0.1, -5.0, passed=True)
+    good = _result("g", 1.0, 1.0, -1.0, passed=True)
+    dominated = _result("d", 0.1, 0.1, -5.0, passed=True)
     # a gate-failing candidate with a great objective must NOT make the front while
     # a gate-passing candidate exists
-    cheater = _result("c", 5.0, 5.0, 5.0, -0.0, passed=False)
+    cheater = _result("c", 5.0, 5.0, -0.0, passed=False)
     front = non_dominated_front([good, dominated, cheater])
     ids = {r.candidate_id for r in front}
     assert "g" in ids and "c" not in ids and "d" not in ids
@@ -66,7 +80,7 @@ def test_front_prefers_gate_passers():
 def test_front_falls_back_when_none_pass():
     a = _result("a", 1.0, 0.0, 0.0, 0.0, passed=False)
     b = _result("b", 0.0, 1.0, 0.0, 0.0, passed=False)
-    c = _result("c", 0.0, 0.0, 0.0, 0.0, passed=False)  # dominated by both a and b
+    c = _result("c", 0.0, 0.0, 0.0, -1.0, passed=False)  # dominated by both a and b
     front = non_dominated_front([a, b, c])
     ids = {r.candidate_id for r in front}
     assert ids == {"a", "b"}

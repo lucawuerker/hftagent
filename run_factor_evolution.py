@@ -161,6 +161,26 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--cutoff-date", default=None,
                    help="ISO date: evaluate only bars strictly before this "
                         "(walk-forward wrapping).")
+
+    # ── progressive data reveal (default OFF) ──
+    p.add_argument("--progressive-reveal", action="store_true",
+                   help="Reveal the dev window block-by-block across generations "
+                        "(expanding IS + sliding VAL), so each generation is partly "
+                        "scored on data no earlier selection saw — prevention of the "
+                        "generational overfitting ratchet.  Ignores --is-frac/"
+                        "--val-frac; the final --test-frac tail is never revealed.")
+    p.add_argument("--test-frac", type=float, default=0.2,
+                   help="Progressive mode: the final never-revealed TEST tail "
+                        "fraction (default 0.2).")
+    p.add_argument("--seed-frac", type=float, default=0.45,
+                   help="Progressive mode: fraction of the dev window visible at "
+                        "generation 0 (default 0.45).")
+    p.add_argument("--reveal-every", type=int, default=1,
+                   help="Progressive mode: generations between block reveals "
+                        "(default 1 = reveal every generation).")
+    p.add_argument("--val-blocks", type=int, default=2,
+                   help="Progressive mode: sliding VAL spans the last this-many "
+                        "revealed blocks (default 2).")
     p.add_argument("--walk-forward", default=None,
                    help="Comma list of ascending ISO dates d0,d1,…: re-run the "
                         "WHOLE loop per fold (evolve < d_i, touch-once score on "
@@ -197,10 +217,9 @@ def _parse_args() -> argparse.Namespace:
                    help="Per-unit-turnover cost (≈5 bps) for the net-of-cost "
                         "diagnostics (default 0.0005).")
     p.add_argument("--perturbation-weight", type=float, default=0.0,
-                   help="Weight of the perturbation-fidelity probe folded into the "
-                        "robustness axis (0 = off, the baseline arm). >0 docks "
-                        "robustness by the sign-aligned VAL-IC drop under a Gaussian "
-                        "signal shock.")
+                   help="Weight of the marginal-axis perturbation probe (0 = off, the "
+                        "baseline arm). >0 docks the marginal-value axis by the "
+                        "sign-aligned VAL-IC drop under a Gaussian signal shock.")
     p.add_argument("--perturbation-sigma", type=float, default=0.5,
                    help="Stdev (in signal z-units) of the perturbation shock "
                         "(default 0.5).")
@@ -307,6 +326,11 @@ def main() -> None:
         val_frac=args.val_frac,
         stability_blocks=args.stability_blocks,
         cutoff_date=args.cutoff_date,
+        progressive=args.progressive_reveal,
+        test_frac=args.test_frac,
+        seed_frac=args.seed_frac,
+        reveal_every=args.reveal_every,
+        val_blocks=args.val_blocks,
         force_prediction_horizon=(args.prediction_horizon_mode == "fixed"),
         independence_metric=args.independence_metric,
         regime_kind=args.regime_kind,
@@ -327,6 +351,12 @@ def main() -> None:
         memory_config=config_name,
         out_dir=str(scope.dir / "evolution"),
     )
+
+    if cfg.progressive:
+        log.info("progressive reveal ON (test_frac=%.2f, seed_frac=%.2f, "
+                 "reveal_every=%d, val_blocks=%d) — --is-frac/--val-frac are ignored; "
+                 "the split follows the per-generation calendar schedule.",
+                 cfg.test_frac, cfg.seed_frac, cfg.reveal_every, cfg.val_blocks)
 
     if args.walk_forward:
         from quant_fund_agent.agents.factor_research.evolution.walkforward import (

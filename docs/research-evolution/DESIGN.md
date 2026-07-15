@@ -61,7 +61,9 @@ conditional value**, not standalone power.
 These four forks were decided with the author and are binding for the build:
 
 1. **Fitness model — Pareto + hard robustness gate.** Maintain a Pareto front
-   over `{marginal value, independence, robustness, parsimony}`; candidates must
+   over `{marginal value, independence, parsimony, structural_novelty}` (**4 axes** —
+   the separate `robustness` axis was removed; its plateau/perturbation/sign parts fold
+   onto the marginal-value axis, see the Update note below); candidates must
    first pass hard OOS-robustness / coverage / deflation gates. No arbitrary
    scalar weights (weights can themselves overfit and bias the search).
 2. **Overfit control — blocked validation stability and walk-forward.** During
@@ -190,8 +192,11 @@ tried 3 variants of this." This is where experience-RAG / GraphRAG feeds the LLM
 ### The CORE objective vector (Pareto axes)
 1. **Marginal contribution to the combined model** (primary),
 2. **Independence** (Δ participation ratio; soft max-corr penalty),
-3. **Robustness** (`mean_block(fixed-prediction LOCO IC) − λ·std_block −
-   plateau_penalty + sign_consistency_bonus`),
+3. **Robustness** (Bailey–López de Prado **Probabilistic Sharpe Ratio** of the
+   candidate's marginal per-bar VAL P&L vs `SR*=0` — significance given sample
+   length + skew/kurtosis; built from the already-fitted marginal predictions with
+   no refit; `− plateau_penalty + sign_consistency_bonus` still fold in. Replaced
+   the earlier blocked-VAL `mean − λ·std` stability),
 4. **Parsimony** (`−complexity`).
 
 **Hard gates** (all must pass, else the candidate is treated as dominated):
@@ -271,10 +276,23 @@ Per-role model selection: `--hypothesis-model`, `--debate-model`,
 
   | Pareto axis | SINGLE (factor) | SET (alpha program) |
   | --- | --- | --- |
-  | 1. Marginal value (primary) | ΔOOS-IC of the combined model from adding the factor to the **Pareto archive** (LOCO) | the set's **own** combined-model OOS-IC/Sharpe directly |
-  | 2. Independence | Δ participation ratio; soft max-corr penalty | internal participation ratio of the set |
-  | 3. Robustness | fixed-prediction blocked-VAL LOCO `mean(ΔIC) − λ·std − plateau + sign_consistency` | blocked-VAL stability of the set's fixed combined prediction |
-  | 4. Parsimony | `−(n_ops + n_constants)` from AST | `−(total_complexity / size)` |
+  | 1. Marginal value (primary) | ΔOOS-IC of the combined model from adding the factor to the **Pareto archive** (LOCO), `− plateau − perturbation ± sign_bonus` (all IC-scale) | the set's **own** combined-model OOS-IC directly, `− perturbation ± sign_bonus` |
+  | 2. Independence | residual (orthogonalised) IC on **IS∪VAL** (betas fit on IS); legacy Δ participation ratio selectable | internal participation ratio of the set |
+  | 3. Parsimony | `−(n_ops + n_constants)` from AST | `−(total_complexity / size)` |
+  | 4. Structural novelty | min canonical AST weighted-subtree distance to the nearest archive member | members' mean nearest-neighbour AST distance |
+
+  > **Update (2026-07-15):** the former **axis 3 `robustness`** (a Bailey–López de
+  > Prado PSR of the marginal per-bar VAL P&L) was **removed**. Computed on the *same
+  > reused* VAL window every generation, it could not police the process-level
+  > selection ratchet it was meant to control, folded IC-scale penalties into a [0,1]
+  > probability, and was a near-monotone transform of the primary axis. Its plateau /
+  > perturbation / sign adjustments now fold onto the **marginal-value** axis. Overfitting
+  > control instead comes from **progressive data reveal** (`--progressive-reveal`,
+  > default off): the dev window is revealed block-by-block across generations
+  > (expanding IS + sliding VAL), so each generation is partly scored on data no earlier
+  > selection saw; the archive is re-scored and a prequential OOS curve logged at each
+  > reveal, and a final `--test-frac` tail is never revealed. The residual-IC
+  > independence axis is scored on **IS∪VAL** (betas on IS) for ~4× the sample.
 
 - **Selection** — NSGA-II: non-dominated sort into Pareto fronts + crowding
   distance for within-front diversity. The **archive = current Pareto front**,

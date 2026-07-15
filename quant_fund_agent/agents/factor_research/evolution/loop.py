@@ -40,6 +40,7 @@ from pathlib import Path
 from typing import Any, Callable, Sequence
 
 import numpy as np
+import pandas as pd
 
 from quant_fund_agent.agents.factor_research.evolution.controller import (
     ControllerConfig,
@@ -114,6 +115,18 @@ class EvolutionRunConfig:
     cutoff_date: str | None = None
     force_prediction_horizon: bool = True
 
+    # ── progressive data reveal (default OFF → byte-identical to today) ──
+    # When on, the dev window is revealed block-by-block across generations (an
+    # expanding IS + sliding VAL), so each generation is partly scored on data no
+    # earlier selection saw.  ``is_frac``/``val_frac`` are ignored in this mode; the
+    # split is driven by the per-generation calendar schedule instead.  The final
+    # ``test_frac`` tail is never revealed (unchanged TEST semantics).
+    progressive: bool = False
+    test_frac: float = 0.2       # final never-revealed TEST tail (progressive mode)
+    seed_frac: float = 0.45      # fraction of DEV visible at generation 0
+    reveal_every: int = 1        # generations between reveals
+    val_blocks: int = 2          # sliding VAL = last val_blocks blocks
+
     # ── fitness axes (P0+): independence basis + the crash-regime axis ──
     independence_metric: str = "residual_ic"   # "residual_ic" | "delta_participation"
     regime_kind: str = "drawdown"              # "drawdown" | "volatility"
@@ -126,7 +139,7 @@ class EvolutionRunConfig:
     # baseline arm is unchanged, enabled as an ablation dimension ──
     gate_turnover: float | None = None         # cost_ok gate floor (None = off)
     cost_rate: float = 5e-4                     # net-of-cost DIAG cost per unit turnover
-    perturbation_weight: float = 0.0           # robustness perturbation probe weight (0 = off)
+    perturbation_weight: float = 0.0           # marginal-axis perturbation probe weight (0 = off)
     perturbation_sigma: float = 0.5            # perturbation shock stdev (z-units)
 
     # ── two-stage curation (Lever 2): keep every gate-passer, curate once ──
@@ -523,6 +536,9 @@ class EvolutionLoop:
         self._llms: dict[str, Any] = {}    # role → chat model (built lazily)
         self._program_pool: dict[str, FactorProgram] = {}  # every program ever admitted
         self.fixed_book = self._dedupe_fixed_book(cfg.fixed_book)
+        # progressive reveal (default OFF): the per-generation frontier schedule
+        self._schedule: list[Any] | None = None
+        self._window: Any | None = None
 
     @staticmethod
     def _dedupe_fixed_book(book: Sequence[dict[str, Any]] | None) -> list[dict[str, Any]]:
@@ -589,10 +605,24 @@ class EvolutionLoop:
 
     # ── evaluation ──
 
-    def evaluate_program(self, program: FactorProgram) -> FitnessResult | None:
-        """Score one program via the MCP seam.  Returns None on eval failure."""
-        from quant_fund_agent.mcp import research_client
+    @property
+    def _window_bounds(self) -> tuple[str | None, str | None]:
+        """The (is_end, val_end) calendar bounds of the current progressive window,
+        or (None, None) in legacy mode (→ the harness uses is_frac/val_frac)."""
+        if self.cfg.progressive and self._window is not None:
+            return self._window.is_end_ts, self._window.val_end_ts
+        return None, None
 
+    def _stamp_window(self, fitness: FitnessResult) -> FitnessResult:
+        """Record which data window scored this fitness (progressive-reveal diag)."""
+        if self.cfg.progressive and self._window is not None:
+            fitness.diagnostics["scored_through"] = self._window.val_end_ts
+            fitness.diagnostics["window_generation"] = self._window.generation
+        return fitness
+
+    def _book_for(self, program: FactorProgram,
+                  archive_programs: Sequence[tuple[str, str]]) -> list[dict[str, Any]]:
+        """LOCO book = fixed book + archive members, excluding the program itself."""
         book = [
             {"factor_id": b["factor_id"], "code": b["code"]}
             for b in self.fixed_book
@@ -601,17 +631,23 @@ class EvolutionLoop:
         fixed_ids = {b["factor_id"] for b in book}
         book.extend(
             {"factor_id": fid, "code": code}
-            for fid, code in self.controller.archive_programs()
+            for fid, code in archive_programs
             if fid != program.factor_id and fid not in fixed_ids
         )
+        return book
+
+    def _score_program(self, program: FactorProgram, book: list[dict[str, Any]],
+                       n_trials: int, *, is_end: str | None,
+                       val_end: str | None) -> dict[str, Any]:
+        """The shared client call for SINGLE scoring (billed eval AND re-score)."""
+        from quant_fund_agent.mcp import research_client
+
         probes = [{"factor_id": pid, "code": pcode}
                   for pid, pcode in jitter_variants(program, self.cfg.plateau_scales)]
-
         reference = [{"factor_id": r["factor_id"], "code": r["code"]}
                      for r in self.cfg.reference_book
                      if r.get("factor_id") != program.factor_id]
-
-        res = research_client.evaluate_fitness(
+        return research_client.evaluate_fitness(
             candidate={"factor_id": program.factor_id, "code": program.code,
                        "expected_sign": program.expected_sign},
             book=book,
@@ -620,7 +656,9 @@ class EvolutionLoop:
             target_horizon=self.cfg.target_horizon,
             is_frac=self.cfg.is_frac,
             val_frac=self.cfg.val_frac,
-            n_trials=self.controller.n_trials + 1,  # bill this look, commit on success
+            is_end=is_end,
+            val_end=val_end,
+            n_trials=n_trials,
             stability_blocks=self.cfg.stability_blocks,
             cutoff_date=self.cfg.cutoff_date,
             data_dir=self.cfg.data_dir,
@@ -635,25 +673,21 @@ class EvolutionLoop:
             perturbation_weight=self.cfg.perturbation_weight,
             perturbation_sigma=self.cfg.perturbation_sigma,
         )
-        if not res.get("ok"):
-            log.info("[%s] evaluation failed: %s", program.factor_id, res.get("error"))
-            self.failures.append({"factor_id": program.factor_id,
-                                  "error": res.get("error")})
-            return None
-        self.controller.next_trial()
-        return FitnessResult.from_dict(res["fitness"])
 
-    def evaluate_set(self, programs: Sequence[FactorProgram],
-                     candidate_id: str) -> FitnessResult | None:
-        """SET mode: score the whole member list jointly via the MCP seam."""
+    def _score_set(self, programs: Sequence[FactorProgram], candidate_id: str,
+                   n_trials: int, *, is_end: str | None,
+                   val_end: str | None) -> dict[str, Any]:
+        """The shared client call for SET scoring (billed eval AND re-score)."""
         from quant_fund_agent.mcp import research_client
 
-        res = research_client.evaluate_set_fitness(
+        return research_client.evaluate_set_fitness(
             [{"factor_id": p.factor_id, "code": p.code} for p in programs],
             target_horizon=self.cfg.target_horizon,
             is_frac=self.cfg.is_frac,
             val_frac=self.cfg.val_frac,
-            n_trials=self.controller.n_trials + 1,
+            is_end=is_end,
+            val_end=val_end,
+            n_trials=n_trials,
             stability_blocks=self.cfg.stability_blocks,
             cutoff_date=self.cfg.cutoff_date,
             data_dir=self.cfg.data_dir,
@@ -668,13 +702,160 @@ class EvolutionLoop:
             perturbation_weight=self.cfg.perturbation_weight,
             perturbation_sigma=self.cfg.perturbation_sigma,
         )
+
+    def evaluate_program(self, program: FactorProgram) -> FitnessResult | None:
+        """Score one program via the MCP seam.  Returns None on eval failure."""
+        is_end, val_end = self._window_bounds
+        book = self._book_for(program, self.controller.archive_programs())
+        res = self._score_program(
+            program, book, self.controller.n_trials + 1,  # bill this look, commit on success
+            is_end=is_end, val_end=val_end)
+        if not res.get("ok"):
+            log.info("[%s] evaluation failed: %s", program.factor_id, res.get("error"))
+            self.failures.append({"factor_id": program.factor_id,
+                                  "error": res.get("error")})
+            return None
+        self.controller.next_trial()
+        return self._stamp_window(FitnessResult.from_dict(res["fitness"]))
+
+    def evaluate_set(self, programs: Sequence[FactorProgram],
+                     candidate_id: str) -> FitnessResult | None:
+        """SET mode: score the whole member list jointly via the MCP seam."""
+        is_end, val_end = self._window_bounds
+        res = self._score_set(programs, candidate_id, self.controller.n_trials + 1,
+                              is_end=is_end, val_end=val_end)
         if not res.get("ok"):
             log.info("[%s] set evaluation failed: %s", candidate_id, res.get("error"))
             self.failures.append({"factor_id": candidate_id,
                                   "error": res.get("error")})
             return None
         self.controller.next_trial()
-        return FitnessResult.from_dict(res["fitness"])
+        return self._stamp_window(FitnessResult.from_dict(res["fitness"]))
+
+    # ── progressive data reveal (default OFF) ──
+
+    def _init_progressive(self) -> None:
+        """Fetch the run timeline and build the per-generation reveal schedule.
+
+        Pure function of (config, cutoff-sliced index); the window in force is
+        recomputed from ``controller.generation`` so a resumed run reproduces it.
+        """
+        from quant_fund_agent.agents.factor_research.evolution.progressive import (
+            build_schedule,
+        )
+        from quant_fund_agent.mcp import research_client
+
+        tl = research_client.panel_timeline(
+            data_dir=self.cfg.data_dir, n_tickers=self.cfg.n_tickers,
+            fields=self.fields, cutoff_date=self.cfg.cutoff_date)
+        if not isinstance(tl, dict) or not tl.get("ok") or not tl.get("index"):
+            raise RuntimeError(
+                f"progressive reveal: could not fetch the panel timeline "
+                f"({tl.get('error') if isinstance(tl, dict) else tl!r})")
+        index = pd.to_datetime(list(tl["index"]))
+        self._schedule = build_schedule(
+            index, generations=self.cfg.generations, test_frac=self.cfg.test_frac,
+            seed_frac=self.cfg.seed_frac, reveal_every=self.cfg.reveal_every,
+            val_blocks=self.cfg.val_blocks)
+        g = min(self.controller.generation, len(self._schedule) - 1)
+        self._window = self._schedule[g]
+        # Resume corruption guard: the recomputed frontier must match the checkpoint.
+        prog_path = self.out_dir / "progressive.json"
+        if self.controller.generation > 0 and prog_path.exists():
+            stored = json.loads(prog_path.read_text())
+            if stored.get("frontier_ts") and \
+                    stored["frontier_ts"] != self._window.val_end_ts:
+                raise RuntimeError(
+                    f"progressive-reveal resume mismatch at generation "
+                    f"{self.controller.generation}: recomputed frontier "
+                    f"{self._window.val_end_ts} != checkpointed "
+                    f"{stored['frontier_ts']}.")
+        log.info("progressive reveal: %d windows; generation %d frontier through %s",
+                 len(self._schedule), self.controller.generation,
+                 self._window.val_end_ts)
+
+    def _prequential_score(self, gen: int, old_ts: str, new_ts: str) -> None:
+        """Honest OOS score of the current archive on the block about to be revealed.
+
+        ``[old_ts, new_ts)`` was never visible to any selection that produced this
+        archive, so this is a genuine out-of-sample check.  One JSON line per reveal is
+        appended to ``prequential.jsonl`` (a ``{"skipped": ...}`` row when the archive
+        is empty or the window is too thin).  Validation only — nothing is gated on it.
+        """
+        from quant_fund_agent.mcp import research_client
+
+        self.out_dir.mkdir(parents=True, exist_ok=True)
+        book = self.controller.archive_programs()
+        if not book:
+            row: dict[str, Any] = {"generation": gen, "start": old_ts, "end": new_ts,
+                                   "skipped": "empty archive"}
+        else:
+            res = research_client.score_book_oos(
+                [{"factor_id": fid, "code": code} for fid, code in book],
+                start=old_ts, end=new_ts, target_horizon=self.cfg.target_horizon,
+                data_dir=self.cfg.data_dir, n_tickers=self.cfg.n_tickers,
+                fields=self.fields, marginal_model=self.cfg.marginal_model)
+            if res.get("ok"):
+                row = {"generation": gen, "start": old_ts, "end": new_ts,
+                       "combined_oos_ic": res.get("combined_oos_ic"),
+                       "n_obs": res.get("combined_n_obs"),
+                       "per_factor_ic": res.get("per_factor_oos_ic"),
+                       "pbo": (res.get("pbo") or {}).get("pbo"),
+                       "archive_size": len(book),
+                       "n_trials": self.controller.n_trials}
+            else:
+                row = {"generation": gen, "start": old_ts, "end": new_ts,
+                       "skipped": res.get("error")}
+        with (self.out_dir / "prequential.jsonl").open("a") as fh:
+            fh.write(json.dumps(row, default=str) + "\n")
+
+    def _rescore_archive_on_window(self, gen: int) -> None:
+        """Re-score every archive member on the just-advanced window (no billing).
+
+        The LOCO book is a snapshot of the archive *before* re-scoring so the pass is
+        order-independent; ``n_trials`` is passed unchanged (re-scores are not trials).
+        Each member's drift is logged as a ``rescore`` lineage row (an overfitting
+        diagnostic the thesis plots), then the controller re-prunes the archive.
+        """
+        archive = list(self.controller.archive)              # snapshot the member list
+        snapshot = list(self.controller.archive_programs())  # snapshot the LOCO book
+        is_end, val_end = self._window_bounds
+        new_fitness: dict[str, FitnessResult] = {}
+        for eg in archive:
+            obj_before = eg.fitness.objective.to_dict()
+            if eg.genome.unit == "set":
+                res = self._score_set(eg.genome.programs, eg.genome.genome_id,
+                                      self.controller.n_trials,  # NO +1 — not a new trial
+                                      is_end=is_end, val_end=val_end)
+            else:
+                book = self._book_for(eg.genome.program, snapshot)
+                res = self._score_program(eg.genome.program, book,
+                                          self.controller.n_trials,
+                                          is_end=is_end, val_end=val_end)
+            if not res.get("ok"):
+                continue
+            fitness = self._stamp_window(FitnessResult.from_dict(res["fitness"]))
+            new_fitness[eg.genome.genome_id] = fitness
+            self.controller.lineage.append({
+                "event": "rescore", "generation": gen,
+                "genome_id": eg.genome.genome_id,
+                "objective_before": obj_before,
+                "objective_after": fitness.objective.to_dict(),
+                "gates_after": fitness.gates.to_dict(),
+            })
+        self.controller.rescore_archive(new_fitness)
+
+    def _advance_reveal(self, gen: int) -> None:
+        """On a reveal generation: prequential probe → advance frontier → re-score the
+        archive on the new window → free gate-failers for a retry (in that order)."""
+        new_window = self._schedule[gen]
+        self._prequential_score(gen, self._window.val_end_ts, new_window.val_end_ts)
+        self._window = new_window
+        self._rescore_archive_on_window(gen)
+        released = self.controller.release_failed_fingerprints()
+        if released:
+            log.info("generation %d: released %d gate-failing fingerprint(s) for retry",
+                     gen, released)
 
     def _admit(self, program: FactorProgram, *, generation: int, island: int,
                operator: str, parent_ids: Sequence[str]) -> EvaluatedGenome | None:
@@ -1035,46 +1216,70 @@ class EvolutionLoop:
         with (self.out_dir / "lineage.jsonl").open("w") as fh:
             for row in self.controller.lineage:
                 fh.write(json.dumps(row, default=str) + "\n")
+        if self.cfg.progressive and self._window is not None:
+            # The reveal frontier the recorded generation implies — a cheap resume
+            # corruption guard (the schedule is otherwise a pure function of config).
+            (self.out_dir / "progressive.json").write_text(json.dumps({
+                "generation": self.controller.generation,
+                "frontier_ts": self._window.val_end_ts,
+                "visible_end": self._window.visible_end,
+            }, indent=2))
 
     # ── main drive ──
 
     def run(self, initial_programs: Sequence[FactorProgram] | None = None,
-            ) -> dict[str, Any]:
+            *, resume: bool = False) -> dict[str, Any]:
         """Run the whole evolutionary search; returns a summary dict.
 
         ``initial_programs`` (mostly for tests / resumed runs) bypasses the LLM
-        seed brainstorm.
+        seed brainstorm.  ``resume`` continues an already-seeded controller (loaded
+        from a checkpoint) from ``controller.generation + 1`` instead of re-seeding.
         """
         cfg = self.cfg
         t0 = time.time()
         self._load_known_ids()
 
-        # ── generation 0: seed ──
-        programs = list(initial_programs) if initial_programs is not None else \
-            seed_programs(cfg, self.data_context, self.known_ids, self.fields)
-        for prog in programs:  # the pool SET-structural ops draw from
-            self._program_pool.setdefault(prog.factor_id, prog)
-        if cfg.unit == "set":
-            # Partition the seed pool into initial sets of ~set_size (round-robin
-            # chunks, so every seed program appears in exactly one set).
-            size = max(1, cfg.set_size)
-            for k in range(0, len(programs), size):
-                chunk = programs[k:k + size]
-                if chunk:
-                    self._admit_set(chunk, generation=0,
-                                    island=(k // size) % max(1, cfg.n_islands),
-                                    operator="seed", parent_ids=[])
+        if cfg.progressive:
+            # Build the reveal schedule and set the window in force (generation 0 on a
+            # fresh run, or the resumed generation).  Corruption guard: a resumed
+            # controller must land on the frontier its recorded generation implies.
+            self._init_progressive()
+
+        resuming = (resume and self.controller.generation > 0
+                    and bool(self.controller.population()))
+        if resuming:
+            start_gen = self.controller.generation
+            log.info("resuming from generation %d: population=%d, archive=%d, "
+                     "n_trials=%d", start_gen, len(self.controller.population()),
+                     len(self.controller.archive), self.controller.n_trials)
         else:
-            for k, prog in enumerate(programs):
-                self._admit(prog, generation=0, island=k % max(1, cfg.n_islands),
-                            operator="seed", parent_ids=[])
-        self._checkpoint()
-        log.info("generation 0: population=%d, archive=%d, n_trials=%d",
-                 len(self.controller.population()), len(self.controller.archive),
-                 self.controller.n_trials)
-        if not self.controller.population():
-            log.warning("empty seed population — aborting run")
-            return self.summary(time.time() - t0)
+            start_gen = 0
+            # ── generation 0: seed ──
+            programs = list(initial_programs) if initial_programs is not None else \
+                seed_programs(cfg, self.data_context, self.known_ids, self.fields)
+            for prog in programs:  # the pool SET-structural ops draw from
+                self._program_pool.setdefault(prog.factor_id, prog)
+            if cfg.unit == "set":
+                # Partition the seed pool into initial sets of ~set_size (round-robin
+                # chunks, so every seed program appears in exactly one set).
+                size = max(1, cfg.set_size)
+                for k in range(0, len(programs), size):
+                    chunk = programs[k:k + size]
+                    if chunk:
+                        self._admit_set(chunk, generation=0,
+                                        island=(k // size) % max(1, cfg.n_islands),
+                                        operator="seed", parent_ids=[])
+            else:
+                for k, prog in enumerate(programs):
+                    self._admit(prog, generation=0, island=k % max(1, cfg.n_islands),
+                                operator="seed", parent_ids=[])
+            self._checkpoint()
+            log.info("generation 0: population=%d, archive=%d, n_trials=%d",
+                     len(self.controller.population()), len(self.controller.archive),
+                     self.controller.n_trials)
+            if not self.controller.population():
+                log.warning("empty seed population — aborting run")
+                return self.summary(time.time() - t0)
 
         if cfg.unit == "set":
             ops: list[tuple[str, float]] = [
@@ -1092,8 +1297,13 @@ class EvolutionLoop:
         op_names = [n for n, _ in ops]
         op_probs = [p / total_p for _, p in ops]
 
-        for gen in range(1, cfg.generations + 1):
+        for gen in range(start_gen + 1, cfg.generations + 1):
             self.controller.generation = gen
+            # progressive reveal: on a reveal generation, run the prequential probe,
+            # advance the frontier, re-score the archive and free gate-failers for a
+            # retry — all BEFORE any child is proposed this generation.
+            if cfg.progressive and self._schedule[gen].reveal:
+                self._advance_reveal(gen)
             made = 0
             for k in range(cfg.children_per_generation):
                 island = k % max(1, cfg.n_islands)

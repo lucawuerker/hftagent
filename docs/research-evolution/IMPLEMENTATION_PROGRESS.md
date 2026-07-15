@@ -7,6 +7,35 @@ test file.
 
 Legend: ✅ done & tested · 🚧 in progress · ⬜ not started
 
+**Post-P5 — 4-axis vector + dev-wide residual IC + progressive reveal — ✅ DONE
+(2026-07-15).** Three overfitting-control corrections (plan:
+`PROGRESSIVE_REVEAL_PLAN.md`). **(1)** The `robustness` (Probabilistic-Sharpe-Ratio)
+Pareto axis is **removed** → the CORE vector is **4 axes**
+`(marginal_value, independence, parsimony, structural_novelty)`. The PSR axis was
+scored on the *same reused* VAL window every generation, so it could not police the
+process-level selection ratchet it was meant to control, folded IC-scale penalties into
+a `[0,1]` probability, and was a near-monotone transform of the primary axis. Its
+window-jitter **plateau penalty**, perturbation-fidelity probe and hypothesis **sign
+bonus** now fold **onto the `marginal_value` axis** (all IC-scale;
+`marginal = raw ΔIC − plateau − perturbation ± sign_bonus`; `sign_bonus` default
+0.02→0.002). Legacy checkpoints carrying a `robustness` key still load. **(2)** The
+**residual-IC** independence axis scores on **IS∪VAL** (betas fit on IS only) for ~4×
+the sample and a lower noise floor. **(3)** New **progressive data reveal**
+(`--progressive-reveal`, default OFF → byte-identical baseline;
+`evolution/progressive.py` `build_schedule`): the dev window is revealed block-by-block
+across generations (expanding IS + sliding VAL); a final `--test-frac` tail is never
+revealed. Calendar-mode split threaded through the MCP seam (`is_end`/`val_end` on
+`evaluate_fitness`/`evaluate_set_fitness` + a new `panel_timeline`; window-keyed signal
+cache). Each reveal: prequential OOS log (`prequential.jsonl`), archive re-score
+(`controller.rescore_archive`, no `N_trials` billing, `rescore` lineage rows),
+gate-failer retry-once (`controller.release_failed_fingerprints`). Resume-safe
+(frontier corruption guard; `failed_fingerprints` persisted). Flags
+`--test-frac --seed-frac --reveal-every --val-blocks`. Tests:
+`tests/test_evolution_progressive.py`, updated
+`test_research_eval_{fitness,harness}.py`, `test_evolution_{controller,mutation,qd}.py`.
+Out of scope (deferred): Thresholdout/select-guard gate, ε-dominance, GP-arm
+progressive reveal.
+
 **Post-P5 — residual-IC + regime axes and two-stage curation (Lever 2) — ✅ DONE.**
 The CORE objective vector is now **5 axes**. The independence axis is the
 candidate's **residual (orthogonalised) IC** — its predictive edge in the

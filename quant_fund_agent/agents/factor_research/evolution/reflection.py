@@ -6,9 +6,9 @@ even opinionated prose the LLM reads when mutating a parent.  It is rendered
 never drift into flattery or self-reinforcement, and identical diagnostics
 always produce the identical brief (reproducible prompts, cacheable runs).
 
-The numbers quoted are all out-of-sample statistics (VAL-window ICs, blocked
-stability dispersion, correlations), never raw labels — the LLM sees *how* the candidate
-failed, not the data it failed on, so the reward stays un-gameable.
+The numbers quoted are all out-of-sample statistics (VAL-window ICs, residual ICs,
+correlations, window-jitter penalties), never raw labels — the LLM sees *how* the
+candidate failed, not the data it failed on, so the reward stays un-gameable.
 """
 
 from __future__ import annotations
@@ -88,24 +88,23 @@ def mutation_brief(
         f"effective factors {_fmt(d.get('pr_before'), 2)} → "
         f"{_fmt(d.get('pr_after'), 2)}); max |corr| to an existing factor: "
         f"{_fmt(d.get('max_abs_corr'))}.")
-    score_kind = d.get("stability_score_kind") or "fixed_marginal_delta"
-    model = d.get("stability_model")
-    model_txt = f" via {model}" if model else ""
-    lines.append(
-        f"Robustness (axis = {score_kind}{model_txt}): fixed-prediction blockwise "
-        f"mean {_fmt(d.get('stability_ic_mean'))} ± "
-        f"{_fmt(d.get('stability_ic_std'))} over "
-        f"{d.get('stability_n_blocks', 0)} contiguous VAL blocks; OOS/IS degradation "
-        f"ratio {_fmt(d.get('degradation_ratio'))}.")
-    if d.get("standalone_block_ic_mean") is not None:
+    raw_mv = d.get("marginal_value_raw")
+    if raw_mv is not None and (
+        d.get("plateau_penalty") or d.get("perturbation_penalty")
+        or d.get("sign_consistency") is not None
+    ):
+        sign_delta = None
+        if d.get("sign_consistency") is not None:
+            sign_delta = "+bonus" if d["sign_consistency"] else "−bonus"
         lines.append(
-            f"Standalone temporal stability diagnostic: raw-signal block IC mean "
-            f"{_fmt(d.get('standalone_block_ic_mean'))} ± "
-            f"{_fmt(d.get('standalone_block_ic_std'))} over "
-            f"{d.get('standalone_n_blocks', 0)} VAL blocks.")
+            f"Marginal axis penalties: raw ΔIC {_fmt(raw_mv)} → axis "
+            f"{_fmt(obj.marginal_value)} (plateau −{_fmt(d.get('plateau_penalty'))}, "
+            f"perturbation −{_fmt(d.get('perturbation_penalty'))}, sign "
+            f"{sign_delta or 'n/a'}); OOS/IS degradation ratio "
+            f"{_fmt(d.get('degradation_ratio'))}.")
     if d.get("structural_novelty") is not None:
         lines.append(
-            f"Structural novelty (5th axis): canonical AST weighted-subtree distance "
+            f"Structural novelty (4th axis): canonical AST weighted-subtree distance "
             f"to nearest archive member {_fmt(d.get('structural_novelty'))} "
             f"(book={_fmt(d.get('novelty_min_book_distance'))}, "
             f"zoo={_fmt(d.get('novelty_min_zoo_distance'))}) — "
@@ -129,6 +128,9 @@ def mutation_brief(
             f"Multiple-testing deflation: after {d.get('n_trials')} trials the "
             f"deflated IC t-stat is {_fmt(defl.get('deflated_t'), 2)} "
             f"(luck haircut on |IC|: {_fmt(defl.get('luck_ic'))}).")
+    if d.get("scored_through") is not None:
+        lines.append(
+            f"Scored on data through {d['scored_through']} (progressive reveal).")
 
     # ── targeted advice (rule-based, from the numbers only) ──
     advice: list[str] = []

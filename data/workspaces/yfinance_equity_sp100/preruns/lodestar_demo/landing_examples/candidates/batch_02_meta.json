@@ -1,0 +1,82 @@
+{
+  "started_at": "2026-07-15T09:12:55+00:00",
+  "git_commit": "7ff6f9bc70bc92f091a7066b75cbbc94ac436778",
+  "scope": "yfinance_equity_sp100/lodestar_demo",
+  "prerun": "lodestar_demo",
+  "config_name": "yfinance_equity_sp100",
+  "n_strategies": 8,
+  "max_iterations": 6,
+  "oos_ratio": 0.2,
+  "no_seeds": true,
+  "universe": {
+    "provider": "yfinance",
+    "asset_class": "equity",
+    "universe": "sp100",
+    "frequency": "1d",
+    "timespan": [
+      "2020-01-01",
+      "2026-06-22"
+    ],
+    "n_tickers_cap": "25"
+  },
+  "models": {
+    "architect": "gpt-4o-mini",
+    "selector": "gpt-4o-mini",
+    "statistician": "gpt-4o-mini"
+  },
+  "env": {
+    "ARCHITECT_N_TICKERS": "25",
+    "QF_USE_MCP": "0"
+  },
+  "attempts": [
+    {
+      "attempt": 2,
+      "approved": true,
+      "reject_stage": null,
+      "strategy_id": "revised_opening_range_breakout_with_volume_momentum_fe0614c5"
+    },
+    {
+      "attempt": 3,
+      "approved": false,
+      "reject_stage": "statistician",
+      "strategy_id": null
+    },
+    {
+      "attempt": 4,
+      "approved": true,
+      "reject_stage": null,
+      "strategy_id": "enhanced_volume_adjusted_breakout_strategy_7e6479af"
+    },
+    {
+      "attempt": 5,
+      "approved": false,
+      "reject_stage": "statistician",
+      "strategy_id": null
+    },
+    {
+      "attempt": 6,
+      "approved": false,
+      "reject_stage": "statistician",
+      "strategy_id": null
+    },
+    {
+      "attempt": 7,
+      "approved": true,
+      "reject_stage": null,
+      "strategy_id": "refined_momentum_strategy_b1a473db"
+    },
+    {
+      "attempt": 8,
+      "approved": false,
+      "reject_stage": "statistician",
+      "strategy_id": null
+    },
+    {
+      "attempt": 9,
+      "approved": false,
+      "reject_stage": "statistician",
+      "strategy_id": null
+    }
+  ],
+  "finished_at": "2026-07-15T09:50:10+00:00"
+}

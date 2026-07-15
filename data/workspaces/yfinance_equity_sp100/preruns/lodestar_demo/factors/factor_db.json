@@ -1,0 +1,1684 @@
+{
+  "factors": [
+    {
+      "id": "opening_range_breakout",
+      "name": "Opening Range Breakout",
+      "class_name": "",
+      "description": "The signal determines if the price has broken above the opening range (high - low of the first 3 bars) and flags the breakout direction.",
+      "formula": "",
+      "trading_idea": "Breakouts from the opening range are commonly seen as signals for potential follow-through momentum. By identifying whether the price breaks above or below the initial range set during the first few bars of trading, this factor seeks to capture the momentum that follows such breakouts.",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.094437,
+        "ic_std": 0.205199,
+        "ic_ir": -0.460222,
+        "ic_hit_rate": 0.2857,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.080382,
+            "ic_std": 0.188362,
+            "ic_ir": -0.426742,
+            "ic_hit_rate": 0.3673,
+            "n_timestamps": 49
+          },
+          "6": {
+            "ic": -0.094437,
+            "ic_std": 0.205199,
+            "ic_ir": -0.460222,
+            "ic_hit_rate": 0.2857,
+            "n_timestamps": 49
+          },
+          "60": {
+            "ic": -0.016723,
+            "ic_std": 0.194504,
+            "ic_ir": -0.085977,
+            "ic_hit_rate": 0.4167,
+            "n_timestamps": 48
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 49,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "evolution:yfinance_equity_sp100:lodestar_demo",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/opening_range_breakout.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-07-15T08:35:58.727624",
+      "metadata": {
+        "llm_model": "gpt-4o-mini",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g0-opening_range_breakout-534824",
+          "generation": 0,
+          "operator": "seed",
+          "parent_ids": [],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": 0.01709291825033914,
+            "independence": -0.0264163282050696,
+            "robustness": 0.9941420362483742,
+            "parsimony": -12.0,
+            "structural_novelty": null
+          },
+          "gates": {
+            "coverage_ok": true,
+            "degradation_ok": null,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 4,
+          "curation": "archive",
+          "selection_deflation": "off",
+          "publish": null
+        },
+        "provenance": {
+          "scope": "yfinance_equity_sp100/lodestar_demo",
+          "config_hash": "695534d71353",
+          "provider": "yfinance",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": "sp100",
+          "timespan": [
+            "2020-01-01",
+            "2026-06-22"
+          ],
+          "stamped_at": "2026-07-15T08:35:58+00:00"
+        }
+      }
+    },
+    {
+      "id": "close_open_return_ratio",
+      "name": "Close/Open Return Ratio",
+      "class_name": "",
+      "description": "This factor computes the ratio of the close price to the open price over the last 6 bars, identifying instances where the close significantly deviates from the open.",
+      "formula": "",
+      "trading_idea": "The relationship between a bar's closing price and its opening price can indicate potential reversion opportunities. A disproportionately high or low close compared to the open may suggest a reversion to the mean in subsequent bars.",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.003217,
+        "ic_std": 0.303328,
+        "ic_ir": -0.010606,
+        "ic_hit_rate": 0.4981,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.002035,
+            "ic_std": 0.306674,
+            "ic_ir": -0.006636,
+            "ic_hit_rate": 0.4923,
+            "n_timestamps": 1619
+          },
+          "6": {
+            "ic": -0.003217,
+            "ic_std": 0.303328,
+            "ic_ir": -0.010606,
+            "ic_hit_rate": 0.4981,
+            "n_timestamps": 1614
+          },
+          "60": {
+            "ic": 0.007629,
+            "ic_std": 0.281155,
+            "ic_ir": 0.027135,
+            "ic_hit_rate": 0.5269,
+            "n_timestamps": 1560
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 1614,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "evolution:yfinance_equity_sp100:lodestar_demo",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/close_open_return_ratio.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-07-15T08:35:58.738176",
+      "metadata": {
+        "llm_model": "gpt-4o-mini",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g0-close_open_return_ratio-5eb501",
+          "generation": 0,
+          "operator": "seed",
+          "parent_ids": [],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": -0.004948837929028407,
+            "independence": -0.025927976718539626,
+            "robustness": 0.0006605496441597358,
+            "parsimony": -9.0,
+            "structural_novelty": 0.9035731365708235
+          },
+          "gates": {
+            "coverage_ok": true,
+            "degradation_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 5,
+          "curation": "archive",
+          "selection_deflation": "off",
+          "publish": null
+        },
+        "provenance": {
+          "scope": "yfinance_equity_sp100/lodestar_demo",
+          "config_hash": "695534d71353",
+          "provider": "yfinance",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": "sp100",
+          "timespan": [
+            "2020-01-01",
+            "2026-06-22"
+          ],
+          "stamped_at": "2026-07-15T08:35:58+00:00"
+        }
+      }
+    },
+    {
+      "id": "volume_weighted_price_change",
+      "name": "Volume-Weighted Price Change",
+      "class_name": "",
+      "description": "The signal computes the volume-weighted price change over the past 6 bars, providing insight into the strength of price movements based on trading activity.",
+      "formula": "",
+      "trading_idea": "Price changes that occur on higher volume are generally more significant and may indicate stronger market conviction. This factor calculates the price change weighted by the volume to highlight substantial movements.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.001555,
+        "ic_std": 0.262374,
+        "ic_ir": -0.005925,
+        "ic_hit_rate": 0.5214,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.000111,
+            "ic_std": 0.275591,
+            "ic_ir": 0.000404,
+            "ic_hit_rate": 0.5043,
+            "n_timestamps": 1618
+          },
+          "6": {
+            "ic": -0.001555,
+            "ic_std": 0.262374,
+            "ic_ir": -0.005925,
+            "ic_hit_rate": 0.5214,
+            "n_timestamps": 1613
+          },
+          "60": {
+            "ic": -0.011292,
+            "ic_std": 0.246148,
+            "ic_ir": -0.045874,
+            "ic_hit_rate": 0.499,
+            "n_timestamps": 1559
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 1613,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "evolution:yfinance_equity_sp100:lodestar_demo",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/volume_weighted_price_change.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-07-15T08:35:58.738307",
+      "metadata": {
+        "llm_model": "gpt-4o-mini",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g0-volume_weighted_price_change-d6374c",
+          "generation": 0,
+          "operator": "seed",
+          "parent_ids": [],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": -0.0018044246365587335,
+            "independence": -0.04818009262366962,
+            "robustness": 0.23574380988324528,
+            "parsimony": -12.0,
+            "structural_novelty": 0.9126240767610607
+          },
+          "gates": {
+            "coverage_ok": true,
+            "degradation_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 7,
+          "curation": "archive",
+          "selection_deflation": "off",
+          "publish": null
+        },
+        "provenance": {
+          "scope": "yfinance_equity_sp100/lodestar_demo",
+          "config_hash": "695534d71353",
+          "provider": "yfinance",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": "sp100",
+          "timespan": [
+            "2020-01-01",
+            "2026-06-22"
+          ],
+          "stamped_at": "2026-07-15T08:35:58+00:00"
+        }
+      }
+    },
+    {
+      "id": "close_open_breakout_reversion",
+      "name": "Close/Open Breakout Reversion",
+      "class_name": "",
+      "description": "The factor computes a signal that indicates the likelihood of mean reversion after a breakout from the opening range, measured by the ratio of the close to the open price. A higher absolute ratio suggests stronger reversion potential after a breakout.",
+      "formula": "",
+      "trading_idea": "This factor combines the momentum signal from breakouts above or below the opening range with a mean reversion signal from the close-to-open price behavior. By identifying when the price breaks out of the opening range and simultaneously deviates significantly from the opening price, it captures potential reversion opportunities following breakouts.",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.001161,
+        "ic_std": 0.27619,
+        "ic_ir": -0.004202,
+        "ic_hit_rate": 0.4947,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.003996,
+            "ic_std": 0.287442,
+            "ic_ir": 0.013903,
+            "ic_hit_rate": 0.4957,
+            "n_timestamps": 1622
+          },
+          "6": {
+            "ic": -0.001161,
+            "ic_std": 0.27619,
+            "ic_ir": -0.004202,
+            "ic_hit_rate": 0.4947,
+            "n_timestamps": 1617
+          },
+          "60": {
+            "ic": 0.002519,
+            "ic_std": 0.271663,
+            "ic_ir": 0.009272,
+            "ic_hit_rate": 0.5112,
+            "n_timestamps": 1563
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 1617,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "evolution:yfinance_equity_sp100:lodestar_demo",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/close_open_breakout_reversion.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-07-15T08:35:58.738421",
+      "metadata": {
+        "llm_model": "gpt-4o-mini",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g1-close_open_breakout_reversion-9d23d4",
+          "generation": 1,
+          "operator": "crossover",
+          "parent_ids": [
+            "g0-close_open_return_ratio-5eb501",
+            "g0-opening_range_breakout-534824"
+          ],
+          "expected_sign": -1,
+          "objective": {
+            "marginal_value": 0.0032509398218973085,
+            "independence": 0.004991694138396971,
+            "robustness": 0.45613399571329305,
+            "parsimony": -21.0,
+            "structural_novelty": 0.7965756035818582
+          },
+          "gates": {
+            "coverage_ok": true,
+            "degradation_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 8,
+          "curation": "archive",
+          "selection_deflation": "off",
+          "publish": null
+        },
+        "provenance": {
+          "scope": "yfinance_equity_sp100/lodestar_demo",
+          "config_hash": "695534d71353",
+          "provider": "yfinance",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": "sp100",
+          "timespan": [
+            "2020-01-01",
+            "2026-06-22"
+          ],
+          "stamped_at": "2026-07-15T08:35:58+00:00"
+        }
+      }
+    },
+    {
+      "id": "volume_weighted_price_momentum",
+      "name": "Volume Weighted Price Momentum",
+      "class_name": "",
+      "description": "This factor computes the price momentum over the last 6 bars, adjusted for the volume during those bars, to identify price movements that are supported by higher trading activity.",
+      "formula": "",
+      "trading_idea": "Momentum in financial markets often persists, driven by the volume of trades accompanying price movements. By calculating the price momentum weighted by volume, we can capture the influence of trading activity on price changes, providing a more robust signal that reflects market sentiment and activity.",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.004651,
+        "ic_std": 0.307205,
+        "ic_ir": -0.015139,
+        "ic_hit_rate": 0.4966,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.000106,
+            "ic_std": 0.322877,
+            "ic_ir": -0.000329,
+            "ic_hit_rate": 0.4938,
+            "n_timestamps": 1618
+          },
+          "6": {
+            "ic": -0.004651,
+            "ic_std": 0.307205,
+            "ic_ir": -0.015139,
+            "ic_hit_rate": 0.4966,
+            "n_timestamps": 1613
+          },
+          "60": {
+            "ic": -0.005787,
+            "ic_std": 0.285223,
+            "ic_ir": -0.020289,
+            "ic_hit_rate": 0.499,
+            "n_timestamps": 1559
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 1613,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "evolution:yfinance_equity_sp100:lodestar_demo",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/volume_weighted_price_momentum.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-07-15T08:35:58.738456",
+      "metadata": {
+        "llm_model": "gpt-4o-mini",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g1-volume_weighted_price_momentum-159fc8",
+          "generation": 1,
+          "operator": "llm_semantic",
+          "parent_ids": [
+            "g0-price_momentum_strength-085666"
+          ],
+          "expected_sign": 1,
+          "objective": {
+            "marginal_value": -0.008287914219526807,
+            "independence": -0.010813289959888915,
+            "robustness": 0.33275766797889883,
+            "parsimony": -15.0,
+            "structural_novelty": 0.8549130100435943
+          },
+          "gates": {
+            "coverage_ok": true,
+            "degradation_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 11,
+          "curation": "archive",
+          "selection_deflation": "off",
+          "publish": null
+        },
+        "provenance": {
+          "scope": "yfinance_equity_sp100/lodestar_demo",
+          "config_hash": "695534d71353",
+          "provider": "yfinance",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": "sp100",
+          "timespan": [
+            "2020-01-01",
+            "2026-06-22"
+          ],
+          "stamped_at": "2026-07-15T08:35:58+00:00"
+        }
+      }
+    },
+    {
+      "id": "opening_range_breakout_j",
+      "name": "Opening Range Breakout (jitter)",
+      "class_name": "",
+      "description": "The signal determines if the price has broken above the opening range (high - low of the first 3 bars) and flags the breakout direction.",
+      "formula": "",
+      "trading_idea": "Breakouts from the opening range are commonly seen as signals for potential follow-through momentum. By identifying whether the price breaks above or below the initial range set during the first few bars of trading, this factor seeks to capture the momentum that follows such breakouts.",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.082007,
+        "ic_std": 0.224916,
+        "ic_ir": -0.364612,
+        "ic_hit_rate": 0.3409,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.08001,
+            "ic_std": 0.191634,
+            "ic_ir": -0.417517,
+            "ic_hit_rate": 0.3864,
+            "n_timestamps": 44
+          },
+          "6": {
+            "ic": -0.082007,
+            "ic_std": 0.224916,
+            "ic_ir": -0.364612,
+            "ic_hit_rate": 0.3409,
+            "n_timestamps": 44
+          },
+          "60": {
+            "ic": -0.032367,
+            "ic_std": 0.176409,
+            "ic_ir": -0.183475,
+            "ic_hit_rate": 0.4186,
+            "n_timestamps": 43
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 44,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "evolution:yfinance_equity_sp100:lodestar_demo",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/opening_range_breakout_j.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-07-15T08:35:58.738494",
+      "metadata": {
+        "llm_model": "gpt-4o-mini",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g2-opening_range_breakout_j-bdcbd5",
+          "generation": 2,
+          "operator": "jitter",
+          "parent_ids": [
+            "g0-opening_range_breakout-534824"
+          ],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": 0.004517214204439378,
+            "independence": 0.009110137869428145,
+            "robustness": 0.9959137285902016,
+            "parsimony": -12.0,
+            "structural_novelty": 0.0
+          },
+          "gates": {
+            "coverage_ok": true,
+            "degradation_ok": null,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 16,
+          "curation": "archive",
+          "selection_deflation": "off",
+          "publish": null
+        },
+        "provenance": {
+          "scope": "yfinance_equity_sp100/lodestar_demo",
+          "config_hash": "695534d71353",
+          "provider": "yfinance",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": "sp100",
+          "timespan": [
+            "2020-01-01",
+            "2026-06-22"
+          ],
+          "stamped_at": "2026-07-15T08:35:58+00:00"
+        }
+      }
+    },
+    {
+      "id": "volume_adjusted_breakout_reversion",
+      "name": "Volume Adjusted Breakout Reversion",
+      "class_name": "",
+      "description": "The factor computes a reversion signal after breakouts from the opening range, weighted by the volume during the breakout period, to identify potential reversals following significant price movements.",
+      "formula": "",
+      "trading_idea": "This factor combines the momentum from price breakouts above or below the opening range with a volume-weighted mean reversion signal. By adjusting the mean reversion signal based on the volume during the breakout, it captures the strength of the breakout and the likelihood of a reversal, providing a more reliable trading signal.",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.014955,
+        "ic_std": 0.266697,
+        "ic_ir": -0.056075,
+        "ic_hit_rate": 0.4808,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.006313,
+            "ic_std": 0.269141,
+            "ic_ir": -0.023457,
+            "ic_hit_rate": 0.4873,
+            "n_timestamps": 1619
+          },
+          "6": {
+            "ic": -0.014955,
+            "ic_std": 0.266697,
+            "ic_ir": -0.056075,
+            "ic_hit_rate": 0.4808,
+            "n_timestamps": 1614
+          },
+          "60": {
+            "ic": -0.063186,
+            "ic_std": 0.268856,
+            "ic_ir": -0.235017,
+            "ic_hit_rate": 0.4064,
+            "n_timestamps": 1560
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 1614,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "evolution:yfinance_equity_sp100:lodestar_demo",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/volume_adjusted_breakout_reversion.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-07-15T08:35:58.738535",
+      "metadata": {
+        "llm_model": "gpt-4o-mini",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g2-volume_adjusted_breakout_reversion-3b9857",
+          "generation": 2,
+          "operator": "crossover",
+          "parent_ids": [
+            "g1-volume_weighted_price_momentum-159fc8",
+            "g2-close_open_breakout_reversion_j-1542e2"
+          ],
+          "expected_sign": -1,
+          "objective": {
+            "marginal_value": -0.0014943336156309824,
+            "independence": -0.005497565507256875,
+            "robustness": 1.0106450635656727,
+            "parsimony": -24.0,
+            "structural_novelty": 0.5065200020456143
+          },
+          "gates": {
+            "coverage_ok": true,
+            "degradation_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 23,
+          "curation": "archive",
+          "selection_deflation": "off",
+          "publish": null
+        },
+        "provenance": {
+          "scope": "yfinance_equity_sp100/lodestar_demo",
+          "config_hash": "695534d71353",
+          "provider": "yfinance",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": "sp100",
+          "timespan": [
+            "2020-01-01",
+            "2026-06-22"
+          ],
+          "stamped_at": "2026-07-15T08:35:58+00:00"
+        }
+      }
+    },
+    {
+      "id": "opening_range_volume_weighted_breakout",
+      "name": "Opening Range Volume-Weighted Breakout",
+      "class_name": "",
+      "description": "The signal flags the breakout direction based on whether the price has broken above or below the opening range, and it adjusts the strength of this signal by incorporating the volume-weighted price changes over the last 6 bars.",
+      "formula": "",
+      "trading_idea": "This factor combines the concept of opening range breakouts with volume-weighted price changes to capture momentum. By assessing breakouts from the opening range while weighting the price movements by volume, it aims to identify stronger signals that are supported by higher trading activity.",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.001081,
+        "ic_std": 0.262153,
+        "ic_ir": 0.004124,
+        "ic_hit_rate": 0.4774,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.000848,
+            "ic_std": 0.275333,
+            "ic_ir": -0.00308,
+            "ic_hit_rate": 0.4957,
+            "n_timestamps": 1618
+          },
+          "6": {
+            "ic": 0.001081,
+            "ic_std": 0.262153,
+            "ic_ir": 0.004124,
+            "ic_hit_rate": 0.4774,
+            "n_timestamps": 1613
+          },
+          "60": {
+            "ic": 0.010822,
+            "ic_std": 0.246509,
+            "ic_ir": 0.043901,
+            "ic_hit_rate": 0.501,
+            "n_timestamps": 1559
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 1613,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "evolution:yfinance_equity_sp100:lodestar_demo",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/opening_range_volume_weighted_breakout.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-07-15T08:35:58.738594",
+      "metadata": {
+        "llm_model": "gpt-4o-mini",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g3-opening_range_volume_weighted_breakout-ba5ca8",
+          "generation": 3,
+          "operator": "crossover",
+          "parent_ids": [
+            "g3-opening_range_breakout_j_1-bb3def",
+            "g0-volume_weighted_price_change-d6374c"
+          ],
+          "expected_sign": 1,
+          "objective": {
+            "marginal_value": -0.0015874774255029412,
+            "independence": 0.03238572939729207,
+            "robustness": 0.14338795056003703,
+            "parsimony": -21.0,
+            "structural_novelty": 0.7995346792829441
+          },
+          "gates": {
+            "coverage_ok": true,
+            "degradation_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 26,
+          "curation": "archive",
+          "selection_deflation": "off",
+          "publish": null
+        },
+        "provenance": {
+          "scope": "yfinance_equity_sp100/lodestar_demo",
+          "config_hash": "695534d71353",
+          "provider": "yfinance",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": "sp100",
+          "timespan": [
+            "2020-01-01",
+            "2026-06-22"
+          ],
+          "stamped_at": "2026-07-15T08:35:58+00:00"
+        }
+      }
+    },
+    {
+      "id": "volume_weighted_breakout_momentum",
+      "name": "Volume Weighted Breakout Momentum",
+      "class_name": "",
+      "description": "This factor computes the price momentum adjusted for volume during breakout conditions, specifically when the price crosses above the high of the opening range, to identify potential continuations in price movement.",
+      "formula": "",
+      "trading_idea": "This child factor combines the momentum from price breakouts above the opening range with a volume-adjusted price momentum signal. By leveraging the volume-weighted momentum during breakout conditions, it captures the strength of the breakout along with the influence of trading activity, providing a more reliable momentum signal.",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.09013,
+        "ic_std": null,
+        "ic_ir": 0.0,
+        "ic_hit_rate": 1.0,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.277997,
+            "ic_std": null,
+            "ic_ir": 0.0,
+            "ic_hit_rate": 1.0,
+            "n_timestamps": 1
+          },
+          "6": {
+            "ic": 0.09013,
+            "ic_std": null,
+            "ic_ir": 0.0,
+            "ic_hit_rate": 1.0,
+            "n_timestamps": 1
+          },
+          "60": {
+            "ic": 0.122533,
+            "ic_std": null,
+            "ic_ir": 0.0,
+            "ic_hit_rate": 1.0,
+            "n_timestamps": 1
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 1,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "evolution:yfinance_equity_sp100:lodestar_demo",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/volume_weighted_breakout_momentum.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-07-15T08:35:58.738630",
+      "metadata": {
+        "llm_model": "gpt-4o-mini",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g3-volume_weighted_breakout_momentum-840f5b",
+          "generation": 3,
+          "operator": "crossover",
+          "parent_ids": [
+            "g1-volume_weighted_price_momentum-159fc8",
+            "g2-volume_adjusted_breakout_reversion-3b9857"
+          ],
+          "expected_sign": 1,
+          "objective": {
+            "marginal_value": 0.0015042969468511975,
+            "independence": 0.01953270638379005,
+            "robustness": 0.990794351100321,
+            "parsimony": -24.0,
+            "structural_novelty": 0.6628464585811872
+          },
+          "gates": {
+            "coverage_ok": true,
+            "degradation_ok": null,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 27,
+          "curation": "archive",
+          "selection_deflation": "off",
+          "publish": null
+        },
+        "provenance": {
+          "scope": "yfinance_equity_sp100/lodestar_demo",
+          "config_hash": "695534d71353",
+          "provider": "yfinance",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": "sp100",
+          "timespan": [
+            "2020-01-01",
+            "2026-06-22"
+          ],
+          "stamped_at": "2026-07-15T08:35:58+00:00"
+        }
+      }
+    },
+    {
+      "id": "volume_adjusted_price_momentum_1",
+      "name": "Volume Adjusted Price Momentum",
+      "class_name": "",
+      "description": "This factor computes the price momentum over the last 6 bars, further adjusted by the relative volume compared to its recent average, highlighting price movements that are supported by significant trading activity.",
+      "formula": "",
+      "trading_idea": "Momentum in financial markets can be more accurately captured by analyzing price changes adjusted for recent trading volume. By focusing on the price momentum in relation to volume spikes, we can identify genuine price movements driven by increased market participation, mitigating the effects of noise from low-volume periods.",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.005679,
+        "ic_std": 0.24529,
+        "ic_ir": -0.02315,
+        "ic_hit_rate": 0.5035,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.000884,
+            "ic_std": 0.271546,
+            "ic_ir": 0.003256,
+            "ic_hit_rate": 0.5032,
+            "n_timestamps": 1582
+          },
+          "6": {
+            "ic": -0.005679,
+            "ic_std": 0.24529,
+            "ic_ir": -0.02315,
+            "ic_hit_rate": 0.5035,
+            "n_timestamps": 1577
+          },
+          "60": {
+            "ic": -0.009893,
+            "ic_std": 0.233586,
+            "ic_ir": -0.042352,
+            "ic_hit_rate": 0.478,
+            "n_timestamps": 1523
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 1577,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "evolution:yfinance_equity_sp100:lodestar_demo",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/volume_adjusted_price_momentum_1.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-07-15T08:35:58.738687",
+      "metadata": {
+        "llm_model": "gpt-4o-mini",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g3-volume_adjusted_price_momentum_1-7fa66c",
+          "generation": 3,
+          "operator": "llm_semantic",
+          "parent_ids": [
+            "g1-volume_weighted_price_momentum-159fc8"
+          ],
+          "expected_sign": 1,
+          "objective": {
+            "marginal_value": -0.0003191688094187116,
+            "independence": 0.08137996141398388,
+            "robustness": 0.21221307385124136,
+            "parsimony": -14.0,
+            "structural_novelty": 0.7598805332402733
+          },
+          "gates": {
+            "coverage_ok": true,
+            "degradation_ok": null,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 29,
+          "curation": "archive",
+          "selection_deflation": "off",
+          "publish": null
+        },
+        "provenance": {
+          "scope": "yfinance_equity_sp100/lodestar_demo",
+          "config_hash": "695534d71353",
+          "provider": "yfinance",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": "sp100",
+          "timespan": [
+            "2020-01-01",
+            "2026-06-22"
+          ],
+          "stamped_at": "2026-07-15T08:35:58+00:00"
+        }
+      }
+    },
+    {
+      "id": "volume_adjusted_price_momentum_2",
+      "name": "Volume Adjusted Price Momentum",
+      "class_name": "",
+      "description": "This factor computes the momentum of price changes over the last 6 bars, adjusted by the ratio of current volume to a trailing average volume, aiming to identify price movements that are both significant and supported by active trading.",
+      "formula": "",
+      "trading_idea": "Price movements supported by a significant increase in volume may indicate stronger momentum, as they reflect heightened market interest and participation. By adjusting the price momentum signal based on the recent volume trends, we can capture the influence of trading activity on price changes while addressing the weaknesses of the parent factor.",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.001555,
+        "ic_std": 0.262374,
+        "ic_ir": -0.005925,
+        "ic_hit_rate": 0.5214,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.000111,
+            "ic_std": 0.275591,
+            "ic_ir": 0.000404,
+            "ic_hit_rate": 0.5043,
+            "n_timestamps": 1618
+          },
+          "6": {
+            "ic": -0.001555,
+            "ic_std": 0.262374,
+            "ic_ir": -0.005925,
+            "ic_hit_rate": 0.5214,
+            "n_timestamps": 1613
+          },
+          "60": {
+            "ic": -0.011292,
+            "ic_std": 0.246148,
+            "ic_ir": -0.045874,
+            "ic_hit_rate": 0.499,
+            "n_timestamps": 1559
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 1613,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "evolution:yfinance_equity_sp100:lodestar_demo",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/volume_adjusted_price_momentum_2.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-07-15T08:35:58.738750",
+      "metadata": {
+        "llm_model": "gpt-4o-mini",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g3-volume_adjusted_price_momentum_2-4f42ea",
+          "generation": 3,
+          "operator": "llm_semantic",
+          "parent_ids": [
+            "g1-volume_weighted_price_momentum-159fc8"
+          ],
+          "expected_sign": 1,
+          "objective": {
+            "marginal_value": -0.00036915193038545516,
+            "independence": -0.03042985150323895,
+            "robustness": 0.9769421789650712,
+            "parsimony": -14.0,
+            "structural_novelty": 0.5996922047007005
+          },
+          "gates": {
+            "coverage_ok": true,
+            "degradation_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 31,
+          "curation": "archive",
+          "selection_deflation": "off",
+          "publish": null
+        },
+        "provenance": {
+          "scope": "yfinance_equity_sp100/lodestar_demo",
+          "config_hash": "695534d71353",
+          "provider": "yfinance",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": "sp100",
+          "timespan": [
+            "2020-01-01",
+            "2026-06-22"
+          ],
+          "stamped_at": "2026-07-15T08:35:58+00:00"
+        }
+      }
+    },
+    {
+      "id": "volume_weighted_price_momentum_2",
+      "name": "Volume Weighted Price Momentum",
+      "class_name": "",
+      "description": "This factor computes the price momentum over the last 6 bars, weighted by the volume during those bars, to identify price movements that are supported by significant trading activity.",
+      "formula": "",
+      "trading_idea": "Incorporating volume directly into price momentum can provide a clearer signal of genuine price movements. By focusing on the price momentum weighted by recent trading volume, we can capture the strength of price changes that are supported by significant market activity, potentially leading to more accurate forecasts.",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.008138,
+        "ic_std": 0.310659,
+        "ic_ir": -0.026195,
+        "ic_hit_rate": 0.4851,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.003211,
+            "ic_std": 0.326899,
+            "ic_ir": -0.009823,
+            "ic_hit_rate": 0.496,
+            "n_timestamps": 1619
+          },
+          "6": {
+            "ic": -0.008138,
+            "ic_std": 0.310659,
+            "ic_ir": -0.026195,
+            "ic_hit_rate": 0.4851,
+            "n_timestamps": 1614
+          },
+          "60": {
+            "ic": -0.005055,
+            "ic_std": 0.286794,
+            "ic_ir": -0.017627,
+            "ic_hit_rate": 0.5,
+            "n_timestamps": 1560
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 1614,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "evolution:yfinance_equity_sp100:lodestar_demo",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/volume_weighted_price_momentum_2.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-07-15T08:35:58.738782",
+      "metadata": {
+        "llm_model": "gpt-4o-mini",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g5-volume_weighted_price_momentum_2-32a11e",
+          "generation": 5,
+          "operator": "llm_semantic",
+          "parent_ids": [
+            "g4-volume_adjusted_price_momentum_1_j_1-df2ef4"
+          ],
+          "expected_sign": 1,
+          "objective": {
+            "marginal_value": 0.007750381566678211,
+            "independence": 0.1217957511244058,
+            "robustness": 0.9574706105235117,
+            "parsimony": -11.0,
+            "structural_novelty": 0.7188591942398344
+          },
+          "gates": {
+            "coverage_ok": true,
+            "degradation_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 40,
+          "curation": "archive",
+          "selection_deflation": "off",
+          "publish": null
+        },
+        "provenance": {
+          "scope": "yfinance_equity_sp100/lodestar_demo",
+          "config_hash": "695534d71353",
+          "provider": "yfinance",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": "sp100",
+          "timespan": [
+            "2020-01-01",
+            "2026-06-22"
+          ],
+          "stamped_at": "2026-07-15T08:35:58+00:00"
+        }
+      }
+    },
+    {
+      "id": "volume_conditioned_price_momentum",
+      "name": "Volume Conditioned Price Momentum",
+      "class_name": "",
+      "description": "This factor computes the price momentum over the last 6 bars, adjusted for the volume in the last 6 bars, to identify price movements that are supported by higher trading activity. It emits a momentum signal only when the recent volume exceeds its average.",
+      "formula": "",
+      "trading_idea": "By conditioning price momentum on the recent volume activity, this factor aims to capture the strength of price changes that are supported by significant trading volumes. This approach leverages the insight that higher trading volumes may provide more reliable momentum signals, as they reflect greater market sentiment and activity.",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.004705,
+        "ic_std": 0.244154,
+        "ic_ir": -0.019271,
+        "ic_hit_rate": 0.506,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.001352,
+            "ic_std": 0.266878,
+            "ic_ir": 0.005067,
+            "ic_hit_rate": 0.507,
+            "n_timestamps": 1582
+          },
+          "6": {
+            "ic": -0.004705,
+            "ic_std": 0.244154,
+            "ic_ir": -0.019271,
+            "ic_hit_rate": 0.506,
+            "n_timestamps": 1577
+          },
+          "60": {
+            "ic": -0.009414,
+            "ic_std": 0.232756,
+            "ic_ir": -0.040447,
+            "ic_hit_rate": 0.4826,
+            "n_timestamps": 1523
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 1577,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "evolution:yfinance_equity_sp100:lodestar_demo",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/volume_conditioned_price_momentum.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-07-15T08:35:58.738810",
+      "metadata": {
+        "llm_model": "gpt-4o-mini",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g5-volume_conditioned_price_momentum-332a2b",
+          "generation": 5,
+          "operator": "crossover",
+          "parent_ids": [
+            "g5-volume_weighted_price_momentum_2-32a11e",
+            "g1-volume_weighted_price_momentum-159fc8"
+          ],
+          "expected_sign": 1,
+          "objective": {
+            "marginal_value": 0.0026568218993542284,
+            "independence": -0.0914268957036098,
+            "robustness": 0.9655724546425696,
+            "parsimony": -14.0,
+            "structural_novelty": 0.6553544919931469
+          },
+          "gates": {
+            "coverage_ok": true,
+            "degradation_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 42,
+          "curation": "archive",
+          "selection_deflation": "off",
+          "publish": null
+        },
+        "provenance": {
+          "scope": "yfinance_equity_sp100/lodestar_demo",
+          "config_hash": "695534d71353",
+          "provider": "yfinance",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": "sp100",
+          "timespan": [
+            "2020-01-01",
+            "2026-06-22"
+          ],
+          "stamped_at": "2026-07-15T08:35:58+00:00"
+        }
+      }
+    },
+    {
+      "id": "volume_adjusted_price_momentum_3",
+      "name": "Volume Adjusted Price Momentum",
+      "class_name": "",
+      "description": "This factor computes the price momentum over the last 6 bars, normalized by the volatility of the trading volume during those bars, to identify price movements that are more robust and reliable.",
+      "formula": "",
+      "trading_idea": "Market movements are often accompanied by varying levels of trading volume, which can indicate the strength of the price movement. By adjusting the price momentum by a measure of volume volatility, we can capture more nuanced signals that reflect the market's reaction to price changes, thus providing a clearer indicator of momentum.",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.007589,
+        "ic_std": 0.191639,
+        "ic_ir": 0.039601,
+        "ic_hit_rate": 0.5232,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.002851,
+            "ic_std": 0.185944,
+            "ic_ir": 0.015335,
+            "ic_hit_rate": 0.5185,
+            "n_timestamps": 1618
+          },
+          "6": {
+            "ic": 0.007589,
+            "ic_std": 0.191639,
+            "ic_ir": 0.039601,
+            "ic_hit_rate": 0.5232,
+            "n_timestamps": 1613
+          },
+          "60": {
+            "ic": -0.005545,
+            "ic_std": 0.182716,
+            "ic_ir": -0.030347,
+            "ic_hit_rate": 0.5093,
+            "n_timestamps": 1559
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 1613,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "evolution:yfinance_equity_sp100:lodestar_demo",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/volume_adjusted_price_momentum_3.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-07-15T08:35:58.738831",
+      "metadata": {
+        "llm_model": "gpt-4o-mini",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g5-volume_adjusted_price_momentum_3-1d495c",
+          "generation": 5,
+          "operator": "llm_semantic",
+          "parent_ids": [
+            "g1-volume_weighted_price_momentum-159fc8"
+          ],
+          "expected_sign": 1,
+          "objective": {
+            "marginal_value": 0.010546553018126507,
+            "independence": -0.043812422853689234,
+            "robustness": 0.10443277998221358,
+            "parsimony": -17.0,
+            "structural_novelty": 0.6405215532158528
+          },
+          "gates": {
+            "coverage_ok": true,
+            "degradation_ok": null,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 43,
+          "curation": "archive",
+          "selection_deflation": "off",
+          "publish": null
+        },
+        "provenance": {
+          "scope": "yfinance_equity_sp100/lodestar_demo",
+          "config_hash": "695534d71353",
+          "provider": "yfinance",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": "sp100",
+          "timespan": [
+            "2020-01-01",
+            "2026-06-22"
+          ],
+          "stamped_at": "2026-07-15T08:35:58+00:00"
+        }
+      }
+    },
+    {
+      "id": "volume_adjusted_price_momentum_4",
+      "name": "Volume Adjusted Price Momentum",
+      "class_name": "",
+      "description": "The signal computes the momentum of price changes over the last 6 bars, adjusted for the volume-weighted average price. It emits a momentum signal when the price change exceeds a threshold relative to the VWAP, indicating a price movement supported by volume.",
+      "formula": "",
+      "trading_idea": "This factor aims to capture price momentum by adjusting the price changes based on the volume-weighted average price (VWAP). Higher price movements accompanied by significant volume increases are likely to indicate stronger market sentiment, thus providing a more reliable momentum signal.",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.002999,
+        "ic_std": 0.299316,
+        "ic_ir": 0.01002,
+        "ic_hit_rate": 0.5009,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.002742,
+            "ic_std": 0.312057,
+            "ic_ir": 0.008788,
+            "ic_hit_rate": 0.5044,
+            "n_timestamps": 1590
+          },
+          "6": {
+            "ic": 0.002999,
+            "ic_std": 0.299316,
+            "ic_ir": 0.01002,
+            "ic_hit_rate": 0.5009,
+            "n_timestamps": 1585
+          },
+          "60": {
+            "ic": 0.005241,
+            "ic_std": 0.278158,
+            "ic_ir": 0.018843,
+            "ic_hit_rate": 0.5049,
+            "n_timestamps": 1531
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 1585,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "evolution:yfinance_equity_sp100:lodestar_demo",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/volume_adjusted_price_momentum_4.py",
+      "required_inputs": [
+        "close"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-07-15T08:35:58.738856",
+      "metadata": {
+        "llm_model": "gpt-4o-mini",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g5-volume_adjusted_price_momentum_4-cb9045",
+          "generation": 5,
+          "operator": "llm_semantic",
+          "parent_ids": [
+            "g5-volume_conditioned_price_momentum-332a2b"
+          ],
+          "expected_sign": 1,
+          "objective": {
+            "marginal_value": -0.002505087565385488,
+            "independence": 0.05904063753086509,
+            "robustness": 0.9560142179349007,
+            "parsimony": -12.0,
+            "structural_novelty": 0.819590641471768
+          },
+          "gates": {
+            "coverage_ok": true,
+            "degradation_ok": null,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 45,
+          "curation": "archive",
+          "selection_deflation": "off",
+          "publish": null
+        },
+        "provenance": {
+          "scope": "yfinance_equity_sp100/lodestar_demo",
+          "config_hash": "695534d71353",
+          "provider": "yfinance",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": "sp100",
+          "timespan": [
+            "2020-01-01",
+            "2026-06-22"
+          ],
+          "stamped_at": "2026-07-15T08:35:58+00:00"
+        }
+      }
+    }
+  ],
+  "trading_ideas": []
+}

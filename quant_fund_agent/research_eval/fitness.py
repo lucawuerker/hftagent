@@ -6,16 +6,23 @@ set of **hard gates** a candidate must clear before it competes at all:
 
 CORE objective vector (all *maximised*):
   1. ``marginal_value``     — ΔOOS-IC the candidate adds to the combined model (LOCO
-     against the Pareto archive).  The primary axis.
+     against the Pareto archive).  The primary axis.  The window-jitter plateau
+     penalty, the perturbation-fidelity probe and the hypothesis sign bonus fold
+     directly into this axis (all in IC units): ``marginal_value = raw ΔIC −
+     plateau − perturbation ± sign_bonus``.  (These previously sat on a separate
+     ``robustness`` axis; that axis was a Probabilistic-Sharpe-Ratio measure on the
+     *same reused VAL window* — it could not police the generational ratchet it was
+     meant to control, folded IC-scale penalties into a [0,1] probability, and was a
+     near-monotone transform of this primary axis, so it was removed.)
   2. ``independence``       — the candidate's **residual (orthogonalised) IC**: its
      predictive edge in the direction the book does *not* span (novel predictive
      content).  Rewards independence that actually predicts, not orthogonal noise.
-     The legacy Δ-participation-ratio − soft max-|corr| penalty stays available as
-     a diagnostic / ``EvalParams.independence_metric`` option.
-  3. ``robustness``         — blocked validation stability of the fixed IS-fitted
-     combined/LOCO predictions, ``mean − λ·std − plateau + sign_bonus``.
-  4. ``parsimony``          — ``−complexity`` (operator + constant count from the AST).
-  5. ``structural_novelty`` — minimum **canonical AST weighted-subtree distance**
+     Scored on **IS∪VAL** (the orthogonalisation betas are still fit on IS only), so
+     the axis has ~4× the effective sample and a lower noise floor.  The legacy
+     Δ-participation-ratio − soft max-|corr| penalty stays available as a diagnostic /
+     ``EvalParams.independence_metric`` option.
+  3. ``parsimony``          — ``−complexity`` (operator + constant count from the AST).
+  4. ``structural_novelty`` — minimum **canonical AST weighted-subtree distance**
      (``research_eval.ast_novelty``) to the nearest archive member.  0 = structural
      clone (same canonical computation) of something already kept, 1 = no shared
      canonical subtree.  Falls back to the zoo reference distance when the archive is
@@ -46,7 +53,7 @@ from typing import Any, Sequence
 
 @dataclass
 class ObjectiveVector:
-    """The five Pareto axes for one candidate — every axis *maximised*.
+    """The four Pareto axes for one candidate — every axis *maximised*.
 
     ``None`` on an axis means "not measured / not applicable"; it is treated as the
     worst possible value in dominance comparisons so an unmeasured candidate never
@@ -55,12 +62,10 @@ class ObjectiveVector:
 
     marginal_value: float | None = None
     independence: float | None = None
-    robustness: float | None = None
     parsimony: float | None = None
     structural_novelty: float | None = None
 
-    AXES = ("marginal_value", "independence", "robustness", "parsimony",
-            "structural_novelty")
+    AXES = ("marginal_value", "independence", "parsimony", "structural_novelty")
 
     def as_tuple(self) -> tuple[float, ...]:
         """The axes as floats (``None`` → ``-inf``, the worst value)."""

@@ -175,15 +175,12 @@ def _fitness(**diag) -> FitnessResult:
         "residual_ic": 0.01, "with_ic": 0.03, "base_ic": 0.01,
         "max_abs_corr": 0.8, "delta_participation": 0.1,
         "pr_before": 3.0, "pr_after": 3.1,
-        "stability_ic_mean": 0.01, "stability_ic_std": 0.02,
-        "stability_n_blocks": 4, "stability_score_kind": "fixed_marginal_delta",
-        "stability_model": "gradient_boosting",
-        "standalone_block_ic_mean": 0.0, "standalone_block_ic_std": 0.01,
-        "standalone_n_blocks": 4,
+        "marginal_value_raw": 0.025,
         "sign_consistency": False, "coverage": 0.5,
         "degradation_ratio": 0.08,
         "ic_decay": {"1": 0.001, "6": 0.004, "24": 0.02},
         "plateau_penalty": 0.05, "jitter_ics": [0.001, -0.002],
+        "perturbation_penalty": None,
         "deflation": {"deflated_t": -0.5, "luck_ic": 0.01},
         "n_trials": 123, "complexity": 14,
     }
@@ -191,7 +188,7 @@ def _fitness(**diag) -> FitnessResult:
     return FitnessResult(
         candidate_id="c",
         objective=ObjectiveVector(marginal_value=0.02, independence=-0.3,
-                                  robustness=-0.01, parsimony=-14.0),
+                                  parsimony=-14.0),
         gates=GateResults(coverage_ok=True, degradation_ok=False, deflation_ok=True,
                           reasons={"degradation": "OOS/IS=0.080 < τ=0.5"}),
         diagnostics=base,
@@ -253,7 +250,7 @@ def test_inmem_compile_rejects_invalid_code():
 
 
 def test_plateau_penalty_docks_knife_edge_candidate():
-    """A candidate whose jitter variants lose the edge gets a lower robustness."""
+    """A candidate whose jitter variants lose the edge gets a lower marginal value."""
     from quant_fund_agent.comparison.config import ComparisonConfig
     from quant_fund_agent.research_eval.harness import EvalParams, evaluate_candidate
 
@@ -275,7 +272,7 @@ def test_plateau_penalty_docks_knife_edge_candidate():
     without = evaluate_candidate(good, [], panel, cfg, params=EvalParams())
 
     assert with_pen.diagnostics["plateau_penalty"] > 0.1
-    assert with_pen.objective.robustness < without.objective.robustness
+    assert with_pen.objective.marginal_value < without.objective.marginal_value
     assert without.diagnostics["plateau_penalty"] is None
 
     # plateau-stable variants (≈ the candidate itself) → ~zero penalty

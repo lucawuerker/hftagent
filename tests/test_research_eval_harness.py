@@ -143,7 +143,7 @@ def test_cost_gate_is_off_by_default_and_rejects_high_turnover_when_enabled():
     assert not r_on.selectable
 
 
-def test_perturbation_probe_only_lowers_robustness_when_enabled():
+def test_perturbation_probe_only_lowers_marginal_value_when_enabled():
     panel, rng = _panel(seed=4)
     cfg = _cfg()
     fwd = panel["close"].pct_change().shift(-1)
@@ -152,10 +152,14 @@ def test_perturbation_probe_only_lowers_robustness_when_enabled():
     pert = evaluate_candidate(
         good, [], panel, cfg,
         params=EvalParams(perturbation_weight=5.0, perturbation_sigma=1.0))
-    # the probe is a penalty: it can only lower (or leave) robustness, never raise it
-    assert pert.objective.robustness <= base.objective.robustness + 1e-9
+    # the probe is a penalty folded onto the marginal-value axis: the axis equals the
+    # raw ΔIC minus perturbation_weight·penalty, so it can only lower (or leave) it
     assert pert.diagnostics["perturbation_penalty"] is not None
     assert pert.diagnostics["perturbation_penalty"] >= 0.0
+    assert pert.objective.marginal_value == pytest.approx(
+        pert.diagnostics["marginal_value_raw"]
+        - 5.0 * pert.diagnostics["perturbation_penalty"])
+    assert pert.objective.marginal_value <= pert.diagnostics["marginal_value_raw"] + 1e-9
     # default run leaves the baseline arm untouched (no perturbation term)
     assert base.diagnostics["perturbation_penalty"] is None
 
@@ -205,10 +209,9 @@ def test_behavior_descriptors_present_and_separate_from_objective():
     # behavior descriptors are produced …
     assert set(r.behavior) >= {"trend_reversal", "signal_speed", "stress_activation"}
     assert r.behavior["signal_speed"] is not None
-    # … but they are NOT part of the scored objective vector (still exactly 5 axes)
+    # … but they are NOT part of the scored objective vector (still exactly 4 axes)
     assert ObjectiveVector.AXES == (
-        "marginal_value", "independence", "robustness", "parsimony",
-        "structural_novelty")
+        "marginal_value", "independence", "parsimony", "structural_novelty")
     assert "trend_reversal" not in ObjectiveVector.AXES
     # round-trips through the MCP/state serialisation
     assert r.to_dict()["behavior"]["signal_speed"] == r.behavior["signal_speed"]
@@ -267,6 +270,41 @@ def test_independence_metric_delta_participation_is_selectable():
     # legacy Δ-participation axis: the unrelated factor raises the book's effective
     # dimensionality more than the near-duplicate does
     assert fresh_r.objective.independence > dup_r.objective.independence
+
+
+def test_residual_ic_independence_scored_on_is_union_val():
+    """Change 2: the residual-IC axis scores on IS∪VAL (betas still fit on IS), so an
+    edge that lives in the IS era is visible where the old VAL-only window saw ~0."""
+    from quant_fund_agent.research_eval.harness import _residual_ic
+
+    rng = np.random.default_rng(3)
+    n_cols = len(TICKERS)
+    idx = pd.date_range("2022-01-01", periods=N_BARS, freq="D")
+    split = three_way_split(idx, is_frac=0.6, val_frac=0.2)
+    is_rows = np.asarray(split.is_mask)
+
+    book_drv = rng.standard_normal((N_BARS, n_cols))        # the book's driver
+    cand_drv = rng.standard_normal((N_BARS, n_cols))        # orthogonal to the book
+    # forward return = book driver everywhere + candidate driver ONLY on IS bars
+    fwd = book_drv.copy()
+    fwd[is_rows] += 1.5 * cand_drv[is_rows]
+    ret = np.zeros((N_BARS, n_cols)); ret[1:] = 0.01 * fwd[:-1]
+    close = pd.DataFrame(100 * np.cumprod(1 + ret, axis=0), index=idx, columns=TICKERS)
+    panel = {"close": close}
+    cfg = _cfg()
+    book = [pd.DataFrame(book_drv, index=idx, columns=TICKERS)]
+    cand = pd.DataFrame(cand_drv, index=idx, columns=TICKERS)
+
+    ic_val = _residual_ic(cand, book, panel, cfg, split.is_mask, split.val_mask,
+                          split.is_val_mask)                 # the OLD VAL-only window
+    ic_dev = _residual_ic(cand, book, panel, cfg, split.is_mask, split.is_val_mask,
+                          split.is_val_mask)                 # the NEW IS∪VAL window
+    assert abs(ic_val) < 0.05                                # invisible on VAL-only
+    assert abs(ic_dev) > 0.1                                 # material on IS∪VAL
+    # the harness wires the independence axis to the IS∪VAL window
+    r = evaluate_candidate(cand, book, panel, cfg, split=split)
+    assert r.diagnostics["residual_ic"] == pytest.approx(ic_dev)
+    assert r.objective.independence == pytest.approx(ic_dev)
 
 
 # ── structural novelty axis (AST-based originality) ──────────────────────────
@@ -427,12 +465,13 @@ def test_conditioning_factor_scores_positive_marginal_under_nonlinear_default():
     assert nonlinear.objective.marginal_value > linear.objective.marginal_value
 
 
-def test_blocked_robustness_reuses_marginal_predictions_without_refit(monkeypatch):
-    """Robustness re-scores the two marginal fits and never fits per block."""
+def test_marginal_penalties_fold_onto_axis_without_refit(monkeypatch):
+    """The plateau/perturbation/sign penalties fold onto the marginal-value axis and
+    never refit a model — only the with-book and book-only marginal fits happen."""
     panel, f1, f2, _ = _two_driver_panel()
     cfg = _cfg()
     split = three_way_split(panel["close"].index, is_frac=0.6, val_frac=0.2)
-    params = EvalParams(stability_blocks=4, marginal_model="ridge")
+    params = EvalParams(marginal_model="ridge")
     calls: list[tuple[int, tuple[int, ...]]] = []
     original = harness_mod._combined_prediction
 
@@ -444,15 +483,35 @@ def test_blocked_robustness_reuses_marginal_predictions_without_refit(monkeypatc
     r = evaluate_candidate(f2, [f1], panel, cfg, split=split,
                            params=params, candidate_id="fresh")
 
+    # exactly the with-book and book-only fits from _marginal_value; the penalties
+    # fold onto the axis and fit nothing extra.
     assert calls == [
         (2, tuple(np.flatnonzero(split.is_mask))),
         (1, tuple(np.flatnonzero(split.is_mask))),
     ]
-    assert r.diagnostics["stability_score_kind"] == "fixed_marginal_delta"
-    assert r.diagnostics["stability_model"] == "ridge"
-    assert r.diagnostics["stability_n_blocks"] == 4
-    assert r.diagnostics["standalone_n_blocks"] == 4
-    assert len(r.diagnostics["stability_block_deltas"]) == 4
+    # the robustness axis is gone
+    assert not hasattr(r.objective, "robustness")
+    assert "robustness" not in r.objective.to_dict()
+    # with no jitter, perturbation off and no expected_sign, the axis equals the raw ΔIC
+    assert r.diagnostics["marginal_value_raw"] is not None
+    assert r.objective.marginal_value == pytest.approx(
+        r.diagnostics["marginal_value_raw"])
+
+
+def test_plateau_penalty_folds_onto_marginal_value():
+    """A window-jitter plateau penalty is subtracted from the marginal-value axis."""
+    panel, rng = _panel(seed=7)
+    cfg = _cfg()
+    fwd = panel["close"].pct_change().shift(-1)
+    good = fwd + 0.01 * rng.standard_normal((N_BARS, len(TICKERS)))
+    # a jitter variant that is pure noise → its VAL IC collapses → a plateau penalty
+    jitter = [_frame(rng.standard_normal((N_BARS, len(TICKERS))))]
+    r = evaluate_candidate(good, [], panel, cfg, jitter_signals=jitter,
+                           params=EvalParams(plateau_weight=1.0))
+    assert r.diagnostics["plateau_penalty"] is not None
+    assert r.diagnostics["plateau_penalty"] > 0.0
+    assert r.objective.marginal_value == pytest.approx(
+        r.diagnostics["marginal_value_raw"] - r.diagnostics["plateau_penalty"])
 
 
 # ── parsimony + sign consistency plumbing ─────────────────────────────────────
@@ -483,8 +542,8 @@ def test_explicit_split_is_respected():
     split = three_way_split(panel["close"].index, is_frac=0.5, val_frac=0.25)
     r = evaluate_candidate(_noise(rng), [], panel, cfg, split=split)
     assert r.raw["split_sizes"] == {"is": 300, "val": 150, "test": 150}
-    # TEST is never scored: robustness uses contiguous blocks inside VAL only.
-    assert r.diagnostics["stability_n_blocks"] >= 2
+    # TEST is never scored: the fitness is measured on VAL rows only.
+    assert r.diagnostics["val_n_obs"] > 0
 
 
 def test_candidate_evaluation_ignores_test_rows_and_boundary_labels():

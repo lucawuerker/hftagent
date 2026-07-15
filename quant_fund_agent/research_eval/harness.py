@@ -18,23 +18,28 @@ Feedback families implemented (tags per ``docs/research-evolution/DESIGN.md``):
 * Family 1 (standalone, ``[DIAG]``): IC at the forecast horizon + an IC-decay curve.
 * Family 2 (marginal, ``[CORE, primary]``): LOCO ΔOOS-IC of the combined model from
   adding the candidate to the book; residual (orthogonalised) IC as a diagnostic.
-* Family 3 (independence, ``[CORE]``): residual IC by default (legacy
-  Δ participation ratio − soft max-|corr| is still selectable).
-* Family 4 (robustness, ``[CORE]``): blocked validation stability of the fixed
-  combined-model/LOCO predictions already fitted for the marginal-value axis,
-  plus the OOS/IS degradation and deflation diagnostics.
+  Three IC-scale adjustments fold **directly onto this axis** (all measured on VAL
+  from the candidate's own signal, no extra fit): the parameter-sensitivity
+  **plateau penalty** (the sign-aligned VAL-IC drop under a ±10% window jitter, when
+  the caller supplies ``jitter_signals`` — a knife-edge factor is docked), the
+  **perturbation-fidelity probe** (the sign-aligned VAL-IC drop under a Gaussian
+  signal shock; default OFF) and the hypothesis **sign bonus**.  So
+  ``marginal_value = raw ΔIC − plateau − perturbation ± sign_bonus``.  (These used to
+  sit on a separate ``robustness`` Pareto axis — a Probabilistic-Sharpe-Ratio measure
+  on the *same reused VAL window*; that axis could not police the generational
+  ratchet it was meant to control, folded IC-scale penalties into a [0,1]
+  probability, and was a near-monotone transform of this primary axis, so it was
+  removed.)
+* Family 3 (independence, ``[CORE]``): residual (orthogonalised) IC by default —
+  scored on **IS∪VAL** (betas still fit on IS only) so the axis has ~4× the effective
+  sample and a lower noise floor (legacy Δ participation ratio − soft max-|corr| is
+  still selectable).
 * Family 5 (realism): coverage gate + hypothesis sign-consistency.
 * Family 6 (structural novelty, ``[CORE]``): minimum **canonical AST weighted-subtree
   distance** to any archive member (``research_eval.ast_novelty`` — inspired by
   AlphaAgent's common-subtree originality criterion, but a normalised weighted
   multiset overlap across all canonical subtrees; promoted from diagnostic to
   first-class Pareto axis).  Zoo distance kept as a secondary diagnostic.
-
-* Family 4 also includes the parameter-sensitivity **plateau penalty** when the
-  caller supplies ``jitter_signals`` (signals of window-jittered variants of the
-  candidate, produced by the P1 jitter mutation operator): a candidate whose VAL
-  IC collapses under a ±10% window jitter sits on a knife-edge, not a plateau,
-  and its robustness is docked by the IC drop.
 
 Not yet wired (documented for later phases): the transaction-cost gate (P5).
 """
@@ -73,9 +78,11 @@ class EvalParams:
     """
 
     n_trials: int = 1                 # candidates evaluated so far (drives deflation)
-    lambda_std: float = 1.0           # robustness penalty on blockwise ΔIC dispersion
     corr_penalty: float = 0.5         # weight of the soft max-|corr| independence penalty
-    sign_bonus: float = 0.02          # ± robustness bonus for hypothesis sign (mis)match
+    # ± marginal-axis bonus for hypothesis sign (mis)match.  Small on purpose: the
+    # bonus now sits on the marginal-ΔIC scale (typical |ΔIC| ~ 0.005–0.02), where an
+    # 0.02 bonus would dominate the axis; it used to sit on a [0,1] PSR scale.
+    sign_bonus: float = 0.002
     # Estimator combining the book's factors for the LOCO marginal-value axis.
     # Default is a NONLINEAR model (gradient boosting) on purpose: a linear model
     # (ridge) only sees *additive* combination value and scores a pure
@@ -86,9 +93,13 @@ class EvalParams:
     # additive-only behaviour); any `modeling.catalog` model id is accepted.
     marginal_model: str = "gradient_boosting"
     plateau_weight: float = 1.0       # weight of the window-jitter plateau penalty
-    # Split VAL into contiguous blocks and re-score the *same* IS-fitted
-    # with-candidate and book-only predictions produced by the marginal-value axis.
-    # No model is refitted for robustness.
+    #                                   (in IC units — coherent with the marginal axis)
+    # Retained for API/CLI compatibility only — unused.  The removed ``robustness``
+    # axis used these (``robustness_min_obs`` = the PSR's minimum sample; ``lambda_std``
+    # / ``stability_blocks`` = the even-earlier blocked ``mean − λ·std`` stability);
+    # the plateau / perturbation / sign adjustments now fold onto ``marginal_value``.
+    robustness_min_obs: int = 8
+    lambda_std: float = 1.0
     stability_blocks: int = 4
     gate_coverage: float = 0.5        # τ_cov: min non-NaN (date,ticker) fraction
     gate_degradation: float = 0.5     # τ_deg: min OOS/IS IC ratio (same sign)
@@ -124,10 +135,10 @@ class EvalParams:
     # net-of-cost-through-executor > 0, and a `net_capture_sota` diagnostic
     # feeds the reflection brief.  None → byte-identical baseline behaviour.
     cost_executor: dict[str, Any] | None = None
-    # perturbation-fidelity probe (AlphaEval) folded into the robustness axis: dock
-    # robustness by the sign-aligned VAL-IC drop under a Gaussian signal shock.  Weight
+    # perturbation-fidelity probe (AlphaEval) folded onto the marginal-value axis: dock
+    # the axis by the sign-aligned VAL-IC drop under a Gaussian signal shock.  Weight
     # 0.0 (default) = off (baseline arm unchanged); > 0 activates the extra probe (one
-    # more robustness term, like the plateau penalty — not a new axis).
+    # more marginal-axis penalty, like the plateau penalty — not a new axis).
     perturbation_weight: float = 0.0
     perturbation_sigma: float = 0.5            # shock stdev in signal z-units
     perturbation_draws: int = 3
@@ -250,8 +261,8 @@ def _marginal_value(
 ) -> dict[str, Any]:
     """LOCO: ΔOOS-IC of the combined model from adding the candidate to the book.
 
-    The fitted ``with``/``base`` predictions are returned alongside the scalar so
-    the regime axis can re-score them on the crash bars without a second fit.
+    The fitted ``with``/``base`` prediction panels are returned alongside the scalar
+    for diagnostics / potential reuse; the scored marginal-value axis is the ΔIC.
     """
     close = panel["close"]
     h = cfg.target_horizon
@@ -280,104 +291,6 @@ def _marginal_value(
     marginal = with_ic - (base_ic if base_ic is not None else 0.0)
     return {"marginal_value": marginal, "with_ic": with_ic, "base_ic": base_ic,
             "with_pred": with_pred, "base_pred": base_pred}
-
-
-def _distribution_stats(values: Sequence[float]) -> tuple[float | None, float | None]:
-    """Mean/std pair for a score distribution, requiring at least two values."""
-    if len(values) < 2:
-        return None, None
-    return float(np.mean(values)), float(np.std(values))
-
-
-def _validation_block_masks(
-    val_mask: np.ndarray,
-    available_mask: np.ndarray,
-    horizon: int,
-    n_blocks: int,
-) -> list[np.ndarray]:
-    """Contiguous, non-overlapping VAL blocks with available forward labels."""
-    eligible = np.asarray(val_mask, dtype=bool) & _label_available_mask(
-        available_mask, horizon)
-    active = np.flatnonzero(eligible)
-    if len(active) < 2:
-        return []
-    groups = np.array_split(active, min(max(2, int(n_blocks)), len(active)))
-    masks: list[np.ndarray] = []
-    for group in groups:
-        if len(group) == 0:
-            continue
-        mask = np.zeros(len(val_mask), dtype=bool)
-        mask[group] = True
-        masks.append(mask)
-    return masks
-
-
-def _blocked_prediction_scores(
-    with_pred: pd.DataFrame,
-    base_pred: pd.DataFrame | None,
-    standalone_signal: pd.DataFrame,
-    close: pd.DataFrame,
-    h: int,
-    val_mask: np.ndarray,
-    is_mask: np.ndarray,
-    available_mask: np.ndarray,
-    n_blocks: int,
-) -> dict[str, Any]:
-    """Re-score fixed IS-fitted predictions on contiguous validation blocks.
-
-    SINGLE mode passes both prediction panels and receives blockwise LOCO deltas.
-    With no base panel (empty book or SET mode), the base IC is zero and the block
-    score is the combined prediction's own IC.  The raw candidate's blockwise IC
-    is retained as a model-free temporal-stability diagnostic.
-    """
-    deltas: list[float] = []
-    with_ics: list[float] = []
-    base_ics: list[float] = []
-    standalone_ics: list[float] = []
-    for block in _validation_block_masks(
-        val_mask, available_mask, h, n_blocks
-    ):
-        with_ic = _pooled_ic(
-            with_pred, close, h, block, is_mask, available_mask
-        )[0]
-        if with_ic is None:
-            continue
-        if base_pred is None:
-            base_ic = 0.0
-        else:
-            base_ic = _pooled_ic(
-                base_pred, close, h, block, is_mask, available_mask
-            )[0]
-            if base_ic is None:
-                continue
-            base_ics.append(float(base_ic))
-        standalone_ic = _pooled_ic(
-            standalone_signal, close, h, block, is_mask, available_mask
-        )[0]
-        if standalone_ic is not None:
-            standalone_ics.append(float(standalone_ic))
-        with_ics.append(float(with_ic))
-        deltas.append(float(with_ic - base_ic))
-
-    mean, std = _distribution_stats(deltas)
-    with_mean, with_std = _distribution_stats(with_ics)
-    base_mean, base_std = _distribution_stats(base_ics)
-    standalone_mean, standalone_std = _distribution_stats(standalone_ics)
-    return {
-        "scores": deltas,
-        "mean": mean,
-        "std": std,
-        "n_blocks": len(deltas),
-        "with_ic_mean": with_mean,
-        "with_ic_std": with_std,
-        "base_ic_mean": base_mean,
-        "base_ic_std": base_std,
-        "standalone_ic_mean": standalone_mean,
-        "standalone_ic_std": standalone_std,
-        "standalone_n_blocks": len(standalone_ics),
-        "score_kind": "fixed_marginal_delta" if base_pred is not None
-                      else "fixed_combined_ic",
-    }
 
 
 def _stress_mask(close: pd.DataFrame, params: EvalParams,
@@ -501,11 +414,15 @@ def _residual_ic(
 ) -> float | None:
     """Orthogonalised (residual) IC — the candidate's edge beyond the book's span.
 
-    Regress the candidate on the book using ``fit_mask`` only, then
+    Regress the candidate on the book using ``fit_mask`` (IS only), then
     Pearson-correlate each asset's residual with its forward returns on ``score_mask``
-    and return the observation-weighted mean.
-    ``available_mask`` prevents a score near the development boundary from using
-    held-out TEST prices as forward-return labels.
+    and return the observation-weighted mean.  As the independence axis this is scored
+    on **IS∪VAL** (``fit_mask = IS``, ``score_mask = IS∪VAL``): factor formulas have no
+    fitted parameters, so only the orthogonalisation betas are estimated — keeping
+    those on IS while scoring the residual on IS∪VAL quadruples the effective sample
+    and lowers the axis's noise floor without leaking (the betas still never see VAL
+    labels).  ``available_mask`` prevents a score near the development boundary from
+    using held-out TEST prices as forward-return labels.
     """
     close = panel["close"]
     h = cfg.target_horizon
@@ -573,10 +490,8 @@ def _independence(candidate: pd.DataFrame, book: Sequence[pd.DataFrame], panel, 
             "pr_before": pr_before, "pr_after": pr_after}
 
 
-def _robustness(
+def _marginal_penalties(
     candidate: pd.DataFrame,
-    with_pred: pd.DataFrame,
-    base_pred: pd.DataFrame | None,
     panel,
     cfg,
     split: ThreeWaySplit,
@@ -586,33 +501,28 @@ def _robustness(
     *,
     standalone_overall_ic: float | None = None,
 ) -> dict[str, Any]:
-    """Blocked stability of the fixed predictions used by marginal value.
+    """The IC-scale adjustments folded onto the marginal-value axis (no model fit).
 
-    ``with_pred`` and ``base_pred`` are exactly the IS-fitted panels returned by
-    :func:`_marginal_value`; this function performs no model fit.  It divides VAL
-    into contiguous blocks, computes the LOCO IC contribution on each block and
-    scores its lower-confidence value ``mean - lambda_std * std``.  The raw
-    candidate's blockwise IC distribution remains a model-free diagnostic.
+    All three are measured on VAL from the candidate's **own** signal:
+
+    * **plateau penalty** — score each window-jittered variant on VAL exactly like the
+      candidate; the penalty is the sign-aligned IC drop from the candidate to the
+      jitter mean, floored at 0.  A knife-edge factor loses its edge under a ±10%
+      window change; a plateau factor keeps it.  Needs ``jitter_signals``.
+    * **perturbation-fidelity probe** (AlphaEval) — shock the signal with Gaussian
+      noise (in z-units) and measure the sign-aligned VAL IC retained; the penalty is
+      the floored IC drop.  Off when ``perturbation_weight == 0``.
+    * **sign consistency** — whether the realized IC sign matches the declared
+      hypothesis (the caller turns this into a ``±sign_bonus``).
+
+    Returned raw; the caller applies them to ``marginal_value``
+    (``raw − plateau_weight·plateau − perturbation_weight·perturbation ± sign_bonus``).
     """
     close = panel["close"]
     h = cfg.target_horizon
     standalone_ref = standalone_overall_ic
     standalone_sign = 1.0 if (standalone_ref is None or standalone_ref >= 0) else -1.0
 
-    blocked = _blocked_prediction_scores(
-        with_pred, base_pred, candidate, close, h, split.val_mask, split.is_mask,
-        split.is_val_mask, params.stability_blocks)
-    stability_mean = blocked["mean"]
-    stability_std = blocked["std"]
-    robustness = (
-        None if stability_mean is None or stability_std is None
-        else stability_mean - params.lambda_std * stability_std
-    )
-
-    # Parameter-sensitivity plateau test: score each window-jittered variant on
-    # VAL exactly like the candidate; the penalty is the (sign-aligned) IC drop
-    # from the candidate to the jitter mean, floored at 0 — a knife-edge factor
-    # loses its edge under a ±10% window change, a plateau factor keeps it.
     plateau_penalty = None
     jitter_ics: list[float] = []
     if jitter_signals and standalone_ref is not None:
@@ -625,15 +535,9 @@ def _robustness(
         if jitter_ics:
             plateau_penalty = max(
                 0.0, float(standalone_ref * standalone_sign - np.mean(jitter_ics)))
-            if robustness is not None:
-                robustness -= params.plateau_weight * plateau_penalty
 
-    # Perturbation-fidelity probe (AlphaEval), folded into robustness like the plateau
-    # penalty: shock the signal with Gaussian noise (in z-units) and measure the
-    # sign-aligned VAL-IC retained.  A knife-edge / noise-sensitive factor loses its
-    # edge under the shock and is docked; a robust one keeps it.  Off when weight == 0.
     perturbation_penalty = None
-    if params.perturbation_weight > 0 and standalone_ref is not None and robustness is not None:
+    if params.perturbation_weight > 0 and standalone_ref is not None:
         rng = np.random.default_rng(0)  # fixed seed → deterministic, un-gameable
         s = candidate.reindex(index=close.index, columns=close.columns)
         # noise scale from the DEV window only (leak-free — never reads TEST rows)
@@ -650,32 +554,42 @@ def _robustness(
         if pert_ics:
             perturbation_penalty = max(
                 0.0, float(standalone_ref * standalone_sign - np.mean(pert_ics)))
-            robustness -= params.perturbation_weight * perturbation_penalty
 
     sign_consistency = None
     if expected_sign is not None and standalone_ref is not None:
         realized = 1 if standalone_ref >= 0 else -1
         sign_consistency = bool(realized == int(np.sign(expected_sign) or 1))
-        if robustness is not None:
-            robustness += params.sign_bonus if sign_consistency else -params.sign_bonus
 
-    return {"robustness": robustness,
-            "stability_ic_mean": stability_mean,
-            "stability_ic_std": stability_std,
-            "stability_n_blocks": blocked["n_blocks"],
-            "stability_block_deltas": blocked["scores"],
-            "sign_consistency": sign_consistency,
-            "plateau_penalty": plateau_penalty, "jitter_ics": jitter_ics,
+    return {"plateau_penalty": plateau_penalty, "jitter_ics": jitter_ics,
             "perturbation_penalty": perturbation_penalty,
-            "stability_score_kind": blocked["score_kind"],
-            "stability_model": params.marginal_model,
-            "stability_with_ic_mean": blocked["with_ic_mean"],
-            "stability_with_ic_std": blocked["with_ic_std"],
-            "stability_base_ic_mean": blocked["base_ic_mean"],
-            "stability_base_ic_std": blocked["base_ic_std"],
-            "standalone_block_ic_mean": blocked["standalone_ic_mean"],
-            "standalone_block_ic_std": blocked["standalone_ic_std"],
-            "standalone_n_blocks": blocked["standalone_n_blocks"]}
+            "sign_consistency": sign_consistency}
+
+
+def _empty_penalties() -> dict[str, Any]:
+    """Unmeasured-penalties record (no candidate signal could be scored)."""
+    return {"plateau_penalty": None, "jitter_ics": [],
+            "perturbation_penalty": None, "sign_consistency": None}
+
+
+def _apply_marginal_penalties(
+    raw: float | None, pen: dict[str, Any], params: EvalParams,
+) -> float | None:
+    """Fold the plateau / perturbation / sign adjustments onto the marginal axis.
+
+    ``marginal_value = raw − plateau_weight·plateau − perturbation_weight·perturbation
+    ± sign_bonus``.  If ``raw`` is None the axis stays None — penalties are not applied
+    to nothing.
+    """
+    if raw is None:
+        return None
+    axis = float(raw)
+    if pen.get("plateau_penalty") is not None:
+        axis -= params.plateau_weight * pen["plateau_penalty"]
+    if pen.get("perturbation_penalty") is not None:
+        axis -= params.perturbation_weight * pen["perturbation_penalty"]
+    if pen.get("sign_consistency") is not None:
+        axis += params.sign_bonus if pen["sign_consistency"] else -params.sign_bonus
+    return axis
 
 
 def _behavior_descriptors(sig: pd.DataFrame, close: pd.DataFrame, h: int,
@@ -880,14 +794,14 @@ def evaluate_candidate(
     """Score one candidate signal against the current book → a :class:`FitnessResult`.
 
     ``split`` is the IS/VAL/TEST seam: the combined model fits on **IS**, the fitness
-    (marginal value, blocked stability, gates) is measured on **VAL** (deliberately
-    burned by the search), and TEST is never touched here.  ``None``
+    (marginal value, gates) is measured on **VAL** — with the independence residual IC
+    on IS∪VAL — deliberately burned by the search, and TEST is never touched here.  ``None``
     derives a default 60/20/20 fraction split.  ``params`` carries the deterministic
     scoring knobs (including ``n_trials`` for deflation); ``candidate_code`` feeds the
     parsimony and structural-novelty axes; ``book_codes`` is the source code of every
     current archive member (for the structural-novelty axis); ``expected_sign`` feeds
-    the sign-consistency check; ``jitter_signals`` feeds the plateau penalty inside
-    robustness.
+    the sign-consistency check; ``jitter_signals`` feeds the plateau penalty folded
+    onto the marginal-value axis.
     """
     params = params or EvalParams()
     close = panel["close"]
@@ -920,7 +834,10 @@ def evaluate_candidate(
     marg = _marginal_value(candidate_signal, book, panel, cfg, is_mask, val_mask,
                            params.marginal_model, split.is_val_mask)
     residual_ic = _residual_ic(
-        candidate_signal, book, panel, cfg, is_mask, val_mask, split.is_val_mask
+        candidate_signal, book, panel, cfg,
+        split.is_mask,          # orthogonalisation betas fit on IS only (unchanged)
+        split.is_val_mask,      # score on IS∪VAL (4× the sample → lower noise floor)
+        split.is_val_mask,
     )
 
     # ── Family 3 — independence (CORE) ──
@@ -936,29 +853,16 @@ def evaluate_candidate(
         else indep["independence"]
     )
 
-    # ── Family 4 — robustness (CORE) ──
-    # Reuse the exact two IS-fitted prediction panels from `_marginal_value`.
-    # Robustness only re-scores them on contiguous VAL blocks; no refit occurs.
-    robust = (
-        _robustness(
-            candidate_signal, marg["with_pred"], marg["base_pred"], panel, cfg,
-            split, params, expected_sign, jitter_signals,
-            standalone_overall_ic=val_ic,
-        )
-        if marg["with_pred"] is not None else {
-            "robustness": None,
-            "stability_ic_mean": None, "stability_ic_std": None,
-            "stability_n_blocks": 0, "stability_block_deltas": [],
-            "sign_consistency": None, "plateau_penalty": None,
-            "jitter_ics": [], "perturbation_penalty": None,
-            "stability_score_kind": "fixed_marginal_delta",
-            "stability_model": params.marginal_model,
-            "stability_with_ic_mean": None, "stability_with_ic_std": None,
-            "stability_base_ic_mean": None, "stability_base_ic_std": None,
-            "standalone_block_ic_mean": None, "standalone_block_ic_std": None,
-            "standalone_n_blocks": 0,
-        }
+    # ── Family 2 (cont.) — marginal-axis penalties ──
+    # The plateau penalty, perturbation-fidelity probe and hypothesis sign bonus fold
+    # directly onto the marginal-value axis (all IC-scale; measured on VAL from the
+    # candidate's own signal — no model refit).
+    penalties = _marginal_penalties(
+        candidate_signal, panel, cfg, split, params, expected_sign,
+        jitter_signals, standalone_overall_ic=val_ic,
     )
+    marginal_value_raw = marg["marginal_value"]
+    marginal_axis = _apply_marginal_penalties(marginal_value_raw, penalties, params)
 
     # ── parsimony axis ──
     parsimony = -float(complexity(candidate_code)) if candidate_code is not None else None
@@ -1022,9 +926,8 @@ def evaluate_candidate(
                         deflation_ok=None, cost_ok=cost_ok, reasons=reasons)
 
     objective = ObjectiveVector(
-        marginal_value=marg["marginal_value"],
+        marginal_value=marginal_axis,
         independence=independence_axis,
-        robustness=robust["robustness"],
         parsimony=parsimony,
         structural_novelty=novelty["structural_novelty"],
     )
@@ -1039,23 +942,11 @@ def evaluate_candidate(
         "max_abs_corr": indep["max_abs_corr"],
         "delta_participation": indep["delta_participation"],
         "pr_before": indep["pr_before"], "pr_after": indep["pr_after"],
-        "stability_ic_mean": robust["stability_ic_mean"],
-        "stability_ic_std": robust["stability_ic_std"],
-        "stability_n_blocks": robust["stability_n_blocks"],
-        "stability_block_deltas": robust["stability_block_deltas"],
-        "stability_score_kind": robust["stability_score_kind"],
-        "stability_model": robust["stability_model"],
-        "stability_with_ic_mean": robust["stability_with_ic_mean"],
-        "stability_with_ic_std": robust["stability_with_ic_std"],
-        "stability_base_ic_mean": robust["stability_base_ic_mean"],
-        "stability_base_ic_std": robust["stability_base_ic_std"],
-        "standalone_block_ic_mean": robust["standalone_block_ic_mean"],
-        "standalone_block_ic_std": robust["standalone_block_ic_std"],
-        "standalone_n_blocks": robust["standalone_n_blocks"],
-        "sign_consistency": robust["sign_consistency"],
-        "plateau_penalty": robust["plateau_penalty"],
-        "jitter_ics": robust["jitter_ics"],
-        "perturbation_penalty": robust.get("perturbation_penalty"),
+        "marginal_value_raw": marginal_value_raw,
+        "sign_consistency": penalties["sign_consistency"],
+        "plateau_penalty": penalties["plateau_penalty"],
+        "jitter_ics": penalties["jitter_ics"],
+        "perturbation_penalty": penalties.get("perturbation_penalty"),
         "turnover": tc["turnover"],
         "gross_ret": tc["gross_ret"],
         "net_ret": tc["net_ret"],
@@ -1108,13 +999,14 @@ def evaluate_set(
 
     1. ``marginal_value`` — the set's **own** combined-model OOS IC (fit on IS,
        scored on VAL); no LOCO against an external archive — the set is
-       self-contained.
+       self-contained.  The perturbation-fidelity probe and hypothesis sign bonus
+       fold onto this axis exactly as in SINGLE mode.
     2. ``independence`` — the set's *internal* participation ratio (effective
        number of independent members), normalised by size to ``[0, 1]`` so sets
        of different sizes compare fairly.
-    3. ``robustness`` — the same blocked-validation ``mean − λ·std`` formula,
-       computed from the fixed IS-fitted **combined prediction**.
-    4. ``parsimony`` — ``−(total member complexity / set size)``.
+    3. ``parsimony`` — ``−(total member complexity / set size)``.
+    4. ``structural_novelty`` — the members' average nearest-neighbour canonical
+       AST weighted-subtree distance (internal structural diversity).
 
     Gates (coverage / degradation / deflation) also apply to the combined
     signal.  Reuses every helper the SINGLE path uses, so the two modes cannot
@@ -1149,23 +1041,13 @@ def evaluate_set(
     else:
         independence = 1.0  # a singleton set is trivially non-redundant
 
-    # ── axis 3: blocked stability of the fixed COMBINED prediction ──
-    robust = (_robustness(pred, pred, None, panel, cfg, split, params,
-                          expected_sign, standalone_overall_ic=combined_val_ic)
-              if pred is not None else
-              {"robustness": None,
-               "stability_ic_mean": None, "stability_ic_std": None,
-               "stability_n_blocks": 0, "stability_block_deltas": [],
-               "sign_consistency": None,
-               "plateau_penalty": None, "jitter_ics": [],
-               "perturbation_penalty": None,
-               "stability_score_kind": "fixed_combined_ic",
-               "stability_model": params.marginal_model,
-               "stability_with_ic_mean": None, "stability_with_ic_std": None,
-               "stability_base_ic_mean": None, "stability_base_ic_std": None,
-               "standalone_block_ic_mean": None,
-               "standalone_block_ic_std": None,
-               "standalone_n_blocks": 0})
+    # ── axis 1 (cont.): marginal-axis penalties on the combined prediction ──
+    # No jitter variants in SET mode, so the plateau penalty is not measured; the
+    # perturbation probe and sign bonus fold onto the combined OOS IC as in SINGLE.
+    penalties = (_marginal_penalties(pred, panel, cfg, split, params, expected_sign,
+                                     standalone_overall_ic=combined_val_ic)
+                 if pred is not None else _empty_penalties())
+    combined_axis = _apply_marginal_penalties(combined_val_ic, penalties, params)
 
     # ── axis 5: structural novelty — average pairwise min code distance ──
     # For a SET genome the axis measures internal diversity: how different are the
@@ -1245,9 +1127,8 @@ def evaluate_set(
     gates = GateResults(coverage_ok=coverage_ok, degradation_ok=degradation_ok,
                         deflation_ok=None, cost_ok=cost_ok, reasons=reasons)
     objective = ObjectiveVector(
-        marginal_value=combined_val_ic,
+        marginal_value=combined_axis,
         independence=independence,
-        robustness=robust["robustness"],
         parsimony=parsimony,
         structural_novelty=set_novelty,
     )
@@ -1258,22 +1139,11 @@ def evaluate_set(
         "val_n_obs": int(val_n),
         "internal_participation_ratio": (
             independence * len(ids) if independence is not None else None),
-        "stability_ic_mean": robust["stability_ic_mean"],
-        "stability_ic_std": robust["stability_ic_std"],
-        "stability_n_blocks": robust["stability_n_blocks"],
-        "stability_block_deltas": robust["stability_block_deltas"],
-        "stability_score_kind": robust["stability_score_kind"],
-        "stability_model": robust["stability_model"],
-        "stability_with_ic_mean": robust["stability_with_ic_mean"],
-        "stability_with_ic_std": robust["stability_with_ic_std"],
-        "stability_base_ic_mean": robust["stability_base_ic_mean"],
-        "stability_base_ic_std": robust["stability_base_ic_std"],
-        "standalone_block_ic_mean": robust["standalone_block_ic_mean"],
-        "standalone_block_ic_std": robust["standalone_block_ic_std"],
-        "standalone_n_blocks": robust["standalone_n_blocks"],
-        "sign_consistency": robust["sign_consistency"],
+        "combined_val_ic_raw": combined_val_ic,
+        "sign_consistency": penalties["sign_consistency"],
+        "plateau_penalty": penalties["plateau_penalty"],
         "structural_novelty": set_novelty,
-        "perturbation_penalty": robust.get("perturbation_penalty"),
+        "perturbation_penalty": penalties.get("perturbation_penalty"),
         "turnover": tc["turnover"], "net_ret": tc["net_ret"],
         "net_gross_ratio": tc["net_gross_ratio"],
         "coverage": coverage,

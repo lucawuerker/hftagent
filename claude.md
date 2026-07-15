@@ -40,13 +40,18 @@ influences its own reward) is fully implemented. **P0** `research_eval/`:
 IS/VAL/TEST `three_way_split` (fit IS, burn VAL, touch TEST once), CPCV
 `cpcv_folds` (purge+embargo) + `walk_forward_folds`; **N_trials-aware**
 `deflated_ic`, Bailey–López de Prado `deflated_sharpe_ratio`, and **`pbo_cscv`**
-(CSCV Probability of Backtest Overfitting); the CORE Pareto `ObjectiveVector`
-{LOCO marginal ΔOOS-IC (primary), Δ-participation-ratio independence − max-|corr|
-penalty, CPCV `mean−λ·std` robustness + sign-consistency bonus − window-jitter
-**plateau penalty**, −AST-complexity parsimony} behind hard coverage/degradation/
-deflation gates; `evaluate_candidate` (signal-based, un-gameable) + `evaluate_set`
-(SET mode: the set's own combined-model OOS IC / internal PR / combined-signal
-robustness). **P1** `agents/factor_research/evolution/`: `genome.py`
+(CSCV Probability of Backtest Overfitting); the CORE Pareto `ObjectiveVector` is
+now **4 axes** {LOCO marginal ΔOOS-IC (primary) − window-jitter **plateau penalty** −
+perturbation-fidelity probe ± sign-consistency bonus (all IC-scale, folded onto the
+primary axis), residual (orthogonalised) IC independence, −AST-complexity parsimony,
+`structural_novelty`} behind hard coverage/degradation/deflation gates. The separate
+**`robustness` (PSR) axis was removed**: it was computed on the *same reused* VAL window
+every generation so it couldn't police the generational ratchet it was meant to control,
+folded IC-scale penalties into a [0,1] probability, and was a near-monotone transform of
+the primary axis — its plateau/perturbation/sign parts now fold onto `marginal_value`.
+`evaluate_candidate` (signal-based, un-gameable) + `evaluate_set`
+(SET mode: the set's own combined-model OOS IC / internal PR / structural diversity).
+**P1** `agents/factor_research/evolution/`: `genome.py`
 (`FactorProgram` + SINGLE/SET `Genome`, id-masked dedup fingerprint);
 `controller.py` — **constrained NSGA-II** (feasibility → #failed-gates →
 dominance), crowding distance, tournament parents, islands + ring migration,
@@ -93,6 +98,43 @@ nothing persisted). Tests (all green): `tests/test_research_eval_*.py`,
 knowledge graph, then the ablation matrix (oneshot → +evolution → +RAG →
 +GraphRAG → +debate; single vs set) with the walk-forward pass for the results
 chapter. Live tracker: `docs/research-evolution/IMPLEMENTATION_PROGRESS.md`.
+
+**Evolutionary researcher — 4-axis vector + dev-wide residual IC + progressive
+reveal (done, 2026-07-15).** Three overfitting-control corrections. **(1)** The
+`robustness` (Probabilistic-Sharpe-Ratio) Pareto axis is **removed** → the CORE
+vector is **4 axes** `("marginal_value", "independence", "parsimony",
+"structural_novelty")`. The PSR axis was scored on the *same reused* VAL window every
+generation, so it could not police the process-level ratchet it was meant to control
+(the statistic becomes the optimisation target), folded IC-scale penalties into a
+[0,1] probability, and was a near-monotone transform of the primary axis. Its useful
+parts — the window-jitter **plateau penalty**, the perturbation-fidelity probe and the
+hypothesis **sign bonus** — now fold **onto the `marginal_value` axis** (all IC-scale:
+`marginal = raw ΔIC − plateau − perturbation ± sign_bonus`; `sign_bonus` default 0.02→
+0.002 for the IC scale). Legacy state files carrying a `robustness` key still load
+(`ObjectiveVector.from_dict` reads only `AXES`). **(2)** The **residual-IC**
+independence axis now scores on **IS∪VAL** (the orthogonalisation betas still fit on IS
+only), quadrupling the effective sample and lowering the axis noise floor without
+leaking — factor formulas have no fitted parameters, so only the betas are estimated.
+**(3)** New **progressive data reveal** (`--progressive-reveal`, default OFF →
+byte-identical baseline): the dev window is revealed block-by-block across generations
+(`evolution/progressive.py` `build_schedule` → per-generation `GenerationWindow`), an
+**expanding IS + sliding VAL**, so part of each generation's scoring window was never
+queried by any earlier selection — *prevention* of the ratchet, not detection. The
+window never drops old blocks; a final `--test-frac` tail (default 0.2) is never
+revealed (unchanged TEST semantics). Threaded through a calendar-mode split seam
+(`is_end`/`val_end` on `mcp/research_{client,server,service}.evaluate_fitness` /
+`evaluate_set_fitness`, plus a new `panel_timeline` seam; the signal cache is
+window-keyed by the dev frontier). On each reveal the loop: logs a **prequential** OOS
+score of the archive on the just-revealed block (`prequential.jsonl` — honest OOS, the
+block was never seen), advances the frontier, **re-scores the archive** on the new
+window (`controller.rescore_archive`, no `N_trials` billing; drift logged as `rescore`
+lineage rows), and frees gate-failing fingerprints for **one** retry
+(`controller.release_failed_fingerprints`). Resume-safe (schedule is a pure fn of
+(config, index); `failed_fingerprints` persisted; frontier corruption guard). Flags:
+`--test-frac --seed-frac --reveal-every --val-blocks`. Tests:
+`tests/test_evolution_progressive.py`, updated `test_research_eval_{fitness,harness}`,
+`test_evolution_{controller,mutation,qd}`. Out of scope (deferred): Thresholdout/
+select-guard gate, ε-dominance, GP-arm progressive reveal.
 
 **Evolutionary researcher — residual-IC + regime axes and two-stage curation
 (done).** The CORE Pareto vector is now **5 axes**. The **independence** axis is
@@ -222,6 +264,30 @@ IC arm, `indneutralize`/cross-sectional terminals, and PCA-directed seeding are 
 extensions. Design: `docs/research-evolution/GP_BENCHMARK.md`; sources logged in
 `research_docs/SOURCES.md` (AutoAlpha IJCAI 2020, AlphaGen KDD 2023). Tests:
 `tests/test_gp_grammar.py`, `tests/test_gp_loop.py`.
+
+**Landing-page example generator (done).** `showcase_pipeline/landing_examples/`
+turns real pipeline runs into provenance-stamped marketing artifacts for the
+startup spinoff (`../company-brain/marketing/examples/`). `run` drives
+Selector→Architect→Statistician attempts and dumps **every** candidate —
+approved AND rejected (run_fund persists only approved; the "Likely overfit"
+card *is* a rejected candidate) — with full trial history + stat-test details to
+`<scope>/landing_examples/candidates/attempt_<nn>.json`; `list` tables each
+candidate's harness metrics incl. a **per-strategy CSCV PBO** (`pbo_cscv` over
+the return series of the variants the Architect actually tried) + a
+deterministic badge (Robust / Worth testing / Likely overfit — fixed thresholds
+on DSR/PBO/OOS, never the Statistician LLM's prose); `export --pick` writes per
+example: `card.json`, `equity_curve.json` (raw series + polylines pre-scaled to
+the landing page's 600×260 SVG; OOS re-based to stitch onto IS), `card.png`,
+`behind_the_verdict.md` (idea → factor code → gates → deflation arithmetic),
+`chat_transcript.json` (deterministic; optional `--polish-llm` rewrites only the
+user turn, flagged), `provenance.json` (config hash, git commit, attempt,
+`recompute_match` — the OOS curve is recomputed via the exact `out_of_sample.py`
+recipe and cross-checked against the recorded Sharpe). Copy is template-only
+with a banned-word compliance guard (hard-fails export). First real export
+(prerun `lodestar_demo`: evolution run → 15 factors, 17 strategy attempts):
+`robust-meanrev-momentum` (IS 5.16 → OOS 2.07, PBO 0%) vs
+`overfit-volume-breakout` (IS 2.01, DSR 0.97, **PBO 74%** — only the CSCV check
+catches it). Tests: `tests/test_landing_examples.py`.
 
 **Walk-forward backtest: prerun factor-injection + rich analytics (done).** The
 walk-forward harness (`run_backtest.py` + `quant_fund_agent/simulation/`) now has
