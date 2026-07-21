@@ -121,8 +121,8 @@ def test_deflation_is_a_diagnostic_not_a_search_gate():
     assert good_r.diagnostics["deflation"]["deflated_t"] > 0
     assert (good_r.diagnostics["deflation"]["deflated_t"]
             > noise_r.diagnostics["deflation"]["deflated_t"])
-    # the predictive factor still clears the *search* gates (coverage; degradation is
-    # now the temporal_robustness Pareto axis, not a gate)
+    # The predictive factor clears the search gates; temporal degradation remains
+    # available only as a teacher diagnostic.
     assert good_r.selectable
 
 
@@ -196,27 +196,6 @@ def test_zoo_dedup_flags_a_rediscovered_factor():
     r_off = evaluate_candidate(novel, [], panel, cfg)
     assert r_off.diagnostics["zoo_max_abs_corr"] is None
 
-
-# ── WS2: QD behavior descriptors (computed, but NOT scored) ────────────────────
-
-def test_behavior_descriptors_present_and_separate_from_objective():
-    from quant_fund_agent.research_eval.fitness import ObjectiveVector
-
-    panel, rng = _panel(seed=6)
-    cfg = _cfg()
-    fwd = panel["close"].pct_change().shift(-1)
-    sig = fwd + 0.01 * rng.standard_normal((N_BARS, len(TICKERS)))
-    r = evaluate_candidate(sig, [], panel, cfg)
-    # behavior descriptors are produced …
-    assert set(r.behavior) >= {"trend_reversal", "signal_speed", "stress_activation"}
-    assert r.behavior["signal_speed"] is not None
-    # … but they are NOT part of the scored objective vector (still exactly 5 axes)
-    assert ObjectiveVector.AXES == (
-        "marginal_value", "independence", "temporal_robustness",
-        "parsimony", "structural_novelty")
-    assert "trend_reversal" not in ObjectiveVector.AXES
-    # round-trips through the MCP/state serialisation
-    assert r.to_dict()["behavior"]["signal_speed"] == r.behavior["signal_speed"]
 
 
 # ── independence axis (residual predictive content) ───────────────────────────
@@ -500,11 +479,10 @@ def test_marginal_penalties_fold_onto_axis_without_refit(monkeypatch):
         r.diagnostics["marginal_value_raw"])
 
 
-# ── temporal_robustness axis (was the OOS/IS degradation gate) ────────────────
+# ── temporal degradation is diagnostic-only ──
 
-def test_temporal_robustness_axis_replaces_degradation_gate():
-    """A sign-flipped VAL edge is no longer fatal — it PASSES the gates and carries a
-    negative temporal_robustness axis value (the degradation gate became a Pareto axis)."""
+def test_temporal_degradation_is_diagnostic_not_axis_or_gate():
+    """A sign-flipped VAL edge passes and reports degradation to the teacher."""
     panel, rng = _panel(seed=3)
     cfg = _cfg()
     split = three_way_split(panel["close"].index, is_frac=0.6, val_frac=0.2)
@@ -517,45 +495,19 @@ def test_temporal_robustness_axis_replaces_degradation_gate():
     sig = sig + 0.001 * _frame(rng.standard_normal((N_BARS, len(TICKERS))))
 
     r = evaluate_candidate(sig, [], panel, cfg, split=split)
-    # it clears the gates (temporal inconsistency is now traded off, not fatal) …
     assert r.selectable
-    # … but the axis is negative (sign reversal) and clipped at −1
-    tr = r.objective.temporal_robustness
-    assert tr is not None and tr < 0 and tr >= -1.0
-    # the RAW unclipped ratio survives as a diagnostic
-    assert r.diagnostics["degradation_ratio"] is not None
+    assert not hasattr(r.objective, "temporal_robustness")
+    assert r.diagnostics["degradation_ratio"] < 0
 
 
-def test_temporal_robustness_none_below_is_floor_leaves_gates_intact():
-    """|IS IC| below min_is_ic → the axis is not evaluable (None); the gates are
-    unaffected by the axis being unmeasured."""
+def test_temporal_degradation_none_below_is_floor_leaves_gates_intact():
     panel, rng = _panel(seed=4)
     cfg = _cfg()
     fwd = panel["close"].pct_change().shift(-1)
     sig = fwd + 0.01 * _frame(rng.standard_normal((N_BARS, len(TICKERS))))
     r = evaluate_candidate(sig, [], panel, cfg, params=EvalParams(min_is_ic=10.0))
-    assert r.objective.temporal_robustness is None
+    assert r.diagnostics["degradation_ratio"] is None
     assert r.gates.coverage_ok  # gates do not depend on the axis
-
-
-def test_temporal_robustness_clips_high_ratio_to_one():
-    """A VAL edge stronger than the IS edge (ratio > 1) clips to exactly 1.0 while the
-    raw ratio > 1 is preserved in diagnostics."""
-    panel, rng = _panel(seed=5)
-    cfg = _cfg()
-    split = three_way_split(panel["close"].index, is_frac=0.6, val_frac=0.2)
-    fwd = panel["close"].pct_change().shift(-1)
-
-    # VAL = clean forward return (IC ≈ 1); IS = noisier (IC ≈ 0.4) → ratio > 1
-    sig = fwd.copy()
-    is_rows = np.flatnonzero(split.is_mask)
-    sig.iloc[is_rows] = (fwd.iloc[is_rows]
-                         + 0.02 * rng.standard_normal((len(is_rows), len(TICKERS))))
-
-    r = evaluate_candidate(sig, [], panel, cfg, split=split)
-    raw = r.diagnostics["degradation_ratio"]
-    assert raw is not None and raw > 1.0
-    assert r.objective.temporal_robustness == 1.0
 
 
 def test_plateau_penalty_folds_onto_marginal_value():

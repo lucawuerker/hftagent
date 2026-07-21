@@ -16,17 +16,19 @@ Examples
 --------
 ::
 
-    # A small evolution run with the default research model.
-    python run_factor_evolution.py --name evo1 --generations 5 --population 10
+    # A grouped evolution run with the default research model.
+    python run_factor_evolution.py --name evo1
 
-    # Larger run, seeded from papers, two islands, stronger model.
+    # Override the serious defaults for a smaller grouped run.
     python run_factor_evolution.py --name evo_claude --model claude-sonnet-5 \
-      --llm-provider anthropic --generations 12 --population 12 \
-      --children-per-gen 10 --islands 2 --seed-papers 6
+      --llm-provider anthropic --generations 8 --population 12 \
+      --mechanism-groups 4 --demes-per-group 2 --children-per-deme 3
 
     # Smoke run, in-process, tiny.
     QF_USE_MCP=0 python run_factor_evolution.py --name evosmoke --reset \
-      --generations 2 --population 4 --children-per-gen 3 --seed-ideas 4 \
+      --generations 2 --population 4 --mechanism-groups 1 \
+      --demes-per-group 1 --children-per-deme 2 --seed-ideas-per-group 4 \
+      --retrieval none \
       --n-tickers 8
 """
 
@@ -84,43 +86,34 @@ def _parse_args() -> argparse.Namespace:
                         "archive) or a whole set/'alpha program' (scored jointly).")
     p.add_argument("--set-size", type=int, default=3,
                    help="Initial members per SET genome (set mode only).")
-    p.add_argument("--generations", type=int, default=5)
-    p.add_argument("--population", type=int, default=10, help="Per-island size.")
-    p.add_argument("--children-per-gen", type=int, default=8)
-    p.add_argument("--islands", type=int, default=1)
-    p.add_argument("--migration-every", type=int, default=5)
+    p.add_argument("--generations", type=int, default=12)
+    p.add_argument("--population", type=int, default=16, help="Per-deme size.")
+    p.add_argument("--mechanism-groups", type=int, default=5,
+                   help="Reserved knowledge-graph mechanism communities.")
+    p.add_argument("--demes-per-group", type=int, default=3,
+                   help="Classic independently evolving islands within each group.")
+    p.add_argument("--children-per-deme", type=int, default=4,
+                   help="Children proposed by every deme in every generation.")
+    p.add_argument("--children-per-gen", type=int, default=None,
+                   help=argparse.SUPPRESS)
+    p.add_argument("--islands", type=int, default=None, help=argparse.SUPPRESS)
+    p.add_argument("--migration-every", type=int, default=3)
     p.add_argument("--seed", type=int, default=0, help="RNG seed for the controller.")
-    # ── selection: NSGA-II Pareto vs QD behavior grid (WS2) ──
-    p.add_argument("--selection", choices=["nsga2", "qd"], default="nsga2",
-                   help="Parent-selection / archive mode. 'nsga2' (default): the "
-                        "Pareto archive drives selection. 'qd': a MAP-Elites behavior "
-                        "grid (trend_reversal × signal_speed) fills a diverse library "
-                        "while keeping the SAME 5-axis Pareto as per-cell quality.")
-    p.add_argument("--grid-dims", type=int, choices=[2, 3], default=2,
-                   help="QD behavior-grid dimensionality: 2 (trend×speed, default) or "
-                        "3 (+ stress_activation).")
-    p.add_argument("--cell-capacity", type=int, default=3,
-                   help="QD mini-Pareto elites kept per behavior cell (default 3).")
-    p.add_argument("--depth-gamma", type=float, default=0.0,
-                   help="P7 depth penalty (1-γ)^depth on QD parent sampling "
-                        "(0 = off; AlphaPROBE-style anti-overfit bias).")
-    p.add_argument("--reuse-omega", type=float, default=0.0,
-                   help="P7 parent-reuse penalty (1-ω)^reuse on QD parent sampling "
-                        "(0 = off; anti mode-collapse bias).")
-
     # ── operator mix ──
-    p.add_argument("--p-llm", type=float, default=0.6, help="P(llm_semantic).")
+    p.add_argument("--p-llm", type=float, default=0.55, help="P(llm_semantic).")
     p.add_argument("--p-crossover", type=float, default=0.25)
-    p.add_argument("--p-jitter", type=float, default=0.15)
+    p.add_argument("--p-cross-group", type=float, default=0.10,
+                   help="P(crossover using parents from different mechanism groups).")
+    p.add_argument("--p-jitter", type=float, default=0.10)
 
     # ── seeding ──
-    p.add_argument("--seed-ideas", type=int, default=8,
-                   help="Generation-0 brainstorm budget.")
+    p.add_argument("--seed-ideas-per-group", type=int, default=6,
+                   help="Generation-0 brainstorm budget for every mechanism group.")
     p.add_argument("--seed-papers", type=int, default=0,
                    help="Papers pulled for the seed brainstorm (0 = knowledge-only).")
 
     # ── retrieval (P2) ──
-    p.add_argument("--retrieval", choices=["none", "rag", "graphrag"], default="none",
+    p.add_argument("--retrieval", choices=["none", "rag", "graphrag"], default="graphrag",
                    help="Ground the brainstorm in retrieved papers (rag) or the "
                         "hybrid knowledge graph (graphrag, P4).")
     p.add_argument("--retrieval-cardinality", choices=["1toN", "Nto1", "NtoM"],
@@ -194,12 +187,6 @@ def _parse_args() -> argparse.Namespace:
                    help="Independence axis basis: residual (orthogonalised) IC "
                         "(default; novel predictive content) or the legacy "
                         "Δ-participation-ratio − max-|corr| penalty.")
-    p.add_argument("--regime-kind", choices=["drawdown", "volatility"],
-                   default="drawdown",
-                   help="Stress bars for the QD descriptor: worst market-return "
-                        "'drawdown' bars (default) or top-volatility bars.")
-    p.add_argument("--regime-quantile", type=float, default=0.2,
-                   help="Tail fraction of dev bars labelled 'stress' (default 0.2).")
     p.add_argument("--marginal-model", default="gradient_boosting",
                    help="Estimator that combines the book for the marginal-value "
                         "(LOCO) axis. Default 'gradient_boosting' is NONLINEAR so "
@@ -301,21 +288,22 @@ def main() -> None:
     cfg = EvolutionRunConfig(
         generations=args.generations,
         population_size=args.population,
-        children_per_generation=args.children_per_gen,
-        n_islands=args.islands,
+        children_per_generation=args.children_per_gen or 8,
+        children_per_deme=(None if args.children_per_gen is not None
+                           else args.children_per_deme),
+        n_mechanism_groups=args.mechanism_groups,
+        demes_per_group=(args.islands if args.islands is not None
+                         else args.demes_per_group),
         migration_every=args.migration_every,
         seed=args.seed,
-        selection=args.selection,
-        grid_dims=args.grid_dims,
-        cell_capacity=args.cell_capacity,
-        depth_gamma=args.depth_gamma,
-        reuse_omega=args.reuse_omega,
         unit=args.evolution_unit,
         set_size=args.set_size,
         p_llm_semantic=args.p_llm,
         p_crossover=args.p_crossover,
+        p_cross_group=args.p_cross_group,
         p_jitter=args.p_jitter,
-        n_seed_ideas=args.seed_ideas,
+        n_seed_ideas=args.seed_ideas_per_group,
+        seed_ideas_per_group=args.seed_ideas_per_group,
         seed_papers=args.seed_papers,
         retrieval=args.retrieval,
         retrieval_cardinality=args.retrieval_cardinality,
@@ -333,8 +321,6 @@ def main() -> None:
         val_blocks=args.val_blocks,
         force_prediction_horizon=(args.prediction_horizon_mode == "fixed"),
         independence_metric=args.independence_metric,
-        regime_kind=args.regime_kind,
-        regime_quantile=args.regime_quantile,
         marginal_model=args.marginal_model,
         gate_turnover=args.gate_turnover,
         cost_rate=args.cost_rate,

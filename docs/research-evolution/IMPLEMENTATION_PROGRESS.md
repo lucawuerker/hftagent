@@ -7,22 +7,15 @@ test file.
 
 Legend: ✅ done & tested · 🚧 in progress · ⬜ not started
 
-**Post-P5 — temporal-degradation gate → 5th Pareto axis — ✅ DONE (2026-07-16).**
-The OOS/IS degradation **hard gate** became the `temporal_robustness` **Pareto axis**
-(plan: `PROGRESSIVE_REVEAL_PLAN.md` Change 4), so the CORE vector is now **5 axes**
-`(marginal_value, independence, temporal_robustness, parsimony, structural_novelty)`
-and the search gates drop to **coverage + optional cost** (`GateResults.GATES =
-(coverage_ok, deflation_ok, cost_ok)`; deflation stays a *publish* filter, never a
-search gate). The gate was too harsh: a conditioning factor whose standalone IC
-fluctuates around zero (|IS IC| just above `min_is_ic`, opposite sign on VAL) was
-excluded outright — the very factor class the primary axis exists to protect. As an
-axis the ratio `(val_ic·sign(is_ic))/|is_ic|` is **clipped to `[-1, 1]`** (bounds
-crowding-distance normalisation; removes the incentive to game tiny-denominator
-ratios) and traded off against the other objectives; `None` when `|is_ic| < min_is_ic`.
-The RAW unclipped ratio survives as the `degradation_ratio` diagnostic. Legacy state
-files carrying `robustness` / `degradation_ok` keys still load (`from_dict` reads only
-`AXES`/`GATES`). `EvalParams.gate_degradation` retained (unused). Tests: extended
-`test_research_eval_{fitness,harness}.py`, `test_evolution_{controller,mutation,qd,loop}.py`.
+**Post-P5 — two-level mechanism groups and four-axis evaluator — ✅ DONE
+(2026-07-21).** The current vector is exactly `(marginal_value, independence,
+parsimony, structural_novelty)`. `temporal_robustness` is removed; the raw
+VAL/IS degradation ratio remains teacher diagnostics only. Knowledge-graph
+communities form reserved upper-level mechanism groups, each containing classic
+NSGA-II demes with within-group migration. Pareto archives are maintained per
+mechanism group and unioned for the accepted book. An explicit cross-group
+synthesis operator is the only normal path for combining mechanisms. The QD
+behavior grid, controller mode, CLI options, archive module, and tests are removed.
 
 **Post-P5 — 4-axis vector + dev-wide residual IC + progressive reveal — ✅ DONE
 (2026-07-15).** Three overfitting-control corrections (plan:
@@ -53,7 +46,7 @@ gate-failer retry-once (`controller.release_failed_fingerprints`). Resume-safe
 Out of scope (deferred): Thresholdout/select-guard gate, ε-dominance, GP-arm
 progressive reveal.
 
-**Post-P5 — residual-IC + regime axes and two-stage curation (Lever 2) — ✅ DONE.**
+**Historical (partly superseded) — residual-IC + regime axes and two-stage curation.**
 The CORE objective vector is now **5 axes**. The independence axis is the
 candidate's **residual (orthogonalised) IC** — its predictive edge in the
 direction the book does *not* span (novel content that actually predicts, instead
@@ -80,8 +73,8 @@ so a good factor is no longer discarded merely for being Pareto-dominated. Tests
 `tests/test_research_eval_curation.py`, extended `test_research_eval_{fitness,harness}.py`,
 `test_evolution_{controller,loop}.py`.
 
-**Post-P5 (round 2) — QD grid, publish-time deflation, economic reward, experience
-memory — ✅ DONE (2026-07-05).** Five additions from a competitive-landscape review
+**Historical (QD portion removed 2026-07-21) — publish-time deflation, economic
+reward, experience memory.** Five additions from a competitive-landscape review
 (`research_docs/competitive-landscape-2026.md`; every borrowed idea is logged in
 `research_docs/SOURCES.md` — keep it current). **WS1 — deflation → shared publish filter.**
 The N_trials deflated-IC *gate* is removed from `harness.evaluate_candidate`/`evaluate_set`

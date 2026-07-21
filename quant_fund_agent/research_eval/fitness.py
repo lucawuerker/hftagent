@@ -1,7 +1,7 @@
 """The CORE Pareto objective vector, the hard gates, and dominance primitives.
 
 Per ``docs/research-evolution/DESIGN.md`` the selection fitness is a **Pareto front**
-over five axes (no arbitrary scalar weights, which can themselves overfit), behind a
+over four axes (no arbitrary scalar weights, which can themselves overfit), behind a
 set of **hard gates** a candidate must clear before it competes at all:
 
 CORE objective vector (all *maximised*):
@@ -21,18 +21,8 @@ CORE objective vector (all *maximised*):
      the axis has ~4× the effective sample and a lower noise floor.  The legacy
      Δ-participation-ratio − soft max-|corr| penalty stays available as a diagnostic /
      ``EvalParams.independence_metric`` option.
-  3. ``temporal_robustness`` — the sign-aligned VAL/IS IC ratio
-     ``(val_ic·sign(is_ic))/|is_ic|`` clipped to ``[-1, 1]`` (the fraction of the
-     in-sample edge retained on VAL; 1 = full retention, negative = a sign reversal).
-     ``None`` when the IS edge is too small to be evaluable (``|is_ic| < min_is_ic``).
-     This was a hard *gate* until 2026-07-16 — but the gate excluded outright a
-     conditioning factor whose standalone IC fluctuates around zero (|IS IC| just above
-     the floor, opposite sign on VAL), the very factor class the primary axis exists to
-     protect.  As a Pareto axis, temporal inconsistency is traded off against the other
-     objectives instead of being fatal.  The clip bounds crowding-distance normalisation
-     and removes the incentive to game tiny-denominator ratios.
-  4. ``parsimony``          — ``−complexity`` (operator + constant count from the AST).
-  5. ``structural_novelty`` — minimum **canonical AST weighted-subtree distance**
+  3. ``parsimony``          — ``−complexity`` (operator + constant count from the AST).
+  4. ``structural_novelty`` — minimum **canonical AST weighted-subtree distance**
      (``research_eval.ast_novelty``) to the nearest archive member.  0 = structural
      clone (same canonical computation) of something already kept, 1 = no shared
      canonical subtree.  Falls back to the zoo reference distance when the archive is
@@ -44,9 +34,8 @@ CORE objective vector (all *maximised*):
      only if it is strictly better on every quality axis.
 
 Hard gates (all must pass, else the candidate is treated as dominated):
-  coverage ≥ τ; (optional, costed) net-of-cost IC > 0.  (Deflation is a *publish*
-  filter, not a search gate; temporal degradation became the ``temporal_robustness``
-  axis above.)
+  coverage ≥ τ; (optional, costed) net-of-cost IC > 0.  Deflation is a *publish*
+  filter, not a search gate.
 
 This module holds the *definitions* (the dataclasses, the gate booleans, the
 dominance test and the non-dominated front).  The full NSGA-II ranking + crowding
@@ -64,7 +53,7 @@ from typing import Any, Sequence
 
 @dataclass
 class ObjectiveVector:
-    """The five Pareto axes for one candidate — every axis *maximised*.
+    """The four Pareto axes for one candidate — every axis *maximised*.
 
     ``None`` on an axis means "not measured / not applicable"; it is treated as the
     worst possible value in dominance comparisons so an unmeasured candidate never
@@ -73,12 +62,10 @@ class ObjectiveVector:
 
     marginal_value: float | None = None
     independence: float | None = None
-    temporal_robustness: float | None = None
     parsimony: float | None = None
     structural_novelty: float | None = None
 
-    AXES = ("marginal_value", "independence", "temporal_robustness",
-            "parsimony", "structural_novelty")
+    AXES = ("marginal_value", "independence", "parsimony", "structural_novelty")
 
     def as_tuple(self) -> tuple[float, ...]:
         """The axes as floats (``None`` → ``-inf``, the worst value)."""
@@ -144,11 +131,8 @@ class FitnessResult:
     gates: GateResults
     diagnostics: dict[str, Any] = field(default_factory=dict)
     raw: dict[str, Any] = field(default_factory=dict)
-    # QD behavior descriptors (WS2): the candidate's *behavioral* coordinates used to
-    # place it in the MAP-Elites grid.  DELIBERATELY separate from ``objective`` — these
-    # organise the archive for diversity, they are NOT scored on.  Keys:
-    # ``trend_reversal`` (fade↔momentum), ``signal_speed`` (slow↔fast),
-    # ``stress_activation`` (metadata at grid_dims=2, a 3rd bin axis at grid_dims=3).
+    # Legacy behavior diagnostics retained only for old checkpoint/API round-trips.
+    # They have no selection, archive, or diversity-control role.
     behavior: dict[str, Any] = field(default_factory=dict)
 
     @property
@@ -183,7 +167,7 @@ class FitnessResult:
 # ── Pareto dominance ─────────────────────────────────────────────────────────
 
 def dominates(a: ObjectiveVector, b: ObjectiveVector) -> bool:
-    """True if ``a`` Pareto-dominates ``b`` (maximisation on all five axes).
+    """True if ``a`` Pareto-dominates ``b`` (maximisation on all four axes).
 
     ``a`` dominates ``b`` when it is ≥ on every axis and strictly > on at least one.
     """

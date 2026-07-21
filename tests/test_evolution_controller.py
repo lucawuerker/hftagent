@@ -162,6 +162,54 @@ def test_islands_and_migration():
     assert any(eg.genome.genome_id == "a" for eg in ctrl.population(1))
 
 
+def test_mechanism_groups_reserve_separate_pareto_archives():
+    ctrl = EvolutionController(ControllerConfig(
+        population_size=4, n_mechanism_groups=2, demes_per_group=2, seed=0))
+    strong = _eg("strong", mv=10, ind=10, par=10)
+    weak = _eg("weak", mv=1, ind=1, par=1)
+    strong.genome.mechanism_group_id = 0
+    weak.genome.mechanism_group_id = 1
+    ctrl.insert(strong)
+    ctrl.insert(weak)
+
+    # A globally dominated factor survives because competition is per mechanism
+    # group; the accepted book is the union of both reserved fronts.
+    assert [eg.genome.genome_id for eg in ctrl.group_archive(0)] == ["strong"]
+    assert [eg.genome.genome_id for eg in ctrl.group_archive(1)] == ["weak"]
+    assert {eg.genome.genome_id for eg in ctrl.accepted_book()} == {"strong", "weak"}
+
+
+def test_migration_never_crosses_mechanism_group_boundary():
+    ctrl = EvolutionController(ControllerConfig(
+        population_size=4, n_mechanism_groups=2, demes_per_group=2,
+        migration_k=1, seed=0))
+    for group in range(2):
+        for deme in range(2):
+            gid = f"g{group}d{deme}"
+            eg = _eg(gid, mv=float(group + deme))
+            eg.genome.mechanism_group_id = group
+            eg.genome.deme_id = deme
+            ctrl.insert(eg)
+    ctrl.migrate()
+
+    for flat, population in enumerate(ctrl.islands):
+        group, deme = ctrl.coordinates(flat)
+        assert population
+        assert all(eg.genome.mechanism_group_id == group for eg in population)
+        assert all(eg.genome.deme_id == deme for eg in population)
+
+
+def test_duplicate_scope_is_per_deme():
+    ctrl = EvolutionController(ControllerConfig(
+        n_mechanism_groups=1, demes_per_group=2, seed=0))
+    first = _genome("a", code="same = 1\n")
+    first.deme_id = 0
+    ctrl.insert(EvaluatedGenome(first, _fit("a")))
+    same_other_deme = _genome("b", code="same = 1\n")
+    same_other_deme.deme_id = 1
+    assert not ctrl.is_duplicate(same_other_deme)
+
+
 def test_state_roundtrip(tmp_path):
     ctrl = EvolutionController(ControllerConfig(population_size=4, seed=7))
     ctrl.next_trial()

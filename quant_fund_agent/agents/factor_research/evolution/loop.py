@@ -127,10 +127,8 @@ class EvolutionRunConfig:
     reveal_every: int = 1        # generations between reveals
     val_blocks: int = 2          # sliding VAL = last val_blocks blocks
 
-    # ── fitness axes (P0+): independence basis + the crash-regime axis ──
+    # ── fitness: four Pareto axes ──
     independence_metric: str = "residual_ic"   # "residual_ic" | "delta_participation"
-    regime_kind: str = "drawdown"              # "drawdown" | "volatility"
-    regime_quantile: float = 0.2
     # nonlinear LOCO combiner so conditioning/interaction value (e.g. a volatility
     # state variable) scores a positive marginal value; "ridge" = additive-only.
     marginal_model: str = "gradient_boosting"
@@ -532,17 +530,19 @@ class EvolutionLoop:
                  fields: list[str] | None = None) -> None:
         self.cfg = cfg
         self.rng = np.random.default_rng(cfg.seed)
+        demes_per_group = cfg.effective_demes_per_group
         self.controller = EvolutionController(ControllerConfig(
             population_size=cfg.population_size,
-            n_islands=cfg.n_islands,
+            n_mechanism_groups=cfg.n_mechanism_groups,
+            demes_per_group=demes_per_group,
             migration_every=cfg.migration_every,
             seed=cfg.seed,
-            selection=cfg.selection,
-            grid_dims=cfg.grid_dims,
-            cell_capacity=cfg.cell_capacity,
-            depth_gamma=cfg.depth_gamma,
-            reuse_omega=cfg.reuse_omega,
         ))
+        self.mechanism_groups: list[dict[str, Any]] = [
+            {"mechanism_group_id": g, "community_id": None,
+             "focus": "", "mechanisms": []}
+            for g in range(max(1, cfg.n_mechanism_groups))
+        ]
         self.briefs: dict[str, str] = {}      # genome_id → reflection brief
         self.fields = fields                   # run-constant field set (panel cache key)
         self.data_context = data_context or self._build_data_context()
@@ -643,6 +643,21 @@ class EvolutionLoop:
             k += 1
         return fid
 
+    def _group_context(self, mechanism_group_id: int) -> str:
+        spec = self.mechanism_groups[
+            mechanism_group_id % len(self.mechanism_groups)]
+        focus = str(spec.get("focus") or "").strip()
+        if not focus:
+            return self.data_context
+        return (
+            self.data_context
+            + "\n\nKNOWLEDGE-GRAPH MECHANISM GROUP\n"
+            + "Develop this lineage within the following economic mechanism "
+              "community. You may combine related mechanisms, but keep a clear "
+              "causal link to the group:\n"
+            + focus
+        )
+
     # ── evaluation ──
 
     @property
@@ -705,8 +720,6 @@ class EvolutionLoop:
             n_tickers=self.cfg.n_tickers,
             fields=self.fields,
             independence_metric=self.cfg.independence_metric,
-            regime_kind=self.cfg.regime_kind,
-            regime_quantile=self.cfg.regime_quantile,
             marginal_model=self.cfg.marginal_model,
             gate_turnover=self.cfg.gate_turnover,
             cost_rate=self.cfg.cost_rate,
@@ -734,8 +747,6 @@ class EvolutionLoop:
             n_tickers=self.cfg.n_tickers,
             fields=self.fields,
             candidate_id=candidate_id,
-            regime_kind=self.cfg.regime_kind,
-            regime_quantile=self.cfg.regime_quantile,
             marginal_model=self.cfg.marginal_model,
             gate_turnover=self.cfg.gate_turnover,
             cost_rate=self.cfg.cost_rate,
@@ -900,10 +911,15 @@ class EvolutionLoop:
     def _admit(self, program: FactorProgram, *, generation: int, island: int,
                operator: str, parent_ids: Sequence[str]) -> EvaluatedGenome | None:
         """SINGLE mode: wrap one program in a genome and admit it."""
+        group_id, deme_id = self.controller.coordinates(island)
+        program.mechanism_group_id = group_id
         genome = Genome(
             genome_id=f"g{generation}-{program.factor_id}-{uuid.uuid4().hex[:6]}",
             programs=[program], unit="single", generation=generation,
-            island=island, parent_ids=list(parent_ids), operator=operator,
+            island=island, mechanism_group_id=group_id, deme_id=deme_id,
+            parent_ids=list(parent_ids), operator=operator,
+            metadata={"mechanism_group_id": group_id,
+                      "mechanism": program.mechanism},
         )
         return self._admit_genome(genome)
 
@@ -911,10 +927,15 @@ class EvolutionLoop:
                    island: int, operator: str,
                    parent_ids: Sequence[str]) -> EvaluatedGenome | None:
         """SET mode: wrap a member list in a genome and admit it."""
+        group_id, deme_id = self.controller.coordinates(island)
+        for program in programs:
+            program.mechanism_group_id = group_id
         genome = Genome(
             genome_id=f"g{generation}-set{len(programs)}-{uuid.uuid4().hex[:6]}",
             programs=list(programs), unit="set", generation=generation,
-            island=island, parent_ids=list(parent_ids), operator=operator,
+            island=island, mechanism_group_id=group_id, deme_id=deme_id,
+            parent_ids=list(parent_ids), operator=operator,
+            metadata={"mechanism_group_id": group_id},
         )
         return self._admit_genome(genome)
 
@@ -1041,17 +1062,20 @@ class EvolutionLoop:
         if not parents:
             return None
         parent = parents[0]
+        group_id, _ = self.controller.coordinates(island)
+        context = self._group_context(group_id)
         if self.cfg.debate == "on":
-            child = self._child_hypothesis_debate_codegen(llm, parent)
+            child = self._child_hypothesis_debate_codegen(llm, parent, context)
         else:
             prompt = build_mutation_prompt(
                 parent.genome.program, self._brief_for(parent),
-                self.data_context, sorted(self.known_ids))
+                context, sorted(self.known_ids))
             child = self._parse_and_validate_child(llm, prompt, [parent])
         return (child, [parent.genome.genome_id]) if child is not None else None
 
     def _child_hypothesis_debate_codegen(self, hyp_llm: Any,
                                          parent: EvaluatedGenome,
+                                         data_context: str,
                                          ) -> FactorProgram | None:
         """P3 agent split: Hypothesis → Debate → Codegen (debate pre-codegen,
         so tokens are never spent implementing an idea the skeptic kills)."""
@@ -1063,7 +1087,7 @@ class EvolutionLoop:
 
         prompt = build_hypothesis_prompt(
             parent.genome.program, self._brief_for(parent),
-            self.data_context, sorted(self.known_ids))
+            data_context, sorted(self.known_ids))
         try:
             raw = parse_hypothesis_response(_invoke(hyp_llm, prompt))
         except Exception as e:  # noqa: BLE001
@@ -1072,7 +1096,7 @@ class EvolutionLoop:
 
         verdict, final, _ = run_debate(
             self._role_llm("debate", 0.3), raw,
-            data_context=self.data_context, book=self._book_entries())
+            data_context=data_context, book=self._book_entries())
         if verdict == "reject":
             log.info("[%s] child hypothesis rejected in debate", raw.get("factor_id"))
             return None
@@ -1086,7 +1110,7 @@ class EvolutionLoop:
         fixed_horizon = (
             self.cfg.target_horizon if self.cfg.force_prediction_horizon else None)
         prog = _codegen_program(
-            self._role_llm("codegen", 0.2), idea, self.data_context,
+            self._role_llm("codegen", 0.2), idea, data_context,
             expected_prediction_horizon=fixed_horizon)
         if prog is not None and not prog.source_paper_ids:
             prog.source_paper_ids = list(parent.genome.program.source_paper_ids)
@@ -1104,10 +1128,12 @@ class EvolutionLoop:
             if not others:
                 return None
             b = others[int(self.rng.integers(0, len(others)))]
+        group_id, _ = self.controller.coordinates(island)
+        context = self._group_context(group_id)
         prompt = build_crossover_prompt(
             a.genome.program, self._brief_for(a),
             b.genome.program, self._brief_for(b),
-            self.data_context, sorted(self.known_ids))
+            context, sorted(self.known_ids))
         child = self._parse_and_validate_child(llm, prompt, [a, b])
         if child is None:
             return None
@@ -1118,11 +1144,48 @@ class EvolutionLoop:
 
             verdict, _, _ = run_debate(
                 self._role_llm("debate", 0.3), _idea_payload(child),
-                data_context=self.data_context, book=self._book_entries(),
+                data_context=context, book=self._book_entries(),
                 max_revisions=0)
             if verdict == "reject":
                 log.info("[%s] crossover child rejected in debate", child.factor_id)
                 return None
+        return child, [a.genome.genome_id, b.genome.genome_id]
+
+    def _child_cross_group(self, llm: Any, island: int,
+                           ) -> tuple[FactorProgram, list[str]] | None:
+        """Synthesize parents from two reserved knowledge-graph groups."""
+        if self.cfg.n_mechanism_groups < 2:
+            return self._child_crossover(llm, island)
+        group_id, _ = self.controller.coordinates(island)
+        local = self.controller.select_parents(1, island)
+        other_groups = [
+            g for g in range(self.cfg.n_mechanism_groups)
+            if g != group_id and self.controller.population(mechanism_group_id=g)
+        ]
+        if not local or not other_groups:
+            return self._child_crossover(llm, island)
+        other_group = int(self.rng.choice(other_groups))
+        remote = self.controller.select_parents(
+            1, mechanism_group_id=other_group)
+        if not remote:
+            return None
+        a, b = local[0], remote[0]
+        context = (
+            self._group_context(group_id)
+            + "\n\nCROSS-GROUP SYNTHESIS\nCombine the focal group with this "
+              "second knowledge-graph group when the economic interaction is "
+              "coherent:\n"
+            + str(self.mechanism_groups[other_group].get("focus") or "")
+        )
+        prompt = build_crossover_prompt(
+            a.genome.program, self._brief_for(a),
+            b.genome.program, self._brief_for(b),
+            context, sorted(self.known_ids))
+        child = self._parse_and_validate_child(llm, prompt, [a, b])
+        if child is None:
+            return None
+        child.mechanism = (
+            f"hybrid:{group_id}+{other_group}")
         return child, [a.genome.genome_id, b.genome.genome_id]
 
     def _parse_and_validate_child(self, llm: Any, prompt: str,
@@ -1190,13 +1253,40 @@ class EvolutionLoop:
     def _child_set(self, op: str, island: int,
                    ) -> tuple[list[FactorProgram], list[str]] | None:
         """One SET child via ``structural`` (add/drop/replace member),
-        ``splice`` (union-sample two parents) or ``member_jitter``.
+        ``splice`` (union-sample two local parents), ``cross_group_splice``,
+        or ``member_jitter``.
 
         All three are programmatic — the LLM's creativity enters SET mode
         through the generation-0 members (and any future member-level LLM
         mutation, a documented extension); the set-level search explores
         *composition* space, which is what the unit is for.
         """
+        if op == "cross_group_splice":
+            group_id, _ = self.controller.coordinates(island)
+            local = self.controller.select_parents(1, island)
+            other_groups = [
+                g for g in range(self.cfg.n_mechanism_groups)
+                if g != group_id and self.controller.population(mechanism_group_id=g)
+            ]
+            if not local or not other_groups:
+                return None
+            other_group = int(self.rng.choice(other_groups))
+            remote = self.controller.select_parents(
+                1, mechanism_group_id=other_group)
+            if not remote:
+                return None
+            a, b = local[0], remote[0]
+            pool = {p.factor_id: p
+                    for p in [*a.genome.programs, *b.genome.programs]}
+            k = max(1, min(len(pool),
+                           max(len(a.genome.programs), len(b.genome.programs))))
+            chosen = self.rng.choice(sorted(pool), size=k, replace=False)
+            # Copy members before the focal-group admission stamps provenance;
+            # never mutate the remote parent programs in place.
+            return ([FactorProgram.from_dict(pool[str(fid)].to_dict())
+                     for fid in chosen],
+                    [a.genome.genome_id, b.genome.genome_id])
+
         parents = self.controller.select_parents(2 if op == "splice" else 1, island)
         if not parents:
             return None
@@ -1228,10 +1318,13 @@ class EvolutionLoop:
                     return members, [a.genome.genome_id]
             return None
 
-        # structural: add / drop / replace against the run-wide member pool
+        # structural: add / drop / replace within the same mechanism group.
+        # Cross-group composition is deliberately reserved for the explicit
+        # cross-group synthesis operator rather than leaking through this pool.
+        group_id, _ = self.controller.coordinates(island)
         current = set(a.genome.factor_ids)
         external = [p for fid, p in sorted(self._program_pool.items())
-                    if fid not in current]
+                    if fid not in current and p.mechanism_group_id == group_id]
         moves = []
         if external:
             moves.extend(["add", "replace"])
@@ -1253,6 +1346,8 @@ class EvolutionLoop:
         self.controller.save(self.out_dir / "state.json")
         (self.out_dir / "run_config.json").write_text(
             json.dumps(self.cfg.to_dict(), indent=2))
+        (self.out_dir / "mechanism_groups.json").write_text(
+            json.dumps(self.mechanism_groups, indent=2, default=str))
         with (self.out_dir / "lineage.jsonl").open("w") as fh:
             for row in self.controller.lineage:
                 fh.write(json.dumps(row, default=str) + "\n")
@@ -1295,24 +1390,49 @@ class EvolutionLoop:
         else:
             start_gen = 0
             # ── generation 0: seed ──
-            programs = list(initial_programs) if initial_programs is not None else \
-                seed_programs(cfg, self.data_context, self.known_ids, self.fields)
+            grouped_programs: dict[int, list[FactorProgram]] = {}
+            if initial_programs is not None:
+                # Tests/manual resumes can supply programs directly.  Respect an
+                # explicit program group tag; otherwise distribute by group.
+                for k, program in enumerate(initial_programs):
+                    tagged = bool(program.mechanism) or program.mechanism_group_id != 0
+                    group_id = (program.mechanism_group_id if tagged else k) \
+                        % max(1, cfg.n_mechanism_groups)
+                    program.mechanism_group_id = group_id
+                    grouped_programs.setdefault(group_id, []).append(program)
+            else:
+                self.mechanism_groups = resolve_mechanism_groups(cfg, self.fields)
+                per_group_cfg = replace(
+                    cfg, n_seed_ideas=cfg.effective_seed_ideas_per_group)
+                for spec in self.mechanism_groups:
+                    group_id = int(spec["mechanism_group_id"])
+                    programs_for_group = seed_programs(
+                        per_group_cfg, self._group_context(group_id),
+                        self.known_ids, self.fields, mechanism_group=spec)
+                    grouped_programs[group_id] = programs_for_group
+                    self.known_ids.update(p.factor_id for p in programs_for_group)
+            programs = [p for group in sorted(grouped_programs)
+                        for p in grouped_programs[group]]
             for prog in programs:  # the pool SET-structural ops draw from
                 self._program_pool.setdefault(prog.factor_id, prog)
-            if cfg.unit == "set":
-                # Partition the seed pool into initial sets of ~set_size (round-robin
-                # chunks, so every seed program appears in exactly one set).
-                size = max(1, cfg.set_size)
-                for k in range(0, len(programs), size):
-                    chunk = programs[k:k + size]
-                    if chunk:
-                        self._admit_set(chunk, generation=0,
-                                        island=(k // size) % max(1, cfg.n_islands),
-                                        operator="seed", parent_ids=[])
-            else:
-                for k, prog in enumerate(programs):
-                    self._admit(prog, generation=0, island=k % max(1, cfg.n_islands),
+            for group_id, group_programs in grouped_programs.items():
+                if cfg.unit == "set":
+                    size = max(1, cfg.set_size)
+                    for k in range(0, len(group_programs), size):
+                        chunk = group_programs[k:k + size]
+                        if chunk:
+                            deme = (k // size) % cfg.effective_demes_per_group
+                            island = self.controller.flat_island(group_id, deme)
+                            self._admit_set(
+                                chunk, generation=0, island=island,
                                 operator="seed", parent_ids=[])
+                else:
+                    for k, prog in enumerate(group_programs):
+                        deme = k % cfg.effective_demes_per_group
+                        island = self.controller.flat_island(group_id, deme)
+                        self._admit(
+                            prog, generation=0, island=island,
+                            operator="seed", parent_ids=[])
             self._checkpoint()
             log.info("generation 0: population=%d, archive=%d, n_trials=%d",
                      len(self.controller.population()), len(self.controller.archive),
@@ -1325,12 +1445,16 @@ class EvolutionLoop:
             ops: list[tuple[str, float]] = [
                 ("structural", max(0.0, cfg.p_llm_semantic)),
                 ("splice", max(0.0, cfg.p_crossover)),
+                ("cross_group_splice", max(0.0, cfg.p_cross_group)
+                 if cfg.n_mechanism_groups > 1 else 0.0),
                 ("member_jitter", max(0.0, cfg.p_jitter)),
             ]
         else:
             ops = [
                 ("llm_semantic", max(0.0, cfg.p_llm_semantic)),
                 ("crossover", max(0.0, cfg.p_crossover)),
+                ("cross_group", max(0.0, cfg.p_cross_group)
+                 if cfg.n_mechanism_groups > 1 else 0.0),
                 ("jitter", max(0.0, cfg.p_jitter)),
             ]
         total_p = sum(p for _, p in ops) or 1.0
@@ -1345,8 +1469,18 @@ class EvolutionLoop:
             if cfg.progressive and self._schedule[gen].reveal:
                 self._advance_reveal(gen)
             made = 0
-            for k in range(cfg.children_per_generation):
-                island = k % max(1, cfg.n_islands)
+            if cfg.children_per_deme is not None:
+                child_islands = [
+                    island
+                    for island in range(len(self.controller.islands))
+                    for _ in range(max(1, cfg.children_per_deme))
+                ]
+            else:
+                child_islands = [
+                    k % len(self.controller.islands)
+                    for k in range(cfg.children_per_generation)
+                ]
+            for island in child_islands:
                 op = str(self.rng.choice(op_names, p=op_probs))
                 if cfg.unit == "set":
                     made_set = self._child_set(op, island)
@@ -1365,6 +1499,9 @@ class EvolutionLoop:
                 elif op == "crossover":
                     made_child = self._child_crossover(
                         self._role_llm("hypothesis", 0.6), island)
+                elif op == "cross_group":
+                    made_child = self._child_cross_group(
+                        self._role_llm("hypothesis", 0.6), island)
                 else:
                     made_child = self._child_llm_semantic(
                         self._role_llm("hypothesis", 0.6), island)
@@ -1375,12 +1512,13 @@ class EvolutionLoop:
                                  operator=op, parent_ids=parent_ids)
                 if eg is not None:
                     made += 1
-            if cfg.n_islands > 1 and gen % max(1, cfg.migration_every) == 0:
+            if cfg.effective_demes_per_group > 1 \
+                    and gen % max(1, cfg.migration_every) == 0:
                 moved = self.controller.migrate()
                 log.info("generation %d: migrated %d elite(s)", gen, moved)
             self._checkpoint()
             log.info("generation %d: %d/%d children admitted; archive=%d; n_trials=%d",
-                     gen, made, cfg.children_per_generation,
+                     gen, made, len(child_islands),
                      len(self.controller.archive), self.controller.n_trials)
 
         self._write_memory()   # WS5: persist survivors + attempt tallies for the next run
@@ -1392,12 +1530,24 @@ class EvolutionLoop:
             "n_trials": self.controller.n_trials,
             "population": len(self.controller.population()),
             "fixed_book_size": len(self.fixed_book),
+            "mechanism_groups": [
+                {
+                    **spec,
+                    "population": len(self.controller.population(
+                        mechanism_group_id=int(spec["mechanism_group_id"]))),
+                    "archive_size": len(self.controller.group_archive(
+                        int(spec["mechanism_group_id"]))),
+                }
+                for spec in self.mechanism_groups
+            ],
             "archive": [
                 {"factor_ids": eg.genome.factor_ids,
                  "genome_id": eg.genome.genome_id,
                  "unit": eg.genome.unit,
                  "operator": eg.genome.operator,
                  "generation": eg.genome.generation,
+                 "mechanism_group_id": eg.genome.mechanism_group_id,
+                 "deme_id": eg.genome.deme_id,
                  "objective": eg.fitness.objective.to_dict()}
                 for eg in self.controller.archive
             ],
@@ -1443,10 +1593,8 @@ def persist_archive(controller: EvolutionController, *, session_id: str,
         TradingIdeaCategory,
     )
 
-    # ── choose the source book (archive/QD-cell-elites vs the full kept-pool) ──
-    # `accepted_book()` returns the QD behavior-grid cell elites in QD mode, else the
-    # Pareto archive — so the default (curation="archive") persist path is the union
-    # of cell elites under QD, exactly as designed.
+    # ── choose source: reserved group archives or the full kept-pool ──
+    # ``accepted_book()`` is the union of mechanism-group Pareto archives.
     use_pool = curation != "archive" and bool(controller.kept_pool)
     source = controller.kept_pool if use_pool else controller.accepted_book()
     prog_by_fid: dict[str, tuple[EvaluatedGenome, FactorProgram]] = {}
@@ -1476,8 +1624,8 @@ def persist_archive(controller: EvolutionController, *, session_id: str,
             log.warning("curation (%s) failed: %s — persisting the full pool",
                         curation, res.get("error"))
 
-    # ── WS1: selection-time deflation publish filter (runs for EVERY source —
-    #        archive, curated kept-pool, or QD cell elites — before materialise) ──
+    # ── WS1: publish-time deflation filter (runs for every source —
+    #        reserved archives or curated kept-pool — before materialise) ──
     publish_info: dict[str, Any] | None = None
     if selection_deflation == "on" and kept_ids:
         pub_book = [{"factor_id": fid, "code": prog_by_fid[fid][1].code}

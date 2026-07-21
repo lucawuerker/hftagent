@@ -185,15 +185,14 @@ def _fitness(**diag) -> FitnessResult:
         "n_trials": 123, "complexity": 14,
     }
     base.update(diag)
-    # gates derived from coverage (the temporal-degradation gate is gone — it is now
-    # the temporal_robustness Pareto axis, not a gate)
+    # gates derive from coverage; temporal degradation is teacher diagnostics only
     cov = base["coverage"]
     coverage_ok = cov >= 0.5
     reasons = {} if coverage_ok else {"coverage": f"{cov:.3f} < τ=0.5"}
     return FitnessResult(
         candidate_id="c",
         objective=ObjectiveVector(marginal_value=0.02, independence=-0.3,
-                                  temporal_robustness=0.08, parsimony=-14.0),
+                                  parsimony=-14.0),
         gates=GateResults(coverage_ok=coverage_ok, deflation_ok=True, reasons=reasons),
         diagnostics=base,
     )
@@ -209,8 +208,7 @@ def test_mutation_brief_is_deterministic_and_specific():
     # all rule-based advice triggers fire on this diagnostics profile
     assert "correlated" in brief1                  # redundancy advice
     assert "conditioning/state variable" in brief1  # low-standalone/high-marginal
-    assert "collapsed out-of-sample" in brief1     # degradation advice (axis, not gate)
-    assert "Temporal robustness (axis)" in brief1  # the axis brief line
+    assert "collapsed out-of-sample" in brief1     # diagnostic-based advice
     assert "knife-edge" in brief1                  # plateau advice
     assert "CONTRADICTS" in brief1                 # sign advice
     assert "24-bar horizon" in brief1              # decay re-anchoring advice

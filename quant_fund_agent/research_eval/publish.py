@@ -5,7 +5,7 @@ Deflation used to be a per-candidate hard gate inside the fitness harness, which
 against the Pareto selection.  Following Bailey & López de Prado (deflate *once*,
 at the end, on the full trial count), deflation now lives here — one choke point
 run over the **final book**, whatever produced it (the Pareto archive, the
-kept-pool, a greedy/elastic-net curation, or the union of QD cell elites).
+kept-pool, a greedy/elastic-net curation, or reserved mechanism-group archives).
 
 Two things make this correct where a naive "``deflated_ic(|val_ic|)`` per factor"
 would be wrong:

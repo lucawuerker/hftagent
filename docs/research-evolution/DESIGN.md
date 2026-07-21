@@ -58,18 +58,14 @@ conditional value**, not standalone power.
 
 ## Locked design decisions
 
-These four forks were decided with the author and are binding for the build:
+These five decisions were made with the author and are binding for the build:
 
 1. **Fitness model — Pareto + hard gates.** Maintain a Pareto front over
-   `{marginal value, independence, temporal_robustness, parsimony, structural_novelty}`
-   (**5 axes** — the separate PSR `robustness` axis was removed, its
-   plateau/perturbation/sign parts folding onto the marginal-value axis; and the former
-   OOS/IS **degradation hard gate** became the `temporal_robustness` axis, 2026-07-16 —
-   see the Update note below); candidates must first pass the remaining hard gates
-   (coverage; optional net-of-cost). No arbitrary scalar weights (weights can themselves
-   overfit and bias the search). `temporal_robustness` is the sign-aligned VAL/IS IC
-   ratio clipped to `[-1, 1]`: temporal inconsistency is now traded off against the
-   other objectives instead of excluding a marginal conditioning factor outright.
+   `{marginal value, independence, parsimony, structural novelty}` (**4 axes**).
+   The former PSR and temporal-robustness objectives are removed. Window-jitter,
+   perturbation, and hypothesis-sign adjustments fold onto marginal value; temporal
+   degradation remains a teacher diagnostic only. Candidates must first pass the
+   remaining hard gates (coverage; optional net-of-cost). No arbitrary scalar weights.
 2. **Overfit control — blocked validation stability and walk-forward.** During
    development, split VAL into contiguous blocks and re-score the fixed IS-fitted
    marginal predictions without refitting. Run the complete evolutionary process
@@ -83,6 +79,12 @@ These four forks were decided with the author and are binding for the build:
    {single,set}`). SINGLE evolves one factor program, scored by what it adds to
    the book; SET evolves a whole "alpha program" (a jointly-evaluated portfolio
    of factors), closest to AlphaEvolve.
+5. **Two-level diversity — knowledge-graph groups + classic demes.** The upper
+   layer reserves separate Pareto archives for distinct knowledge-graph mechanism
+   communities. Each group contains multiple classic island populations; migration
+   is restricted to demes in the same group. Cross-group combinations occur only
+   through the explicit low-probability synthesis operator. The former QD behavior
+   grid is removed; knowledge-graph grouping is the diversity-control mechanism.
 
 Two further points confirmed:
 

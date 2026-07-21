@@ -2,7 +2,7 @@
 
 Reuses the LLM arm's deterministic machinery verbatim — the NSGA-II
 ``EvolutionController`` (selection, Pareto archive, N_trials/deflation, islands,
-lineage, checkpoint/resume, optional QD grid), the ``evaluate_fitness`` scoring
+lineage and checkpoint/resume), the ``evaluate_fitness`` scoring
 seam, and ``persist_archive`` — and swaps only the *operator layer* for
 deterministic GP:
 
@@ -82,13 +82,6 @@ class GPRunConfig:
     category: str = "statistical_arbitrage"
     max_resample_tries: int = 12        # attempts to find a valid, non-degenerate child
 
-    # ── selection (reuses the controller's NSGA-II / QD) ──
-    selection: str = "nsga2"
-    grid_dims: int = 2
-    cell_capacity: int = 3
-    depth_gamma: float = 0.0
-    reuse_omega: float = 0.0
-
     # ── evaluation (threads straight into research_eval, same as the LLM arm) ──
     target_horizon: int = 6
     is_frac: float = 0.6
@@ -99,8 +92,6 @@ class GPRunConfig:
 
     # ── fitness axes ──
     independence_metric: str = "residual_ic"
-    regime_kind: str = "drawdown"
-    regime_quantile: float = 0.2
     marginal_model: str = "gradient_boosting"
 
     # ── economic realism (all default OFF, matching the baseline arm) ──
@@ -140,11 +131,6 @@ class GPLoop:
             n_islands=cfg.n_islands,
             migration_every=cfg.migration_every,
             seed=cfg.seed,
-            selection=cfg.selection,
-            grid_dims=cfg.grid_dims,
-            cell_capacity=cfg.cell_capacity,
-            depth_gamma=cfg.depth_gamma,
-            reuse_omega=cfg.reuse_omega,
         ))
         self.fields = sorted(allowed_fields) if allowed_fields else None
         self.grammar = build_grammar(
@@ -315,8 +301,6 @@ class GPLoop:
             n_tickers=self.cfg.n_tickers,
             fields=self.fields,
             independence_metric=self.cfg.independence_metric,
-            regime_kind=self.cfg.regime_kind,
-            regime_quantile=self.cfg.regime_quantile,
             marginal_model=self.cfg.marginal_model,
             gate_turnover=self.cfg.gate_turnover,
             cost_rate=self.cfg.cost_rate,

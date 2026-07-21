@@ -26,6 +26,7 @@ from quant_fund_agent.knowledge.graph_query import (
     computable_unexploited,
     island_focus,
     local_context,
+    mechanism_group_specs,
     mechanism_gaps,
     under_covered_communities,
 )
@@ -202,3 +203,11 @@ def test_island_focus_steers_by_community_gaps(built_graph):
     assert any("target mechanisms" in f for f in focuses)
     joined = " ".join(focuses).lower()
     assert "momentum" in joined or "order flow" in joined
+
+
+def test_mechanism_group_specs_have_stable_distinct_slots(built_graph):
+    detect_and_summarize_communities(built_graph, seed=0)
+    specs = mechanism_group_specs(built_graph, 2, FIELDS)
+    assert [s["mechanism_group_id"] for s in specs] == [0, 1]
+    assert all(s["focus"] for s in specs)
+    assert len({s["community_id"] for s in specs}) == 2

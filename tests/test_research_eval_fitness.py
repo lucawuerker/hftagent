@@ -15,10 +15,9 @@ from quant_fund_agent.research_eval.fitness import (
 )
 
 
-def _result(cid, mv, indep, par, nov=None, *, tr=None, passed=True):
+def _result(cid, mv, indep, par, nov=None, *, passed=True):
     obj = ObjectiveVector(marginal_value=mv, independence=indep,
-                          temporal_robustness=tr, parsimony=par,
-                          structural_novelty=nov)
+                          parsimony=par, structural_novelty=nov)
     gates = GateResults(coverage_ok=passed, deflation_ok=passed, cost_ok=passed)
     return FitnessResult(candidate_id=cid, objective=obj, gates=gates)
 
@@ -27,32 +26,27 @@ def _result(cid, mv, indep, par, nov=None, *, tr=None, passed=True):
 
 def test_objective_none_is_worst():
     v = ObjectiveVector(marginal_value=None, independence=1.0,
-                        temporal_robustness=0.4, parsimony=-3.0,
-                        structural_novelty=0.5)
+                        parsimony=-3.0, structural_novelty=0.5)
     t = v.as_tuple()
     assert t[0] == float("-inf")
-    assert t[1:] == (1.0, 0.4, -3.0, 0.5)
+    assert t[1:] == (1.0, -3.0, 0.5)
     # an unmeasured (None) structural_novelty axis is likewise the worst value
     assert ObjectiveVector(marginal_value=1.0, independence=1.0,
-                           temporal_robustness=-1.0,
-                           parsimony=-1.0).as_tuple()[4] == float("-inf")
+                           parsimony=-1.0).as_tuple()[3] == float("-inf")
 
 
-def test_axes_are_five_and_from_dict_ignores_legacy_robustness():
-    # the objective vector is now 5 axes (the PSR robustness axis was removed; the
-    # temporal-degradation hard gate became the temporal_robustness axis)
+def test_axes_are_four_and_from_dict_ignores_removed_robustness_axes():
     assert ObjectiveVector.AXES == (
-        "marginal_value", "independence", "temporal_robustness",
-        "parsimony", "structural_novelty")
-    # old checkpoints / state files carry a "robustness" key — loading ignores it
+        "marginal_value", "independence", "parsimony", "structural_novelty")
+    # old checkpoints may carry either removed robustness key; loading ignores both
     legacy = {"marginal_value": 1.0, "independence": 0.5, "robustness": 0.9,
               "temporal_robustness": 0.7, "parsimony": -2.0,
               "structural_novelty": 0.3}
     v = ObjectiveVector.from_dict(legacy)
     assert not hasattr(v, "robustness")
+    assert not hasattr(v, "temporal_robustness")
     assert v.to_dict() == {"marginal_value": 1.0, "independence": 0.5,
-                           "temporal_robustness": 0.7, "parsimony": -2.0,
-                           "structural_novelty": 0.3}
+                           "parsimony": -2.0, "structural_novelty": 0.3}
 
 
 # ── dominance ─────────────────────────────────────────────────────────────────
@@ -73,7 +67,7 @@ def test_gates_passed_semantics():
 
 
 def test_gates_are_three_and_from_dict_ignores_legacy_degradation():
-    # the degradation gate became the temporal_robustness axis → 3 gates remain
+    # temporal degradation is diagnostic-only; three compatibility gates remain
     assert GateResults.GATES == ("coverage_ok", "deflation_ok", "cost_ok")
     # old state files carry a "degradation_ok" gate — loading ignores it
     legacy = {"coverage_ok": True, "degradation_ok": False, "deflation_ok": None,

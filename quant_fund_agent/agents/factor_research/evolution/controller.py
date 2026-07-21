@@ -260,6 +260,12 @@ class EvolutionController:
     def insert(self, evaluated: EvaluatedGenome) -> None:
         """Add an evaluated genome to its island, truncate, update the archive."""
         genome = evaluated.genome
+        # Legacy callers/checkpoints only populated the flat ``island`` field.
+        # Preserve that placement unless semantic coordinates were supplied.
+        if (genome.mechanism_group_id == 0 and genome.deme_id == 0
+                and genome.island != 0):
+            genome.mechanism_group_id, genome.deme_id = self.coordinates(
+                genome.island)
         self._fingerprints.add(self._fingerprint_key(genome))
 
         island_idx = self.flat_island(
@@ -347,8 +353,7 @@ class EvolutionController:
         and the archive rebuilt as the gate-passing non-dominated set of the re-scored
         members.  Members that drop out stay in ``kept_pool`` (end-of-run curation
         refits on the final window anyway).  Deliberately does **not** touch
-        ``n_trials`` (re-scores are not new trials) or the QD grid (a diversity
-        library, not the marginal reference).
+        ``n_trials`` (re-scores are not new trials).
         """
         from quant_fund_agent.research_eval.fitness import dominates
 
@@ -427,7 +432,19 @@ class EvolutionController:
                     if any(o.genome.genome_id == eg.genome.genome_id
                            for o in self.islands[dst]):
                         continue
-                    self.islands[dst].append(eg)
+                    # A migrant is a resident copy in the destination deme.  Do
+                    # not mutate the source genome's coordinates by sharing the
+                    # same object between two populations.
+                    migrant_genome = Genome.from_dict(eg.genome.to_dict())
+                    migrant_genome.island = dst
+                    migrant_genome.mechanism_group_id, migrant_genome.deme_id = \
+                        self.coordinates(dst)
+                    migrant = EvaluatedGenome(
+                        genome=migrant_genome,
+                        fitness=FitnessResult.from_dict(eg.fitness.to_dict()),
+                    )
+                    self.islands[dst].append(migrant)
+                    self._fingerprints.add(self._fingerprint_key(migrant_genome))
                     moved += 1
                 if len(self.islands[dst]) > self.config.population_size:
                     keep = _rank_population(self.islands[dst])[:self.config.population_size]
@@ -444,9 +461,7 @@ class EvolutionController:
         """The accepted book as ``(factor_id, code)`` pairs (SINGLE marginal ref).
 
         De-duplicated by factor id — in SET mode archive genomes may share
-        members; the book is the union of member programs.  In QD mode the book is
-        the union of the behavior-grid cell elites (the diverse archive), keeping the
-        non-stationary LOCO marginal-value semantics vs a *diverse* reference.
+        members; the book is the union of every reserved mechanism-group archive.
         """
         seen: dict[str, str] = {}
         for eg in self.accepted_book():
@@ -541,8 +556,24 @@ class EvolutionController:
         ctrl.kept_pool = [_eg(d) for d in payload.get("kept_pool", [])]
         ctrl._pool_fingerprints = {
             eg.genome.code_fingerprint() for eg in ctrl.kept_pool}
-        ctrl._fingerprints = set(payload.get("fingerprints", []))
-        ctrl._failed_fingerprints = {
-            k: int(v) for k, v in payload.get("failed_fingerprints", {}).items()}
+        loaded_fingerprints = set(payload.get("fingerprints", []))
+        # Pre-grouped checkpoints stored raw code fingerprints.  Rebuild scoped
+        # keys so the same mechanism may be explored independently by each deme.
+        if loaded_fingerprints and all(fp.count(":") < 2
+                                       for fp in loaded_fingerprints):
+            ctrl._fingerprints = {
+                ctrl._fingerprint_key(eg.genome) for eg in ctrl.population()}
+        else:
+            ctrl._fingerprints = loaded_fingerprints
+        loaded_failed = payload.get("failed_fingerprints", {})
+        if loaded_failed and all(str(fp).count(":") < 2 for fp in loaded_failed):
+            ctrl._failed_fingerprints = {
+                ctrl._fingerprint_key(eg.genome): int(loaded_failed.get(
+                    eg.genome.code_fingerprint(), 0))
+                for eg in ctrl.population() if not eg.selectable
+            }
+        else:
+            ctrl._failed_fingerprints = {
+                k: int(v) for k, v in loaded_failed.items()}
         ctrl.parent_reuse = dict(payload.get("parent_reuse", {}))
         return ctrl

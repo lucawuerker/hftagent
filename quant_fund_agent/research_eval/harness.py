@@ -34,11 +34,6 @@ Feedback families implemented (tags per ``docs/research-evolution/DESIGN.md``):
   scored on **IS∪VAL** (betas still fit on IS only) so the axis has ~4× the effective
   sample and a lower noise floor (legacy Δ participation ratio − soft max-|corr| is
   still selectable).
-* Family 4 (temporal robustness, ``[CORE]``): the sign-aligned VAL/IS IC ratio
-  clipped to ``[-1, 1]`` — the fraction of the in-sample edge retained on VAL.  This
-  was a hard *degradation gate* until 2026-07-16; it excluded outright a conditioning
-  factor whose |IS IC| barely clears the floor with the opposite sign on VAL, so it is
-  now a traded-off Pareto axis instead of fatal.
 * Family 5 (realism): coverage gate + hypothesis sign-consistency.
 * Family 6 (structural novelty, ``[CORE]``): minimum **canonical AST weighted-subtree
   distance** to any archive member (``research_eval.ast_novelty`` — inspired by
@@ -107,21 +102,18 @@ class EvalParams:
     lambda_std: float = 1.0
     stability_blocks: int = 4
     gate_coverage: float = 0.5        # τ_cov: min non-NaN (date,ticker) fraction
-    # Retained for API/CLI compatibility only — unused.  The OOS/IS degradation ratio
-    # is now the ``temporal_robustness`` Pareto axis (traded off, not a fatal gate), so
-    # there is no threshold to compare against any more.
+    # Retained for API/CLI compatibility only. Temporal degradation is diagnostic,
+    # not a Pareto objective or fatal gate.
     gate_degradation: float = 0.5
-    min_is_ic: float = 0.005          # |IS IC| below this → temporal_robustness axis None
+    min_is_ic: float = 0.005          # |IS IC| below this → degradation diagnostic None
     ic_decay_horizons: tuple[int, ...] = (1, 3, 6, 12, 24)
     # ── independence axis basis ──
     # "residual_ic": the candidate's predictive edge orthogonal to the book (novel
     # content; the default — un-saturating, rewards independence that *predicts*).
     # "delta_participation": the legacy Δ-participation-ratio − max-|corr| penalty.
     independence_metric: str = "residual_ic"
-    # ── regime / QD stress behavior descriptor (NOT a Pareto axis) ──
-    # These parameters drive the QD grid's ``stress_activation`` behavior cell
-    # (``_behavior_descriptors`` → ``_stress_mask``).  The stress-complementarity
-    # Pareto axis was replaced by ``structural_novelty`` (AST-based originality).
+    # Legacy regime diagnostic parameters; retained at the API boundary for
+    # checkpoint/client compatibility, but unused by selection or diversity control.
     regime_kind: str = "drawdown"     # "drawdown" (worst market-return bars) | "volatility"
     regime_quantile: float = 0.2      # tail fraction of dev bars labelled "stress"
     regime_vol_window: int = 20       # rolling window (bars) for the volatility regime
@@ -299,41 +291,6 @@ def _marginal_value(
     marginal = with_ic - (base_ic if base_ic is not None else 0.0)
     return {"marginal_value": marginal, "with_ic": with_ic, "base_ic": base_ic,
             "with_pred": with_pred, "base_pred": base_pred}
-
-
-def _stress_mask(close: pd.DataFrame, params: EvalParams,
-                 scope_mask: np.ndarray) -> np.ndarray:
-    """Boolean mask of "stress"/"crash" bars, computed within ``scope_mask`` only.
-
-    ``drawdown`` (default): the worst ``regime_quantile`` fraction of bars by
-    cross-sectional mean return (the crash bars).  ``volatility``: the top
-    ``regime_quantile`` fraction by rolling market-return volatility.  The
-    labelling quantile is taken over the development window (``scope_mask``,
-    i.e. IS∪VAL) only and never reads a held-out TEST price, so the regime axis
-    stays leak-free exactly like every other score.
-    """
-    scope = np.asarray(scope_mask, dtype=bool)
-    mkt = close.pct_change().mean(axis=1)  # cross-sectional mean simple return / bar
-    high = getattr(params, "regime_kind", "drawdown") == "volatility"
-    if high:
-        window = max(2, int(params.regime_vol_window))
-        metric = mkt.rolling(window, min_periods=max(2, window // 2)).std() \
-            .to_numpy(dtype=float)
-    else:
-        metric = mkt.to_numpy(dtype=float)
-
-    finite = np.isfinite(metric) & scope
-    vals = metric[finite]
-    q = min(max(float(params.regime_quantile), 1e-6), 0.9)
-    if vals.size < max(5, int(round(1.0 / q))):
-        return np.zeros(len(scope), dtype=bool)  # too few bars to label a regime
-    if high:
-        thr = float(np.quantile(vals, 1.0 - q))
-        stress = metric >= thr
-    else:
-        thr = float(np.quantile(vals, q))
-        stress = metric <= thr
-    return np.asarray(stress) & finite
 
 
 def _structural_novelty(
@@ -600,58 +557,6 @@ def _apply_marginal_penalties(
     return axis
 
 
-def _behavior_descriptors(sig: pd.DataFrame, close: pd.DataFrame, h: int,
-                          split: ThreeWaySplit, params: EvalParams) -> dict[str, Any]:
-    """QD behavior descriptors (WS2) — the candidate's *behavioral* coordinates.
-
-    These are NOT fitness axes (they never enter the objective vector or a gate); they
-    place the candidate in the MAP-Elites grid so the search fills a diverse library.
-    All computed on the development window (IS∪VAL) only, so they are leak-free:
-
-    * ``trend_reversal`` — weighted per-asset Pearson(signal, *trailing* h-bar return).  Negative ⇒
-      mean-reversion / fade, positive ⇒ momentum / continuation.  (Trailing, not
-      forward — a behavioral property, not predictive power.)
-    * ``signal_speed`` — ``1 − lag-1 autocorr`` of the per-underlying z-signal.  Low ⇒
-      slow / state-like, high ⇒ fast / reactive.
-    * ``stress_activation`` — ``mean(|z| on stress bars) / mean(|z| on normal bars)``:
-      how much more the factor "fires" in crashes.  Metadata at ``grid_dims=2``.
-    """
-    dev = np.asarray(split.is_val_mask, dtype=bool)
-    dev_idx = close.index[dev]
-    z = per_underlying_zscore(sig.reindex(index=close.index, columns=close.columns), dev_idx)
-    zt = z.to_numpy(dtype=float)
-
-    # trend_reversal: signal vs trailing h-bar return (past return, leak-free)
-    trailing = close.pct_change(max(1, int(h))).to_numpy(dtype=float)
-    tr = _weighted_asset_pearson(zt[dev], trailing[dev])[0]
-
-    # signal_speed: 1 − mean per-underlying lag-1 autocorr over the dev window
-    acs: list[float] = []
-    for j in range(zt.shape[1]):
-        col = zt[dev, j]
-        col = col[np.isfinite(col)]
-        if len(col) > 10 and np.std(col) > 0:
-            ac = float(np.corrcoef(col[:-1], col[1:])[0, 1])
-            if np.isfinite(ac):
-                acs.append(ac)
-    signal_speed = (1.0 - float(np.mean(acs))) if acs else None
-
-    # stress_activation: |z| firing in stress vs normal dev bars
-    stress = _stress_mask(close, params, split.is_val_mask)
-    zabs = np.abs(zt)
-    s_rows = dev & np.asarray(stress, dtype=bool)
-    n_rows = dev & ~np.asarray(stress, dtype=bool)
-    sa = None
-    if s_rows.any() and n_rows.any():
-        s_mean = np.nanmean(zabs[s_rows])
-        n_mean = np.nanmean(zabs[n_rows])
-        if np.isfinite(s_mean) and np.isfinite(n_mean) and n_mean > 0:
-            sa = float(s_mean / n_mean)
-
-    return {"trend_reversal": tr, "signal_speed": signal_speed,
-            "stress_activation": sa}
-
-
 def _coverage(sig: pd.DataFrame, close: pd.DataFrame, mask: np.ndarray) -> float:
     """Fraction of (date,ticker) cells in ``mask`` where the signal is finite."""
     s = sig.reindex(index=close.index, columns=close.columns).to_numpy(dtype=float)[mask]
@@ -891,19 +796,10 @@ def evaluate_candidate(
     if not coverage_ok:
         reasons["coverage"] = f"{coverage:.3f} < τ={params.gate_coverage}"
 
-    # OOS/IS degradation → the ``temporal_robustness`` Pareto axis (was a hard gate).
-    # The sign-aligned VAL/IS IC ratio, clipped to [-1, 1]: the fraction of the
-    # in-sample edge retained on VAL.  Not evaluable on a near-zero IS edge (axis stays
-    # None).  The clip bounds crowding-distance normalisation (an uncapped ratio
-    # explodes when |is_ic| sits just above the floor) and removes the incentive to
-    # game tiny-denominator ratios; −1 bounds the sign-reversal side symmetrically.
+    # Sign-aligned VAL/IS degradation is retained as teacher-channel diagnostics only.
     deg_ratio = None
-    temporal_robustness: float | None
-    if is_ic is None or val_ic is None or abs(is_ic) < params.min_is_ic:
-        temporal_robustness = None  # not evaluable on a near-zero IS edge
-    else:
+    if is_ic is not None and val_ic is not None and abs(is_ic) >= params.min_is_ic:
         deg_ratio = (val_ic * np.sign(is_ic)) / abs(is_ic)
-        temporal_robustness = float(np.clip(deg_ratio, -1.0, 1.0))
 
     # N_trials-aware deflation is computed as a DIAGNOSTIC only (teacher channel).
     # It is deliberately NOT a per-candidate *search* gate any more: deflation is a
@@ -939,7 +835,6 @@ def evaluate_candidate(
     objective = ObjectiveVector(
         marginal_value=marginal_axis,
         independence=independence_axis,
-        temporal_robustness=temporal_robustness,
         parsimony=parsimony,
         structural_novelty=novelty["structural_novelty"],
     )
@@ -985,10 +880,8 @@ def evaluate_candidate(
         diagnostics["net_capture_sota"] = tc["net_gross_ratio"]
         diagnostics["cost_executor_id"] = params.cost_executor.get("executor_id")
 
-    behavior = _behavior_descriptors(candidate_signal, close, h, split, params)
-
     return FitnessResult(candidate_id=candidate_id, objective=objective, gates=gates,
-                         diagnostics=diagnostics, behavior=behavior,
+                         diagnostics=diagnostics,
                          raw={"split_sizes": split.sizes})
 
 
@@ -1100,15 +993,11 @@ def evaluate_set(
     if not coverage_ok:
         reasons["coverage"] = f"{coverage:.3f} < τ={params.gate_coverage}"
 
-    # OOS/IS degradation → the ``temporal_robustness`` Pareto axis (was a hard gate).
+    # Sign-aligned degradation remains a diagnostic only.
     deg_ratio = None
-    temporal_robustness: float | None
-    if combined_is_ic is None or combined_val_ic is None \
-            or abs(combined_is_ic) < params.min_is_ic:
-        temporal_robustness = None
-    else:
+    if combined_is_ic is not None and combined_val_ic is not None \
+            and abs(combined_is_ic) >= params.min_is_ic:
         deg_ratio = (combined_val_ic * np.sign(combined_is_ic)) / abs(combined_is_ic)
-        temporal_robustness = float(np.clip(deg_ratio, -1.0, 1.0))
 
     # DIAG only — deflation is a selection-time control (research_eval.publish, WS1),
     # not a per-candidate search gate.  ``deflation_ok`` stays ``None``.
@@ -1140,7 +1029,6 @@ def evaluate_set(
     objective = ObjectiveVector(
         marginal_value=combined_axis,
         independence=independence,
-        temporal_robustness=temporal_robustness,
         parsimony=parsimony,
         structural_novelty=set_novelty,
     )
@@ -1163,11 +1051,6 @@ def evaluate_set(
         "deflation": defl,
         "n_trials": params.n_trials,
     }
-    behavior = (_behavior_descriptors(pred, close, h, split, params)
-                if pred is not None
-                else {"trend_reversal": None, "signal_speed": None,
-                      "stress_activation": None})
-
     return FitnessResult(candidate_id=candidate_id, objective=objective, gates=gates,
-                         diagnostics=diagnostics, behavior=behavior,
+                         diagnostics=diagnostics,
                          raw={"split_sizes": split.sizes})

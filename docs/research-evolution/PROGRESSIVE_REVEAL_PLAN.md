@@ -1,9 +1,10 @@
 # Implementation plan: Pareto-vector rework + dev-wide residual IC + progressive data reveal
 
-**Status: DECIDED, not yet implemented.** This document is a complete handoff:
-give it to the implementing model verbatim as its task description.
-**Amended 2026-07-16:** Change 4 added (temporal-degradation hard gate becomes
-the fifth Pareto axis) — the final axis count is **five**, the gate count three.
+**Status: HISTORICAL AND SUPERSEDED.** Progressive reveal was implemented, but
+the 2026-07-16 proposal to add `temporal_robustness` was subsequently reversed.
+The live evaluator has four axes: marginal value, independence, parsimony, and
+structural novelty. Temporal degradation is diagnostic-only. Use `DESIGN.md` and
+the live code as the source of truth; the text below records the earlier plan.
 
 ---
 
