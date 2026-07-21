@@ -29,7 +29,7 @@ from quant_fund_agent.research_eval.fitness import (
 
 
 def _eg(gid, behavior, *, mv=0.1, passed=True) -> EvaluatedGenome:
-    gates = (GateResults(coverage_ok=True, degradation_ok=True)
+    gates = (GateResults(coverage_ok=True, deflation_ok=True)
              if passed else GateResults(coverage_ok=False))
     fit = FitnessResult(
         candidate_id=gid,

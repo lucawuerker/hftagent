@@ -24,9 +24,9 @@ from quant_fund_agent.research_eval.fitness import (
 def _fit(cid="c", mv=0.0, ind=0.0, rob=0.0, par=0.0, passed=True,
          n_fail=0) -> FitnessResult:
     # ``rob`` is accepted for call-site compatibility but no longer a Pareto axis.
-    gates = GateResults(coverage_ok=True, degradation_ok=True, deflation_ok=True)
+    gates = GateResults(coverage_ok=True, deflation_ok=True, cost_ok=True)
     if not passed:
-        fails = ["coverage_ok", "degradation_ok", "deflation_ok"][:max(1, n_fail)]
+        fails = ["coverage_ok", "deflation_ok", "cost_ok"][:max(1, n_fail)]
         for g in fails:
             setattr(gates, g, False)
     return FitnessResult(

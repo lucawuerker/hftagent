@@ -100,11 +100,16 @@ def mutation_brief(
             f"Marginal axis penalties: raw ΔIC {_fmt(raw_mv)} → axis "
             f"{_fmt(obj.marginal_value)} (plateau −{_fmt(d.get('plateau_penalty'))}, "
             f"perturbation −{_fmt(d.get('perturbation_penalty'))}, sign "
-            f"{sign_delta or 'n/a'}); OOS/IS degradation ratio "
-            f"{_fmt(d.get('degradation_ratio'))}.")
+            f"{sign_delta or 'n/a'}).")
+    if obj.temporal_robustness is not None or d.get("degradation_ratio") is not None:
+        lines.append(
+            f"Temporal robustness (axis): retained "
+            f"{_fmt(d.get('degradation_ratio'))} of the in-sample edge on VAL "
+            f"(IS {_fmt(d.get('is_ic'))}, VAL {_fmt(d.get('val_ic'))}; axis value "
+            f"{_fmt(obj.temporal_robustness)}).")
     if d.get("structural_novelty") is not None:
         lines.append(
-            f"Structural novelty (4th axis): canonical AST weighted-subtree distance "
+            f"Structural novelty (5th axis): canonical AST weighted-subtree distance "
             f"to nearest archive member {_fmt(d.get('structural_novelty'))} "
             f"(book={_fmt(d.get('novelty_min_book_distance'))}, "
             f"zoo={_fmt(d.get('novelty_min_zoo_distance'))}) — "

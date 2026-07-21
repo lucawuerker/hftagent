@@ -40,6 +40,8 @@ class FactorProgram:
     suggested_horizons: list[int] = field(default_factory=list)
     expected_sign: int | None = None
     source_paper_ids: list[str] = field(default_factory=list)
+    mechanism: str = ""
+    mechanism_group_id: int = 0
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -63,7 +65,12 @@ class Genome:
     programs: list[FactorProgram]
     unit: str = "single"                    # "single" | "set"
     generation: int = 0
+    # ``island`` remains the flat controller index for checkpoint compatibility.
+    # The two fields below are the semantic coordinates: a knowledge-graph
+    # mechanism group containing a classic independently evolving deme.
     island: int = 0
+    mechanism_group_id: int = 0
+    deme_id: int = 0
     parent_ids: list[str] = field(default_factory=list)
     operator: str = "seed"                  # "seed" | "llm_semantic" | "jitter" | "crossover" | ...
     metadata: dict[str, Any] = field(default_factory=dict)

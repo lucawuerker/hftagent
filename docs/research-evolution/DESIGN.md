@@ -60,12 +60,16 @@ conditional value**, not standalone power.
 
 These four forks were decided with the author and are binding for the build:
 
-1. **Fitness model — Pareto + hard robustness gate.** Maintain a Pareto front
-   over `{marginal value, independence, parsimony, structural_novelty}` (**4 axes** —
-   the separate `robustness` axis was removed; its plateau/perturbation/sign parts fold
-   onto the marginal-value axis, see the Update note below); candidates must
-   first pass hard OOS-robustness / coverage / deflation gates. No arbitrary
-   scalar weights (weights can themselves overfit and bias the search).
+1. **Fitness model — Pareto + hard gates.** Maintain a Pareto front over
+   `{marginal value, independence, temporal_robustness, parsimony, structural_novelty}`
+   (**5 axes** — the separate PSR `robustness` axis was removed, its
+   plateau/perturbation/sign parts folding onto the marginal-value axis; and the former
+   OOS/IS **degradation hard gate** became the `temporal_robustness` axis, 2026-07-16 —
+   see the Update note below); candidates must first pass the remaining hard gates
+   (coverage; optional net-of-cost). No arbitrary scalar weights (weights can themselves
+   overfit and bias the search). `temporal_robustness` is the sign-aligned VAL/IS IC
+   ratio clipped to `[-1, 1]`: temporal inconsistency is now traded off against the
+   other objectives instead of excluding a marginal conditioning factor outright.
 2. **Overfit control — blocked validation stability and walk-forward.** During
    development, split VAL into contiguous blocks and re-score the fixed IS-fitted
    marginal predictions without refitting. Run the complete evolutionary process

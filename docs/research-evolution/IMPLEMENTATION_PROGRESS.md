@@ -7,6 +7,23 @@ test file.
 
 Legend: ✅ done & tested · 🚧 in progress · ⬜ not started
 
+**Post-P5 — temporal-degradation gate → 5th Pareto axis — ✅ DONE (2026-07-16).**
+The OOS/IS degradation **hard gate** became the `temporal_robustness` **Pareto axis**
+(plan: `PROGRESSIVE_REVEAL_PLAN.md` Change 4), so the CORE vector is now **5 axes**
+`(marginal_value, independence, temporal_robustness, parsimony, structural_novelty)`
+and the search gates drop to **coverage + optional cost** (`GateResults.GATES =
+(coverage_ok, deflation_ok, cost_ok)`; deflation stays a *publish* filter, never a
+search gate). The gate was too harsh: a conditioning factor whose standalone IC
+fluctuates around zero (|IS IC| just above `min_is_ic`, opposite sign on VAL) was
+excluded outright — the very factor class the primary axis exists to protect. As an
+axis the ratio `(val_ic·sign(is_ic))/|is_ic|` is **clipped to `[-1, 1]`** (bounds
+crowding-distance normalisation; removes the incentive to game tiny-denominator
+ratios) and traded off against the other objectives; `None` when `|is_ic| < min_is_ic`.
+The RAW unclipped ratio survives as the `degradation_ratio` diagnostic. Legacy state
+files carrying `robustness` / `degradation_ok` keys still load (`from_dict` reads only
+`AXES`/`GATES`). `EvalParams.gate_degradation` retained (unused). Tests: extended
+`test_research_eval_{fitness,harness}.py`, `test_evolution_{controller,mutation,qd,loop}.py`.
+
 **Post-P5 — 4-axis vector + dev-wide residual IC + progressive reveal — ✅ DONE
 (2026-07-15).** Three overfitting-control corrections (plan:
 `PROGRESSIVE_REVEAL_PLAN.md`). **(1)** The `robustness` (Probabilistic-Sharpe-Ratio)

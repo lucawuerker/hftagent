@@ -261,8 +261,7 @@ def test_fixed_book_is_passed_to_single_candidate_evaluator(tmp_path, monkeypatc
         fitness = FitnessResult(
             candidate_id=candidate["factor_id"],
             objective=ObjectiveVector(marginal_value=0.1, independence=0.2),
-            gates=GateResults(coverage_ok=True, degradation_ok=None,
-                              deflation_ok=True),
+            gates=GateResults(coverage_ok=True, deflation_ok=True),
             diagnostics={"n_trials": kwargs["n_trials"]},
         )
         return {"ok": True, "fitness": fitness.to_dict()}

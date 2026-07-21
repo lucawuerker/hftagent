@@ -1,4 +1,4 @@
-"""Deterministic evolution controller: NSGA-II selection, archive, islands, N_trials.
+"""Deterministic evolution controller: grouped NSGA-II demes and N_trials.
 
 This is the *selection* half of the loop — it only ever consumes the deterministic
 :class:`~quant_fund_agent.research_eval.fitness.FitnessResult` (objective vector +
@@ -16,9 +16,9 @@ Selection is **constrained NSGA-II** (Deb 2002):
   within-front selection pressure favours diverse candidates.
 * *Binary tournament* on (front rank, crowding) picks parents.
 
-The **archive** is the gate-passing non-dominated front across everything ever
-evaluated — per the locked decision it *is* the "accepted book" that SINGLE-mode
-marginal value is scored against, and it is what gets persisted at the end.
+Every knowledge-graph mechanism group owns a gate-passing non-dominated archive.
+The accepted book is their union: no mechanism group can be erased by a globally
+stronger group before final curation.
 
 The controller also owns the ``N_trials`` counter (every evaluated candidate
 increments it, feeding the deflation gate — the search is a multiple-testing
@@ -164,19 +164,20 @@ def _rank_population(pop: Sequence[EvaluatedGenome]) -> list[tuple[int, float, i
 @dataclass
 class ControllerConfig:
     population_size: int = 12          # per island
-    n_islands: int = 1
+    n_mechanism_groups: int = 1
+    demes_per_group: int = 1
+    # Legacy alias.  Old checkpoints/callers used ``n_islands`` for the single
+    # layer; when provided it means demes per group.
+    n_islands: int | None = None
     migration_every: int = 5           # generations between elite migrations
     migration_k: int = 1               # elites moved per island per migration
     seed: int = 0
-    # ── QD selection (WS2) ──
-    # "nsga2" (default): the Pareto archive drives parent selection (existing arm).
-    # "qd": a MAP-Elites behavior grid drives parent selection + the accepted book,
-    # keeping the SAME 5-axis Pareto as the per-cell quality (a clean ablation arm).
-    selection: str = "nsga2"
-    grid_dims: int = 2                 # QD behavior-grid dimensionality (2 or 3)
-    cell_capacity: int = 3             # QD mini-Pareto elites per cell
-    depth_gamma: float = 0.0           # P7 depth penalty on QD parent sampling (0 = off)
-    reuse_omega: float = 0.0           # P7 parent-reuse penalty on QD parent sampling
+
+    def __post_init__(self) -> None:
+        if self.n_islands is not None:
+            self.demes_per_group = max(1, int(self.n_islands))
+        self.n_mechanism_groups = max(1, int(self.n_mechanism_groups))
+        self.demes_per_group = max(1, int(self.demes_per_group))
 
 
 class EvolutionController:
@@ -185,9 +186,11 @@ class EvolutionController:
     def __init__(self, config: ControllerConfig | None = None) -> None:
         self.config = config or ControllerConfig()
         self.rng = np.random.default_rng(self.config.seed)
+        n_demes = self.config.n_mechanism_groups * self.config.demes_per_group
         self.islands: list[list[EvaluatedGenome]] = [
-            [] for _ in range(max(1, self.config.n_islands))]
-        self.archive: list[EvaluatedGenome] = []
+            [] for _ in range(n_demes)]
+        self.group_archives: list[list[EvaluatedGenome]] = [
+            [] for _ in range(self.config.n_mechanism_groups)]
         # Two-stage curation (Lever 2): every gate-passing genome ever evaluated,
         # regardless of whether it survives the Pareto archive.  When curation is
         # enabled this pool — not the (domination-pruned) archive — is what gets
@@ -204,21 +207,28 @@ class EvolutionController:
         # failed a gate before may honestly pass, so its fingerprint is freed once (cap
         # = 1 retry) so an identical genome isn't re-tried every reveal forever.
         self._failed_fingerprints: dict[str, int] = {}
-        # ── QD selection (WS2): a behavior grid alongside the Pareto archive ──
-        self.qd = None
-        if self.config.selection == "qd":
-            from quant_fund_agent.agents.factor_research.evolution.qd import (
-                QDArchive,
-                QDConfig,
-            )
-            self.qd = QDArchive(QDConfig(
-                grid_dims=self.config.grid_dims,
-                cell_capacity=self.config.cell_capacity,
-                depth_gamma=self.config.depth_gamma,
-                reuse_omega=self.config.reuse_omega,
-            ))
-        # P7: how many times each genome has been drawn as a parent (QD sampling bias)
         self.parent_reuse: dict[str, int] = {}
+
+    @property
+    def archive(self) -> list[EvaluatedGenome]:
+        """Union of the reserved per-mechanism archives (legacy public seam)."""
+        return [eg for group in self.group_archives for eg in group]
+
+    @archive.setter
+    def archive(self, values: Sequence[EvaluatedGenome]) -> None:
+        self.group_archives = [[] for _ in range(self.config.n_mechanism_groups)]
+        for eg in values:
+            group = eg.genome.mechanism_group_id % len(self.group_archives)
+            self.group_archives[group].append(eg)
+
+    def flat_island(self, mechanism_group_id: int, deme_id: int) -> int:
+        group = mechanism_group_id % self.config.n_mechanism_groups
+        deme = deme_id % self.config.demes_per_group
+        return group * self.config.demes_per_group + deme
+
+    def coordinates(self, island: int) -> tuple[int, int]:
+        flat = island % len(self.islands)
+        return divmod(flat, self.config.demes_per_group)
 
     # ── trials / dedup ──
 
@@ -238,16 +248,23 @@ class EvolutionController:
         ``N_trials`` (they carry no new information) and don't crowd the
         population with clones.
         """
-        return genome.code_fingerprint() in self._fingerprints
+        key = self._fingerprint_key(genome)
+        return key in self._fingerprints
+
+    def _fingerprint_key(self, genome: Genome) -> str:
+        return (f"{genome.mechanism_group_id}:{genome.deme_id}:"
+                f"{genome.code_fingerprint()}")
 
     # ── insertion ──
 
     def insert(self, evaluated: EvaluatedGenome) -> None:
         """Add an evaluated genome to its island, truncate, update the archive."""
         genome = evaluated.genome
-        self._fingerprints.add(genome.code_fingerprint())
+        self._fingerprints.add(self._fingerprint_key(genome))
 
-        island_idx = genome.island % len(self.islands)
+        island_idx = self.flat_island(
+            genome.mechanism_group_id, genome.deme_id)
+        genome.island = island_idx
         island = self.islands[island_idx]
         island.append(evaluated)
         if len(island) > self.config.population_size:
@@ -256,11 +273,9 @@ class EvolutionController:
 
         if not evaluated.selectable:
             # track gate-failers so progressive reveal can retry them on new data
-            self._failed_fingerprints.setdefault(genome.code_fingerprint(), 0)
+            self._failed_fingerprints.setdefault(self._fingerprint_key(genome), 0)
 
         self._update_archive(evaluated)
-        if self.qd is not None:
-            self.qd.insert(evaluated)   # QD behavior grid (only gate-passers occupy cells)
         if evaluated.selectable:
             fp = genome.code_fingerprint()
             if fp not in self._pool_fingerprints:
@@ -271,6 +286,8 @@ class EvolutionController:
             "factor_ids": genome.factor_ids,
             "generation": genome.generation,
             "island": island_idx,
+            "mechanism_group_id": genome.mechanism_group_id,
+            "deme_id": genome.deme_id,
             "operator": genome.operator,
             "parent_ids": genome.parent_ids,
             "n_trials_at_eval": evaluated.fitness.diagnostics.get("n_trials"),
@@ -292,13 +309,14 @@ class EvolutionController:
             return
         from quant_fund_agent.research_eval.fitness import dominates
 
-        pool = self.archive + [evaluated]
+        group_id = evaluated.genome.mechanism_group_id % len(self.group_archives)
+        pool = self.group_archives[group_id] + [evaluated]
         new_archive: list[EvaluatedGenome] = []
         for eg in pool:
             if not any(dominates(o.fitness.objective, eg.fitness.objective)
                        for o in pool if o is not eg):
                 new_archive.append(eg)
-        self.archive = new_archive
+        self.group_archives[group_id] = new_archive
 
     # ── progressive reveal: retry gate-failers + re-score the archive ──
 
@@ -338,43 +356,42 @@ class EvolutionController:
             newf = new_fitness_by_genome_id.get(eg.genome.genome_id)
             if newf is not None:
                 eg.fitness = newf
-        passing = [eg for eg in self.archive if eg.selectable]
-        new_archive: list[EvaluatedGenome] = []
-        for eg in passing:
-            if not any(dominates(o.fitness.objective, eg.fitness.objective)
-                       for o in passing if o is not eg):
-                new_archive.append(eg)
-        self.archive = new_archive
+        for group_id, archive in enumerate(self.group_archives):
+            passing = [eg for eg in archive if eg.selectable]
+            self.group_archives[group_id] = [
+                eg for eg in passing
+                if not any(dominates(o.fitness.objective, eg.fitness.objective)
+                           for o in passing if o is not eg)
+            ]
 
     # ── selection ──
 
-    def population(self, island: int | None = None) -> list[EvaluatedGenome]:
+    def population(self, island: int | None = None, *,
+                   mechanism_group_id: int | None = None,
+                   deme_id: int | None = None) -> list[EvaluatedGenome]:
+        if mechanism_group_id is not None:
+            if deme_id is not None:
+                island = self.flat_island(mechanism_group_id, deme_id)
+            else:
+                start = (mechanism_group_id % self.config.n_mechanism_groups) \
+                    * self.config.demes_per_group
+                return [eg for isl in self.islands[
+                    start:start + self.config.demes_per_group] for eg in isl]
         if island is not None:
             return list(self.islands[island % len(self.islands)])
         return [eg for isl in self.islands for eg in isl]
 
-    def select_parents(self, k: int, island: int | None = None) -> list[EvaluatedGenome]:
+    def select_parents(self, k: int, island: int | None = None, *,
+                       mechanism_group_id: int | None = None,
+                       deme_id: int | None = None) -> list[EvaluatedGenome]:
         """``k`` parents by binary tournament on (front rank, crowding distance).
 
         Draws from one island (or the whole population) with replacement across
         tournaments — the classic NSGA-II parent-selection pressure: mostly the
         front, but diverse and occasionally an underdog.
         """
-        # ── QD parent selection: sample an occupied cell → one elite (P7-biased) ──
-        if self.qd is not None and self.qd.n_cells() > 0:
-            parents: list[EvaluatedGenome] = []
-            for _ in range(k):
-                eg = self.qd.sample_parent(self.rng, reuse_counts=self.parent_reuse)
-                if eg is None:
-                    break
-                self.parent_reuse[eg.genome.genome_id] = \
-                    self.parent_reuse.get(eg.genome.genome_id, 0) + 1
-                parents.append(eg)
-            if parents:
-                return parents
-            # QD grid still empty (gen 0 before any gate-passer) → fall through to NSGA
-
-        pop = self.population(island)
+        pop = self.population(island, mechanism_group_id=mechanism_group_id,
+                              deme_id=deme_id)
         if not pop:
             return []
         keyed = _rank_population(pop)
@@ -392,38 +409,35 @@ class EvolutionController:
 
         Returns the number of genomes moved.  A no-op with one island.
         """
-        n_isl = len(self.islands)
-        if n_isl < 2:
+        if self.config.demes_per_group < 2:
             return 0
         moved = 0
-        elites_per_island: list[list[EvaluatedGenome]] = []
-        for island in self.islands:
-            if not island:
-                elites_per_island.append([])
-                continue
-            keyed = _rank_population(island)[: self.config.migration_k]
-            elites_per_island.append([island[i] for _, _, i in keyed])
-        for src, elites in enumerate(elites_per_island):
-            dst = (src + 1) % n_isl
-            for eg in elites:
-                if any(o.genome.genome_id == eg.genome.genome_id
-                       for o in self.islands[dst]):
-                    continue
-                self.islands[dst].append(eg)
-                moved += 1
-            if len(self.islands[dst]) > self.config.population_size:
-                keep = _rank_population(self.islands[dst])[: self.config.population_size]
-                self.islands[dst] = [self.islands[dst][i] for _, _, i in keep]
+        # Ring migration is strictly inside a mechanism group.  Information crosses
+        # groups only through the explicit synthesis operator in the outer loop.
+        for group in range(self.config.n_mechanism_groups):
+            base = group * self.config.demes_per_group
+            local = self.islands[base:base + self.config.demes_per_group]
+            elites_per_deme: list[list[EvaluatedGenome]] = []
+            for deme in local:
+                keyed = _rank_population(deme)[: self.config.migration_k] if deme else []
+                elites_per_deme.append([deme[i] for _, _, i in keyed])
+            for src, elites in enumerate(elites_per_deme):
+                dst = base + ((src + 1) % self.config.demes_per_group)
+                for eg in elites:
+                    if any(o.genome.genome_id == eg.genome.genome_id
+                           for o in self.islands[dst]):
+                        continue
+                    self.islands[dst].append(eg)
+                    moved += 1
+                if len(self.islands[dst]) > self.config.population_size:
+                    keep = _rank_population(self.islands[dst])[:self.config.population_size]
+                    self.islands[dst] = [self.islands[dst][i] for _, _, i in keep]
         return moved
 
     # ── the book the harness scores against ──
 
     def accepted_book(self) -> list[EvaluatedGenome]:
-        """The genomes that form the accepted book — the QD cell elites in QD mode,
-        else the Pareto archive.  This is the SINGLE marginal-value reference and the
-        default persist source, so the two selection modes share one seam."""
-        if self.qd is not None:
-            return self.qd.elites()
+        """Union of reserved mechanism-group Pareto archives."""
         return self.archive
 
     def archive_programs(self) -> list[tuple[str, str]]:
@@ -453,31 +467,36 @@ class EvolutionController:
                 seen.setdefault(p.factor_id, p.code)
         return list(seen.items())
 
+    def group_archive(self, mechanism_group_id: int) -> list[EvaluatedGenome]:
+        """Reserved Pareto archive for one knowledge-graph mechanism group."""
+        return list(self.group_archives[
+            mechanism_group_id % len(self.group_archives)])
+
     # ── persistence (resumability + thesis audit) ──
 
     def state_dict(self) -> dict[str, Any]:
         return {
             "config": {
                 "population_size": self.config.population_size,
-                "n_islands": self.config.n_islands,
+                "n_mechanism_groups": self.config.n_mechanism_groups,
+                "demes_per_group": self.config.demes_per_group,
                 "migration_every": self.config.migration_every,
                 "migration_k": self.config.migration_k,
                 "seed": self.config.seed,
-                "selection": self.config.selection,
-                "grid_dims": self.config.grid_dims,
-                "cell_capacity": self.config.cell_capacity,
-                "depth_gamma": self.config.depth_gamma,
-                "reuse_omega": self.config.reuse_omega,
             },
             "n_trials": self.n_trials,
             "generation": self.generation,
             "islands": [[eg.to_dict() for eg in isl] for isl in self.islands],
+            "group_archives": [
+                [eg.to_dict() for eg in archive]
+                for archive in self.group_archives
+            ],
+            # Kept for older readers.  New readers use ``group_archives``.
             "archive": [eg.to_dict() for eg in self.archive],
             "kept_pool": [eg.to_dict() for eg in self.kept_pool],
             "fingerprints": sorted(self._fingerprints),
             "failed_fingerprints": dict(self._failed_fingerprints),
             "parent_reuse": dict(self.parent_reuse),
-            "qd": self.qd.to_dict() if self.qd is not None else None,
         }
 
     def save(self, path: str | Path) -> None:
@@ -491,15 +510,12 @@ class EvolutionController:
         cfgd = payload.get("config", {})
         ctrl = cls(ControllerConfig(
             population_size=cfgd.get("population_size", 12),
-            n_islands=cfgd.get("n_islands", 1),
+            n_mechanism_groups=cfgd.get("n_mechanism_groups", 1),
+            demes_per_group=cfgd.get(
+                "demes_per_group", cfgd.get("n_islands", 1)),
             migration_every=cfgd.get("migration_every", 5),
             migration_k=cfgd.get("migration_k", 1),
             seed=cfgd.get("seed", 0),
-            selection=cfgd.get("selection", "nsga2"),
-            grid_dims=cfgd.get("grid_dims", 2),
-            cell_capacity=cfgd.get("cell_capacity", 3),
-            depth_gamma=cfgd.get("depth_gamma", 0.0),
-            reuse_omega=cfgd.get("reuse_omega", 0.0),
         ))
 
         def _eg(d: dict[str, Any]) -> EvaluatedGenome:
@@ -508,10 +524,20 @@ class EvolutionController:
 
         ctrl.n_trials = payload.get("n_trials", 0)
         ctrl.generation = payload.get("generation", 0)
-        ctrl.islands = [[_eg(d) for d in isl] for isl in payload.get("islands", [[]])]
-        if not ctrl.islands:
-            ctrl.islands = [[]]
-        ctrl.archive = [_eg(d) for d in payload.get("archive", [])]
+        loaded_islands = [[_eg(d) for d in isl]
+                          for isl in payload.get("islands", [[]])]
+        expected = ctrl.config.n_mechanism_groups * ctrl.config.demes_per_group
+        ctrl.islands = (loaded_islands + [[] for _ in range(expected)])[:expected]
+        grouped = payload.get("group_archives")
+        if grouped is not None:
+            ctrl.group_archives = [
+                [_eg(d) for d in archive] for archive in grouped]
+            ctrl.group_archives = (
+                ctrl.group_archives
+                + [[] for _ in range(ctrl.config.n_mechanism_groups)]
+            )[:ctrl.config.n_mechanism_groups]
+        else:
+            ctrl.archive = [_eg(d) for d in payload.get("archive", [])]
         ctrl.kept_pool = [_eg(d) for d in payload.get("kept_pool", [])]
         ctrl._pool_fingerprints = {
             eg.genome.code_fingerprint() for eg in ctrl.kept_pool}
@@ -519,8 +545,4 @@ class EvolutionController:
         ctrl._failed_fingerprints = {
             k: int(v) for k, v in payload.get("failed_fingerprints", {}).items()}
         ctrl.parent_reuse = dict(payload.get("parent_reuse", {}))
-        qd_payload = payload.get("qd")
-        if qd_payload is not None:
-            from quant_fund_agent.agents.factor_research.evolution.qd import QDArchive
-            ctrl.qd = QDArchive.from_dict(qd_payload)
         return ctrl

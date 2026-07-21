@@ -34,6 +34,11 @@ Feedback families implemented (tags per ``docs/research-evolution/DESIGN.md``):
   scored on **IS∪VAL** (betas still fit on IS only) so the axis has ~4× the effective
   sample and a lower noise floor (legacy Δ participation ratio − soft max-|corr| is
   still selectable).
+* Family 4 (temporal robustness, ``[CORE]``): the sign-aligned VAL/IS IC ratio
+  clipped to ``[-1, 1]`` — the fraction of the in-sample edge retained on VAL.  This
+  was a hard *degradation gate* until 2026-07-16; it excluded outright a conditioning
+  factor whose |IS IC| barely clears the floor with the opposite sign on VAL, so it is
+  now a traded-off Pareto axis instead of fatal.
 * Family 5 (realism): coverage gate + hypothesis sign-consistency.
 * Family 6 (structural novelty, ``[CORE]``): minimum **canonical AST weighted-subtree
   distance** to any archive member (``research_eval.ast_novelty`` — inspired by
@@ -102,8 +107,11 @@ class EvalParams:
     lambda_std: float = 1.0
     stability_blocks: int = 4
     gate_coverage: float = 0.5        # τ_cov: min non-NaN (date,ticker) fraction
-    gate_degradation: float = 0.5     # τ_deg: min OOS/IS IC ratio (same sign)
-    min_is_ic: float = 0.005          # |IS IC| below this → degradation gate not evaluated
+    # Retained for API/CLI compatibility only — unused.  The OOS/IS degradation ratio
+    # is now the ``temporal_robustness`` Pareto axis (traded off, not a fatal gate), so
+    # there is no threshold to compare against any more.
+    gate_degradation: float = 0.5
+    min_is_ic: float = 0.005          # |IS IC| below this → temporal_robustness axis None
     ic_decay_horizons: tuple[int, ...] = (1, 3, 6, 12, 24)
     # ── independence axis basis ──
     # "residual_ic": the candidate's predictive edge orthogonal to the book (novel
@@ -883,16 +891,19 @@ def evaluate_candidate(
     if not coverage_ok:
         reasons["coverage"] = f"{coverage:.3f} < τ={params.gate_coverage}"
 
-    # OOS/IS degradation: aligned by the IS sign, require same sign + ratio ≥ τ.
-    degradation_ok: bool | None
+    # OOS/IS degradation → the ``temporal_robustness`` Pareto axis (was a hard gate).
+    # The sign-aligned VAL/IS IC ratio, clipped to [-1, 1]: the fraction of the
+    # in-sample edge retained on VAL.  Not evaluable on a near-zero IS edge (axis stays
+    # None).  The clip bounds crowding-distance normalisation (an uncapped ratio
+    # explodes when |is_ic| sits just above the floor) and removes the incentive to
+    # game tiny-denominator ratios; −1 bounds the sign-reversal side symmetrically.
     deg_ratio = None
+    temporal_robustness: float | None
     if is_ic is None or val_ic is None or abs(is_ic) < params.min_is_ic:
-        degradation_ok = None  # not evaluable on a near-zero IS edge
+        temporal_robustness = None  # not evaluable on a near-zero IS edge
     else:
         deg_ratio = (val_ic * np.sign(is_ic)) / abs(is_ic)
-        degradation_ok = bool(deg_ratio >= params.gate_degradation)
-        if not degradation_ok:
-            reasons["degradation"] = f"OOS/IS={deg_ratio:.3f} < τ={params.gate_degradation}"
+        temporal_robustness = float(np.clip(deg_ratio, -1.0, 1.0))
 
     # N_trials-aware deflation is computed as a DIAGNOSTIC only (teacher channel).
     # It is deliberately NOT a per-candidate *search* gate any more: deflation is a
@@ -922,12 +933,13 @@ def evaluate_candidate(
                 f"net-of-cost return through SOTA executor "
                 f"{(params.cost_executor or {}).get('executor_id')} ≤ 0")
 
-    gates = GateResults(coverage_ok=coverage_ok, degradation_ok=degradation_ok,
+    gates = GateResults(coverage_ok=coverage_ok,
                         deflation_ok=None, cost_ok=cost_ok, reasons=reasons)
 
     objective = ObjectiveVector(
         marginal_value=marginal_axis,
         independence=independence_axis,
+        temporal_robustness=temporal_robustness,
         parsimony=parsimony,
         structural_novelty=novelty["structural_novelty"],
     )
@@ -1088,16 +1100,15 @@ def evaluate_set(
     if not coverage_ok:
         reasons["coverage"] = f"{coverage:.3f} < τ={params.gate_coverage}"
 
-    degradation_ok: bool | None
+    # OOS/IS degradation → the ``temporal_robustness`` Pareto axis (was a hard gate).
     deg_ratio = None
+    temporal_robustness: float | None
     if combined_is_ic is None or combined_val_ic is None \
             or abs(combined_is_ic) < params.min_is_ic:
-        degradation_ok = None
+        temporal_robustness = None
     else:
         deg_ratio = (combined_val_ic * np.sign(combined_is_ic)) / abs(combined_is_ic)
-        degradation_ok = bool(deg_ratio >= params.gate_degradation)
-        if not degradation_ok:
-            reasons["degradation"] = f"OOS/IS={deg_ratio:.3f} < τ={params.gate_degradation}"
+        temporal_robustness = float(np.clip(deg_ratio, -1.0, 1.0))
 
     # DIAG only — deflation is a selection-time control (research_eval.publish, WS1),
     # not a per-candidate search gate.  ``deflation_ok`` stays ``None``.
@@ -1124,11 +1135,12 @@ def evaluate_set(
                 f"net-of-cost return through SOTA executor "
                 f"{(params.cost_executor or {}).get('executor_id')} ≤ 0")
 
-    gates = GateResults(coverage_ok=coverage_ok, degradation_ok=degradation_ok,
+    gates = GateResults(coverage_ok=coverage_ok,
                         deflation_ok=None, cost_ok=cost_ok, reasons=reasons)
     objective = ObjectiveVector(
         marginal_value=combined_axis,
         independence=independence,
+        temporal_robustness=temporal_robustness,
         parsimony=parsimony,
         structural_novelty=set_novelty,
     )

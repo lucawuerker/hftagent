@@ -35,7 +35,7 @@ import json
 import logging
 import time
 import uuid
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 from pathlib import Path
 from typing import Any, Callable, Sequence
 
@@ -72,26 +72,26 @@ class EvolutionRunConfig:
     generations: int = 5
     population_size: int = 10          # per island
     children_per_generation: int = 8   # candidates proposed per generation
+    children_per_deme: int | None = None  # grouped mode; None preserves legacy total
+    n_mechanism_groups: int = 1
+    demes_per_group: int = 1
+    # Legacy single-layer alias.  If set above 1 while grouped fields are left at
+    # defaults, it is interpreted as demes_per_group.
     n_islands: int = 1
     migration_every: int = 5
     seed: int = 0
     unit: str = "single"               # "single" | "set"
     set_size: int = 3                  # initial members per SET genome
 
-    # ── selection: NSGA-II Pareto vs QD behavior grid (WS2) ──
-    selection: str = "nsga2"           # "nsga2" (default) | "qd" (MAP-Elites grid)
-    grid_dims: int = 2                 # QD grid dims: 2 (trend×speed) | 3 (+stress)
-    cell_capacity: int = 3             # QD mini-Pareto elites per cell
-    depth_gamma: float = 0.0           # P7 depth penalty on QD parent sampling (0 = off)
-    reuse_omega: float = 0.0           # P7 parent-reuse penalty on QD parent sampling
-
     # ── operator mix (probabilities; renormalised) ──
     p_llm_semantic: float = 0.6
     p_crossover: float = 0.25
     p_jitter: float = 0.15
+    p_cross_group: float = 0.10
 
     # ── seeding (generation 0, via the existing brainstorm/codegen path) ──
     n_seed_ideas: int = 8
+    seed_ideas_per_group: int | None = None
     seed_papers: int = 0               # papers pulled for the seed brainstorm (0 → knowledge-only)
 
     # ── retrieval (P2): grounds the seed brainstorm in retrieved papers ──
@@ -176,6 +176,42 @@ class EvolutionRunConfig:
         d["plateau_scales"] = list(self.plateau_scales)
         return d
 
+    @property
+    def effective_demes_per_group(self) -> int:
+        if self.demes_per_group == 1 and self.n_islands != 1:
+            return max(1, self.n_islands)
+        return max(1, self.demes_per_group)
+
+    @property
+    def effective_seed_ideas_per_group(self) -> int:
+        return max(1, self.seed_ideas_per_group or self.n_seed_ideas)
+
+
+def resolve_mechanism_groups(
+    cfg: EvolutionRunConfig,
+    fields: Sequence[str] | None,
+) -> list[dict[str, Any]]:
+    """Resolve the upper knowledge-graph layer once, before any seed generation."""
+    n_groups = max(1, cfg.n_mechanism_groups)
+    if n_groups == 1 and cfg.retrieval != "graphrag":
+        return [{"mechanism_group_id": 0, "community_id": None,
+                 "focus": "", "mechanisms": []}]
+    if cfg.retrieval != "graphrag":
+        raise ValueError(
+            "multiple mechanism groups require retrieval='graphrag'; the upper "
+            "layer must be grounded in the knowledge graph")
+
+    from quant_fund_agent.knowledge.graph_query import mechanism_group_specs
+    from quant_fund_agent.knowledge.graph_store import KnowledgeGraph
+
+    graph = KnowledgeGraph.load()
+    specs = mechanism_group_specs(graph, n_groups, list(fields or []))
+    if len(specs) != n_groups or any(not s.get("focus") for s in specs):
+        raise ValueError(
+            f"knowledge graph could form only {len(specs)} usable mechanism groups "
+            f"for requested n_mechanism_groups={n_groups}")
+    return specs
+
 
 # ── LLM plumbing (patchable in tests) ─────────────────────────────────────────
 
@@ -247,14 +283,17 @@ def _codegen_program(
 
 def seed_programs(cfg: EvolutionRunConfig, data_context: str,
                   existing_ids: set[str],
-                  fields: Sequence[str] | None = None) -> list[FactorProgram]:
+                  fields: Sequence[str] | None = None,
+                  mechanism_group: dict[str, Any] | None = None,
+                  ) -> list[FactorProgram]:
     """Generation 0: brainstorm ideas (GraphRAG / RAG / papers / knowledge-only)
     → validated programs."""
     from quant_fund_agent.agents.factor_research.graph import _brainstorm_one
     from quant_fund_agent.agents.factor_research.state import FactorIdea, PaperSnippet
     from quant_fund_agent.mcp import research_client
 
-    session_id = f"evo-seed-{cfg.seed}"
+    group_id = int((mechanism_group or {}).get("mechanism_group_id", 0))
+    session_id = f"evo-seed-{cfg.seed}-group-{group_id}"
     brainstorm_llm = _get_llm(temperature=0.7, role="hypothesis")
     known = set(existing_ids)
     raw_ideas: list[dict] = []
@@ -270,12 +309,11 @@ def seed_programs(cfg: EvolutionRunConfig, data_context: str,
         from quant_fund_agent.knowledge.embed_store import EmbedStore
         from quant_fund_agent.knowledge.retrieval import retrieve_and_brainstorm
 
-        focus = None
+        focus = str((mechanism_group or {}).get("focus") or "") or None
         gap_names: list[str] | None = None
         if cfg.retrieval == "graphrag":
             from quant_fund_agent.knowledge.graph_query import (
                 computable_unexploited,
-                island_focus,
             )
             from quant_fund_agent.knowledge.graph_store import (
                 DEFAULT_GRAPH_PATH,
@@ -284,14 +322,14 @@ def seed_programs(cfg: EvolutionRunConfig, data_context: str,
 
             try:
                 graph = KnowledgeGraph.load()
-                gap_ids = computable_unexploited(graph, list(fields or []))
-                gap_names = [graph.g.nodes[m].get("name", m)
-                             for m in gap_ids][:8] or None
-                focuses = island_focus(graph, max(1, cfg.n_islands),
-                                       list(fields or []))
-                focus = " | ".join(f for f in focuses if f) or None
-                log.info("graphrag seeding: %d computable gap(s), focus=%r",
-                         len(gap_ids), (focus or "")[:120])
+                if mechanism_group is not None:
+                    gap_names = list(mechanism_group.get("mechanisms") or []) or None
+                else:
+                    gap_ids = computable_unexploited(graph, list(fields or []))
+                    gap_names = [graph.g.nodes[m].get("name", m)
+                                 for m in gap_ids][:8] or None
+                log.info("graphrag group %d seeding: focus=%r mechanisms=%s",
+                         group_id, (focus or "")[:120], gap_names or [])
             except FileNotFoundError:
                 log.warning("knowledge graph missing (%s) — run "
                             "scripts/build_knowledge_graph.py first; falling "
@@ -375,6 +413,8 @@ def seed_programs(cfg: EvolutionRunConfig, data_context: str,
             codegen_llm, idea, data_context,
             expected_prediction_horizon=fixed_horizon)
         if prog is not None:
+            prog.mechanism_group_id = group_id
+            prog.mechanism = mech_by_fid.get(prog.factor_id, "")
             programs.append(prog)
     log.info("seeded %d/%d program(s) from %d idea(s)",
              len(programs), cfg.n_seed_ideas, len(ideas))

@@ -106,22 +106,25 @@ def local_context(graph: KnowledgeGraph, mechanism: str) -> dict[str, Any]:
     }
 
 
-def island_focus(graph: KnowledgeGraph, n_islands: int,
-                 available_fields: Sequence[str] | None = None) -> list[str]:
-    """One retrieval-steering focus string per island.
+def mechanism_group_specs(
+    graph: KnowledgeGraph,
+    n_groups: int,
+    available_fields: Sequence[str] | None = None,
+) -> list[dict[str, Any]]:
+    """Build reserved knowledge-graph mechanism groups for one evolution run.
 
-    Islands are seeded with the thinnest communities' summaries plus their most
+    Groups use the thinnest communities' summaries plus their most
     paper-supported computable gap mechanisms — structural, mechanism-level
-    diversity rather than only numeric diversity.  Falls back to plain gap
-    mechanisms (then to empty strings) when communities are undetected.
+    coverage.  The returned mechanism names are used for retrieval tagging and the
+    stable integer id is written into every descendant genome.
     """
     summaries = graph.g.graph.get("community_summaries", {})
     gaps = (computable_unexploited(graph, available_fields)
             if available_fields is not None else mechanism_gaps(graph))
     gap_names = [graph.g.nodes[m].get("name", m) for m in gaps]
 
-    focuses: list[str] = []
-    ranked = under_covered_communities(graph, k=max(n_islands, 1))
+    specs: list[dict[str, Any]] = []
+    ranked = under_covered_communities(graph, k=max(n_groups, 1))
     for cid, _ratio in ranked:
         members = graph.community_members().get(cid, [])
         community_gaps = [graph.g.nodes[m].get("name", m) for m in gaps
@@ -129,16 +132,33 @@ def island_focus(graph: KnowledgeGraph, n_islands: int,
         parts = [summaries.get(str(cid), "")]
         if community_gaps:
             parts.append("target mechanisms: " + ", ".join(community_gaps[:4]))
-        focuses.append(" ".join(p for p in parts if p).strip())
-        if len(focuses) >= n_islands:
+        specs.append({
+            "mechanism_group_id": len(specs),
+            "community_id": cid,
+            "focus": " ".join(p for p in parts if p).strip(),
+            "mechanisms": community_gaps[:4],
+        })
+        if len(specs) >= n_groups:
             break
 
     # top up from the flat gap list when communities are missing/too few
     gi = 0
-    while len(focuses) < n_islands:
+    while len(specs) < n_groups:
         chunk = gap_names[gi:gi + 3]
-        focuses.append("target mechanisms: " + ", ".join(chunk) if chunk else "")
+        specs.append({
+            "mechanism_group_id": len(specs),
+            "community_id": None,
+            "focus": "target mechanisms: " + ", ".join(chunk) if chunk else "",
+            "mechanisms": chunk,
+        })
         gi += 3
         if gi > len(gap_names) + 3:
             break
-    return (focuses + [""] * n_islands)[:n_islands]
+    return specs[:n_groups]
+
+
+def island_focus(graph: KnowledgeGraph, n_islands: int,
+                 available_fields: Sequence[str] | None = None) -> list[str]:
+    """Backward-compatible focus-only view of :func:`mechanism_group_specs`."""
+    return [s["focus"] for s in mechanism_group_specs(
+        graph, n_islands, available_fields)]

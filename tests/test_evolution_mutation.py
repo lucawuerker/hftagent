@@ -176,7 +176,7 @@ def _fitness(**diag) -> FitnessResult:
         "max_abs_corr": 0.8, "delta_participation": 0.1,
         "pr_before": 3.0, "pr_after": 3.1,
         "marginal_value_raw": 0.025,
-        "sign_consistency": False, "coverage": 0.5,
+        "sign_consistency": False, "coverage": 0.4,
         "degradation_ratio": 0.08,
         "ic_decay": {"1": 0.001, "6": 0.004, "24": 0.02},
         "plateau_penalty": 0.05, "jitter_ics": [0.001, -0.002],
@@ -185,12 +185,16 @@ def _fitness(**diag) -> FitnessResult:
         "n_trials": 123, "complexity": 14,
     }
     base.update(diag)
+    # gates derived from coverage (the temporal-degradation gate is gone — it is now
+    # the temporal_robustness Pareto axis, not a gate)
+    cov = base["coverage"]
+    coverage_ok = cov >= 0.5
+    reasons = {} if coverage_ok else {"coverage": f"{cov:.3f} < τ=0.5"}
     return FitnessResult(
         candidate_id="c",
         objective=ObjectiveVector(marginal_value=0.02, independence=-0.3,
-                                  parsimony=-14.0),
-        gates=GateResults(coverage_ok=True, degradation_ok=False, deflation_ok=True,
-                          reasons={"degradation": "OOS/IS=0.080 < τ=0.5"}),
+                                  temporal_robustness=0.08, parsimony=-14.0),
+        gates=GateResults(coverage_ok=coverage_ok, deflation_ok=True, reasons=reasons),
         diagnostics=base,
     )
 
@@ -201,11 +205,12 @@ def test_mutation_brief_is_deterministic_and_specific():
     brief2 = mutation_brief(fit, book_size=4)
     assert brief1 == brief2
     # verdict names the failed gate
-    assert "FAILED" in brief1 and "degradation" in brief1
+    assert "FAILED" in brief1 and "coverage" in brief1
     # all rule-based advice triggers fire on this diagnostics profile
     assert "correlated" in brief1                  # redundancy advice
     assert "conditioning/state variable" in brief1  # low-standalone/high-marginal
-    assert "collapsed out-of-sample" in brief1     # degradation advice
+    assert "collapsed out-of-sample" in brief1     # degradation advice (axis, not gate)
+    assert "Temporal robustness (axis)" in brief1  # the axis brief line
     assert "knife-edge" in brief1                  # plateau advice
     assert "CONTRADICTS" in brief1                 # sign advice
     assert "24-bar horizon" in brief1              # decay re-anchoring advice
@@ -217,7 +222,6 @@ def test_mutation_brief_clean_candidate_has_no_advice_section():
                    degradation_ratio=0.9, plateau_penalty=0.0,
                    sign_consistency=True, coverage=0.95,
                    ic_decay={"6": 0.05})
-    fit.gates.degradation_ok = True
     fit.gates.reasons = {}
     brief = mutation_brief(fit)
     assert "WHAT TO DO DIFFERENTLY" not in brief

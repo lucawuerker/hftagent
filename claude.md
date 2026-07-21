@@ -41,14 +41,19 @@ IS/VAL/TEST `three_way_split` (fit IS, burn VAL, touch TEST once), CPCV
 `cpcv_folds` (purge+embargo) + `walk_forward_folds`; **N_trials-aware**
 `deflated_ic`, Bailey–López de Prado `deflated_sharpe_ratio`, and **`pbo_cscv`**
 (CSCV Probability of Backtest Overfitting); the CORE Pareto `ObjectiveVector` is
-now **4 axes** {LOCO marginal ΔOOS-IC (primary) − window-jitter **plateau penalty** −
+now **5 axes** {LOCO marginal ΔOOS-IC (primary) − window-jitter **plateau penalty** −
 perturbation-fidelity probe ± sign-consistency bonus (all IC-scale, folded onto the
-primary axis), residual (orthogonalised) IC independence, −AST-complexity parsimony,
-`structural_novelty`} behind hard coverage/degradation/deflation gates. The separate
+primary axis), residual (orthogonalised) IC independence, **`temporal_robustness`**
+(sign-aligned VAL/IS IC ratio clipped to [−1,1]), −AST-complexity parsimony,
+`structural_novelty`} behind hard **coverage (+ optional cost)** gates. The separate
 **`robustness` (PSR) axis was removed**: it was computed on the *same reused* VAL window
 every generation so it couldn't police the generational ratchet it was meant to control,
 folded IC-scale penalties into a [0,1] probability, and was a near-monotone transform of
 the primary axis — its plateau/perturbation/sign parts now fold onto `marginal_value`.
+The former OOS/IS **degradation hard gate** became the `temporal_robustness` axis
+(2026-07-16): too harsh as a gate (it excluded a marginal conditioning factor whose
+|IS IC| barely clears `min_is_ic` with the opposite sign on VAL), it is now traded off
+against the other objectives; deflation stays a *publish* filter, not a search gate.
 `evaluate_candidate` (signal-based, un-gameable) + `evaluate_set`
 (SET mode: the set's own combined-model OOS IC / internal PR / structural diversity).
 **P1** `agents/factor_research/evolution/`: `genome.py`
@@ -98,6 +103,28 @@ nothing persisted). Tests (all green): `tests/test_research_eval_*.py`,
 knowledge graph, then the ablation matrix (oneshot → +evolution → +RAG →
 +GraphRAG → +debate; single vs set) with the walk-forward pass for the results
 chapter. Live tracker: `docs/research-evolution/IMPLEMENTATION_PROGRESS.md`.
+
+**Evolutionary researcher — temporal-degradation gate → 5th Pareto axis (done,
+2026-07-16).** The OOS/IS **degradation hard gate** became the `temporal_robustness`
+**Pareto axis**, so the CORE vector is now **5 axes** `("marginal_value",
+"independence", "temporal_robustness", "parsimony", "structural_novelty")` and the
+search gates drop to **coverage + optional cost** (`GateResults.GATES =
+("coverage_ok", "deflation_ok", "cost_ok")`; deflation stays a *publish* filter). The
+gate was too harsh: a conditioning factor whose standalone IC fluctuates around zero
+(|IS IC| just above `min_is_ic`, opposite sign on VAL) was excluded outright — the very
+factor class the primary axis exists to protect. As an axis the ratio
+`(val_ic·sign(is_ic))/|is_ic|` is **clipped to [−1, 1]** (bounds crowding-distance
+normalisation; removes the incentive to game tiny-denominator ratios; symmetric
+sign-reversal floor) and traded off against the other objectives; `None` when
+`|is_ic| < min_is_ic`. The RAW unclipped ratio survives as the `degradation_ratio`
+diagnostic and its reflection advice rule is unchanged. Under progressive reveal the
+axis gains meaning: at reveal generations part of VAL was never scored by any earlier
+selection, so the ratio there reflects retention on genuinely unseen data (the
+`reveal_generation` diagnostic stamp separates them). Legacy state files carrying
+`robustness` / `degradation_ok` keys still load (`from_dict` reads only `AXES`/`GATES`);
+`EvalParams.gate_degradation` retained (unused). Tests: extended
+`test_research_eval_{fitness,harness}.py`,
+`test_evolution_{controller,mutation,qd,loop}.py`.
 
 **Evolutionary researcher — 4-axis vector + dev-wide residual IC + progressive
 reveal (done, 2026-07-15).** Three overfitting-control corrections. **(1)** The

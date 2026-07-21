@@ -1,14 +1,16 @@
-# Implementation plan: 4-axis Pareto vector + dev-wide residual IC + progressive data reveal
+# Implementation plan: Pareto-vector rework + dev-wide residual IC + progressive data reveal
 
 **Status: DECIDED, not yet implemented.** This document is a complete handoff:
 give it to the implementing model verbatim as its task description.
+**Amended 2026-07-16:** Change 4 added (temporal-degradation hard gate becomes
+the fifth Pareto axis) — the final axis count is **five**, the gate count three.
 
 ---
 
 ## Prompt to the implementing model
 
-Implement the three changes specified below in this repository, in the given
-order, exactly as specified. Do not implement anything in the "Out of scope"
+Implement the four changes specified below in this repository, in the order
+given in "Suggested order", exactly as specified. Do not implement anything in the "Out of scope"
 section. Do not redesign: every design decision has already been made and is
 recorded here with its rationale; where this document says "decide X like Y",
 follow it literally.
@@ -67,6 +69,17 @@ with the author:
    cause: the newly revealed block). A final `test_frac` tail (default 20%,
    author wants 15–20%) is **never revealed** and is only scored once after the
    whole run — unchanged from today's TEST semantics.
+4. **The temporal-degradation hard gate becomes the fifth Pareto axis**
+   (decided 2026-07-16). The gate (sign-aligned VAL/IS IC ratio ≥ τ) was too
+   harsh: a conditioning factor whose standalone IC fluctuates around zero can
+   show |IS IC| just above `min_is_ic` with the opposite sign on VAL and be
+   excluded outright — even though its value is *marginal*, the very factor
+   class the primary axis exists to protect. As a Pareto axis, temporal
+   inconsistency must be traded off against the other objectives instead of
+   being fatal. Under progressive reveal the axis also gains meaning: at
+   reveal generations part of VAL was never scored by any earlier selection,
+   so the ratio measured there reflects retention on genuinely unseen data —
+   which is why the reveal-generation diagnostic stamp (3d) matters.
 
 ---
 
@@ -75,8 +88,10 @@ with the author:
 ### 1a. `quant_fund_agent/research_eval/fitness.py`
 
 - `ObjectiveVector` (line ~52): delete the `robustness` field and remove
-  `"robustness"` from `AXES` → 4 axes
-  `("marginal_value", "independence", "parsimony", "structural_novelty")`.
+  `"robustness"` from `AXES`. Change 4 then adds `temporal_robustness` in its
+  place, so the FINAL tuple is
+  `("marginal_value", "independence", "temporal_robustness", "parsimony",
+  "structural_novelty")` (5 axes).
   `from_dict` already ignores unknown keys (it reads only `cls.AXES`), so old
   checkpoints/state files load fine — add a test asserting that.
 - Update the module docstring (renumber the axes; state that plateau /
@@ -334,9 +349,13 @@ Add optional `is_end: str | None = None, val_end: str | None = None` kwargs to:
   4. **Dedup retry**: call the new `controller.release_failed_fingerprints()`
      (see 3e).
 - Stamp diagnostics: after every successful evaluation in progressive mode,
-  set `fitness.diagnostics["scored_through"] = self._window.val_end_ts` and
-  `["window_generation"] = self._window.generation` (loop-side, after
-  `FitnessResult.from_dict`). Reflection: in `mutation_brief`, if
+  set `fitness.diagnostics["scored_through"] = self._window.val_end_ts`,
+  `["window_generation"] = self._window.generation`, and
+  `["reveal_generation"] = self._window.reveal` (loop-side, after
+  `FitnessResult.from_dict`). The reveal flag matters for Change 4: at reveal
+  generations part of VAL is newly revealed, so the temporal-robustness values
+  measured there are the ones computed on genuinely unseen data — post-run
+  analysis must be able to separate them. Reflection: in `mutation_brief`, if
   `scored_through` is present, append one line
   `Scored on data through {date} (progressive reveal).`
 
@@ -389,14 +408,98 @@ Follow the stub-LLM / synthetic-panel patterns already used in
 
 ---
 
+## Change 4 — temporal-degradation gate → fifth Pareto axis (added 2026-07-16)
+
+This change is small — the ratio is already computed as the
+`degradation_ratio` diagnostic, so the work is moving one number from the gate
+channel to the objective vector — but the touch points are spread across
+several files. Work through the whole list; do not stop after the harness.
+
+### 4a. `research_eval/fitness.py`
+
+- `ObjectiveVector`: add `temporal_robustness: float | None = None` in the
+  position the deleted `robustness` field occupied → final
+  `AXES = ("marginal_value", "independence", "temporal_robustness",
+  "parsimony", "structural_novelty")`. The `None → −inf` dominance handling
+  applies unchanged.
+- `GateResults`: delete the `degradation_ok` field and remove it from `GATES`
+  → `("coverage_ok", "deflation_ok", "cost_ok")`. `from_dict` reads only
+  `cls.GATES` keys, so legacy state files containing `degradation_ok` still
+  load — add a test.
+- Update the module docstring (axis list + gate list).
+
+### 4b. `research_eval/harness.py`
+
+- `evaluate_candidate`: keep computing the degradation ratio exactly as today
+  (`deg_ratio = (val_ic · sign(is_ic)) / |is_ic|`, not evaluable when
+  `is_ic`/`val_ic` is missing or `|is_ic| < params.min_is_ic`), but instead of
+  a gate:
+
+  ```python
+  temporal_robustness = (None if deg_ratio is None
+                         else float(np.clip(deg_ratio, -1.0, 1.0)))
+  ```
+
+  Set it on the objective vector; delete the degradation gate block and the
+  `reasons["degradation"]` entry; keep the RAW unclipped ratio in diagnostics
+  as `degradation_ratio`.
+  **Why the clip (do not skip it):** Pareto dominance uses only per-axis
+  ordering, but crowding distance normalises by axis range — an uncapped
+  ratio explodes when `|is_ic|` sits just above the evaluability floor
+  (val 0.03 / is 0.006 = 5) and a single outlier flattens crowding for every
+  other candidate; capping at 1 also removes the incentive to game
+  tiny-denominator ratios (full retention of the in-sample edge is as good as
+  it gets), and the floor at −1 bounds the sign-reversal side symmetrically.
+- `evaluate_set` (~lines 1178–1190): identical conversion for the combined
+  signal's degradation gate → the SET-mode objective's `temporal_robustness`.
+- `EvalParams`: `gate_degradation` becomes unused — keep the field with the
+  existing "retained for API/CLI compatibility, unused" comment convention.
+  `min_is_ic` stays live (it now governs axis evaluability, not a gate) —
+  update its comment.
+
+### 4c. `agents/factor_research/evolution/reflection.py`
+
+- Give the axis its own brief line; do NOT leave the degradation ratio inside
+  the marginal-penalties line added by Change 1c. Suggested rendering:
+  `Temporal robustness (axis): retained {ratio} of the in-sample edge on VAL
+  (IS {is_ic}, VAL {val_ic}; axis value {clipped}).` with the usual n/a
+  handling when unmeasured.
+- The existing advice rule (`degradation_ratio < 0.5` → "classic overfit
+  signature — simplify") stays unchanged. Verdict lines no longer mention a
+  degradation gate, because it no longer exists.
+
+### 4d. Reference sweep
+
+- `grep -rn "degradation_ok"` repo-wide and fix every reference (tests,
+  showcase/landing-examples, publish, QD — wherever it appears).
+- `grep -rn "gate_degradation"` across `run_factor_evolution.py`, `loop.py`,
+  `mcp/research_{client,server,service}.py`: remove any CLI flag wiring; keep
+  the `EvalParams` field per 4b.
+
+### 4e. Tests
+
+- `fitness`: `AXES` == 5 including `temporal_robustness`; `GATES` == 3;
+  legacy dicts containing `robustness` / `degradation_ok` keys round-trip.
+- `harness` (synthetic panel): a candidate with a clear IS edge and an
+  opposite-sign VAL edge now PASSES the gates and carries
+  `temporal_robustness < 0`; `|is_ic| < min_is_ic` → axis `None` while the
+  gates are unaffected; a ratio > 1 → axis exactly `1.0`; diagnostics keep the
+  raw unclipped ratio.
+- Update every existing test that asserts a degradation-gate failure or
+  reads `degradation_ok`.
+
+---
+
 ## Docs (required, project convention)
 
 - `README.md` and `claude.md`: update the evolutionary-researcher status
-  paragraphs — the CORE vector is now **4 axes** (PSR robustness axis removed;
-  plateau/perturbation/sign folded into the marginal axis), residual IC scores
-  on IS∪VAL, and progressive reveal exists behind `--progressive-reveal`
-  (expanding window, sliding VAL, per-reveal archive re-scoring, prequential
-  OOS log, final `test_frac` tail untouched).
+  paragraphs — the CORE vector is now **5 axes** (PSR robustness axis removed,
+  plateau/perturbation/sign folded into the marginal axis; the
+  temporal-degradation hard gate became the clipped `temporal_robustness`
+  axis, so the search gates are down to coverage + optional cost), residual IC
+  scores on IS∪VAL, and progressive reveal exists behind
+  `--progressive-reveal` (expanding window, sliding VAL, per-reveal archive
+  re-scoring, prequential OOS log, final `test_frac` tail untouched).
 - `docs/research-evolution/DESIGN.md`: update the objective-vector section the
   same way. `docs/factor_research_math_summary.tex`: update the axis list if it
   documents the five axes.
@@ -431,20 +534,27 @@ Follow the stub-LLM / synthetic-panel patterns already used in
 
 Stages (each ends with a full green `./venv/bin/pytest` and its own commit):
 
-1. Change 1 (axis removal + penalty fold + reflection + test updates).
-2. Change 2 (residual-IC window + test).
-3. Change 3a–3c (schedule module + config/CLI + MCP seam incl. signal-cache
+1. Change 1 (PSR axis removal + penalty fold + reflection + test updates).
+2. Change 4 (degradation gate → `temporal_robustness` axis; pairs naturally
+   with Change 1 since it touches the same files).
+3. Change 2 (residual-IC window + test).
+4. Change 3a–3c (schedule module + config/CLI + MCP seam incl. signal-cache
    key) + tests 1–2.
-4. Change 3d–3e (loop/controller integration, prequential log, dedup retry,
-   resume) + tests 3–5.
-5. Docs.
+5. Change 3d–3e (loop/controller integration, prequential log, dedup retry,
+   resume, reveal-generation stamp) + tests 3–5.
+6. Docs.
 
 Acceptance checklist:
 
-- [ ] `ObjectiveVector.AXES` has 4 entries; legacy state files with a
-      `robustness` key still load.
-- [ ] `grep -rn "robustness" quant_fund_agent/` shows only compat comments /
-      unrelated factor-code comments — no selection-channel references.
+- [ ] `ObjectiveVector.AXES` has 5 entries (`temporal_robustness` in place of
+      `robustness`); `GateResults.GATES` has 3; legacy state files containing
+      `robustness` / `degradation_ok` keys still load.
+- [ ] A candidate with a sign-flipped VAL edge passes the gates and carries a
+      negative `temporal_robustness`; a ratio > 1 clips to exactly 1.0; the
+      raw ratio survives as the `degradation_ratio` diagnostic.
+- [ ] `grep -rn "robustness" quant_fund_agent/` shows only the
+      `temporal_robustness` axis, compat comments and unrelated factor-code
+      comments — no PSR-based selection-channel references.
 - [ ] Marginal axis = raw ΔIC − plateau − perturbation ± sign_bonus (default
       sign_bonus now 0.002), verified by tests.
 - [ ] Residual IC scored on IS∪VAL, betas fit on IS, no TEST leak.
