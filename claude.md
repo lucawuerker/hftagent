@@ -514,6 +514,51 @@ to opt out. Live: AV's free tier delivers these; FMP's free tier serves only
 `profile` and paywalls the rest (factors degrade, never crash). **Next (designed,
 not built):** sentiment + macro — see `docs/data-layer/FUNDAMENTAL_AND_ALT_DATA.md`.
 
+**FMP Premium archive — local, survivorship-bias-free S&P 500 + Nasdaq-100 back to
+2004 (code done; the download itself is a one-time run).** With a Premium key the
+free path's two gaps close. `quant_fund_agent/data/fmp_ingest/` is a one-time,
+**resumable** bulk downloader (`scripts/fmp_bulk_download.py`): an endpoint
+**registry** (`endpoints.py`), a rate-limited threaded `client.py` that classifies
+**402 plan-restriction (terminal, never retried) vs 429 (back off) vs transient**,
+a `capabilities.py` **probe** (`--probe` → `capabilities.json`; FMP gates by
+endpoint, by *parameter value* — `period=quarter`, a numeric `limit` cap — and by
+**individual symbol**, which is why delisted tickers 402 on lower plans), a
+`store.py` archive with an append-only manifest journal compacted at the end (one
+unit of work = `(endpoint, period, symbol)` = one parquet + one manifest row, so a
+killed run re-enters exactly where it stopped), `symbols.py` delisted-name
+resolution (literal ticker → `.`/`-` variants → `symbol-change` chain → stripped
+bankruptcy suffix; files keyed by the **membership** ticker) and `download.py`
+orchestration. ~1 300 tickers × ~22–30 calls ≈ 30–40k calls ≈ 5 GB at 600/min
+(~1–1.5 h). Membership is now **FMP-native**: `membership.FmpSource` is
+implemented (was a stub) and `scripts/build_fmp_membership.py` backward-walks
+`historical-{sp500,nasdaq}-constituent` into the **existing canonical schema**
+(so `membership.py`/`resolve_universe`/the per-bar mask are unchanged), audited
+(count band, no overlaps) and reconciled **per year** against the preserved free
+reconstruction `sp500_public.csv` — itself rebuilt back to 2004, which alone
+recovers **145** members that left before 2010 (Bear Stearns, Ambac, AT&T
+Wireless…). Consumption is `data/providers/fmp_archive.py` (`provider:
+fmp_archive`, `quant.config.{fmp_sp500,nasdaq100}.yaml`): reads the archive
+**offline**, filters to requested `fields` *before* materialising (the full panel
+would be GBs), and — the real PIT upgrade — `ratios`/`key-metrics`/
+`financial-growth` carry no filing date, so they **inherit the matching income
+statement's actual `filingDate`** joined on `(fiscalYear, period)` (earliest
+filing wins, so a restatement can't hide a value that was public) instead of the
+flat 60-day lag. The canonical vocabulary grew 17 → **~130 fields** via one table,
+`fields.ARCHIVE_FIELD_SPECS`, which now drives the tier sets, the per-endpoint
+normalisation maps **and** the researcher's DATA CONTEXT prose so they can't
+drift. Shared interval algebra (`coalesce_spells`, `members_from_spells`,
+`audit_spells`, `compare_spells`, `normalize_ticker`) moved into
+`data/membership.py`; `build_sp500_membership.py` now imports it (verified
+byte-identical: 850 spells / 834 tickers / Jaccard 0.9111). **Units fix:** the
+legacy map had canonical `freeCashFlow` pointing at FMP's `freeCashFlowPerShare`;
+`freeCashFlow` is now absolute USD and `freeCashFlowPerShare` is its own field.
+Not PIT-backfilled by design: `profile` and `shares-float` are *current*
+snapshots (the PIT share count is `sharesOutstanding` =
+`weightedAverageShsOut`). Unadjusted prices + dividends + splits are archived so a
+PIT adjustment factor can be rebuilt later. Tests (offline, synthetic payloads):
+`tests/test_fmp_ingest.py`, `tests/test_fmp_archive_provider.py`. Docs:
+`docs/data-layer/FMP_PREMIUM_ARCHIVE.md`.
+
 **Survivorship-bias-free S&P 500 — point-in-time membership (done).** A static
 ticker list over a 2010→today backtest over-represents survivors. `DataSettings.
 membership="sp500"` (or `QF_MEMBERSHIP`) turns the universe **time-varying**:

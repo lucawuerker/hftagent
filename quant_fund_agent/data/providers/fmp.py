@@ -63,7 +63,7 @@ _FMP_NON_OHLCV = frozenset(
         "sector", "industry", "marketCap",
         "peRatio", "pbRatio", "psRatio", "roe", "roic",
         "debtToEquity", "currentRatio", "grossMargin", "netMargin",
-        "revenue", "eps", "freeCashFlow",
+        "revenue", "eps", "freeCashFlowPerShare",
         "epsEstimate", "revenueEstimate", "epsSurprise",
     }
 )

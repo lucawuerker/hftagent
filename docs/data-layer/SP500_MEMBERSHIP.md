@@ -167,8 +167,11 @@ model-comparison harness inherits it too. No per-agent or per-loop change needed
   no price column, so they silently drop out of the panel. The build's
   `--check-coverage N` probe quantifies this (≈ **82 %** of a 50-name sample served,
   a lower bound — some misses are rate-limit timeouts on live names like PFE/HLT).
-  This is the one bias the free path cannot fully remove; a premium provider with
-  delisted history closes it (§8). *(User decision: yfinance ⇒ tickers only.)*
+  This is the one bias the free path cannot fully remove. **Closed on the premium
+  path** — FMP serves delisted symbols, and `symbol_map.csv` reports per-ticker
+  *spell coverage* (bars returned ÷ business days actually spent in the index), a
+  direct measurement rather than a sampled estimate. See §8 and
+  [`FMP_PREMIUM_ARCHIVE.md`](FMP_PREMIUM_ARCHIVE.md).
 - **Wikipedia incompleteness** for pre-~2015 changes — mitigated by using
   `fja05680` as primary; surfaced by the Jaccard trend.
 - **Renames** are curated + same-day-heuristic detected; an unhandled rename shows
@@ -182,20 +185,45 @@ model-comparison harness inherits it too. No per-agent or per-loop change needed
 
 ---
 
-## 8. Premium extension (closing the delisted-price gap)
+## 8. Premium extension — **built** (FMP)
 
-`membership.py` defines a `MembershipSource` seam. The free
-`PublicReconstructionSource` (this document) can be swapped for a vendor source
-that supplies **both** PIT membership and delisted prices:
+`membership.py` defines a `MembershipSource` seam so the free
+`PublicReconstructionSource` (this document) can be swapped for a vendor that
+supplies **both** PIT membership and delisted prices.
 
-- **`CrspSource`** (WRDS/CRSP) — PIT index constituents keyed on PERMNO, with full
-  delisted security history. Academic gold standard.
-- **`FmpSource`** — FMP's historical-constituents endpoint + delisted price
-  coverage (paid tier).
+**`FmpSource` is now implemented** and is the default source of
+`sp500.csv`/`nasdaq100.csv`. It replays FMP's `historical-*-constituent` change
+log (archived locally, so the build stays offline and reproducible) into the same
+canonical interval table; the free reconstruction is preserved as
+**`sp500_public.csv`** and used as the month-by-month cross-check. The
+accompanying one-time download closes the delisted-price gap of §7 — see
+**[`FMP_PREMIUM_ARCHIVE.md`](FMP_PREMIUM_ARCHIVE.md)** for the endpoint registry,
+the reconstruction algorithm and its caveats, the resume/cost model, and the
+point-in-time rules for fundamentals.
 
-Both are stubbed (`NotImplementedError`) and only the *membership* table format
-changes; the query API, the per-bar mask, and every downstream consumer are
-unchanged.
+```bash
+./venv/bin/python scripts/fmp_bulk_download.py --groups index
+./venv/bin/python scripts/build_fmp_membership.py --index sp500,nasdaq100 --since 2004-01-01
+```
+
+Extending the free table back to 2004 (offline, from a saved snapshot) recovers
+**145 tickers** that were members between 2004 and 2010 and left before 2010 —
+Bear Stearns, Ambac, AT&T Wireless, Anheuser-Busch and the rest of the 2008
+casualty list — on top of the 834 the 2010+ build already had:
+
+```bash
+./venv/bin/python scripts/build_sp500_membership.py --since 2004-01-01 --index sp500_public
+```
+
+**`CrspSource`** (WRDS/CRSP — PIT constituents keyed on PERMNO, the academic gold
+standard) remains a documented stub. Only the *membership table format* would
+change; the query API, the per-bar mask and every downstream consumer are
+unchanged either way.
+
+The shared interval algebra used by every builder — `coalesce_spells`,
+`members_from_spells`, `audit_spells`, `compare_spells`, `normalize_ticker` —
+lives in `data/membership.py`, so the free and premium builds audit and reconcile
+through one implementation rather than two drifting copies.
 
 ---
 

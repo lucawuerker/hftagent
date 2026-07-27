@@ -82,7 +82,8 @@ Deeper levels are NaN when the pull was shallower — guard with ``.fillna``."""
 _FUNDAMENTAL_ENTRIES: dict[str, str] = {
     "sector": '    sector    : GICS-style sector label (text, e.g. "Technology"). Static.',
     "industry": "    industry  : finer industry label (text). Static.",
-    "marketCap": "    marketCap : market capitalization in USD (float, per fiscal quarter).",
+    "marketCap": "    marketCap : market capitalization in USD (daily where the feed\n"
+                 "                supplies it, otherwise per fiscal quarter).",
     "peRatio": "    peRatio   : price / earnings (float; negative for loss-makers).",
     "pbRatio": "    pbRatio   : price / book.",
     "psRatio": "    psRatio   : price / sales.",
@@ -94,11 +95,38 @@ _FUNDAMENTAL_ENTRIES: dict[str, str] = {
     "netMargin": "    netMargin   : net profitability margin (fraction).",
     "revenue": "    revenue   : quarterly revenue (USD).",
     "eps": "    eps       : reported EPS (USD).",
-    "freeCashFlow": "    freeCashFlow : free cash flow per share.",
+    "freeCashFlow": "    freeCashFlow : free cash flow in USD (operating cash flow − capex).",
     "epsEstimate": "    epsEstimate    : analyst EPS consensus for the latest quarter.",
     "revenueEstimate": "    revenueEstimate: analyst revenue consensus for the latest quarter.",
     "epsSurprise": "    epsSurprise : reported EPS − estimate (post-earnings-drift signal).",
 }
+
+
+def _archive_entries() -> dict[str, str]:
+    """Prose lines for the premium-archive fields, grouped and machine-generated.
+
+    The premium FMP archive serves ~130 fundamental fields; hand-writing a line
+    for each would guarantee drift from :data:`data.fields.ARCHIVE_FIELD_SPECS`.
+    Instead the descriptions live *with* the field definitions and are rendered
+    here, grouped so a long list still reads as an ordered menu rather than a
+    wall of names.  Hand-written entries above take precedence for the fields
+    they already cover (they carry extra nuance worth keeping).
+    """
+    from quant_fund_agent.data.fields import ARCHIVE_FIELD_SPECS, FIELD_GROUPS
+
+    width = max((len(s.name) for s in ARCHIVE_FIELD_SPECS), default=12)
+    out: dict[str, str] = {}
+    for group in FIELD_GROUPS:
+        for spec in ARCHIVE_FIELD_SPECS:
+            if spec.group == group and spec.name not in _FUNDAMENTAL_ENTRIES:
+                out[spec.name] = f"    {spec.name:<{width}}: {spec.desc}"
+    return out
+
+
+# Hand-written entries first (they read better for the core fields), then every
+# remaining archive field.  ``_section`` preserves this declaration order, so the
+# gated list stays grouped.
+_FUNDAMENTAL_ENTRIES.update(_archive_entries())
 
 _FUNDAMENTAL_LOOKAHEAD = """\
 LOOK-AHEAD — read carefully.  These fields are **already point-in-time**:
@@ -306,122 +334,130 @@ DATA_CONTEXT = build_data_context(None)
 # ---------------------------------------------------------------------------
 
 OPERATOR_REFERENCE = """\
-OPERATOR REFERENCE
-------------------
-The factor code may use TWO distinct surfaces.  They are NOT
-interchangeable — using one when you meant the other is the single
-most common mistake here.
+OPERATOR REFERENCE & IMPORT CONTRACT
+------------------------------------
+You are an LLM researcher, not a formula-recombiner.  Read this first: the
+``ops`` library below is a *convenience shelf* of common primitives — it is
+NOT the limit of what you may compute, and most interesting factors will need
+more than it offers.  You are strongly encouraged to write your OWN vectorised,
+causal helper functions to implement the *actual* mathematical machinery a
+paper describes — truncated path signatures, Hawkes-process intensities,
+spectral / wavelet / entropy features, rolling eigen-decompositions,
+Ornstein-Uhlenbeck half-lives, variance ratios, robust regressions, and so on.
+If a paper's mechanism is richer than rank/mean/delta, implement the richer
+mechanism; do NOT water it down to fit the shelf.
 
-== SURFACE A: ``quant_fund_agent.factors.ops`` (free functions) ==
+THREE PLACES COMPUTATION COMES FROM - use whichever fits, mix them freely:
 
-These are WorldQuant-style operators.  They are FREE FUNCTIONS
-imported by name, take POSITIONAL arguments only (no ``window=``,
-``min_periods=``, ``axis=`` etc.), and apply to whole DataFrames.
+1. YOUR OWN HELPER FUNCTIONS - preferred for anything non-trivial.
+   Define module-level ``def _my_transform(df, ...):`` helpers in the file and
+   call them from ``calc``.  Build them from numpy / scipy / statsmodels /
+   pandas.  This is where signature transforms, Hawkes intensities, spectral
+   features, etc. live.  They MUST be vectorised over the panel, causal
+   (trailing windows and positive lags only), and deterministic.
 
-The list below is EXHAUSTIVE — if a name is not here, it is NOT in
-``ops``.  Do not invent names; do not import pandas methods from
-``ops``.
+2. ``quant_fund_agent.factors.ops`` - a convenience library of WorldQuant-style
+   primitives.  Reach for them when they happen to fit; skip them when they
+   don't.  They are FREE FUNCTIONS, take POSITIONAL arguments ONLY (never
+   ``window=``, ``n=``, ``min_periods=``, ``axis=``), and act on whole
+   DataFrames.  The names below are the ONLY names that exist in ``ops``:
 
-Data helpers (consume the full ``data`` dict):
-    returns(data)            close.pct_change(); uses data["returns"] if present
-    vwap(data)               uses data["vwap"] or (H+L+C)/3 fallback
+   Data helpers (consume the full ``data`` dict):
+       returns(data)            close.pct_change(); uses data["returns"] if present
+       vwap(data)               uses data["vwap"] or (H+L+C)/3 fallback
 
-Cross-sectional (per-row, no window):
-    rank(df)                 percentile rank in [0, 1]
+   Cross-sectional (per-row, no window):
+       rank(df)                 percentile rank in [0, 1]
 
-Time-series (n = positive int, lookback in bars):
-    delta(df, n)             df[t] - df[t-n]
-    delay(df, n)             df.shift(n)
-    ts_sum(df, n)
-    ts_mean(df, n)
-    stddev(df, n)
-    ts_min(df, n)
-    ts_max(df, n)
-    ts_argmax(df, n)         1-indexed position of max in last n bars
-    ts_argmin(df, n)
-    ts_rank(df, n)           percentile rank of the latest value in last n bars
-    product(df, n)           rolling product
-    decay_linear(df, n)      linear-weighted MA, newest weight = n
-    adv(volume_df, n)        n-bar average of volume
+   Time-series (n = positive int, lookback in bars):
+       delta(df, n)             df[t] - df[t-n]
+       delay(df, n)             df.shift(n)
+       ts_sum(df, n)
+       ts_mean(df, n)
+       stddev(df, n)
+       ts_min(df, n)
+       ts_max(df, n)
+       ts_argmax(df, n)         1-indexed position of max in last n bars
+       ts_argmin(df, n)
+       ts_rank(df, n)           percentile rank of the latest value in last n bars
+       product(df, n)           rolling product
+       decay_linear(df, n)      linear-weighted MA, newest weight = n
+       adv(volume_df, n)        n-bar average of volume
 
-Pairwise / math:
-    correlation(x, y, n)     rolling Pearson corr between x and y over n
-    covariance(x, y, n)
-    signed_power(df, a)      sign(df) * |df|^a
-    power(df, a)             df ** a
-    log(df)                  natural log; zeros are masked to NaN
-    abs_(df)
-    sign(df)
-    scale(df)                row-normalise so sum(|values|) == 1
-    indneutralize(df, groups)  subtract per-group row mean
+   Pairwise / math:
+       correlation(x, y, n)     rolling Pearson corr between x and y over n
+       covariance(x, y, n)
+       signed_power(df, a)      sign(df) * |df|^a
+       power(df, a)             df ** a
+       log(df)                  natural log; zeros are masked to NaN
+       abs_(df)
+       sign(df)
+       scale(df)                row-normalise so sum(|values|) == 1
+       indneutralize(df, groups)  subtract per-group row mean
 
-Research-method primitives (causal trailing-window building blocks):
-    ts_zscore(df, n)         trailing z-score using the last n bars
-    rolling_beta(y, x, n)    trailing OLS beta of y on x
-    rolling_residual(y, x, n) current residual from trailing OLS y~x
-    rolling_autocorr(df, n, lag) trailing autocorr; use lag=1 unless justified
-    signed_area(x, y, n)     two-channel trailing path signed area
-    path_length(x, y, n)     two-channel trailing path length
-    tail_ratio(df, n, q)     upper-tail magnitude / lower-tail magnitude
-    sign_entropy(df, n)      entropy of positive / negative / zero signs
+   Research-method primitives (causal trailing-window building blocks):
+       ts_zscore(df, n)         trailing z-score using the last n bars
+       rolling_beta(y, x, n)    trailing OLS beta of y on x
+       rolling_residual(y, x, n) current residual from trailing OLS y~x
+       rolling_autocorr(df, n, lag) trailing autocorr; use lag=1 unless justified
+       signed_area(x, y, n)     two-channel trailing path signed area
+       path_length(x, y, n)     two-channel trailing path length
+       tail_ratio(df, n, q)     upper-tail magnitude / lower-tail magnitude
+       sign_entropy(df, n)      entropy of positive / negative / zero signs
 
-Import them like::
+3. DIRECT pandas / numpy / scipy - for plumbing and inline math:
+       df.fillna(0.0)   df.where(cond, 0.0)   df.replace(0, np.nan)   df.clip(...)
+       df.rolling(n, min_periods=n).std()      df.ewm(halflife=h).mean()
+       np.log1p(df)   np.sqrt(df)   scipy.signal.welch(...)   scipy.special.expit(...)
+   These are METHODS / functions - call them directly; they are NOT in ``ops``.
 
-    from quant_fund_agent.factors.ops import (
-        rank, delta, delay, ts_sum, ts_mean, stddev,
-        ts_min, ts_max, ts_argmax, ts_argmin, ts_rank,
-        correlation, covariance, signed_power, log, abs_,
-        sign, adv, product, scale, decay_linear, power,
-        returns, vwap, indneutralize, ts_zscore,
-        rolling_beta, rolling_residual, rolling_autocorr,
-        signed_area, path_length, tail_ratio, sign_entropy,
-    )
+IMPORT CONTRACT - the source of almost every retry you keep hitting
+-------------------------------------------------------------------
+Import ONLY from this set.  Anything else is rejected BEFORE your code runs,
+burning a whole attempt:
 
-== SURFACE B: pandas / numpy methods (called on the DataFrame) ==
+    from __future__ import annotations
+    import pandas as pd
+    import numpy as np
+    import math                                  # + statistics / functools /
+                                                 #   itertools / collections /
+                                                 #   dataclasses / typing / warnings
+    from scipy import signal, stats, linalg, special, integrate, fft  # pick what you use
+    import statsmodels.api as sm                 # causal time-series, robust stats
+    from quant_fund_agent.factors.base import BaseFactor
+    from quant_fund_agent.factors.registry import register_factor
+    from quant_fund_agent.factors.ops import <only names listed above>
 
-For everything else — defensive NaN handling, conditional masks,
-elementwise arithmetic, and paper-specific deterministic transforms — use
-the pandas DataFrame method, numpy/scipy/statsmodels function, or a small
-helper function DIRECTLY.  Do NOT import them from ``ops``.
-If using external libraries, import them properly.
+Two rules behind the import rejections - internalise both:
 
-    df.fillna(0.0)               # fill NaN
-    df.replace(0, np.nan)        # replace a value
-    df.where(cond, other=0.0)    # element-wise conditional
-    df.mask(cond, other)         # inverse of where
-    df.shift(n) / df.diff(n)     # already exposed as delay / delta in ops
-    df.dropna(how="all")
-    df.clip(lower=-1, upper=1)
-    df.rolling(n, min_periods=n).std()    # equivalent to stddev(df, n)
-    np.log1p(df), np.sqrt(df), np.exp(df) # math
-    pd.concat([a, b], axis=1)             # joining
+  (A) Specialised third-party libraries are NOT installed.  There is NO
+      ``iisignature``, ``signatory``, ``tick``, ``hawkeslib``, ``pywt``,
+      ``torch``, ``numba``, ``cvxpy``, ``arch``.  Do not import them - implement
+      the paper's maths yourself with numpy / scipy / statsmodels.  That is
+      exactly why an LLM is doing this and not a grammar-bound search: a
+      truncated signature is a few nested cumulative sums; a Hawkes intensity is
+      an exponentially-decayed event kernel - write them out.
 
-You are allowed to implement a method from a paper directly when the
-operator library does not already contain it, as long as the computation is:
-trailing-window / causal, vectorized over the panel, deterministic, and
-returns a DataFrame aligned to ``data["close"]``.  Do not water a paper down
-into a generic rank/mean/delta formula if its actual mechanism needs a richer
-transform.
+  (B) ``ops`` exports ONLY the free functions listed above.  Pandas/numpy
+      methods are NOT in it.  Never
+      ``from quant_fund_agent.factors.ops import fillna`` (or ``where`` /
+      ``replace`` / ``dropna`` / ``rolling`` / ``clip`` / ``mean`` / ``std``):
+      those are DataFrame methods - call them on the frame, e.g.
+      ``df.fillna(0.0)``.
 
-LEAKAGE RULES:
-    - no negative shifts/diffs/pct_change periods;
-    - no centered rolling windows;
-    - no fitting sklearn/statsmodels estimators inside ``calc`` on the full
-      panel.  Learned models need an explicit fit/predict interface outside
-      this factor class.  Approximate learned-paper ideas with causal trailing
-      statistics here, or state the mechanism in the hypothesis for a later
-      learned-factor extension.
+LEAKAGE RULES (they hold for your custom maths too):
+    - no negative shifts/diffs/pct_change periods; no centered rolling windows;
+    - trailing windows and positive lags only - the value at t sees only <= t;
+    - no fitting a *learned* sklearn/statsmodels estimator inside ``calc`` on
+      the full panel.  A rolling / trailing OLS you compute yourself IS fine;
+      learned models need an explicit fit/predict interface elsewhere.
 
-WRONG — these will all be rejected by the validator:
-    from quant_fund_agent.factors.ops import fillna        # NO
-    from quant_fund_agent.factors.ops import where         # NO
-    from quant_fund_agent.factors.ops import replace       # NO
-    from quant_fund_agent.factors.ops import dropna        # NO
-
+WRONG - rejected by the validator:
+    from quant_fund_agent.factors.ops import fillna    # NO - it's df.fillna(...)
+    import iisignature                                 # NO - not installed
 RIGHT:
     df = data["close"].fillna(0.0)
-    out = of.where(events > 0, 0.0)
-    safe = df.replace(0, np.nan)
+    safe = df.replace(0, np.nan)                       # write the maths yourself
 """
 
 
@@ -473,6 +509,56 @@ when the paper calls for them.
             active = (-1.0 * ts_rank(abs_(d7), 60)) * sign(d7)
             fallback = pd.DataFrame(-1.0, index=close.index, columns=close.columns)
             return active.where(adv20 < volume, fallback)
+
+EXAMPLE OF A CUSTOM PAPER-MATH FACTOR (this is the encouraged pattern)
+---------------------------------------------------------------------
+Here the mechanism is NOT in ``ops`` — it is a Lo–MacKinlay variance ratio,
+written as a small vectorised, causal helper.  This is what "implement the
+paper's actual mechanism" looks like: plain numpy/pandas, trailing-only,
+deterministic, no special library needed.  Do this whenever a paper's object
+of interest (a signature, an intensity, a spectral feature, …) is richer than
+the shelf provides.
+
+    """Variance-ratio regime factor: fade names whose returns mean-revert."""
+
+    from __future__ import annotations
+
+    import numpy as np
+    import pandas as pd
+
+    from quant_fund_agent.factors.base import BaseFactor
+    from quant_fund_agent.factors.ops import rank, returns
+    from quant_fund_agent.factors.registry import register_factor
+
+
+    def _variance_ratio(ret: pd.DataFrame, k: int, n: int) -> pd.DataFrame:
+        """Lo–MacKinlay variance ratio over horizon k, estimated on a trailing
+        n-bar window.  VR < 1 => mean-reverting, VR > 1 => trending.  Causal:
+        every term is a trailing rolling statistic, so value at t sees only <= t."""
+        var_1 = ret.rolling(n, min_periods=n).var()
+        k_ret = ret.rolling(k, min_periods=k).sum()          # overlapping k-bar returns
+        var_k = k_ret.rolling(n, min_periods=n).var()
+        return var_k / (k * var_1).replace(0.0, np.nan)
+
+
+    @register_factor
+    class VarianceRatioReversion(BaseFactor):
+        factor_id = "variance_ratio_reversion"
+        name = "Variance-ratio reversion"
+        category = "mean_reversion"
+        description = (
+            "Cross-sectional rank of (1 - trailing variance ratio): long the "
+            "most mean-reverting names, short the most trending ones."
+        )
+        window_length = 120
+        inputs = ["close"]
+        prediction_horizon = 12
+        suggested_horizons = [6, 12, 24]
+
+        def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:
+            ret = returns(data)
+            vr = _variance_ratio(ret, 5, 100)
+            return rank(1.0 - vr)
 '''
 
 
@@ -501,9 +587,15 @@ Read the paper like a researcher implementing a mechanism, not like a prompt
 asking for a familiar formula.  Extract the paper's actual object of interest
 (state variable, event process, path shape, residual, tail behaviour, regime,
 or interaction), map it to the fields available here, and implement the closest
-causal approximation.  You are not limited to minor recombinations of the
-existing seed alphas; creative, method-faithful transforms are welcome when
-they remain computable and leak-free.
+causal approximation.  You are NOT confined to a fixed operator vocabulary: if
+a paper turns on truncated path signatures, Hawkes-process intensities,
+spectral / wavelet / entropy features, rolling eigen-structure, or any other
+richer transform, propose exactly that — the codegen step implements such maths
+directly as vectorised, causal numpy/scipy code, so do not pre-emptively flatten
+it into a rank/mean/delta.  You are not limited to minor recombinations of the
+existing seed alphas; creative, method-faithful mechanisms are precisely what
+this stage is for, as long as they remain computable from the listed fields and
+leak-free.
 
 WHAT TO PRODUCE
 ---------------
@@ -580,15 +672,22 @@ suggested_horizons: {suggested_horizons}
 
 STRICT REQUIREMENTS
 -------------------
-1. Only import from these modules:
-     - ``pandas`` (as pd) and ``numpy`` (as np) if needed
-     - ``scipy`` and ``statsmodels`` if needed for deterministic paper math
-     - ``quant_fund_agent.factors.base``  (for BaseFactor)
-     - ``quant_fund_agent.factors.registry`` (for register_factor)
-     - ``quant_fund_agent.factors.ops`` (for the helper operators)
-     - ``__future__`` annotations
-   Scikit-learn model fitting is not allowed inside a factor ``calc``; learned
-   models require a separate fit/predict interface.
+1. Import ONLY from these (anything else is rejected BEFORE your code runs — a
+   wasted attempt; see the IMPORT CONTRACT above):
+     - ``__future__`` (annotations)
+     - ``pandas`` (as pd), ``numpy`` (as np)
+     - ``math`` and, only if genuinely needed, other pure-stdlib compute
+       modules (``statistics``, ``functools``, ``itertools``, ``collections``,
+       ``dataclasses``, ``typing``, ``warnings``)
+     - ``scipy`` and ``statsmodels`` — your toolbox for the *actual* paper maths
+       (signatures, Hawkes intensities, spectral / wavelet features, robust
+       stats, causal time-series).  There is NO ``iisignature`` / ``signatory``
+       / ``tick`` / ``hawkeslib`` / ``pywt`` / ``torch`` / ``numba`` / ``arch``
+       — implement the mechanism yourself from numpy/scipy/statsmodels.
+     - ``quant_fund_agent.factors.base`` / ``.registry`` / ``.ops``
+   Do NOT fit a *learned* sklearn/statsmodels estimator inside ``calc`` on the
+   full panel; a rolling / trailing OLS you compute yourself is fine, and
+   learned models need a separate fit/predict interface.
 2. Define exactly ONE class subclassing ``BaseFactor``, decorated with
    ``@register_factor``.
 3. The class MUST set the following class attributes:
@@ -619,11 +718,14 @@ STRICT REQUIREMENTS
    ``df.replace(0, np.nan)``, etc.  These are NOT in ``ops``.  Trying
    to ``from quant_fund_agent.factors.ops import fillna`` will be
    rejected by the validator.
-7. If the paper needs a transform not in ``ops``, implement it as a small
-   deterministic helper function in this file using pandas/numpy/scipy/
-   statsmodels.  It must use only information available at time t: trailing
-   windows, positive lags, no centered windows, no negative shifts, and no
-   full-panel model fitting.
+7. Prefer implementing the paper's real mechanism as your OWN vectorised helper
+   function(s) in this file over flattening it into a rank/mean/delta.  ``ops``
+   is only a convenience shelf; richer maths (path signatures, Hawkes
+   intensities, spectral / wavelet features, variance ratios, rolling
+   regressions, …) should be written directly with pandas/numpy/scipy/
+   statsmodels — see the second worked example above.  Every helper must use
+   only information available at time t: trailing windows, positive lags, no
+   centered windows, no negative shifts, and no full-panel model fitting.
 8. No I/O, no network, no ``os``, no ``open``, no ``eval``/``exec``,
    no ``__import__``.  No filesystem access.
 9. Add a short docstring at the top of the file with the trading idea
@@ -667,14 +769,20 @@ Most common causes, in order of frequency:
    methods on the DataFrame.  Use ``df.fillna(0.0)``, ``df.where(...)``,
    ``df.replace(0, np.nan)`` etc. directly on the DataFrame.
 
-3. Passed a keyword argument to an ``ops`` function.  Every op is
+3. Imported a library that is NOT installed (e.g. ``iisignature``,
+   ``signatory``, ``tick``, ``hawkeslib``, ``pywt``, ``torch``, ``numba``,
+   ``arch``).  Only pandas, numpy, math (+ stdlib compute modules), scipy,
+   statsmodels and the ``quant_fund_agent.factors.*`` modules are importable —
+   implement the paper's maths yourself with numpy/scipy/statsmodels.
+
+4. Passed a keyword argument to an ``ops`` function.  Every op is
    positional-only — ``ts_sum(x, 5)``, NOT ``ts_sum(x, n=5)`` or
    ``ts_sum(x, window=5, min_periods=5)``.
 
-4. Referenced a ``data[...]`` field that does not exist.  Only the
+5. Referenced a ``data[...]`` field that does not exist.  Only the
    fields listed in DATA CONTEXT are available.
 
-5. Used a future-looking construct (negative ``shift`` / ``diff`` /
+6. Used a future-looking construct (negative ``shift`` / ``diff`` /
    ``pct_change`` period, centered rolling window, or a ``fit()`` call inside
    ``calc``).  Rewrite it as a trailing-window deterministic transform.
 

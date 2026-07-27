@@ -489,8 +489,31 @@ at once. The membership table is reconstructed from **free public sources**
 (GitHub `fja05680/sp500` as primary + Wikipedia change-log as cross-check),
 audited (month-end count 497–506; TSLA/ATVI spot-checks), and fully reproducible —
 `./venv/bin/python scripts/build_sp500_membership.py`. Free path is **tickers-only**
-(yfinance can't serve most delisted names — the residual gap a premium provider
-closes); see [`SP500_MEMBERSHIP.md`](docs/data-layer/SP500_MEMBERSHIP.md).
+(yfinance can't serve most delisted names — the residual gap the premium path
+below closes); see [`SP500_MEMBERSHIP.md`](docs/data-layer/SP500_MEMBERSHIP.md).
+
+**Premium path — a local FMP archive back to 2004.** With an FMP **Premium** key,
+`scripts/fmp_bulk_download.py` pulls a one-time, resumable, local archive
+(`data/vendor/fmp/`, gitignored) covering **every** name that was ever an S&P 500
+or Nasdaq-100 constituent since 2004: adjusted *and* unadjusted OHLCV, dividends,
+splits, daily market cap, and the full fundamental record (~300 raw fields per
+quarter across income statement / balance sheet / cash flow / ratios /
+key-metrics / growth / enterprise values / earnings). Two things follow:
+
+- **delisted names actually load** — the residual survivorship bias of the free
+  path is closed, and `symbol_map.csv` reports per-ticker *spell coverage* so
+  what remains missing is measured rather than assumed;
+- **~130 canonical fundamental fields** (up from 13) are exposed to the Factor
+  Researcher through `provider: fmp_archive`, which reads the archive **offline**
+  and stamps every value point-in-time — including the fix that `ratios` /
+  `key-metrics` / `financial-growth`, which carry no filing date, inherit the
+  matching income statement's *actual* `filingDate` instead of a flat 60-day lag.
+
+Membership itself becomes FMP-native (`scripts/build_fmp_membership.py`, backward
+walk of `historical-*-constituent`), audited and reconciled month-by-month against
+the preserved free reconstruction. Run it with
+`--config quant.config.fmp_sp500.yaml`; see
+[`FMP_PREMIUM_ARCHIVE.md`](docs/data-layer/FMP_PREMIUM_ARCHIVE.md).
 
 **LOBSTER specifics:** place CSVs under `ticker_data/` (or set `DATA_DIR`). The
 loader (`backtesting/data_loader.py`) builds an aligned panel of OHLCV plus

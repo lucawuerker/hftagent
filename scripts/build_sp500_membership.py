@@ -49,6 +49,16 @@ from pathlib import Path
 import pandas as pd
 import requests
 
+ROOT_PKG = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT_PKG))
+
+from quant_fund_agent.data.membership import (  # noqa: E402
+    audit_spells,
+    coalesce_spells as _coalesce,
+    members_from_spells as members_as_of_intervals,
+    normalize_ticker,
+)
+
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 log = logging.getLogger("build_sp500_membership")
 
@@ -153,11 +163,6 @@ def fetch_sources(snapshot_dir: Path, *, force: bool, offline: bool) -> dict[str
 
 # ── parsing ──────────────────────────────────────────────────────────────────
 
-def normalize_ticker(t: str) -> str:
-    """Canonicalize to the yfinance/repo convention (``BRK.B`` -> ``BRK-B``)."""
-    return str(t).strip().upper().replace(".", "-")
-
-
 def parse_components(path: Path) -> pd.DataFrame:
     """Parse the ``date,tickers`` series into ``date`` (Timestamp) + ``set``."""
     df = pd.read_csv(path)
@@ -230,30 +235,6 @@ def intervals_from_components(comp: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows, columns=["ticker", "start_date", "end_date"])
 
 
-def _coalesce(spells: pd.DataFrame) -> pd.DataFrame:
-    """Merge per-ticker spells that touch or overlap into single spells."""
-    OPEN = pd.Timestamp("2999-12-31")
-    out = []
-    for ticker, sub in spells.groupby("ticker"):
-        sub = sub.sort_values("start_date")
-        cur_s, cur_e = None, None
-        for _, r in sub.iterrows():
-            s = r["start_date"]
-            e = r["end_date"] if pd.notna(r["end_date"]) else OPEN
-            if cur_s is None:
-                cur_s, cur_e = s, e
-            elif s <= cur_e:                       # touching/overlapping -> extend
-                cur_e = max(cur_e, e)
-            else:
-                out.append((ticker, cur_s, cur_e))
-                cur_s, cur_e = s, e
-        if cur_s is not None:
-            out.append((ticker, cur_s, cur_e))
-    df = pd.DataFrame(out, columns=["ticker", "start_date", "end_date"])
-    df["end_date"] = df["end_date"].replace(OPEN, pd.NaT)
-    return df
-
-
 def detect_renames(changes: pd.DataFrame) -> dict[str, str]:
     """Same-day, same-company add/remove pairs -> ``old_ticker: new_ticker``."""
     detected: dict[str, str] = {}
@@ -313,13 +294,6 @@ class WikiSnapshots:
         return self._sets[max(i, 0)]
 
 
-def members_as_of_intervals(spells: pd.DataFrame, q) -> set[str]:
-    q = pd.Timestamp(q).normalize()
-    end = spells["end_date"].fillna(pd.Timestamp("2999-12-31"))
-    active = (spells["start_date"] <= q) & (q < end)
-    return set(spells.loc[active, "ticker"])
-
-
 # ── enrichment, audit, report ────────────────────────────────────────────────
 
 def build_name_map(current: pd.DataFrame, changes: pd.DataFrame) -> dict[str, str]:
@@ -375,33 +349,8 @@ def enrich(spells: pd.DataFrame, names: dict[str, str], changes: pd.DataFrame) -
 
 
 def audit(spells: pd.DataFrame, since: pd.Timestamp) -> tuple[list[str], pd.DataFrame]:
-    """Structural + count invariants.  Returns (errors, monthly count table)."""
-    errors: list[str] = []
-    bad = spells[spells["end_date"].notna() & (spells["end_date"] <= spells["start_date"])]
-    if len(bad):
-        errors.append(f"{len(bad)} spell(s) with end_date <= start_date")
-    # No overlapping spells per ticker.
-    for ticker, sub in spells.groupby("ticker"):
-        sub = sub.sort_values("start_date")
-        ends = sub["end_date"].fillna(pd.Timestamp("2999-12-31")).tolist()
-        starts = sub["start_date"].tolist()
-        for i in range(1, len(starts)):
-            if starts[i] < ends[i - 1]:
-                errors.append(f"overlapping spells for {ticker}")
-                break
-    # Monthly count band.
-    end = min(pd.Timestamp.today().normalize(),
-              spells["end_date"].fillna(pd.Timestamp.min).max() or pd.Timestamp.today())
-    months = pd.date_range(since, pd.Timestamp.today().normalize(), freq="ME")
-    counts = [(m, len(members_as_of_intervals(spells, m))) for m in months]
-    cdf = pd.DataFrame(counts, columns=["date", "n"])
-    out_of_band = cdf[(cdf["n"] < COUNT_LO) | (cdf["n"] > COUNT_HI)]
-    if len(out_of_band):
-        errors.append(
-            f"{len(out_of_band)}/{len(cdf)} month-ends outside [{COUNT_LO},{COUNT_HI}] "
-            f"(min {cdf['n'].min()}, max {cdf['n'].max()})"
-        )
-    return errors, cdf
+    """Structural + count invariants (shared implementation in data/membership.py)."""
+    return audit_spells(spells, since, band=(COUNT_LO, COUNT_HI))
 
 
 def reconcile(spells: pd.DataFrame, wiki: WikiSnapshots, since: pd.Timestamp) -> pd.DataFrame:

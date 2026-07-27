@@ -85,6 +85,12 @@ class DataSettings:
     reporting_lag_days: int = 60       # availability = fiscal-end + lag (no filing date)
     fundamentals_staleness_days: int = 400  # drop a fundamental older than this → NaN
     fundamentals_ttl_days: int = 90    # quarterly cache refresh for slow-moving data
+    # Fiscal period the fmp_archive provider reads (annual is the fallback when a
+    # name has no quarterly file).
+    fundamentals_period: str = "quarter"   # quarter | annual
+    # Root of the one-time FMP premium archive (provider="fmp_archive"); also
+    # overridable with QF_FMP_ARCHIVE.  See docs/data-layer/FMP_PREMIUM_ARCHIVE.md.
+    archive_dir: str = "data/vendor/fmp"
 
 
 @dataclass

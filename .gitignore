@@ -4,6 +4,10 @@
 # table, but not the bulky re-fetchable raw source snapshots (provenance summary
 # lives in the tracked build_report.md).
 !quant_fund_agent/data/universes/membership/sp500.csv
+# ...and its siblings: the Nasdaq-100 table and the preserved free reconstruction
+# that the FMP-native build is reconciled against (see FMP_PREMIUM_ARCHIVE.md).
+!quant_fund_agent/data/universes/membership/nasdaq100.csv
+!quant_fund_agent/data/universes/membership/sp500_public.csv
 quant_fund_agent/data/universes/membership/sources/
 ticker_data/
 binSamples/
@@ -38,6 +42,11 @@ data/papers/fulltext_cache/
 # Vendor market-data parquet cache (yfinance/FMP/AlphaVantage pulls). Re-fetched
 # on demand from the provider; user-specific and potentially large, never tracked.
 data/market/
+
+# One-time FMP premium archive (scripts/fmp_bulk_download.py): full OHLCV +
+# fundamentals for every PIT S&P 500 / Nasdaq-100 member since 2004. Several GB,
+# licensed vendor data, and reproducible from the manifest — never tracked.
+data/vendor/
 
 # User onboarding config written by `python -m quant_fund_agent.setup`. Holds no
 # secrets (those stay in .env) but is environment-specific, so left untracked.

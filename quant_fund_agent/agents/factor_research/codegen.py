@@ -66,9 +66,17 @@ _FORBIDDEN_TOKENS = (
 )
 
 # Imports that *are* allowed in researcher code.  Anything else and we
-# bail out — this keeps generated factors self-contained and on the
-# same primitive surface as the seed alphas.
+# bail out.  The scientific-computing stack (numpy/scipy/statsmodels) is the
+# deliberate surface the LLM researcher implements *its own* paper maths on
+# (signature transforms, Hawkes intensities, spectral / entropy features,
+# rolling regressions, …) — it is intentionally broader than the fixed
+# ``BASE_OPS`` grammar the non-LLM GP benchmark is confined to.  The stdlib
+# compute modules below (``math``, ``typing``, …) are pure and side-effect
+# free; they are allowed because the model reaches for them by reflex and
+# rejecting them only burns a retry.  I/O / system modules stay out (and are
+# also caught by ``_FORBIDDEN_TOKENS``).
 _ALLOWED_IMPORT_PREFIXES = (
+    # scientific-computing stack — implement richer paper maths here
     "pandas",
     "numpy",
     "scipy",
@@ -82,6 +90,19 @@ _ALLOWED_IMPORT_PREFIXES = (
     "sklearn.tree",
     "sklearn.svm",
     "sklearn.naive_bayes",
+    # pure-stdlib compute helpers (no I/O, no system access)
+    "math",
+    "cmath",
+    "statistics",
+    "functools",
+    "itertools",
+    "collections",
+    "dataclasses",
+    "typing",
+    "numbers",
+    "fractions",
+    "warnings",
+    # the factor framework
     "quant_fund_agent.factors.base",
     "quant_fund_agent.factors.registry",
     "quant_fund_agent.factors.ops",

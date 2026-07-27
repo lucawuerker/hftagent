@@ -196,6 +196,129 @@ def apply_membership_mask(
     return out
 
 
+# ── interval algebra (shared by every builder) ───────────────────────────────
+#
+# These operate on a *spells* frame (``ticker``/``start_date``/``end_date``, end
+# exclusive, ``NaT`` = still a member) before it is written to CSV, so the free
+# public reconstruction (``scripts/build_sp500_membership.py``), the FMP-native
+# builder (``data/fmp_ingest/constituents.py``) and any future vendor source all
+# audit and reconcile through exactly one implementation.
+
+def normalize_ticker(ticker: str) -> str:
+    """Canonicalize to the repo convention (``BRK.B`` → ``BRK-B``)."""
+    return str(ticker).strip().upper().replace(".", "-")
+
+
+def coalesce_spells(spells: pd.DataFrame) -> pd.DataFrame:
+    """Merge each ticker's touching/overlapping spells into single spells."""
+    out: list[tuple[str, pd.Timestamp, pd.Timestamp]] = []
+    for ticker, sub in spells.groupby("ticker"):
+        sub = sub.sort_values("start_date")
+        cur_s: pd.Timestamp | None = None
+        cur_e: pd.Timestamp | None = None
+        for _, r in sub.iterrows():
+            s = r["start_date"]
+            e = r["end_date"] if pd.notna(r["end_date"]) else _OPEN_END
+            if cur_s is None:
+                cur_s, cur_e = s, e
+            elif s <= cur_e:  # touching/overlapping → extend
+                cur_e = max(cur_e, e)
+            else:
+                out.append((ticker, cur_s, cur_e))
+                cur_s, cur_e = s, e
+        if cur_s is not None:
+            out.append((ticker, cur_s, cur_e))
+    df = pd.DataFrame(out, columns=["ticker", "start_date", "end_date"])
+    df["end_date"] = df["end_date"].replace(_OPEN_END, pd.NaT)
+    return df
+
+
+def members_from_spells(spells: pd.DataFrame, date: Any) -> set[str]:
+    """Constituent set on ``date`` from an in-memory spells frame."""
+    ts = pd.Timestamp(date).normalize()
+    end = spells["end_date"].fillna(_OPEN_END)
+    active = (spells["start_date"] <= ts) & (ts < end)
+    return set(spells.loc[active, "ticker"])
+
+
+def audit_spells(
+    spells: pd.DataFrame,
+    since: Any,
+    *,
+    band: tuple[int, int] = (475, 515),
+    until: Any | None = None,
+) -> tuple[list[str], pd.DataFrame]:
+    """Structural + count invariants.  Returns ``(errors, month-end counts)``.
+
+    ``band`` is the plausible constituent-count range for the index (the S&P 500
+    briefly runs 500–505 with share classes / pending spin-offs; a Nasdaq-100
+    table should pass ``(95, 115)``).  A table that leaves the band is almost
+    always a change-log parsing bug, not a real index event.
+    """
+    errors: list[str] = []
+    lo, hi = band
+
+    bad = spells[spells["end_date"].notna() & (spells["end_date"] <= spells["start_date"])]
+    if len(bad):
+        errors.append(f"{len(bad)} spell(s) with end_date <= start_date")
+
+    for ticker, sub in spells.groupby("ticker"):
+        sub = sub.sort_values("start_date")
+        ends = sub["end_date"].fillna(_OPEN_END).tolist()
+        starts = sub["start_date"].tolist()
+        if any(starts[i] < ends[i - 1] for i in range(1, len(starts))):
+            errors.append(f"overlapping spells for {ticker}")
+
+    stop = pd.Timestamp(until).normalize() if until is not None else pd.Timestamp.today().normalize()
+    months = pd.date_range(pd.Timestamp(since).normalize(), stop, freq="ME")
+    counts = pd.DataFrame(
+        [(m, len(members_from_spells(spells, m))) for m in months], columns=["date", "n"]
+    )
+    if len(counts):
+        out_of_band = counts[(counts["n"] < lo) | (counts["n"] > hi)]
+        if len(out_of_band):
+            errors.append(
+                f"{len(out_of_band)}/{len(counts)} month-ends outside [{lo},{hi}] "
+                f"(min {counts['n'].min()}, max {counts['n'].max()})"
+            )
+    return errors, counts
+
+
+def compare_spells(
+    primary: pd.DataFrame,
+    other: pd.DataFrame,
+    since: Any,
+    *,
+    until: Any | None = None,
+    label_a: str = "primary",
+    label_b: str = "other",
+) -> pd.DataFrame:
+    """Month-end Jaccard agreement between two interval tables.
+
+    The independent ground truth for a membership table is its audit invariants,
+    not source agreement — but a per-month Jaccard makes *where* two
+    reconstructions diverge (usually the oldest years, where change logs thin
+    out) immediately visible instead of averaging it away.
+    """
+    stop = pd.Timestamp(until).normalize() if until is not None else pd.Timestamp.today().normalize()
+    rows = []
+    for m in pd.date_range(pd.Timestamp(since).normalize(), stop, freq="ME"):
+        a = members_from_spells(primary, m)
+        b = members_from_spells(other, m)
+        if not (a or b):
+            continue
+        union = len(a | b)
+        rows.append((
+            m, len(a), len(b), (len(a & b) / union) if union else 1.0,
+            ",".join(sorted(a - b)[:8]), ",".join(sorted(b - a)[:8]),
+        ))
+    return pd.DataFrame(
+        rows,
+        columns=["date", f"n_{label_a}", f"n_{label_b}", "jaccard",
+                 f"only_{label_a}", f"only_{label_b}"],
+    )
+
+
 # ── source abstraction (free now; premium documented) ────────────────────────
 
 class MembershipSource(ABC):
@@ -241,13 +364,49 @@ class CrspSource(MembershipSource):  # pragma: no cover - premium stub
         )
 
 
-class FmpSource(MembershipSource):  # pragma: no cover - premium stub
-    """PIT constituents from FMP's historical-constituents endpoint (paid tier)."""
+class FmpSource(MembershipSource):
+    """PIT constituents reconstructed from FMP's change log (paid tier).
+
+    Reads the **archived** payloads under ``data/vendor/fmp/index/`` (written by
+    ``scripts/fmp_bulk_download.py --groups index``) and replays them into the
+    canonical interval table — so this class never touches the network and stays
+    reproducible offline, exactly like the free reconstruction it replaces.
+    Building the canonical CSV from it is ``scripts/build_fmp_membership.py``.
+    """
 
     name = "fmp"
 
-    def intervals(self, index: str) -> pd.DataFrame:
-        raise NotImplementedError(
-            "FMP historical constituents need a paid key — premium path. "
-            "See the 'Premium extension' section of docs/data-layer/SP500_MEMBERSHIP.md."
+    def __init__(self, archive_root: Any | None = None) -> None:
+        from quant_fund_agent.data.fmp_ingest.store import DEFAULT_ROOT
+
+        self.archive_root = Path(archive_root) if archive_root else DEFAULT_ROOT
+
+    def intervals(self, index: str, *, since: Any = "2004-01-01") -> pd.DataFrame:
+        from quant_fund_agent.data.fmp_ingest.constituents import (
+            INDEX_ENDPOINTS,
+            build_intervals,
         )
+        from quant_fund_agent.data.fmp_ingest.store import Archive
+
+        if index not in INDEX_ENDPOINTS:
+            raise ValueError(
+                f"No FMP constituent endpoints for index {index!r}. "
+                f"Known: {sorted(INDEX_ENDPOINTS)}."
+            )
+        current_ep, changes_ep, _band = INDEX_ENDPOINTS[index]
+        archive = Archive(self.archive_root)
+        current = archive.read(current_ep)
+        changes = archive.read(changes_ep)
+        if current is None or changes is None:
+            raise FileNotFoundError(
+                f"FMP constituent payloads for {index!r} are not in the archive at "
+                f"{self.archive_root}. Fetch them with "
+                "`./venv/bin/python scripts/fmp_bulk_download.py --groups index`."
+            )
+        build = build_intervals(
+            index,
+            current.reset_index().to_dict("records"),
+            changes.reset_index().to_dict("records"),
+            since=since,
+        )
+        return build.spells

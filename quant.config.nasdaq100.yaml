@@ -1,0 +1,20 @@
+# Survivorship-bias-free Nasdaq-100, 2004 → today, off the local FMP archive.
+#
+# Same archive as quant.config.fmp_sp500.yaml — only the membership mask differs,
+# so no extra download is needed once the S&P 500 pull has run (the two universes
+# overlap heavily and the downloader fetches their union).
+#
+# See docs/data-layer/FMP_PREMIUM_ARCHIVE.md.
+data:
+  provider: fmp_archive
+  asset_class: equity
+  frequency: 1d
+  start: '2004-01-01'
+  end: '2026-07-27'
+  archive_dir: data/vendor/fmp
+  membership: nasdaq100
+  fundamentals: true
+  fundamentals_period: quarter
+  fundamentals_staleness_days: 400
+  reporting_lag_days: 60
+  dtype: float32

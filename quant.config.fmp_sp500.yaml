@@ -1,0 +1,26 @@
+# Survivorship-bias-free S&P 500, 2004 → today, off the local FMP premium archive.
+#
+# Reads `data/vendor/fmp/` (built once by `scripts/fmp_bulk_download.py`) — no
+# network, so every run is reproducible.  The PIT membership mask is applied at
+# panel load, so research, the Architect/Statistician, the walk-forward loop and
+# the comparison harness are all survivorship-correct with no per-consumer change.
+#
+#   ./venv/bin/python run_factor_research.py --config quant.config.fmp_sp500.yaml ...
+#
+# See docs/data-layer/FMP_PREMIUM_ARCHIVE.md.
+data:
+  provider: fmp_archive
+  asset_class: equity
+  frequency: 1d
+  start: '2004-01-01'
+  end: '2026-07-27'
+  archive_dir: data/vendor/fmp
+  membership: sp500          # point-in-time universe (union of ever-members)
+  fundamentals: true
+  fundamentals_period: quarter
+  # A quarterly figure goes stale after ~5 quarters without a new filing → NaN.
+  fundamentals_staleness_days: 400
+  # Only used when a record has no filing date at all (the archive provider
+  # inherits the income statement's real filing date wherever it can).
+  reporting_lag_days: 60
+  dtype: float32
