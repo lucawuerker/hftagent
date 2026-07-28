@@ -140,7 +140,25 @@ deferred table; `factors/_labels.py` helper; allow-listed for in-memory compile)
 and form the standing fixed book via `scripts/build_formulaic_prebook.py` →
 `data/prebooks/formulaic_101.json` (101 members validate) wired as
 `--fixed-book`/`--reference-book` in the matrix; researcher prompts sharpened to
-a novelty/falsifiability/PM-grade-skeptic bar (+7% tokens).
+a novelty/falsifiability/PM-grade-skeptic bar (+7% tokens). **2026-07-28
+hardening (B15–B17 in the plan):** `--mechanism-groups-mode max` (the group
+count is a hard UPPER limit — the run shrinks to however many usable graph
+communities exist; matrix asks for 8/max); orchestrator **per-entrypoint
+defaults** (`gp_defaults`/`oneshot_defaults` in the plan YAML — evolution flags
+no longer leak into the GP/oneshot argv and crash them at L0/L1), GP `--config`
+flag + preflight `load_panel` call fixed, `--n-tickers 0`=full now honoured by
+`run_gp_factor_mining.py`/`run_factor_research.py`/`run_evolution_timing.py`
+too (0 used to slice the universe EMPTY); plan-vs-argparse guard
+`tests/test_final_matrix_plan.py`; re-embed CLI `scripts/rebuild_embeddings.py`
+(runbook step 2 was pseudocode). Preflight verified live offline
+(`--preflight-only --no-probes`: panel 3,665×209 density 0.463, forward reserve
+OK, correctly refuses on the missing knowledge graph). Full test suite now
+**genuinely green (679 passed)** — fixed the two pre-existing `test_data_layer`
+failures (ambient `quant.config.yaml` leaking into tests that assume lobster
+defaults) and an order-dependent `test_mcp_modeling` failure
+(`comparison.load_panel_cached` leaks `_PANEL_CACHE`/`_SIGNAL_CACHE`/
+`QF_DATA_TICKERS` etc. process-wide; `test_comparison.py` now snapshots and
+restores).
 
 **Evolutionary researcher — knowledge-graph nested islands replace the QD grid;
 4-axis vector (done, 2026-07-21). THIS SUPERSEDES THE TWO BLOCKS BELOW.**

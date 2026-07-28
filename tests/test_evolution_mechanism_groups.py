@@ -96,6 +96,72 @@ def test_graph_that_cannot_fill_the_groups_is_an_error(monkeypatch):
         resolve_mechanism_groups(cfg, ["close"])
 
 
+def test_max_mode_uses_however_many_usable_groups_the_graph_forms(monkeypatch):
+    """mechanism_groups_mode='max': the requested count is a hard UPPER limit —
+    a graph that forms fewer usable groups shrinks the run instead of aborting,
+    and the surviving specs are renumbered contiguously."""
+    import quant_fund_agent.knowledge.graph_query as gq
+
+    monkeypatch.setattr(gq, "mechanism_group_specs",
+                        lambda graph, n, fields: [
+                            {"mechanism_group_id": 0, "community_id": 1,
+                             "focus": "momentum", "mechanisms": ["m"]},
+                            {"mechanism_group_id": 1, "community_id": 2,
+                             "focus": "", "mechanisms": []},   # unusable top-up
+                            {"mechanism_group_id": 2, "community_id": 3,
+                             "focus": "liquidity", "mechanisms": ["l"]}])
+    monkeypatch.setattr(
+        "quant_fund_agent.knowledge.graph_store.KnowledgeGraph.load",
+        staticmethod(lambda *a, **k: object()))
+
+    cfg = EvolutionRunConfig(n_mechanism_groups=8, retrieval="graphrag",
+                             mechanism_groups_mode="max")
+    specs = resolve_mechanism_groups(cfg, ["close"])
+    assert [s["focus"] for s in specs] == ["momentum", "liquidity"]
+    assert [s["mechanism_group_id"] for s in specs] == [0, 1]
+
+
+def test_max_mode_shrinks_the_controller_to_the_resolved_count(monkeypatch):
+    """The loop must size the island structure to the RESOLVED group count,
+    not the requested upper limit."""
+    import quant_fund_agent.knowledge.graph_query as gq
+    from quant_fund_agent.agents.factor_research.evolution.loop import EvolutionLoop
+
+    monkeypatch.setattr(gq, "mechanism_group_specs",
+                        lambda graph, n, fields: [
+                            {"mechanism_group_id": 0, "community_id": 1,
+                             "focus": "momentum", "mechanisms": ["m"]},
+                            {"mechanism_group_id": 1, "community_id": 3,
+                             "focus": "liquidity", "mechanisms": ["l"]}])
+    monkeypatch.setattr(
+        "quant_fund_agent.knowledge.graph_store.KnowledgeGraph.load",
+        staticmethod(lambda *a, **k: object()))
+
+    cfg = EvolutionRunConfig(n_mechanism_groups=8, retrieval="graphrag",
+                             mechanism_groups_mode="max", demes_per_group=2)
+    loop = EvolutionLoop(cfg, data_context="ctx", fields=["close"])
+    assert loop.cfg.n_mechanism_groups == 2
+    assert len(loop.controller.islands) == 2 * 2
+    assert [s["focus"] for s in loop.mechanism_groups] == ["momentum", "liquidity"]
+
+
+def test_max_mode_with_zero_usable_groups_still_fails_loudly(monkeypatch):
+    import quant_fund_agent.knowledge.graph_query as gq
+
+    monkeypatch.setattr(gq, "mechanism_group_specs",
+                        lambda graph, n, fields: [
+                            {"mechanism_group_id": 0, "community_id": None,
+                             "focus": "", "mechanisms": []}])
+    monkeypatch.setattr(
+        "quant_fund_agent.knowledge.graph_store.KnowledgeGraph.load",
+        staticmethod(lambda *a, **k: object()))
+
+    cfg = EvolutionRunConfig(n_mechanism_groups=8, retrieval="graphrag",
+                             mechanism_groups_mode="max")
+    with pytest.raises(ValueError, match="no usable mechanism groups"):
+        resolve_mechanism_groups(cfg, ["close"])
+
+
 def test_legacy_islands_alias_means_demes_per_group():
     """Old configs/checkpoints said ``n_islands``; it must map to the lower level."""
     assert EvolutionRunConfig(n_islands=4).effective_demes_per_group == 4

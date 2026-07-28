@@ -161,13 +161,22 @@ stage, and (E) the deliverables (results + walkthrough notebook).
 | B12 | Ablation orchestrator + matrix plan (preflight: forward-reserve, mask density, graph presence, 1-call provider probes) | `run_ablation_matrix.py`, `matrix/final_matrix.yaml` | **DONE** |
 | B13 | Walkthrough notebook scaffold (28 cells; renders transcripts, gen_quality, prequential, drift, cost report) | `notebooks/final_run_walkthrough.ipynb` | **DONE** (scaffold; execute against the D3 smoke run) |
 | B14 | Fixed statistically-broken curation test (noise unscaled vs 1% returns) | `tests/test_research_eval_curation.py` | **DONE** |
+| B15 | `--mechanism-groups-mode max` (the group count is a hard UPPER limit; the run shrinks to however many usable graph communities exist) | `evolution/loop.py`, `run_factor_evolution.py` | **DONE** |
+| B16 | Orchestrator per-entrypoint defaults (`gp_defaults`/`oneshot_defaults` — evolution flags no longer leak into GP/oneshot argv and crash them), GP `--config` flag fix, preflight `load_panel` call fix; `--n-tickers 0` = full universe now also honoured by `run_gp_factor_mining.py`, `run_factor_research.py`, `run_evolution_timing.py` (0 used to slice the universe empty); plan-vs-argparse guard test | `run_ablation_matrix.py`, `matrix/final_matrix.yaml`, `tests/test_final_matrix_plan.py` | **DONE** |
+| B17 | Re-embed CLI (runbook step 2 was pseudocode) | `scripts/rebuild_embeddings.py` | **DONE** |
 
 All changes default-off / byte-identical unless flagged, so existing tests stay green.
 
 ## C. Run matrix & budget (estimates)
 
-Per-run shape (evolution arms): `--generations 20 --mechanism-groups 4 --demes-per-group 3
---children-per-deme 4` → 960 children + ~50 seed calls; `--population 16`; archive cap 25/group;
+Per-run shape (evolution arms): `--generations 20 --mechanism-groups 8
+--mechanism-groups-mode max --demes-per-group 3 --children-per-deme 4` — **8 is a hard upper
+limit, not a demand**: the run uses however many usable mechanism communities the knowledge graph
+actually forms (revised 2026-07-27 pm; all arms share one graph so the resolved count is identical
+across arms). Children/generation = groups × 12, so per-run cost scales with the resolved count —
+at 4 groups ≈ 960 children (the budget table below), at 8 groups ≈ 1920 (≈2× the per-run $ and
+wall-clock; still within credits, but re-check the budget after the graph build and trim
+`--children-per-deme` to 3 if the graph yields 7-8 groups). `--population 16`; archive cap 40/group;
 `--progressive-reveal --reveal-every 2 --test-frac 0.2`; `--curation greedy --selection-deflation on`;
 horizon 6. (~10M in / 1M out tokens debate-on; ~55% of that debate-off.)
 
@@ -247,8 +256,8 @@ timing probe must confirm before launch.** Target ≤ ~4h/run, 2–3 runs in par
 # 1. Harvest the corpus expansion (+~1000 papers, gpt-4o-mini descriptions):
 ./venv/bin/python scripts/populate_papers.py --blocks fundamental,general --max-papers 1200
 # 2. Re-embed with the OpenAI embedder (hash embedder is the current, weak, cache):
-QF_EMBEDDER=openai ./venv/bin/python -c "from quant_fund_agent.knowledge.embed_store import EmbedStore; EmbedStore.build()"
-#    (check the exact build entrypoint signature; ~$5, minutes)
+./venv/bin/python scripts/rebuild_embeddings.py --embedder openai --force
+#    (~$5, minutes; `--embedder hash` dry-runs the plumbing offline for free)
 # 3. Build the knowledge graph (DOES NOT EXIST YET; graphrag arms crash without it):
 ./venv/bin/python scripts/build_knowledge_graph.py --model gpt-4o-mini
 # 4. Preflight (no credits spent beyond 6 probe calls):

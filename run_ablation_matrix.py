@@ -15,7 +15,7 @@ Usage
 The plan file is YAML::
 
     config_file: quant.config.nasdaq100_2010.yaml
-    defaults:                 # merged into every evolution arm's flags
+    defaults:                 # merged into every EVOLUTION arm's flags
       generations: 20
       mechanism-groups: 4
       demes-per-group: 3
@@ -29,6 +29,14 @@ The plan file is YAML::
       archive-cap: 25
       n-tickers: 0
       max-cost-usd: 120
+    gp_defaults:              # merged into every GP arm (gp accepts a much
+      n-tickers: 0            # smaller flag set than the evolution entrypoint,
+      horizon: 6              # so evolution defaults must never leak into it)
+      curation: archive
+      selection-deflation: "on"
+    oneshot_defaults:         # ditto for run_factor_research.py arms
+      n-tickers: 0
+      horizon: 6
     providers:                # env applied per model key
       opus5:  {model: "anthropic.claude-opus-5",  llm-provider: bedrock_converse}
       sol:    {model: "gpt-5.6-sol"}
@@ -87,14 +95,34 @@ def _expand_env(value: str) -> str:
     return os.path.expandvars(value)
 
 
+# Each entrypoint accepts a different flag vocabulary, so each has its own
+# defaults section in the plan — evolution flags leaking into the GP/oneshot
+# argv would be an immediate argparse error.
+_DEFAULTS_KEY = {"evolution": "defaults",
+                 "gp": "gp_defaults",
+                 "oneshot": "oneshot_defaults"}
+
+
+def _emit_flags(argv: list[str], flags: dict) -> None:
+    for key, val in flags.items():
+        flag = f"--{key}"
+        if isinstance(val, bool):
+            if val:
+                argv.append(flag)
+        else:
+            argv += [flag, str(val)]
+
+
 def arm_command(plan: dict, arm: dict) -> tuple[list[str], dict, str]:
     """Return (argv, extra_env, prerun_name) for one arm."""
     name = arm["name"]
     entry = arm.get("entrypoint", "evolution")
+    if entry not in _DEFAULTS_KEY:
+        raise SystemExit(f"unknown entrypoint {entry!r} for arm {name}")
     seed = arm.get("seed", 0)
     env: dict[str, str] = {}
 
-    flags = copy.deepcopy(plan.get("defaults", {}))
+    flags = copy.deepcopy(plan.get(_DEFAULTS_KEY[entry]) or {})
     flags.update(arm.get("flags", {}))
 
     provider_key = arm.get("provider")
@@ -102,7 +130,7 @@ def arm_command(plan: dict, arm: dict) -> tuple[list[str], dict, str]:
     if provider_key is not None:
         prov = plan["providers"][provider_key]
         model = prov.get("model")
-        if prov.get("llm-provider"):
+        if prov.get("llm-provider") and entry != "gp":  # gp has no LLM at all
             flags["llm-provider"] = prov["llm-provider"]
         for k, v in (prov.get("env") or {}).items():
             env[k] = _expand_env(str(v))
@@ -112,27 +140,15 @@ def arm_command(plan: dict, arm: dict) -> tuple[list[str], dict, str]:
                 "--config", plan["config_file"], "--seed", str(seed)]
         if model:
             argv += ["--model", model]
-        for key, val in flags.items():
-            flag = f"--{key}"
-            if isinstance(val, bool):
-                if val:
-                    argv.append(flag)
-            else:
-                argv += [flag, str(val)]
     elif entry == "gp":
         argv = [sys.executable, "run_gp_factor_mining.py", "--name", name,
-                "--config-file", plan["config_file"], "--seed", str(seed)]
-        for key, val in flags.items():
-            argv += [f"--{key}", str(val)] if not isinstance(val, bool) else ([f"--{key}"] if val else [])
-    elif entry == "oneshot":
+                "--config", plan["config_file"], "--seed", str(seed)]
+    else:  # oneshot
         argv = [sys.executable, "run_factor_research.py", "--name", name]
         if model:
             argv += ["--model", model]
         env["QF_CONFIG_FILE"] = plan["config_file"]
-        for key, val in flags.items():
-            argv += [f"--{key}", str(val)] if not isinstance(val, bool) else ([f"--{key}"] if val else [])
-    else:
-        raise SystemExit(f"unknown entrypoint {entry!r} for arm {name}")
+    _emit_flags(argv, flags)
     return argv, env, name
 
 
@@ -155,8 +171,9 @@ def preflight(plan: dict, run_probes: bool = True) -> None:
     if end > dt.date.today() - dt.timedelta(days=2 * 365 - 5):
         raise SystemExit(f"[preflight] FORWARD RESERVE VIOLATED: config end {end} is within 2y of today")
 
-    # 2. membership mask density
-    panel = load_panel(settings.data, fields=["close"])
+    # 2. membership mask density (ambient settings via QF_CONFIG_FILE —
+    # load_panel's first positional is data_dir, NOT a settings object)
+    panel = load_panel(fields=["close"], settings=settings)
     close = panel["close"]
     density = float(close.notna().mean().mean())
     print(f"[preflight] panel {close.shape[0]} bars x {close.shape[1]} tickers, density {density:.3f}")

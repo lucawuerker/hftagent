@@ -10,7 +10,14 @@ config_file: quant.config.nasdaq100_2010.yaml
 
 defaults:
   generations: 20
-  mechanism-groups: 4
+  # 8 is a HARD UPPER LIMIT, not a demand: with mechanism-groups-mode=max the run
+  # uses however many usable mechanism communities the knowledge graph actually
+  # forms (typically fewer). NOTE children/generation = groups x demes x
+  # children-per-deme, so per-run cost scales with the resolved group count —
+  # re-check the budget after the graph is built (all arms share one graph, so
+  # the count is identical across arms and the comparison stays fair).
+  mechanism-groups: 8
+  mechanism-groups-mode: max
   demes-per-group: 3
   children-per-deme: 4
   population: 16
@@ -37,6 +44,29 @@ defaults:
   n-tickers: 0
   horizon: 6
   max-cost-usd: 200
+
+# The GP and oneshot entrypoints accept a much smaller flag vocabulary than
+# run_factor_evolution.py, so each gets its own defaults section — the
+# orchestrator NEVER merges the evolution `defaults` into them. Known L0
+# asymmetries (documented in the plan): no knowledge graph -> 1 group of flat
+# islands, no progressive reveal, no 101-alpha fixed book, no archive cap.
+gp_defaults:
+  n-tickers: 0
+  horizon: 6
+  # NB the arms set generations explicitly — it is PER depth stage (x3 stages)
+  depth-schedule: "3,5,7"
+  islands: 3
+  population: 16
+  children-per-generation: 12
+  marginal-model: lightgbm
+  curation: archive
+  selection-deflation: "on"
+
+oneshot_defaults:
+  n-tickers: 0
+  horizon: 6
+  prediction-horizon-mode: fixed
+  dedup-scope: prerun
 
 providers:
   opus5:   {model: "anthropic.claude-opus-5",   llm-provider: bedrock_converse}

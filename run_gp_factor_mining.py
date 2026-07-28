@@ -123,6 +123,9 @@ def _parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = _parse_args()
+    # 0 / negative --n-tickers = the full universe (n_tickers=None is the
+    # no-cap convention downstream; 0 would slice the universe to nothing).
+    args.n_tickers = args.n_tickers if args.n_tickers > 0 else None
 
     # A data config file must be set before the panel (and settings) load.
     if args.config:

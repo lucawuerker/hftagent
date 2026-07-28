@@ -117,6 +117,9 @@ def _researcher_count(db_path: Path) -> int:
 
 def main() -> None:
     args = _parse_args()
+    # 0 / negative --n-tickers = the full universe (n_tickers=None is the
+    # no-cap convention downstream; 0 would slice the universe to nothing).
+    args.n_tickers = args.n_tickers if args.n_tickers > 0 else None
     if not os.getenv("OPENAI_API_KEY") and (args.llm_provider in (None, "openai")):
         raise SystemExit("Set OPENAI_API_KEY in .env or the environment first.")
 

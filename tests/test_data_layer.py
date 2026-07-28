@@ -39,10 +39,19 @@ def _write_lobster_dir(root: Path, symbols=("AAA", "BBB"), n: int = 24) -> Path:
     return root
 
 
-def test_routed_load_panel_matches_legacy(tmp_path):
+def _isolate_ambient_config(monkeypatch, tmp_path):
+    """Point QF_CONFIG_FILE at a nonexistent file so the repo-root
+    ``quant.config.yaml`` (written by the setup wizard; e.g. provider=yfinance)
+    cannot leak into tests that assert the pristine lobster defaults."""
+    monkeypatch.setenv("QF_CONFIG_FILE", str(tmp_path / "no-such-config.yaml"))
+
+
+def test_routed_load_panel_matches_legacy(tmp_path, monkeypatch):
     from quant_fund_agent.backtesting.data_loader import load_panel as legacy
     from quant_fund_agent.data import load_panel as routed
     from quant_fund_agent.data.panel import SYNTH_DEPS
+
+    _isolate_ambient_config(monkeypatch, tmp_path)
 
     root = _write_lobster_dir(tmp_path / "ticker_data")
     a = legacy(str(root))
@@ -56,19 +65,21 @@ def test_routed_load_panel_matches_legacy(tmp_path):
     pd.testing.assert_frame_equal(b["returns"], a["close"].pct_change())
 
 
-def test_targeted_load_synthesises_and_trims(tmp_path):
+def test_targeted_load_synthesises_and_trims(tmp_path, monkeypatch):
     """Requesting vwap/returns loads their OHLC deps, derives them, trims output."""
     from quant_fund_agent.data import load_panel as routed
 
+    _isolate_ambient_config(monkeypatch, tmp_path)
     root = _write_lobster_dir(tmp_path / "ticker_data")
     panel = routed(str(root), fields=["vwap", "returns", "close"])
     assert set(panel) == {"vwap", "returns", "close"}  # high/low loaded as deps, trimmed out
     pd.testing.assert_frame_equal(panel["returns"], panel["close"].pct_change())
 
 
-def test_settings_env_override(monkeypatch):
+def test_settings_env_override(monkeypatch, tmp_path):
     from quant_fund_agent.config import get_settings
 
+    _isolate_ambient_config(monkeypatch, tmp_path)
     monkeypatch.setenv("DATA_DIR", "/some/where")
     monkeypatch.setenv("ARCHITECT_N_TICKERS", "7")
     s = get_settings()

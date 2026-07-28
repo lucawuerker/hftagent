@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 from pathlib import Path
 
 import pandas as pd
@@ -22,6 +23,29 @@ from quant_fund_agent.schemas import FactorRecord, FactorSource, TradingIdeaCate
 
 TICKER_DATA = Path("ticker_data")
 N_TICKERS = 6
+
+
+@pytest.fixture(autouse=True)
+def _restore_shared_panel_state():
+    """``load_panel_cached`` deliberately mutates process-wide state so every
+    comparison track shares one panel: the modeling service's ``_PANEL_CACHE`` /
+    ``_SIGNAL_CACHE`` / ``DATA_DIR`` globals plus the ``DATA_DIR`` /
+    ``ARCHITECT_N_TICKERS`` / ``QF_DATA_TICKERS`` env vars.  Left in place, the
+    tiny synthetic panel + ticker pin poison later test modules (e.g.
+    ``test_mcp_modeling``'s in-process fit loads a panel restricted to the fake
+    tickers and finds zero usable samples).  Snapshot and restore all of it."""
+    from quant_fund_agent.modeling import service
+
+    env_keys = ("DATA_DIR", "ARCHITECT_N_TICKERS", "QF_DATA_TICKERS")
+    saved_env = {k: os.environ.get(k) for k in env_keys}
+    saved = (service._PANEL_CACHE, service._SIGNAL_CACHE, service.DATA_DIR)
+    yield
+    service._PANEL_CACHE, service._SIGNAL_CACHE, service.DATA_DIR = saved
+    for k, v in saved_env.items():
+        if v is None:
+            os.environ.pop(k, None)
+        else:
+            os.environ[k] = v
 
 
 def _seed_ids_with_ic(n: int) -> list[str]:

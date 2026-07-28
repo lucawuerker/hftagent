@@ -110,6 +110,12 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--population", type=int, default=16, help="Per-deme size.")
     p.add_argument("--mechanism-groups", type=int, default=5,
                    help="Reserved knowledge-graph mechanism communities.")
+    p.add_argument("--mechanism-groups-mode", choices=["exact", "max"],
+                   default="exact",
+                   help="'exact' (legacy): the graph must yield exactly "
+                        "--mechanism-groups usable groups or the run aborts. "
+                        "'max': --mechanism-groups is a hard UPPER limit — the "
+                        "run uses however many usable groups the graph forms.")
     p.add_argument("--demes-per-group", type=int, default=3,
                    help="Classic independently evolving islands within each group.")
     p.add_argument("--children-per-deme", type=int, default=4,
@@ -365,6 +371,7 @@ def main() -> None:
         children_per_deme=(None if args.children_per_gen is not None
                            else args.children_per_deme),
         n_mechanism_groups=args.mechanism_groups,
+        mechanism_groups_mode=args.mechanism_groups_mode,
         demes_per_group=(args.islands if args.islands is not None
                          else args.demes_per_group),
         migration_every=args.migration_every,

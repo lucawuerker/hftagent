@@ -88,6 +88,12 @@ class EvolutionRunConfig:
     children_per_generation: int = 8   # candidates proposed per generation
     children_per_deme: int | None = None  # grouped mode; None preserves legacy total
     n_mechanism_groups: int = 1
+    # "exact": the graph must yield exactly n_mechanism_groups usable groups (raise
+    # otherwise — legacy behaviour).  "max": n_mechanism_groups is a HARD UPPER
+    # LIMIT; the run uses however many usable groups the knowledge graph actually
+    # forms (>=1), and the config is shrunk to the resolved count before the
+    # controller is built.
+    mechanism_groups_mode: str = "exact"
     demes_per_group: int = 1
     # Legacy single-layer alias.  If set above 1 while grouped fields are left at
     # defaults, it is interpreted as demes_per_group.
@@ -232,6 +238,20 @@ def resolve_mechanism_groups(
 
     graph = KnowledgeGraph.load()
     specs = mechanism_group_specs(graph, n_groups, list(fields or []))
+    if getattr(cfg, "mechanism_groups_mode", "exact") == "max":
+        # n_mechanism_groups is an upper limit: keep every usable (focused)
+        # group the graph formed, renumbered contiguously.
+        usable = [s for s in specs if s.get("focus")][:n_groups]
+        if not usable:
+            raise ValueError(
+                "knowledge graph formed no usable mechanism groups "
+                "(is the graph built and non-trivial?)")
+        for k, spec in enumerate(usable):
+            spec["mechanism_group_id"] = k
+        if len(usable) < n_groups:
+            log.info("mechanism_groups_mode=max: graph yields %d usable "
+                     "group(s) (upper limit %d)", len(usable), n_groups)
+        return usable
     if len(specs) != n_groups or any(not s.get("focus") for s in specs):
         raise ValueError(
             f"knowledge graph could form only {len(specs)} usable mechanism groups "
@@ -621,6 +641,17 @@ class EvolutionLoop:
                  data_context: str | None = None,
                  fields: list[str] | None = None) -> None:
         self.cfg = cfg
+        # "max" group mode: consult the knowledge graph BEFORE the controller is
+        # built and shrink the config to the resolved group count, so the island
+        # structure, cross-group operators and seeding all agree with the graph.
+        self._resolved_groups: list[dict[str, Any]] | None = None
+        if (getattr(cfg, "mechanism_groups_mode", "exact") == "max"
+                and cfg.n_mechanism_groups > 1):
+            self._resolved_groups = resolve_mechanism_groups(cfg, fields)
+            if len(self._resolved_groups) != cfg.n_mechanism_groups:
+                cfg = replace(cfg,
+                              n_mechanism_groups=len(self._resolved_groups))
+                self.cfg = cfg
         self.rng = np.random.default_rng(cfg.seed)
         demes_per_group = cfg.effective_demes_per_group
         controller_kwargs: dict[str, Any] = dict(
@@ -643,7 +674,7 @@ class EvolutionLoop:
         # without the sink still works.
         if hasattr(self.controller, "event_sink"):
             self.controller.event_sink = self._lineage_event
-        self.mechanism_groups: list[dict[str, Any]] = [
+        self.mechanism_groups: list[dict[str, Any]] = self._resolved_groups or [
             {"mechanism_group_id": g, "community_id": None,
              "focus": "", "mechanisms": []}
             for g in range(max(1, cfg.n_mechanism_groups))
@@ -1651,7 +1682,8 @@ class EvolutionLoop:
                     program.mechanism_group_id = group_id
                     grouped_programs.setdefault(group_id, []).append(program)
             else:
-                self.mechanism_groups = resolve_mechanism_groups(cfg, self.fields)
+                self.mechanism_groups = (self._resolved_groups
+                                         or resolve_mechanism_groups(cfg, self.fields))
                 per_group_cfg = replace(
                     cfg, n_seed_ideas=cfg.effective_seed_ideas_per_group)
                 for spec in self.mechanism_groups:
