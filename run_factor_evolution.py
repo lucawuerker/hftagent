@@ -59,13 +59,18 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--config-name", default=None,
                    help="Config scope under data/workspaces/ (default: derived "
                         "from the active config).")
+    p.add_argument("--config", "--config-file", dest="config", default=None,
+                   help="Path to a quant.config.<x>.yaml (sets QF_CONFIG_FILE "
+                        "before settings/panel load, like run_backtest.py).")
     p.add_argument("--model", default=None,
                    help="Research LLM model id (sets FACTOR_RESEARCH_LLM_MODEL).")
     p.add_argument("--llm-provider", default=None)
     p.add_argument("--reset", action="store_true",
                    help="Purge this prerun's factors + evolution state first.")
     p.add_argument("--data-dir", default=os.getenv("DATA_DIR", "ticker_data"))
-    p.add_argument("--n-tickers", type=int, default=15)
+    p.add_argument("--n-tickers", type=int, default=0,
+                   help="Number of tickers to load; 0 (default) or negative = "
+                        "the full universe.")
     p.add_argument("--reference-book", default=None,
                    help="Prebook file of reference factors (e.g. the ~86 base "
                         "factors) for the novelty DIAG: the candidate's max-|corr| "
@@ -75,10 +80,25 @@ def _parse_args() -> argparse.Namespace:
                         "accumulate survivors + per-mechanism attempt/survival tallies "
                         "across runs; steer next-run seeding away from exhausted "
                         "mechanisms and feed the teacher channel.")
+    p.add_argument("--memory-key", default=None,
+                   help="Override the experience-memory store key (default: the data "
+                        "config name). Use a per-arm key in an ablation matrix so "
+                        "memory-on arms never cross-contaminate through the shared "
+                        "config-level store.")
     p.add_argument("--fixed-book", default=None,
                    help="JSON prebook to condition SINGLE-mode fitness on without "
                         "inserting those factors into the archive, e.g. a Lasso "
                         "prebook built by scripts/build_lasso_prebook.py.")
+    p.add_argument("--archive-cap", type=int, default=None,
+                   help="Per-mechanism-group Pareto archive cap: when the front-1 "
+                        "archive exceeds this, cull by crowding distance (best-"
+                        "marginal member always kept; evictions logged to lineage). "
+                        "Default: uncapped (legacy behaviour).")
+    p.add_argument("--creative-frac", type=float, default=0.0,
+                   help="Fraction of llm_semantic children (and of seed ideas per "
+                        "group) generated in creative mode: an explicitly novel, "
+                        "paper-independent hypothesis drawing on maths/statistics/"
+                        "signal-processing/behavioural reasoning. Default 0 = off.")
 
     # ── search shape ──
     p.add_argument("--evolution-unit", choices=["single", "set"], default="single",
@@ -135,6 +155,19 @@ def _parse_args() -> argparse.Namespace:
                    help="Model for the skeptic/moderator (default: --model).")
     p.add_argument("--codegen-model", default=None,
                    help="Model for codegen (default: --model).")
+    p.add_argument("--hypothesis-provider", default=None,
+                   help="Provider for the Hypothesis role (sets "
+                        "HYPOTHESIS_LLM_PROVIDER; default: inferred).")
+    p.add_argument("--debate-provider", default=None,
+                   help="Provider for the Debate role (sets "
+                        "DEBATE_LLM_PROVIDER; default: inferred).")
+    p.add_argument("--codegen-provider", default=None,
+                   help="Provider for the Codegen role (sets "
+                        "CODEGEN_LLM_PROVIDER; default: inferred).")
+    p.add_argument("--max-cost-usd", type=float, default=None,
+                   help="Hard ceiling on cumulative LLM spend (sets "
+                        "QF_MAX_LLM_COST_USD; the run aborts with "
+                        "LLMBudgetExceeded when crossed).")
 
     # ── evaluation / overfit control ──
     p.add_argument("--horizon", type=int, default=6,
@@ -236,17 +269,30 @@ def _parse_args() -> argparse.Namespace:
 def main() -> None:
     args = _parse_args()
 
+    # A data config file must be set before get_settings()/the panel load.
+    if args.config:
+        os.environ["QF_CONFIG_FILE"] = args.config
     if args.model:
         os.environ["FACTOR_RESEARCH_LLM_MODEL"] = args.model
     if args.llm_provider:
         os.environ["FACTOR_RESEARCH_LLM_PROVIDER"] = args.llm_provider
-    # Per-role model overrides (P3): tokens go where they matter.
+    # Per-role model/provider overrides (P3): tokens go where they matter.
     for role, value in (("HYPOTHESIS", args.hypothesis_model),
                         ("DEBATE", args.debate_model),
                         ("CODEGEN", args.codegen_model)):
         if value:
             os.environ[f"{role}_LLM_MODEL"] = value
+    for role, value in (("HYPOTHESIS", args.hypothesis_provider),
+                        ("DEBATE", args.debate_provider),
+                        ("CODEGEN", args.codegen_provider)):
+        if value:
+            os.environ[f"{role}_LLM_PROVIDER"] = value
+    if args.max_cost_usd is not None:
+        os.environ["QF_MAX_LLM_COST_USD"] = str(args.max_cost_usd)
     os.environ["DATA_DIR"] = args.data_dir
+    # 0 / negative --n-tickers = the full universe (n_tickers=None is the
+    # loader's "all tickers" sentinel, supported end-to-end).
+    n_tickers = args.n_tickers if args.n_tickers > 0 else None
 
     from quant_fund_agent.agents.factor_research.evolution.loop import (
         EvolutionLoop,
@@ -254,9 +300,36 @@ def main() -> None:
         persist_archive,
     )
     from quant_fund_agent.config import default_config_name, get_settings
-    from quant_fund_agent.llm import resolve_research_model, resolve_research_provider
+    from quant_fund_agent.llm import (
+        infer_provider,
+        resolve_research_model,
+        resolve_research_provider,
+        usage_summary,
+    )
     from quant_fund_agent.workspace import Scope
     from quant_fund_agent.research_eval.prebook import book_entries, load_prebook
+
+    # ── credential sanity: hard error only for the OpenAI key (mirrors
+    #    run_factor_research.py); non-OpenAI providers (e.g. Bedrock via the
+    #    AWS credential chain) only warn because their auth isn't a single env.
+    _providers_in_use = {
+        resolve_research_provider(resolve_research_model()),
+    }
+    for _role in ("HYPOTHESIS", "DEBATE", "CODEGEN"):
+        _role_model = os.getenv(f"{_role}_LLM_MODEL")
+        _providers_in_use.add(
+            os.getenv(f"{_role}_LLM_PROVIDER")
+            or (infer_provider(_role_model) if _role_model
+                else resolve_research_provider(resolve_research_model())))
+    if ({None, "openai"} & _providers_in_use) and not os.getenv("OPENAI_API_KEY"):
+        raise SystemExit("Set OPENAI_API_KEY in .env or the environment first.")
+    _non_openai = {p for p in _providers_in_use if p not in (None, "openai")}
+    if _non_openai:
+        log.warning(
+            "Non-OpenAI provider(s) in use (%s): credentials can't be "
+            "validated up front (Bedrock uses the AWS credential chain; other "
+            "providers read their own API-key env). The first LLM call will "
+            "fail loudly if they are missing.", ", ".join(sorted(_non_openai)))
 
     settings = get_settings()
     config_name = args.config_name or default_config_name(settings.data)
@@ -330,11 +403,14 @@ def main() -> None:
         n_keep=args.n_keep,
         selection_deflation=args.selection_deflation,
         data_dir=args.data_dir,
-        n_tickers=args.n_tickers,
+        n_tickers=n_tickers,
         fixed_book=fixed_book,
         reference_book=reference_book,
         memory=args.memory,
         memory_config=config_name,
+        memory_key=args.memory_key,
+        archive_cap_per_group=args.archive_cap,
+        creative_frac=args.creative_frac,
         out_dir=str(scope.dir / "evolution"),
     )
 
@@ -367,7 +443,7 @@ def main() -> None:
     persisted = persist_archive(
         loop.controller, session_id=session_id,
         target_horizon=args.horizon, cutoff_date=args.cutoff_date,
-        data_dir=args.data_dir, n_tickers=args.n_tickers,
+        data_dir=args.data_dir, n_tickers=n_tickers,
         curation=args.curation, n_keep=args.n_keep,
         is_frac=args.is_frac, val_frac=args.val_frac, fields=loop.fields,
         marginal_model=args.marginal_model,
@@ -376,10 +452,20 @@ def main() -> None:
     summary["curation"] = args.curation
     summary["selection_deflation"] = args.selection_deflation
 
+    # Resolved per-role models/providers + metered usage for provenance.
+    llm_roles = {}
+    for role in ("hypothesis", "debate", "codegen"):
+        role_model = os.getenv(f"{role.upper()}_LLM_MODEL") or model
+        llm_roles[role] = {
+            "model": role_model,
+            "provider": (os.getenv(f"{role.upper()}_LLM_PROVIDER")
+                         or infer_provider(role_model) or provider),
+        }
     scope.write_manifest(
         llm_model=model, llm_provider=provider, engine="evolution",
         generations=summary["generations"], n_trials=summary["n_trials"],
         n_factors=len(persisted["kept_factor_ids"]),
+        llm_roles=llm_roles, llm_usage=usage_summary(),
     )
 
     print("\n" + "=" * 80)

@@ -318,6 +318,35 @@ def test_progressive_loop_advances_frontier_and_logs_prequential(prog_loop):
     starts_ends = {(r["start"], r["end"]) for r in rows}
     assert (idx[192].isoformat(), idx[288].isoformat()) in starts_ends
     assert (idx[288].isoformat(), idx[384].isoformat()) in starts_ends
+    # reveal stamps: position among the reveal generations + the new frontier
+    assert [r["reveal_index"] for r in rows] == [0, 1]
+    for r in rows:
+        assert r["frontier_ts"] == r["end"]
+        assert isinstance(r["visible_end"], int)
+    assert [r["visible_end"] for r in rows] == [288, 384]
+
+
+def test_prequential_rows_are_deduped_on_rewrite(prog_loop):
+    """A generation that already has a prequential row is never written twice
+    (the crashed-then-resumed run re-enters _advance_reveal for the same gen)."""
+    make, tmp_path = prog_loop
+    loop = make()
+    loop.run(initial_programs=_seeds())
+    preq = tmp_path / "evolution" / "prequential.jsonl"
+    n_rows = len(preq.read_text().splitlines())
+
+    idx = pd.date_range("2024-01-01", periods=N_BARS, freq="D")
+    # same-instance retry is skipped …
+    loop._prequential_score(1, idx[192].isoformat(), idx[288].isoformat())
+    assert len(preq.read_text().splitlines()) == n_rows
+    # … and so is a fresh instance that lazily reloads the dedup set from disk
+    loop._prequential_done = None
+    loop._prequential_score(2, idx[288].isoformat(), idx[384].isoformat())
+    assert len(preq.read_text().splitlines()) == n_rows
+    # a genuinely new generation still appends
+    loop._prequential_score(99, idx[288].isoformat(), idx[384].isoformat())
+    rows = [json.loads(l) for l in preq.read_text().splitlines()]
+    assert len(rows) == n_rows + 1 and rows[-1]["generation"] == 99
 
 
 def test_rescore_does_not_bill_ntrials_and_stamps_window(prog_loop):
@@ -331,6 +360,11 @@ def test_rescore_does_not_bill_ntrials_and_stamps_window(prog_loop):
     # re-scores happened on the reveal generations …
     assert rescore_rows
     assert all("objective_before" in r and "objective_after" in r for r in rescore_rows)
+    # … each carrying the reveal stamps + a diagnostics sub-dict
+    for r in rescore_rows:
+        assert r["reveal_index"] is not None
+        assert r["scored_through"] is not None
+        assert {"val_ic", "marginal_value_raw", "coverage"} <= set(r["diagnostics"])
     # … but did NOT increment the multiple-testing budget (one trial per billed insert)
     assert loop.controller.n_trials == len(billed_rows)
     # every scored fitness records the window it was measured through
@@ -338,6 +372,28 @@ def test_rescore_does_not_bill_ntrials_and_stamps_window(prog_loop):
     for eg in loop.controller.archive:
         assert eg.fitness.diagnostics.get("scored_through") is not None
         assert eg.fitness.diagnostics.get("window_generation") is not None
+
+
+def test_failed_rescore_emits_visible_lineage_row(prog_loop):
+    """A rescore that errors out appends a rescore_failed row (stale fitness kept)."""
+    make, _ = prog_loop
+    loop = make()
+    loop.run(initial_programs=_seeds())
+    assert loop.controller.archive
+
+    fitness_before = {eg.genome.genome_id: eg.fitness.objective.to_dict()
+                      for eg in loop.controller.archive}
+    loop._score_program = lambda *a, **kw: {"ok": False, "error": "boom"}
+    loop._score_set = lambda *a, **kw: {"ok": False, "error": "boom"}
+    loop._rescore_archive_on_window(2)
+
+    failed = [r for r in loop.controller.lineage
+              if r.get("event") == "rescore_failed"]
+    assert failed and all(r["error"] == "boom" for r in failed)
+    assert {"generation", "genome_id", "error"} <= set(failed[0])
+    # behaviour otherwise unchanged: stale fitness kept, members not dropped
+    for eg in loop.controller.archive:
+        assert eg.fitness.objective.to_dict() == fitness_before[eg.genome.genome_id]
 
 
 def test_gate_failer_fingerprint_is_retriable_once():
@@ -437,6 +493,12 @@ def test_resume_recomputes_frontier_and_continues(prog_loop):
     assert reloaded.generation == 1                 # last clean checkpoint
     assert isinstance(reloaded._failed_fingerprints, dict)  # round-trips
 
+    # the last clean checkpoint's lineage history (what resume must preserve)
+    lineage_at_crash = [json.loads(l) for l in
+                        (tmp_path / "evolution" / "lineage.jsonl")
+                        .read_text().splitlines()]
+    assert lineage_at_crash
+
     # resume from the loaded controller with the SAME generations → guard must pass
     resumed = make(generations=3)
     resumed.controller = reloaded
@@ -446,3 +508,23 @@ def test_resume_recomputes_frontier_and_continues(prog_loop):
     # the recomputed schedule matches the crashed run's (pure fn of config + index)
     assert [w.val_end_ts for w in resumed._schedule] == \
         [w.val_end_ts for w in first._schedule]
+
+    # lineage history was reloaded, not truncated: the pre-crash rows are still
+    # the head of the rewritten file (incl. the generation-0 seed rows)
+    lineage_after = [json.loads(l) for l in
+                     (tmp_path / "evolution" / "lineage.jsonl")
+                     .read_text().splitlines()]
+    assert lineage_after[:len(lineage_at_crash)] == lineage_at_crash
+    assert len(lineage_after) > len(lineage_at_crash)
+    assert any("event" not in r and r["generation"] == 0 and r["operator"] == "seed"
+               for r in lineage_after)
+
+    # prequential + gen_quality rows are deduped across the crash/resume boundary
+    preq_gens = [json.loads(l)["generation"] for l in
+                 (tmp_path / "evolution" / "prequential.jsonl")
+                 .read_text().splitlines()]
+    assert preq_gens == sorted(set(preq_gens))
+    gq_gens = [json.loads(l)["generation"] for l in
+               (tmp_path / "evolution" / "gen_quality.jsonl")
+               .read_text().splitlines()]
+    assert gq_gens == sorted(set(gq_gens))

@@ -61,6 +61,20 @@ from quant_fund_agent.agents.factor_research.evolution.mutation import (
 from quant_fund_agent.agents.factor_research.evolution.reflection import mutation_brief
 from quant_fund_agent.research_eval.fitness import FitnessResult
 
+# LLM cost metering + per-role attribution (defensive: no-op fallbacks so the
+# loop keeps working against an older quant_fund_agent.llm without the meter).
+try:
+    from quant_fund_agent.llm import set_llm_role, usage_summary
+except ImportError:  # pragma: no cover — older llm.py without the meter
+    import contextlib
+
+    def usage_summary() -> dict:
+        return {}
+
+    @contextlib.contextmanager
+    def set_llm_role(role: str):
+        yield
+
 log = logging.getLogger("evolution.loop")
 
 
@@ -82,12 +96,22 @@ class EvolutionRunConfig:
     seed: int = 0
     unit: str = "single"               # "single" | "set"
     set_size: int = 3                  # initial members per SET genome
+    # Optional hard cap on each mechanism group's Pareto archive (threaded into
+    # ControllerConfig).  None (default) keeps the unbounded behaviour.
+    archive_cap_per_group: int | None = None
 
     # ── operator mix (probabilities; renormalised) ──
     p_llm_semantic: float = 0.6
     p_crossover: float = 0.25
     p_jitter: float = 0.15
     p_cross_group: float = 0.10
+    # With this probability an ``llm_semantic`` child is generated in "creative
+    # mode" (a clearly-marked prompt section asking for a genuinely novel
+    # mechanism, not derived from the parent or any paper).  At seeding,
+    # ``round(creative_frac * n_ideas)`` ideas per group come from the
+    # knowledge-only brainstorm path with the same novelty section appended.
+    # 0.0 (default) is byte-identical to the historical behaviour.
+    creative_frac: float = 0.0
 
     # ── seeding (generation 0, via the existing brainstorm/codegen path) ──
     n_seed_ideas: int = 8
@@ -165,6 +189,10 @@ class EvolutionRunConfig:
     # ── cross-run experience memory (P6, WS5) — per-config, opt-in ──
     memory: bool = False               # accumulate survivors + attempt tallies across runs
     memory_config: str | None = None   # config name → memory file path (per-config keyed)
+    # Per-arm memory keying: when set, the experience store is keyed by this
+    # string instead of the config-derived key (so ablation arms don't share
+    # one memory).  None (default) keeps the config-derived behaviour.
+    memory_key: str | None = None
 
     # ── output ──
     out_dir: str = "data/evolution"    # overridden by the entrypoint to the scope dir
@@ -298,6 +326,12 @@ def seed_programs(cfg: EvolutionRunConfig, data_context: str,
     graph = None           # GraphRAG: set when the knowledge graph is in play
     mech_by_fid: dict[str, str] = {}
 
+    # --creative-frac: reserve a slice of the seed ideas for the knowledge-only
+    # brainstorm path with the novelty section appended (0 → byte-identical).
+    n_creative = (int(round(cfg.creative_frac * cfg.n_seed_ideas))
+                  if cfg.creative_frac > 0 else 0)
+    n_regular = max(0, cfg.n_seed_ideas - n_creative)
+
     if cfg.retrieval in ("rag", "graphrag"):
         # Retrieval-grounded seeding: embedding retrieval picks the papers
         # (date-gated) and the cardinality mode shapes the call(s); citations
@@ -335,9 +369,22 @@ def seed_programs(cfg: EvolutionRunConfig, data_context: str,
                 graph = None
 
         store = EmbedStore()
-        raw_ideas = retrieve_and_brainstorm(
-            brainstorm_llm, store,
-            n_ideas=cfg.n_seed_ideas, known_ids=known,
+        # Scope-filtered retrieval: when the run's field scope carries no
+        # fundamental / estimate / event field, restrict retrieval to papers
+        # harvested under price/general data scopes.
+        allowed_scopes = None
+        try:
+            from quant_fund_agent.data.tiers import TIERS
+
+            non_price = (TIERS.get("fundamental", frozenset())
+                         | TIERS.get("estimates", frozenset())
+                         | TIERS.get("events", frozenset()))
+            if fields is not None and not any(f in non_price for f in fields):
+                allowed_scopes = {"price", "general"}
+        except Exception as e:  # noqa: BLE001 — never let scoping break seeding
+            log.warning("could not resolve retrieval data scopes (%s)", e)
+        rb_kwargs: dict[str, Any] = dict(
+            n_ideas=n_regular, known_ids=known,
             data_context=data_context,
             cardinality=cfg.retrieval_cardinality,
             k_papers=max(cfg.rag_k, cfg.seed_papers or 0) or 4,
@@ -345,6 +392,16 @@ def seed_programs(cfg: EvolutionRunConfig, data_context: str,
             focus=focus, gaps=gap_names,
             mechanism_tags=gap_names if graph is not None else None,
         )
+        if n_regular > 0:
+            with set_llm_role("brainstorm"):
+                try:
+                    raw_ideas = retrieve_and_brainstorm(
+                        brainstorm_llm, store,
+                        allowed_scopes=allowed_scopes, **rb_kwargs)
+                except TypeError:
+                    # older retrieval signature without ``allowed_scopes``
+                    raw_ideas = retrieve_and_brainstorm(
+                        brainstorm_llm, store, **rb_kwargs)
         mech_by_fid = {
             (raw.get("factor_id") or "").strip().lower(): str(raw["mechanism"])
             for raw in raw_ideas
@@ -360,16 +417,31 @@ def seed_programs(cfg: EvolutionRunConfig, data_context: str,
             except Exception as e:  # noqa: BLE001 — degrade to knowledge-only
                 log.warning("seed paper load failed (%s) — knowledge-only brainstorm", e)
 
-        if papers:
-            per_paper = max(1, -(-cfg.n_seed_ideas // len(papers)))  # ceil division
-            for paper in papers:
-                if len(raw_ideas) >= cfg.n_seed_ideas:
-                    break
-                raw_ideas.extend(_brainstorm_one(
-                    brainstorm_llm, paper, per_paper, known, session_id, data_context))
-        else:
-            raw_ideas = _brainstorm_one(
-                brainstorm_llm, None, cfg.n_seed_ideas, known, session_id, data_context)
+        with set_llm_role("brainstorm"):
+            if papers and n_regular > 0:
+                per_paper = max(1, -(-n_regular // len(papers)))  # ceil division
+                for paper in papers:
+                    if len(raw_ideas) >= n_regular:
+                        break
+                    raw_ideas.extend(_brainstorm_one(
+                        brainstorm_llm, paper, per_paper, known, session_id,
+                        data_context))
+            elif n_regular > 0:
+                raw_ideas = _brainstorm_one(
+                    brainstorm_llm, None, n_regular, known, session_id,
+                    data_context)
+
+    if n_creative > 0:
+        # Creative slice: knowledge-only brainstorm with the novelty section.
+        from quant_fund_agent.agents.factor_research.evolution.mutation import (
+            CREATIVE_NOVELTY_SECTION,
+        )
+
+        creative_context = f"{data_context}\n\n{CREATIVE_NOVELTY_SECTION}"
+        with set_llm_role("brainstorm"):
+            raw_ideas = list(raw_ideas) + _brainstorm_one(
+                brainstorm_llm, None, n_creative, known,
+                f"{session_id}-creative", creative_context)
 
     ideas: list[FactorIdea] = []
     seen: set[str] = set()
@@ -392,8 +464,10 @@ def seed_programs(cfg: EvolutionRunConfig, data_context: str,
         debate_llm = _get_llm(temperature=0.3, role="debate")
         surviving: list[FactorIdea] = []
         for idea in ideas:
-            verdict, final, _ = run_debate(
-                debate_llm, _idea_payload(idea), data_context=data_context, book=[])
+            with set_llm_role("debate"):
+                verdict, final, _ = run_debate(
+                    debate_llm, _idea_payload(idea), data_context=data_context,
+                    book=[])
             if verdict == "reject":
                 log.info("[seed:%s] rejected in debate", idea.factor_id)
                 continue
@@ -407,9 +481,10 @@ def seed_programs(cfg: EvolutionRunConfig, data_context: str,
     programs = []
     fixed_horizon = cfg.target_horizon if cfg.force_prediction_horizon else None
     for idea in ideas:
-        prog = _codegen_program(
-            codegen_llm, idea, data_context,
-            expected_prediction_horizon=fixed_horizon)
+        with set_llm_role("codegen"):
+            prog = _codegen_program(
+                codegen_llm, idea, data_context,
+                expected_prediction_horizon=fixed_horizon)
         if prog is not None:
             prog.mechanism_group_id = group_id
             prog.mechanism = mech_by_fid.get(prog.factor_id, "")
@@ -531,13 +606,26 @@ class EvolutionLoop:
         self.cfg = cfg
         self.rng = np.random.default_rng(cfg.seed)
         demes_per_group = cfg.effective_demes_per_group
-        self.controller = EvolutionController(ControllerConfig(
+        controller_kwargs: dict[str, Any] = dict(
             population_size=cfg.population_size,
             n_mechanism_groups=cfg.n_mechanism_groups,
             demes_per_group=demes_per_group,
             migration_every=cfg.migration_every,
             seed=cfg.seed,
-        ))
+        )
+        try:
+            self.controller = EvolutionController(ControllerConfig(
+                archive_cap_per_group=cfg.archive_cap_per_group,
+                **controller_kwargs))
+        except TypeError:
+            # older ControllerConfig without the cap field
+            self.controller = EvolutionController(
+                ControllerConfig(**controller_kwargs))
+        # Archive-eviction events flow into the run lineage (the same list
+        # _checkpoint writes to lineage.jsonl); guarded so an older controller
+        # without the sink still works.
+        if hasattr(self.controller, "event_sink"):
+            self.controller.event_sink = self._lineage_event
         self.mechanism_groups: list[dict[str, Any]] = [
             {"mechanism_group_id": g, "community_id": None,
              "focus": "", "mechanisms": []}
@@ -559,8 +647,10 @@ class EvolutionLoop:
         self._mech_by_genome: dict[str, str] = {}   # genome_id → mechanism (child inherit)
         if cfg.memory:
             from quant_fund_agent.knowledge import experience
+            # Per-arm keying: an explicit memory_key wins over the config-derived
+            # key so ablation arms can keep separate experience stores.
             self._memory_path = experience.memory_graph_path(
-                cfg.memory_config or "default")
+                cfg.memory_key or cfg.memory_config or "default")
             self.memory = experience.load_or_new(self._memory_path)
             self._exhausted_mechs = experience.exhausted_mechanisms(self.memory)
             self._memory_brief = experience.memory_summary(self.memory)
@@ -579,6 +669,31 @@ class EvolutionLoop:
         # progressive reveal (default OFF): the per-generation frontier schedule
         self._schedule: list[Any] | None = None
         self._window: Any | None = None
+        # resume-dedup sets for the appended-to run artifacts (lazily loaded from
+        # the existing files, so a resumed run never duplicates a row)
+        self._prequential_done: set[int] | None = None
+        self._gen_quality_done: set[int] | None = None
+
+    def _lineage_event(self, event: dict) -> None:
+        """Controller event sink: archive events land in the run lineage.
+
+        No timestamp is added — the lineage stays deterministic given the seed.
+        """
+        self.controller.lineage.append(dict(event))
+
+    @staticmethod
+    def _jsonl_generations(path: Path) -> set[int]:
+        """The ``generation`` values already recorded in an appended jsonl file."""
+        done: set[int] = set()
+        if path.exists():
+            for line in path.read_text().splitlines():
+                try:
+                    g = json.loads(line).get("generation")
+                except (json.JSONDecodeError, AttributeError):
+                    continue
+                if g is not None:
+                    done.add(int(g))
+        return done
 
     @staticmethod
     def _dedupe_fixed_book(book: Sequence[dict[str, Any]] | None) -> list[dict[str, Any]]:
@@ -836,6 +951,14 @@ class EvolutionLoop:
         from quant_fund_agent.mcp import research_client
 
         self.out_dir.mkdir(parents=True, exist_ok=True)
+        # Resume-dedup: one row per generation, ever (read the file once).
+        if self._prequential_done is None:
+            self._prequential_done = self._jsonl_generations(
+                self.out_dir / "prequential.jsonl")
+        if gen in self._prequential_done:
+            log.info("prequential row for generation %d already recorded — skipped",
+                     gen)
+            return
         book = self.controller.archive_programs()
         if not book:
             row: dict[str, Any] = {"generation": gen, "start": old_ts, "end": new_ts,
@@ -857,8 +980,23 @@ class EvolutionLoop:
             else:
                 row = {"generation": gen, "start": old_ts, "end": new_ts,
                        "skipped": res.get("error")}
+        # Reveal stamps: which reveal this was and the frontier it advanced to.
+        row["reveal_index"] = self._reveal_index(gen)
+        row["frontier_ts"] = str(new_ts)
+        if self._schedule is not None and gen < len(self._schedule):
+            row["visible_end"] = self._schedule[gen].visible_end
         with (self.out_dir / "prequential.jsonl").open("a") as fh:
             fh.write(json.dumps(row, default=str) + "\n")
+        self._prequential_done.add(gen)
+
+    def _reveal_index(self, gen: int) -> int | None:
+        """Position of ``gen`` among this run's reveal generations (None if not one)."""
+        from quant_fund_agent.agents.factor_research.evolution.progressive import (
+            reveal_generations,
+        )
+
+        gens = reveal_generations(self.cfg.generations, max(1, self.cfg.reveal_every))
+        return gens.index(gen) if gen in gens else None
 
     def _rescore_archive_on_window(self, gen: int) -> None:
         """Re-score every archive member on the just-advanced window (no billing).
@@ -884,15 +1022,31 @@ class EvolutionLoop:
                                           self.controller.n_trials,
                                           is_end=is_end, val_end=val_end)
             if not res.get("ok"):
+                # Visible failure (stale fitness kept — behaviour unchanged).
+                self.controller.lineage.append({
+                    "event": "rescore_failed", "generation": gen,
+                    "genome_id": eg.genome.genome_id,
+                    "error": res.get("error"),
+                })
+                log.warning("[%s] rescore failed on the new window: %s",
+                            eg.genome.genome_id, res.get("error"))
                 continue
             fitness = self._stamp_window(FitnessResult.from_dict(res["fitness"]))
             new_fitness[eg.genome.genome_id] = fitness
+            diags = fitness.diagnostics or {}
             self.controller.lineage.append({
                 "event": "rescore", "generation": gen,
                 "genome_id": eg.genome.genome_id,
                 "objective_before": obj_before,
                 "objective_after": fitness.objective.to_dict(),
                 "gates_after": fitness.gates.to_dict(),
+                "reveal_index": self._reveal_index(gen),
+                "scored_through": diags.get("scored_through"),
+                "diagnostics": {
+                    "val_ic": diags.get("val_ic"),
+                    "marginal_value_raw": diags.get("marginal_value_raw"),
+                    "coverage": diags.get("coverage"),
+                },
             })
         self.controller.rescore_archive(new_fitness)
 
@@ -1057,6 +1211,7 @@ class EvolutionLoop:
         return fixed + archive
 
     def _child_llm_semantic(self, llm: Any, island: int,
+                            creative: bool = False,
                             ) -> tuple[FactorProgram, list[str]] | None:
         parents = self.controller.select_parents(1, island)
         if not parents:
@@ -1065,17 +1220,20 @@ class EvolutionLoop:
         group_id, _ = self.controller.coordinates(island)
         context = self._group_context(group_id)
         if self.cfg.debate == "on":
-            child = self._child_hypothesis_debate_codegen(llm, parent, context)
+            child = self._child_hypothesis_debate_codegen(
+                llm, parent, context, creative=creative)
         else:
             prompt = build_mutation_prompt(
                 parent.genome.program, self._brief_for(parent),
-                context, sorted(self.known_ids))
-            child = self._parse_and_validate_child(llm, prompt, [parent])
+                context, sorted(self.known_ids), creative=creative)
+            with set_llm_role("mutation"):
+                child = self._parse_and_validate_child(llm, prompt, [parent])
         return (child, [parent.genome.genome_id]) if child is not None else None
 
     def _child_hypothesis_debate_codegen(self, hyp_llm: Any,
                                          parent: EvaluatedGenome,
                                          data_context: str,
+                                         creative: bool = False,
                                          ) -> FactorProgram | None:
         """P3 agent split: Hypothesis → Debate → Codegen (debate pre-codegen,
         so tokens are never spent implementing an idea the skeptic kills)."""
@@ -1087,16 +1245,18 @@ class EvolutionLoop:
 
         prompt = build_hypothesis_prompt(
             parent.genome.program, self._brief_for(parent),
-            data_context, sorted(self.known_ids))
+            data_context, sorted(self.known_ids), creative=creative)
         try:
-            raw = parse_hypothesis_response(_invoke(hyp_llm, prompt))
+            with set_llm_role("hypothesis"):
+                raw = parse_hypothesis_response(_invoke(hyp_llm, prompt))
         except Exception as e:  # noqa: BLE001
             log.info("hypothesis response unparsable: %s", e)
             return None
 
-        verdict, final, _ = run_debate(
-            self._role_llm("debate", 0.3), raw,
-            data_context=data_context, book=self._book_entries())
+        with set_llm_role("debate"):
+            verdict, final, _ = run_debate(
+                self._role_llm("debate", 0.3), raw,
+                data_context=data_context, book=self._book_entries())
         if verdict == "reject":
             log.info("[%s] child hypothesis rejected in debate", raw.get("factor_id"))
             return None
@@ -1109,9 +1269,10 @@ class EvolutionLoop:
         idea.factor_id = self._unique_id(idea.factor_id)
         fixed_horizon = (
             self.cfg.target_horizon if self.cfg.force_prediction_horizon else None)
-        prog = _codegen_program(
-            self._role_llm("codegen", 0.2), idea, data_context,
-            expected_prediction_horizon=fixed_horizon)
+        with set_llm_role("codegen"):
+            prog = _codegen_program(
+                self._role_llm("codegen", 0.2), idea, data_context,
+                expected_prediction_horizon=fixed_horizon)
         if prog is not None and not prog.source_paper_ids:
             prog.source_paper_ids = list(parent.genome.program.source_paper_ids)
         return prog
@@ -1134,7 +1295,8 @@ class EvolutionLoop:
             a.genome.program, self._brief_for(a),
             b.genome.program, self._brief_for(b),
             context, sorted(self.known_ids))
-        child = self._parse_and_validate_child(llm, prompt, [a, b])
+        with set_llm_role("crossover"):
+            child = self._parse_and_validate_child(llm, prompt, [a, b])
         if child is None:
             return None
         if self.cfg.debate == "on":
@@ -1142,10 +1304,11 @@ class EvolutionLoop:
             # "revise" verdict can't be honoured without regenerating it).
             from quant_fund_agent.agents.factor_research.debate import run_debate
 
-            verdict, _, _ = run_debate(
-                self._role_llm("debate", 0.3), _idea_payload(child),
-                data_context=context, book=self._book_entries(),
-                max_revisions=0)
+            with set_llm_role("debate"):
+                verdict, _, _ = run_debate(
+                    self._role_llm("debate", 0.3), _idea_payload(child),
+                    data_context=context, book=self._book_entries(),
+                    max_revisions=0)
             if verdict == "reject":
                 log.info("[%s] crossover child rejected in debate", child.factor_id)
                 return None
@@ -1181,7 +1344,8 @@ class EvolutionLoop:
             a.genome.program, self._brief_for(a),
             b.genome.program, self._brief_for(b),
             context, sorted(self.known_ids))
-        child = self._parse_and_validate_child(llm, prompt, [a, b])
+        with set_llm_role("crossover"):
+            child = self._parse_and_validate_child(llm, prompt, [a, b])
         if child is None:
             return None
         child.mechanism = (
@@ -1346,6 +1510,11 @@ class EvolutionLoop:
         self.controller.save(self.out_dir / "state.json")
         (self.out_dir / "run_config.json").write_text(
             json.dumps(self.cfg.to_dict(), indent=2))
+        try:
+            (self.out_dir / "llm_usage.json").write_text(
+                json.dumps(usage_summary(), indent=2, default=str))
+        except Exception as e:  # noqa: BLE001 — metering must never kill a run
+            log.warning("could not write llm_usage.json: %s", e)
         (self.out_dir / "mechanism_groups.json").write_text(
             json.dumps(self.mechanism_groups, indent=2, default=str))
         with (self.out_dir / "lineage.jsonl").open("w") as fh:
@@ -1359,6 +1528,50 @@ class EvolutionLoop:
                 "frontier_ts": self._window.val_end_ts,
                 "visible_end": self._window.visible_end,
             }, indent=2))
+
+    def _write_gen_quality(self) -> None:
+        """Append one cheap per-generation quality row to ``gen_quality.jsonl``.
+
+        Computed purely from the controller's in-memory archive (no model fits).
+        Resume-safe: one row per generation, deduped against the existing file.
+        """
+        gen = int(self.controller.generation)
+        self.out_dir.mkdir(parents=True, exist_ok=True)
+        if self._gen_quality_done is None:
+            self._gen_quality_done = self._jsonl_generations(
+                self.out_dir / "gen_quality.jsonl")
+        if gen in self._gen_quality_done:
+            return
+        archive = list(self.controller.archive)
+
+        def _axis(name: str) -> list[float]:
+            vals: list[float] = []
+            for eg in archive:
+                v = getattr(eg.fitness.objective, name, None)
+                if v is not None:
+                    vals.append(float(v))
+            return vals
+
+        marginal = _axis("marginal_value")
+        novelty = _axis("structural_novelty")
+        row = {
+            "generation": gen,
+            "archive_size_total": len(archive),
+            "archive_size_per_group": [
+                len(group)
+                for group in getattr(self.controller, "group_archives", [])
+            ],
+            "kept_pool_size": len(getattr(self.controller, "kept_pool", [])),
+            "n_trials": self.controller.n_trials,
+            "mean_marginal_value": (
+                sum(marginal) / len(marginal) if marginal else None),
+            "max_marginal_value": max(marginal) if marginal else None,
+            "mean_structural_novelty": (
+                sum(novelty) / len(novelty) if novelty else None),
+        }
+        with (self.out_dir / "gen_quality.jsonl").open("a") as fh:
+            fh.write(json.dumps(row, default=str) + "\n")
+        self._gen_quality_done.add(gen)
 
     # ── main drive ──
 
@@ -1374,6 +1587,11 @@ class EvolutionLoop:
         t0 = time.time()
         self._load_known_ids()
 
+        # A replaced/reloaded controller (resume) must feed the same event sink.
+        if hasattr(self.controller, "event_sink") \
+                and getattr(self.controller, "event_sink", None) is None:
+            self.controller.event_sink = self._lineage_event
+
         if cfg.progressive:
             # Build the reveal schedule and set the window in force (generation 0 on a
             # fresh run, or the resumed generation).  Corruption guard: a resumed
@@ -1384,6 +1602,21 @@ class EvolutionLoop:
                     and bool(self.controller.population()))
         if resuming:
             start_gen = self.controller.generation
+            # The controller checkpoint does not carry the lineage; reload it from
+            # lineage.jsonl so the "w"-rewrite at the next checkpoint keeps the
+            # full history instead of truncating it to the resumed rows.
+            lineage_path = self.out_dir / "lineage.jsonl"
+            if not self.controller.lineage and lineage_path.exists():
+                rows: list[dict[str, Any]] = []
+                for line in lineage_path.read_text().splitlines():
+                    try:
+                        rows.append(json.loads(line))
+                    except json.JSONDecodeError:
+                        log.warning("skipping corrupt lineage row on resume: %r",
+                                    line[:120])
+                self.controller.lineage = rows
+                log.info("resume: reloaded %d lineage row(s) from %s",
+                         len(rows), lineage_path)
             log.info("resuming from generation %d: population=%d, archive=%d, "
                      "n_trials=%d", start_gen, len(self.controller.population()),
                      len(self.controller.archive), self.controller.n_trials)
@@ -1433,6 +1666,7 @@ class EvolutionLoop:
                         self._admit(
                             prog, generation=0, island=island,
                             operator="seed", parent_ids=[])
+            self._write_gen_quality()
             self._checkpoint()
             log.info("generation 0: population=%d, archive=%d, n_trials=%d",
                      len(self.controller.population()), len(self.controller.archive),
@@ -1494,6 +1728,7 @@ class EvolutionLoop:
                     continue
                 # the mutating LLM is built lazily (and cached) so jitter-only
                 # and SET runs never construct a chat model at all
+                creative = False
                 if op == "jitter":
                     made_child = self._child_jitter(island)
                 elif op == "crossover":
@@ -1503,19 +1738,28 @@ class EvolutionLoop:
                     made_child = self._child_cross_group(
                         self._role_llm("hypothesis", 0.6), island)
                 else:
+                    # --creative-frac: with this probability the semantic child is
+                    # asked for a genuinely novel mechanism (RNG drawn only when the
+                    # flag is on, so the default stream stays byte-identical).
+                    if cfg.creative_frac > 0:
+                        creative = bool(
+                            float(self.rng.random()) < cfg.creative_frac)
                     made_child = self._child_llm_semantic(
-                        self._role_llm("hypothesis", 0.6), island)
+                        self._role_llm("hypothesis", 0.6), island,
+                        creative=creative)
                 if made_child is None:
                     continue
                 child, parent_ids = made_child
+                op_label = "llm_semantic_creative" if creative else op
                 eg = self._admit(child, generation=gen, island=island,
-                                 operator=op, parent_ids=parent_ids)
+                                 operator=op_label, parent_ids=parent_ids)
                 if eg is not None:
                     made += 1
             if cfg.effective_demes_per_group > 1 \
                     and gen % max(1, cfg.migration_every) == 0:
                 moved = self.controller.migrate()
                 log.info("generation %d: migrated %d elite(s)", gen, moved)
+            self._write_gen_quality()
             self._checkpoint()
             log.info("generation %d: %d/%d children admitted; archive=%d; n_trials=%d",
                      gen, made, len(child_islands),
@@ -1553,6 +1797,7 @@ class EvolutionLoop:
             ],
             "n_eval_failures": len(self.failures),
             "elapsed_sec": round(elapsed, 1),
+            "llm_usage": usage_summary(),
         }
 
 
@@ -1602,27 +1847,51 @@ def persist_archive(controller: EvolutionController, *, session_id: str,
         for prog in eg.genome.programs:
             prog_by_fid.setdefault(prog.factor_id, (eg, prog))
 
+    import os
+
+    # Fail-closed by default: a curation/publish failure (or an empty curated /
+    # deflated book) aborts the persist so a broken stage can't silently ship
+    # the un-curated pool.  ``QF_PERSIST_FAIL_OPEN=1`` restores the historical
+    # fallback, flagged in each persisted factor's ``metadata.evolution``.
+    fail_open = os.getenv("QF_PERSIST_FAIL_OPEN") == "1"
+    curation_failed = False
+    publish_failed = False
+
     kept_ids = list(prog_by_fid)
     curation_info: dict[str, Any] | None = None
     if use_pool and prog_by_fid:
         pool = [{"factor_id": fid, "code": prog.code}
                 for fid, (_, prog) in prog_by_fid.items()]
-        res = research_client.curate_book(
-            pool, mode=curation, n_keep=n_keep, target_horizon=target_horizon,
-            is_frac=is_frac, val_frac=val_frac, cutoff_date=cutoff_date,
-            data_dir=data_dir, n_tickers=n_tickers,
-            fields=list(fields) if fields else None, marginal_model=marginal_model)
-        if res.get("ok"):
-            kept_ids = [fid for fid in res.get("kept_factor_ids", [])
-                        if fid in prog_by_fid] or kept_ids
+        try:
+            res = research_client.curate_book(
+                pool, mode=curation, n_keep=n_keep, target_horizon=target_horizon,
+                is_frac=is_frac, val_frac=val_frac, cutoff_date=cutoff_date,
+                data_dir=data_dir, n_tickers=n_tickers,
+                fields=list(fields) if fields else None,
+                marginal_model=marginal_model)
+        except Exception as e:  # noqa: BLE001 — surfaced as a stage failure below
+            res = {"ok": False, "error": repr(e)}
+        curated = ([fid for fid in res.get("kept_factor_ids", [])
+                    if fid in prog_by_fid] if res.get("ok") else [])
+        if curated:
+            kept_ids = curated
             curation_info = {k: res[k] for k in
                              ("mode", "combined_ic", "selection_frequency", "n_pool")
                              if k in res}
             log.info("curation (%s) kept %d/%d factors from the pool",
                      curation, len(kept_ids), len(prog_by_fid))
         else:
-            log.warning("curation (%s) failed: %s — persisting the full pool",
-                        curation, res.get("error"))
+            err = (res.get("error") if not res.get("ok")
+                   else "curation returned an empty book")
+            if not fail_open:
+                raise RuntimeError(
+                    f"persist_archive: curation stage ({curation}) failed: {err}. "
+                    "Set QF_PERSIST_FAIL_OPEN=1 to persist the full pool instead.")
+            curation_failed = True
+            log.warning(
+                "!!! curation (%s) failed: %s — QF_PERSIST_FAIL_OPEN=1, "
+                "persisting the FULL UN-CURATED pool (flagged in metadata)",
+                curation, err)
 
     # ── WS1: publish-time deflation filter (runs for every source —
     #        reserved archives or curated kept-pool — before materialise) ──
@@ -1630,25 +1899,37 @@ def persist_archive(controller: EvolutionController, *, session_id: str,
     if selection_deflation == "on" and kept_ids:
         pub_book = [{"factor_id": fid, "code": prog_by_fid[fid][1].code}
                     for fid in kept_ids]
-        pres = research_client.publish_book(
-            pub_book, n_trials=controller.n_trials, mode=selection_deflation,
-            target_horizon=target_horizon, is_frac=is_frac, val_frac=val_frac,
-            cutoff_date=cutoff_date, data_dir=data_dir, n_tickers=n_tickers,
-            fields=list(fields) if fields else None, marginal_model=marginal_model)
-        if pres.get("ok"):
-            pub_kept = [fid for fid in pres.get("kept_factor_ids", [])
-                        if fid in prog_by_fid]
+        try:
+            pres = research_client.publish_book(
+                pub_book, n_trials=controller.n_trials, mode=selection_deflation,
+                target_horizon=target_horizon, is_frac=is_frac, val_frac=val_frac,
+                cutoff_date=cutoff_date, data_dir=data_dir, n_tickers=n_tickers,
+                fields=list(fields) if fields else None,
+                marginal_model=marginal_model)
+        except Exception as e:  # noqa: BLE001 — surfaced as a stage failure below
+            pres = {"ok": False, "error": repr(e)}
+        pub_kept = ([fid for fid in pres.get("kept_factor_ids", [])
+                     if fid in prog_by_fid] if pres.get("ok") else [])
+        if pub_kept:
             publish_info = {k: pres.get(k) for k in
                             ("passed", "combined_ic", "deflated", "n_trials",
                              "dropped", "mode") if k in pres}
             log.info("publish deflation (N_trials=%d) kept %d/%d (passed=%s, dropped=%s)",
                      controller.n_trials, len(pub_kept), len(kept_ids),
                      pres.get("passed"), pres.get("dropped"))
-            if pub_kept:
-                kept_ids = pub_kept
+            kept_ids = pub_kept
         else:
-            log.warning("publish deflation failed: %s — persisting un-deflated book",
-                        pres.get("error"))
+            err = (pres.get("error") if not pres.get("ok")
+                   else "publish deflation returned an empty book")
+            if not fail_open:
+                raise RuntimeError(
+                    f"persist_archive: publish stage (deflation) failed: {err}. "
+                    "Set QF_PERSIST_FAIL_OPEN=1 to persist the un-deflated book "
+                    "instead.")
+            publish_failed = True
+            log.warning(
+                "!!! publish deflation failed: %s — QF_PERSIST_FAIL_OPEN=1, "
+                "persisting the UN-DEFLATED book (flagged in metadata)", err)
 
     materialised: list[tuple[EvaluatedGenome, FactorProgram, str]] = []
     for fid in kept_ids:
@@ -1723,6 +2004,8 @@ def persist_archive(controller: EvolutionController, *, session_id: str,
                     "curation": curation,
                     "selection_deflation": selection_deflation,
                     "publish": publish_info,
+                    **({"curation_failed": True} if curation_failed else {}),
+                    **({"publish_failed": True} if publish_failed else {}),
                 },
             },
         )

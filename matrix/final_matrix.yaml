@@ -1,0 +1,79 @@
+# Final thesis run matrix — see docs/research-evolution/FINAL_RUN_PLAN.md.
+# Ablation ladder L0-L7 on the workhorse (Claude Opus 5 via Bedrock) + model sweep
+# at the full configuration (L5), 2 seeds each. Driven by run_ablation_matrix.py.
+#
+# NOTE launch order: knowledge graph must be built first (scripts/build_knowledge_graph.py)
+# and the D1/D2 verification gates in the plan must pass (use --preflight-only, then the
+# timing probe) BEFORE running any arm.
+
+config_file: quant.config.nasdaq100_2010.yaml
+
+defaults:
+  generations: 20
+  mechanism-groups: 4
+  demes-per-group: 3
+  children-per-deme: 4
+  population: 16
+  seed-ideas-per-group: 6
+  progressive-reveal: true
+  reveal-every: 2
+  test-frac: 0.2
+  retrieval: graphrag
+  curation: greedy
+  selection-deflation: "on"
+  archive-cap: 25
+  creative-frac: 0.1
+  n-tickers: 0
+  horizon: 6
+  max-cost-usd: 200
+
+providers:
+  opus5:   {model: "anthropic.claude-opus-5",   llm-provider: bedrock_converse}
+  sonnet5: {model: "anthropic.claude-sonnet-5", llm-provider: bedrock_converse}
+  fable5:  {model: "anthropic.claude-fable-5",  llm-provider: bedrock_converse}
+  sol:     {model: "gpt-5.6-sol"}
+  luna:    {model: "gpt-5.6-luna"}
+  muse:
+    model: "muse-spark-1.1"
+    env:
+      FACTOR_RESEARCH_LLM_BASE_URL: "${META_API_BASE_URL}"   # Meta Model API endpoint
+      OPENAI_API_KEY: "${META_API_KEY}"                       # Meta key via the OpenAI-compat client
+
+arms:
+  # ---- Ablation ladder on the workhorse (Claude Opus 5), seeds 0 & 1 -------
+  # L0: GP baseline (no LLM). L1: oneshot baseline (run separately if flags differ).
+  - {name: L0_gp_s0, entrypoint: gp, seed: 0, flags: {generations: 8}}
+  - {name: L0_gp_s1, entrypoint: gp, seed: 1, flags: {generations: 8}}
+  - {name: L1_oneshot_opus5_s0, entrypoint: oneshot, provider: opus5, seed: 0, flags: {}}
+  - {name: L1_oneshot_opus5_s1, entrypoint: oneshot, provider: opus5, seed: 1, flags: {}}
+  # L2: evolution, no grounding (creative/own-knowledge only)
+  - {name: L2_opus5_s0, provider: opus5, seed: 0, flags: {retrieval: none, mechanism-groups: 1, demes-per-group: 4, children-per-deme: 12}}
+  - {name: L2_opus5_s1, provider: opus5, seed: 1, flags: {retrieval: none, mechanism-groups: 1, demes-per-group: 4, children-per-deme: 12}}
+  # L3: + flat RAG (no graph, so 1 mechanism group)
+  - {name: L3_opus5_s0, provider: opus5, seed: 0, flags: {retrieval: rag, mechanism-groups: 1, demes-per-group: 4, children-per-deme: 12}}
+  - {name: L3_opus5_s1, provider: opus5, seed: 1, flags: {retrieval: rag, mechanism-groups: 1, demes-per-group: 4, children-per-deme: 12}}
+  # L4: + GraphRAG mechanism groups
+  - {name: L4_opus5_s0, provider: opus5, seed: 0, flags: {}}
+  - {name: L4_opus5_s1, provider: opus5, seed: 1, flags: {}}
+  # L5: + debate  <- THE FULL CONFIG (debate A/B = L4 vs L5)
+  - {name: L5_opus5_s0, provider: opus5, seed: 0, flags: {debate: "on"}}
+  - {name: L5_opus5_s1, provider: opus5, seed: 1, flags: {debate: "on"}}
+  # L6: SET-mode variant of L5
+  - {name: L6_opus5_s0, provider: opus5, seed: 0, flags: {debate: "on", evolution-unit: set, set-size: 3}}
+  - {name: L6_opus5_s1, provider: opus5, seed: 1, flags: {debate: "on", evolution-unit: set, set-size: 3}}
+  # L7: + experience memory (per-arm key so arms never cross-contaminate)
+  - {name: L7_opus5_s0, provider: opus5, seed: 0, flags: {debate: "on", memory: true, memory-key: L7_opus5}}
+  - {name: L7_opus5_s1, provider: opus5, seed: 1, flags: {debate: "on", memory: true, memory-key: L7_opus5}}
+
+  # ---- Model sweep at the full config (L5), seeds 0 & 1 --------------------
+  # (Opus 5's sweep entries are the L5_opus5_* rows above.)
+  - {name: L5_sol_s0,     provider: sol,     seed: 0, flags: {debate: "on"}}
+  - {name: L5_sol_s1,     provider: sol,     seed: 1, flags: {debate: "on"}}
+  - {name: L5_luna_s0,    provider: luna,    seed: 0, flags: {debate: "on"}}
+  - {name: L5_luna_s1,    provider: luna,    seed: 1, flags: {debate: "on"}}
+  - {name: L5_sonnet5_s0, provider: sonnet5, seed: 0, flags: {debate: "on"}}
+  - {name: L5_sonnet5_s1, provider: sonnet5, seed: 1, flags: {debate: "on"}}
+  - {name: L5_fable5_s0,  provider: fable5,  seed: 0, flags: {debate: "on", max-cost-usd: 300}}
+  - {name: L5_fable5_s1,  provider: fable5,  seed: 1, flags: {debate: "on", max-cost-usd: 300}}
+  - {name: L5_muse_s0,    provider: muse,    seed: 0, flags: {debate: "on"}}
+  - {name: L5_muse_s1,    provider: muse,    seed: 1, flags: {debate: "on"}}

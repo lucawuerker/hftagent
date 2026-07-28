@@ -34,9 +34,14 @@ def _frame(values, idx):
 def test_greedy_keeps_strong_drops_noise_and_auto_sizes():
     close, idx, rng = _panel()
     fwd = close.pct_change().shift(-1).fillna(0.0)
+    # Noise is scaled by the target's own volatility so the tiers are genuinely
+    # distinct: unscaled N(0,1) noise dwarfs a ~1% return and would make
+    # "strong"'s true IC (~0.03) statistically indistinguishable from pure
+    # noise's sampling error on the VAL window.
+    scale = float(fwd.std().mean())
     signals = {
-        "strong": fwd + 0.3 * _frame(rng.standard_normal((N, len(TICKERS))), idx),
-        "medium": fwd + 1.0 * _frame(rng.standard_normal((N, len(TICKERS))), idx),
+        "strong": fwd + 0.3 * scale * _frame(rng.standard_normal((N, len(TICKERS))), idx),
+        "medium": fwd + 3.0 * scale * _frame(rng.standard_normal((N, len(TICKERS))), idx),
         "noise": _frame(rng.standard_normal((N, len(TICKERS))), idx),
     }
     split = three_way_split(idx, is_frac=0.5, val_frac=0.25)
@@ -51,7 +56,8 @@ def test_greedy_keeps_strong_drops_noise_and_auto_sizes():
 def test_greedy_respects_n_keep():
     close, idx, rng = _panel(1)
     fwd = close.pct_change().shift(-1).fillna(0.0)
-    signals = {f"f{i}": fwd + (0.3 + 0.2 * i) * _frame(
+    scale = float(fwd.std().mean())
+    signals = {f"f{i}": fwd + (0.3 + 0.2 * i) * scale * _frame(
         rng.standard_normal((N, len(TICKERS))), idx) for i in range(4)}
     split = three_way_split(idx, is_frac=0.5, val_frac=0.25)
     out = curation.curate("greedy", signals, close, _cfg(), split, n_keep=2)
@@ -61,9 +67,10 @@ def test_greedy_respects_n_keep():
 def test_elastic_net_returns_ranked_subset():
     close, idx, rng = _panel(2)
     fwd = close.pct_change().shift(-1).fillna(0.0)
+    scale = float(fwd.std().mean())
     signals = {
-        "strong": fwd + 0.2 * _frame(rng.standard_normal((N, len(TICKERS))), idx),
-        "weak": fwd + 2.0 * _frame(rng.standard_normal((N, len(TICKERS))), idx),
+        "strong": fwd + 0.2 * scale * _frame(rng.standard_normal((N, len(TICKERS))), idx),
+        "weak": fwd + 2.0 * scale * _frame(rng.standard_normal((N, len(TICKERS))), idx),
         "noise": _frame(rng.standard_normal((N, len(TICKERS))), idx),
     }
     split = three_way_split(idx, is_frac=0.5, val_frac=0.25)

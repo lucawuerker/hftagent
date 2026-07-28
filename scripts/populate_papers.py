@@ -1,12 +1,23 @@
-"""Populate data/papers/index.json with quantitative finance papers from ArXiv.
+"""Populate data/papers/index.json with papers from ArXiv, in scoped blocks.
 
-Searches ArXiv using a set of quant-finance query terms, generates a short
-description for each paper via gpt-4o-mini, and upserts the results into the
-paper database.  Already-indexed papers (matched by ArXiv ID stored in
-metadata["arxiv_id"]) are skipped so the script is safe to re-run.
+Searches ArXiv using named query *blocks* — each with its own query list,
+category filter and per-query result count — generates a short description for
+each paper via gpt-4o-mini, and upserts the results into the paper database.
+Every harvested paper is stamped with ``metadata["data_scope"] = <block name>``
+so retrieval can be scoped to the run's data feed (e.g. exclude the
+``fundamental`` block when fundamentals are off).  Already-indexed papers
+(matched by ArXiv ID stored in metadata["arxiv_id"]) are skipped so the script
+is safe to re-run.
+
+Blocks:
+    price        — the original OHLCV/price-action quant queries (q-fin heavy).
+    fundamental  — cross-sectional fundamental/quality-factor literature.
+    general      — non-finance maths/ML/signal-processing that could inspire
+                   novel factors (no q-fin category restriction).
 
 Usage:
-    ./venv/bin/python scripts/populate_papers.py [--max-papers N] [--dry-run]
+    ./venv/bin/python scripts/populate_papers.py \
+        [--blocks fundamental,general,price] [--max-papers N] [--dry-run]
 """
 
 from __future__ import annotations
@@ -76,7 +87,12 @@ PAPER_INDEX_PATH = Path(os.getenv("PAPER_INDEX_PATH", "data/papers/index.json"))
     "Hawkes processes cross-asset market impact tick data",
     "information asymmetry probability of informed trading PIN L2 data",
 ]'''
-SEARCH_QUERIES = [
+# ── query blocks ───────────────────────────────────────────────────────────
+# Each block: its own queries, its own arXiv category filter, and its own
+# per-query result count.  The block name is stamped onto every harvested
+# paper as metadata["data_scope"] so retrieval can be scoped per run.
+
+PRICE_QUERIES = [
     # Advanced Time-Series & Volatility Stochastics
     "Rough volatility fractional Brownian motion OHLCV realized volatility estimation",
     "GARCH-MIDAS mixed data sampling macroeconomic variables daily OHLCV",
@@ -120,24 +136,109 @@ SEARCH_QUERIES = [
     "Bayesian structural time series BSTS counterfactual analysis OHLCV",
 ]
 
+FUNDAMENTAL_QUERIES = [
+    # Accruals / earnings quality
+    "accruals anomaly earnings quality cross-sectional stock returns",
+    "cash flow versus accruals earnings persistence stock return predictability",
+    # Profitability / quality factors
+    "gross profitability factor quality minus junk cross-sectional returns",
+    "operating profitability return on equity factor investing",
+    "Piotroski F-score fundamental strength value stocks returns",
+    # Earnings surprise / drift / revisions
+    "post-earnings announcement drift PEAD earnings surprise anomaly",
+    "analyst forecast revisions earnings estimates stock return predictability",
+    "standardized unexpected earnings SUE momentum cross-section",
+    # Investment / asset growth
+    "asset growth anomaly corporate investment cross-sectional returns",
+    "investment factor capital expenditure abnormal returns CAPM",
+    "net share issuance equity financing anomaly stock returns",
+    # Intangibles / R&D
+    "intangible capital R&D capitalization book-to-market mispricing",
+    "research and development intensity innovation stock returns anomaly",
+    # Distress / balance sheet
+    "financial distress risk Ohlson O-score bankruptcy prediction returns",
+    "leverage balance sheet strength default risk equity returns",
+    # Low volatility with fundamentals
+    "low volatility anomaly fundamentals profitability betting against beta",
+    # Value / timing / fundamental momentum
+    "value spread timing book-to-market factor premium predictability",
+    "fundamental momentum earnings trends factor performance",
+]
+
+GENERAL_QUERIES = [
+    # Point processes / state space
+    "Hawkes process self-exciting point process inference",
+    "state-space models Kalman filtering latent dynamics time series",
+    # Signal processing / spectral
+    "wavelet scattering transform invariant signal representation",
+    "spectral graph methods graph signal processing learning",
+    "compressed sensing sparse recovery signal reconstruction",
+    # Random matrices / transport / topology
+    "random matrix theory covariance denoising eigenvalue spectrum",
+    "optimal transport Wasserstein distance distribution comparison",
+    "topological data analysis persistent homology time series",
+    # Extremes / breaks / uncertainty
+    "extreme value theory tail estimation heavy tails",
+    "change-point detection structural break online algorithms",
+    "conformal prediction distribution-free uncertainty quantification",
+    # Representation learning / dynamics
+    "self-supervised representation learning time series contrastive",
+    "Koopman operator dynamic mode decomposition nonlinear dynamics",
+    "rough path theory signature features sequential data",
+    "causal discovery time series Granger structure learning",
+    "dynamical systems reservoir computing chaotic time series prediction",
+]
+
 LLM_MODEL = os.getenv("POPULATE_PAPERS_LLM_MODEL", "gpt-4o-mini")
-ARXIV_MAX_RESULTS_PER_QUERY = 30  # fetched per query before dedup / cap
-# Extended to include math/stat categories where rough-path, Hawkes, and
-# signature-transform papers are typically filed.
-ARXIV_CATEGORIES = [
+
+# Categories where rough-path, Hawkes, and signature-transform papers are
+# typically filed (the original OHLCV block's filter).
+PRICE_CATEGORIES = [
     "q-fin.PM", "q-fin.TR", "q-fin.ST", "q-fin.MF", "q-fin.CP",
     "econ.GN", "cs.LG", "stat.ML", "math.PR",
 ]
+# Cross-sectional fundamental/quality literature lives in the q-fin + econ set.
+FUNDAMENTAL_CATEGORIES = [
+    "q-fin.PM", "q-fin.ST", "q-fin.GN", "econ.GN",
+]
+# Deliberately NO q-fin restriction: the point of this block is non-finance
+# mathematics/ML/signal-processing that could inspire novel factors.
+GENERAL_CATEGORIES = [
+    "math.PR", "math.ST", "stat.ML", "cs.LG", "eess.SP", "math.DS",
+]
+
+# Per-block per-query result counts tuned so the two NEW blocks yield roughly
+# +1000 papers combined after arXiv-id dedup:
+#   fundamental: 18 queries × 35 ≈ 630 raw
+#   general:     16 queries × 30 ≈ 480 raw   → ~1100 raw, ~1000 after dedup.
+QUERY_BLOCKS: dict[str, dict] = {
+    "fundamental": {
+        "queries": FUNDAMENTAL_QUERIES,
+        "categories": FUNDAMENTAL_CATEGORIES,
+        "max_results_per_query": 35,
+    },
+    "general": {
+        "queries": GENERAL_QUERIES,
+        "categories": GENERAL_CATEGORIES,
+        "max_results_per_query": 30,
+    },
+    "price": {
+        "queries": PRICE_QUERIES,
+        "categories": PRICE_CATEGORIES,
+        "max_results_per_query": 30,
+    },
+}
 
 
 # ---------------------------------------------------------------------------
 # ArXiv search
 # ---------------------------------------------------------------------------
 
-def _fetch_arxiv(query: str, max_results: int) -> list[dict]:
+def _fetch_arxiv(query: str, max_results: int,
+                 categories: list[str]) -> list[dict]:
     import arxiv
 
-    cat_filter = " OR ".join(f"cat:{c}" for c in ARXIV_CATEGORIES)
+    cat_filter = " OR ".join(f"cat:{c}" for c in categories)
     full_query = f"({query}) AND ({cat_filter})"
 
     client = arxiv.Client(page_size=min(max_results, 100), delay_seconds=1.0)
@@ -198,17 +299,94 @@ def _load_existing_arxiv_ids(paper_db) -> set[str]:
     return ids
 
 
+def collect_candidates(blocks: dict[str, dict],
+                       seen_arxiv: set[str],
+                       max_candidates: int,
+                       fetch=_fetch_arxiv,
+                       sleep=time.sleep) -> list[dict]:
+    """Run every query of every block; return deduped candidate dicts.
+
+    Each candidate is stamped with ``data_scope`` = the name of the block whose
+    query found it first (dedup is by arXiv id across blocks — first block
+    wins).  ``seen_arxiv`` is mutated in place.  ``fetch``/``sleep`` are
+    injectable for tests.
+    """
+    candidates: list[dict] = []
+    for block_name, block in blocks.items():
+        for query in block["queries"]:
+            if len(candidates) >= max_candidates:
+                return candidates[:max_candidates]
+            log.info("[%s] Searching: %s", block_name, query)
+            try:
+                results = fetch(query,
+                                max_results=block["max_results_per_query"],
+                                categories=block["categories"])
+            except Exception as e:
+                log.warning("ArXiv query failed ('%s'): %s", query, e)
+                continue
+            for r in results:
+                if r["arxiv_id"] not in seen_arxiv:
+                    seen_arxiv.add(r["arxiv_id"])
+                    candidates.append({**r, "data_scope": block_name})
+            log.info("  → %d unique new candidates so far", len(candidates))
+            sleep(3.0)  # avoid ArXiv 429s between queries
+    return candidates[:max_candidates]
+
+
+def build_paper(candidate: dict, description: str, existing_ids: set[str]):
+    """One candidate dict → a ``Paper`` with data_scope stamped in metadata.
+
+    Assigns a slug id, suffixing on collision; ``existing_ids`` is mutated in
+    place with the assigned id.
+    """
+    from quant_fund_agent.schemas import Paper, PaperStatus
+
+    base_id = _slugify(candidate["title"])
+    paper_id = base_id
+    suffix = 1
+    while paper_id in existing_ids:
+        suffix += 1
+        paper_id = f"{base_id}_{suffix}"
+    existing_ids.add(paper_id)
+
+    return Paper(
+        id=paper_id,
+        title=candidate["title"],
+        authors=candidate["authors"],
+        abstract=candidate["abstract"],
+        published_date=candidate["published_date"],
+        status=PaperStatus.UNREAD,
+        file_path=None,
+        url=candidate["url"],
+        metadata={
+            "arxiv_id": candidate["arxiv_id"],
+            "pdf_url": candidate["pdf_url"],
+            "description": description,
+            "data_scope": candidate.get("data_scope"),
+        },
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Populate paper database from ArXiv")
-    parser.add_argument("--max-papers", type=int, default=300,
-                        help="Maximum number of new papers to add (default: 300)")
+    parser.add_argument("--blocks", type=str,
+                        default=",".join(QUERY_BLOCKS),
+                        help="Comma-separated query blocks to run "
+                             f"(default: all = {','.join(QUERY_BLOCKS)})")
+    parser.add_argument("--max-papers", type=int, default=1200,
+                        help="Maximum number of new papers to add (default: 1200)")
     parser.add_argument("--dry-run", action="store_true",
                         help="Print what would be added without writing anything")
     args = parser.parse_args()
 
+    block_names = [b.strip() for b in args.blocks.split(",") if b.strip()]
+    unknown = [b for b in block_names if b not in QUERY_BLOCKS]
+    if unknown:
+        parser.error(f"unknown block(s) {unknown}; choose from {list(QUERY_BLOCKS)}")
+    blocks = {name: QUERY_BLOCKS[name] for name in block_names}
+
     # -- Load existing DB ------------------------------------------------
     from quant_fund_agent.databases import PaperDatabase
-    from quant_fund_agent.schemas import Paper, PaperStatus
 
     paper_db = PaperDatabase()
     paper_db.load_from_json(PAPER_INDEX_PATH)
@@ -218,30 +396,12 @@ def main() -> None:
 
     # -- Collect candidates from ArXiv -----------------------------------
     seen_arxiv: set[str] = set(existing_arxiv_ids)
-    candidates: list[dict] = []
-
-    for query in SEARCH_QUERIES:
-        if len(candidates) >= args.max_papers * 3:
-            break
-        log.info("Searching: %s", query)
-        try:
-            results = _fetch_arxiv(query, max_results=ARXIV_MAX_RESULTS_PER_QUERY)
-        except Exception as e:
-            log.warning("ArXiv query failed ('%s'): %s", query, e)
-            continue
-        for r in results:
-            if r["arxiv_id"] not in seen_arxiv:
-                seen_arxiv.add(r["arxiv_id"])
-                candidates.append(r)
-        log.info("  → %d unique new candidates so far", len(candidates))
-        time.sleep(3.0)  # avoid ArXiv 429s between queries
-
-    candidates = candidates[: args.max_papers]
+    candidates = collect_candidates(blocks, seen_arxiv, args.max_papers)
     log.info("Total new candidates to process: %d", len(candidates))
 
     if args.dry_run:
         for c in candidates[:20]:
-            print(f"  [{c['arxiv_id']}] {c['title'][:80]}")
+            print(f"  [{c['data_scope']}] [{c['arxiv_id']}] {c['title'][:80]}")
         if len(candidates) > 20:
             print(f"  ... and {len(candidates) - 20} more")
         return
@@ -251,35 +411,13 @@ def main() -> None:
     llm = ChatOpenAI(model=LLM_MODEL, temperature=0.2)
 
     # -- Generate descriptions and build Paper objects -------------------
-    new_papers: list[Paper] = []
+    new_papers = []
     for i, c in enumerate(candidates, 1):
-        log.info("[%d/%d] %s", i, len(candidates), c["title"][:70])
+        log.info("[%d/%d] (%s) %s", i, len(candidates),
+                 c.get("data_scope"), c["title"][:70])
 
         description = _generate_description(c["title"], c["abstract"], llm)
-
-        base_id = _slugify(c["title"])
-        paper_id = base_id
-        suffix = 1
-        while paper_id in existing_ids:
-            suffix += 1
-            paper_id = f"{base_id}_{suffix}"
-        existing_ids.add(paper_id)
-
-        paper = Paper(
-            id=paper_id,
-            title=c["title"],
-            authors=c["authors"],
-            abstract=c["abstract"],
-            published_date=c["published_date"],
-            status=PaperStatus.UNREAD,
-            file_path=None,
-            url=c["url"],
-            metadata={
-                "arxiv_id": c["arxiv_id"],
-                "pdf_url": c["pdf_url"],
-                "description": description,
-            },
-        )
+        paper = build_paper(c, description, existing_ids)
         paper_db.add_paper(paper)
         new_papers.append(paper)
 

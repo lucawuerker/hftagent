@@ -1,9 +1,12 @@
 """Tests for the RAG subsystem (P2): embed store, retrieval, cardinality modes,
-date-gating and citation verification.  All offline via the hashing embedder."""
+date-gating, data-scope gating and citation verification.  All offline via the
+hashing embedder."""
 
 from __future__ import annotations
 
+import importlib.util
 import json
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -15,9 +18,11 @@ from quant_fund_agent.knowledge.embed_store import (
     verify_citations,
 )
 from quant_fund_agent.knowledge.retrieval import (
+    _papers_block,
     build_query,
     retrieve_and_brainstorm,
 )
+from quant_fund_agent.knowledge.embed_store import RetrievedPaper
 
 
 def _corpus() -> list[CorpusDoc]:
@@ -177,3 +182,214 @@ def test_build_query_includes_scope_fields():
     q = build_query(ctx, focus="microstructure island", gaps=["carry"])
     assert "close" in q and "volume" in q
     assert "microstructure island" in q and "carry" in q
+
+
+# ── data-scope gating ────────────────────────────────────────────────────────
+
+def _scoped_corpus() -> list[CorpusDoc]:
+    return [
+        CorpusDoc("s_price", "Momentum on prices", "2015-03-01",
+                  "Momentum momentum winners minus losers price trend "
+                  "continuation daily bars." * 3, data_scope="price"),
+        CorpusDoc("s_fund", "Accruals anomaly", "2016-05-01",
+                  "Accruals anomaly earnings quality fundamentals balance "
+                  "sheet profitability cross-section." * 3,
+                  data_scope="fundamental"),
+        CorpusDoc("s_gen", "Hawkes processes", "2019-02-01",
+                  "Hawkes process self-exciting point process intensity "
+                  "kernel estimation." * 3, data_scope="general"),
+        CorpusDoc("s_legacy", "Untagged legacy paper", "2014-01-01",
+                  "Momentum accruals Hawkes a bit of everything, indexed "
+                  "before scope tagging existed." * 3),  # data_scope=None
+    ]
+
+
+@pytest.fixture()
+def scoped_store(tmp_path):
+    return EmbedStore(_scoped_corpus(), embedder="hash",
+                      cache_dir=tmp_path / "emb_scoped").build()
+
+
+def test_scope_mask_filters_tagged_docs_and_passes_untagged(scoped_store):
+    got = scoped_store.retrieve_papers(
+        "anything at all", k=10, allowed_scopes={"price"})
+    ids = {p.paper_id for p in got}
+    assert "s_price" in ids
+    assert "s_legacy" in ids            # untagged always passes
+    assert "s_fund" not in ids
+    assert "s_gen" not in ids
+
+    got = scoped_store.retrieve_papers(
+        "anything at all", k=10, allowed_scopes={"price", "fundamental"})
+    ids = {p.paper_id for p in got}
+    assert ids == {"s_price", "s_fund", "s_legacy"}
+
+    # no filter → everything retrievable
+    got = scoped_store.retrieve_papers("anything at all", k=10)
+    assert len(got) == 4
+
+
+def test_scope_mask_composes_with_cutoff_date(scoped_store):
+    got = scoped_store.retrieve_papers(
+        "anything", k=10, cutoff_date="2016-01-01",
+        allowed_scopes={"fundamental"})
+    ids = {p.paper_id for p in got}
+    # s_fund is scope-allowed but published after the cutoff; s_legacy is
+    # untagged (passes scope) and pre-cutoff.
+    assert ids == {"s_legacy"}
+
+
+def test_chunks_inherit_parent_doc_scope(scoped_store):
+    chunks = scoped_store.retrieve_chunks(
+        "Hawkes self-exciting intensity", k=10,
+        allowed_scopes={"fundamental"})
+    pids = {c.paper_id for c in chunks}
+    assert "s_gen" not in pids          # its chunks are masked with the doc
+    assert "s_price" not in pids
+    assert pids <= {"s_fund", "s_legacy"}
+
+    chunks = scoped_store.retrieve_chunks(
+        "Hawkes self-exciting intensity", k=3, allowed_scopes={"general"})
+    assert chunks and chunks[0].paper_id == "s_gen"
+
+
+def test_data_scope_persisted_in_meta_json(scoped_store, tmp_path):
+    meta = json.loads((tmp_path / "emb_scoped" / "meta.json").read_text())
+    scopes = dict(zip(meta["paper_ids"], meta["data_scopes"]))
+    assert scopes == {"s_price": "price", "s_fund": "fundamental",
+                      "s_gen": "general", "s_legacy": None}
+
+
+def test_retrieve_and_brainstorm_forwards_allowed_scopes(scoped_store):
+    llm = FakeBrainstormLLM()
+    retrieve_and_brainstorm(
+        llm, scoped_store, n_ideas=2, known_ids=set(), data_context="ctx",
+        cardinality="NtoM", k_papers=4, allowed_scopes={"general"})
+    prompt = llm.prompts[0]
+    assert "id=s_gen," in prompt
+    assert "id=s_legacy," in prompt     # untagged passes
+    assert "id=s_fund," not in prompt
+    assert "id=s_price," not in prompt
+
+
+# ── paper-text token cap ─────────────────────────────────────────────────────
+
+def test_papers_block_truncates_long_text(monkeypatch):
+    monkeypatch.setenv("QF_RAG_PAPER_MAX_CHARS", "100")
+    long = RetrievedPaper("p_long", "Long paper", "2020-01-01", 0.9,
+                          text="x" * 500)
+    short = RetrievedPaper("p_short", "Short paper", "2020-01-01", 0.8,
+                           text="y" * 50)
+    block = _papers_block([long, short])
+    assert "... [truncated]" in block
+    assert "x" * 100 in block and "x" * 101 not in block
+    assert "y" * 50 in block            # under the cap → untouched
+    # the truncated suffix is attached to the long paper only
+    assert block.count("[truncated]") == 1
+
+
+def test_papers_block_default_cap_is_20k(monkeypatch):
+    monkeypatch.delenv("QF_RAG_PAPER_MAX_CHARS", raising=False)
+    p = RetrievedPaper("p", "T", "2020-01-01", 0.5, text="z" * 25_000)
+    block = _papers_block([p])
+    assert "... [truncated]" in block
+    assert "z" * 20_000 in block and "z" * 20_001 not in block
+
+
+def test_papers_block_cap_applies_inside_brainstorm(scoped_store, monkeypatch):
+    monkeypatch.setenv("QF_RAG_PAPER_MAX_CHARS", "80")
+    llm = FakeBrainstormLLM()
+    retrieve_and_brainstorm(
+        llm, scoped_store, n_ideas=2, known_ids=set(), data_context="ctx",
+        cardinality="Nto1", k_papers=3)
+    assert "[truncated]" in llm.prompts[0]
+
+
+# ── populate_papers block structure ──────────────────────────────────────────
+
+def _load_populate_papers():
+    path = Path(__file__).resolve().parent.parent / "scripts" / "populate_papers.py"
+    spec = importlib.util.spec_from_file_location("populate_papers", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+@pytest.fixture(scope="module")
+def pp():
+    return _load_populate_papers()
+
+
+def test_query_blocks_expose_scope_labels(pp):
+    assert set(pp.QUERY_BLOCKS) == {"price", "fundamental", "general"}
+    for name, block in pp.QUERY_BLOCKS.items():
+        assert len(block["queries"]) >= 15 or name == "price"
+        assert block["categories"]
+        assert block["max_results_per_query"] > 0
+    # fundamental keeps the q-fin/econ restriction and adds q-fin.GN
+    fund_cats = set(pp.QUERY_BLOCKS["fundamental"]["categories"])
+    assert {"q-fin.GN", "q-fin.PM", "q-fin.ST", "econ.GN"} <= fund_cats
+    # general has NO q-fin restriction — pure maths/ML/signal-processing
+    gen_cats = set(pp.QUERY_BLOCKS["general"]["categories"])
+    assert not any(c.startswith("q-fin") for c in gen_cats)
+    assert {"math.PR", "math.ST", "stat.ML", "cs.LG", "eess.SP",
+            "math.DS"} <= gen_cats
+    # tuned toward ~+1000 new papers across the two new blocks
+    expected_new = sum(
+        len(pp.QUERY_BLOCKS[b]["queries"]) *
+        pp.QUERY_BLOCKS[b]["max_results_per_query"]
+        for b in ("fundamental", "general"))
+    assert 900 <= expected_new <= 1500
+
+
+def test_collect_candidates_stamps_scope_and_dedups(pp):
+    blocks = {
+        "fundamental": {"queries": ["q1"], "categories": ["q-fin.GN"],
+                        "max_results_per_query": 5},
+        "general": {"queries": ["q2"], "categories": ["math.PR"],
+                    "max_results_per_query": 5},
+    }
+    payload = {
+        "q1": [{"arxiv_id": "1111.1", "title": "A", "authors": ["x"],
+                "abstract": "a", "published_date": None,
+                "url": "u1", "pdf_url": "p1"},
+               {"arxiv_id": "2222.2", "title": "B", "authors": ["x"],
+                "abstract": "b", "published_date": None,
+                "url": "u2", "pdf_url": "p2"}],
+        "q2": [{"arxiv_id": "2222.2", "title": "B", "authors": ["x"],
+                "abstract": "b", "published_date": None,
+                "url": "u2", "pdf_url": "p2"},   # dup across blocks
+               {"arxiv_id": "3333.3", "title": "C", "authors": ["x"],
+                "abstract": "c", "published_date": None,
+                "url": "u3", "pdf_url": "p3"}],
+    }
+    calls = []
+
+    def fake_fetch(query, max_results, categories):
+        calls.append((query, max_results, tuple(categories)))
+        return payload[query]
+
+    seen = {"3333.3"}  # already in the DB → skipped
+    cands = pp.collect_candidates(blocks, seen, max_candidates=100,
+                                  fetch=fake_fetch, sleep=lambda s: None)
+    assert calls == [("q1", 5, ("q-fin.GN",)), ("q2", 5, ("math.PR",))]
+    got = {c["arxiv_id"]: c["data_scope"] for c in cands}
+    assert got == {"1111.1": "fundamental", "2222.2": "fundamental"}
+
+
+def test_build_paper_stamps_data_scope_metadata(pp):
+    cand = {"arxiv_id": "1234.5", "title": "Accruals & Quality!",
+            "authors": ["A. Uthor"], "abstract": "abs",
+            "published_date": None, "url": "http://x",
+            "pdf_url": "http://x.pdf", "data_scope": "fundamental"}
+    existing = {"accruals_quality"}
+    paper = pp.build_paper(cand, "desc", existing)
+    assert paper.metadata["data_scope"] == "fundamental"
+    assert paper.metadata["arxiv_id"] == "1234.5"
+    assert paper.metadata["description"] == "desc"
+    assert paper.id != "accruals_quality" and paper.id in existing
+
+    # a candidate without a scope (defensive) → None, i.e. legacy semantics
+    cand2 = dict(cand, arxiv_id="9999.9", title="Other title")
+    paper2 = pp.build_paper(cand2 | {"data_scope": None}, "d", existing)
+    assert paper2.metadata["data_scope"] is None

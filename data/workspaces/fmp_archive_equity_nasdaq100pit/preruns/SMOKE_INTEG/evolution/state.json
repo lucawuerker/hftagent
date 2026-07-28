@@ -1,0 +1,2604 @@
+{
+  "config": {
+    "population_size": 8,
+    "n_mechanism_groups": 1,
+    "demes_per_group": 1,
+    "migration_every": 3,
+    "migration_k": 1,
+    "seed": 0,
+    "archive_cap_per_group": 10
+  },
+  "n_trials": 7,
+  "generation": 2,
+  "islands": [
+    [
+      {
+        "genome": {
+          "genome_id": "g0-short_term_price_reversion-18b99f",
+          "programs": [
+            {
+              "factor_id": "short_term_price_reversion",
+              "code": "\"\"\"Market prices often exhibit mean-reverting behavior over short time horizons, particularly after significant movements. This factor exploits the tendency for prices to revert to their mean shortly after they deviate substantially from it, capturing potential reversal opportunities. By measuring the deviation from a rolling average, we can identify stocks that are likely to revert back to their mean price. This signal computes the z-score of the price relative to a short-term moving average, indicating how far the current price is from the average. A high positive z-score suggests overbought conditions, while a high negative z-score indicates oversold conditions, signaling potential price reversals.\"\"\"\n\nfrom __future__ import annotations\nimport pandas as pd\nimport numpy as np\nfrom quant_fund_agent.factors.base import BaseFactor\nfrom quant_fund_agent.factors.registry import register_factor\nfrom quant_fund_agent.factors.ops import ts_mean, ts_zscore\n\n@register_factor\nclass ShortTermPriceReversion(BaseFactor):\n    factor_id = \"short_term_price_reversion\"\n    name = \"Short-Term Price Reversion\"\n    category = \"mean_reversion\"\n    description = \"This factor captures potential price reversals by measuring the z-score of the price relative to a short-term moving average.\"\n    inputs = [\"close\"]\n    prediction_horizon = 6  # bars ahead the edge peaks\n    suggested_horizons = [6]\n\n    def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:\n        close = data[\"close\"]\n        rolling_mean = ts_mean(close, 20)  # 20-bar moving average\n        z_score = ts_zscore(close, 20)  # z-score based on the 20-bar moving average\n        return z_score.fillna(0.0)  # Fill NaNs with 0 for safety",
+              "name": "Short-Term Price Reversion",
+              "category": "mean_reversion",
+              "trading_idea": "Market prices often exhibit mean-reverting behavior over short time horizons, particularly after significant movements. This factor exploits the tendency for prices to revert to their mean shortly after they deviate substantially from it, capturing potential reversal opportunities. By measuring the deviation from a rolling average, we can identify stocks that are likely to revert back to their mean price.",
+              "description": "This signal computes the z-score of the price relative to a short-term moving average, indicating how far the current price is from the average. A high positive z-score suggests overbought conditions, while a high negative z-score indicates oversold conditions, signaling potential price reversals.",
+              "prediction_horizon": 6,
+              "suggested_horizons": [
+                6
+              ],
+              "expected_sign": null,
+              "source_paper_ids": [],
+              "mechanism": "",
+              "mechanism_group_id": 0
+            }
+          ],
+          "unit": "single",
+          "generation": 0,
+          "island": 0,
+          "mechanism_group_id": 0,
+          "deme_id": 0,
+          "parent_ids": [],
+          "operator": "seed",
+          "metadata": {
+            "mechanism_group_id": 0,
+            "mechanism": ""
+          }
+        },
+        "fitness": {
+          "candidate_id": "short_term_price_reversion",
+          "objective": {
+            "marginal_value": -0.0009274808910524346,
+            "independence": -0.006543354211391481,
+            "parsimony": -8.0,
+            "structural_novelty": 0.8991213564229753
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "selectable": true,
+          "diagnostics": {
+            "standalone_ic": -0.05557885727877171,
+            "ic_decay": {
+              "1": -0.029698312379899786,
+              "3": -0.04102394726943847,
+              "6": -0.05557885727877171,
+              "12": -0.06336482057017646,
+              "24": -0.08788876360157485
+            },
+            "is_ic": -0.0474690213972788,
+            "val_ic": -0.05557885727877171,
+            "val_n_obs": 163001,
+            "residual_ic": -0.006543354211391481,
+            "independence_metric": "residual_ic",
+            "with_ic": 0.045558367769710284,
+            "base_ic": 0.04648584866076272,
+            "max_abs_corr": 0.886979193400884,
+            "delta_participation": 0.0723351040303244,
+            "pr_before": 1.8054943043252512,
+            "pr_after": 1.8778294083555755,
+            "marginal_value_raw": -0.0009274808910524346,
+            "sign_consistency": null,
+            "plateau_penalty": 0.0,
+            "jitter_ics": [
+              0.05557885727877171,
+              0.05557885727877171
+            ],
+            "perturbation_penalty": null,
+            "turnover": 0.10351051260794925,
+            "gross_ret": -0.0009390747499629556,
+            "net_ret": -0.0010528349679466069,
+            "net_gross_ratio": 1.1211407483676235,
+            "zoo_max_abs_corr": null,
+            "zoo_nearest": null,
+            "zoo_min_code_distance": null,
+            "structural_novelty": 0.8991213564229753,
+            "novelty_min_book_distance": 0.8991213564229753,
+            "novelty_min_zoo_distance": null,
+            "novelty_nearest_book_idx": 1,
+            "novelty_metric": "canonical_ast_weighted_subtree_jaccard",
+            "novelty_nearest_book_similarity": 0.1008786435770247,
+            "novelty_candidate_ast_nodes": 11,
+            "novelty_candidate_unique_subtrees": 11,
+            "coverage": 1.0,
+            "degradation_ratio": 1.1708448087357834,
+            "deflation": {
+              "best_ic": 0.055579,
+              "deflated_ic": 0.051135,
+              "deflated_t": 20.644942,
+              "luck_ic": 0.004444,
+              "n_obs": 163001,
+              "n_trials": 5
+            },
+            "n_trials": 5,
+            "complexity": 8,
+            "scored_through": "2021-08-26T00:00:00",
+            "window_generation": 2
+          },
+          "behavior": {},
+          "raw": {
+            "split_sizes": {
+              "is": 1320,
+              "val": 1612,
+              "test": 0
+            },
+            "heldout_test_split_sizes": {
+              "is": 1320,
+              "val": 1612,
+              "test": 733
+            }
+          }
+        }
+      },
+      {
+        "genome": {
+          "genome_id": "g0-momentum_volume_accumulation-13f581",
+          "programs": [
+            {
+              "factor_id": "momentum_volume_accumulation",
+              "code": "\"\"\"High trading volumes often accompany price movements, suggesting stronger momentum and sustainability of trends. This factor identifies stocks that not only exhibit price momentum but also see increased volume, signaling the potential for continued upward or downward price movements. By combining price momentum with volume changes, we can enhance signal robustness.\"\"\"\n\nfrom __future__ import annotations\n\nimport pandas as pd\nimport numpy as np\n\nfrom quant_fund_agent.factors.base import BaseFactor\nfrom quant_fund_agent.factors.ops import delta, adv, ts_mean\nfrom quant_fund_agent.factors.registry import register_factor\n\n\n@register_factor\nclass MomentumVolumeAccumulation(BaseFactor):\n    factor_id = \"momentum_volume_accumulation\"\n    name = \"Momentum Volume Accumulation\"\n    category = \"momentum\"\n    description = (\"This signal computes the rate of change in price over the last few bars and multiplies it by the average volume over the same period. The result indicates whether price movements are supported by significant trading activity, providing insight into the strength of the momentum.\")\n    inputs = [\"close\", \"volume\"]\n    prediction_horizon = 6  # bars ahead the momentum edge peaks\n    suggested_horizons = [6]\n\n    def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:\n        close = data[\"close\"]\n        volume = data[\"volume\"]\n        # Calculate the rate of change in price over the last 5 bars\n        price_change = delta(close, 5)\n        # Calculate the average volume over the last 5 bars\n        avg_volume = adv(volume, 5)\n        # Compute the momentum volume accumulation signal\n        momentum_signal = price_change * avg_volume\n        # Fill NaN values with 0.0 for safety\n        return momentum_signal.fillna(0.0)",
+              "name": "Momentum Volume Accumulation",
+              "category": "momentum",
+              "trading_idea": "High trading volumes often accompany price movements, suggesting stronger momentum and sustainability of trends. This factor identifies stocks that not only exhibit price momentum but also see increased volume, signaling the potential for continued upward or downward price movements. By combining price momentum with volume changes, we can enhance signal robustness.",
+              "description": "This signal computes the rate of change in price over the last few bars and multiplies it by the average volume over the same period. The result indicates whether price movements are supported by significant trading activity, providing insight into the strength of the momentum.",
+              "prediction_horizon": 6,
+              "suggested_horizons": [
+                6
+              ],
+              "expected_sign": null,
+              "source_paper_ids": [],
+              "mechanism": "",
+              "mechanism_group_id": 0
+            }
+          ],
+          "unit": "single",
+          "generation": 0,
+          "island": 0,
+          "mechanism_group_id": 0,
+          "deme_id": 0,
+          "parent_ids": [],
+          "operator": "seed",
+          "metadata": {
+            "mechanism_group_id": 0,
+            "mechanism": ""
+          }
+        },
+        "fitness": {
+          "candidate_id": "momentum_volume_accumulation",
+          "objective": {
+            "marginal_value": -0.014886940722261842,
+            "independence": -0.023688203948535682,
+            "parsimony": -9.0,
+            "structural_novelty": 0.8542084084483597
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "selectable": true,
+          "diagnostics": {
+            "standalone_ic": -0.042720305954090196,
+            "ic_decay": {
+              "1": -0.02649383025378623,
+              "3": -0.034666045586127,
+              "6": -0.042720305954090196,
+              "12": -0.053469034511404036,
+              "24": -0.05101307088094213
+            },
+            "is_ic": -0.07440178125093906,
+            "val_ic": -0.042720305954090196,
+            "val_n_obs": 151526,
+            "residual_ic": -0.023688203948535682,
+            "independence_metric": "residual_ic",
+            "with_ic": 0.032333585297894,
+            "base_ic": 0.04615973136034449,
+            "max_abs_corr": 0.5746134732445851,
+            "delta_participation": 0.45790869076076257,
+            "pr_before": 1.9990754035525469,
+            "pr_after": 2.4569840943133094,
+            "marginal_value_raw": -0.013826146062450494,
+            "sign_consistency": null,
+            "plateau_penalty": 0.0010607946598113482,
+            "jitter_ics": [
+              0.039743677338871325,
+              0.04357534524968638
+            ],
+            "perturbation_penalty": null,
+            "turnover": 0.070295524908528,
+            "gross_ret": -0.000592041387636921,
+            "net_ret": -0.0006718624765269524,
+            "net_gross_ratio": 1.1348234947030138,
+            "zoo_max_abs_corr": null,
+            "zoo_nearest": null,
+            "zoo_min_code_distance": null,
+            "structural_novelty": 0.8542084084483597,
+            "novelty_min_book_distance": 0.8542084084483597,
+            "novelty_min_zoo_distance": null,
+            "novelty_nearest_book_idx": 0,
+            "novelty_metric": "canonical_ast_weighted_subtree_jaccard",
+            "novelty_nearest_book_similarity": 0.14579159155164034,
+            "novelty_candidate_ast_nodes": 18,
+            "novelty_candidate_unique_subtrees": 16,
+            "coverage": 1.0,
+            "degradation_ratio": 0.5741839138233132,
+            "deflation": {
+              "best_ic": 0.04272,
+              "deflated_ic": 0.038912,
+              "deflated_t": 15.147148,
+              "luck_ic": 0.003808,
+              "n_obs": 151526,
+              "n_trials": 3
+            },
+            "n_trials": 3,
+            "complexity": 9,
+            "scored_through": "2018-06-13T00:00:00",
+            "window_generation": 1
+          },
+          "behavior": {},
+          "raw": {
+            "split_sizes": {
+              "is": 513,
+              "val": 1612,
+              "test": 0
+            },
+            "heldout_test_split_sizes": {
+              "is": 513,
+              "val": 1612,
+              "test": 1540
+            }
+          }
+        }
+      },
+      {
+        "genome": {
+          "genome_id": "g0-order_flow_entropy-56945d",
+          "programs": [
+            {
+              "factor_id": "order_flow_entropy",
+              "code": "\"\"\"The concept of entropy can be applied to order flow as a measure of market uncertainty and imbalance. A high entropy value indicates a more chaotic and unpredictable order flow, which may precede significant price movements. Conversely, low entropy suggests a stable environment, potentially leading to mean-reversion opportunities.\"\"\"\n\nfrom __future__ import annotations\n\nimport pandas as pd\nimport numpy as np\nfrom quant_fund_agent.factors.base import BaseFactor\nfrom quant_fund_agent.factors.registry import register_factor\nfrom quant_fund_agent.factors.ops import ts_sum, delta\n\n\ndef _order_flow_entropy(volume: pd.DataFrame) -> pd.DataFrame:\n    \"\"\"Calculate the entropy of the order flow based on volume data.\"\"\"\n    # Calculate the total volume\n    total_volume = ts_sum(volume, 5)\n    # Calculate the probabilities of buy and sell orders\n    prob_buy = volume / total_volume.where(total_volume != 0, np.nan)\n    prob_sell = (1 - prob_buy).fillna(0)\n    # Calculate entropy using the formula: -sum(p * log(p))\n    entropy = - (prob_buy * np.log(prob_buy + 1e-10)).fillna(0) - (prob_sell * np.log(prob_sell + 1e-10)).fillna(0)\n    return entropy\n\n\n@register_factor\nclass OrderFlowEntropy(BaseFactor):\n    factor_id = \"order_flow_entropy\"\n    name = \"Order Flow Entropy\"\n    category = \"microstructure\"\n    description = \"This factor calculates the entropy of the order flow using the volume data over a fixed window. It evaluates the distribution of buy and sell orders, where higher entropy indicates greater uncertainty in market direction, while lower values suggest a more predictable flow.\"\n    inputs = [\"volume\"]\n    prediction_horizon = 6  # bars ahead the edge peaks\n    suggested_horizons = [6]\n\n    def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:\n        volume = data[\"volume\"].fillna(0.0)\n        entropy = _order_flow_entropy(volume)\n        return entropy",
+              "name": "Order Flow Entropy",
+              "category": "microstructure",
+              "trading_idea": "The concept of entropy can be applied to order flow as a measure of market uncertainty and imbalance. A high entropy value indicates a more chaotic and unpredictable order flow, which may precede significant price movements. Conversely, low entropy suggests a stable environment, potentially leading to mean-reversion opportunities.",
+              "description": "This factor calculates the entropy of the order flow using the volume data over a fixed window. It evaluates the distribution of buy and sell orders, where higher entropy indicates greater uncertainty in market direction, while lower values suggest a more predictable flow.",
+              "prediction_horizon": 6,
+              "suggested_horizons": [
+                6
+              ],
+              "expected_sign": null,
+              "source_paper_ids": [],
+              "mechanism": "",
+              "mechanism_group_id": 0
+            }
+          ],
+          "unit": "single",
+          "generation": 0,
+          "island": 0,
+          "mechanism_group_id": 0,
+          "deme_id": 0,
+          "parent_ids": [],
+          "operator": "seed",
+          "metadata": {
+            "mechanism_group_id": 0,
+            "mechanism": ""
+          }
+        },
+        "fitness": {
+          "candidate_id": "order_flow_entropy",
+          "objective": {
+            "marginal_value": -0.002971474636321824,
+            "independence": -0.003653405085277548,
+            "parsimony": -29.0,
+            "structural_novelty": 0.9298735594683023
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "selectable": true,
+          "diagnostics": {
+            "standalone_ic": -0.004050896887523414,
+            "ic_decay": {
+              "1": -0.00649497432795938,
+              "3": -0.010096309636428233,
+              "6": -0.004050896887523414,
+              "12": -0.003432765348314023,
+              "24": -0.005423430882111877
+            },
+            "is_ic": 0.012142208247625408,
+            "val_ic": -0.004050896887523414,
+            "val_n_obs": 163001,
+            "residual_ic": -0.003653405085277548,
+            "independence_metric": "residual_ic",
+            "with_ic": 0.050716520005267954,
+            "base_ic": 0.053539206035014456,
+            "max_abs_corr": 0.32822231193696827,
+            "delta_participation": 0.7584674112637313,
+            "pr_before": 1.1193619970918443,
+            "pr_after": 1.8778294083555755,
+            "marginal_value_raw": -0.0028226860297465017,
+            "sign_consistency": null,
+            "plateau_penalty": 0.00014878860657532248,
+            "jitter_ics": [
+              0.0033688441157330314,
+              0.004435372446163152
+            ],
+            "perturbation_penalty": null,
+            "turnover": 0.13043662734909953,
+            "gross_ret": 0.0011589521576805776,
+            "net_ret": 0.001016078795801766,
+            "net_gross_ratio": 0.8767219501409398,
+            "zoo_max_abs_corr": null,
+            "zoo_nearest": null,
+            "zoo_min_code_distance": null,
+            "structural_novelty": 0.9298735594683023,
+            "novelty_min_book_distance": 0.9298735594683023,
+            "novelty_min_zoo_distance": null,
+            "novelty_nearest_book_idx": 0,
+            "novelty_metric": "canonical_ast_weighted_subtree_jaccard",
+            "novelty_nearest_book_similarity": 0.0701264405316977,
+            "novelty_candidate_ast_nodes": 10,
+            "novelty_candidate_unique_subtrees": 10,
+            "coverage": 1.0,
+            "degradation_ratio": -0.33362110127831385,
+            "deflation": {
+              "best_ic": 0.004051,
+              "deflated_ic": 0.0,
+              "deflated_t": -0.158638,
+              "luck_ic": 0.004444,
+              "n_obs": 163001,
+              "n_trials": 5
+            },
+            "n_trials": 5,
+            "complexity": 29,
+            "scored_through": "2021-08-26T00:00:00",
+            "window_generation": 2
+          },
+          "behavior": {},
+          "raw": {
+            "split_sizes": {
+              "is": 1320,
+              "val": 1612,
+              "test": 0
+            },
+            "heldout_test_split_sizes": {
+              "is": 1320,
+              "val": 1612,
+              "test": 733
+            }
+          }
+        }
+      },
+      {
+        "genome": {
+          "genome_id": "g1-order_flow_mean_reversion-83a642",
+          "programs": [
+            {
+              "factor_id": "order_flow_mean_reversion",
+              "code": "\"\"\"Order Flow Mean Reversion: combines order flow entropy and price mean reversion signals.\"\"\"\n\nfrom __future__ import annotations\n\nimport pandas as pd\nimport numpy as np\nfrom quant_fund_agent.factors.base import BaseFactor\nfrom quant_fund_agent.factors.registry import register_factor\nfrom quant_fund_agent.factors.ops import ts_mean, ts_zscore, ts_sum\n\n\ndef _order_flow_entropy(volume: pd.DataFrame) -> pd.DataFrame:\n    \"\"\"Calculate the entropy of the order flow based on volume data.\"\"\"\n    total_volume = ts_sum(volume, 5)\n    prob_buy = volume / total_volume.where(total_volume != 0, np.nan)\n    prob_sell = (1 - prob_buy).fillna(0)\n    entropy = - (prob_buy * np.log(prob_buy + 1e-10)).fillna(0) - (prob_sell * np.log(prob_sell + 1e-10)).fillna(0)\n    return entropy\n\n\n@register_factor\nclass OrderFlowMeanReversion(BaseFactor):\n    factor_id = \"order_flow_mean_reversion\"\n    name = \"Order Flow Mean Reversion\"\n    category = \"mean_reversion\"\n    description = \"This factor combines the z-score of price relative to a short-term average with the entropy of order flow to identify potential mean-reversion opportunities.\"\n    inputs = [\"close\", \"volume\"]\n    prediction_horizon = 6  # bars ahead the edge peaks\n    suggested_horizons = [6]\n\n    def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:\n        close = data[\"close\"].fillna(0.0)\n        volume = data[\"volume\"].fillna(0.0)\n        rolling_mean = ts_mean(close, 20)  # 20-bar moving average\n        z_score = ts_zscore(close, 20)  # z-score based on the 20-bar moving average\n        entropy = _order_flow_entropy(volume)\n        return z_score * (1 - entropy)  # Combine z-score with inverted entropy to indicate potential reversals",
+              "name": "Order Flow Mean Reversion",
+              "category": "mean_reversion",
+              "trading_idea": "This factor combines insights from order flow entropy and short-term price reversion. By assessing the order flow's entropy and identifying deviations from a rolling price average, it captures the potential for mean reversion when market uncertainty is high. The idea posits that chaotic order flow can lead to overreactions in price, setting the stage for subsequent reversals.",
+              "description": "This signal computes the z-score of the price relative to a short-term moving average while conditioning on the entropy of order flow. A high z-score suggests overbought conditions, while a high entropy value indicates market uncertainty, signaling potential price reversals.",
+              "prediction_horizon": 6,
+              "suggested_horizons": [
+                6
+              ],
+              "expected_sign": -1,
+              "source_paper_ids": [],
+              "mechanism": "",
+              "mechanism_group_id": 0
+            }
+          ],
+          "unit": "single",
+          "generation": 1,
+          "island": 0,
+          "mechanism_group_id": 0,
+          "deme_id": 0,
+          "parent_ids": [
+            "g0-order_flow_entropy-56945d",
+            "g0-short_term_price_reversion-18b99f"
+          ],
+          "operator": "crossover",
+          "metadata": {
+            "mechanism_group_id": 0,
+            "mechanism": ""
+          }
+        },
+        "fitness": {
+          "candidate_id": "order_flow_mean_reversion",
+          "objective": {
+            "marginal_value": -0.0017518488443588626,
+            "independence": -0.015358624632079598,
+            "parsimony": -38.0,
+            "structural_novelty": 0.7096255850394203
+          },
+          "gates": {
+            "coverage_ok": false,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": false,
+            "reasons": {
+              "coverage": "0.449 < \u03c4=0.5"
+            }
+          },
+          "selectable": false,
+          "diagnostics": {
+            "standalone_ic": -0.05631303904516058,
+            "ic_decay": {
+              "1": -0.02794495145698111,
+              "3": -0.04569646884990006,
+              "6": -0.05631303904516058,
+              "12": -0.06872582904249412,
+              "24": -0.0766816518177505
+            },
+            "is_ic": -0.05128854435281412,
+            "val_ic": -0.05631303904516058,
+            "val_n_obs": 151526,
+            "residual_ic": -0.015358624632079598,
+            "independence_metric": "residual_ic",
+            "with_ic": 0.04240788251598563,
+            "base_ic": 0.04615973136034449,
+            "max_abs_corr": 0.8976399649995049,
+            "delta_participation": -0.048069745727580715,
+            "pr_before": 1.9990754035525469,
+            "pr_after": 1.9510056578249662,
+            "marginal_value_raw": -0.0037518488443588627,
+            "sign_consistency": true,
+            "plateau_penalty": 0.0,
+            "jitter_ics": [
+              0.05592705567757803,
+              0.056828591966048295
+            ],
+            "perturbation_penalty": null,
+            "turnover": 0.09456797072896145,
+            "gross_ret": -0.0009684736630854205,
+            "net_ret": -0.001075534996692947,
+            "net_gross_ratio": 1.1105464585030058,
+            "zoo_max_abs_corr": null,
+            "zoo_nearest": null,
+            "zoo_min_code_distance": null,
+            "structural_novelty": 0.7096255850394203,
+            "novelty_min_book_distance": 0.7096255850394203,
+            "novelty_min_zoo_distance": null,
+            "novelty_nearest_book_idx": 1,
+            "novelty_metric": "canonical_ast_weighted_subtree_jaccard",
+            "novelty_nearest_book_similarity": 0.2903744149605797,
+            "novelty_candidate_ast_nodes": 22,
+            "novelty_candidate_unique_subtrees": 19,
+            "coverage": 0.4491010413734872,
+            "degradation_ratio": 1.0979652426433268,
+            "deflation": {
+              "best_ic": 0.056313,
+              "deflated_ic": 0.052035,
+              "deflated_t": 20.255496,
+              "luck_ic": 0.004278,
+              "n_obs": 151526,
+              "n_trials": 4
+            },
+            "n_trials": 4,
+            "complexity": 38,
+            "scored_through": "2018-06-13T00:00:00",
+            "window_generation": 1
+          },
+          "behavior": {},
+          "raw": {
+            "split_sizes": {
+              "is": 513,
+              "val": 1612,
+              "test": 0
+            },
+            "heldout_test_split_sizes": {
+              "is": 513,
+              "val": 1612,
+              "test": 1540
+            }
+          }
+        }
+      },
+      {
+        "genome": {
+          "genome_id": "g1-dynamic_mean_reversion-b81c64",
+          "programs": [
+            {
+              "factor_id": "dynamic_mean_reversion",
+              "code": "'''Dynamic Mean Reversion: Capture price reversion relative to a volatility-adjusted mean.'''  \n\nfrom __future__ import annotations  \nimport pandas as pd  \nimport numpy as np  \nfrom quant_fund_agent.factors.base import BaseFactor  \nfrom quant_fund_agent.factors.registry import register_factor  \nfrom quant_fund_agent.factors.ops import ts_mean, ts_zscore, stddev  \n\n@register_factor  \nclass DynamicMeanReversion(BaseFactor):  \n    factor_id = 'dynamic_mean_reversion'  \n    name = 'Dynamic Mean Reversion'  \n    category = 'mean_reversion'  \n    description = 'Captures potential price reversals by measuring the z-score of the price relative to a dynamically adjusted mean based on recent volatility.'  \n    inputs = ['close', 'volume']  \n    prediction_horizon = 6  # bars ahead the edge peaks  \n    suggested_horizons = [6]  \n\n    def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:  \n        close = data['close']  \n        vol = stddev(close, 20)  # 20-bar rolling volatility  \n        dynamic_mean = ts_mean(close, 20) + vol  # Adjust mean with volatility  \n        z_score = (close - dynamic_mean) / vol  # Z-score calculation  \n        return z_score.fillna(0.0)  # Fill NaNs with 0 for safety",
+              "name": "Dynamic Mean Reversion",
+              "category": "mean_reversion",
+              "trading_idea": "This factor captures the tendency of price movements to revert to dynamically adjusted means based on recent volatility. By measuring the distance of the current price from a volatility-adjusted mean, we can identify potential reversal opportunities more effectively, particularly in volatile market conditions where traditional moving averages may lag.",
+              "description": "The signal computes a z-score of the current price relative to a dynamically adjusted mean based on the recent volatility. This allows for a more responsive mean-reversion signal that adapts to changing market conditions.",
+              "prediction_horizon": 6,
+              "suggested_horizons": [
+                6
+              ],
+              "expected_sign": 1,
+              "source_paper_ids": [],
+              "mechanism": "",
+              "mechanism_group_id": 0
+            }
+          ],
+          "unit": "single",
+          "generation": 1,
+          "island": 0,
+          "mechanism_group_id": 0,
+          "deme_id": 0,
+          "parent_ids": [
+            "g0-short_term_price_reversion-18b99f"
+          ],
+          "operator": "llm_semantic_creative",
+          "metadata": {
+            "mechanism_group_id": 0,
+            "mechanism": ""
+          }
+        },
+        "fitness": {
+          "candidate_id": "dynamic_mean_reversion",
+          "objective": {
+            "marginal_value": 0.007055135521329999,
+            "independence": -0.014733095459251899,
+            "parsimony": -11.0,
+            "structural_novelty": 0.8991213564229753
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "selectable": true,
+          "diagnostics": {
+            "standalone_ic": -0.055744662887065075,
+            "ic_decay": {
+              "1": -0.029716497288726475,
+              "3": -0.0410423150035257,
+              "6": -0.055744662887065075,
+              "12": -0.06348180407498213,
+              "24": -0.08838537220709536
+            },
+            "is_ic": -0.05270035911092063,
+            "val_ic": -0.055744662887065075,
+            "val_n_obs": 163001,
+            "residual_ic": -0.014733095459251899,
+            "independence_metric": "residual_ic",
+            "with_ic": 0.05420248554788966,
+            "base_ic": 0.04514735002655966,
+            "max_abs_corr": 0.8869791934008839,
+            "delta_participation": -0.11833428717400274,
+            "pr_before": 1.9961636955295776,
+            "pr_after": 1.8778294083555749,
+            "marginal_value_raw": 0.009055135521329999,
+            "sign_consistency": false,
+            "plateau_penalty": 0.0,
+            "jitter_ics": [
+              0.05618207223993359,
+              0.05547644411218197
+            ],
+            "perturbation_penalty": null,
+            "turnover": 0.10034302238294483,
+            "gross_ret": -0.0015818236197725191,
+            "net_ret": -0.0016921093628920498,
+            "net_gross_ratio": 1.0697206324023603,
+            "zoo_max_abs_corr": null,
+            "zoo_nearest": null,
+            "zoo_min_code_distance": null,
+            "structural_novelty": 0.8991213564229753,
+            "novelty_min_book_distance": 0.8991213564229753,
+            "novelty_min_zoo_distance": null,
+            "novelty_nearest_book_idx": 0,
+            "novelty_metric": "canonical_ast_weighted_subtree_jaccard",
+            "novelty_nearest_book_similarity": 0.1008786435770247,
+            "novelty_candidate_ast_nodes": 29,
+            "novelty_candidate_unique_subtrees": 16,
+            "coverage": 1.0,
+            "degradation_ratio": 1.0577662814353308,
+            "deflation": {
+              "best_ic": 0.055745,
+              "deflated_ic": 0.051301,
+              "deflated_t": 20.711883,
+              "luck_ic": 0.004444,
+              "n_obs": 163001,
+              "n_trials": 5
+            },
+            "n_trials": 5,
+            "complexity": 11,
+            "scored_through": "2021-08-26T00:00:00",
+            "window_generation": 2
+          },
+          "behavior": {},
+          "raw": {
+            "split_sizes": {
+              "is": 1320,
+              "val": 1612,
+              "test": 0
+            },
+            "heldout_test_split_sizes": {
+              "is": 1320,
+              "val": 1612,
+              "test": 733
+            }
+          }
+        }
+      },
+      {
+        "genome": {
+          "genome_id": "g2-short_term_price_reversion_v2-874913",
+          "programs": [
+            {
+              "factor_id": "short_term_price_reversion_v2",
+              "code": "'''Short-Term Price Reversion V2: Captures mean-reverting behavior adjusted for volatility.'''  \n\nfrom __future__ import annotations  \nimport pandas as pd  \nimport numpy as np  \nfrom quant_fund_agent.factors.base import BaseFactor  \nfrom quant_fund_agent.factors.registry import register_factor  \nfrom quant_fund_agent.factors.ops import ts_mean, ts_zscore, stddev  \n\n@register_factor  \nclass ShortTermPriceReversionV2(BaseFactor):  \n    factor_id = 'short_term_price_reversion_v2'  \n    name = 'Short-Term Price Reversion V2'  \n    category = 'mean_reversion'  \n    description = 'This signal captures potential price reversals by measuring the z-score of the price relative to a long-term moving average, adjusted for volatility.'  \n    inputs = ['close']  \n    prediction_horizon = 6  \n    suggested_horizons = [6]  \n\n    def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:  \n        close = data['close']  \n        rolling_mean = ts_mean(close, 50)  \n        rolling_std = stddev(close, 50)  \n        z_score = (close - rolling_mean) / rolling_std  \n        return z_score.fillna(0.0)  # Fill NaNs with 0 for safety",
+              "name": "Short-Term Price Reversion V2",
+              "category": "mean_reversion",
+              "trading_idea": "Prices tend to revert to their mean after experiencing significant volatility. This factor identifies overbought or oversold conditions by comparing the current price to a longer-term moving average while incorporating the recent volatility of the price. By normalizing the deviation from the moving average with a volatility measure, we can better capture potential reversals.",
+              "description": "This signal computes the z-score of the price deviation from a 50-bar moving average, adjusted for the recent volatility over the same window. A high positive z-score indicates overbought conditions, while a high negative z-score suggests oversold conditions.",
+              "prediction_horizon": 6,
+              "suggested_horizons": [
+                6
+              ],
+              "expected_sign": -1,
+              "source_paper_ids": [],
+              "mechanism": "",
+              "mechanism_group_id": 0
+            }
+          ],
+          "unit": "single",
+          "generation": 2,
+          "island": 0,
+          "mechanism_group_id": 0,
+          "deme_id": 0,
+          "parent_ids": [
+            "g0-short_term_price_reversion-18b99f"
+          ],
+          "operator": "llm_semantic",
+          "metadata": {
+            "mechanism_group_id": 0,
+            "mechanism": ""
+          }
+        },
+        "fitness": {
+          "candidate_id": "short_term_price_reversion_v2",
+          "objective": {
+            "marginal_value": -0.006421391361584957,
+            "independence": -0.02470387595301585,
+            "parsimony": -10.0,
+            "structural_novelty": 0.6713870695778875
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "selectable": true,
+          "diagnostics": {
+            "standalone_ic": -0.05797935517851787,
+            "ic_decay": {
+              "1": -0.031021377051997038,
+              "3": -0.042974856725471536,
+              "6": -0.05797935517851787,
+              "12": -0.07291703980694218,
+              "24": -0.11030042180818976
+            },
+            "is_ic": -0.06013559262029329,
+            "val_ic": -0.05797935517851787,
+            "val_n_obs": 162878,
+            "residual_ic": -0.02470387595301585,
+            "independence_metric": "residual_ic",
+            "with_ic": 0.0457810941863047,
+            "base_ic": 0.05420248554788966,
+            "max_abs_corr": 0.7859161532818008,
+            "delta_participation": 0.12919706140585863,
+            "pr_before": 1.8778294083555749,
+            "pr_after": 2.0070264697614335,
+            "marginal_value_raw": -0.008421391361584957,
+            "sign_consistency": true,
+            "plateau_penalty": 0.0,
+            "jitter_ics": [
+              0.056295825242837376,
+              0.059903359188996044
+            ],
+            "perturbation_penalty": null,
+            "turnover": 0.06281944163397456,
+            "gross_ret": -0.0007745113022442949,
+            "net_ret": -0.0008435718965092488,
+            "net_gross_ratio": 1.0891666707313858,
+            "zoo_max_abs_corr": null,
+            "zoo_nearest": null,
+            "zoo_min_code_distance": null,
+            "structural_novelty": 0.6713870695778875,
+            "novelty_min_book_distance": 0.6713870695778875,
+            "novelty_min_zoo_distance": null,
+            "novelty_nearest_book_idx": 2,
+            "novelty_metric": "canonical_ast_weighted_subtree_jaccard",
+            "novelty_nearest_book_similarity": 0.3286129304221125,
+            "novelty_candidate_ast_nodes": 22,
+            "novelty_candidate_unique_subtrees": 15,
+            "coverage": 1.0,
+            "degradation_ratio": 0.9641437400411054,
+            "deflation": {
+              "best_ic": 0.057979,
+              "deflated_ic": 0.053289,
+              "deflated_t": 21.506375,
+              "luck_ic": 0.004691,
+              "n_obs": 162878,
+              "n_trials": 6
+            },
+            "n_trials": 6,
+            "complexity": 10,
+            "scored_through": "2021-08-26T00:00:00",
+            "window_generation": 2
+          },
+          "behavior": {},
+          "raw": {
+            "split_sizes": {
+              "is": 1320,
+              "val": 1612,
+              "test": 0
+            },
+            "heldout_test_split_sizes": {
+              "is": 1320,
+              "val": 1612,
+              "test": 733
+            }
+          }
+        }
+      },
+      {
+        "genome": {
+          "genome_id": "g2-dynamic_mean_reversion_j-798e23",
+          "programs": [
+            {
+              "factor_id": "dynamic_mean_reversion_j",
+              "code": "\"\"\"Dynamic Mean Reversion: Capture price reversion relative to a volatility-adjusted mean.\"\"\"\nfrom __future__ import annotations\nimport pandas as pd\nimport numpy as np\nfrom quant_fund_agent.factors.base import BaseFactor\nfrom quant_fund_agent.factors.registry import register_factor\nfrom quant_fund_agent.factors.ops import ts_mean, ts_zscore, stddev\n\n@register_factor\nclass DynamicMeanReversion(BaseFactor):\n    factor_id = 'dynamic_mean_reversion_j'\n    name = 'Dynamic Mean Reversion'\n    category = 'mean_reversion'\n    description = 'Captures potential price reversals by measuring the z-score of the price relative to a dynamically adjusted mean based on recent volatility.'\n    inputs = ['close', 'volume']\n    prediction_horizon = 6\n    suggested_horizons = [6]\n\n    def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:\n        close = data['close']\n        vol = stddev(close, 21)\n        dynamic_mean = ts_mean(close, 21) + vol\n        z_score = (close - dynamic_mean) / vol\n        return z_score.fillna(0.0)",
+              "name": "Dynamic Mean Reversion (jitter)",
+              "category": "mean_reversion",
+              "trading_idea": "This factor captures the tendency of price movements to revert to dynamically adjusted means based on recent volatility. By measuring the distance of the current price from a volatility-adjusted mean, we can identify potential reversal opportunities more effectively, particularly in volatile market conditions where traditional moving averages may lag.",
+              "description": "The signal computes a z-score of the current price relative to a dynamically adjusted mean based on the recent volatility. This allows for a more responsive mean-reversion signal that adapts to changing market conditions.",
+              "prediction_horizon": 6,
+              "suggested_horizons": [
+                6
+              ],
+              "expected_sign": 1,
+              "source_paper_ids": [],
+              "mechanism": "",
+              "mechanism_group_id": 0
+            }
+          ],
+          "unit": "single",
+          "generation": 2,
+          "island": 0,
+          "mechanism_group_id": 0,
+          "deme_id": 0,
+          "parent_ids": [
+            "g1-dynamic_mean_reversion-b81c64"
+          ],
+          "operator": "jitter",
+          "metadata": {
+            "mechanism_group_id": 0,
+            "mechanism": ""
+          }
+        },
+        "fitness": {
+          "candidate_id": "dynamic_mean_reversion_j",
+          "objective": {
+            "marginal_value": -0.010701460091276918,
+            "independence": -0.00127696672662829,
+            "parsimony": -11.0,
+            "structural_novelty": 0.0
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "selectable": true,
+          "diagnostics": {
+            "standalone_ic": -0.05557415612377563,
+            "ic_decay": {
+              "1": -0.029657422093382173,
+              "3": -0.04073891195362495,
+              "6": -0.05557415612377563,
+              "12": -0.06397820153473521,
+              "24": -0.08904169343105012
+            },
+            "is_ic": -0.053229916188540415,
+            "val_ic": -0.05557415612377563,
+            "val_n_obs": 162981,
+            "residual_ic": -0.00127696672662829,
+            "independence_metric": "residual_ic",
+            "with_ic": 0.04550102545661274,
+            "base_ic": 0.05420248554788966,
+            "max_abs_corr": 0.9974472669048964,
+            "delta_participation": -0.2049133489504289,
+            "pr_before": 1.8778294083555749,
+            "pr_after": 1.672916059405146,
+            "marginal_value_raw": -0.008701460091276918,
+            "sign_consistency": false,
+            "plateau_penalty": 0.0,
+            "jitter_ics": [
+              0.05586892595206783,
+              0.055325816515281505
+            ],
+            "perturbation_penalty": null,
+            "turnover": 0.09781196759727671,
+            "gross_ret": -0.0015783188105035113,
+            "net_ret": -0.0016858311009177091,
+            "net_gross_ratio": 1.0681182342241107,
+            "zoo_max_abs_corr": null,
+            "zoo_nearest": null,
+            "zoo_min_code_distance": null,
+            "structural_novelty": 0.0,
+            "novelty_min_book_distance": 0.0,
+            "novelty_min_zoo_distance": null,
+            "novelty_nearest_book_idx": 2,
+            "novelty_metric": "canonical_ast_weighted_subtree_jaccard",
+            "novelty_nearest_book_similarity": 1.0,
+            "novelty_candidate_ast_nodes": 29,
+            "novelty_candidate_unique_subtrees": 16,
+            "coverage": 1.0,
+            "degradation_ratio": 1.0440398952899328,
+            "deflation": {
+              "best_ic": 0.055574,
+              "deflated_ic": 0.050688,
+              "deflated_t": 20.46302,
+              "luck_ic": 0.004887,
+              "n_obs": 162981,
+              "n_trials": 7
+            },
+            "n_trials": 7,
+            "complexity": 11,
+            "scored_through": "2021-08-26T00:00:00",
+            "window_generation": 2
+          },
+          "behavior": {},
+          "raw": {
+            "split_sizes": {
+              "is": 1320,
+              "val": 1612,
+              "test": 0
+            },
+            "heldout_test_split_sizes": {
+              "is": 1320,
+              "val": 1612,
+              "test": 733
+            }
+          }
+        }
+      }
+    ]
+  ],
+  "group_archives": [
+    [
+      {
+        "genome": {
+          "genome_id": "g0-short_term_price_reversion-18b99f",
+          "programs": [
+            {
+              "factor_id": "short_term_price_reversion",
+              "code": "\"\"\"Market prices often exhibit mean-reverting behavior over short time horizons, particularly after significant movements. This factor exploits the tendency for prices to revert to their mean shortly after they deviate substantially from it, capturing potential reversal opportunities. By measuring the deviation from a rolling average, we can identify stocks that are likely to revert back to their mean price. This signal computes the z-score of the price relative to a short-term moving average, indicating how far the current price is from the average. A high positive z-score suggests overbought conditions, while a high negative z-score indicates oversold conditions, signaling potential price reversals.\"\"\"\n\nfrom __future__ import annotations\nimport pandas as pd\nimport numpy as np\nfrom quant_fund_agent.factors.base import BaseFactor\nfrom quant_fund_agent.factors.registry import register_factor\nfrom quant_fund_agent.factors.ops import ts_mean, ts_zscore\n\n@register_factor\nclass ShortTermPriceReversion(BaseFactor):\n    factor_id = \"short_term_price_reversion\"\n    name = \"Short-Term Price Reversion\"\n    category = \"mean_reversion\"\n    description = \"This factor captures potential price reversals by measuring the z-score of the price relative to a short-term moving average.\"\n    inputs = [\"close\"]\n    prediction_horizon = 6  # bars ahead the edge peaks\n    suggested_horizons = [6]\n\n    def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:\n        close = data[\"close\"]\n        rolling_mean = ts_mean(close, 20)  # 20-bar moving average\n        z_score = ts_zscore(close, 20)  # z-score based on the 20-bar moving average\n        return z_score.fillna(0.0)  # Fill NaNs with 0 for safety",
+              "name": "Short-Term Price Reversion",
+              "category": "mean_reversion",
+              "trading_idea": "Market prices often exhibit mean-reverting behavior over short time horizons, particularly after significant movements. This factor exploits the tendency for prices to revert to their mean shortly after they deviate substantially from it, capturing potential reversal opportunities. By measuring the deviation from a rolling average, we can identify stocks that are likely to revert back to their mean price.",
+              "description": "This signal computes the z-score of the price relative to a short-term moving average, indicating how far the current price is from the average. A high positive z-score suggests overbought conditions, while a high negative z-score indicates oversold conditions, signaling potential price reversals.",
+              "prediction_horizon": 6,
+              "suggested_horizons": [
+                6
+              ],
+              "expected_sign": null,
+              "source_paper_ids": [],
+              "mechanism": "",
+              "mechanism_group_id": 0
+            }
+          ],
+          "unit": "single",
+          "generation": 0,
+          "island": 0,
+          "mechanism_group_id": 0,
+          "deme_id": 0,
+          "parent_ids": [],
+          "operator": "seed",
+          "metadata": {
+            "mechanism_group_id": 0,
+            "mechanism": ""
+          }
+        },
+        "fitness": {
+          "candidate_id": "short_term_price_reversion",
+          "objective": {
+            "marginal_value": -0.0009274808910524346,
+            "independence": -0.006543354211391481,
+            "parsimony": -8.0,
+            "structural_novelty": 0.8991213564229753
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "selectable": true,
+          "diagnostics": {
+            "standalone_ic": -0.05557885727877171,
+            "ic_decay": {
+              "1": -0.029698312379899786,
+              "3": -0.04102394726943847,
+              "6": -0.05557885727877171,
+              "12": -0.06336482057017646,
+              "24": -0.08788876360157485
+            },
+            "is_ic": -0.0474690213972788,
+            "val_ic": -0.05557885727877171,
+            "val_n_obs": 163001,
+            "residual_ic": -0.006543354211391481,
+            "independence_metric": "residual_ic",
+            "with_ic": 0.045558367769710284,
+            "base_ic": 0.04648584866076272,
+            "max_abs_corr": 0.886979193400884,
+            "delta_participation": 0.0723351040303244,
+            "pr_before": 1.8054943043252512,
+            "pr_after": 1.8778294083555755,
+            "marginal_value_raw": -0.0009274808910524346,
+            "sign_consistency": null,
+            "plateau_penalty": 0.0,
+            "jitter_ics": [
+              0.05557885727877171,
+              0.05557885727877171
+            ],
+            "perturbation_penalty": null,
+            "turnover": 0.10351051260794925,
+            "gross_ret": -0.0009390747499629556,
+            "net_ret": -0.0010528349679466069,
+            "net_gross_ratio": 1.1211407483676235,
+            "zoo_max_abs_corr": null,
+            "zoo_nearest": null,
+            "zoo_min_code_distance": null,
+            "structural_novelty": 0.8991213564229753,
+            "novelty_min_book_distance": 0.8991213564229753,
+            "novelty_min_zoo_distance": null,
+            "novelty_nearest_book_idx": 1,
+            "novelty_metric": "canonical_ast_weighted_subtree_jaccard",
+            "novelty_nearest_book_similarity": 0.1008786435770247,
+            "novelty_candidate_ast_nodes": 11,
+            "novelty_candidate_unique_subtrees": 11,
+            "coverage": 1.0,
+            "degradation_ratio": 1.1708448087357834,
+            "deflation": {
+              "best_ic": 0.055579,
+              "deflated_ic": 0.051135,
+              "deflated_t": 20.644942,
+              "luck_ic": 0.004444,
+              "n_obs": 163001,
+              "n_trials": 5
+            },
+            "n_trials": 5,
+            "complexity": 8,
+            "scored_through": "2021-08-26T00:00:00",
+            "window_generation": 2
+          },
+          "behavior": {},
+          "raw": {
+            "split_sizes": {
+              "is": 1320,
+              "val": 1612,
+              "test": 0
+            },
+            "heldout_test_split_sizes": {
+              "is": 1320,
+              "val": 1612,
+              "test": 733
+            }
+          }
+        }
+      },
+      {
+        "genome": {
+          "genome_id": "g0-order_flow_entropy-56945d",
+          "programs": [
+            {
+              "factor_id": "order_flow_entropy",
+              "code": "\"\"\"The concept of entropy can be applied to order flow as a measure of market uncertainty and imbalance. A high entropy value indicates a more chaotic and unpredictable order flow, which may precede significant price movements. Conversely, low entropy suggests a stable environment, potentially leading to mean-reversion opportunities.\"\"\"\n\nfrom __future__ import annotations\n\nimport pandas as pd\nimport numpy as np\nfrom quant_fund_agent.factors.base import BaseFactor\nfrom quant_fund_agent.factors.registry import register_factor\nfrom quant_fund_agent.factors.ops import ts_sum, delta\n\n\ndef _order_flow_entropy(volume: pd.DataFrame) -> pd.DataFrame:\n    \"\"\"Calculate the entropy of the order flow based on volume data.\"\"\"\n    # Calculate the total volume\n    total_volume = ts_sum(volume, 5)\n    # Calculate the probabilities of buy and sell orders\n    prob_buy = volume / total_volume.where(total_volume != 0, np.nan)\n    prob_sell = (1 - prob_buy).fillna(0)\n    # Calculate entropy using the formula: -sum(p * log(p))\n    entropy = - (prob_buy * np.log(prob_buy + 1e-10)).fillna(0) - (prob_sell * np.log(prob_sell + 1e-10)).fillna(0)\n    return entropy\n\n\n@register_factor\nclass OrderFlowEntropy(BaseFactor):\n    factor_id = \"order_flow_entropy\"\n    name = \"Order Flow Entropy\"\n    category = \"microstructure\"\n    description = \"This factor calculates the entropy of the order flow using the volume data over a fixed window. It evaluates the distribution of buy and sell orders, where higher entropy indicates greater uncertainty in market direction, while lower values suggest a more predictable flow.\"\n    inputs = [\"volume\"]\n    prediction_horizon = 6  # bars ahead the edge peaks\n    suggested_horizons = [6]\n\n    def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:\n        volume = data[\"volume\"].fillna(0.0)\n        entropy = _order_flow_entropy(volume)\n        return entropy",
+              "name": "Order Flow Entropy",
+              "category": "microstructure",
+              "trading_idea": "The concept of entropy can be applied to order flow as a measure of market uncertainty and imbalance. A high entropy value indicates a more chaotic and unpredictable order flow, which may precede significant price movements. Conversely, low entropy suggests a stable environment, potentially leading to mean-reversion opportunities.",
+              "description": "This factor calculates the entropy of the order flow using the volume data over a fixed window. It evaluates the distribution of buy and sell orders, where higher entropy indicates greater uncertainty in market direction, while lower values suggest a more predictable flow.",
+              "prediction_horizon": 6,
+              "suggested_horizons": [
+                6
+              ],
+              "expected_sign": null,
+              "source_paper_ids": [],
+              "mechanism": "",
+              "mechanism_group_id": 0
+            }
+          ],
+          "unit": "single",
+          "generation": 0,
+          "island": 0,
+          "mechanism_group_id": 0,
+          "deme_id": 0,
+          "parent_ids": [],
+          "operator": "seed",
+          "metadata": {
+            "mechanism_group_id": 0,
+            "mechanism": ""
+          }
+        },
+        "fitness": {
+          "candidate_id": "order_flow_entropy",
+          "objective": {
+            "marginal_value": -0.002971474636321824,
+            "independence": -0.003653405085277548,
+            "parsimony": -29.0,
+            "structural_novelty": 0.9298735594683023
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "selectable": true,
+          "diagnostics": {
+            "standalone_ic": -0.004050896887523414,
+            "ic_decay": {
+              "1": -0.00649497432795938,
+              "3": -0.010096309636428233,
+              "6": -0.004050896887523414,
+              "12": -0.003432765348314023,
+              "24": -0.005423430882111877
+            },
+            "is_ic": 0.012142208247625408,
+            "val_ic": -0.004050896887523414,
+            "val_n_obs": 163001,
+            "residual_ic": -0.003653405085277548,
+            "independence_metric": "residual_ic",
+            "with_ic": 0.050716520005267954,
+            "base_ic": 0.053539206035014456,
+            "max_abs_corr": 0.32822231193696827,
+            "delta_participation": 0.7584674112637313,
+            "pr_before": 1.1193619970918443,
+            "pr_after": 1.8778294083555755,
+            "marginal_value_raw": -0.0028226860297465017,
+            "sign_consistency": null,
+            "plateau_penalty": 0.00014878860657532248,
+            "jitter_ics": [
+              0.0033688441157330314,
+              0.004435372446163152
+            ],
+            "perturbation_penalty": null,
+            "turnover": 0.13043662734909953,
+            "gross_ret": 0.0011589521576805776,
+            "net_ret": 0.001016078795801766,
+            "net_gross_ratio": 0.8767219501409398,
+            "zoo_max_abs_corr": null,
+            "zoo_nearest": null,
+            "zoo_min_code_distance": null,
+            "structural_novelty": 0.9298735594683023,
+            "novelty_min_book_distance": 0.9298735594683023,
+            "novelty_min_zoo_distance": null,
+            "novelty_nearest_book_idx": 0,
+            "novelty_metric": "canonical_ast_weighted_subtree_jaccard",
+            "novelty_nearest_book_similarity": 0.0701264405316977,
+            "novelty_candidate_ast_nodes": 10,
+            "novelty_candidate_unique_subtrees": 10,
+            "coverage": 1.0,
+            "degradation_ratio": -0.33362110127831385,
+            "deflation": {
+              "best_ic": 0.004051,
+              "deflated_ic": 0.0,
+              "deflated_t": -0.158638,
+              "luck_ic": 0.004444,
+              "n_obs": 163001,
+              "n_trials": 5
+            },
+            "n_trials": 5,
+            "complexity": 29,
+            "scored_through": "2021-08-26T00:00:00",
+            "window_generation": 2
+          },
+          "behavior": {},
+          "raw": {
+            "split_sizes": {
+              "is": 1320,
+              "val": 1612,
+              "test": 0
+            },
+            "heldout_test_split_sizes": {
+              "is": 1320,
+              "val": 1612,
+              "test": 733
+            }
+          }
+        }
+      },
+      {
+        "genome": {
+          "genome_id": "g1-dynamic_mean_reversion-b81c64",
+          "programs": [
+            {
+              "factor_id": "dynamic_mean_reversion",
+              "code": "'''Dynamic Mean Reversion: Capture price reversion relative to a volatility-adjusted mean.'''  \n\nfrom __future__ import annotations  \nimport pandas as pd  \nimport numpy as np  \nfrom quant_fund_agent.factors.base import BaseFactor  \nfrom quant_fund_agent.factors.registry import register_factor  \nfrom quant_fund_agent.factors.ops import ts_mean, ts_zscore, stddev  \n\n@register_factor  \nclass DynamicMeanReversion(BaseFactor):  \n    factor_id = 'dynamic_mean_reversion'  \n    name = 'Dynamic Mean Reversion'  \n    category = 'mean_reversion'  \n    description = 'Captures potential price reversals by measuring the z-score of the price relative to a dynamically adjusted mean based on recent volatility.'  \n    inputs = ['close', 'volume']  \n    prediction_horizon = 6  # bars ahead the edge peaks  \n    suggested_horizons = [6]  \n\n    def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:  \n        close = data['close']  \n        vol = stddev(close, 20)  # 20-bar rolling volatility  \n        dynamic_mean = ts_mean(close, 20) + vol  # Adjust mean with volatility  \n        z_score = (close - dynamic_mean) / vol  # Z-score calculation  \n        return z_score.fillna(0.0)  # Fill NaNs with 0 for safety",
+              "name": "Dynamic Mean Reversion",
+              "category": "mean_reversion",
+              "trading_idea": "This factor captures the tendency of price movements to revert to dynamically adjusted means based on recent volatility. By measuring the distance of the current price from a volatility-adjusted mean, we can identify potential reversal opportunities more effectively, particularly in volatile market conditions where traditional moving averages may lag.",
+              "description": "The signal computes a z-score of the current price relative to a dynamically adjusted mean based on the recent volatility. This allows for a more responsive mean-reversion signal that adapts to changing market conditions.",
+              "prediction_horizon": 6,
+              "suggested_horizons": [
+                6
+              ],
+              "expected_sign": 1,
+              "source_paper_ids": [],
+              "mechanism": "",
+              "mechanism_group_id": 0
+            }
+          ],
+          "unit": "single",
+          "generation": 1,
+          "island": 0,
+          "mechanism_group_id": 0,
+          "deme_id": 0,
+          "parent_ids": [
+            "g0-short_term_price_reversion-18b99f"
+          ],
+          "operator": "llm_semantic_creative",
+          "metadata": {
+            "mechanism_group_id": 0,
+            "mechanism": ""
+          }
+        },
+        "fitness": {
+          "candidate_id": "dynamic_mean_reversion",
+          "objective": {
+            "marginal_value": 0.007055135521329999,
+            "independence": -0.014733095459251899,
+            "parsimony": -11.0,
+            "structural_novelty": 0.8991213564229753
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "selectable": true,
+          "diagnostics": {
+            "standalone_ic": -0.055744662887065075,
+            "ic_decay": {
+              "1": -0.029716497288726475,
+              "3": -0.0410423150035257,
+              "6": -0.055744662887065075,
+              "12": -0.06348180407498213,
+              "24": -0.08838537220709536
+            },
+            "is_ic": -0.05270035911092063,
+            "val_ic": -0.055744662887065075,
+            "val_n_obs": 163001,
+            "residual_ic": -0.014733095459251899,
+            "independence_metric": "residual_ic",
+            "with_ic": 0.05420248554788966,
+            "base_ic": 0.04514735002655966,
+            "max_abs_corr": 0.8869791934008839,
+            "delta_participation": -0.11833428717400274,
+            "pr_before": 1.9961636955295776,
+            "pr_after": 1.8778294083555749,
+            "marginal_value_raw": 0.009055135521329999,
+            "sign_consistency": false,
+            "plateau_penalty": 0.0,
+            "jitter_ics": [
+              0.05618207223993359,
+              0.05547644411218197
+            ],
+            "perturbation_penalty": null,
+            "turnover": 0.10034302238294483,
+            "gross_ret": -0.0015818236197725191,
+            "net_ret": -0.0016921093628920498,
+            "net_gross_ratio": 1.0697206324023603,
+            "zoo_max_abs_corr": null,
+            "zoo_nearest": null,
+            "zoo_min_code_distance": null,
+            "structural_novelty": 0.8991213564229753,
+            "novelty_min_book_distance": 0.8991213564229753,
+            "novelty_min_zoo_distance": null,
+            "novelty_nearest_book_idx": 0,
+            "novelty_metric": "canonical_ast_weighted_subtree_jaccard",
+            "novelty_nearest_book_similarity": 0.1008786435770247,
+            "novelty_candidate_ast_nodes": 29,
+            "novelty_candidate_unique_subtrees": 16,
+            "coverage": 1.0,
+            "degradation_ratio": 1.0577662814353308,
+            "deflation": {
+              "best_ic": 0.055745,
+              "deflated_ic": 0.051301,
+              "deflated_t": 20.711883,
+              "luck_ic": 0.004444,
+              "n_obs": 163001,
+              "n_trials": 5
+            },
+            "n_trials": 5,
+            "complexity": 11,
+            "scored_through": "2021-08-26T00:00:00",
+            "window_generation": 2
+          },
+          "behavior": {},
+          "raw": {
+            "split_sizes": {
+              "is": 1320,
+              "val": 1612,
+              "test": 0
+            },
+            "heldout_test_split_sizes": {
+              "is": 1320,
+              "val": 1612,
+              "test": 733
+            }
+          }
+        }
+      },
+      {
+        "genome": {
+          "genome_id": "g2-dynamic_mean_reversion_j-798e23",
+          "programs": [
+            {
+              "factor_id": "dynamic_mean_reversion_j",
+              "code": "\"\"\"Dynamic Mean Reversion: Capture price reversion relative to a volatility-adjusted mean.\"\"\"\nfrom __future__ import annotations\nimport pandas as pd\nimport numpy as np\nfrom quant_fund_agent.factors.base import BaseFactor\nfrom quant_fund_agent.factors.registry import register_factor\nfrom quant_fund_agent.factors.ops import ts_mean, ts_zscore, stddev\n\n@register_factor\nclass DynamicMeanReversion(BaseFactor):\n    factor_id = 'dynamic_mean_reversion_j'\n    name = 'Dynamic Mean Reversion'\n    category = 'mean_reversion'\n    description = 'Captures potential price reversals by measuring the z-score of the price relative to a dynamically adjusted mean based on recent volatility.'\n    inputs = ['close', 'volume']\n    prediction_horizon = 6\n    suggested_horizons = [6]\n\n    def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:\n        close = data['close']\n        vol = stddev(close, 21)\n        dynamic_mean = ts_mean(close, 21) + vol\n        z_score = (close - dynamic_mean) / vol\n        return z_score.fillna(0.0)",
+              "name": "Dynamic Mean Reversion (jitter)",
+              "category": "mean_reversion",
+              "trading_idea": "This factor captures the tendency of price movements to revert to dynamically adjusted means based on recent volatility. By measuring the distance of the current price from a volatility-adjusted mean, we can identify potential reversal opportunities more effectively, particularly in volatile market conditions where traditional moving averages may lag.",
+              "description": "The signal computes a z-score of the current price relative to a dynamically adjusted mean based on the recent volatility. This allows for a more responsive mean-reversion signal that adapts to changing market conditions.",
+              "prediction_horizon": 6,
+              "suggested_horizons": [
+                6
+              ],
+              "expected_sign": 1,
+              "source_paper_ids": [],
+              "mechanism": "",
+              "mechanism_group_id": 0
+            }
+          ],
+          "unit": "single",
+          "generation": 2,
+          "island": 0,
+          "mechanism_group_id": 0,
+          "deme_id": 0,
+          "parent_ids": [
+            "g1-dynamic_mean_reversion-b81c64"
+          ],
+          "operator": "jitter",
+          "metadata": {
+            "mechanism_group_id": 0,
+            "mechanism": ""
+          }
+        },
+        "fitness": {
+          "candidate_id": "dynamic_mean_reversion_j",
+          "objective": {
+            "marginal_value": -0.010701460091276918,
+            "independence": -0.00127696672662829,
+            "parsimony": -11.0,
+            "structural_novelty": 0.0
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "selectable": true,
+          "diagnostics": {
+            "standalone_ic": -0.05557415612377563,
+            "ic_decay": {
+              "1": -0.029657422093382173,
+              "3": -0.04073891195362495,
+              "6": -0.05557415612377563,
+              "12": -0.06397820153473521,
+              "24": -0.08904169343105012
+            },
+            "is_ic": -0.053229916188540415,
+            "val_ic": -0.05557415612377563,
+            "val_n_obs": 162981,
+            "residual_ic": -0.00127696672662829,
+            "independence_metric": "residual_ic",
+            "with_ic": 0.04550102545661274,
+            "base_ic": 0.05420248554788966,
+            "max_abs_corr": 0.9974472669048964,
+            "delta_participation": -0.2049133489504289,
+            "pr_before": 1.8778294083555749,
+            "pr_after": 1.672916059405146,
+            "marginal_value_raw": -0.008701460091276918,
+            "sign_consistency": false,
+            "plateau_penalty": 0.0,
+            "jitter_ics": [
+              0.05586892595206783,
+              0.055325816515281505
+            ],
+            "perturbation_penalty": null,
+            "turnover": 0.09781196759727671,
+            "gross_ret": -0.0015783188105035113,
+            "net_ret": -0.0016858311009177091,
+            "net_gross_ratio": 1.0681182342241107,
+            "zoo_max_abs_corr": null,
+            "zoo_nearest": null,
+            "zoo_min_code_distance": null,
+            "structural_novelty": 0.0,
+            "novelty_min_book_distance": 0.0,
+            "novelty_min_zoo_distance": null,
+            "novelty_nearest_book_idx": 2,
+            "novelty_metric": "canonical_ast_weighted_subtree_jaccard",
+            "novelty_nearest_book_similarity": 1.0,
+            "novelty_candidate_ast_nodes": 29,
+            "novelty_candidate_unique_subtrees": 16,
+            "coverage": 1.0,
+            "degradation_ratio": 1.0440398952899328,
+            "deflation": {
+              "best_ic": 0.055574,
+              "deflated_ic": 0.050688,
+              "deflated_t": 20.46302,
+              "luck_ic": 0.004887,
+              "n_obs": 162981,
+              "n_trials": 7
+            },
+            "n_trials": 7,
+            "complexity": 11,
+            "scored_through": "2021-08-26T00:00:00",
+            "window_generation": 2
+          },
+          "behavior": {},
+          "raw": {
+            "split_sizes": {
+              "is": 1320,
+              "val": 1612,
+              "test": 0
+            },
+            "heldout_test_split_sizes": {
+              "is": 1320,
+              "val": 1612,
+              "test": 733
+            }
+          }
+        }
+      }
+    ]
+  ],
+  "archive": [
+    {
+      "genome": {
+        "genome_id": "g0-short_term_price_reversion-18b99f",
+        "programs": [
+          {
+            "factor_id": "short_term_price_reversion",
+            "code": "\"\"\"Market prices often exhibit mean-reverting behavior over short time horizons, particularly after significant movements. This factor exploits the tendency for prices to revert to their mean shortly after they deviate substantially from it, capturing potential reversal opportunities. By measuring the deviation from a rolling average, we can identify stocks that are likely to revert back to their mean price. This signal computes the z-score of the price relative to a short-term moving average, indicating how far the current price is from the average. A high positive z-score suggests overbought conditions, while a high negative z-score indicates oversold conditions, signaling potential price reversals.\"\"\"\n\nfrom __future__ import annotations\nimport pandas as pd\nimport numpy as np\nfrom quant_fund_agent.factors.base import BaseFactor\nfrom quant_fund_agent.factors.registry import register_factor\nfrom quant_fund_agent.factors.ops import ts_mean, ts_zscore\n\n@register_factor\nclass ShortTermPriceReversion(BaseFactor):\n    factor_id = \"short_term_price_reversion\"\n    name = \"Short-Term Price Reversion\"\n    category = \"mean_reversion\"\n    description = \"This factor captures potential price reversals by measuring the z-score of the price relative to a short-term moving average.\"\n    inputs = [\"close\"]\n    prediction_horizon = 6  # bars ahead the edge peaks\n    suggested_horizons = [6]\n\n    def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:\n        close = data[\"close\"]\n        rolling_mean = ts_mean(close, 20)  # 20-bar moving average\n        z_score = ts_zscore(close, 20)  # z-score based on the 20-bar moving average\n        return z_score.fillna(0.0)  # Fill NaNs with 0 for safety",
+            "name": "Short-Term Price Reversion",
+            "category": "mean_reversion",
+            "trading_idea": "Market prices often exhibit mean-reverting behavior over short time horizons, particularly after significant movements. This factor exploits the tendency for prices to revert to their mean shortly after they deviate substantially from it, capturing potential reversal opportunities. By measuring the deviation from a rolling average, we can identify stocks that are likely to revert back to their mean price.",
+            "description": "This signal computes the z-score of the price relative to a short-term moving average, indicating how far the current price is from the average. A high positive z-score suggests overbought conditions, while a high negative z-score indicates oversold conditions, signaling potential price reversals.",
+            "prediction_horizon": 6,
+            "suggested_horizons": [
+              6
+            ],
+            "expected_sign": null,
+            "source_paper_ids": [],
+            "mechanism": "",
+            "mechanism_group_id": 0
+          }
+        ],
+        "unit": "single",
+        "generation": 0,
+        "island": 0,
+        "mechanism_group_id": 0,
+        "deme_id": 0,
+        "parent_ids": [],
+        "operator": "seed",
+        "metadata": {
+          "mechanism_group_id": 0,
+          "mechanism": ""
+        }
+      },
+      "fitness": {
+        "candidate_id": "short_term_price_reversion",
+        "objective": {
+          "marginal_value": -0.0009274808910524346,
+          "independence": -0.006543354211391481,
+          "parsimony": -8.0,
+          "structural_novelty": 0.8991213564229753
+        },
+        "gates": {
+          "coverage_ok": true,
+          "deflation_ok": null,
+          "cost_ok": null,
+          "passed": true
+        },
+        "selectable": true,
+        "diagnostics": {
+          "standalone_ic": -0.05557885727877171,
+          "ic_decay": {
+            "1": -0.029698312379899786,
+            "3": -0.04102394726943847,
+            "6": -0.05557885727877171,
+            "12": -0.06336482057017646,
+            "24": -0.08788876360157485
+          },
+          "is_ic": -0.0474690213972788,
+          "val_ic": -0.05557885727877171,
+          "val_n_obs": 163001,
+          "residual_ic": -0.006543354211391481,
+          "independence_metric": "residual_ic",
+          "with_ic": 0.045558367769710284,
+          "base_ic": 0.04648584866076272,
+          "max_abs_corr": 0.886979193400884,
+          "delta_participation": 0.0723351040303244,
+          "pr_before": 1.8054943043252512,
+          "pr_after": 1.8778294083555755,
+          "marginal_value_raw": -0.0009274808910524346,
+          "sign_consistency": null,
+          "plateau_penalty": 0.0,
+          "jitter_ics": [
+            0.05557885727877171,
+            0.05557885727877171
+          ],
+          "perturbation_penalty": null,
+          "turnover": 0.10351051260794925,
+          "gross_ret": -0.0009390747499629556,
+          "net_ret": -0.0010528349679466069,
+          "net_gross_ratio": 1.1211407483676235,
+          "zoo_max_abs_corr": null,
+          "zoo_nearest": null,
+          "zoo_min_code_distance": null,
+          "structural_novelty": 0.8991213564229753,
+          "novelty_min_book_distance": 0.8991213564229753,
+          "novelty_min_zoo_distance": null,
+          "novelty_nearest_book_idx": 1,
+          "novelty_metric": "canonical_ast_weighted_subtree_jaccard",
+          "novelty_nearest_book_similarity": 0.1008786435770247,
+          "novelty_candidate_ast_nodes": 11,
+          "novelty_candidate_unique_subtrees": 11,
+          "coverage": 1.0,
+          "degradation_ratio": 1.1708448087357834,
+          "deflation": {
+            "best_ic": 0.055579,
+            "deflated_ic": 0.051135,
+            "deflated_t": 20.644942,
+            "luck_ic": 0.004444,
+            "n_obs": 163001,
+            "n_trials": 5
+          },
+          "n_trials": 5,
+          "complexity": 8,
+          "scored_through": "2021-08-26T00:00:00",
+          "window_generation": 2
+        },
+        "behavior": {},
+        "raw": {
+          "split_sizes": {
+            "is": 1320,
+            "val": 1612,
+            "test": 0
+          },
+          "heldout_test_split_sizes": {
+            "is": 1320,
+            "val": 1612,
+            "test": 733
+          }
+        }
+      }
+    },
+    {
+      "genome": {
+        "genome_id": "g0-order_flow_entropy-56945d",
+        "programs": [
+          {
+            "factor_id": "order_flow_entropy",
+            "code": "\"\"\"The concept of entropy can be applied to order flow as a measure of market uncertainty and imbalance. A high entropy value indicates a more chaotic and unpredictable order flow, which may precede significant price movements. Conversely, low entropy suggests a stable environment, potentially leading to mean-reversion opportunities.\"\"\"\n\nfrom __future__ import annotations\n\nimport pandas as pd\nimport numpy as np\nfrom quant_fund_agent.factors.base import BaseFactor\nfrom quant_fund_agent.factors.registry import register_factor\nfrom quant_fund_agent.factors.ops import ts_sum, delta\n\n\ndef _order_flow_entropy(volume: pd.DataFrame) -> pd.DataFrame:\n    \"\"\"Calculate the entropy of the order flow based on volume data.\"\"\"\n    # Calculate the total volume\n    total_volume = ts_sum(volume, 5)\n    # Calculate the probabilities of buy and sell orders\n    prob_buy = volume / total_volume.where(total_volume != 0, np.nan)\n    prob_sell = (1 - prob_buy).fillna(0)\n    # Calculate entropy using the formula: -sum(p * log(p))\n    entropy = - (prob_buy * np.log(prob_buy + 1e-10)).fillna(0) - (prob_sell * np.log(prob_sell + 1e-10)).fillna(0)\n    return entropy\n\n\n@register_factor\nclass OrderFlowEntropy(BaseFactor):\n    factor_id = \"order_flow_entropy\"\n    name = \"Order Flow Entropy\"\n    category = \"microstructure\"\n    description = \"This factor calculates the entropy of the order flow using the volume data over a fixed window. It evaluates the distribution of buy and sell orders, where higher entropy indicates greater uncertainty in market direction, while lower values suggest a more predictable flow.\"\n    inputs = [\"volume\"]\n    prediction_horizon = 6  # bars ahead the edge peaks\n    suggested_horizons = [6]\n\n    def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:\n        volume = data[\"volume\"].fillna(0.0)\n        entropy = _order_flow_entropy(volume)\n        return entropy",
+            "name": "Order Flow Entropy",
+            "category": "microstructure",
+            "trading_idea": "The concept of entropy can be applied to order flow as a measure of market uncertainty and imbalance. A high entropy value indicates a more chaotic and unpredictable order flow, which may precede significant price movements. Conversely, low entropy suggests a stable environment, potentially leading to mean-reversion opportunities.",
+            "description": "This factor calculates the entropy of the order flow using the volume data over a fixed window. It evaluates the distribution of buy and sell orders, where higher entropy indicates greater uncertainty in market direction, while lower values suggest a more predictable flow.",
+            "prediction_horizon": 6,
+            "suggested_horizons": [
+              6
+            ],
+            "expected_sign": null,
+            "source_paper_ids": [],
+            "mechanism": "",
+            "mechanism_group_id": 0
+          }
+        ],
+        "unit": "single",
+        "generation": 0,
+        "island": 0,
+        "mechanism_group_id": 0,
+        "deme_id": 0,
+        "parent_ids": [],
+        "operator": "seed",
+        "metadata": {
+          "mechanism_group_id": 0,
+          "mechanism": ""
+        }
+      },
+      "fitness": {
+        "candidate_id": "order_flow_entropy",
+        "objective": {
+          "marginal_value": -0.002971474636321824,
+          "independence": -0.003653405085277548,
+          "parsimony": -29.0,
+          "structural_novelty": 0.9298735594683023
+        },
+        "gates": {
+          "coverage_ok": true,
+          "deflation_ok": null,
+          "cost_ok": null,
+          "passed": true
+        },
+        "selectable": true,
+        "diagnostics": {
+          "standalone_ic": -0.004050896887523414,
+          "ic_decay": {
+            "1": -0.00649497432795938,
+            "3": -0.010096309636428233,
+            "6": -0.004050896887523414,
+            "12": -0.003432765348314023,
+            "24": -0.005423430882111877
+          },
+          "is_ic": 0.012142208247625408,
+          "val_ic": -0.004050896887523414,
+          "val_n_obs": 163001,
+          "residual_ic": -0.003653405085277548,
+          "independence_metric": "residual_ic",
+          "with_ic": 0.050716520005267954,
+          "base_ic": 0.053539206035014456,
+          "max_abs_corr": 0.32822231193696827,
+          "delta_participation": 0.7584674112637313,
+          "pr_before": 1.1193619970918443,
+          "pr_after": 1.8778294083555755,
+          "marginal_value_raw": -0.0028226860297465017,
+          "sign_consistency": null,
+          "plateau_penalty": 0.00014878860657532248,
+          "jitter_ics": [
+            0.0033688441157330314,
+            0.004435372446163152
+          ],
+          "perturbation_penalty": null,
+          "turnover": 0.13043662734909953,
+          "gross_ret": 0.0011589521576805776,
+          "net_ret": 0.001016078795801766,
+          "net_gross_ratio": 0.8767219501409398,
+          "zoo_max_abs_corr": null,
+          "zoo_nearest": null,
+          "zoo_min_code_distance": null,
+          "structural_novelty": 0.9298735594683023,
+          "novelty_min_book_distance": 0.9298735594683023,
+          "novelty_min_zoo_distance": null,
+          "novelty_nearest_book_idx": 0,
+          "novelty_metric": "canonical_ast_weighted_subtree_jaccard",
+          "novelty_nearest_book_similarity": 0.0701264405316977,
+          "novelty_candidate_ast_nodes": 10,
+          "novelty_candidate_unique_subtrees": 10,
+          "coverage": 1.0,
+          "degradation_ratio": -0.33362110127831385,
+          "deflation": {
+            "best_ic": 0.004051,
+            "deflated_ic": 0.0,
+            "deflated_t": -0.158638,
+            "luck_ic": 0.004444,
+            "n_obs": 163001,
+            "n_trials": 5
+          },
+          "n_trials": 5,
+          "complexity": 29,
+          "scored_through": "2021-08-26T00:00:00",
+          "window_generation": 2
+        },
+        "behavior": {},
+        "raw": {
+          "split_sizes": {
+            "is": 1320,
+            "val": 1612,
+            "test": 0
+          },
+          "heldout_test_split_sizes": {
+            "is": 1320,
+            "val": 1612,
+            "test": 733
+          }
+        }
+      }
+    },
+    {
+      "genome": {
+        "genome_id": "g1-dynamic_mean_reversion-b81c64",
+        "programs": [
+          {
+            "factor_id": "dynamic_mean_reversion",
+            "code": "'''Dynamic Mean Reversion: Capture price reversion relative to a volatility-adjusted mean.'''  \n\nfrom __future__ import annotations  \nimport pandas as pd  \nimport numpy as np  \nfrom quant_fund_agent.factors.base import BaseFactor  \nfrom quant_fund_agent.factors.registry import register_factor  \nfrom quant_fund_agent.factors.ops import ts_mean, ts_zscore, stddev  \n\n@register_factor  \nclass DynamicMeanReversion(BaseFactor):  \n    factor_id = 'dynamic_mean_reversion'  \n    name = 'Dynamic Mean Reversion'  \n    category = 'mean_reversion'  \n    description = 'Captures potential price reversals by measuring the z-score of the price relative to a dynamically adjusted mean based on recent volatility.'  \n    inputs = ['close', 'volume']  \n    prediction_horizon = 6  # bars ahead the edge peaks  \n    suggested_horizons = [6]  \n\n    def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:  \n        close = data['close']  \n        vol = stddev(close, 20)  # 20-bar rolling volatility  \n        dynamic_mean = ts_mean(close, 20) + vol  # Adjust mean with volatility  \n        z_score = (close - dynamic_mean) / vol  # Z-score calculation  \n        return z_score.fillna(0.0)  # Fill NaNs with 0 for safety",
+            "name": "Dynamic Mean Reversion",
+            "category": "mean_reversion",
+            "trading_idea": "This factor captures the tendency of price movements to revert to dynamically adjusted means based on recent volatility. By measuring the distance of the current price from a volatility-adjusted mean, we can identify potential reversal opportunities more effectively, particularly in volatile market conditions where traditional moving averages may lag.",
+            "description": "The signal computes a z-score of the current price relative to a dynamically adjusted mean based on the recent volatility. This allows for a more responsive mean-reversion signal that adapts to changing market conditions.",
+            "prediction_horizon": 6,
+            "suggested_horizons": [
+              6
+            ],
+            "expected_sign": 1,
+            "source_paper_ids": [],
+            "mechanism": "",
+            "mechanism_group_id": 0
+          }
+        ],
+        "unit": "single",
+        "generation": 1,
+        "island": 0,
+        "mechanism_group_id": 0,
+        "deme_id": 0,
+        "parent_ids": [
+          "g0-short_term_price_reversion-18b99f"
+        ],
+        "operator": "llm_semantic_creative",
+        "metadata": {
+          "mechanism_group_id": 0,
+          "mechanism": ""
+        }
+      },
+      "fitness": {
+        "candidate_id": "dynamic_mean_reversion",
+        "objective": {
+          "marginal_value": 0.007055135521329999,
+          "independence": -0.014733095459251899,
+          "parsimony": -11.0,
+          "structural_novelty": 0.8991213564229753
+        },
+        "gates": {
+          "coverage_ok": true,
+          "deflation_ok": null,
+          "cost_ok": null,
+          "passed": true
+        },
+        "selectable": true,
+        "diagnostics": {
+          "standalone_ic": -0.055744662887065075,
+          "ic_decay": {
+            "1": -0.029716497288726475,
+            "3": -0.0410423150035257,
+            "6": -0.055744662887065075,
+            "12": -0.06348180407498213,
+            "24": -0.08838537220709536
+          },
+          "is_ic": -0.05270035911092063,
+          "val_ic": -0.055744662887065075,
+          "val_n_obs": 163001,
+          "residual_ic": -0.014733095459251899,
+          "independence_metric": "residual_ic",
+          "with_ic": 0.05420248554788966,
+          "base_ic": 0.04514735002655966,
+          "max_abs_corr": 0.8869791934008839,
+          "delta_participation": -0.11833428717400274,
+          "pr_before": 1.9961636955295776,
+          "pr_after": 1.8778294083555749,
+          "marginal_value_raw": 0.009055135521329999,
+          "sign_consistency": false,
+          "plateau_penalty": 0.0,
+          "jitter_ics": [
+            0.05618207223993359,
+            0.05547644411218197
+          ],
+          "perturbation_penalty": null,
+          "turnover": 0.10034302238294483,
+          "gross_ret": -0.0015818236197725191,
+          "net_ret": -0.0016921093628920498,
+          "net_gross_ratio": 1.0697206324023603,
+          "zoo_max_abs_corr": null,
+          "zoo_nearest": null,
+          "zoo_min_code_distance": null,
+          "structural_novelty": 0.8991213564229753,
+          "novelty_min_book_distance": 0.8991213564229753,
+          "novelty_min_zoo_distance": null,
+          "novelty_nearest_book_idx": 0,
+          "novelty_metric": "canonical_ast_weighted_subtree_jaccard",
+          "novelty_nearest_book_similarity": 0.1008786435770247,
+          "novelty_candidate_ast_nodes": 29,
+          "novelty_candidate_unique_subtrees": 16,
+          "coverage": 1.0,
+          "degradation_ratio": 1.0577662814353308,
+          "deflation": {
+            "best_ic": 0.055745,
+            "deflated_ic": 0.051301,
+            "deflated_t": 20.711883,
+            "luck_ic": 0.004444,
+            "n_obs": 163001,
+            "n_trials": 5
+          },
+          "n_trials": 5,
+          "complexity": 11,
+          "scored_through": "2021-08-26T00:00:00",
+          "window_generation": 2
+        },
+        "behavior": {},
+        "raw": {
+          "split_sizes": {
+            "is": 1320,
+            "val": 1612,
+            "test": 0
+          },
+          "heldout_test_split_sizes": {
+            "is": 1320,
+            "val": 1612,
+            "test": 733
+          }
+        }
+      }
+    },
+    {
+      "genome": {
+        "genome_id": "g2-dynamic_mean_reversion_j-798e23",
+        "programs": [
+          {
+            "factor_id": "dynamic_mean_reversion_j",
+            "code": "\"\"\"Dynamic Mean Reversion: Capture price reversion relative to a volatility-adjusted mean.\"\"\"\nfrom __future__ import annotations\nimport pandas as pd\nimport numpy as np\nfrom quant_fund_agent.factors.base import BaseFactor\nfrom quant_fund_agent.factors.registry import register_factor\nfrom quant_fund_agent.factors.ops import ts_mean, ts_zscore, stddev\n\n@register_factor\nclass DynamicMeanReversion(BaseFactor):\n    factor_id = 'dynamic_mean_reversion_j'\n    name = 'Dynamic Mean Reversion'\n    category = 'mean_reversion'\n    description = 'Captures potential price reversals by measuring the z-score of the price relative to a dynamically adjusted mean based on recent volatility.'\n    inputs = ['close', 'volume']\n    prediction_horizon = 6\n    suggested_horizons = [6]\n\n    def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:\n        close = data['close']\n        vol = stddev(close, 21)\n        dynamic_mean = ts_mean(close, 21) + vol\n        z_score = (close - dynamic_mean) / vol\n        return z_score.fillna(0.0)",
+            "name": "Dynamic Mean Reversion (jitter)",
+            "category": "mean_reversion",
+            "trading_idea": "This factor captures the tendency of price movements to revert to dynamically adjusted means based on recent volatility. By measuring the distance of the current price from a volatility-adjusted mean, we can identify potential reversal opportunities more effectively, particularly in volatile market conditions where traditional moving averages may lag.",
+            "description": "The signal computes a z-score of the current price relative to a dynamically adjusted mean based on the recent volatility. This allows for a more responsive mean-reversion signal that adapts to changing market conditions.",
+            "prediction_horizon": 6,
+            "suggested_horizons": [
+              6
+            ],
+            "expected_sign": 1,
+            "source_paper_ids": [],
+            "mechanism": "",
+            "mechanism_group_id": 0
+          }
+        ],
+        "unit": "single",
+        "generation": 2,
+        "island": 0,
+        "mechanism_group_id": 0,
+        "deme_id": 0,
+        "parent_ids": [
+          "g1-dynamic_mean_reversion-b81c64"
+        ],
+        "operator": "jitter",
+        "metadata": {
+          "mechanism_group_id": 0,
+          "mechanism": ""
+        }
+      },
+      "fitness": {
+        "candidate_id": "dynamic_mean_reversion_j",
+        "objective": {
+          "marginal_value": -0.010701460091276918,
+          "independence": -0.00127696672662829,
+          "parsimony": -11.0,
+          "structural_novelty": 0.0
+        },
+        "gates": {
+          "coverage_ok": true,
+          "deflation_ok": null,
+          "cost_ok": null,
+          "passed": true
+        },
+        "selectable": true,
+        "diagnostics": {
+          "standalone_ic": -0.05557415612377563,
+          "ic_decay": {
+            "1": -0.029657422093382173,
+            "3": -0.04073891195362495,
+            "6": -0.05557415612377563,
+            "12": -0.06397820153473521,
+            "24": -0.08904169343105012
+          },
+          "is_ic": -0.053229916188540415,
+          "val_ic": -0.05557415612377563,
+          "val_n_obs": 162981,
+          "residual_ic": -0.00127696672662829,
+          "independence_metric": "residual_ic",
+          "with_ic": 0.04550102545661274,
+          "base_ic": 0.05420248554788966,
+          "max_abs_corr": 0.9974472669048964,
+          "delta_participation": -0.2049133489504289,
+          "pr_before": 1.8778294083555749,
+          "pr_after": 1.672916059405146,
+          "marginal_value_raw": -0.008701460091276918,
+          "sign_consistency": false,
+          "plateau_penalty": 0.0,
+          "jitter_ics": [
+            0.05586892595206783,
+            0.055325816515281505
+          ],
+          "perturbation_penalty": null,
+          "turnover": 0.09781196759727671,
+          "gross_ret": -0.0015783188105035113,
+          "net_ret": -0.0016858311009177091,
+          "net_gross_ratio": 1.0681182342241107,
+          "zoo_max_abs_corr": null,
+          "zoo_nearest": null,
+          "zoo_min_code_distance": null,
+          "structural_novelty": 0.0,
+          "novelty_min_book_distance": 0.0,
+          "novelty_min_zoo_distance": null,
+          "novelty_nearest_book_idx": 2,
+          "novelty_metric": "canonical_ast_weighted_subtree_jaccard",
+          "novelty_nearest_book_similarity": 1.0,
+          "novelty_candidate_ast_nodes": 29,
+          "novelty_candidate_unique_subtrees": 16,
+          "coverage": 1.0,
+          "degradation_ratio": 1.0440398952899328,
+          "deflation": {
+            "best_ic": 0.055574,
+            "deflated_ic": 0.050688,
+            "deflated_t": 20.46302,
+            "luck_ic": 0.004887,
+            "n_obs": 162981,
+            "n_trials": 7
+          },
+          "n_trials": 7,
+          "complexity": 11,
+          "scored_through": "2021-08-26T00:00:00",
+          "window_generation": 2
+        },
+        "behavior": {},
+        "raw": {
+          "split_sizes": {
+            "is": 1320,
+            "val": 1612,
+            "test": 0
+          },
+          "heldout_test_split_sizes": {
+            "is": 1320,
+            "val": 1612,
+            "test": 733
+          }
+        }
+      }
+    }
+  ],
+  "kept_pool": [
+    {
+      "genome": {
+        "genome_id": "g0-short_term_price_reversion-18b99f",
+        "programs": [
+          {
+            "factor_id": "short_term_price_reversion",
+            "code": "\"\"\"Market prices often exhibit mean-reverting behavior over short time horizons, particularly after significant movements. This factor exploits the tendency for prices to revert to their mean shortly after they deviate substantially from it, capturing potential reversal opportunities. By measuring the deviation from a rolling average, we can identify stocks that are likely to revert back to their mean price. This signal computes the z-score of the price relative to a short-term moving average, indicating how far the current price is from the average. A high positive z-score suggests overbought conditions, while a high negative z-score indicates oversold conditions, signaling potential price reversals.\"\"\"\n\nfrom __future__ import annotations\nimport pandas as pd\nimport numpy as np\nfrom quant_fund_agent.factors.base import BaseFactor\nfrom quant_fund_agent.factors.registry import register_factor\nfrom quant_fund_agent.factors.ops import ts_mean, ts_zscore\n\n@register_factor\nclass ShortTermPriceReversion(BaseFactor):\n    factor_id = \"short_term_price_reversion\"\n    name = \"Short-Term Price Reversion\"\n    category = \"mean_reversion\"\n    description = \"This factor captures potential price reversals by measuring the z-score of the price relative to a short-term moving average.\"\n    inputs = [\"close\"]\n    prediction_horizon = 6  # bars ahead the edge peaks\n    suggested_horizons = [6]\n\n    def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:\n        close = data[\"close\"]\n        rolling_mean = ts_mean(close, 20)  # 20-bar moving average\n        z_score = ts_zscore(close, 20)  # z-score based on the 20-bar moving average\n        return z_score.fillna(0.0)  # Fill NaNs with 0 for safety",
+            "name": "Short-Term Price Reversion",
+            "category": "mean_reversion",
+            "trading_idea": "Market prices often exhibit mean-reverting behavior over short time horizons, particularly after significant movements. This factor exploits the tendency for prices to revert to their mean shortly after they deviate substantially from it, capturing potential reversal opportunities. By measuring the deviation from a rolling average, we can identify stocks that are likely to revert back to their mean price.",
+            "description": "This signal computes the z-score of the price relative to a short-term moving average, indicating how far the current price is from the average. A high positive z-score suggests overbought conditions, while a high negative z-score indicates oversold conditions, signaling potential price reversals.",
+            "prediction_horizon": 6,
+            "suggested_horizons": [
+              6
+            ],
+            "expected_sign": null,
+            "source_paper_ids": [],
+            "mechanism": "",
+            "mechanism_group_id": 0
+          }
+        ],
+        "unit": "single",
+        "generation": 0,
+        "island": 0,
+        "mechanism_group_id": 0,
+        "deme_id": 0,
+        "parent_ids": [],
+        "operator": "seed",
+        "metadata": {
+          "mechanism_group_id": 0,
+          "mechanism": ""
+        }
+      },
+      "fitness": {
+        "candidate_id": "short_term_price_reversion",
+        "objective": {
+          "marginal_value": -0.0009274808910524346,
+          "independence": -0.006543354211391481,
+          "parsimony": -8.0,
+          "structural_novelty": 0.8991213564229753
+        },
+        "gates": {
+          "coverage_ok": true,
+          "deflation_ok": null,
+          "cost_ok": null,
+          "passed": true
+        },
+        "selectable": true,
+        "diagnostics": {
+          "standalone_ic": -0.05557885727877171,
+          "ic_decay": {
+            "1": -0.029698312379899786,
+            "3": -0.04102394726943847,
+            "6": -0.05557885727877171,
+            "12": -0.06336482057017646,
+            "24": -0.08788876360157485
+          },
+          "is_ic": -0.0474690213972788,
+          "val_ic": -0.05557885727877171,
+          "val_n_obs": 163001,
+          "residual_ic": -0.006543354211391481,
+          "independence_metric": "residual_ic",
+          "with_ic": 0.045558367769710284,
+          "base_ic": 0.04648584866076272,
+          "max_abs_corr": 0.886979193400884,
+          "delta_participation": 0.0723351040303244,
+          "pr_before": 1.8054943043252512,
+          "pr_after": 1.8778294083555755,
+          "marginal_value_raw": -0.0009274808910524346,
+          "sign_consistency": null,
+          "plateau_penalty": 0.0,
+          "jitter_ics": [
+            0.05557885727877171,
+            0.05557885727877171
+          ],
+          "perturbation_penalty": null,
+          "turnover": 0.10351051260794925,
+          "gross_ret": -0.0009390747499629556,
+          "net_ret": -0.0010528349679466069,
+          "net_gross_ratio": 1.1211407483676235,
+          "zoo_max_abs_corr": null,
+          "zoo_nearest": null,
+          "zoo_min_code_distance": null,
+          "structural_novelty": 0.8991213564229753,
+          "novelty_min_book_distance": 0.8991213564229753,
+          "novelty_min_zoo_distance": null,
+          "novelty_nearest_book_idx": 1,
+          "novelty_metric": "canonical_ast_weighted_subtree_jaccard",
+          "novelty_nearest_book_similarity": 0.1008786435770247,
+          "novelty_candidate_ast_nodes": 11,
+          "novelty_candidate_unique_subtrees": 11,
+          "coverage": 1.0,
+          "degradation_ratio": 1.1708448087357834,
+          "deflation": {
+            "best_ic": 0.055579,
+            "deflated_ic": 0.051135,
+            "deflated_t": 20.644942,
+            "luck_ic": 0.004444,
+            "n_obs": 163001,
+            "n_trials": 5
+          },
+          "n_trials": 5,
+          "complexity": 8,
+          "scored_through": "2021-08-26T00:00:00",
+          "window_generation": 2
+        },
+        "behavior": {},
+        "raw": {
+          "split_sizes": {
+            "is": 1320,
+            "val": 1612,
+            "test": 0
+          },
+          "heldout_test_split_sizes": {
+            "is": 1320,
+            "val": 1612,
+            "test": 733
+          }
+        }
+      }
+    },
+    {
+      "genome": {
+        "genome_id": "g0-momentum_volume_accumulation-13f581",
+        "programs": [
+          {
+            "factor_id": "momentum_volume_accumulation",
+            "code": "\"\"\"High trading volumes often accompany price movements, suggesting stronger momentum and sustainability of trends. This factor identifies stocks that not only exhibit price momentum but also see increased volume, signaling the potential for continued upward or downward price movements. By combining price momentum with volume changes, we can enhance signal robustness.\"\"\"\n\nfrom __future__ import annotations\n\nimport pandas as pd\nimport numpy as np\n\nfrom quant_fund_agent.factors.base import BaseFactor\nfrom quant_fund_agent.factors.ops import delta, adv, ts_mean\nfrom quant_fund_agent.factors.registry import register_factor\n\n\n@register_factor\nclass MomentumVolumeAccumulation(BaseFactor):\n    factor_id = \"momentum_volume_accumulation\"\n    name = \"Momentum Volume Accumulation\"\n    category = \"momentum\"\n    description = (\"This signal computes the rate of change in price over the last few bars and multiplies it by the average volume over the same period. The result indicates whether price movements are supported by significant trading activity, providing insight into the strength of the momentum.\")\n    inputs = [\"close\", \"volume\"]\n    prediction_horizon = 6  # bars ahead the momentum edge peaks\n    suggested_horizons = [6]\n\n    def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:\n        close = data[\"close\"]\n        volume = data[\"volume\"]\n        # Calculate the rate of change in price over the last 5 bars\n        price_change = delta(close, 5)\n        # Calculate the average volume over the last 5 bars\n        avg_volume = adv(volume, 5)\n        # Compute the momentum volume accumulation signal\n        momentum_signal = price_change * avg_volume\n        # Fill NaN values with 0.0 for safety\n        return momentum_signal.fillna(0.0)",
+            "name": "Momentum Volume Accumulation",
+            "category": "momentum",
+            "trading_idea": "High trading volumes often accompany price movements, suggesting stronger momentum and sustainability of trends. This factor identifies stocks that not only exhibit price momentum but also see increased volume, signaling the potential for continued upward or downward price movements. By combining price momentum with volume changes, we can enhance signal robustness.",
+            "description": "This signal computes the rate of change in price over the last few bars and multiplies it by the average volume over the same period. The result indicates whether price movements are supported by significant trading activity, providing insight into the strength of the momentum.",
+            "prediction_horizon": 6,
+            "suggested_horizons": [
+              6
+            ],
+            "expected_sign": null,
+            "source_paper_ids": [],
+            "mechanism": "",
+            "mechanism_group_id": 0
+          }
+        ],
+        "unit": "single",
+        "generation": 0,
+        "island": 0,
+        "mechanism_group_id": 0,
+        "deme_id": 0,
+        "parent_ids": [],
+        "operator": "seed",
+        "metadata": {
+          "mechanism_group_id": 0,
+          "mechanism": ""
+        }
+      },
+      "fitness": {
+        "candidate_id": "momentum_volume_accumulation",
+        "objective": {
+          "marginal_value": -0.014886940722261842,
+          "independence": -0.023688203948535682,
+          "parsimony": -9.0,
+          "structural_novelty": 0.8542084084483597
+        },
+        "gates": {
+          "coverage_ok": true,
+          "deflation_ok": null,
+          "cost_ok": null,
+          "passed": true
+        },
+        "selectable": true,
+        "diagnostics": {
+          "standalone_ic": -0.042720305954090196,
+          "ic_decay": {
+            "1": -0.02649383025378623,
+            "3": -0.034666045586127,
+            "6": -0.042720305954090196,
+            "12": -0.053469034511404036,
+            "24": -0.05101307088094213
+          },
+          "is_ic": -0.07440178125093906,
+          "val_ic": -0.042720305954090196,
+          "val_n_obs": 151526,
+          "residual_ic": -0.023688203948535682,
+          "independence_metric": "residual_ic",
+          "with_ic": 0.032333585297894,
+          "base_ic": 0.04615973136034449,
+          "max_abs_corr": 0.5746134732445851,
+          "delta_participation": 0.45790869076076257,
+          "pr_before": 1.9990754035525469,
+          "pr_after": 2.4569840943133094,
+          "marginal_value_raw": -0.013826146062450494,
+          "sign_consistency": null,
+          "plateau_penalty": 0.0010607946598113482,
+          "jitter_ics": [
+            0.039743677338871325,
+            0.04357534524968638
+          ],
+          "perturbation_penalty": null,
+          "turnover": 0.070295524908528,
+          "gross_ret": -0.000592041387636921,
+          "net_ret": -0.0006718624765269524,
+          "net_gross_ratio": 1.1348234947030138,
+          "zoo_max_abs_corr": null,
+          "zoo_nearest": null,
+          "zoo_min_code_distance": null,
+          "structural_novelty": 0.8542084084483597,
+          "novelty_min_book_distance": 0.8542084084483597,
+          "novelty_min_zoo_distance": null,
+          "novelty_nearest_book_idx": 0,
+          "novelty_metric": "canonical_ast_weighted_subtree_jaccard",
+          "novelty_nearest_book_similarity": 0.14579159155164034,
+          "novelty_candidate_ast_nodes": 18,
+          "novelty_candidate_unique_subtrees": 16,
+          "coverage": 1.0,
+          "degradation_ratio": 0.5741839138233132,
+          "deflation": {
+            "best_ic": 0.04272,
+            "deflated_ic": 0.038912,
+            "deflated_t": 15.147148,
+            "luck_ic": 0.003808,
+            "n_obs": 151526,
+            "n_trials": 3
+          },
+          "n_trials": 3,
+          "complexity": 9,
+          "scored_through": "2018-06-13T00:00:00",
+          "window_generation": 1
+        },
+        "behavior": {},
+        "raw": {
+          "split_sizes": {
+            "is": 513,
+            "val": 1612,
+            "test": 0
+          },
+          "heldout_test_split_sizes": {
+            "is": 513,
+            "val": 1612,
+            "test": 1540
+          }
+        }
+      }
+    },
+    {
+      "genome": {
+        "genome_id": "g0-order_flow_entropy-56945d",
+        "programs": [
+          {
+            "factor_id": "order_flow_entropy",
+            "code": "\"\"\"The concept of entropy can be applied to order flow as a measure of market uncertainty and imbalance. A high entropy value indicates a more chaotic and unpredictable order flow, which may precede significant price movements. Conversely, low entropy suggests a stable environment, potentially leading to mean-reversion opportunities.\"\"\"\n\nfrom __future__ import annotations\n\nimport pandas as pd\nimport numpy as np\nfrom quant_fund_agent.factors.base import BaseFactor\nfrom quant_fund_agent.factors.registry import register_factor\nfrom quant_fund_agent.factors.ops import ts_sum, delta\n\n\ndef _order_flow_entropy(volume: pd.DataFrame) -> pd.DataFrame:\n    \"\"\"Calculate the entropy of the order flow based on volume data.\"\"\"\n    # Calculate the total volume\n    total_volume = ts_sum(volume, 5)\n    # Calculate the probabilities of buy and sell orders\n    prob_buy = volume / total_volume.where(total_volume != 0, np.nan)\n    prob_sell = (1 - prob_buy).fillna(0)\n    # Calculate entropy using the formula: -sum(p * log(p))\n    entropy = - (prob_buy * np.log(prob_buy + 1e-10)).fillna(0) - (prob_sell * np.log(prob_sell + 1e-10)).fillna(0)\n    return entropy\n\n\n@register_factor\nclass OrderFlowEntropy(BaseFactor):\n    factor_id = \"order_flow_entropy\"\n    name = \"Order Flow Entropy\"\n    category = \"microstructure\"\n    description = \"This factor calculates the entropy of the order flow using the volume data over a fixed window. It evaluates the distribution of buy and sell orders, where higher entropy indicates greater uncertainty in market direction, while lower values suggest a more predictable flow.\"\n    inputs = [\"volume\"]\n    prediction_horizon = 6  # bars ahead the edge peaks\n    suggested_horizons = [6]\n\n    def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:\n        volume = data[\"volume\"].fillna(0.0)\n        entropy = _order_flow_entropy(volume)\n        return entropy",
+            "name": "Order Flow Entropy",
+            "category": "microstructure",
+            "trading_idea": "The concept of entropy can be applied to order flow as a measure of market uncertainty and imbalance. A high entropy value indicates a more chaotic and unpredictable order flow, which may precede significant price movements. Conversely, low entropy suggests a stable environment, potentially leading to mean-reversion opportunities.",
+            "description": "This factor calculates the entropy of the order flow using the volume data over a fixed window. It evaluates the distribution of buy and sell orders, where higher entropy indicates greater uncertainty in market direction, while lower values suggest a more predictable flow.",
+            "prediction_horizon": 6,
+            "suggested_horizons": [
+              6
+            ],
+            "expected_sign": null,
+            "source_paper_ids": [],
+            "mechanism": "",
+            "mechanism_group_id": 0
+          }
+        ],
+        "unit": "single",
+        "generation": 0,
+        "island": 0,
+        "mechanism_group_id": 0,
+        "deme_id": 0,
+        "parent_ids": [],
+        "operator": "seed",
+        "metadata": {
+          "mechanism_group_id": 0,
+          "mechanism": ""
+        }
+      },
+      "fitness": {
+        "candidate_id": "order_flow_entropy",
+        "objective": {
+          "marginal_value": -0.002971474636321824,
+          "independence": -0.003653405085277548,
+          "parsimony": -29.0,
+          "structural_novelty": 0.9298735594683023
+        },
+        "gates": {
+          "coverage_ok": true,
+          "deflation_ok": null,
+          "cost_ok": null,
+          "passed": true
+        },
+        "selectable": true,
+        "diagnostics": {
+          "standalone_ic": -0.004050896887523414,
+          "ic_decay": {
+            "1": -0.00649497432795938,
+            "3": -0.010096309636428233,
+            "6": -0.004050896887523414,
+            "12": -0.003432765348314023,
+            "24": -0.005423430882111877
+          },
+          "is_ic": 0.012142208247625408,
+          "val_ic": -0.004050896887523414,
+          "val_n_obs": 163001,
+          "residual_ic": -0.003653405085277548,
+          "independence_metric": "residual_ic",
+          "with_ic": 0.050716520005267954,
+          "base_ic": 0.053539206035014456,
+          "max_abs_corr": 0.32822231193696827,
+          "delta_participation": 0.7584674112637313,
+          "pr_before": 1.1193619970918443,
+          "pr_after": 1.8778294083555755,
+          "marginal_value_raw": -0.0028226860297465017,
+          "sign_consistency": null,
+          "plateau_penalty": 0.00014878860657532248,
+          "jitter_ics": [
+            0.0033688441157330314,
+            0.004435372446163152
+          ],
+          "perturbation_penalty": null,
+          "turnover": 0.13043662734909953,
+          "gross_ret": 0.0011589521576805776,
+          "net_ret": 0.001016078795801766,
+          "net_gross_ratio": 0.8767219501409398,
+          "zoo_max_abs_corr": null,
+          "zoo_nearest": null,
+          "zoo_min_code_distance": null,
+          "structural_novelty": 0.9298735594683023,
+          "novelty_min_book_distance": 0.9298735594683023,
+          "novelty_min_zoo_distance": null,
+          "novelty_nearest_book_idx": 0,
+          "novelty_metric": "canonical_ast_weighted_subtree_jaccard",
+          "novelty_nearest_book_similarity": 0.0701264405316977,
+          "novelty_candidate_ast_nodes": 10,
+          "novelty_candidate_unique_subtrees": 10,
+          "coverage": 1.0,
+          "degradation_ratio": -0.33362110127831385,
+          "deflation": {
+            "best_ic": 0.004051,
+            "deflated_ic": 0.0,
+            "deflated_t": -0.158638,
+            "luck_ic": 0.004444,
+            "n_obs": 163001,
+            "n_trials": 5
+          },
+          "n_trials": 5,
+          "complexity": 29,
+          "scored_through": "2021-08-26T00:00:00",
+          "window_generation": 2
+        },
+        "behavior": {},
+        "raw": {
+          "split_sizes": {
+            "is": 1320,
+            "val": 1612,
+            "test": 0
+          },
+          "heldout_test_split_sizes": {
+            "is": 1320,
+            "val": 1612,
+            "test": 733
+          }
+        }
+      }
+    },
+    {
+      "genome": {
+        "genome_id": "g1-dynamic_mean_reversion-b81c64",
+        "programs": [
+          {
+            "factor_id": "dynamic_mean_reversion",
+            "code": "'''Dynamic Mean Reversion: Capture price reversion relative to a volatility-adjusted mean.'''  \n\nfrom __future__ import annotations  \nimport pandas as pd  \nimport numpy as np  \nfrom quant_fund_agent.factors.base import BaseFactor  \nfrom quant_fund_agent.factors.registry import register_factor  \nfrom quant_fund_agent.factors.ops import ts_mean, ts_zscore, stddev  \n\n@register_factor  \nclass DynamicMeanReversion(BaseFactor):  \n    factor_id = 'dynamic_mean_reversion'  \n    name = 'Dynamic Mean Reversion'  \n    category = 'mean_reversion'  \n    description = 'Captures potential price reversals by measuring the z-score of the price relative to a dynamically adjusted mean based on recent volatility.'  \n    inputs = ['close', 'volume']  \n    prediction_horizon = 6  # bars ahead the edge peaks  \n    suggested_horizons = [6]  \n\n    def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:  \n        close = data['close']  \n        vol = stddev(close, 20)  # 20-bar rolling volatility  \n        dynamic_mean = ts_mean(close, 20) + vol  # Adjust mean with volatility  \n        z_score = (close - dynamic_mean) / vol  # Z-score calculation  \n        return z_score.fillna(0.0)  # Fill NaNs with 0 for safety",
+            "name": "Dynamic Mean Reversion",
+            "category": "mean_reversion",
+            "trading_idea": "This factor captures the tendency of price movements to revert to dynamically adjusted means based on recent volatility. By measuring the distance of the current price from a volatility-adjusted mean, we can identify potential reversal opportunities more effectively, particularly in volatile market conditions where traditional moving averages may lag.",
+            "description": "The signal computes a z-score of the current price relative to a dynamically adjusted mean based on the recent volatility. This allows for a more responsive mean-reversion signal that adapts to changing market conditions.",
+            "prediction_horizon": 6,
+            "suggested_horizons": [
+              6
+            ],
+            "expected_sign": 1,
+            "source_paper_ids": [],
+            "mechanism": "",
+            "mechanism_group_id": 0
+          }
+        ],
+        "unit": "single",
+        "generation": 1,
+        "island": 0,
+        "mechanism_group_id": 0,
+        "deme_id": 0,
+        "parent_ids": [
+          "g0-short_term_price_reversion-18b99f"
+        ],
+        "operator": "llm_semantic_creative",
+        "metadata": {
+          "mechanism_group_id": 0,
+          "mechanism": ""
+        }
+      },
+      "fitness": {
+        "candidate_id": "dynamic_mean_reversion",
+        "objective": {
+          "marginal_value": 0.007055135521329999,
+          "independence": -0.014733095459251899,
+          "parsimony": -11.0,
+          "structural_novelty": 0.8991213564229753
+        },
+        "gates": {
+          "coverage_ok": true,
+          "deflation_ok": null,
+          "cost_ok": null,
+          "passed": true
+        },
+        "selectable": true,
+        "diagnostics": {
+          "standalone_ic": -0.055744662887065075,
+          "ic_decay": {
+            "1": -0.029716497288726475,
+            "3": -0.0410423150035257,
+            "6": -0.055744662887065075,
+            "12": -0.06348180407498213,
+            "24": -0.08838537220709536
+          },
+          "is_ic": -0.05270035911092063,
+          "val_ic": -0.055744662887065075,
+          "val_n_obs": 163001,
+          "residual_ic": -0.014733095459251899,
+          "independence_metric": "residual_ic",
+          "with_ic": 0.05420248554788966,
+          "base_ic": 0.04514735002655966,
+          "max_abs_corr": 0.8869791934008839,
+          "delta_participation": -0.11833428717400274,
+          "pr_before": 1.9961636955295776,
+          "pr_after": 1.8778294083555749,
+          "marginal_value_raw": 0.009055135521329999,
+          "sign_consistency": false,
+          "plateau_penalty": 0.0,
+          "jitter_ics": [
+            0.05618207223993359,
+            0.05547644411218197
+          ],
+          "perturbation_penalty": null,
+          "turnover": 0.10034302238294483,
+          "gross_ret": -0.0015818236197725191,
+          "net_ret": -0.0016921093628920498,
+          "net_gross_ratio": 1.0697206324023603,
+          "zoo_max_abs_corr": null,
+          "zoo_nearest": null,
+          "zoo_min_code_distance": null,
+          "structural_novelty": 0.8991213564229753,
+          "novelty_min_book_distance": 0.8991213564229753,
+          "novelty_min_zoo_distance": null,
+          "novelty_nearest_book_idx": 0,
+          "novelty_metric": "canonical_ast_weighted_subtree_jaccard",
+          "novelty_nearest_book_similarity": 0.1008786435770247,
+          "novelty_candidate_ast_nodes": 29,
+          "novelty_candidate_unique_subtrees": 16,
+          "coverage": 1.0,
+          "degradation_ratio": 1.0577662814353308,
+          "deflation": {
+            "best_ic": 0.055745,
+            "deflated_ic": 0.051301,
+            "deflated_t": 20.711883,
+            "luck_ic": 0.004444,
+            "n_obs": 163001,
+            "n_trials": 5
+          },
+          "n_trials": 5,
+          "complexity": 11,
+          "scored_through": "2021-08-26T00:00:00",
+          "window_generation": 2
+        },
+        "behavior": {},
+        "raw": {
+          "split_sizes": {
+            "is": 1320,
+            "val": 1612,
+            "test": 0
+          },
+          "heldout_test_split_sizes": {
+            "is": 1320,
+            "val": 1612,
+            "test": 733
+          }
+        }
+      }
+    },
+    {
+      "genome": {
+        "genome_id": "g2-short_term_price_reversion_v2-874913",
+        "programs": [
+          {
+            "factor_id": "short_term_price_reversion_v2",
+            "code": "'''Short-Term Price Reversion V2: Captures mean-reverting behavior adjusted for volatility.'''  \n\nfrom __future__ import annotations  \nimport pandas as pd  \nimport numpy as np  \nfrom quant_fund_agent.factors.base import BaseFactor  \nfrom quant_fund_agent.factors.registry import register_factor  \nfrom quant_fund_agent.factors.ops import ts_mean, ts_zscore, stddev  \n\n@register_factor  \nclass ShortTermPriceReversionV2(BaseFactor):  \n    factor_id = 'short_term_price_reversion_v2'  \n    name = 'Short-Term Price Reversion V2'  \n    category = 'mean_reversion'  \n    description = 'This signal captures potential price reversals by measuring the z-score of the price relative to a long-term moving average, adjusted for volatility.'  \n    inputs = ['close']  \n    prediction_horizon = 6  \n    suggested_horizons = [6]  \n\n    def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:  \n        close = data['close']  \n        rolling_mean = ts_mean(close, 50)  \n        rolling_std = stddev(close, 50)  \n        z_score = (close - rolling_mean) / rolling_std  \n        return z_score.fillna(0.0)  # Fill NaNs with 0 for safety",
+            "name": "Short-Term Price Reversion V2",
+            "category": "mean_reversion",
+            "trading_idea": "Prices tend to revert to their mean after experiencing significant volatility. This factor identifies overbought or oversold conditions by comparing the current price to a longer-term moving average while incorporating the recent volatility of the price. By normalizing the deviation from the moving average with a volatility measure, we can better capture potential reversals.",
+            "description": "This signal computes the z-score of the price deviation from a 50-bar moving average, adjusted for the recent volatility over the same window. A high positive z-score indicates overbought conditions, while a high negative z-score suggests oversold conditions.",
+            "prediction_horizon": 6,
+            "suggested_horizons": [
+              6
+            ],
+            "expected_sign": -1,
+            "source_paper_ids": [],
+            "mechanism": "",
+            "mechanism_group_id": 0
+          }
+        ],
+        "unit": "single",
+        "generation": 2,
+        "island": 0,
+        "mechanism_group_id": 0,
+        "deme_id": 0,
+        "parent_ids": [
+          "g0-short_term_price_reversion-18b99f"
+        ],
+        "operator": "llm_semantic",
+        "metadata": {
+          "mechanism_group_id": 0,
+          "mechanism": ""
+        }
+      },
+      "fitness": {
+        "candidate_id": "short_term_price_reversion_v2",
+        "objective": {
+          "marginal_value": -0.006421391361584957,
+          "independence": -0.02470387595301585,
+          "parsimony": -10.0,
+          "structural_novelty": 0.6713870695778875
+        },
+        "gates": {
+          "coverage_ok": true,
+          "deflation_ok": null,
+          "cost_ok": null,
+          "passed": true
+        },
+        "selectable": true,
+        "diagnostics": {
+          "standalone_ic": -0.05797935517851787,
+          "ic_decay": {
+            "1": -0.031021377051997038,
+            "3": -0.042974856725471536,
+            "6": -0.05797935517851787,
+            "12": -0.07291703980694218,
+            "24": -0.11030042180818976
+          },
+          "is_ic": -0.06013559262029329,
+          "val_ic": -0.05797935517851787,
+          "val_n_obs": 162878,
+          "residual_ic": -0.02470387595301585,
+          "independence_metric": "residual_ic",
+          "with_ic": 0.0457810941863047,
+          "base_ic": 0.05420248554788966,
+          "max_abs_corr": 0.7859161532818008,
+          "delta_participation": 0.12919706140585863,
+          "pr_before": 1.8778294083555749,
+          "pr_after": 2.0070264697614335,
+          "marginal_value_raw": -0.008421391361584957,
+          "sign_consistency": true,
+          "plateau_penalty": 0.0,
+          "jitter_ics": [
+            0.056295825242837376,
+            0.059903359188996044
+          ],
+          "perturbation_penalty": null,
+          "turnover": 0.06281944163397456,
+          "gross_ret": -0.0007745113022442949,
+          "net_ret": -0.0008435718965092488,
+          "net_gross_ratio": 1.0891666707313858,
+          "zoo_max_abs_corr": null,
+          "zoo_nearest": null,
+          "zoo_min_code_distance": null,
+          "structural_novelty": 0.6713870695778875,
+          "novelty_min_book_distance": 0.6713870695778875,
+          "novelty_min_zoo_distance": null,
+          "novelty_nearest_book_idx": 2,
+          "novelty_metric": "canonical_ast_weighted_subtree_jaccard",
+          "novelty_nearest_book_similarity": 0.3286129304221125,
+          "novelty_candidate_ast_nodes": 22,
+          "novelty_candidate_unique_subtrees": 15,
+          "coverage": 1.0,
+          "degradation_ratio": 0.9641437400411054,
+          "deflation": {
+            "best_ic": 0.057979,
+            "deflated_ic": 0.053289,
+            "deflated_t": 21.506375,
+            "luck_ic": 0.004691,
+            "n_obs": 162878,
+            "n_trials": 6
+          },
+          "n_trials": 6,
+          "complexity": 10,
+          "scored_through": "2021-08-26T00:00:00",
+          "window_generation": 2
+        },
+        "behavior": {},
+        "raw": {
+          "split_sizes": {
+            "is": 1320,
+            "val": 1612,
+            "test": 0
+          },
+          "heldout_test_split_sizes": {
+            "is": 1320,
+            "val": 1612,
+            "test": 733
+          }
+        }
+      }
+    },
+    {
+      "genome": {
+        "genome_id": "g2-dynamic_mean_reversion_j-798e23",
+        "programs": [
+          {
+            "factor_id": "dynamic_mean_reversion_j",
+            "code": "\"\"\"Dynamic Mean Reversion: Capture price reversion relative to a volatility-adjusted mean.\"\"\"\nfrom __future__ import annotations\nimport pandas as pd\nimport numpy as np\nfrom quant_fund_agent.factors.base import BaseFactor\nfrom quant_fund_agent.factors.registry import register_factor\nfrom quant_fund_agent.factors.ops import ts_mean, ts_zscore, stddev\n\n@register_factor\nclass DynamicMeanReversion(BaseFactor):\n    factor_id = 'dynamic_mean_reversion_j'\n    name = 'Dynamic Mean Reversion'\n    category = 'mean_reversion'\n    description = 'Captures potential price reversals by measuring the z-score of the price relative to a dynamically adjusted mean based on recent volatility.'\n    inputs = ['close', 'volume']\n    prediction_horizon = 6\n    suggested_horizons = [6]\n\n    def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:\n        close = data['close']\n        vol = stddev(close, 21)\n        dynamic_mean = ts_mean(close, 21) + vol\n        z_score = (close - dynamic_mean) / vol\n        return z_score.fillna(0.0)",
+            "name": "Dynamic Mean Reversion (jitter)",
+            "category": "mean_reversion",
+            "trading_idea": "This factor captures the tendency of price movements to revert to dynamically adjusted means based on recent volatility. By measuring the distance of the current price from a volatility-adjusted mean, we can identify potential reversal opportunities more effectively, particularly in volatile market conditions where traditional moving averages may lag.",
+            "description": "The signal computes a z-score of the current price relative to a dynamically adjusted mean based on the recent volatility. This allows for a more responsive mean-reversion signal that adapts to changing market conditions.",
+            "prediction_horizon": 6,
+            "suggested_horizons": [
+              6
+            ],
+            "expected_sign": 1,
+            "source_paper_ids": [],
+            "mechanism": "",
+            "mechanism_group_id": 0
+          }
+        ],
+        "unit": "single",
+        "generation": 2,
+        "island": 0,
+        "mechanism_group_id": 0,
+        "deme_id": 0,
+        "parent_ids": [
+          "g1-dynamic_mean_reversion-b81c64"
+        ],
+        "operator": "jitter",
+        "metadata": {
+          "mechanism_group_id": 0,
+          "mechanism": ""
+        }
+      },
+      "fitness": {
+        "candidate_id": "dynamic_mean_reversion_j",
+        "objective": {
+          "marginal_value": -0.010701460091276918,
+          "independence": -0.00127696672662829,
+          "parsimony": -11.0,
+          "structural_novelty": 0.0
+        },
+        "gates": {
+          "coverage_ok": true,
+          "deflation_ok": null,
+          "cost_ok": null,
+          "passed": true
+        },
+        "selectable": true,
+        "diagnostics": {
+          "standalone_ic": -0.05557415612377563,
+          "ic_decay": {
+            "1": -0.029657422093382173,
+            "3": -0.04073891195362495,
+            "6": -0.05557415612377563,
+            "12": -0.06397820153473521,
+            "24": -0.08904169343105012
+          },
+          "is_ic": -0.053229916188540415,
+          "val_ic": -0.05557415612377563,
+          "val_n_obs": 162981,
+          "residual_ic": -0.00127696672662829,
+          "independence_metric": "residual_ic",
+          "with_ic": 0.04550102545661274,
+          "base_ic": 0.05420248554788966,
+          "max_abs_corr": 0.9974472669048964,
+          "delta_participation": -0.2049133489504289,
+          "pr_before": 1.8778294083555749,
+          "pr_after": 1.672916059405146,
+          "marginal_value_raw": -0.008701460091276918,
+          "sign_consistency": false,
+          "plateau_penalty": 0.0,
+          "jitter_ics": [
+            0.05586892595206783,
+            0.055325816515281505
+          ],
+          "perturbation_penalty": null,
+          "turnover": 0.09781196759727671,
+          "gross_ret": -0.0015783188105035113,
+          "net_ret": -0.0016858311009177091,
+          "net_gross_ratio": 1.0681182342241107,
+          "zoo_max_abs_corr": null,
+          "zoo_nearest": null,
+          "zoo_min_code_distance": null,
+          "structural_novelty": 0.0,
+          "novelty_min_book_distance": 0.0,
+          "novelty_min_zoo_distance": null,
+          "novelty_nearest_book_idx": 2,
+          "novelty_metric": "canonical_ast_weighted_subtree_jaccard",
+          "novelty_nearest_book_similarity": 1.0,
+          "novelty_candidate_ast_nodes": 29,
+          "novelty_candidate_unique_subtrees": 16,
+          "coverage": 1.0,
+          "degradation_ratio": 1.0440398952899328,
+          "deflation": {
+            "best_ic": 0.055574,
+            "deflated_ic": 0.050688,
+            "deflated_t": 20.46302,
+            "luck_ic": 0.004887,
+            "n_obs": 162981,
+            "n_trials": 7
+          },
+          "n_trials": 7,
+          "complexity": 11,
+          "scored_through": "2021-08-26T00:00:00",
+          "window_generation": 2
+        },
+        "behavior": {},
+        "raw": {
+          "split_sizes": {
+            "is": 1320,
+            "val": 1612,
+            "test": 0
+          },
+          "heldout_test_split_sizes": {
+            "is": 1320,
+            "val": 1612,
+            "test": 733
+          }
+        }
+      }
+    }
+  ],
+  "fingerprints": [
+    "0:0:1615dd68c986633f",
+    "0:0:1f5f6011d0f7c46c",
+    "0:0:23cd75112beed411",
+    "0:0:5f9fb16a9a79a140",
+    "0:0:a242aadd18c82940",
+    "0:0:d60558d45f71eecd"
+  ],
+  "failed_fingerprints": {
+    "0:0:e2ec9c7403bebc34": 1
+  },
+  "parent_reuse": {}
+}

@@ -111,6 +111,9 @@ class CorpusDoc:
     title: str = ""
     published_date: str | None = None   # ISO date
     text: str = ""
+    # Harvest-block label ("price" / "fundamental" / "general"); None for
+    # legacy papers indexed before scope tagging existed.
+    data_scope: str | None = None
 
     @property
     def published(self) -> date | None:
@@ -154,6 +157,7 @@ def load_corpus(max_chars: int = 60_000) -> list[CorpusDoc]:
             title=p.title or p.id,
             published_date=p.published_date.isoformat() if p.published_date else None,
             text=(p.title or "") + "\n\n" + text[:max_chars],
+            data_scope=(p.metadata or {}).get("data_scope"),
         ))
     return docs
 
@@ -262,6 +266,9 @@ class EmbedStore:
                 "fingerprint": fp,
                 "embedder": self.embedder_name,
                 "paper_ids": [d.paper_id for d in self.docs],
+                # aligned with paper_ids; survives cache round-trips (adding
+                # papers changes the fingerprint and rebuilds anyway)
+                "data_scopes": [d.data_scope for d in self.docs],
                 "chunk_meta": [[pid, ci, lo, hi]
                                for pid, ci, (lo, hi) in self.chunk_meta],
                 "built": datetime.now().isoformat(timespec="seconds"),
@@ -288,17 +295,32 @@ class EmbedStore:
             mask[i] = pub is not None and pub < cut
         return mask
 
+    def _scope_mask(self, allowed_scopes: set[str] | None) -> np.ndarray:
+        """True where the doc's ``data_scope`` is allowed.
+
+        ``None`` (no filter) keeps everything.  Docs with ``data_scope=None``
+        — the legacy papers indexed before scope tagging — always pass, so a
+        scope filter never silences the pre-existing library.
+        """
+        if allowed_scopes is None:
+            return np.ones(len(self.docs), dtype=bool)
+        mask = np.zeros(len(self.docs), dtype=bool)
+        for i, d in enumerate(self.docs):
+            mask[i] = d.data_scope is None or d.data_scope in allowed_scopes
+        return mask
+
     def retrieve_papers(self, query: str, k: int = 5, *,
                         cutoff_date: str | date | None = None,
                         exclude_ids: set[str] | None = None,
+                        allowed_scopes: set[str] | None = None,
                         with_text: bool = True) -> list[RetrievedPaper]:
-        """Top-``k`` papers by cosine similarity, date-gated, optionally excluded."""
+        """Top-``k`` papers by cosine similarity, date- and scope-gated."""
         self._ensure_built()
         if not self.docs:
             return []
         qv = self.embed([query])[0]
         sims = self.paper_vecs @ qv
-        mask = self._date_mask(cutoff_date)
+        mask = self._date_mask(cutoff_date) & self._scope_mask(allowed_scopes)
         if exclude_ids:
             for i, d in enumerate(self.docs):
                 if d.paper_id in exclude_ids:
@@ -317,14 +339,19 @@ class EmbedStore:
         return out
 
     def retrieve_chunks(self, query: str, k: int = 8, *,
-                        cutoff_date: str | date | None = None) -> list[RetrievedChunk]:
-        """Top-``k`` chunks by cosine similarity (grounding / citation checks)."""
+                        cutoff_date: str | date | None = None,
+                        allowed_scopes: set[str] | None = None) -> list[RetrievedChunk]:
+        """Top-``k`` chunks by cosine similarity (grounding / citation checks).
+
+        Chunks inherit the parent paper's ``data_scope`` — the mask is applied
+        at the paper level and chunks of a masked-out paper never surface.
+        """
         self._ensure_built()
         if self.chunk_vecs is None or not len(self.chunk_meta):
             return []
         qv = self.embed([query])[0]
         sims = self.chunk_vecs @ qv
-        mask = self._date_mask(cutoff_date)
+        mask = self._date_mask(cutoff_date) & self._scope_mask(allowed_scopes)
         allowed_papers = {d.paper_id for i, d in enumerate(self.docs) if mask[i]}
         order = np.argsort(-sims)
         out: list[RetrievedChunk] = []

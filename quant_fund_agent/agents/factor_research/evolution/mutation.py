@@ -194,6 +194,22 @@ def random_jitter_child(program: FactorProgram, rng: np.random.Generator,
     return child
 
 
+# ── creative mode (--creative-frac): a clearly-marked extra prompt section ────
+
+CREATIVE_NOVELTY_SECTION = """\
+CREATIVE MODE — PROPOSE A GENUINELY NOVEL MECHANISM
+---------------------------------------------------
+For THIS child, do NOT derive the mechanism from the parent factor(s) or from
+any paper referenced above.  Propose a genuinely NOVEL mechanism of your own,
+drawing on mathematics, statistics, signal processing, physics or behavioural
+reasoning (for example: Hawkes-process self-excitation of order flow, spectral
+coherence between volume and returns, Ornstein-Uhlenbeck relaxation rates,
+distributional entropy shifts, prospect-theory anchoring) — explicitly NOT just
+another trend-following / moving-average variant.  The mechanism must remain
+causal, leak-free and computable from the fields in the DATA CONTEXT, and you
+must respond with the exact same JSON schema requested in this prompt."""
+
+
 # ── hypothesis-only mutation (P3 agent split: Hypothesis → Debate → Codegen) ──
 
 HYPOTHESIS_MUTATION_PROMPT = """\
@@ -206,8 +222,11 @@ hypothesis first, so make it defensible).
 
 Keep what works, fix what the report criticises.  If the report shows the
 parent is redundant with the book, change the *mechanism*, not the constants.
-State a falsifiable directional claim (`expected_sign`) and when the effect
-should work or fail (`regime_dependence`).
+The mechanism may be 2-4 sentences and may be economic OR mathematical /
+statistical / microstructural / behavioural — reasoning like "Hawkes-process
+self-excitation describes clustering of order flow" is as valid as a classic
+economic story.  State a falsifiable directional claim (`expected_sign`) and
+when the effect should work or fail (`regime_dependence`).
 
 DATA CONTEXT
 ------------
@@ -240,10 +259,11 @@ Respond with strict JSON, exactly:
 
 
 def build_hypothesis_prompt(parent: FactorProgram, brief: str, data_context: str,
-                            existing_ids: Sequence[str]) -> str:
+                            existing_ids: Sequence[str],
+                            creative: bool = False) -> str:
     from quant_fund_agent.agents.factor_research.debate import IDEA_SCHEMA
 
-    return HYPOTHESIS_MUTATION_PROMPT.format(
+    prompt = HYPOTHESIS_MUTATION_PROMPT.format(
         data_context=data_context,
         parent_id=parent.factor_id,
         parent_idea=parent.trading_idea or parent.description or "(none recorded)",
@@ -254,6 +274,9 @@ def build_hypothesis_prompt(parent: FactorProgram, brief: str, data_context: str
         existing_ids=", ".join(sorted(existing_ids)) if existing_ids else "(none)",
         idea_schema=IDEA_SCHEMA,
     )
+    if creative:
+        prompt = f"{prompt}\n\n{CREATIVE_NOVELTY_SECTION}"
+    return prompt
 
 
 def parse_hypothesis_response(content: str) -> dict[str, Any]:
@@ -298,8 +321,11 @@ evaluation report our research harness produced for it.  Your task is to
 propose ONE improved CHILD factor: keep what works, fix what the report
 criticises, and state a falsifiable hypothesis for the child.
 
-Think like a scientist, not a curve-fitter: the child must embody an economic
-mechanism, not just perturbed constants.  If the report shows the parent is
+Think like a scientist, not a curve-fitter: the child must embody a clearly
+stated mechanism (2-4 sentences), not just perturbed constants.  The mechanism
+may be economic OR mathematical / statistical / microstructural / behavioural —
+reasoning like "Hawkes-process self-excitation describes clustering of order
+flow" is as valid as a classic economic story.  If the report shows the parent is
 redundant with the book, change the *mechanism*, not the window.  If the edge
 decays instantly, look for a slower expression of the same idea (or declare a
 shorter horizon).  If the parent failed gates badly, it is fine to propose a
@@ -418,13 +444,14 @@ STRICT_REQUIREMENTS = """\
 
 
 def build_mutation_prompt(parent: FactorProgram, brief: str, data_context: str,
-                          existing_ids: Sequence[str]) -> str:
+                          existing_ids: Sequence[str],
+                          creative: bool = False) -> str:
     from quant_fund_agent.agents.factor_research.prompts import (
         EXAMPLE_FACTOR,
         OPERATOR_REFERENCE,
     )
 
-    return MUTATION_PROMPT.format(
+    prompt = MUTATION_PROMPT.format(
         data_context=data_context,
         operator_reference=OPERATOR_REFERENCE,
         example_factor=EXAMPLE_FACTOR,
@@ -438,6 +465,9 @@ def build_mutation_prompt(parent: FactorProgram, brief: str, data_context: str,
         strict_requirements=STRICT_REQUIREMENTS,
         child_schema=CHILD_SCHEMA,
     )
+    if creative:
+        prompt = f"{prompt}\n\n{CREATIVE_NOVELTY_SECTION}"
+    return prompt
 
 
 def build_crossover_prompt(parent_a: FactorProgram, brief_a: str,

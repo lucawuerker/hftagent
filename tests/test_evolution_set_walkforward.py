@@ -156,7 +156,7 @@ def test_set_mode_loop_end_to_end(set_loop):
         assert len(entry["factor_ids"]) >= 1
 
     ops = {row["operator"] for row in loop.controller.lineage
-           if row["generation"] > 0}
+           if "event" not in row and row["generation"] > 0}
     assert ops <= {"structural", "splice", "member_jitter"}
     assert ops, "no set children were admitted"
 

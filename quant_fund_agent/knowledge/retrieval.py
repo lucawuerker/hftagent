@@ -21,6 +21,7 @@ is discarded.
 from __future__ import annotations
 
 import logging
+import os
 from typing import Any, Sequence
 
 from quant_fund_agent.knowledge.embed_store import (
@@ -74,12 +75,28 @@ def build_query(data_context: str | None = None,
     return "\n".join(parts)
 
 
+# Per-paper cap on inlined text (chars).  Full papers run to 60k chars each —
+# inlining several uncapped is a token-cost hazard; ~20k chars ≈ 5k tokens.
+DEFAULT_PAPER_MAX_CHARS = 20_000
+
+
+def _paper_max_chars() -> int:
+    try:
+        return int(os.getenv("QF_RAG_PAPER_MAX_CHARS", DEFAULT_PAPER_MAX_CHARS))
+    except ValueError:
+        return DEFAULT_PAPER_MAX_CHARS
+
+
 def _papers_block(papers: Sequence[RetrievedPaper]) -> str:
+    cap = _paper_max_chars()
     parts = []
     for p in papers:
+        text = p.text or "(no text available)"
+        if len(text) > cap:
+            text = text[:cap] + "\n... [truncated]"
         parts.append(
             f"=== {p.title} (id={p.paper_id}, published={p.published_date}) ===\n"
-            f"{p.text or '(no text available)'}")
+            f"{text}")
     return "\n\n".join(parts) or "(no papers retrieved — rely on your own knowledge)"
 
 
@@ -105,6 +122,7 @@ def retrieve_and_brainstorm(
     cardinality: str = "1toN",
     k_papers: int = 4,
     cutoff_date: str | None = None,
+    allowed_scopes: set[str] | None = None,
     focus: str | None = None,
     gaps: Sequence[str] | None = None,
     mechanism_tags: Sequence[str] | None = None,
@@ -113,6 +131,9 @@ def retrieve_and_brainstorm(
 
     Returns the raw idea dicts (the caller coerces/validates them exactly like
     the oneshot path) with ``source_paper_ids`` already **citation-verified**.
+    ``allowed_scopes`` restricts retrieval to papers harvested under those
+    ``data_scope`` blocks (e.g. drop ``{"fundamental"}`` when the run has no
+    fundamentals feed); untagged legacy papers always pass.
     ``mechanism_tags`` (GraphRAG mode) asks each idea to name the mechanism it
     exploits — the hook that closes the Paper → Mechanism → Factor provenance
     path when the resulting factor is linked back into the graph.
@@ -121,7 +142,8 @@ def retrieve_and_brainstorm(
         raise ValueError(f"cardinality must be one of {CARDINALITY_MODES}")
 
     query = build_query(data_context, focus=focus, gaps=gaps)
-    papers = store.retrieve_papers(query, k=k_papers, cutoff_date=cutoff_date)
+    papers = store.retrieve_papers(query, k=k_papers, cutoff_date=cutoff_date,
+                                   allowed_scopes=allowed_scopes)
     retrieved_ids = [p.paper_id for p in papers]
     log.info("retrieved %d paper(s) [%s] for cardinality=%s",
              len(papers), ", ".join(retrieved_ids), cardinality)

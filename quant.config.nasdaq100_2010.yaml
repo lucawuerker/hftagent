@@ -1,0 +1,22 @@
+# FINAL-RUN primary config — survivorship-bias-free Nasdaq-100, 2010 → 2024-07-27.
+#
+# The end date deliberately stops TWO YEARS before today (2026-07-27): the last two
+# years are a forward-testing reserve that no research run may ever see (decision
+# A3 in docs/research-evolution/FINAL_RUN_PLAN.md). Within the visible panel the
+# progressive-reveal --test-frac tail is additionally held out as touch-once TEST.
+#
+# Same FMP archive as quant.config.fmp_sp500.yaml — only the membership mask and
+# date range differ. PIT union 2010→2024-07: 226 tickers, ~103 members per date.
+data:
+  provider: fmp_archive
+  asset_class: equity
+  frequency: 1d
+  start: '2010-01-01'
+  end: '2024-07-27'
+  archive_dir: data/vendor/fmp
+  membership: nasdaq100
+  fundamentals: true
+  fundamentals_period: quarter
+  fundamentals_staleness_days: 400
+  reporting_lag_days: 60
+  dtype: float32

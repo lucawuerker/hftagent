@@ -456,9 +456,9 @@ def test_marginal_penalties_fold_onto_axis_without_refit(monkeypatch):
     calls: list[tuple[int, tuple[int, ...]]] = []
     original = harness_mod._combined_prediction
 
-    def spy(signals, close, is_mask, cfg, model):
+    def spy(signals, close, is_mask, cfg, model, **kwargs):
         calls.append((len(signals), tuple(np.flatnonzero(is_mask))))
-        return original(signals, close, is_mask, cfg, model)
+        return original(signals, close, is_mask, cfg, model, **kwargs)
 
     monkeypatch.setattr(harness_mod, "_combined_prediction", spy)
     r = evaluate_candidate(f2, [f1], panel, cfg, split=split,
@@ -477,6 +477,241 @@ def test_marginal_penalties_fold_onto_axis_without_refit(monkeypatch):
     assert r.diagnostics["marginal_value_raw"] is not None
     assert r.objective.marginal_value == pytest.approx(
         r.diagnostics["marginal_value_raw"])
+
+
+# ── combined-model fit cache (rescore-cost optimisation; zero number change) ──
+
+def _assert_nested_exact(left, right):
+    """EXACT structural equality (NaN == NaN allowed) — no approx tolerance."""
+    if isinstance(left, dict):
+        assert set(left) == set(right)
+        for key in left:
+            _assert_nested_exact(left[key], right[key])
+    elif isinstance(left, (list, tuple)):
+        assert len(left) == len(right)
+        for l_item, r_item in zip(left, right):
+            _assert_nested_exact(l_item, r_item)
+    elif isinstance(left, float) and isinstance(right, float) \
+            and left != left and right != right:
+        pass  # NaN == NaN for this purpose
+    else:
+        assert left == right and type(left) is type(right)
+
+
+def _spy_build_estimator(monkeypatch):
+    """Count every actual estimator construction/fit in the marginal path."""
+    import quant_fund_agent.modeling.catalog as catalog_mod
+
+    fits: list[str] = []
+    original = catalog_mod.build_estimator
+
+    def spy(model_type, params):
+        fits.append(model_type)
+        return original(model_type, params)
+
+    monkeypatch.setattr(catalog_mod, "build_estimator", spy)
+    return fits
+
+
+def test_fit_cache_reduces_fits_and_preserves_numbers_exactly(monkeypatch):
+    """(a) A shared fit_cache reuses the book-only fit across candidates evaluated
+    against the SAME book, and every objective/diagnostic is EXACTLY identical to
+    the uncached path (the cache stores prediction frames, never estimators)."""
+    panel, rng = _panel(seed=30)
+    cfg = _cfg()
+    split = three_way_split(panel["close"].index, is_frac=0.6, val_frac=0.2)
+    params = EvalParams(marginal_model="ridge")
+    book = [_noise(rng), _noise(rng)]
+    c1, c2 = _noise(rng), _noise(rng)
+    fits = _spy_build_estimator(monkeypatch)
+
+    kw = dict(split=split, params=params)
+    r1 = evaluate_candidate(c1, book, panel, cfg, **kw, candidate_id="c1")
+    r2 = evaluate_candidate(c2, book, panel, cfg, **kw, candidate_id="c2")
+    assert len(fits) == 4                      # (with + base) per candidate
+
+    fits.clear()
+    cache: dict = {}
+    r1c = evaluate_candidate(c1, book, panel, cfg, **kw, candidate_id="c1",
+                             fit_cache=cache, candidate_key="c1",
+                             book_keys=["b0", "b1"])
+    r2c = evaluate_candidate(c2, book, panel, cfg, **kw, candidate_id="c2",
+                             fit_cache=cache, candidate_key="c2",
+                             book_keys=["b0", "b1"])
+    # candidate 2's base (book-only) fit is served from the cache: 4 fits → 3
+    assert len(fits) == 3
+    assert len(cache) == 3                      # (b0,b1,c1), (b0,b1), (b0,b1,c2)
+    _assert_nested_exact(r1.to_dict(), r1c.to_dict())
+    _assert_nested_exact(r2.to_dict(), r2c.to_dict())
+
+
+def test_fit_cache_absent_keys_bypass_and_default_is_uncached(monkeypatch):
+    """Without candidate_key/book_keys the cache is never consulted (and the
+    default fit_cache=None path performs the full fits)."""
+    panel, rng = _panel(seed=31)
+    cfg = _cfg()
+    split = three_way_split(panel["close"].index, is_frac=0.6, val_frac=0.2)
+    params = EvalParams(marginal_model="ridge")
+    book = [_noise(rng)]
+    cand = _noise(rng)
+    fits = _spy_build_estimator(monkeypatch)
+
+    cache: dict = {}
+    evaluate_candidate(cand, book, panel, cfg, split=split, params=params,
+                       fit_cache=cache)         # keys missing → bypass
+    assert len(fits) == 2 and cache == {}
+    fits.clear()
+    evaluate_candidate(cand, book, panel, cfg, split=split, params=params,
+                       fit_cache=cache, candidate_key="c",
+                       book_keys=[None])        # a None key → bypass
+    assert len(fits) == 2 and cache == {}
+
+
+def test_fit_cache_does_not_leak_across_windows(monkeypatch):
+    """(b) A different IS/VAL boundary is a different fit identity: entries from one
+    window are never reused for another, and repeating a window is a full hit."""
+    panel, rng = _panel(seed=32)
+    cfg = _cfg()
+    idx = panel["close"].index
+    split_a = three_way_split(idx, is_frac=0.5, val_frac=0.25)
+    split_b = three_way_split(idx, is_frac=0.6, val_frac=0.2)
+    params = EvalParams(marginal_model="ridge")
+    book = [_noise(rng)]
+    cand = _noise(rng)
+    fits = _spy_build_estimator(monkeypatch)
+
+    cache: dict = {}
+    keys = dict(fit_cache=cache, candidate_key="c", book_keys=["b0"])
+    r_a = evaluate_candidate(cand, book, panel, cfg, split=split_a, params=params,
+                             candidate_id="c", **keys)
+    assert len(fits) == 2
+    evaluate_candidate(cand, book, panel, cfg, split=split_b, params=params,
+                       candidate_id="c", **keys)
+    assert len(fits) == 4                       # window B: all misses, no leak
+    assert len(cache) == 4                      # 2 entries per window
+    fits.clear()
+    r_a2 = evaluate_candidate(cand, book, panel, cfg, split=split_a, params=params,
+                              candidate_id="c", **keys)
+    assert len(fits) == 0                       # window A repeats → full hit
+    _assert_nested_exact(r_a.to_dict(), r_a2.to_dict())
+
+
+def test_fit_cache_key_is_ordered_so_permuted_books_miss(monkeypatch):
+    """The cache key keeps the caller's X-column ORDER: the fitted prediction is not
+    bit-invariant to a feature permutation, so a permuted book must MISS (never
+    silently serve a prediction fitted on differently-ordered X)."""
+    panel, rng = _panel(seed=33)
+    cfg = _cfg()
+    split = three_way_split(panel["close"].index, is_frac=0.6, val_frac=0.2)
+    params = EvalParams(marginal_model="ridge")
+    b0, b1 = _noise(rng), _noise(rng)
+    cand = _noise(rng)
+    fits = _spy_build_estimator(monkeypatch)
+
+    cache: dict = {}
+    evaluate_candidate(cand, [b0, b1], panel, cfg, split=split, params=params,
+                       fit_cache=cache, candidate_key="c", book_keys=["b0", "b1"])
+    n = len(fits)
+    r_perm = evaluate_candidate(cand, [b1, b0], panel, cfg, split=split,
+                                params=params, fit_cache=cache, candidate_key="c",
+                                book_keys=["b1", "b0"])
+    assert len(fits) == 2 * n                   # permuted order → all misses
+    # and the permuted cached run equals its own uncached run exactly
+    r_perm_ref = evaluate_candidate(cand, [b1, b0], panel, cfg, split=split,
+                                    params=params, candidate_id=r_perm.candidate_id)
+    _assert_nested_exact(r_perm.to_dict(), r_perm_ref.to_dict())
+
+
+# ── service-level fit cache (research_service._FIT_CACHE) ─────────────────────
+
+def _service_factor_code(fid: str, body: str) -> str:
+    return f'''\
+"""Test factor {fid}."""
+
+from __future__ import annotations
+
+import pandas as pd
+
+from quant_fund_agent.factors.base import BaseFactor
+from quant_fund_agent.factors.registry import register_factor
+
+
+@register_factor
+class F_{fid}(BaseFactor):
+    factor_id = "{fid}"
+    name = "{fid}"
+    category = "momentum"
+    inputs = ["close"]
+    prediction_horizon = 1
+
+    def calc(self, data):
+        close = data["close"]
+        return {body}
+'''
+
+
+def test_service_fit_cache_hits_across_calls_and_stays_one_window(monkeypatch):
+    """(c) Two evaluate_fitness calls in the shape consecutive loop evaluations take
+    (same window, same deterministically-ordered book, different candidates) hit the
+    module-level fit cache on the shared book-only fit; a window change drops the
+    old window's entries (the cache holds exactly one window)."""
+    from quant_fund_agent.mcp import research_service as svc
+
+    rng = np.random.default_rng(40)
+    n_bars, tickers = 480, ["A", "B", "C", "D", "E", "F"]
+    rets = np.zeros((n_bars, len(tickers)))
+    eps = rng.standard_normal((n_bars, len(tickers))) * 0.01
+    for t in range(1, n_bars):
+        rets[t] = 0.5 * rets[t - 1] + eps[t]
+    idx = pd.date_range("2024-01-01", periods=n_bars, freq="D")
+    close = pd.DataFrame(100 * np.cumprod(1 + rets, axis=0),
+                         index=idx, columns=tickers)
+    panel = {"close": close}
+
+    monkeypatch.setattr(svc, "_load_panel_cached",
+                        lambda data_dir, fields, n_tickers: panel)
+    monkeypatch.setattr(svc, "_panel_cache_key",
+                        lambda data_dir, fields, n_tickers: ("fitcache-panel",))
+    svc._SIGNAL_CACHE.clear()
+    svc._FIT_CACHE.clear()
+    svc._FIT_CACHE_STATS.update(hits=0, misses=0)
+
+    book = [
+        {"factor_id": "bk1",
+         "code": _service_factor_code("bk1", "close.pct_change().fillna(0.0)")},
+        {"factor_id": "bk2",
+         "code": _service_factor_code(
+             "bk2", "close.pct_change().rolling(3).mean().fillna(0.0)")},
+    ]
+    common = dict(book=book, target_horizon=1, fields=["close"], n_tickers=None,
+                  marginal_model="ridge")
+
+    cand_a = {"factor_id": "cand_a", "code": _service_factor_code(
+        "cand_a", "close.pct_change().rolling(5).mean().fillna(0.0)")}
+    r1 = svc.evaluate_fitness(cand_a, **common)
+    assert r1["ok"], r1.get("error")
+    assert svc._FIT_CACHE_STATS["hits"] == 0    # first call: cold cache
+
+    cand_b = {"factor_id": "cand_b", "code": _service_factor_code(
+        "cand_b", "(close / close.rolling(10).mean() - 1.0).fillna(0.0)")}
+    r2 = svc.evaluate_fitness(cand_b, **common)
+    assert r2["ok"], r2.get("error")
+    # the shared book-only base fit was served from the cache on the second call
+    assert svc._FIT_CACHE_STATS["hits"] == 1
+    assert len(svc._FIT_CACHE) == 1             # one window dict
+    (window_dict,) = svc._FIT_CACHE.values()
+    assert len(window_dict) == 3                # base + the two with-candidate fits
+
+    # a different calendar window (rescore after a frontier advance) starts empty:
+    # the previous window's fits are dropped and nothing is reused across windows
+    hits_before = svc._FIT_CACHE_STATS["hits"]
+    r3 = svc.evaluate_fitness(cand_a, **common, is_end=idx[240].isoformat(),
+                              val_end=idx[360].isoformat())
+    assert r3["ok"], r3.get("error")
+    assert svc._FIT_CACHE_STATS["hits"] == hits_before
+    assert len(svc._FIT_CACHE) == 1             # only the NEW window is retained
+    (new_window_dict,) = svc._FIT_CACHE.values()
+    assert new_window_dict is not window_dict
 
 
 # ── temporal degradation is diagnostic-only ──

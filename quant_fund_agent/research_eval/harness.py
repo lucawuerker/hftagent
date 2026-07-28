@@ -47,6 +47,7 @@ Not yet wired (documented for later phases): the transaction-cost gate (P5).
 from __future__ import annotations
 
 import logging
+from collections.abc import MutableMapping
 from dataclasses import dataclass, field
 from typing import Any, Sequence
 
@@ -172,9 +173,51 @@ def _pooled_ic(
     return _weighted_asset_pearson(x, y)
 
 
+# Distinguishes "no cache entry" from a cached ``None`` prediction (too few rows).
+_FIT_CACHE_MISS = object()
+
+
+def _fit_cache_key(
+    signal_keys: Sequence[Any], close: pd.DataFrame, is_mask: np.ndarray,
+    cfg: Any, model: str,
+) -> tuple:
+    """Cache key uniquely determining a :func:`_combined_prediction` output.
+
+    The per-signal keys are kept in the caller's **ordered** X-column order on
+    purpose: the fitted prediction is NOT bit-invariant to a column permutation
+    (verified empirically — ridge differs at ~1e-13, gradient boosting at ~1e-17
+    under a feature permutation), so a sorted/set key could silently swap in a
+    prediction computed from a differently-ordered X.  Ordered keys mean identical
+    ordered calls hit and differently-ordered calls miss — strictly safe.
+
+    Besides the signal identities the key pins everything else the fit reads: the
+    model name, ``cfg.target_horizon`` (the label), ``cfg.fit_standardize`` (the
+    feature transform), the fast-model params, the exact panel window
+    (length / bounds / columns) and the exact IS mask bytes (the fit rows).
+    """
+    idx = close.index
+    window = (len(idx),
+              str(idx[0]) if len(idx) else None,
+              str(idx[-1]) if len(idx) else None,
+              tuple(close.columns))
+    fast = cfg.fast_model_params(model) if hasattr(cfg, "fast_model_params") else None
+    return (
+        tuple(signal_keys),
+        str(model),
+        int(cfg.target_horizon),
+        str(getattr(cfg, "fit_standardize", "per_underlying")),
+        repr(fast),
+        window,
+        np.asarray(is_mask, dtype=bool).tobytes(),
+    )
+
+
 def _combined_prediction(
     signals: Sequence[pd.DataFrame], close: pd.DataFrame, is_mask: np.ndarray,
     cfg: Any, model: str,
+    *,
+    fit_cache: MutableMapping | None = None,
+    signal_keys: Sequence[Any] | None = None,
 ) -> pd.DataFrame | None:
     """Fit ``model`` on the book's standardised signals (IS rows) → (T×N) prediction.
 
@@ -184,12 +227,28 @@ def _combined_prediction(
     Training rows whose forward-return label leaves the IS window are dropped, so
     the fit never consumes validation/test outcomes through boundary labels.
     Returns ``None`` if there are too few finite IS training rows to fit.
+
+    ``fit_cache`` (optional) memoises the returned *prediction frame* (never the
+    estimator) under :func:`_fit_cache_key`; it is only consulted when
+    ``signal_keys`` supplies one non-None identity per signal in X-column order.
+    With ``fit_cache=None`` (the default) behaviour is byte-identical to the
+    uncached path.
     """
     from quant_fund_agent.backtesting.strategy_backtester import normalise_factor_signals
     from quant_fund_agent.modeling.catalog import build_estimator
 
     if not signals:
         return None
+
+    cache_key = None
+    if (fit_cache is not None and signal_keys is not None
+            and len(signal_keys) == len(signals)
+            and all(k is not None for k in signal_keys)):
+        cache_key = _fit_cache_key(signal_keys, close, is_mask, cfg, model)
+        hit = fit_cache.get(cache_key, _FIT_CACHE_MISS)
+        if hit is not _FIT_CACHE_MISS:
+            return hit
+
     index, cols = close.index, close.columns
     n_rows, n_cols = len(index), len(cols)
     is_idx = index[is_mask]
@@ -209,12 +268,17 @@ def _combined_prediction(
     is_rows = np.repeat(fit_mask, n_cols)
     train = np.flatnonzero(is_rows & np.isfinite(y))
     if len(train) < 30:
+        if cache_key is not None:
+            fit_cache[cache_key] = None  # a deterministic outcome too — cacheable
         return None
     fast = cfg.fast_model_params(model) if hasattr(cfg, "fast_model_params") else None
     est = build_estimator(model, fast)
     est.fit(X[train], y[train])
     pred = np.asarray(est.predict(X), dtype=float).reshape(n_rows, n_cols)
-    return pd.DataFrame(pred, index=index, columns=cols)
+    result = pd.DataFrame(pred, index=index, columns=cols)
+    if cache_key is not None:
+        fit_cache[cache_key] = result
+    return result
 
 
 def _label_available_mask(available_mask: np.ndarray, horizon: int) -> np.ndarray:
@@ -258,23 +322,41 @@ def _flat_z(
 def _marginal_value(
     candidate: pd.DataFrame, book: Sequence[pd.DataFrame], panel, cfg,
     is_mask, val_mask, model: str, available_mask: np.ndarray,
+    *,
+    fit_cache: MutableMapping | None = None,
+    candidate_key: Any | None = None,
+    book_keys: Sequence[Any] | None = None,
 ) -> dict[str, Any]:
     """LOCO: ΔOOS-IC of the combined model from adding the candidate to the book.
 
     The fitted ``with``/``base`` prediction panels are returned alongside the scalar
     for diagnostics / potential reuse; the scored marginal-value axis is the ΔIC.
+
+    ``fit_cache`` + per-signal identities (``candidate_key`` / ``book_keys``, aligned
+    with ``book``) enable the combined-fit prediction cache in
+    :func:`_combined_prediction`; when any of them is missing the cache is bypassed
+    and behaviour is byte-identical to the uncached path.
     """
     close = panel["close"]
     h = cfg.target_horizon
 
-    with_pred = _combined_prediction([*book, candidate], close, is_mask, cfg, model)
+    keys_ok = (fit_cache is not None and candidate_key is not None
+               and book_keys is not None and len(book_keys) == len(book)
+               and all(k is not None for k in book_keys))
+    cache = fit_cache if keys_ok else None
+    with_keys = [*book_keys, candidate_key] if keys_ok else None
+    base_keys = list(book_keys) if keys_ok else None
+
+    with_pred = _combined_prediction([*book, candidate], close, is_mask, cfg, model,
+                                     fit_cache=cache, signal_keys=with_keys)
     with_ic = (
         _pooled_ic(with_pred, close, h, val_mask, is_mask, available_mask)[0]
         if with_pred is not None else None
     )
 
     if book:
-        base_pred = _combined_prediction(list(book), close, is_mask, cfg, model)
+        base_pred = _combined_prediction(list(book), close, is_mask, cfg, model,
+                                         fit_cache=cache, signal_keys=base_keys)
         base_ic = (
             _pooled_ic(base_pred, close, h, val_mask, is_mask, available_mask)[0]
             if base_pred is not None else None
@@ -703,6 +785,9 @@ def evaluate_candidate(
     reference_signals: Sequence[pd.DataFrame] | None = None,
     reference_ids: Sequence[str] | None = None,
     reference_codes: Sequence[str] | None = None,
+    fit_cache: MutableMapping | None = None,
+    candidate_key: Any | None = None,
+    book_keys: Sequence[Any] | None = None,
 ) -> FitnessResult:
     """Score one candidate signal against the current book → a :class:`FitnessResult`.
 
@@ -715,6 +800,13 @@ def evaluate_candidate(
     current archive member (for the structural-novelty axis); ``expected_sign`` feeds
     the sign-consistency check; ``jitter_signals`` feeds the plateau penalty folded
     onto the marginal-value axis.
+
+    ``fit_cache`` (a mutable mapping owned by the caller) plus per-signal identities
+    (``candidate_key``, ``book_keys`` — e.g. code fingerprints, aligned with
+    ``book_signals``) memoise the two combined-model *prediction frames* of the
+    LOCO marginal-value axis across calls; the estimator is never cached, only its
+    prediction, so a cache hit returns exactly what the fit would have.  All three
+    default to ``None`` → the cache is bypassed and behaviour is byte-identical.
     """
     params = params or EvalParams()
     close = panel["close"]
@@ -745,7 +837,9 @@ def evaluate_candidate(
 
     # ── Family 2 — marginal / incremental value (CORE, primary) ──
     marg = _marginal_value(candidate_signal, book, panel, cfg, is_mask, val_mask,
-                           params.marginal_model, split.is_val_mask)
+                           params.marginal_model, split.is_val_mask,
+                           fit_cache=fit_cache, candidate_key=candidate_key,
+                           book_keys=book_keys)
     residual_ic = _residual_ic(
         candidate_signal, book, panel, cfg,
         split.is_mask,          # orthogonalisation betas fit on IS only (unchanged)

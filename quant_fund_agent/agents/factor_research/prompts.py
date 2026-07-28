@@ -607,9 +607,12 @@ Propose exactly {n_ideas} distinct factor ideas.  Each idea must:
   - belong to one of the categories: momentum, mean_reversion,
     volatility, microstructure, statistical_arbitrage, carry, sentiment,
     or other;
-  - state a clear `trading_idea` — the *why*, in 2-4 sentences
-    grounded in market structure, behavioural finance, or the scientific
-    method in the paper, citing the source paper(s) if relevant;
+  - state a clear `trading_idea` — the *why*, in 2-4 sentences.  The
+    mechanism may be economic OR mathematical / statistical /
+    microstructural / behavioural — reasoning like "Hawkes-process
+    self-excitation describes clustering of order flow" is as valid as
+    a market-structure or behavioural-finance story, as long as it is
+    grounded and falsifiable; cite the source paper(s) if relevant;
   - declare a `prediction_horizon` (positive integer number of bars) —
     the forward offset at which the signal's edge is expected to
     materialise (see the PREDICTION HORIZON note in the DATA CONTEXT);

@@ -31,7 +31,7 @@ import json
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any, Callable, Sequence
 
 import numpy as np
 
@@ -172,12 +172,20 @@ class ControllerConfig:
     migration_every: int = 5           # generations between elite migrations
     migration_k: int = 1               # elites moved per island per migration
     seed: int = 0
+    # Optional hard size cap on each mechanism group's Pareto archive.  ``None``
+    # (the default) keeps the historical unbounded behaviour byte-identical.
+    # When set, an over-cap archive is culled to the members with the largest
+    # crowding distance (ties broken by genome_id); the best-``marginal_value``
+    # member is never evicted.
+    archive_cap_per_group: int | None = None
 
     def __post_init__(self) -> None:
         if self.n_islands is not None:
             self.demes_per_group = max(1, int(self.n_islands))
         self.n_mechanism_groups = max(1, int(self.n_mechanism_groups))
         self.demes_per_group = max(1, int(self.demes_per_group))
+        if self.archive_cap_per_group is not None:
+            self.archive_cap_per_group = max(1, int(self.archive_cap_per_group))
 
 
 class EvolutionController:
@@ -208,6 +216,12 @@ class EvolutionController:
         # = 1 retry) so an identical genome isn't re-tried every reveal forever.
         self._failed_fingerprints: dict[str, int] = {}
         self.parent_reuse: dict[str, int] = {}
+        # Optional archive-event observer, set post-init by the loop (NOT part of
+        # ControllerConfig and never serialised).  When set it receives one dict
+        # per member evicted from a group archive:
+        # {"event": "archive_evict", "generation", "genome_id", "group_id",
+        #  "reason": "dominated" | "cap" | "rescore_gate_fail" | "rescore_dominated"}
+        self.event_sink: Callable[[dict], None] | None = None
 
     @property
     def archive(self) -> list[EvaluatedGenome]:
@@ -316,13 +330,68 @@ class EvolutionController:
         from quant_fund_agent.research_eval.fitness import dominates
 
         group_id = evaluated.genome.mechanism_group_id % len(self.group_archives)
-        pool = self.group_archives[group_id] + [evaluated]
+        old_archive = self.group_archives[group_id]
+        pool = old_archive + [evaluated]
         new_archive: list[EvaluatedGenome] = []
         for eg in pool:
             if not any(dominates(o.fitness.objective, eg.fitness.objective)
                        for o in pool if o is not eg):
                 new_archive.append(eg)
+        surviving = {eg.genome.genome_id for eg in new_archive}
+        for eg in old_archive:
+            if eg.genome.genome_id not in surviving:
+                self._emit_evict(eg, group_id, "dominated")
+        new_archive, culled = self._cull_to_cap(new_archive)
+        for eg in culled:
+            self._emit_evict(eg, group_id, "cap")
         self.group_archives[group_id] = new_archive
+
+    def _emit_evict(self, evicted: EvaluatedGenome, group_id: int,
+                    reason: str) -> None:
+        """Report one archive eviction to the loop's event sink (if any)."""
+        if self.event_sink is None:
+            return
+        self.event_sink({
+            "event": "archive_evict",
+            "generation": self.generation,
+            "genome_id": evicted.genome.genome_id,
+            "group_id": group_id,
+            "reason": reason,
+        })
+
+    def _cull_to_cap(
+        self, archive: list[EvaluatedGenome],
+    ) -> tuple[list[EvaluatedGenome], list[EvaluatedGenome]]:
+        """Cull one group archive to ``archive_cap_per_group`` → (kept, evicted).
+
+        Keeps the members with the *largest* crowding distance over this group
+        archive's objective vectors (ties broken deterministically by genome_id),
+        and never evicts the best-``marginal_value`` member.  A no-op (everything
+        kept) when the cap is unset or not exceeded, so unset stays byte-identical.
+        """
+        cap = self.config.archive_cap_per_group
+        if cap is None or len(archive) <= cap:
+            return archive, []
+        results = [eg.fitness for eg in archive]
+        crowd = crowding_distance(results, list(range(len(archive))))
+
+        def _marginal(eg: EvaluatedGenome) -> float:
+            v = eg.fitness.objective.marginal_value
+            return float("-inf") if v is None else float(v)
+
+        # Guard: the argmax-marginal member is always kept (tie → lowest genome_id).
+        best_idx = min(range(len(archive)),
+                       key=lambda i: (-_marginal(archive[i]),
+                                      archive[i].genome.genome_id))
+        order = sorted(range(len(archive)),
+                       key=lambda i: (-crowd[i], archive[i].genome.genome_id))
+        keep_idx = order[:cap]
+        if best_idx not in keep_idx:
+            keep_idx[-1] = best_idx
+        keep_set = set(keep_idx)
+        kept = [archive[i] for i in range(len(archive)) if i in keep_set]
+        evicted = [archive[i] for i in range(len(archive)) if i not in keep_set]
+        return kept, evicted
 
     # ── progressive reveal: retry gate-failers + re-score the archive ──
 
@@ -363,11 +432,22 @@ class EvolutionController:
                 eg.fitness = newf
         for group_id, archive in enumerate(self.group_archives):
             passing = [eg for eg in archive if eg.selectable]
-            self.group_archives[group_id] = [
+            for eg in archive:
+                if not eg.selectable:
+                    self._emit_evict(eg, group_id, "rescore_gate_fail")
+            pruned = [
                 eg for eg in passing
                 if not any(dominates(o.fitness.objective, eg.fitness.objective)
                            for o in passing if o is not eg)
             ]
+            surviving = {eg.genome.genome_id for eg in pruned}
+            for eg in passing:
+                if eg.genome.genome_id not in surviving:
+                    self._emit_evict(eg, group_id, "rescore_dominated")
+            pruned, culled = self._cull_to_cap(pruned)
+            for eg in culled:
+                self._emit_evict(eg, group_id, "cap")
+            self.group_archives[group_id] = pruned
 
     # ── selection ──
 
@@ -498,6 +578,7 @@ class EvolutionController:
                 "migration_every": self.config.migration_every,
                 "migration_k": self.config.migration_k,
                 "seed": self.config.seed,
+                "archive_cap_per_group": self.config.archive_cap_per_group,
             },
             "n_trials": self.n_trials,
             "generation": self.generation,
@@ -531,6 +612,7 @@ class EvolutionController:
             migration_every=cfgd.get("migration_every", 5),
             migration_k=cfgd.get("migration_k", 1),
             seed=cfgd.get("seed", 0),
+            archive_cap_per_group=cfgd.get("archive_cap_per_group"),
         ))
 
         def _eg(d: dict[str, Any]) -> EvaluatedGenome:

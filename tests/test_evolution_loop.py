@@ -81,9 +81,11 @@ class FakeLLM:
 
     def __init__(self):
         self.calls = 0
+        self.prompts: list[str] = []
 
     def invoke(self, prompt: str):
         self.calls += 1
+        self.prompts.append(str(prompt))
         body = CHILD_BODY_1 if self.calls % 2 else CHILD_BODY_2
         payload = {
             "factor_id": "evo_child",
@@ -217,10 +219,13 @@ def test_full_loop_runs_and_checkpoints(wired_loop):
 
     lineage = [json.loads(l) for l in
                (tmp_path / "evolution" / "lineage.jsonl").read_text().splitlines()]
-    assert len(lineage) == summary["n_trials"]            # one row per scored candidate
-    assert {row["operator"] for row in lineage} & {"llm_semantic", "crossover", "jitter"}
+    # one BILLED row per scored candidate (event rows — e.g. archive evictions
+    # reported through the controller's event sink — are bookkeeping, not trials)
+    billed = [r for r in lineage if "event" not in r]
+    assert len(billed) == summary["n_trials"]
+    assert {row["operator"] for row in billed} & {"llm_semantic", "crossover", "jitter"}
     # children carry their parents in the lineage
-    child_rows = [r for r in lineage if r["generation"] > 0]
+    child_rows = [r for r in billed if r["generation"] > 0]
     assert child_rows and all(r["parent_ids"] for r in child_rows
                               if r["operator"] != "seed")
 
@@ -395,3 +400,201 @@ def test_experience_memory_is_written_across_a_run(synthetic_panel, tmp_path,
     g = KnowledgeGraph.load(mem_path)
     mid = KnowledgeGraph.mechanism_id("momentum")
     assert g.g.nodes[mid]["n_attempts"] >= 1       # attempt tally recorded (topic=category)
+
+
+# ── new run artifacts + resume integrity ──────────────────────────────────────
+
+def test_lineage_and_gen_quality_survive_resume(wired_loop):
+    """lineage.jsonl history and gen_quality.jsonl rows are preserved (and
+    deduped) when a run resumes from a checkpoint."""
+    from quant_fund_agent.agents.factor_research.evolution.controller import (
+        EvolutionController,
+    )
+
+    loop, _, tmp_path = wired_loop
+    loop.run(initial_programs=_seeds())
+    out = tmp_path / "evolution"
+
+    lineage_before = [json.loads(l)
+                      for l in (out / "lineage.jsonl").read_text().splitlines()]
+    assert lineage_before
+    gq_before = [json.loads(l)
+                 for l in (out / "gen_quality.jsonl").read_text().splitlines()]
+    assert [r["generation"] for r in gq_before] == [0, 1, 2]
+    for row in gq_before:
+        assert {"generation", "archive_size_total", "archive_size_per_group",
+                "kept_pool_size", "n_trials", "mean_marginal_value",
+                "max_marginal_value", "mean_structural_novelty"} <= set(row)
+        assert isinstance(row["archive_size_per_group"], list)
+
+    # resume with one extra generation: same out_dir, controller reloaded
+    cfg2 = EvolutionRunConfig(
+        generations=3, population_size=6, children_per_generation=4,
+        seed=11, target_horizon=1, stability_blocks=4,
+        n_tickers=None, out_dir=str(out),
+    )
+    import quant_fund_agent.agents.factor_research.evolution.loop as loop_mod
+
+    resumed = loop_mod.EvolutionLoop(
+        cfg2, data_context="TEST DATA CONTEXT",
+        fields=["open", "high", "low", "close", "volume"])
+    resumed._load_known_ids = lambda: None
+    resumed.controller = EvolutionController.load(out / "state.json")
+    resumed.run(resume=True)
+
+    lineage_after = [json.loads(l)
+                     for l in (out / "lineage.jsonl").read_text().splitlines()]
+    # the pre-resume history is still the head of the rewritten file (before the
+    # fix, resume restarted from an EMPTY lineage and the rewrite truncated it);
+    # gen-3 children may all be dedup-skipped by the cycling FakeLLM, so only
+    # ≥ is guaranteed for the length.
+    assert lineage_after[:len(lineage_before)] == lineage_before
+    assert len(lineage_after) >= len(lineage_before)
+
+    gq_after = [json.loads(l)
+                for l in (out / "gen_quality.jsonl").read_text().splitlines()]
+    gens = [r["generation"] for r in gq_after]
+    assert gens == sorted(set(gens))                  # resume-deduped, in order
+    assert gens[-1] == 3
+
+
+def test_event_sink_and_archive_cap_are_wired(tmp_path):
+    """The controller's eviction events land in the run lineage (no timestamps)
+    and archive_cap_per_group threads into ControllerConfig."""
+    cfg = EvolutionRunConfig(archive_cap_per_group=2,
+                             out_dir=str(tmp_path / "evolution"))
+    loop = EvolutionLoop(cfg, data_context="CTX", fields=["close"])
+    assert loop.controller.config.archive_cap_per_group == 2
+    assert loop.controller.event_sink == loop._lineage_event
+
+    loop._lineage_event({"event": "archive_evict", "generation": 1,
+                         "genome_id": "g1-x", "group_id": 0, "reason": "cap"})
+    assert loop.controller.lineage[-1]["event"] == "archive_evict"
+    assert "ts" not in loop.controller.lineage[-1]
+
+
+def test_creative_frac_marks_children_and_prompt(synthetic_panel, tmp_path,
+                                                 monkeypatch):
+    """creative_frac=1.0: every llm_semantic child is generated in creative mode —
+    the prompt carries the novelty section and the lineage stamps the operator."""
+    monkeypatch.setenv("QF_USE_MCP", "0")
+    from quant_fund_agent.mcp import research_service as svc
+
+    monkeypatch.setattr(svc, "_load_panel_cached",
+                        lambda data_dir, fields, n_tickers: synthetic_panel)
+    monkeypatch.setattr(svc, "_panel_cache_key",
+                        lambda data_dir, fields, n_tickers: ("test-panel",))
+    svc._SIGNAL_CACHE.clear()
+
+    fake = FakeLLM()
+    import quant_fund_agent.agents.factor_research.evolution.loop as loop_mod
+
+    monkeypatch.setattr(loop_mod, "_get_llm", lambda temperature, role=None: fake)
+
+    cfg = EvolutionRunConfig(
+        generations=1, population_size=6, children_per_generation=3,
+        seed=11, target_horizon=1, stability_blocks=4, n_tickers=None,
+        p_llm_semantic=1.0, p_crossover=0.0, p_jitter=0.0, p_cross_group=0.0,
+        creative_frac=1.0, out_dir=str(tmp_path / "evolution"),
+    )
+    loop = loop_mod.EvolutionLoop(cfg, data_context="TEST DATA CONTEXT",
+                                  fields=["open", "high", "low", "close", "volume"])
+    loop._load_known_ids = lambda: None
+    loop.run(initial_programs=_seeds())
+
+    assert fake.prompts and all(
+        "CREATIVE MODE — PROPOSE A GENUINELY NOVEL MECHANISM" in p
+        for p in fake.prompts)
+    child_ops = {r["operator"] for r in loop.controller.lineage
+                 if "event" not in r and r["generation"] > 0}
+    assert child_ops == {"llm_semantic_creative"}
+
+
+def test_memory_key_overrides_config_derived_key(tmp_path, monkeypatch):
+    """EvolutionRunConfig.memory_key routes the experience store; memory_config
+    remains the fallback."""
+    from quant_fund_agent.knowledge import experience
+
+    captured: list[str] = []
+    monkeypatch.setattr(
+        experience, "memory_graph_path",
+        lambda name: captured.append(name) or tmp_path / "mem" / f"{name}.json")
+
+    cfg = EvolutionRunConfig(memory=True, memory_config="cfg_a",
+                             memory_key="arm_b",
+                             out_dir=str(tmp_path / "evolution"))
+    EvolutionLoop(cfg, data_context="CTX", fields=["close"])
+    assert captured == ["arm_b"]
+
+    captured.clear()
+    cfg2 = EvolutionRunConfig(memory=True, memory_config="cfg_a",
+                              out_dir=str(tmp_path / "evolution2"))
+    EvolutionLoop(cfg2, data_context="CTX", fields=["close"])
+    assert captured == ["cfg_a"]                    # default keeps prior behaviour
+
+
+def _wire_persist_fakes(monkeypatch, persisted: dict):
+    from quant_fund_agent.mcp import research_client
+
+    monkeypatch.setattr(research_client, "materialise_factor",
+                        lambda fid, code: {"ok": True, "code_path": f"/tmp/{fid}.py"})
+    monkeypatch.setattr(research_client, "backtest_factors",
+                        lambda factor_ids, **kw: {f: {"ok": False}
+                                                  for f in factor_ids})
+    monkeypatch.setattr(research_client, "persist_results",
+                        lambda kept, rej: (persisted.update(kept=kept)
+                                           or {"kept_factor_ids": [r["id"] for r in kept],
+                                               "rejected_factor_ids": []}))
+
+
+def test_persist_fails_closed_on_curation_failure(wired_loop, monkeypatch):
+    loop, _, _ = wired_loop
+    loop.run(initial_programs=_seeds())
+    assert loop.controller.kept_pool
+
+    from quant_fund_agent.mcp import research_client
+
+    monkeypatch.delenv("QF_PERSIST_FAIL_OPEN", raising=False)
+    monkeypatch.setattr(research_client, "curate_book",
+                        lambda *a, **kw: {"ok": False, "error": "boom"})
+    persisted: dict = {}
+    _wire_persist_fakes(monkeypatch, persisted)
+
+    with pytest.raises(RuntimeError, match="curation stage"):
+        persist_archive(loop.controller, session_id="evolution:test:evo",
+                        target_horizon=1, curation="greedy")
+
+    # fail-open: the historical fallback, flagged in every record's metadata
+    monkeypatch.setenv("QF_PERSIST_FAIL_OPEN", "1")
+    out = persist_archive(loop.controller, session_id="evolution:test:evo",
+                          target_horizon=1, curation="greedy")
+    pool_ids = {fid for fid, _ in loop.controller.kept_pool_programs()}
+    assert set(out["kept_factor_ids"]) == pool_ids   # full un-curated pool
+    for rec in persisted["kept"]:
+        assert rec["metadata"]["evolution"]["curation_failed"] is True
+
+
+def test_persist_fails_closed_on_publish_failure(wired_loop, monkeypatch):
+    loop, _, _ = wired_loop
+    loop.run(initial_programs=_seeds())
+    assert loop.controller.archive
+
+    from quant_fund_agent.mcp import research_client
+
+    monkeypatch.delenv("QF_PERSIST_FAIL_OPEN", raising=False)
+    monkeypatch.setattr(research_client, "publish_book",
+                        lambda *a, **kw: {"ok": False, "error": "deflation down"})
+    persisted: dict = {}
+    _wire_persist_fakes(monkeypatch, persisted)
+
+    with pytest.raises(RuntimeError, match="publish stage"):
+        persist_archive(loop.controller, session_id="evolution:test:evo",
+                        target_horizon=1, selection_deflation="on")
+
+    monkeypatch.setenv("QF_PERSIST_FAIL_OPEN", "1")
+    out = persist_archive(loop.controller, session_id="evolution:test:evo",
+                          target_horizon=1, selection_deflation="on")
+    assert set(out["kept_factor_ids"]) == {
+        p.factor_id for eg in loop.controller.archive for p in eg.genome.programs}
+    for rec in persisted["kept"]:
+        assert rec["metadata"]["evolution"]["publish_failed"] is True

@@ -1,0 +1,3 @@
+{"generation": 0, "archive_size_total": 3, "archive_size_per_group": [3], "kept_pool_size": 3, "n_trials": 3, "mean_marginal_value": 0.014822310433005956, "max_marginal_value": 0.043233887395163415, "mean_structural_novelty": 0.8669588056784789}
+{"generation": 1, "archive_size_total": 3, "archive_size_per_group": [3], "kept_pool_size": 4, "n_trials": 5, "mean_marginal_value": -0.0019068981636933338, "max_marginal_value": 0.000890849266712998, "mean_structural_novelty": 0.8776796559266443}
+{"generation": 2, "archive_size_total": 4, "archive_size_per_group": [4], "kept_pool_size": 6, "n_trials": 7, "mean_marginal_value": -0.0018863200243302944, "max_marginal_value": 0.007055135521329999, "mean_structural_novelty": 0.6820290680785632}

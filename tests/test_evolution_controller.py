@@ -229,6 +229,112 @@ def test_state_roundtrip(tmp_path):
     assert len(loaded.population()) == 2
 
 
+# ── archive cap + eviction events ────────────────────────────────────────────
+
+def _tradeoff_egs(n):
+    """``n`` mutually non-dominated genomes (mv=i, ind=n-1-i trade-off)."""
+    return [_eg(f"t{i:02d}", mv=float(i), ind=float(n - 1 - i), par=0.0)
+            for i in range(n)]
+
+
+def test_archive_uncapped_by_default_can_grow_unbounded():
+    # Same setup as the archive test above, but with many mutually
+    # non-dominated members: with the cap unset the archive holds all of them.
+    ctrl = EvolutionController(ControllerConfig(population_size=16, seed=0))
+    assert ctrl.config.archive_cap_per_group is None
+    for eg in _tradeoff_egs(7):
+        ctrl.insert(eg)
+    assert len(ctrl.archive) == 7  # exceeds any small bound → no culling
+
+
+def test_archive_cap_culls_by_crowding_and_keeps_best_marginal():
+    cap = 3
+    ctrl = EvolutionController(ControllerConfig(
+        population_size=16, seed=0, archive_cap_per_group=cap))
+    for eg in _tradeoff_egs(7):
+        ctrl.insert(eg)
+        assert len(ctrl.group_archive(0)) <= cap  # never exceeds cap
+    ids = {eg.genome.genome_id for eg in ctrl.group_archive(0)}
+    assert "t06" in ids  # the argmax-marginal member is always kept
+
+    # deterministic: an identical run produces the identical archive
+    ctrl2 = EvolutionController(ControllerConfig(
+        population_size=16, seed=0, archive_cap_per_group=cap))
+    for eg in _tradeoff_egs(7):
+        ctrl2.insert(eg)
+    assert [eg.genome.genome_id for eg in ctrl2.group_archive(0)] == \
+           [eg.genome.genome_id for eg in ctrl.group_archive(0)]
+
+
+def test_eviction_event_dominated_by_newcomer():
+    ctrl = EvolutionController(ControllerConfig(population_size=8, seed=0))
+    events = []
+    ctrl.event_sink = events.append
+    ctrl.insert(_eg("mid", mv=1, ind=1, par=1))
+    assert events == []
+    ctrl.insert(_eg("best", mv=2, ind=2, par=2))  # dominates mid
+    assert events == [{
+        "event": "archive_evict", "generation": 0,
+        "genome_id": "mid", "group_id": 0, "reason": "dominated",
+    }]
+
+
+def test_eviction_event_cap_cull():
+    ctrl = EvolutionController(ControllerConfig(
+        population_size=8, seed=0, archive_cap_per_group=2))
+    events = []
+    ctrl.event_sink = events.append
+    for eg in _tradeoff_egs(3):
+        ctrl.insert(eg)
+    cap_events = [e for e in events if e["reason"] == "cap"]
+    assert len(cap_events) == 1
+    evicted = cap_events[0]["genome_id"]
+    ids = {eg.genome.genome_id for eg in ctrl.group_archive(0)}
+    assert evicted not in ids
+    assert "t02" in ids  # best marginal_value survives the cull
+    assert len(ids) == 2
+
+
+def test_eviction_events_on_rescore():
+    ctrl = EvolutionController(ControllerConfig(population_size=8, seed=0))
+    for eg in _tradeoff_egs(3):
+        ctrl.insert(eg)
+    events = []
+    ctrl.event_sink = events.append
+    ctrl.generation = 5
+    # t00 now fails a gate; t01 is now dominated by t02's fresh fitness.
+    ctrl.rescore_archive({
+        "t00": _fit("t00", mv=9, passed=False),
+        "t01": _fit("t01", mv=1, ind=1, par=0),
+        "t02": _fit("t02", mv=2, ind=2, par=0),
+    })
+    by_id = {e["genome_id"]: e for e in events}
+    assert by_id["t00"]["reason"] == "rescore_gate_fail"
+    assert by_id["t01"]["reason"] == "rescore_dominated"
+    assert all(e["generation"] == 5 and e["event"] == "archive_evict"
+               and e["group_id"] == 0 for e in events)
+    assert [eg.genome.genome_id for eg in ctrl.archive] == ["t02"]
+
+
+def test_state_roundtrip_with_archive_cap(tmp_path):
+    ctrl = EvolutionController(ControllerConfig(
+        population_size=16, seed=3, archive_cap_per_group=3))
+    for eg in _tradeoff_egs(6):
+        ctrl.insert(eg)
+    path = tmp_path / "state.json"
+    ctrl.save(path)
+
+    loaded = EvolutionController.load(path)
+    assert loaded.config.archive_cap_per_group == 3
+    assert loaded.event_sink is None  # never serialised
+    assert [eg.genome.genome_id for eg in loaded.group_archive(0)] == \
+           [eg.genome.genome_id for eg in ctrl.group_archive(0)]
+    # the cap keeps being enforced after resume
+    for eg in _tradeoff_egs(12)[6:]:
+        loaded.insert(eg)
+        assert len(loaded.group_archive(0)) <= 3
+
+
 def test_kept_pool_accumulates_gate_passers_and_roundtrips(tmp_path):
     ctrl = EvolutionController(ControllerConfig(population_size=8, seed=0))
     ctrl.insert(_eg("a", mv=2, ind=2, rob=2, par=2))            # passes → pool + archive

@@ -541,6 +541,54 @@ def _cached_signal(program: dict[str, Any], panel: dict[str, Any],
     return signal
 
 
+# Combined-model FIT cache for the LOCO marginal-value axis (the expensive part of
+# an archive rescore: ~2 gradient-boosting fits per member).  Keyed two-level:
+# {window key: {fit key: prediction frame}} — the window key mirrors the signal
+# cache's invalidation dimensions (panel key, cutoff, is/val frontier, sliced-panel
+# bounds), and the inner fit key is ``harness._fit_cache_key`` (ORDERED per-signal
+# code fingerprints + model + split/window identity).  Only the *prediction frame*
+# is stored, never the estimator, so a hit returns exactly what the fit would have.
+# Only the CURRENT window's inner dict is kept (a frontier advance drops the rest),
+# and the inner dict is size-bounded — memory stays O(one window).
+_FIT_CACHE: dict[tuple, "_FitCacheDict"] = {}
+_FIT_CACHE_MAX = 128          # max cached predictions within one window
+_FIT_CACHE_STATS = {"hits": 0, "misses": 0}
+
+
+class _FitCacheDict(dict):
+    """Per-window fit cache: tallies hit/miss stats (for tests/telemetry) and
+    bounds its own size by evicting the oldest half when full."""
+
+    def get(self, key, default=None):  # the harness's single lookup path
+        if super().__contains__(key):
+            _FIT_CACHE_STATS["hits"] += 1
+            return super().__getitem__(key)
+        _FIT_CACHE_STATS["misses"] += 1
+        return default
+
+    def __setitem__(self, key, value):
+        if len(self) >= _FIT_CACHE_MAX and not super().__contains__(key):
+            for k in list(self)[: _FIT_CACHE_MAX // 2]:
+                super().pop(k, None)
+        super().__setitem__(key, value)
+
+
+def _fit_cache_for(window_key: tuple) -> "_FitCacheDict":
+    """The current window's fit cache; any other window's entries are dropped.
+
+    Keeping exactly one window's dict both bounds memory and implements the
+    invalidation rule: a progressive-reveal frontier advance (or any panel /
+    cutoff / split change) starts an empty cache — a prediction fitted on an
+    earlier, shorter dev window is never reused on a later, longer one.
+    """
+    cached = _FIT_CACHE.get(window_key)
+    if cached is None:
+        _FIT_CACHE.clear()
+        cached = _FitCacheDict()
+        _FIT_CACHE[window_key] = cached
+    return cached
+
+
 def _json_safe(obj: Any) -> Any:
     """Recursively convert numpy scalars/arrays so the payload crosses MCP as JSON."""
     import numpy as np
@@ -672,11 +720,20 @@ def evaluate_fitness(
     except Exception as e:  # noqa: BLE001 — candidate failure is a scored outcome
         return {"ok": False, "error": f"candidate signal failed: {e}"}
 
+    # The combined-fit cache lives per window: same invalidation dimensions as the
+    # signal cache, plus ``is_end`` (the fit's IS boundary).  Signal identities are
+    # the same code fingerprints the signal cache keys on.
+    fit_cache = _fit_cache_for((
+        panel_key, cutoff_date, is_end, val_end, _panel_window_key(panel_dev)))
+    candidate_key = _code_fingerprint(candidate["code"])
+
     book_sigs = []
+    book_keys: list[str] = []          # aligned with book_sigs (failed members skipped)
     for prog in book:
         try:
             book_sigs.append(
                 _cached_signal(prog, panel_dev, panel_key, cutoff_date, val_end))
+            book_keys.append(_code_fingerprint(prog["code"]))
         except Exception as e:  # noqa: BLE001
             log.warning("[evaluate_fitness] book member %s failed (%s) — skipped",
                         prog.get("factor_id"), e)
@@ -733,6 +790,9 @@ def evaluate_fitness(
             reference_signals=ref_sigs or None,
             reference_ids=ref_ids or None,
             reference_codes=ref_codes or None,
+            fit_cache=fit_cache,
+            candidate_key=candidate_key,
+            book_keys=book_keys,
         )
     except Exception as e:  # noqa: BLE001 — surface, don't crash the loop
         return {"ok": False, "error": f"evaluation failed: {e}"}

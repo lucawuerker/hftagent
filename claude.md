@@ -105,6 +105,33 @@ knowledge graph, then the ablation matrix (oneshot → +evolution → +RAG →
 +GraphRAG → +debate; single vs set) with the walk-forward pass for the results
 chapter. Live tracker: `docs/research-evolution/IMPLEMENTATION_PROGRESS.md`.
 
+**FINAL COMPARISON RUN — prepared 2026-07-27 (code DONE, runs pending).** The
+thesis comparison (ablation ladder L0–L7 on Claude Opus 5 via Bedrock + model
+sweep at the full config across GPT-5.6 Sol/Luna, Claude Sonnet 5/Fable 5, Meta
+Muse Spark 1.1; 2 seeds; Nasdaq-100 PIT 2010→2024-07 with a hard 2-year forward
+reserve) is fully specified in **`docs/research-evolution/FINAL_RUN_PLAN.md`**
+(decision record + runbook + verification gates — READ THIS FIRST before any
+run). Supporting build (all default-off/byte-identical): multi-provider LLM
+layer with Bedrock + base-URL wiring and a per-role **token/cost meter** with
+hard `--max-cost-usd` ceiling + optional prompt transcript
+(`QF_LLM_TRANSCRIPT_PATH`) in `llm.py`; `--config`/`--n-tickers 0=full` on
+`run_factor_evolution.py`; per-group **archive cap** with crowding cull +
+eviction lineage events; progressive-reveal drift instrumentation
+(`reveal_index` stamps, rescore diagnostics + `rescore_failed` rows,
+`gen_quality.jsonl`, lineage-resume + prequential-dedup fixes) + a byte-exact
+LOCO **fit cache**; fail-closed curation/publish (`QF_PERSIST_FAIL_OPEN=1`
+escape); `--creative-frac` ungrounded-idea operator + relaxed (non-economic,
+2–4 sentence) mechanism briefs; `--memory-key` per-arm memory isolation;
+paper harvester restructured into scope-tagged query blocks
+(fundamental/general/price) with `allowed_scopes` retrieval masking and a RAG
+paper-text cap; orchestrator `run_ablation_matrix.py` + `matrix/final_matrix.yaml`
+(resumable, preflight probes/mask-density/forward-reserve asserts); walkthrough
+notebook scaffold `notebooks/final_run_walkthrough.ipynb`; run configs
+`quant.config.{nasdaq100_2010,sp500_2010}.yaml` (panel verified 3,665×209,
+density 0.463). **Before any credits: build the +1000-paper corpus, re-embed
+with `QF_EMBEDDER=openai`, build the knowledge graph (missing → graphrag arms
+crash), then the plan's D1–D5 gates.**
+
 **Evolutionary researcher — knowledge-graph nested islands replace the QD grid;
 4-axis vector (done, 2026-07-21). THIS SUPERSEDES THE TWO BLOCKS BELOW.**
 Diversity is no longer maintained by a Quality-Diversity behavior grid but by a
