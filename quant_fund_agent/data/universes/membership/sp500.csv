@@ -1,851 +1,1017 @@
-ticker,name,start_date,end_date,add_reason,remove_reason,source
-A,Agilent Technologies,2000-06-05,,,,fja05680
-AABA,,1999-12-08,2017-06-19,,,fja05680
-AAL,American Airlines Group,2015-03-23,2024-09-23,,Market capitalization change.[29],fja05680
-AAP,Advance Auto Parts,2015-07-09,2023-08-25,,,fja05680
-AAPL,Apple Inc.,1996-01-02,,,,fja05680
-ABBV,AbbVie,2013-01-02,,ABBV spun off from Abbott Labs (ABT)[210],,fja05680
-ABC,,2001-08-30,2023-08-30,,,fja05680
-ABMD,Abiomed,2018-05-31,2022-12-22,Wyndham Worldwide spun off Wyndham Hotels & Resorts (NYSE:WH).[112],S&P 500 constituent Johnson & Johnson acquired Abiomed.[45],fja05680
-ABNB,Airbnb,2023-09-18,,,,fja05680
-ABT,Abbott Laboratories,1996-01-02,,,,fja05680
-ACGL,Arch Capital Group,2022-11-01,,,,fja05680
-ACN,Accenture,2011-07-06,,,,fja05680
-ACS,,2004-04-02,2010-02-08,,,fja05680
-ADBE,Adobe Inc.,1997-05-06,,,,fja05680
-ADI,Analog Devices,1999-10-12,,,,fja05680
-ADM,Archer Daniels Midland,1996-01-02,,,,fja05680
-ADP,Automatic Data Processing,1996-01-02,,,,fja05680
-ADS,Alliance Data Systems,2013-12-23,2020-06-22,,Market capitalization change.[72],fja05680
-ADSK,Autodesk,1996-01-02,,,,fja05680
-ADT,ADT,2012-10-02,2016-05-02,Tyco spun off ADT,ADT acquired by APO[147],fja05680
-AEE,Ameren,1996-01-02,,,,fja05680
-AEP,American Electric Power,1996-01-02,,,,fja05680
-AES,AES Corporation,1998-10-02,,,,fja05680
-AET,Aetna,1996-01-02,2018-11-29,,CVS acquired Aetna[100],fja05680
-AFL,Aflac,1999-05-28,,,,fja05680
-AGN,Allergan,1996-01-02,2020-05-12,,Allergan acquired by AbbVie.[74],fja05680
-AIG,American International Group,1996-01-02,,,,fja05680
-AIV,Apartment Investment & Management,2003-03-14,2020-12-21,,,fja05680
-AIZ,Assurant,2007-04-10,,,,fja05680
-AJG,Arthur J. Gallagher & Co.,2016-05-31,,,,fja05680
-AKAM,Akamai Technologies,2007-07-12,,,,fja05680
-AKS,AK Steel,2008-07-01,2011-12-19,,Market capitalization changes[228],fja05680
-ALB,Albemarle Corporation,2016-07-01,,,,fja05680
-ALGN,Align Technology,2017-06-19,,,,fja05680
-ALK,Alaska Air Group,2016-05-13,2023-10-18,,,fja05680
-ALL,Allstate,1996-01-02,,,,fja05680
-ALLE,Allegion,2013-12-02,,Allegion spun off by Ingersoll Rand.[197],,fja05680
-ALTR,Altera,2000-04-18,2015-12-28,,ALTR taken over by INTC[159],fja05680
-ALXN,Alexion Pharmaceuticals,2012-05-25,2021-07-21,,AstraZeneca acquired Alexion Pharmaceuticals.[61],fja05680
-AMAT,Applied Materials,1996-01-02,,,,fja05680
-AMCR,Amcor,2019-06-07,,,,fja05680
-AMD,Advanced Micro Devices,1996-01-02,2013-09-23,,Market capitalization change.[200],fja05680
-AMD,Advanced Micro Devices,2017-03-20,,,,fja05680
-AME,Ametek,2013-09-23,,,,fja05680
-AMG,Affiliated Managers Group,2014-07-01,2019-12-23,,Market capitalization change.[80],fja05680
-AMGN,Amgen,1996-01-02,,,,fja05680
-AMP,Ameriprise Financial,2005-10-03,,,,fja05680
-AMT,American Tower,2007-11-19,,,,fja05680
-AMTM,Amentum,2024-09-30,2024-12-23,"S&P 500 constituent Jacobs Solutions spun off its Critical Mission Solutions and Cyber Intelligence business, which merged with private Amentum to create newly publicly traded Amentum Holdings.[28]",Market capitalization change.[25],fja05680
-AMZN,Amazon,2005-11-21,,,,fja05680
-AN,AutoNation,2003-02-24,2017-08-08,,,fja05680
-ANDV,Andeavor,2007-09-27,2018-10-01,,ANDV acquired by Marathon Petroleum.[104],fja05680
-ANET,Arista Networks,2018-08-28,,,,fja05680
-ANF,Abercrombie & Fitch,2007-03-29,2013-12-23,,Market capitalization changes.[195],fja05680
-ANRZQ,,2011-06-02,2012-10-02,,,fja05680
-ANSS,Ansys,2017-06-19,2025-07-18,,S&P 500 constituent Synopsys Inc. acquired Ansys.[21],fja05680
-AON,Aon plc,1996-04-23,,,,fja05680
-AOS,A. O. Smith,2017-07-26,,,,fja05680
-APA,APA Corporation,1997-07-28,,,,fja05680
-APC,Anadarko Petroleum,1997-07-28,2019-08-09,,S&P 500 & 100 constituent Occidental Petroleum Corp. (NYSE:OXY) acquired Anadarko Petroleum.[87],fja05680
-APD,Air Products,1996-01-02,,,,fja05680
-APH,Amphenol,2008-09-30,,,,fja05680
-APO,Apollo Global Management,2024-12-23,,,,fja05680
-APOL,Apollo Education Group,2002-05-15,2013-07-01,,Apollo Group's market cap more representative of a mid-cap[203],fja05680
-APP,AppLovin,2025-09-22,,,,fja05680
-APTV,Aptiv,2012-12-24,,,,fja05680
-ARE,Alexandria Real Estate Equities,2017-03-20,,,,fja05680
-ARES,Ares Management,2025-12-11,,,,fja05680
-ARG,Airgas,2009-09-09,2016-05-23,,ARG acquired by Air Liquide[144],fja05680
-ARNC,Arconic,1996-01-02,2020-04-06,,Arconic separated into 2 companies - Howmet remained on the index.[76],fja05680
-ATGE,,2009-06-09,2012-10-01,,,fja05680
-ATI,Allegheny Technologies,1996-01-02,2015-07-02,,Spin off of Columbia Pipeline.[171],fja05680
-ATO,Atmos Energy,2019-02-15,,,,fja05680
-ATVI,Activision Blizzard,2015-08-31,2023-10-18,,S&P 500 and S&P 100 constituent Microsoft acquired Activision Blizzard.[35],fja05680
-AVB,AvalonBay Communities,2007-01-10,,,,fja05680
-AVGO,Broadcom,2014-05-08,,,,fja05680
-AVP,Avon Products,1996-01-02,2015-03-23,,Market Capitalization Changes.,fja05680
-AVY,Avery Dennison,1996-01-02,,,,fja05680
-AWK,American Water Works,2016-03-04,,,,fja05680
-AXON,Axon Enterprise,2023-05-04,,,,fja05680
-AXP,American Express,1996-01-02,,,,fja05680
-AYE,Allegheny Energy,2000-12-11,2011-02-28,,Acquired by First Energy (FE).[241],fja05680
-AYI,Acuity Brands,2016-05-03,2018-06-18,,Market capitalization change.[109],fja05680
-AZO,AutoZone,1997-01-02,,,,fja05680
-BA,Boeing,1996-01-02,,,,fja05680
-BAC,Bank of America,1996-01-02,,,,fja05680
-BALL,Ball Corporation,2022-05-10,,,,fja05680
-BAX,Baxter International,1996-01-02,,,,fja05680
-BBBY,Bed Bath & Beyond,1999-10-01,2017-07-26,,Market capitalization change.[121],fja05680
-BBWI,"Bath & Body Works, Inc.",2021-08-03,2024-10-01,,Market capitalization change.[28],fja05680
-BBY,Best Buy,1999-06-30,,,,fja05680
-BCR,CR Bard,1996-01-02,2017-12-29,,Becton Dickinson acquired BCR.[116],fja05680
-BDK,,1996-01-02,2010-03-15,,,fja05680
-BDX,Becton Dickinson,1996-01-02,,,,fja05680
-BEAM,Suntory Global Spirits,1996-01-02,2014-05-01,,Beam acquired by Suntory[190],fja05680
-BEN,Franklin Resources,1998-04-29,,,,fja05680
-BF-B,Brown–Forman,1996-01-02,,,,fja05680
-BG,Bunge Global,2023-03-15,,,,fja05680
-BHF,Brighthouse Financial,2017-08-07,2019-04-02,"BHF replaced AN,[120] MET spun off BHF[120]",,fja05680
-BHGE,,1996-01-02,2019-10-18,,,fja05680
-BIG,Big Lots,1998-01-20,2013-02-14,,Market capitalization changes[209],fja05680
-BIIB,Biogen,2003-11-13,,,,fja05680
-BIO,Bio-Rad Laboratories,2020-06-22,2024-09-23,,Market capitalization change.[29],fja05680
-BJS,BJ Services,2002-05-15,2010-04-29,,Acquired by Baker Hughes[249],fja05680
-BK,,1996-01-02,2026-05-21,,,fja05680
-BKNG,Booking Holdings,2009-11-06,,,,fja05680
-BKR,Baker Hughes,2019-10-18,,,,fja05680
-BLDR,Builders FirstSource,2023-10-18,,,,fja05680
-BLK,BlackRock,2011-04-04,,,,fja05680
-BLL,,1996-01-02,2022-05-10,,,fja05680
-BMC,BMC Software,1998-10-01,2013-09-11,,BMC taken private by consortium[201],fja05680
-BMS,Bemis,1996-01-02,2014-12-05,,Market cap changes[181],fja05680
-BMY,Bristol Myers Squibb,1996-01-02,,,,fja05680
-BNI,,1996-01-02,2010-02-16,,,fja05680
-BNY,BNY Mellon,2026-05-21,,,,fja05680
-BR,Broadridge Financial Solutions,2018-06-18,,,,fja05680
-BRCM,Broadcom Corporation,2000-07-03,2016-02-01,,FRT replaces BRCM[156],fja05680
-BRK-B,Berkshire Hathaway,2010-02-16,,,,fja05680
-BRO,Brown & Brown,2021-09-20,,,,fja05680
-BSX,Boston Scientific,1996-01-02,,,,fja05680
-BTUUQ,,2006-11-20,2014-09-22,,,fja05680
-BWA,BorgWarner,2011-12-19,2025-03-24,,Market capitalization change.[24],fja05680
-BX,Blackstone Inc.,2023-09-18,,,,fja05680
-BXLT,Baxalta,2015-07-01,2016-06-03,Baxalta spun off by Baxter.[173],SHPG acquiring BXLT[142],fja05680
-BXP,"BXP, Inc.",2006-04-03,,,,fja05680
-C,Citigroup,1996-01-02,,,,fja05680
-CA,CA Technologies,1996-01-02,2018-11-06,,CA acquired by Broadcom.[102],fja05680
-CAG,Conagra Brands,1996-01-02,,,,fja05680
-CAH,Cardinal Health,1997-05-27,,,,fja05680
-CAM,Cameron International,2008-01-29,2016-04-04,,Schlumberger acquired Cameron[150],fja05680
-CARR,Carrier Global,2020-04-03,,United Technologies spun off Otis and Carrier and acquired Raytheon Company.[75],,fja05680
-CASY,Casey's,2026-04-09,,,,fja05680
-CAT,Caterpillar Inc.,1996-01-02,,,,fja05680
-CB,Chubb Limited,1996-01-02,,,,fja05680
-CBE,Cooper Industries,2011-11-23,2012-12-03,,Acquired by Eaton Corp. (ETN)[213],fja05680
-CBOE,Cboe Global Markets,2017-03-01,,,,fja05680
-CBRE,CBRE Group,2006-11-10,,,,fja05680
-CBS,,1996-01-02,2019-12-05,,,fja05680
-CCE,Coca-Cola Enterprises,1998-10-08,2016-05-31,,CCE merging with European bottlers[143],fja05680
-CCEP,,2016-01-04,2016-05-31,,,fja05680
-CCI,Crown Castle,2012-03-13,,,,fja05680
-CCL,Carnival Corporation,1998-12-22,,,,fja05680
-CDAY,Ceridian,2021-09-20,2024-02-01,,,fja05680
-CDNS,Cadence Design Systems,2017-09-18,,,,fja05680
-CDW,CDW Corporation,2019-09-23,,,,fja05680
-CE,Celanese,2018-12-24,2025-03-24,,Market capitalization change.[24],fja05680
-CEG,Constellation Energy,1996-01-02,2012-03-13,,Acquired by Exelon Corp. (EXC)[225],fja05680
-CEG,Constellation Energy,2022-02-02,,S&P 500 and 100 constituent Exelon Corp. spun off Constellation Energy.[56],,fja05680
-CELG,Celgene,2006-11-06,2019-11-21,,Bristol-Myers Squibb (NYSE:BMY) acquired Celgene.[83],fja05680
-CEPH,Cephalon,2008-11-17,2011-10-14,,Acquired by Teva Pharmaceutical Industries (TEVA).[232],fja05680
-CERN,Cerner,2010-04-30,2022-06-08,,S&P 500 constituent Oracle Corp. acquired Cerner.[51],fja05680
-CF,CF Industries,2008-08-27,,,,fja05680
-CFG,Citizens Financial Group,2016-02-01,,,,fja05680
-CFN,Carefusion,2009-09-01,2015-03-17,,Carefusion acquired by Becton Dickinson[177],fja05680
-CHD,Church & Dwight,2015-12-29,,,,fja05680
-CHK,Chesapeake Energy,2006-03-03,2018-03-19,,Market capitalization change.[114],fja05680
-CHRW,C.H. Robinson,2007-03-02,,,,fja05680
-CHTR,Charter Communications,2016-09-08,,,,fja05680
-CI,Cigna,1996-01-02,,,,fja05680
-CIEN,Ciena,2026-02-09,,,,fja05680
-CINF,Cincinnati Financial,1997-12-18,,,,fja05680
-CL,Colgate-Palmolive,1996-01-02,,,,fja05680
-CLF,Cliffs Natural Resources,2009-12-21,2014-04-02,,Market capitalization changes[192],fja05680
-CLX,Clorox,1996-01-02,,,,fja05680
-CMA,Comerica,1996-01-02,2024-06-24,,Market capitalization change.[30],fja05680
-CMCSA,Comcast,1996-01-02,,,,fja05680
-CMCSK,Comcast K Corp,2015-09-21,2015-12-14,Share class methodology change[2],CMCSK shares no longer listed[160],fja05680
-CME,CME Group,2006-08-11,,,,fja05680
-CMG,Chipotle Mexican Grill,2011-04-28,,,,fja05680
-CMI,Cummins,1996-01-02,,,,fja05680
-CMS,CMS Energy,1999-05-03,,,,fja05680
-CNC,Centene Corporation,2016-03-30,,,,fja05680
-CNP,CenterPoint Energy,1996-01-02,,,,fja05680
-CNX,Consol Energy,2006-06-28,2016-03-04,,AWK replaces CNX[153],fja05680
-COF,Capital One,1998-07-01,,,,fja05680
-COG,Cabot Oil & Gas,2008-06-23,2021-10-04,,,fja05680
-COHR,Coherent Corp.,2026-03-23,,,,fja05680
-COIN,Coinbase,2025-05-19,,,,fja05680
-COL,Rockwell Collins,2001-07-02,2018-11-27,,UTX acquired COL[100],fja05680
-COO,Cooper Companies (The),2016-09-23,,,,fja05680
-COP,ConocoPhillips,1996-01-02,,,,fja05680
-COR,Cencora,2023-08-30,,,,fja05680
-COST,Costco,1996-01-02,,,,fja05680
-COTY,Coty,2016-10-03,2020-09-21,,Market capitalization change.[71],fja05680
-COV,Covidien,2011-03-01,2015-01-27,,Covidien acquired by Medtronic[180],fja05680
-CPAY,Corpay,2024-03-25,,,,fja05680
-CPB,Campbell's,1996-01-02,,,,fja05680
-CPGX,Columbia Pipeline Group,2015-07-02,2016-07-01,,CPGX acquired by TRP[139],fja05680
-CPRI,Capri Holdings,2016-01-04,2020-05-12,,Market capitalization change.[74],fja05680
-CPRT,Copart,2018-07-02,,,,fja05680
-CPT,Camden Property Trust,2022-04-04,,,,fja05680
-CPWR,Compuware,1999-01-04,2012-01-03,,Market capitalization changes[226],fja05680
-CRH,CRH plc,2025-12-22,,,,fja05680
-CRL,Charles River Laboratories,2021-05-14,,,,fja05680
-CRM,Salesforce,2008-09-15,,,,fja05680
-CRWD,CrowdStrike,2024-06-24,,,,fja05680
-CSCO,Cisco,1996-01-02,,,,fja05680
-CSGP,CoStar Group,2022-09-19,,,,fja05680
-CSRA,CSRA,2015-11-30,2018-04-04,,S&P 500 constituent General Dynamics (NYSE: GD) acquired CSRA.[113],fja05680
-CSX,CSX Corporation,1996-01-02,,,,fja05680
-CTAS,Cintas,2001-03-01,,,,fja05680
-CTL,,1999-03-25,2020-09-18,,,fja05680
-CTLT,Catalent,2020-09-21,2024-12-23,,Novo Holdings A/S acquired Catalent.[26],fja05680
-CTRA,Coterra Energy,2021-10-04,2026-05-07,,S&P 500 constituent Devon Energy Corp. acquired Coterra Energy. [8][9],fja05680
-CTSH,Cognizant,2006-11-17,,,,fja05680
-CTVA,Corteva,2019-06-03,,CTVA spun off from DWDP (which then changed symbol to DD)[92],,fja05680
-CTXS,Citrix Systems,1999-12-01,2022-10-03,,Vista Equity Partners acquired Citrix Systems.[49],fja05680
-CVC,Cablevision Systems,2010-12-20,2016-06-21,,CVC acquired by Altice NV[141],fja05680
-CVH,Coventry Health Care,2005-08-30,2013-05-07,,Acquired by Aetna (AET)[207],fja05680
-CVNA,Carvana,2025-12-22,,,,fja05680
-CVS,CVS Health,1996-01-02,,,,fja05680
-CVX,Chevron Corporation,1996-01-02,,,,fja05680
-CXO,Concho Resources,2016-02-22,2021-01-21,,S&P 500/100 constituent ConocoPhillips acquired Concho Resources.[66],fja05680
-CZR,Caesars Entertainment,2021-03-22,2025-09-22,,Market capitalization change.[18],fja05680
-D,Dominion Energy,1996-01-02,,,,fja05680
-DAL,Delta Air Lines,2013-09-11,,,,fja05680
-DASH,DoorDash,2025-03-24,,,,fja05680
-DAY,Dayforce,2024-02-01,2026-02-09,,Thoma Bravo L.P. acquired Dayforce.[12],fja05680
-DD,DuPont,1996-01-02,,,,fja05680
-DDOG,Datadog,2025-07-09,,,,fja05680
-DE,Deere & Company,1996-01-02,,,,fja05680
-DECK,Deckers Brands,2024-03-18,,,,fja05680
-DELL,Dell Technologies,1996-09-06,2013-10-29,,Founder Michael Dell and Silver Lake Partners acquired Dell.[199],fja05680
-DELL,Dell Technologies,2024-09-23,,,,fja05680
-DF,Dean Foods,2006-04-03,2013-05-24,,,fja05680
-DFS,Discover Financial,2007-07-02,2025-05-19,,S&P 500 constituent Capital One Financial Corp. acquired Discover Financial Services.[23],fja05680
-DG,Dollar General,2012-12-03,,,,fja05680
-DGX,Quest Diagnostics,2002-12-12,,,,fja05680
-DHI,D. R. Horton,2005-07-05,,,,fja05680
-DHR,Danaher Corporation,1998-11-18,,,,fja05680
-DIS,Walt Disney Company (The),1996-01-02,,,,fja05680
-DISCA,"Discovery, Inc.",2010-03-01,2022-04-11,,WarnerMedia and Discovery merge to create Warner Bros. Discovery.[52],fja05680
-DISCK,"Discovery, Inc.",2014-08-07,2022-04-11,Class C share distribution[185],WarnerMedia and Discovery merge to create Warner Bros. Discovery.[52],fja05680
-DISH,Dish Network,2017-03-13,2023-06-20,,Market capitalization change.[39],fja05680
-DLR,Digital Realty,2016-05-18,,,,fja05680
-DLTR,Dollar Tree,2011-12-19,,,,fja05680
-DNB,Dun & Bradstreet,2008-12-02,2017-04-05,,IT acquiring CEB[126],fja05680
-DNR,Denbury Resources,2009-04-02,2015-03-23,,Market Capitalization Changes.[177],fja05680
-DO,Diamond Offshore Drilling,2009-02-26,2016-10-03,,COTY replaces DO[135],fja05680
-DOC,Healthpeak Properties,2024-03-04,,,,fja05680
-DOV,Dover Corporation,1996-01-02,,,,fja05680
-DOW,Dow Inc.,1996-01-02,2017-09-01,,The Dow Chemical Company renamed to DowDuPont Inc. and ticker changed from DOW to DWDP after acquiring DuPont.[119],fja05680
-DOW,Dow Inc.,2019-04-02,,DOW spun off from DWDP[93],,fja05680
-DPZ,Domino's,2020-05-12,,,,fja05680
-DRE,Duke Realty,2017-07-26,2022-10-03,,S&P 500 constituent Prologis Inc. acquired Duke Realty.[49],fja05680
-DRI,Darden Restaurants,1996-01-02,,,,fja05680
-DTE,DTE Energy,1996-01-02,,,,fja05680
-DTV,DirecTV,2006-12-04,2015-07-27,,DirecTV acquired by AT&T.[167],fja05680
-DUK,Duke Energy,1996-01-02,,,,fja05680
-DVA,DaVita,2008-07-31,,,,fja05680
-DVN,Devon Energy,2000-08-30,,,,fja05680
-DXC,DXC Technology,1996-01-02,2015-12-01,,,fja05680
-DXC,DXC Technology,2017-04-04,2023-10-02,,Market capitalization change.[36],fja05680
-DXCM,Dexcom,2020-05-12,,,,fja05680
-EA,Electronic Arts,2002-07-22,,,,fja05680
-EBAY,eBay Inc.,2002-07-22,,,,fja05680
-ECL,Ecolab,1996-01-02,,,,fja05680
-ED,Consolidated Edison,1996-01-02,,,,fja05680
-EFX,Equifax,1997-06-19,,,,fja05680
-EG,Everest Group,2023-07-10,,,,fja05680
-EIX,Edison International,1996-01-02,,,,fja05680
-EKDKQ,,1996-01-02,2010-12-20,,,fja05680
-EL,Estée Lauder Companies (The),2006-01-05,,,,fja05680
-ELV,Elevance Health,2002-07-25,,,,fja05680
-EMC,EMC Corporation,1996-03-28,2016-09-07,,Dell acquires EMC[137],fja05680
-EME,Emcor,2025-09-22,,,,fja05680
-EMN,Eastman Chemical Co.,1996-01-02,2025-11-04,,Market capitalization change.[17],fja05680
-EMR,Emerson Electric,1996-01-02,,,,fja05680
-ENDP,Endo International,2015-01-27,2017-03-02,,REG acquires EQY[132],fja05680
-ENPH,Enphase Energy,2021-01-07,2025-09-22,,Market capitalization change.[18],fja05680
-EOG,EOG Resources,2000-11-02,,,,fja05680
-EP,El Paso Corporation,1999-10-26,2012-05-25,,,fja05680
-EPAM,EPAM Systems,2021-12-14,2026-06-02,,Market capitalization change.[7],fja05680
-EQIX,Equinix,2015-03-23,,,,fja05680
-EQR,Equity Residential,2001-12-03,,,,fja05680
-EQT,EQT Corporation,2008-12-19,2018-11-13,,,fja05680
-EQT,EQT Corporation,2022-10-03,,,,fja05680
-ERIE,Erie Indemnity,2024-09-23,,,,fja05680
-ES,Eversource Energy,2009-03-17,,,,fja05680
-ESRX,Express Scripts,2003-09-26,2018-12-21,,S&P 500 constituent Cigna (NYSE: CI) acquired ESRX[99],fja05680
-ESS,Essex Property Trust,2014-04-02,,,,fja05680
-ESV,Ensco,2012-07-31,2016-03-30,,Centene acquired Health Net.[151],fja05680
-ETFC,E-Trade,2004-04-01,2020-10-07,,Morgan Stanley acquired E*Trade.[70],fja05680
-ETN,Eaton Corporation,1996-01-02,,,,fja05680
-ETR,Entergy,1996-01-02,,,,fja05680
-ETSY,Etsy,2020-09-21,2024-09-23,,Market capitalization change.[29],fja05680
-EVHC,Envision Healthcare,2016-12-02,2018-10-11,,EVHC acquired by KKR.[103],fja05680
-EVRG,Evergy,2018-06-05,,,,fja05680
-EW,Edwards Lifesciences,2011-04-01,,,,fja05680
-EXC,Exelon,1996-01-02,,,,fja05680
-EXE,Expand Energy,2025-03-24,,,,fja05680
-EXPD,Expeditors International,2007-10-10,,,,fja05680
-EXPE,Expedia Group,2007-10-02,,,,fja05680
-EXR,Extra Space Storage,2016-01-19,,,,fja05680
-F,Ford Motor Company,1996-01-02,,,,fja05680
-FANG,Diamondback Energy,2018-12-03,,,,fja05680
-FAST,Fastenal,2008-09-15,,,,fja05680
-FBIN,,2016-06-24,2022-12-19,,,fja05680
-FCPT,,2015-11-10,2015-11-17,,,fja05680
-FCX,Freeport-McMoRan,1996-01-02,,,,fja05680
-FDO,Family Dollar,2001-08-06,2015-07-07,,Family Dollar acquired.[169],fja05680
-FDS,FactSet,2021-12-20,,,,fja05680
-FDX,FedEx,1996-01-02,,,,fja05680
-FDXF,FedEx Freight,2026-06-01,,S&P 500 & 100 constituent FedEx Corp. spun off FedEx Freight Holding.[7],,fja05680
-FE,FirstEnergy,1996-01-02,,,,fja05680
-FFIV,"F5, Inc.",2010-12-20,,,,fja05680
-FHN,First Horizon,2002-05-06,2013-06-24,,,fja05680
-FI,,2001-04-02,,,,fja05680
-FICO,Fair Isaac,2023-03-20,,,,fja05680
-FII,Federated Investors,2003-04-16,2013-01-02,,,fja05680
-FIS,Fidelity National Information Services,2006-11-10,,,,fja05680
-FITB,Fifth Third Bancorp,1996-03-08,,,,fja05680
-FIX,Comfort Systems USA,2025-12-22,,,,fja05680
-FL,Foot Locker,2016-04-04,2019-08-09,,Market capitalization change.[87],fja05680
-FLIR,FLIR Systems,2009-01-02,2021-05-14,,S&P 500 constituent Teledyne Technologies acquired FLIR Systems.[62],fja05680
-FLR,Fluor Corporation,2000-12-22,2019-06-03,,,fja05680
-FLS,Flowserve,2008-10-02,2021-03-22,,Market capitalization change.[64],fja05680
-FLT,FleetCor Technologies,2018-06-20,2024-03-25,,,fja05680
-FMC,FMC Corporation,2009-08-19,2025-03-24,,Market capitalization change.[24],fja05680
-FOSL,Fossil Group,2012-04-04,2016-01-05,,WSH merges with TW (and renames to WLTW)[158],fja05680
-FOX,Fox Corporation (Class B),2015-09-21,,Share class methodology change,,fja05680
-FOXA,Fox Corporation (Class A),2004-12-20,,,,fja05680
-FRC,First Republic Bank,2019-01-02,2023-05-04,,The Federal Deposit Insurance Corporation (FDIC) placed First Republic Bank into FDIC Receivership.[40],fja05680
-FRT,Federal Realty Investment Trust,2016-02-01,,,,fja05680
-FRX,Forest Laboratories,2000-11-22,2014-07-01,,Actavis acquires Forest Laboratories[187],fja05680
-FSLR,First Solar,2009-10-16,2017-03-20,,Market capitalization change.[129],fja05680
-FSLR,First Solar,2022-12-19,,,,fja05680
-FTI,TechnipFMC,2009-06-05,2021-02-12,,,fja05680
-FTNT,Fortinet,2018-10-11,,,,fja05680
-FTR,Frontier Communications,2001-02-27,2017-03-20,,Market capitalization change.[129],fja05680
-FTV,Fortive,2016-07-05,,,,fja05680
-GAS,AGL Resources,1996-01-02,2011-12-12,,"Nicor acquired by AGL, which retained the GAS ticker.[229]",fja05680
-GAS,AGL Resources,2011-12-13,2016-07-01,,GAS acquired by SO[140],fja05680
-GD,General Dynamics,1996-01-02,,,,fja05680
-GDDY,GoDaddy,2024-06-24,,,,fja05680
-GE,GE Aerospace,1996-01-02,,,,fja05680
-GEHC,GE HealthCare,2023-01-04,,S&P 500 constituent General Electric spun off GE HealthCare.[44],,fja05680
-GEN,Gen Digital,2022-11-08,,,,fja05680
-GENZ,Genzyme,2001-12-14,2011-04-04,,Acquired by Sanofi Aventis (SNY)[238],fja05680
-GEV,GE Vernova,2024-04-03,,S&P 500 and 100 constituent General Electric Corp. spun off GE Vernova.[32],,fja05680
-GGP,GGP,2013-12-10,2018-08-28,,GGP acquired by Brookfield Property Partners.[106],fja05680
-GHC,Graham Holdings,2007-12-31,2014-09-22,,Market cap changes,fja05680
-GILD,Gilead Sciences,2004-07-01,,,,fja05680
-GIS,General Mills,1996-01-02,,,,fja05680
-GL,Globe Life,2019-08-08,,,,fja05680
-GLW,Corning Inc.,1996-01-02,,,,fja05680
-GM,General Motors,2013-06-07,,,,fja05680
-GMCR,Keurig Green Mountain,2014-03-24,2016-03-03,,JAB Holding Company acquired Keurig Green Mountain[152],fja05680
-GME,GameStop,2007-12-14,2016-04-25,,Global Payments is acquiring Heartland Payment Systems[148],fja05680
-GNRC,Generac,2021-03-22,,,,fja05680
-GNW,Genworth Financial,2005-12-02,2015-11-18,,GE spinning off Synchrony Financial[163],fja05680
-GOOG,Alphabet Inc. (Class C),2014-04-03,,,,fja05680
-GOOGL,Alphabet Inc. (Class A),2006-04-03,,,,fja05680
-GPC,Genuine Parts Company,1996-01-02,,,,fja05680
-GPN,Global Payments,2016-04-25,,,,fja05680
-GPS,Gap,1996-01-02,2022-02-02,,Market capitalization change.[56],fja05680
-GR,Goodrich Corporation,1996-01-02,2012-07-27,,Goodrich acquired by United Technologies (UTX).[217],fja05680
-GRMN,Garmin,2012-12-12,,,,fja05680
-GS,Goldman Sachs,2002-07-22,,,,fja05680
-GT,The Goodyear Tire & Rubber Company,1996-01-02,2019-02-27,,WAB acquired GE transportation business[95],fja05680
-GWW,W. W. Grainger,1996-01-02,,,,fja05680
-HAL,Halliburton,1996-01-02,,,,fja05680
-HAR,Harman International,2006-02-01,2017-03-13,,Samsung Electronics acquired Harman International Industries.[130],fja05680
-HAS,Hasbro,1996-01-02,,,,fja05680
-HBAN,Huntington Bancshares,1997-08-06,,,,fja05680
-HBI,Hanesbrands,2015-03-23,2021-12-20,,Market capitalization change.[57],fja05680
-HCA,HCA Healthcare,2015-01-27,,,,fja05680
-HCBK,Hudson City Bancorp,2007-02-15,2015-11-02,,HPQ spins off HPE[164],fja05680
-HCP,,2008-03-31,2019-11-05,,,fja05680
-HD,Home Depot (The),1996-01-02,,,,fja05680
-HES,Hess Corporation,1996-01-02,2025-07-23,,S&P 500 and S&P 100 constituent Chevron Corp. acquired Hess Corporation[20],fja05680
-HFC,HollyFrontier,2018-06-18,2021-06-04,,Market capitalization change.[56],fja05680
-HIG,Hartford (The),1996-01-02,,,,fja05680
-HII,Huntington Ingalls Industries,2018-01-03,,,,fja05680
-HLT,Hilton Worldwide,2017-06-19,,,,fja05680
-HNZ,Heinz,1996-01-02,2013-06-07,,HNZ acquired by consortium[205],fja05680
-HOG,Harley-Davidson,2000-01-31,2020-06-22,,Market capitalization change.[72],fja05680
-HOLX,Hologic,2016-03-30,2026-04-09,,Blackstone Inc. and TPG Inc. acquired Hologic.[10],fja05680
-HON,Honeywell,1996-01-02,,,,fja05680
-HOOD,Robinhood Markets,2025-09-22,,,,fja05680
-HOT,Starwood,2000-11-17,2016-09-23,,MAR acquires HOT[136],fja05680
-HP,Helmerich & Payne,2010-03-01,2020-05-22,,Market capitalization change.[73],fja05680
-HPE,Hewlett Packard Enterprise,2015-11-02,,,,fja05680
-HPQ,HP Inc.,1996-01-02,,,,fja05680
-HRB,H&R Block,1996-01-02,2020-09-21,,Market capitalization change.[71],fja05680
-HRL,Hormel Foods,2009-03-04,,,,fja05680
-HRS,Harris Corporation,2008-09-22,2019-06-01,,,fja05680
-HSH,,1996-01-02,2012-06-29,,,fja05680
-HSIC,Henry Schein,2015-03-18,,,,fja05680
-HSP,Hospira,2004-05-03,2015-09-03,,Hospira taken over[166],fja05680
-HST,Host Hotels & Resorts,2007-03-20,,,,fja05680
-HSY,Hershey Company (The),1996-01-02,,,,fja05680
-HUBB,Hubbell Incorporated,2023-10-18,,,,fja05680
-HUM,Humana,1996-01-02,,,,fja05680
-HWM,Howmet Aerospace,2020-04-06,,,,fja05680
-IBKR,Interactive Brokers,2025-08-28,,,,fja05680
-IBM,IBM,1996-01-02,,,,fja05680
-ICE,Intercontinental Exchange,2007-09-26,,,,fja05680
-IDXX,Idexx Laboratories,2017-01-05,,,,fja05680
-IEX,IDEX Corporation,2019-08-09,,,,fja05680
-IFF,International Flavors & Fragrances,1996-01-02,,,,fja05680
-IGT,International Game Technology,2001-09-04,2014-06-20,,Market capitalization changes[188],fja05680
-ILMN,"Illumina, Inc.",2015-11-19,2024-06-24,,Market capitalization change.[30],fja05680
-INCY,Incyte,2017-02-28,,,,fja05680
-INFO,IHS Markit,2017-06-02,2022-03-02,,S&P 500 constituent S&P Global Inc. acquired IHS Markit.[54],fja05680
-INTC,Intel,1996-01-02,,,,fja05680
-INTU,Intuit,2000-12-11,,,,fja05680
-INVH,Invitation Homes,2022-09-19,,,,fja05680
-IP,International Paper,1996-01-02,,,,fja05680
-IPG,Interpublic Group,1996-01-02,2025-11-28,,S&P 500 constituent Omnicom Group Inc. acquired (The) Interpublic Group.[15][16],fja05680
-IPGP,IPG Photonics,2018-03-07,2022-06-21,,Market capitalization change.[51],fja05680
-IQV,IQVIA,2017-08-29,,,,fja05680
-IR,Ingersoll Rand,2010-11-17,,,,fja05680
-IRM,Iron Mountain,2009-01-06,,,,fja05680
-ISRG,Intuitive Surgical,2008-06-02,,,,fja05680
-IT,Gartner,2017-04-05,,,,fja05680
-ITT,ITT,1996-01-02,2011-11-01,,,fja05680
-ITW,Illinois Tool Works,1996-01-02,,,,fja05680
-IVZ,Invesco,2008-08-21,,,,fja05680
-J,Jacobs Solutions,2019-12-10,,,,fja05680
-JAVA,,1996-01-02,2010-01-27,,,fja05680
-JBHT,J.B. Hunt,2015-07-01,,,,fja05680
-JBL,Jabil,2001-01-30,2014-11-05,,Market cap changes[182],fja05680
-JBL,Jabil,2023-10-18,,,,fja05680
-JCI,Johnson Controls,1996-01-02,,,,fja05680
-JCP,JCPenney,1996-01-02,2013-12-02,,,fja05680
-JEC,Jacobs Engineering Group,2007-10-26,2019-12-10,,,fja05680
-JEF,Jefferies Financial Group,2007-08-27,2019-09-26,,,fja05680
-JKHY,Jack Henry & Associates,2018-11-13,,EQT spun off ETRN[101],,fja05680
-JNJ,Johnson & Johnson,1996-01-02,,,,fja05680
-JNPR,Juniper Networks,2006-06-02,2025-07-09,,S&P 500 constituent Hewlett Packard Enterprise Co. acquired Juniper Networks.[22],fja05680
-JNS,Janus Capital Group,2000-07-13,2011-11-23,,Janus Capital Group's market capitalization is less than $1.2 billion  and is no longer representative of the large cap market space.[230],fja05680
-JOY,Joy Global,2011-02-28,2015-10-08,,Market capitalization change.[165],fja05680
-JPM,JPMorgan Chase,1996-01-02,,,,fja05680
-JWN,Nordstrom,1996-01-02,2020-06-22,,Market capitalization change.[72],fja05680
-K,Kellanova,1996-01-02,2025-12-11,,Mars Inc. acquired Kellanova.[14],fja05680
-KDP,Keurig Dr Pepper,2008-10-07,2018-07-02,,,fja05680
-KDP,Keurig Dr Pepper,2022-06-21,,,,fja05680
-KEY,KeyCorp,1996-01-02,,,,fja05680
-KEYS,Keysight Technologies,2018-11-06,,,,fja05680
-KG,King Pharmaceuticals,2000-10-03,2010-12-20,,Acquired by Pfizer.[243],fja05680
-KHC,Kraft Heinz,2015-07-06,,,,fja05680
-KIM,Kimco Realty,2006-04-03,,,,fja05680
-KKR,KKR & Co.,2024-06-24,,,,fja05680
-KLAC,KLA Corporation,1997-09-15,,,,fja05680
-KMB,Kimberly-Clark,1996-01-02,,,,fja05680
-KMI,Kinder Morgan,2012-05-25,,,,fja05680
-KMX,CarMax,2010-06-28,2025-10-31,,Market capitalization change.[17],fja05680
-KO,Coca-Cola Company (The),1996-01-02,,,,fja05680
-KORS,Michael Kors,2013-11-13,2018-09-19,,,fja05680
-KR,Kroger,1996-01-02,,,,fja05680
-KRFT,Kraft Foods,2012-10-02,2015-07-06,,Kraft merger with Heinz.[170],fja05680
-KSS,Kohl's,1998-08-14,2020-09-21,,Market capitalization change.[71],fja05680
-KSU,Kansas City Southern,2013-05-24,2021-12-14,DF too small after spinoff of White Wave Foods[206],Canadian Pacific acquired Kansas City Southern.[58],fja05680
-KVUE,Kenvue,2023-08-25,,S&P 500 and S&P 100 constituent Johnson & Johnson offered to exchange the shares of Kenvue held for shares of Johnson & Johnson in a split-off exchange offer.[38],,fja05680
-L,Loews Corporation,1996-01-02,,,,fja05680
-LB,,1996-01-02,2021-08-03,,,fja05680
-LDOS,Leidos,2009-12-21,2013-09-23,,,fja05680
-LDOS,Leidos,2019-08-09,,,,fja05680
-LEG,Leggett & Platt,1999-10-18,2021-12-20,,Market capitalization change.[57],fja05680
-LEN,Lennar,2005-10-04,,,,fja05680
-LH,Labcorp,2004-11-01,,,,fja05680
-LHX,L3Harris,2019-06-01,,,,fja05680
-LIFE,Life Technologies,2008-11-24,2014-01-24,,Life Technologies acquired by Thermo Fisher Scientific Inc[194],fja05680
-LII,Lennox International,2024-12-23,,,,fja05680
-LIN,Linde plc,2018-11-06,,,,fja05680
-LITE,Lumentum,2026-03-23,,,,fja05680
-LKQ,LKQ Corporation,2016-05-23,2025-12-22,,Market capitalization change.[13],fja05680
-LLL,L3 Technologies,2004-12-01,2019-07-01,,L3 purchased by Harris Corporation[89],fja05680
-LLTC,Linear Technology,2000-04-03,2017-03-13,,S&P 500 constituent Analog Devices (NASD:ADI) acquired Linear Technology.[131],fja05680
-LLY,Lilly (Eli),1996-01-02,,,,fja05680
-LM,Legg Mason,2006-04-24,2016-12-02,,Market capitalization change.[134],fja05680
-LMT,Lockheed Martin,1996-01-02,,,,fja05680
-LNC,Lincoln National Corporation,1996-01-02,2023-09-18,,Market capitalization change.[37],fja05680
-LNT,Alliant Energy,2016-07-01,,,,fja05680
-LO,Lorillard Tobacco Company,2008-06-11,2015-06-12,,Lorillard gets acquired.[174],fja05680
-LOW,Lowe's,1996-01-02,,,,fja05680
-LRCX,Lam Research,2012-06-05,,,,fja05680
-LSI,LSI Corporation,1996-01-02,2014-05-07,,Avago acquires LSI[189],fja05680
-LULU,Lululemon Athletica,2023-10-18,,,,fja05680
-LUMN,Lumen Technologies,2020-09-18,2023-03-20,,Market capitalization change.[41],fja05680
-LUV,Southwest Airlines,1996-01-02,,,,fja05680
-LVLT,Level 3 Communications,2014-11-05,2017-10-13,,CenturyLink acquired LVLT.[117],fja05680
-LVS,Las Vegas Sands,2019-10-03,,,,fja05680
-LW,Lamb Weston,2018-12-03,2026-03-23,,Market capitalization change.[11],fja05680
-LXK,Lexmark,1999-08-13,2012-10-01,,,fja05680
-LYB,LyondellBasell,2012-09-05,,,,fja05680
-LYV,Live Nation Entertainment,2019-12-23,,,,fja05680
-M,Macy's,1996-01-02,2020-04-06,,Market capitalization change.[75],fja05680
-MA,Mastercard,2008-07-18,,,,fja05680
-MAA,Mid-America Apartment Communities,2016-12-02,,,,fja05680
-MAC,Macerich,2013-05-09,2019-12-23,,Market capitalization change.[80],fja05680
-MAR,Marriott International,1998-05-21,,,,fja05680
-MAS,Masco,1996-01-02,,,,fja05680
-MAT,Mattel,1996-01-02,2019-06-07,,Pending merger of Bemis and Amcor; Bemis treated as the surviving entity.[91],fja05680
-MCD,McDonald's,1996-01-02,,,,fja05680
-MCHP,Microchip Technology,2007-09-07,,,,fja05680
-MCK,McKesson Corporation,1999-01-13,,,,fja05680
-MCO,Moody's Corporation,1996-01-02,,,,fja05680
-MDLZ,Mondelez International,2007-04-02,,,,fja05680
-MDP,Meredith Corp,1996-01-02,2011-01-04,,,fja05680
-MDT,Medtronic,1996-01-02,,,,fja05680
-MEE,Massey Energy,2008-06-23,2011-06-02,,Alpha Natural Resources acquired Massey Energy.[236],fja05680
-MET,MetLife,2000-12-11,,,,fja05680
-META,Meta Platforms,2013-12-23,,,,fja05680
-MFE,McAfee,2008-12-23,2011-03-01,,Acquired by Intel[240],fja05680
-MGM,MGM Resorts,2017-07-26,,,,fja05680
-MHK,Mohawk Industries,2013-12-23,2025-12-22,,Market capitalization change.[13],fja05680
-MHS,Medco Health Solutions,2003-08-20,2012-04-02,,Acquired by Express Scripts (ESRX)[224],fja05680
-MI,Marshall & Ilsley,2002-02-11,2011-07-06,,Marshall & Iisley is being bought by Bank of Montreal[234],fja05680
-MIL,Millipore,1996-01-02,2010-07-15,,Acquired by Merck KGaA (MKGAY)[246],fja05680
-MJN,Mead Johnson,2009-12-21,2017-06-15,,Reckitt Benckiser acquired Mead Johnson Nutrition.[124],fja05680
-MKC,McCormick & Company,2003-03-21,,,,fja05680
-MKTX,MarketAxess,2019-07-01,2025-09-22,,Market capitalization change.[18],fja05680
-MLM,Martin Marietta Materials,2014-07-02,,,,fja05680
-MMC,,1996-01-02,2026-01-14,,,fja05680
-MMI,Motorola Mobility,2011-01-04,2012-05-22,S&P constituent Motorola spun off Motorola Mobility.[242],Acquired by Google (GOOG)[221],fja05680
-MMM,3M,1996-01-02,,,,fja05680
-MNK,Mallinckrodt,2014-08-19,2017-07-26,,Market capitalization change.[121],fja05680
-MNST,Monster Beverage,2012-06-29,,,,fja05680
-MO,Altria,1996-01-02,,,,fja05680
-MOH,Molina Healthcare,2022-03-02,2026-03-23,,Market capitalization change.[11],fja05680
-MOLX,Molex,1999-12-01,2013-12-09,,MOLX acquired by Koch Industries.[196],fja05680
-MON,Monsanto,2002-08-14,2018-06-07,,Bayer acquired Monsanto.[110],fja05680
-MOS,Mosaic Company (The),2011-09-26,,,,fja05680
-MPC,Marathon Petroleum,2011-07-01,,,,fja05680
-MPWR,Monolithic Power Systems,2021-02-12,,TechnipFMC was removed from the S&P 500 in anticipation of its announced spin-off of Technip Energies.[65],,fja05680
-MRK,Merck & Co.,1996-01-02,,,,fja05680
-MRNA,Moderna,2021-07-21,,,,fja05680
-MRO,Marathon Oil,1996-01-02,2024-11-26,,S&P 500 & 100 constituent ConocoPhillips acquired Marathon Oil.[27],fja05680
-MRSH,Marsh McLennan,2026-01-14,,,,fja05680
-MS,Morgan Stanley,1996-01-02,,,,fja05680
-MSCI,MSCI Inc.,2018-04-04,,,,fja05680
-MSFT,Microsoft,1996-01-02,,,,fja05680
-MSI,Motorola Solutions,1996-01-02,,,,fja05680
-MTB,M&T Bank,2004-02-27,,,,fja05680
-MTCH,Match Group,2021-09-20,2026-03-23,,Market capitalization change.[11],fja05680
-MTD,Mettler Toledo,2016-09-06,,,,fja05680
-MU,Micron Technology,1996-01-02,,,,fja05680
-MUR,Murphy Oil,2005-08-15,2017-07-26,,Market capitalization change.[121],fja05680
-MWV,,1996-01-02,2015-07-02,,,fja05680
-MWW,Monster Worldwide,2001-06-04,2011-12-19,,Market capitalization changes,fja05680
-MXIM,Maxim Integrated,2018-12-03,2021-08-30,,S&P 500 constituent Analog Devices acquired Maxim Integrated Products.[60],fja05680
-MYL,,2004-04-23,2020-11-17,,,fja05680
-NAVI,Navient,2014-05-01,2018-06-05,Navient Spun off from SLM[190],Westar Energy (NYSE: WR) acquired Great Plains Energy (NYSE: GXP) and changed name to Evergy.[111],fja05680
-NBL,Noble Energy,2007-10-08,2020-10-12,,Chevron acquired Noble Energy.[69],fja05680
-NBR,Nabors Industries,2000-10-18,2015-03-23,,Market Capitalization Changes.,fja05680
-NCLH,Norwegian Cruise Line Holdings,2017-10-13,,,,fja05680
-NDAQ,"Nasdaq, Inc.",2008-10-22,,,,fja05680
-NDSN,Nordson Corporation,2022-02-15,,,,fja05680
-NE,Noble Corporation,2011-01-18,2015-07-20,,,fja05680
-NEE,NextEra Energy,1996-01-02,,,,fja05680
-NEM,Newmont,1996-01-02,,,,fja05680
-NFLX,Netflix,2010-12-20,,,,fja05680
-NFX,Newfield Exploration,2010-12-20,2019-02-15,,ECA acquired NFX[96],fja05680
-NI,NiSource,2000-11-02,,,,fja05680
-NKE,"Nike, Inc.",1996-01-02,,,,fja05680
-NKTR,Nektar Therapeutics,2018-03-19,2019-10-03,,Market capitalization change.[84],fja05680
-NLOK,,2019-11-05,2022-11-08,,,fja05680
-NLSN,Nielsen Holdings,2013-07-09,2022-10-12,,Elliot Management Corp acquired Nielsen Holdings.[48],fja05680
-NOC,Northrop Grumman,1996-01-02,,,,fja05680
-NOV,Nov,2005-03-14,2021-09-20,,Market capitalization change.[59],fja05680
-NOVL,Novell,1996-01-02,2011-04-28,,Acquired by private equity firms.[237],fja05680
-NOW,ServiceNow,2019-11-21,,,,fja05680
-NRG,NRG Energy,2010-01-29,,,,fja05680
-NSC,Norfolk Southern,1996-01-02,,,,fja05680
-NSM,National Semiconductor,1996-01-02,2011-09-26,,Acquired by Texas Instruments (TXN).[233],fja05680
-NTAP,NetApp,1999-06-25,,,,fja05680
-NTRS,Northern Trust,1998-01-30,,,,fja05680
-NUE,Nucor,1996-01-02,,,,fja05680
-NVDA,Nvidia,2001-11-30,,,,fja05680
-NVLS,Novellus Systems,2000-06-19,2012-06-05,,Acquired by Lam Research (LRCX)[220],fja05680
-NVR,"NVR, Inc.",2019-09-26,,JEF spun off SPB.[85],,fja05680
-NWL,Newell Brands,1996-01-02,2023-09-18,,Market capitalization change.[37],fja05680
-NWS,News Corp (Class B),2015-09-21,,Share class methodology change,,fja05680
-NWSA,News Corp (Class A),2013-07-01,,,,fja05680
-NXPI,NXP Semiconductors,2021-03-22,,,,fja05680
-NYT,The New York Times Company,1996-01-02,2010-12-20,,Market Cap changes.,fja05680
-NYX,NYSE Euronext,2007-10-25,2013-11-13,,ICE Exchange acquired NYSE Euronext.[198],fja05680
-O,Realty Income,2015-04-07,,,,fja05680
-ODFL,Old Dominion,2019-12-09,,,,fja05680
-ODP,Office Depot,1999-06-24,2010-12-20,,Market Cap changes.,fja05680
-OGN,Organon & Co.,2021-06-04,2023-10-18,S&P 500/100 constituent Merck & Co. spun off Organon.[56],Market capitalization change.[35],fja05680
-OI,Owens-Illinois,2009-01-02,2016-12-02,,Market capitalization change.[134],fja05680
-OKE,Oneok,2010-03-15,,,,fja05680
-OMC,Omnicom Group,1997-12-24,,,,fja05680
-ON,ON Semiconductor,2022-06-21,,,,fja05680
-ORCL,Oracle Corporation,1996-01-02,,,,fja05680
-ORLY,O’Reilly Automotive,2009-03-27,,,,fja05680
-OTIS,Otis Worldwide,2020-04-03,,United Technologies spun off Otis and Carrier and acquired Raytheon Company.[75],,fja05680
-OXY,Occidental Petroleum,1996-01-02,,,,fja05680
-PANW,Palo Alto Networks,2023-06-20,,,,fja05680
-PARA,,2022-02-17,2025-08-08,,,fja05680
-PAYC,Paycom,2020-01-28,2026-03-23,,Market capitalization change.[11],fja05680
-PAYX,Paychex,1998-10-01,,,,fja05680
-PBCT,People's United Financial,2008-11-13,2022-04-04,,S&P 500 constituent M&T Bank Corp. acquired People's United Financial.[53],fja05680
-PBG,,2001-05-14,2010-03-01,,,fja05680
-PBI,Pitney Bowes,1996-01-02,2017-03-01,,CBOE acquires BATS[132],fja05680
-PCAR,Paccar,1996-01-02,,,,fja05680
-PCG,PG&E Corporation,1996-01-02,2019-01-18,,PCG filed for bankruptcy[97],fja05680
-PCG,PG&E Corporation,2022-10-03,,,,fja05680
-PCL,Plum Creek Timber,2002-01-17,2016-02-22,,PCL taken over by WY[154],fja05680
-PCP,Precision Castparts Corporation,2007-06-01,2016-02-01,,CFG replaces PCP[155],fja05680
-PDCO,Patterson Companies,2005-10-11,2018-03-19,,Market capitalization change.[114],fja05680
-PEAK,,2019-11-05,2024-03-04,,,fja05680
-PEG,Public Service Enterprise Group,1996-01-02,,,,fja05680
-PENN,Penn Entertainment,2021-03-22,2022-09-19,,Market capitalization change.[50],fja05680
-PEP,PepsiCo,1996-01-02,,,,fja05680
-PETM,PetSmart,2012-10-05,2015-03-12,,PetSmart acquired by private equity consortium[178],fja05680
-PFE,Pfizer,1996-01-02,,,,fja05680
-PFG,Principal Financial Group,2002-07-22,,,,fja05680
-PG,Procter & Gamble,1996-01-02,,,,fja05680
-PGN,Progress Energy,1996-01-02,2012-07-02,,Acquired by Duke Energy (DUK)[218],fja05680
-PGR,Progressive Corporation,1997-08-04,,,,fja05680
-PH,Parker Hannifin,1996-01-02,,,,fja05680
-PHM,PulteGroup,1996-01-02,,,,fja05680
-PKG,Packaging Corporation of America,2017-07-26,,,,fja05680
-PKI,,1996-01-02,2023-05-16,,,fja05680
-PLD,Prologis,2003-07-17,,,,fja05680
-PLL,Pall Corporation,1996-01-02,2015-08-31,,Pall taken over[166],fja05680
-PLTR,Palantir Technologies,2024-09-23,,,,fja05680
-PM,Philip Morris International,2008-03-31,,,,fja05680
-PNC,PNC Financial Services,1996-01-02,,,,fja05680
-PNR,Pentair,2012-10-01,,Tyco spin-off merged w/Pentair,,fja05680
-PNW,Pinnacle West Capital,1999-10-04,,,,fja05680
-PODD,Insulet Corporation,2023-03-15,,,,fja05680
-POM,Pepco Holdings,2007-11-09,2016-03-24,,Exelon acquired Pepco.[151],fja05680
-POOL,Pool Corporation,2020-10-07,,,,fja05680
-PPG,PPG Industries,1996-01-02,,,,fja05680
-PPL,PPL Corporation,1996-01-02,,,,fja05680
-PRGO,Perrigo,2011-12-19,2021-09-20,,Market capitalization change.[59],fja05680
-PRU,Prudential Financial,2002-07-22,,,,fja05680
-PSA,Public Storage,2005-08-19,,,,fja05680
-PSKY,Paramount Skydance Corporation,2025-08-08,,,,fja05680
-PSX,Phillips 66,2012-05-01,,,,fja05680
-PTC,PTC Inc.,2021-04-20,,,,fja05680
-PTV,Pactiv,1999-11-05,2010-11-17,,Reynolds Group Holdings acquired Pactiv.[244],fja05680
-PVH,PVH,2013-02-14,2022-09-19,,Market capitalization change.[50],fja05680
-PWR,Quanta Services,2009-07-01,,,,fja05680
-PX,,1996-01-02,2018-10-31,,,fja05680
-PXD,Pioneer Natural Resources,2008-09-24,2024-05-08,,S&P 500 and S&P 100 constituent ExxonMobil acquired Pioneer Natural Resources.[31],fja05680
-PYPL,PayPal,2015-07-20,,PayPal Spun off by eBay[168],,fja05680
-Q,Qnity Electronics,2000-07-06,2011-04-01,,Acquired by CenturyLink[239],fja05680
-Q,Qnity Electronics,2025-11-03,,"S&P 500 constituent Dupont de Nemours, Inc. spun off Qnity Electronics.[17]",,fja05680
-QCOM,Qualcomm,1999-07-22,,,,fja05680
-QEP,QEP Resources,2010-07-01,2015-07-01,,,fja05680
-QLGC,,2000-12-12,2011-01-18,,,fja05680
-QRVO,Qorvo,2015-06-12,2024-12-23,,Market capitalization change.[25],fja05680
-R,Ryder System,1996-01-02,2017-06-19,,Market capitalization changes.[123],fja05680
-RAI,Reynolds American,2002-09-04,2017-07-25,,British American Tobacco (NYSE MKT:BTI) acquired Reynolds American.[121],fja05680
-RCL,Royal Caribbean Group,2014-12-05,,,,fja05680
-RDC,Rowan Companies,1996-01-02,2014-08-19,,Market cap changes[184],fja05680
-RE,Everest Re,2017-06-19,2023-07-10,,,fja05680
-REG,Regency Centers,2017-03-02,,,,fja05680
-REGN,Regeneron Pharmaceuticals,2013-05-01,,,,fja05680
-RF,Regions Financial Corporation,1998-08-28,,,,fja05680
-RHI,Robert Half,2000-12-05,2024-06-24,,Market capitalization change.[30],fja05680
-RHT,Red Hat,2009-07-27,2019-07-15,,S&P 500 & 100 constituent IBM acquired Red Hat.[88],fja05680
-RIG,Transocean,2013-10-29,2017-07-26,,Market capitalization change.[121],fja05680
-RJF,Raymond James Financial,2017-03-20,,,,fja05680
-RL,Ralph Lauren Corporation,2007-02-02,,,,fja05680
-RMD,ResMed,2017-07-26,,,,fja05680
-ROK,Rockwell Automation,1996-01-02,,,,fja05680
-ROL,"Rollins, Inc.",2018-10-01,,,,fja05680
-ROP,Roper Technologies,2009-12-23,,,,fja05680
-ROST,Ross Stores,2009-12-21,,,,fja05680
-RRC,Range Resources,2007-12-21,2018-06-18,,Market capitalization change.[109],fja05680
-RRD,RR Donnelley,1996-01-02,2012-12-12,,Market capitalization changes[212],fja05680
-RSG,Republic Services,2008-12-05,,,,fja05680
-RSHCQ,,1996-01-02,2011-07-01,,,fja05680
-RTX,RTX Corporation,1996-01-02,,,,fja05680
-RVTY,Revvity,2023-05-16,,,,fja05680
-RX,IMS Health,1996-11-04,2010-02-26,,Taken private,fja05680
-S,Sprint Nextel,1996-01-02,2013-07-09,,Softbank consortium purchase results in public float below 50%[202],fja05680
-SATS,EchoStar,2026-03-23,,,,fja05680
-SBAC,SBA Communications,2017-09-01,,,,fja05680
-SBNY,Signature Bank,2021-12-20,2023-03-15,,The FDIC placed Signature Bank into FDIC Receivership.[42],fja05680
-SBUX,Starbucks,2000-06-08,,,,fja05680
-SCG,SCANA,2009-01-02,2019-01-02,,Dominion Energy acquired SCANA Corporation[98],fja05680
-SCHW,Charles Schwab Corporation,1997-06-02,,,,fja05680
-SE,Spectra Energy,2007-01-03,2017-02-27,,SE acquired by ENB[132],fja05680
-SEDG,SolarEdge,2021-12-20,2023-10-18,,,fja05680
-SEE,Sealed Air,1998-04-01,2023-10-18,,,fja05680
-SHLD,Sears Holdings,2005-03-28,2012-09-05,,SHLD below public float threshold,fja05680
-SHW,Sherwin-Williams,1996-01-02,,,,fja05680
-SIAL,Sigma-Aldrich,1996-01-02,2015-11-18,,Sigma-Aldrich acquired by Merck KGaA (MKGAY)[162],fja05680
-SIG,Signet Jewelers,2015-07-29,2018-03-19,,Market capitalization change.[114],fja05680
-SII,Smith International,2006-10-02,2010-08-27,,Acquired by Schlumberger (SLB)[245],fja05680
-SIVB,SVB Financial Group,2018-03-19,2023-03-15,,"The FDIC placed SVB's main subsidiary, Silicon Valley Bank, into receivership.[43]",fja05680
-SJM,J.M. Smucker Company (The),2008-11-06,,,,fja05680
-SLB,Schlumberger,1996-01-02,,,,fja05680
-SLG,SL Green Realty,2015-03-23,2021-03-22,,Market capitalization change.[64],fja05680
-SLM,SLM Corporation,1998-07-01,2014-05-01,,,fja05680
-SMCI,Supermicro,2024-03-18,,,,fja05680
-SNA,Snap-on,1996-01-02,,,,fja05680
-SNDK,Sandisk,2006-04-20,2016-05-12,,SNDK acquired by WDC[146],fja05680
-SNDK,Sandisk,2025-11-28,,,,fja05680
-SNI,Scripps Networks Interactive,2008-07-01,2018-03-07,,Discovery Communications acquired SNI.[115],fja05680
-SNPS,Synopsys,2017-03-16,,,,fja05680
-SO,Southern Company,1996-01-02,,,,fja05680
-SOLS,Solstice Advanced Materials,2025-10-30,2025-12-22,S&P 500 and S&P 100 constituent Honeywell International Inc. spun off Solstice Advanced Materials.[17],Market capitalization change.[13],fja05680
-SOLV,Solventum,2024-04-03,,S&P 500 and 100 constituent 3M Co. spun off Solventum.[32],,fja05680
-SPG,Simon Property Group,2002-06-26,,,,fja05680
-SPGI,S&P Global,1996-01-02,,,,fja05680
-SPLS,Staples,1998-10-07,2017-09-13,,Sycamore Partners acquired Staples.[118],fja05680
-SRCL,Stericycle,2008-11-19,2018-12-03,,Market Capitalization change[100],fja05680
-SRE,Sempra,1998-06-29,,,,fja05680
-STE,Steris,2019-12-23,,,,fja05680
-STI,SunTrust Banks,1996-01-02,2019-12-09,,BB&T acquired SunTrust to form Truist Financial.[81],fja05680
-STJ,St Jude Medical,1996-01-02,2017-01-05,,S&P 100 & 500 constituent Abbott Laboratories (NYSE:ABT) acquired St. Jude Medical.[133],fja05680
-STLD,Steel Dynamics,2022-12-22,,,,fja05680
-STR,Questar,2006-12-01,2010-07-01,,"Company split. QEP retained, but ticker changed.[247]",fja05680
-STT,State Street Corporation,1997-08-18,,,,fja05680
-STX,Seagate Technology,2012-07-02,,,,fja05680
-STZ,Constellation Brands,2005-07-05,,,,fja05680
-SUN,Sunoco,1996-01-02,2012-10-05,,Acquired by Energy Transfer Partners (ETP)[214],fja05680
-SUNEQ,,2007-05-31,2011-12-19,,,fja05680
-SVU,Supervalu,1996-01-02,2012-05-01,,,fja05680
-SW,Smurfit Westrock,2024-07-08,,,,fja05680
-SWK,Stanley Black & Decker,1996-01-02,,,,fja05680
-SWKS,Skyworks Solutions,2015-03-12,,,,fja05680
-SWN,Southwestern Energy,2008-06-06,2017-04-04,,"HPE spins off Everett, merged with CSC to form DXC[127][128]",fja05680
-SWY,Safeway,1998-11-13,2015-01-27,,Safeway acquired by private equity consortium[179],fja05680
-SYF,Synchrony Financial,2015-11-18,,,,fja05680
-SYK,Stryker Corporation,2000-12-12,,,,fja05680
-SYMC,,2003-03-31,2019-11-05,,,fja05680
-SYY,Sysco,1996-01-02,,,,fja05680
-T,AT&T,1996-01-02,,,,fja05680
-TAP,Molson Coors Beverage Company,1996-01-02,,,,fja05680
-TDC,Teradata,2007-10-01,2017-06-19,Teradata spun off by NCR Corporation.[264],Market capitalization changes.[123],fja05680
-TDG,TransDigm Group,2016-06-03,,,,fja05680
-TDY,Teledyne Technologies,2020-06-22,,,,fja05680
-TE,TECO Energy,2001-10-10,2016-07-01,,TE acquired by EMA[139],fja05680
-TECH,Bio-Techne,2021-08-30,,,,fja05680
-TEG,Integrys Energy Group,2007-02-22,2015-06-30,,Integrys taken over.[172],fja05680
-TEL,TE Connectivity,2011-10-17,,,,fja05680
-TER,Teradyne,1999-11-15,2013-12-23,,Market capitalization changes.[195],fja05680
-TER,Teradyne,2020-09-21,,,,fja05680
-TFC,Truist Financial,1997-12-04,,,,fja05680
-TFX,Teleflex,2019-01-18,2025-03-24,,Market capitalization change.[24],fja05680
-TGNA,Tegna,1996-01-02,2017-06-02,,TGNA spins off Cars.com[125],fja05680
-TGT,Target Corporation,1996-01-02,,,,fja05680
-THC,Tenet Healthcare,1996-01-02,2016-04-18,,Ulta replaces Tenet[149],fja05680
-TIE,Titanium Metals,2007-10-29,2012-12-24,,TIE acquired by Precision Cast Parts (PCP)[211],fja05680
-TIF,Tiffany & Co,2000-06-21,2021-01-07,,LVMH Moet Hennessy-Louis Vuitton SE acquired Tiffany & Co.[67],fja05680
-TJX,TJX Companies,1996-01-02,,,,fja05680
-TKO,TKO Group Holdings,2025-03-24,,,,fja05680
-TLAB,Tellabs,1996-01-02,2011-12-21,,,fja05680
-TMK,,1996-01-02,2019-08-08,,,fja05680
-TMO,Thermo Fisher Scientific,1997-01-02,,,,fja05680
-TMUS,T-Mobile US,2009-06-30,2013-05-01,,,fja05680
-TMUS,T-Mobile US,2019-07-15,,,,fja05680
-TPL,Texas Pacific Land Corporation,2024-11-26,,,,fja05680
-TPR,"Tapestry, Inc.",2004-09-01,,,,fja05680
-TRGP,Targa Resources,2022-10-12,,,,fja05680
-TRIP,TripAdvisor,2011-12-21,2019-12-23,Expedia spun off TripAdvisor.[227],Market capitalization change.[80],fja05680
-TRMB,Trimble Inc.,2021-01-21,,,,fja05680
-TROW,T. Rowe Price,1999-10-13,,,,fja05680
-TRV,Travelers Companies (The),1996-01-02,,,,fja05680
-TSCO,Tractor Supply,2014-01-24,,,,fja05680
-TSLA,"Tesla, Inc.",2020-12-21,,Apartment Investment and Management (Aimco) spun off Apartment Income REIT.[68],,fja05680
-TSN,Tyson Foods,2005-08-11,,,,fja05680
-TSS,TSYS,2008-01-02,2019-09-23,,S&P 500 constituent Global Payments (NYSE: GPN) acquired TSS.[86],fja05680
-TT,Trane Technologies,2020-03-03,,,,fja05680
-TTD,Trade Desk (The),2025-07-18,,,,fja05680
-TTWO,Take-Two Interactive,2018-03-19,,,,fja05680
-TWC,Time Warner Cable,2009-03-30,2016-05-18,,TWC acquired by CHTR[145],fja05680
-TWTR,Twitter,2018-06-07,2022-11-01,,Elon Musk acquired Twitter.[47],fja05680
-TWX,Time Warner,1996-01-02,2018-06-15,,AT&T acquired Time Warner.[108],fja05680
-TXN,Texas Instruments,1996-01-02,,,,fja05680
-TXT,Textron,1996-01-02,,,,fja05680
-TYL,Tyler Technologies,2020-06-22,,,,fja05680
-UA,Under Armour (Class C),2016-04-08,2022-06-21,Under Armour distribution of second class of stock,Market capitalization change.[51],fja05680
-UAA,Under Armour (Class A),2014-05-01,2022-06-21,,Market capitalization change.[51],fja05680
-UAL,United Airlines Holdings,2015-09-03,,,,fja05680
-UBER,Uber,2023-10-18,,,,fja05680
-UDR,"UDR, Inc.",2016-03-07,,,,fja05680
-UHS,Universal Health Services,2014-09-22,,,,fja05680
-ULTA,Ulta Beauty,2016-04-18,,,,fja05680
-UNH,UnitedHealth Group,1996-01-02,,,,fja05680
-UNM,Unum,1996-01-02,2021-09-20,,Market capitalization change.[59],fja05680
-UNP,Union Pacific Corporation,1996-01-02,,,,fja05680
-UPS,United Parcel Service,2002-07-22,,,,fja05680
-URBN,Urban Outfitters,2010-02-08,2017-03-20,,Market capitalization change.[129],fja05680
-URI,United Rentals,2014-09-22,,,,fja05680
-USB,U.S. Bancorp,1996-01-02,,,,fja05680
-UTX,,1996-01-02,2020-04-03,,,fja05680
-V,Visa Inc.,2009-12-21,,,,fja05680
-VAR,Varian Medical Systems,2007-02-12,2021-04-20,,Siemens Healthineers acquired Varian Medical Systems.[63],fja05680
-VEEV,Veeva Systems,2026-05-07,,,,fja05680
-VFC,VF Corporation,1996-01-02,2024-04-03,,Market capitalization change.[32],fja05680
-VIAB,Viacom,2006-01-03,2019-12-05,,CBS acquired Viacom to form ViacomCBS.[82],fja05680
-VIAC,,2019-12-05,2022-02-17,,,fja05680
-VIAV,,2000-07-27,2013-12-23,,,fja05680
-VICI,Vici Properties,2022-06-08,,,,fja05680
-VLO,Valero Energy,2004-04-29,,,,fja05680
-VLTO,Veralto,2023-10-02,,S&P 500 and S&P 100 constituent Danaher Corporation spun off Veralto.[36],,fja05680
-VMC,Vulcan Materials Company,1999-07-01,,,,fja05680
-VNO,Vornado Realty Trust,2005-08-12,2023-01-04,,Market capitalization change.[44],fja05680
-VNT,Vontier,2020-10-12,2021-03-22,S&P 500 constituent Fortive spun off Vontier.[69],Market capitalization change.[64],fja05680
-VRSK,Verisk Analytics,2015-10-08,,,,fja05680
-VRSN,Verisign,2006-02-01,,,,fja05680
-VRT,Vertiv,2026-03-23,,,,fja05680
-VRTX,Vertex Pharmaceuticals,2013-09-23,,,,fja05680
-VST,Vistra Corp.,2024-05-08,,,,fja05680
-VTR,Ventas,2009-03-04,,,,fja05680
-VTRS,Viatris,2020-11-17,,,,fja05680
-VZ,Verizon,1996-01-02,,,,fja05680
-WAB,Wabtec,2019-02-27,,,,fja05680
-WAT,Waters Corporation,2002-01-02,,,,fja05680
-WBA,Walgreens Boots Alliance,1996-01-02,2025-08-28,,Sycamore Partners acquired Walgreen Boots Alliance.[19],fja05680
-WBD,Warner Bros. Discovery,2022-04-11,,,,fja05680
-WCG,WellCare,2018-09-17,2020-01-28,,S&P 500 constituent Centene Corp. (NYSE: CNC) acquired Wellcare Health Plans.[79],fja05680
-WDAY,"Workday, Inc.",2024-12-23,,,,fja05680
-WDC,Western Digital,2009-07-01,,,,fja05680
-WEC,WEC Energy Group,2008-10-31,,,,fja05680
-WELL,Welltower,2009-01-30,,,,fja05680
-WFC,Wells Fargo,1996-01-02,,,,fja05680
-WFM,Whole Foods Market,2006-01-03,2017-08-28,,Amazon acquired Whole Foods Market.[119],fja05680
-WHR,Whirlpool Corporation,1996-01-02,2024-03-18,,Market capitalization change.[33],fja05680
-WIN,Windstream Communications,2006-07-18,2015-04-07,,Market capitalization change.[175],fja05680
-WM,Waste Management,1998-07-17,,,,fja05680
-WMB,Williams Companies,1996-01-02,,,,fja05680
-WMT,Walmart,1996-01-02,,,,fja05680
-WPX,WPX Energy,2012-01-03,2014-03-24,,Market capitalization changes[193],fja05680
-WRB,W. R. Berkley Corporation,2019-12-05,,,,fja05680
-WRK,,2015-07-02,2024-07-08,,,fja05680
-WSM,"Williams-Sonoma, Inc.",2025-03-24,,,,fja05680
-WST,West Pharmaceutical Services,2020-05-22,,,,fja05680
-WTW,Willis Towers Watson,2016-01-05,,,,fja05680
-WU,Western Union,2006-10-02,2021-12-20,,Market capitalization change.[57],fja05680
-WY,Weyerhaeuser,1996-01-02,,,,fja05680
-WYND,,2006-08-01,2018-05-31,,,fja05680
-WYNN,Wynn Resorts,2008-11-14,,,,fja05680
-X,United States Steel,1996-01-02,2014-07-02,,Market capitalization changes[186],fja05680
-XEC,Cimarex Energy,2014-06-20,2020-03-03,,"Gardner Denver acquired Ingersoll Rand's industrial businesses then changed its name to the ""new"" Ingersoll Rand Inc.[77][78]",fja05680
-XEL,Xcel Energy,1996-01-02,,,,fja05680
-XL,XL Group,2001-09-04,2018-09-12,,XL acquired by Axa.[105],fja05680
-XLNX,Xilinx,1999-11-08,2022-02-15,,S&P 500 constituent Advanced Micro Devices acquired Xilinx.[55],fja05680
-XOM,ExxonMobil,1996-01-02,,,,fja05680
-XRAY,Dentsply Sirona,2008-11-14,2024-04-03,,Market capitalization change.[32],fja05680
-XRX,Xerox,1996-01-02,2021-03-22,,Market capitalization change.[64],fja05680
-XTO,XTO Energy,2004-12-29,2010-06-28,,Acquired by ExxonMobil[248],fja05680
-XYL,Xylem Inc.,2011-11-01,,Spun off from ITT Corp.[231],,fja05680
-XYZ,"Block, Inc.",2025-07-23,,,,fja05680
-YUM,Yum! Brands,1997-10-07,,,,fja05680
-ZBH,Zimmer Biomet,2001-08-07,,,,fja05680
-ZBRA,Zebra Technologies,2019-12-23,,,,fja05680
-ZION,Zions Bancorporation,2001-06-25,2024-03-18,,Market capitalization change.[33],fja05680
-ZTS,Zoetis,2013-06-24,,Zoetis spun off by Pfizer[204],,fja05680
+ticker,name,start_date,end_date,add_reason,remove_reason,source,cik
+A,Agilent Technologies,2000-06-02,,Annual Re-ranking,,fmp:sp500,0001090872
+AA,Alcoa Inc,1957-03-02,2016-11-01,,Annual Re-ranking,fmp:sp500,
+AAL,American Airlines Group,2015-03-20,2024-09-23,Allergan acquired by Actavis (and changed name to Allergan).,Market capitalization change.,fmp:sp500,
+AAP,Advance Auto Parts Inc,2015-07-08,2023-08-24,Family Dollar acquired.,S&P 500 and S&P 100 constituent Johnson & Johnson offered to exchange the shares of Kenvue held for shares of Johnson & Johnson in a split-off exchange offer.,fmp:sp500,
+AAPL,Apple Inc.,1982-11-18,,Annual Re-ranking,,fmp:sp500,0000320193
+ABBV,AbbVie,2013-01-01,,ABBV spun off from Abbott Labs (ABT),,fmp:sp500,0001551152
+ABI,Applied Biosystems Inc.,1974-10-17,2008-11-21,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+ABMD,ABIOMED Inc,2018-05-30,2022-12-21,Wyndham Worldwide spun off Wyndham Hotels & Resorts (NYSE:WH).,S&P 500 constituent Johnson & Johnson acquired Abiomed.,fmp:sp500,
+ABNB,Airbnb,2023-09-15,,Market capitalization change.,,fmp:sp500,0001559720
+ABS,Albertson's Inc.,1984-11-23,2006-06-01,Annual Re-ranking,Albertsons acquired by SuperValu and CVS Corp.,fmp:sp500,
+ABT,Abbott Laboratories,1957-03-04,,,,fmp:sp500,0000001800
+ACAS,American Capital Ltd,2007-07-06,2009-03-03,Annual Re-ranking,Capitalization rebalance.,fmp:sp500,
+ACE,Chubb Corp.,1957-03-02,2016-01-15,,"EXR replaces ACE as ACE Ltd acquires Chubb and retains the CB ticker, giving up ACE",fmp:sp500,
+ACGL,Arch Capital Group,2022-10-31,,Elon Musk acquired Twitter.,,fmp:sp500,0000947484
+ACN,Accenture,2011-07-05,,Marshall & Iisley is being bought by Bank of Montreal,,fmp:sp500,0001467373
+ACS,American Crystal Sugar Co,2004-04-01,2010-02-05,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+ACV,,1971-03-04,2006-11-16,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+ADBE,Adobe Inc.,1997-05-05,,Annual Re-ranking,,fmp:sp500,0000796343
+ADCT,ADC Telecommunications Inc,1999-07-30,2007-06-29,Annual Re-ranking,"Discover Financial Services Debuts On New York Stock Exchange Under Ticker Symbol DFS
+",fmp:sp500,
+ADI,Analog Devices,1999-10-11,,Annual Re-ranking,,fmp:sp500,0000006281
+ADM,Archer Daniels Midland,1981-07-30,,Annual Re-ranking,,fmp:sp500,0000007084
+ADP,Automatic Data Processing,1981-02-26,,Annual Re-ranking,,fmp:sp500,0000008670
+ADS,Alliance Data Systems Corp.,2013-12-20,2020-06-19,Market capitalization changes.,Market capitalization change.,fmp:sp500,
+ADSK,Autodesk,1989-12-20,,Annual Re-ranking,,fmp:sp500,0000769397
+ADT,ADT Corp.,2012-09-28,2016-05-02,Tyco spun off ADT,ADT acquired by APO,fmp:sp500,
+AEE,Ameren,1991-09-19,,Annual Re-ranking,,fmp:sp500,0001002910
+AEP,American Electric Power,1957-03-04,,,,fmp:sp500,0000004904
+AES,AES Corporation,1998-10-01,,Annual Re-ranking,,fmp:sp500,0000874761
+AET,Aetna Inc.,1976-07-01,2018-11-30,Annual Re-ranking,CVS acquired Aetna,fmp:sp500,
+AFL,Aflac,1999-05-27,,Annual Re-ranking,,fmp:sp500,0000004977
+AGN,Allergan Inc.,1999-04-09,2020-05-11,Annual Re-ranking,Allergan acquired by AbbVie.,fmp:sp500,
+AIG,American International Group,1980-02-14,,Annual Re-ranking,,fmp:sp500,0000005272
+AIV,Aimco,2003-03-13,2020-12-18,Annual Re-ranking,Apartment Investment and Management (Aimco) spun off Apartment Income REIT.,fmp:sp500,
+AIZ,Assurant,2007-04-09,,Annual Re-ranking,,fmp:sp500,0001267238
+AJG,Arthur J. Gallagher & Co.,2016-05-27,,CCE merging with European bottlers,,fmp:sp500,0000354190
+AKAM,Akamai Technologies,2007-07-11,,Annual Re-ranking,,fmp:sp500,0001086222
+AKS,AK Steel Holding Corp.,2008-06-30,2011-12-16,Ak Steel replaced Countrywide Financial.,Market capitalization changes,fmp:sp500,
+ALB,Albemarle Corporation,2016-06-30,,TE acquired by EMA,,fmp:sp500,0000915913
+ALGN,Align Technology,2017-06-19,,Market capitalization changes.,,fmp:sp500,0001097149
+ALK,Alaska Air Group,2016-05-12,2023-12-15,SNDK acquired by WDC,Market capitalization change.,fmp:sp500,
+ALL,Allstate,1995-07-12,,Annual Re-ranking,,fmp:sp500,0000899051
+ALLE,Allegion,2013-11-29,,Allegion spun off by Ingersoll Rand.,,fmp:sp500,0001579241
+ALTR,Altera Corp.,2000-04-17,2015-12-28,Annual Re-ranking,ALTR taken over by INTC,fmp:sp500,
+ALXN,Alexion Pharmaceuticals Inc,2012-05-24,2021-07-20,Acquired by Google (GOOG),AstraZeneca acquired Alexion Pharmaceuticals.,fmp:sp500,
+AM,Armour & Co,1989-10-04,2004-04-30,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+AMAT,Applied Materials,1995-03-15,,Annual Re-ranking,,fmp:sp500,0000006951
+AMBC,Ambac Financial Group Inc.,2000-12-08,2008-06-10,"Market Cap changes.
+",Market Value Decline,fmp:sp500,
+AMCC,Applied Micro Circuits Corp.,1957-03-02,2006-05-17,,Annual Re-ranking,fmp:sp500,
+AMCR,Amcor,2019-06-06,,BMS changed to AMCR post merger with Amcor;,,fmp:sp500,0001748790
+AMD,Advanced Micro Devices,1984-06-21,2013-09-20,Annual Re-ranking,Market capitalization change.,fmp:sp500,0000002488
+AMD,Advanced Micro Devices,2017-03-19,,Market capitalization change.,,fmp:sp500,0000002488
+AME,Ametek,2013-09-20,,Market capitalization change.,,fmp:sp500,0001037868
+AMG,Affiliated Managers Group Inc,2014-06-30,2019-12-20,Actavis acquires Forest Laboratories,Market capitalization change.,fmp:sp500,
+AMGN,Amgen,1991-12-31,,Annual Re-ranking,,fmp:sp500,0000318154
+AMP,Ameriprise Financial,2005-09-30,,Annual Re-ranking,,fmp:sp500,0000820027
+AMT,American Tower,2007-11-16,,Annual Re-ranking,,fmp:sp500,0001053507
+AMTM,Amentum,2024-10-30,2024-12-22,Market capitalization change.,Market capitalization change.,fmp:sp500,
+AMZN,Amazon,2005-11-18,,AT&T Corp. acquired by SBC Communications,,fmp:sp500,0001018724
+AN,Airco Inc,2003-02-21,2017-08-07,Annual Re-ranking,"BHF replaced AN,",fmp:sp500,
+ANDV,Andeavor,2007-09-26,2018-09-28,MXIM delisted from NASDAQ exchange.,ANDV acquired by Marathon Petroleum.,fmp:sp500,
+ANDW,Andrew Corp.,1984-11-23,2006-09-29,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+ANET,Arista Networks,2018-08-27,,GGP acquired by Brookfield Property Partners.,,fmp:sp500,0001596532
+ANF,Abercrombie & Fitch Co,2007-03-28,2013-12-20,Annual Re-ranking,Market capitalization changes.,fmp:sp500,
+ANR,American Natural Resource Co,2011-06-01,2012-10-01,Alpha Natural Resources acquired Massey Energy.,Kraft split into two companies,fmp:sp500,
+ANSS,ANSYS Inc.,2017-06-19,2025-07-17,Market capitalization changes.,S&P 500 constituent Synopsys Inc. acquired Ansys.,fmp:sp500,
+AON,Aon,1996-04-22,,Annual Re-ranking,,fmp:sp500,0000315293
+AOS,A. O. Smith,2017-07-25,,Market capitalization change.,,fmp:sp500,0000091142
+APA,APA Corporation,1997-07-25,,Annual Re-ranking,,fmp:sp500,0001841666
+APC,Alpha Portland Inds Inc,1997-07-25,2019-08-08,Annual Re-ranking,S&P 500 & 100 constituent Occidental Petroleum Corp. (NYSE:OXY) acquired Anadarko Petroleum.,fmp:sp500,
+APCC,American Power Conversion Corp,2000-05-31,2007-02-14,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+APD,Air Products,1985-04-11,,Annual Re-ranking,,fmp:sp500,0000002969
+APH,Amphenol,2008-09-29,,Annual Re-ranking,,fmp:sp500,0000820313
+APO,Apollo Global Management,2024-12-22,,Market capitalization change.,,fmp:sp500,0001858681
+APOL,Apollo Education Group,2002-05-14,2013-06-28,Annual Re-ranking,Apollo Group's market cap more representative of a mid-cap,fmp:sp500,
+APP,AppLovin Corporation,2025-09-21,,Market capitalization changes,,fmp:sp500,0001751008
+APTV,Aptiv,2012-12-21,,TIE acquired by Precision Cast Parts (PCP),,fmp:sp500,0001521332
+ARE,Alexandria Real Estate Equities,2017-03-20,,Market capitalization change.,,fmp:sp500,0001035443
+ARES,Ares Management Corporation,2025-12-11,,Mars Inc. acquired Kellanova.,,fmp:sp500,0001176948
+ARG,Airgas Inc.,2009-09-08,2016-05-20,Redomesticated to Ireland,ARG acquired by Air Liquide,fmp:sp500,
+ASH,Ashland Global Holdings Inc,1989-08-03,2008-11-13,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+ASN,,2004-12-17,2007-10-05,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+ASO,AmSouth Bancorp,1999-03-09,2006-11-03,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+AT,Alltel Corp,1994-12-20,2007-11-16,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+ATGE,"DeVry, Inc.",2009-06-08,2012-09-28,Annual Re-ranking,Tyco spin-off merged w/Pentair,fmp:sp500,
+ATI,Allegheny Technologies Inc.,1994-04-05,2015-07-01,Annual Re-ranking,Spin off of Columbia Pipeline.,fmp:sp500,
+ATO,Atmos Energy,2019-02-14,,ECA acquired NFX,,fmp:sp500,0000731802
+ATVI,Activision Blizzard Inc,2015-08-28,2023-10-17,Pall taken over,S&P 500 and S&P 100 constituent Microsoft acquired Activision Blizzard.,fmp:sp500,
+AV,Avaya Inc.,2000-09-29,2007-10-25,Annual Re-ranking,Taken private,fmp:sp500,
+AVB,AvalonBay Communities,2007-01-09,,Acquired by Motorola,,fmp:sp500,0000915912
+AVGO,Broadcom,2014-05-07,,Avago acquires LSI,,fmp:sp500,0001730168
+AVP,Avon Products Inc,1957-03-02,2015-03-20,,"Market Capitalization Changes.
+",fmp:sp500,
+AVY,Avery Dennison,1987-12-24,,Annual Re-ranking,,fmp:sp500,0000008818
+AW,Allied Waste Industries Inc.,1999-07-30,2008-12-04,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+AWE,AT&T Wireless,2001-07-06,2004-10-26,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+AWK,American Water Works,2016-03-03,,AWK replaces CNX,,fmp:sp500,0001410636
+AXON,Axon Enterprise,2023-05-03,,The Federal Deposit Insurance Corporation (FDIC) placed First Republic Bank into FDIC Receivership.,,fmp:sp500,0001069183
+AXP,American Express,1976-07-01,,Annual Re-ranking,,fmp:sp500,0000004962
+AYE,Allegheny Energy Inc.,2000-12-08,2011-02-25,"Market Cap changes.
+",Annual Re-ranking,fmp:sp500,
+AYI,Acuity Brands Inc,2016-05-02,2018-06-15,ADT acquired by APO,Market capitalization change.,fmp:sp500,
+AZO,AutoZone,1996-12-31,,Annual Re-ranking,,fmp:sp500,0000866787
+BA,Boeing,1957-03-04,,,,fmp:sp500,0000012927
+BAC,Bank of America,1976-07-01,,Annual Re-ranking,,fmp:sp500,0000070858
+BALL,Ball Corporation,1984-10-04,,Annual Re-ranking,,fmp:sp500,0000009389
+BAX,Baxter International,1972-09-14,,Annual Re-ranking,,fmp:sp500,0000010456
+BBBY,Bed Bath & Beyond Inc,1999-09-30,2017-07-25,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+BBWI,Bath & Body Works Inc,1983-09-15,2024-10-30,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+BBY,Best Buy,1999-06-29,,Annual Re-ranking,,fmp:sp500,0000764478
+BC,Brunswick Corp.,1973-03-01,2008-06-20,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+BCR,C. R. Bard Inc,1975-06-12,2017-12-28,Annual Re-ranking,Becton Dickinson acquired BCR.,fmp:sp500,
+BDK,Black & Decker Manufacturing,1976-01-15,2010-03-12,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+BDX,Becton Dickinson,1972-09-14,,Annual Re-ranking,,fmp:sp500,0000010795
+BEAM,Beam Suntory Inc,1976-07-01,2014-04-30,Annual Re-ranking,Beam acquired by Suntory,fmp:sp500,
+BEN,Franklin Resources,1998-04-28,,Annual Re-ranking,,fmp:sp500,0000038777
+BF-B,Brown–Forman,1982-10-14,,Annual Re-ranking,,fmp:sp500,0000014693
+BG,Bunge Global,2023-03-14,,The FDIC placed Signature Bank into FDIC Receivership.,,fmp:sp500,0001996862
+BHF,Brighthouse Financial Inc,2017-08-08,2019-04-02,"BHF replaced AN,",DOW spun off from DWDP,fmp:sp500,
+BIG,Big Lots Inc.,1998-01-16,2013-02-13,Annual Re-ranking,Market capitalization changes,fmp:sp500,
+BIIB,Biogen,2003-11-12,,Annual Re-ranking,,fmp:sp500,0000875045
+BIO,Bio-Rad Laboratories,2020-06-19,2024-09-23,Market capitalization change.,Market capitalization change.,fmp:sp500,
+BJS,BJ Services Co.,2002-05-14,2010-04-29,Annual Re-ranking,Acquired by Baker Hughes,fmp:sp500,
+BKNG,Booking Holdings,2009-11-03,,Acquired by Merck & Co. (MRK),,fmp:sp500,0001075531
+BKR,Baker Hughes,1987-04-09,,Annual Re-ranking,,fmp:sp500,0001701605
+BLDR,Builders FirstSource,2023-12-15,,Market capitalization change.,,fmp:sp500,0001316835
+BLK,BlackRock,2011-04-01,,Acquired by Sanofi Aventis (SNY),,fmp:sp500,0002012383
+BLS,BellSouth Corp.,1983-12-01,2007-01-03,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+BMC,BMC Software Inc,1998-09-30,2013-09-10,Annual Re-ranking,BMC taken private by consortium,fmp:sp500,
+BMET,Biomet Inc.,1990-08-22,2007-07-11,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+BMS,Bemis Company Inc,1978-07-20,2014-12-04,Annual Re-ranking,Market cap changes,fmp:sp500,
+BMY,Bristol Myers Squibb,1957-03-04,,,,fmp:sp500,0000014272
+BNI,Burlington Northern Santa Fe Corp,1970-03-05,2010-02-12,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+BNY,Bank of New York Mellon Corp,1995-03-30,,,,fmp:sp500,0001390777
+BOL,Bausch & Lomb Inc.,1986-05-08,2007-10-26,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+BR,Broadridge Financial Solutions,1993-11-22,2006-03-31,Annual Re-ranking,Annual Re-ranking,fmp:sp500,0001383312
+BR,Broadridge Financial Solutions,2018-06-15,,Market capitalization change.,,fmp:sp500,0001383312
+BRCM,Broadcom Corp.,2000-06-30,2016-01-29,Annual Re-ranking,FRT replaces BRCM,fmp:sp500,
+BRK-B,Berkshire Hathaway,2010-02-12,,Annual Re-ranking,,fmp:sp500,0001067983
+BRL,Barr Pharmaceuticals Inc.,2006-02-24,2008-12-22,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+BRO,Brown & Brown,2021-09-17,,Market capitalization change.,,fmp:sp500,0000079282
+BSC,Bear Stearns Co,1998-06-30,2008-06-02,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+BSX,Boston Scientific,1995-02-23,,Annual Re-ranking,,fmp:sp500,0000885725
+BTU,Peabody Energy Corp,2006-11-17,2014-09-19,Annual Re-ranking,Market cap changes,fmp:sp500,
+BUD,,1976-07-01,2008-11-18,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+BWA,BorgWarner Inc,2011-12-16,2025-03-23,Market capitalization changes,Market capitalization change.,fmp:sp500,
+BX,Blackstone Inc.,2023-09-15,,Market capitalization change.,,fmp:sp500,0001393818
+BXLT,Baxalta,2015-06-30,2016-06-02,Baxalta spun off by Baxter.,SHPG acquiring BXLT,fmp:sp500,
+BXP,"BXP, Inc.",2006-03-31,,Annual Re-ranking,,fmp:sp500,0001037540
+C,Citigroup,1988-05-26,,Annual Re-ranking,,fmp:sp500,0000831001
+CA,CA Inc,1987-07-09,2018-11-05,Annual Re-ranking,CA acquired by Broadcom.,fmp:sp500,
+CAG,ConAgra Brands Inc,1983-09-01,2026-06-29,Annual Re-ranking,Market Capitalization Changes,fmp:sp500,
+CAH,Cardinal Health,1997-05-23,,Annual Re-ranking,,fmp:sp500,0000721371
+CAM,Cameron International Corp,2008-01-28,2016-04-01,Annual Re-ranking,Schlumberger acquired Cameron,fmp:sp500,
+CAR,Avis Budget Group,1995-04-28,2006-07-31,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+CARR,Carrier Global,2020-04-02,,United Technologies spun off Otis and Carrier and acquired Raytheon Company.,,fmp:sp500,0001783180
+CASY,"Casey's General Stores, Inc.",2026-04-09,,Blackstone Inc. and TPG Inc. acquired Hologic.,,fmp:sp500,0000726958
+CAT,Caterpillar Inc.,1957-03-04,,,,fmp:sp500,0000018230
+CB,Chubb Limited,2002-01-29,2008-07-17,Annual Re-ranking,Annual Re-ranking,fmp:sp500,0000896159
+CB,Chubb Limited,2010-07-14,,Acquired by Merck KGaA (MKGAY),,fmp:sp500,0000896159
+CBE,Cooper Industries plc,1957-03-02,2009-09-08,,Redomesticated to Ireland,fmp:sp500,
+CBE,Cooper Industries plc,2011-11-22,2012-11-30,Annual Re-ranking,Acquired by Eaton Corp. (ETN),fmp:sp500,
+CBH,Commerce Bancorp (New Jersey),2006-06-05,2008-03-28,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+CBOE,Cboe Global Markets,2017-02-28,,CBOE acquires BATS,,fmp:sp500,0001374310
+CBRE,CBRE Group,2006-11-09,,Annual Re-ranking,,fmp:sp500,0001138118
+CBSS,Compass Bancshares Inc,2004-12-17,2007-09-07,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+CC,Circuit City Stores Inc.,1989-05-11,2008-03-28,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+CCE,,1998-10-07,2016-05-27,Annual Re-ranking,CCE merging with European bottlers,fmp:sp500,
+CCI,Crown Castle,2012-03-13,,Acquired by Exelon Corp. (EXC),,fmp:sp500,0001051470
+CCL,Carnival,1998-12-21,,Berkshire Hathaway purchased General Re.,,fmp:sp500,0000815097
+CDNS,Cadence Design Systems,2017-09-18,,Sycamore Partners acquired Staples.,,fmp:sp500,0000813672
+CDW,CDW,2019-09-20,,S&P 500 constituent Global Payments (NYSE: GPN) acquired TSS.,,fmp:sp500,0001402057
+CE,Concord EFS Inc.,2001-03-30,2004-02-26,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+CE,Concord EFS Inc.,2018-12-21,2025-03-23,S&P 500 constituent Cigna (NYSE: CI) acquired ESRX,Market capitalization change.,fmp:sp500,
+CEG,Constellation Energy,1957-03-02,2012-03-13,,Acquired by Exelon Corp. (EXC),fmp:sp500,0001868275
+CEG,Constellation Energy,2022-02-02,,S&P 500 and 100 constituent Exelon Corp. spun off Constellation Energy.,,fmp:sp500,0001868275
+CELG,Celgene Corp.,2006-11-03,2019-11-20,Annual Re-ranking,Bristol-Myers Squibb (NYSE:BMY) acquired Celgene.,fmp:sp500,
+CEPH,Cephalon Inc.,2008-11-14,2011-10-14,Annual Re-ranking,Acquired by Teva Pharmaceutical Industries (TEVA).,fmp:sp500,
+CERN,Cerner Corp,2010-04-29,2022-06-07,Acquired by Baker Hughes,S&P 500 constituent Oracle Corp. acquired Cerner.,fmp:sp500,
+CF,CF Industries,2000-06-16,2004-08-31,Annual Re-ranking,Annual Re-ranking,fmp:sp500,0001324404
+CF,CF Industries,2008-08-26,,Annual Re-ranking,,fmp:sp500,0001324404
+CFC,Countrywide Financial Corp.,1997-06-17,2008-06-30,Annual Re-ranking,Ak Steel replaced Countrywide Financial.,fmp:sp500,
+CFG,Citizens Financial Group,2016-01-29,,CFG replaces PCP,,fmp:sp500,0000759944
+CFN,CareFusion Corp,2009-08-31,2015-03-17,Annual Re-ranking,Carefusion acquired by Becton Dickinson,fmp:sp500,
+CHD,Church & Dwight,2015-12-28,,ALTR taken over by INTC,,fmp:sp500,0000313927
+CHIR,Chiron Corp.,2000-11-22,2006-04-19,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+CHK,Chesapeake Energy Corp,2006-03-02,2018-03-19,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+CHRW,C.H. Robinson,2007-03-01,,Annual Re-ranking,,fmp:sp500,0001043277
+CHTR,Charter Communications,2016-09-07,,Dell acquires EMC,,fmp:sp500,0001091667
+CI,Cigna,1982-04-08,,Annual Re-ranking,,fmp:sp500,0001739940
+CIEN,Ciena Corporation,2001-08-29,2009-12-18,Annual Re-ranking,Market capitalization change.,fmp:sp500,0000936395
+CIEN,Ciena Corporation,2026-02-09,,Thoma Bravo L.P. acquired Dayforce,,fmp:sp500,0000936395
+CIN,Cinergy Corp.,1994-10-24,2006-03-31,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+CINF,Cincinnati Financial,1997-12-17,,Annual Re-ranking,,fmp:sp500,0000020286
+CIT,CIT Financial Corp,2004-10-26,2009-07-24,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+CL,Colgate-Palmolive,1957-03-04,,,,fmp:sp500,0000021665
+CLF,Cliffs Natural Resources,2009-12-18,2014-04-01,Market capitalization change.,Market capitalization changes,fmp:sp500,
+CLX,Clorox,1969-03-31,,,,fmp:sp500,0000021076
+CMA,Comerica Inc.,1995-11-30,2024-06-24,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+CMCSA,Comcast,2002-11-18,,Annual Re-ranking,,fmp:sp500,0001166691
+CMCSK,Comcast Corp,2015-09-18,2015-12-11,Share class methodology change,CMCSK shares no longer listed,fmp:sp500,
+CME,CME Group,2006-08-10,,Annual Re-ranking,,fmp:sp500,0001156375
+CMG,Chipotle Mexican Grill,2011-04-27,,Acquired by private equity firms.,,fmp:sp500,0001058090
+CMI,Cummins,1973-05-31,,Annual Re-ranking,,fmp:sp500,0000026172
+CMS,CMS Energy,1999-04-30,,Annual Re-ranking,,fmp:sp500,0000811156
+CMVT,Comverse Technology Inc,1999-10-26,2007-02-01,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+CMX,Caremark Rx,2004-03-24,2007-03-22,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+CNC,Centene Corporation,2016-03-29,,Centene acquired Health Net.,,fmp:sp500,0001071739
+CNP,CenterPoint Energy,1985-07-25,,Annual Re-ranking,,fmp:sp500,0001130310
+CNX,Consol Energy Inc.,2006-06-27,2016-03-03,Annual Re-ranking,AWK replaces CNX,fmp:sp500,
+COF,Capital One,1998-06-30,,Annual Re-ranking,,fmp:sp500,0000927628
+COHR,"Coherent, Inc.",2026-03-23,,Market capitalization change.,,fmp:sp500,0000820318
+COIN,Coinbase Global,2025-05-18,,S&P 500 constituent Capital One Financial Corp. acquired Discover Financial Services.,,fmp:sp500,0001679788
+COL,Rockwell Collins Inc,2001-06-29,2018-11-30,Annual Re-ranking,UTX acquired COL,fmp:sp500,
+COO,Cooper Companies (The),2016-09-22,,MAR acquires HOT,,fmp:sp500,0000711404
+COOP,Mr. Cooper Group Inc,1997-07-01,2008-09-29,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+COP,ConocoPhillips,1957-03-04,,,,fmp:sp500,0001163165
+COR,Cencora,2001-08-29,,Annual Re-ranking,,fmp:sp500,0001140859
+COST,Costco,1993-10-21,,Annual Re-ranking,,fmp:sp500,0000909832
+COTY,Coty Inc,2016-09-30,2020-09-18,COTY replaces DO,Market capitalization change.,fmp:sp500,
+COV,Covidien Plc,2007-06-29,2009-06-04,Annual Re-ranking,"Covidien moved its place of incorporation to Ireland, making it ineligible for inclusion in the index.",fmp:sp500,
+COV,Covidien Plc,2011-02-28,2015-01-26,Annual Re-ranking,Covidien acquired by Medtronic,fmp:sp500,
+CPAY,Corpay,2018-06-19,,AT&T acquired Time Warner.,,fmp:sp500,0001175454
+CPB,Campbell Soup Company,1957-03-04,2026-06-22,,Market capitalization change.,fmp:sp500,
+CPGX,Columbia Pipeline Group Inc.,2015-07-01,2016-07-05,Spin off of Columbia Pipeline.,CPGX acquired by TRP,fmp:sp500,
+CPN,Calpine Corp.,2000-11-30,2005-12-01,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+CPRI,Capri Holdings Ltd,2013-11-12,2020-05-11,ICE Exchange acquired NYSE Euronext.,Market capitalization change.,fmp:sp500,
+CPRT,Copart,2018-06-29,,DPS acquired by Keurig Green Mountain.,,fmp:sp500,0000900075
+CPT,Camden Property Trust,2022-04-01,,S&P 500 constituent M&T Bank Corp. acquired People's United Financial.,,fmp:sp500,0000906345
+CPWR,Compuware Corp,1998-12-31,2011-12-30,Annual Re-ranking,Market capitalization changes,fmp:sp500,
+CR,Crane Co.,1957-03-03,2004-12-17,,Annual Re-ranking,fmp:sp500,
+CRH,CRH plc,2025-12-22,,Market capitalization change.,,fmp:sp500,0000849395
+CRL,Charles River Laboratories,2021-05-13,,S&P 500 constituent Teledyne Technologies acquired FLIR Systems.,,fmp:sp500,0001100682
+CRM,Salesforce,2008-09-12,,Capitalization rebalance.,,fmp:sp500,0001108524
+CRWD,CrowdStrike,2024-06-24,,Market capitalization change.,,fmp:sp500,0001535527
+CSC,Computer Sciences Corp.,1981-05-14,2015-11-30,Annual Re-ranking,CSC spins off CSRA,fmp:sp500,
+CSCO,Cisco,1993-12-30,,Annual Re-ranking,,fmp:sp500,0000858877
+CSGP,CoStar Group,2022-09-16,,Market capitalization change.,,fmp:sp500,0001057352
+CSRA,CSRA Inc,2015-11-30,2018-04-03,CSC spins off CSRA,S&P 500 constituent General Dynamics (NYSE: GD) acquired CSRA.,fmp:sp500,
+CSX,CSX Corporation,1980-11-06,,Annual Re-ranking,,fmp:sp500,0000277948
+CTAS,Cintas,2001-02-28,,Annual Re-ranking,,fmp:sp500,0000723254
+CTB,Cooper Tire & Rubber Co.,1990-05-24,2006-07-17,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+CTLT,Catalent Inc,2020-09-18,2024-12-22,Market capitalization change.,Acquired by Novo Holdings A/S (NVO),fmp:sp500,
+CTRA,Coterra Energy Inc,2008-06-20,2026-05-07,Market capitalization change.,Coterra Energy was removed due to its acquisition by Devon Energy.,fmp:sp500,
+CTSH,Cognizant,2006-11-16,,Annual Re-ranking,,fmp:sp500,0001058290
+CTVA,Corteva,2019-05-31,,CTVA spun off from DWDP (which then changed symbol to DD),,fmp:sp500,0001755672
+CTX,Centex Corp.,1977-03-31,2009-08-18,Annual Re-ranking,Centex acquired by Pulte Homes.,fmp:sp500,
+CTXS,Citrix Systems Inc,1999-11-30,2022-09-30,Annual Re-ranking,Vista Equity Partners acquired Citrix Systems.,fmp:sp500,
+CVG,Convergys Corp.,2000-06-12,2009-12-18,Tribune Co. acquired Times Mirror.,Annual Re-ranking,fmp:sp500,
+CVH,Coventry Corp,2005-08-29,2013-05-08,Annual Re-ranking,Acquired by Aetna (AET),fmp:sp500,
+CVNA,Carvana Co.,2025-12-22,,Market capitalization change.,,fmp:sp500,0001690820
+CVS,CVS Health,1957-03-04,,,,fmp:sp500,0000064803
+CVX,Chevron Corporation,1957-03-04,,,,fmp:sp500,0000093410
+CXO,Concho Resources Inc,2016-02-19,2021-01-20,PCL taken over by WY,S&P 500/100 constituent ConocoPhillips acquired Concho Resources.,fmp:sp500,
+CZR,Harrah's Entertainment,1990-02-07,2008-01-28,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+CZR,Harrah's Entertainment,2021-03-19,2025-09-21,Market capitalization change.,Market capitalization changes,fmp:sp500,
+D,Dominion Energy,1983-05-20,,Annual Re-ranking,,fmp:sp500,0000715957
+DAL,Delta Air Lines,1957-03-02,2005-08-18,,Annual Re-ranking,fmp:sp500,0000027904
+DAL,Delta Air Lines,2013-09-10,,BMC taken private by consortium,,fmp:sp500,0000027904
+DAN,Dana Inc,1957-03-03,2006-03-02,,Annual Re-ranking,fmp:sp500,
+DASH,DoorDash,2025-03-23,,Market capitalization change.,,fmp:sp500,0001792789
+DAY,Dayforce Inc,2021-09-17,2026-02-09,Market capitalization change.,Thoma Bravo L.P. acquired Dayforce,fmp:sp500,
+DD,DuPont,1957-03-02,2017-08-31,,The Dow Chemical Company acquired DuPont.,fmp:sp500,0001666700
+DD,DuPont,2019-06-03,,DWDP changed to DD after spinning off Corteva.,,fmp:sp500,0001666700
+DDOG,Datadog,2025-07-08,,S&P 500 constituent Hewlett Packard Enterprise Co. acquired Juniper Networks.,,fmp:sp500,0001561550
+DDS,Dillard's Inc.,1986-10-02,2008-10-21,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+DE,Deere & Company,1957-03-04,,,,fmp:sp500,0000315189
+DECK,Deckers Brands,2024-03-15,,Market capitalization change.,,fmp:sp500,0000910521
+DELL,Dell Technologies,1996-09-05,2013-10-28,Annual Re-ranking,Founder Michael Dell and Silver Lake Partners acquired Dell.,fmp:sp500,0001571996
+DELL,Dell Technologies,2024-09-23,,Market capitalization change.,,fmp:sp500,0001571996
+DF,Dean Foods Co,2006-03-31,2013-05-23,Annual Re-ranking,DF too small after spinoff of White Wave Foods,fmp:sp500,
+DFS,Discover Financial Services,2007-06-29,2025-05-18,"Discover Financial Services Debuts On New York Stock Exchange Under Ticker Symbol DFS
+",S&P 500 constituent Capital One Financial Corp. acquired Discover Financial Services.,fmp:sp500,
+DG,Dollar General,1998-07-15,2007-07-06,Annual Re-ranking,Annual Re-ranking,fmp:sp500,0000029534
+DG,Dollar General,2012-11-30,,Acquired by Eaton Corp. (ETN),,fmp:sp500,0000029534
+DGX,Quest Diagnostics,2002-12-11,,Annual Re-ranking,,fmp:sp500,0001022079
+DHI,D. R. Horton,2005-07-01,,Annual Re-ranking,,fmp:sp500,0000882184
+DHR,Danaher Corporation,1998-11-17,,Annual Re-ranking,,fmp:sp500,0000313616
+DIS,Walt Disney Company (The),1976-07-01,,Annual Re-ranking,,fmp:sp500,0001744489
+DISCK,Discovery Communications Inc Class C (Warner Bros. Discovery Inc),2014-08-06,2022-04-11,Class C share distribution,Annual Re-ranking,fmp:sp500,
+DISH,DISH Network Corp,2017-03-13,2023-06-20,S&P 500 constituent Analog Devices (NASD:ADI) acquired Linear Technology.,Market capitalization change.,fmp:sp500,
+DJ,Dow Jones & Co. Inc.,1978-05-04,2007-12-13,Annual Re-ranking,Acquired by News Corporation,fmp:sp500,
+DLR,Digital Realty,2016-05-17,,TWC acquired by CHTR,,fmp:sp500,0001297996
+DLTR,Dollar Tree,2011-12-16,,"Market capitalization changes
+",,fmp:sp500,0000935703
+DLX,Deluxe Corp.,1986-04-24,2004-12-17,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+DNB,Dun & Bradstreet Corp,2008-12-01,2017-04-04,Annual Re-ranking,IT acquiring CEB,fmp:sp500,
+DNR,Denbury Resources Inc.,2009-04-01,2015-03-20,Annual Re-ranking,Market Capitalization Changes.,fmp:sp500,
+DO,Diamond Offshore Drilling Inc,2009-02-25,2016-09-30,Annual Re-ranking,COTY replaces DO,fmp:sp500,
+DOC,Healthpeak Properties,2008-03-28,,Annual Re-ranking,,fmp:sp500,0000765880
+DOV,Dover Corporation,1985-10-24,,Annual Re-ranking,,fmp:sp500,0000029905
+DOW,Dow Inc.,1957-03-03,2017-09-01,,The Dow Chemical Company renamed to DowDuPont Inc. and ticker changed from DOW to DWDP after acquiring DuPont.,fmp:sp500,0001751788
+DOW,Dow Inc.,2019-04-01,,DOW spun off from DWDP,,fmp:sp500,0001751788
+DPH,Delphi Corp.,1999-05-27,2005-10-10,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+DPS,Dr Pepper Snapple Group Inc,2008-10-03,2018-06-29,Annual Re-ranking,DPS acquired by Keurig Green Mountain.,fmp:sp500,
+DPZ,Domino's,2020-05-11,,Market capitalization change.,,fmp:sp500,0001286681
+DRE,Duke Realty,2017-07-25,2022-09-30,Market capitalization change.,S&P 500 constituent Prologis Inc. acquired Duke Realty.,fmp:sp500,
+DRI,Darden Restaurants,1995-05-26,,Annual Re-ranking,,fmp:sp500,0000940944
+DTE,DTE Energy,1957-03-04,,,,fmp:sp500,0000936340
+DTV,DirecTV,2006-12-01,2015-07-28,Annual Re-ranking,DirecTV acquired by AT&T.,fmp:sp500,
+DUK,Duke Energy,1976-07-01,,Annual Re-ranking,,fmp:sp500,0001326160
+DVA,DaVita,2008-07-30,,Annual Re-ranking,,fmp:sp500,0000927066
+DVN,Devon Energy,2000-08-29,,Annual Re-ranking,,fmp:sp500,0001090012
+DWDP,DuPont,2017-09-01,2019-06-03,The Dow Chemical Company renamed to DowDuPont Inc. and ticker changed from DOW to DWDP after acquiring DuPont.,DWDP changed to DD after spinning off Corteva.,fmp:sp500,
+DXC,DXC Technology,2017-04-03,2023-10-02,"HPE spins off Everett, merged with CSC to form DXC",Market capitalization change.,fmp:sp500,
+DXCM,Dexcom,2020-05-11,,Allergan acquired by AbbVie.,,fmp:sp500,0001093557
+DYN,Dynegy Inc.,2000-10-02,2009-12-18,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+EA,Electronic Arts,2002-07-19,,Annual Re-ranking,,fmp:sp500,0000712515
+EBAY,eBay,2002-07-19,,Annual Re-ranking,,fmp:sp500,0001065088
+EC,Engelhard Corp.,1983-07-07,2006-06-05,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+ECHO,EchoStar Corporation,2026-03-23,,,,fmp:sp500,0001415404
+ECL,Ecolab,1989-01-12,,Annual Re-ranking,,fmp:sp500,0000031462
+ED,Consolidated Edison,1957-03-04,,,,fmp:sp500,0001047862
+EDS,Electronic Data Systems Corp,1998-08-10,2008-08-26,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+EFX,Equifax,1997-06-18,,Annual Re-ranking,,fmp:sp500,0000033185
+EG,Everest Group,2017-06-19,,Reckitt Benckiser acquired Mead Johnson Nutrition.,,fmp:sp500,0001095073
+EIX,Edison International,1957-03-04,,,,fmp:sp500,0000827052
+EL,Estée Lauder Companies (The),2006-01-04,,Annual Re-ranking,,fmp:sp500,0001001250
+ELV,Elevance Health,2002-07-24,,Annual Re-ranking,,fmp:sp500,0001156039
+EMC,EMC Corp.,1996-03-27,2016-09-07,Annual Re-ranking,Dell acquires EMC,fmp:sp500,
+EME,"EMCOR Group, Inc.",2025-09-21,,Market capitalization changes,,fmp:sp500,0000105634
+EMN,Eastman Chemical Co,1994-01-03,2025-11-04,Annual Re-ranking,"S&P 500 constituent Dupont de Nemours, Inc. spun off Qnity Electronics. Market capitalization change.",fmp:sp500,
+EMR,Emerson Electric,1965-03-31,,,,fmp:sp500,0000032604
+ENDP,Endo Int'l plc,2015-01-26,2017-03-01,Covidien acquired by Medtronic,REG acquires EQY,fmp:sp500,
+ENPH,Enphase Energy Inc,2021-01-06,2025-09-21,LVMH Moet Hennessy-Louis Vuitton SE acquired Tiffany & Co.,Market capitalization changes,fmp:sp500,
+EOG,EOG Resources,2000-11-01,,Annual Re-ranking,,fmp:sp500,0000821189
+EOP,Equity Office Properties Trust,2001-10-09,2007-02-09,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+EP,El Paso Corp.,1999-10-25,2012-05-24,Annual Re-ranking,Acquired by Kinder Morgan (KMI),fmp:sp500,
+EPAM,EPAM Systems Inc,2021-12-13,2026-06-01,Canadian Pacific acquired Kansas City Southern.,Market capitalization change.,fmp:sp500,
+EQ,Embarq Corporation,2006-05-17,2009-06-30,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+EQIX,Equinix,2015-03-20,,Market Capitalization Changes.,,fmp:sp500,0001101239
+EQR,Equity Residential,2001-11-30,,Annual Re-ranking,,fmp:sp500,0000906107
+EQT,EQT Corporation,2008-12-18,2018-11-12,Annual Re-ranking,EQT spun off ETRN,fmp:sp500,0000033213
+EQT,EQT Corporation,2022-09-30,,S&P 500 constituent Prologis Inc. acquired Duke Realty.,,fmp:sp500,0000033213
+ERIE,Erie Indemnity,2024-09-23,,Market capitalization change.,,fmp:sp500,0000922621
+ES,Eversource Energy,2009-03-16,,Annual Re-ranking,,fmp:sp500,0000072741
+ESRX,Express Scripts Holding Co,2003-09-25,2018-12-21,Taken private,S&P 500 constituent Cigna (NYSE: CI) acquired ESRX,fmp:sp500,
+ESS,Essex Property Trust,2014-04-01,,Market capitalization changes,,fmp:sp500,0000920522
+ETFC,E*Trade Financial Corp.,2004-03-31,2020-10-06,Annual Re-ranking,Morgan Stanley acquired E*Trade.,fmp:sp500,
+ETN,Eaton Corporation,1957-03-04,,,,fmp:sp500,0001551182
+ETR,Entergy,1957-03-04,,,,fmp:sp500,0000065984
+ETSY,Etsy Inc.,2020-09-18,2024-09-23,Market capitalization change.,Market capitalization change.,fmp:sp500,
+EVHC,Envision Healthcare Holdings Inc,2016-12-01,2018-10-10,Market capitalization change.,EVHC acquired by KKR.,fmp:sp500,
+EVRG,Evergy,2018-06-04,,Westar Energy (NYSE: WR) acquired Great Plains Energy (NYSE: GXP) and changed name to Evergy.,,fmp:sp500,0001711269
+EW,Edwards Lifesciences,2011-03-31,,Acquired by CenturyLink,,fmp:sp500,0001099800
+EXC,Exelon,1957-03-04,,,,fmp:sp500,0001109357
+EXE,Expand Energy,2025-03-23,,Market capitalization change.,,fmp:sp500,0000895126
+EXPD,Expeditors International,2007-10-09,,Annual Re-ranking,,fmp:sp500,0000746515
+EXPE,Expedia Group,2007-10-01,,Solectron acquired by Flextronics.,,fmp:sp500,0001324424
+EXR,Extra Space Storage,2016-01-15,,"EXR replaces ACE as ACE Ltd acquires Chubb and retains the CB ticker, giving up ACE",,fmp:sp500,0001289490
+F,Ford Motor Company,1957-03-04,,,,fmp:sp500,0000037996
+FANG,Diamondback Energy,2018-11-30,,Market Capitalization change,,fmp:sp500,0001539838
+FAST,Fastenal,2008-09-12,,Capitalization rebalance.,,fmp:sp500,0000815556
+FBF,FleetBoston Financial Group Inc,1988-11-10,2004-03-31,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+FBIN,Fortune Brands Innovations Inc,2016-06-23,2022-12-20,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+FCX,Freeport-McMoRan,1995-07-28,,Annual Re-ranking,,fmp:sp500,0000831259
+FDC,First Data Corp.,1994-09-26,2007-09-24,Annual Re-ranking,FDC acquired by KKR.,fmp:sp500,
+FDO,Family Dollar Stores Inc,2001-08-03,2015-07-08,Annual Re-ranking,Family Dollar acquired.,fmp:sp500,
+FDS,FactSet,2021-12-17,,Market capitalization change.,,fmp:sp500,0001013237
+FDX,FedEx,1980-11-06,,Annual Re-ranking,,fmp:sp500,0001048911
+FDXF,"FedEx Freight Holding Company, Inc.",2026-06-01,,Market capitalization change.,,fmp:sp500,0002082247
+FE,FirstEnergy,1997-11-28,,,,fmp:sp500,0001031296
+FFIV,"F5, Inc.",2010-12-17,,Market Cap changes.,,fmp:sp500,0001048695
+FHI,Federated Hermes Inc,2003-04-15,2013-01-01,Annual Re-ranking,ABBV spun off from Abbott Labs (ABT),fmp:sp500,
+FHN,First Horizon National Corp,2002-05-03,2013-06-21,Annual Re-ranking,Zoetis spun off by Pfizer,fmp:sp500,
+FICO,Fair Isaac,2023-03-17,,Market capitalization change.,,fmp:sp500,0000814547
+FIS,Fidelity National Information Services,2006-11-09,,Annual Re-ranking,,fmp:sp500,0001136893
+FISV,"Fiserv, Inc.",2001-04-01,,,,fmp:sp500,0000798354
+FITB,Fifth Third Bancorp,1996-03-07,,Annual Re-ranking,,fmp:sp500,0000035527
+FIX,"Comfort Systems USA, Inc.",2025-12-22,,Market capitalization change.,,fmp:sp500,0001035983
+FL,Foot Locker Inc.,2016-04-01,2019-08-08,Schlumberger acquired Cameron,Market capitalization change.,fmp:sp500,
+FLEX,Flex Ltd.,2026-06-22,,Market capitalization change.,,fmp:sp500,0000866374
+FLIR,FLIR Systems Inc,2008-12-31,2021-05-13,Annual Re-ranking,S&P 500 constituent Teledyne Technologies acquired FLIR Systems.,fmp:sp500,
+FLR,Fluor Corp.,2000-12-21,2019-05-31,Annual Re-ranking,CTVA spun off from DWDP (which then changed symbol to DD),fmp:sp500,
+FLS,Flowserve Corporation,2008-10-01,2021-03-19,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+FMC,FMC Corp,2009-08-18,2025-03-23,Centex acquired by Pulte Homes.,Market capitalization change.,fmp:sp500,
+FMCC,Freddie Mac (FHLMC),1991-12-31,2008-09-10,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+FNMA,Fannie Mae (FNMA),1988-08-11,2008-09-10,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+FOSL,Fossil Group,2012-04-03,2016-01-04,Acquired by Express Scripts (ESRX),WSH merges with TW (and renames to WLTW),fmp:sp500,
+FOX,Fox Corporation (Class B),2015-09-18,,"Share class methodology change
+",,fmp:sp500,0001754301
+FOXA,Fox Corporation (Class A),2004-12-17,,Annual Re-ranking,,fmp:sp500,0001754301
+FRC,First Republic Bank,2018-12-31,2023-05-03,Dominion Energy acquired SCANA Corporation,The Federal Deposit Insurance Corporation (FDIC) placed First Republic Bank into FDIC Receivership.,fmp:sp500,
+FRT,Federal Realty Investment Trust,2016-01-29,,FRT replaces BRCM,,fmp:sp500,0000034903
+FRX,Forest Laboratories Inc,2000-11-21,2014-06-30,Annual Re-ranking,Actavis acquires Forest Laboratories,fmp:sp500,
+FSH,Fisher Scientific Int'l,2004-08-02,2006-11-09,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+FSLB,Freescale Semiconductor Inc,2004-12-02,2006-12-01,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+FSLR,First Solar,2009-10-15,2017-03-20,Annual Re-ranking,Market capitalization change.,fmp:sp500,0001274494
+FSLR,First Solar,2022-12-20,,Market capitalization change.,,fmp:sp500,0001274494
+FTI,TechnipFMC plc,2009-06-04,2021-02-11,"Covidien moved its place of incorporation to Ireland, making it ineligible for inclusion in the index.",TechnipFMC was removed from the S&P 500 in anticipation of its announced spin-off of Technip Energies.,fmp:sp500,
+FTNT,Fortinet,2018-10-10,,EVHC acquired by KKR.,,fmp:sp500,0001262039
+FTR,Fruehauf Corp,1957-03-02,2017-03-20,,Market capitalization change.,fmp:sp500,
+FTV,Fortive,2016-07-01,,CPGX acquired by TRP,,fmp:sp500,0001659166
+G,Gillette Co.,1957-03-02,2005-09-30,,Annual Re-ranking,fmp:sp500,
+GAS,Nicor Inc.,1989-08-03,2016-06-30,Annual Re-ranking,GAS acquired by SO,fmp:sp500,
+GD,General Dynamics,1957-03-04,,,,fmp:sp500,0000040533
+GDDY,GoDaddy,2024-06-24,,Market capitalization change.,,fmp:sp500,0001609711
+GDT,Guidant Corp,1996-12-18,2006-04-21,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+GDW,Golden West Financial,1988-06-09,2006-09-29,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+GE,GE Aerospace,1957-03-04,,,,fmp:sp500,0000040545
+GEHC,GE HealthCare,2023-01-03,,S&P 500 constituent General Electric spun off GE HealthCare.,,fmp:sp500,0001932393
+GEN,Gen Digital,2003-03-28,,Annual Re-ranking,,fmp:sp500,0000849399
+GENZ,Genzyme Corp.,2001-12-13,2011-04-01,Annual Re-ranking,Acquired by Sanofi Aventis (SNY),fmp:sp500,
+GEV,GE Vernova,2024-04-01,,S&P 500 and 100 constituent General Electric Corp. spun off GE Vernova.,,fmp:sp500,0001996810
+GGP,GGP Inc,2007-06-29,2008-11-12,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+GGP,GGP Inc,2013-12-09,2018-08-27,MOLX acquired by Koch Industries.,GGP acquired by Brookfield Property Partners.,fmp:sp500,
+GHC,Galen Health Care Inc,2007-12-28,2014-09-19,Annual Re-ranking,"Market cap changes
+",fmp:sp500,
+GILD,Gilead Sciences,2004-06-30,,Annual Re-ranking,,fmp:sp500,0000882095
+GIS,General Mills,1957-03-04,,,,fmp:sp500,0000040704
+GL,Globe Life,1989-04-27,,Annual Re-ranking,,fmp:sp500,0000320335
+GLK,Great Lakes Chemical Corp,1991-11-22,2005-07-01,Annual Re-ranking,Acquired by Crompton Corp.,fmp:sp500,
+GLW,Corning Inc.,1995-02-27,,,,fmp:sp500,0000024741
+GM,General Motors,1957-03-03,2009-06-02,,Annual Re-ranking,fmp:sp500,0001467858
+GM,General Motors,2013-06-06,,HNZ acquired by consortium,,fmp:sp500,0001467858
+GMCR,Keurig Green Mountain Inc,2014-03-21,2016-03-04,Market capitalization changes,JAB Holding Company acquired Keurig Green Mountain,fmp:sp500,
+GME,GameStop Corp.,2007-12-13,2016-04-22,Acquired by News Corporation,Global Payments is acquiring Heartland Payment Systems,fmp:sp500,
+GNRC,Generac,2021-03-19,,Market capitalization change.,,fmp:sp500,0001474735
+GNW,Genworth Financial Inc.,2005-12-01,2015-11-17,Annual Re-ranking,GE spinning off Synchrony Financial,fmp:sp500,
+GOOG,Alphabet Inc. (Class C),2014-04-03,,Annual Re-ranking,,fmp:sp500,0001652044
+GOOGL,Alphabet Inc. (Class A),2006-03-31,,Annual Re-ranking,,fmp:sp500,0001652044
+GP,,1957-03-02,2005-12-19,,Annual Re-ranking,fmp:sp500,
+GPC,Genuine Parts Company,1973-11-15,,Annual Re-ranking,,fmp:sp500,0000040987
+GPN,Global Payments,2016-04-22,,Global Payments is acquiring Heartland Payment Systems,,fmp:sp500,0001123360
+GPS,Gap Inc.,1986-08-21,2022-02-02,Annual Re-ranking,S&P 500 and 100 constituent Exelon Corp. spun off Constellation Energy.,fmp:sp500,
+GR,Goodrich Corp.,1957-03-03,2012-07-30,,Goodrich acquired by United Technologies (UTX).,fmp:sp500,
+GRMN,Garmin,2012-12-11,,Market capitalization changes,,fmp:sp500,0001121788
+GS,Goldman Sachs,2002-07-19,,Annual Re-ranking,,fmp:sp500,0000886982
+GT,The Goodyear Tire & Rubber Co,1957-03-03,2019-02-26,,WAB acquired GE transportation business,fmp:sp500,
+GTW,Gateway Inc.,1998-04-24,2006-07-31,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+GWW,W. W. Grainger,1981-05-14,,Annual Re-ranking,,fmp:sp500,0000277135
+HAL,Halliburton,1957-03-04,,,,fmp:sp500,0000045012
+HAR,Harvey Aluminium Inc,2006-01-31,2017-03-15,Annual Re-ranking,Samsung Electronics acquired Harman International Industries.,fmp:sp500,
+HAS,Hasbro,1984-09-13,,Annual Re-ranking,,fmp:sp500,0000046080
+HBAN,Huntington Bancshares,1997-08-05,,Annual Re-ranking,,fmp:sp500,0000049196
+HBI,Hanesbrands Inc,2015-03-20,2021-12-17,"Market Capitalization Changes.
+",Market capitalization change.,fmp:sp500,
+HCA,HCA Healthcare,1993-08-31,2006-11-17,Annual Re-ranking,Annual Re-ranking,fmp:sp500,0000860730
+HCA,HCA Healthcare,2015-01-26,,Safeway acquired by private equity consortium,,fmp:sp500,0000860730
+HCBK,Hudson City Bancorp Inc,2007-02-14,2015-11-02,Annual Re-ranking,HPQ spins off HPE,fmp:sp500,
+HCR,Manor Care Inc.,1998-09-27,2007-11-08,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+HD,Home Depot (The),1988-03-03,,Annual Re-ranking,,fmp:sp500,0000354950
+HES,Hess Corp,1984-05-17,2025-07-22,Annual Re-ranking,S&P 500 and S&P 100 constituent Chevron Corp. acquired Hess Corp.,fmp:sp500,
+HFC,HollyFrontier Corp,2018-06-15,2021-06-03,Market capitalization change.,Market capitalization change.,fmp:sp500,
+HIG,Hartford (The),1995-12-19,,Annual Re-ranking,,fmp:sp500,0000874766
+HII,Huntington Ingalls Industries,2018-01-02,,Becton Dickinson acquired BCR.,,fmp:sp500,0001501585
+HLT,Hilton Worldwide,1970-04-23,2007-10-24,Annual Re-ranking,Annual Re-ranking,fmp:sp500,0001585689
+HLT,Hilton Worldwide,2017-06-19,,VZ acquired YHOO operations; remainder of YHOO converted to closed-end company known as Altaba.,,fmp:sp500,0001585689
+HMA,Health Management Associates Inc,2001-11-06,2007-03-01,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+HNZ,H. J. Heinz Company,1957-03-02,2013-06-06,,HNZ acquired by consortium,fmp:sp500,
+HOG,,2000-01-28,2020-06-19,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+HOLX,Hologic Inc,2016-03-29,2026-04-09,Exelon acquired Pepco.,Blackstone Inc. and TPG Inc. acquired Hologic.,fmp:sp500,
+HON,Honeywell,1957-03-04,,,,fmp:sp500,0000773840
+HONA,Honeywell Aerospace Inc,2026-06-29,,Market Capitalization Changes,,fmp:sp500,0002089271
+HOOD,"Robinhood Markets, Inc.",2025-09-21,,Market capitalization changes,,fmp:sp500,0001783879
+HOT,Starwood Hotels & Resorts Worldwide Inc,2000-11-16,2016-09-22,Annual Re-ranking,MAR acquires HOT,fmp:sp500,
+HP,Helmerich and Payne Inc,2010-02-26,2020-05-21,Taken private,Market capitalization change.,fmp:sp500,
+HPC,Hercules Inc.,1957-03-02,2008-11-13,,Annual Re-ranking,fmp:sp500,
+HPE,Hewlett Packard Enterprise,2015-11-02,,HPQ spins off HPE,,fmp:sp500,0001645590
+HPQ,HP Inc.,1974-10-17,,Annual Re-ranking,,fmp:sp500,0000047217
+HRB,H&R Block Inc,1986-11-28,2020-09-18,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+HRL,Hormel Foods,2009-03-03,,Capitalization rebalance.,,fmp:sp500,0000048465
+HSH,Hillshire Brands Co,1981-09-10,2012-06-28,Annual Re-ranking,Split up of Sara Lee,fmp:sp500,
+HSIC,Henry Schein,2015-03-17,,Carefusion acquired by Becton Dickinson,,fmp:sp500,0001000228
+HSP,Hospira Inc.,2004-04-30,2015-09-02,Annual Re-ranking,Hospira taken over,fmp:sp500,
+HST,Host Hotels & Resorts,2007-03-19,,Annual Re-ranking,,fmp:sp500,0001070750
+HSY,Hershey Company (The),1957-03-04,,,,fmp:sp500,0000047111
+HUBB,Hubbell Incorporated,2023-10-17,,Market capitalization change.,,fmp:sp500,0000048898
+HUM,Humana,1995-11-30,,Annual Re-ranking,,fmp:sp500,0000049071
+HWM,Howmet Aerospace,2016-11-01,,Annual Re-ranking,,fmp:sp500,0000004281
+IAC,IAC/InterActiveCorp,2006-11-30,2008-08-20,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+IBKR,Interactive Brokers Group,2025-08-27,,Sycamore acquired Walgreen Boots Alliance.,,fmp:sp500,0001381197
+IBM,IBM,1957-03-04,,,,fmp:sp500,0000051143
+ICE,Intercontinental Exchange,2007-09-25,,FDC acquired by KKR.,,fmp:sp500,0001571949
+IDXX,Idexx Laboratories,2017-01-04,,S&P 100 & 500 constituent Abbott Laboratories (NYSE:ABT) acquired St. Jude Medical.,,fmp:sp500,0000874716
+IEX,IDEX Corporation,2019-08-08,,Market capitalization change.,,fmp:sp500,0000832101
+IFF,International Flavors & Fragrances,1976-03-04,,Annual Re-ranking,,fmp:sp500,0000051253
+IGT,International Game Technology plc,2001-08-31,2014-06-20,Annual Re-ranking,Market capitalization changes,fmp:sp500,
+IHRT,iHeartMedia Inc,1997-08-29,2008-07-30,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+ILMN,Illumina Inc,2015-11-18,2024-06-24,Sigma-Aldrich acquired by Merck KGaA (MKGAY),Market capitalization change.,fmp:sp500,
+IMS,IMS Health Holdings Inc,1996-11-01,2010-02-26,Annual Re-ranking,Taken private,fmp:sp500,
+INCY,Incyte,2017-02-27,,SE acquired by ENB,,fmp:sp500,0000879169
+INFO,IHS Markit Ltd.,2017-06-01,2022-02-25,TGNA spins off Cars.com,S&P 500 constituent S&P Global Inc. acquired IHS Markit.,fmp:sp500,
+INTC,Intel,1976-12-09,,Annual Re-ranking,,fmp:sp500,0000050863
+INTU,Intuit,2000-12-08,,Market Cap changes.,,fmp:sp500,0000896878
+INVH,Invitation Homes,2022-09-16,,Market capitalization change.,,fmp:sp500,0001687229
+IP,International Paper,1957-03-04,,,,fmp:sp500,0000051434
+IPG,Interpublic Group of Companies Inc,1992-10-29,2025-11-28,Annual Re-ranking,Omnicom Group Inc. (OMC) is acquiring (The) Interpublic Group,fmp:sp500,
+IPGP,IPG Photonics Corp,2018-03-06,2022-06-17,Discovery Communications acquired SNI.,Market capitalization change.,fmp:sp500,
+IQV,IQVIA,2017-08-28,,Amazon acquired Whole Foods Market.,,fmp:sp500,0001478242
+IR,Ingersoll Rand,2020-03-02,,"Gardner Denver acquired Ingersoll Rand's industrial businesses then changed its name to the ""new"" Ingersoll Rand Inc.",,fmp:sp500,0001699150
+IRM,Iron Mountain,2009-01-05,,Annual Re-ranking,,fmp:sp500,0001020569
+ISRG,Intuitive Surgical,2008-06-02,,Annual Re-ranking,,fmp:sp500,0001035267
+IT,Gartner,2017-04-04,,IT acquiring CEB,,fmp:sp500,0000749251
+ITT,ITT Inc,1995-12-19,2011-10-31,Annual Re-ranking,Spun off from ITT Corp.,fmp:sp500,
+ITW,Illinois Tool Works,1986-02-13,,Annual Re-ranking,,fmp:sp500,0000049826
+IVZ,Invesco,2008-08-20,,Annual Re-ranking,,fmp:sp500,0000914208
+J,Jacobs Solutions,2007-10-25,,Taken private,,fmp:sp500,0000052988
+JAVA,Sun Microsystems,1992-08-19,2010-01-27,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+JBHT,J.B. Hunt,2015-06-30,,Integrys taken over.,,fmp:sp500,0000728535
+JBL,Jabil,2001-01-29,2014-11-04,Annual Re-ranking,Market cap changes,fmp:sp500,0000898293
+JBL,Jabil,2023-12-15,,Market capitalization change.,,fmp:sp500,0000898293
+JCI,Johnson Controls,1989-07-27,2009-03-16,Annual Re-ranking,Annual Re-ranking,fmp:sp500,0000833444
+JCI,Johnson Controls,2010-08-26,,Acquired by Schlumberger (SLB),,fmp:sp500,0000833444
+JCP,J.C. Penney Co Inc,1957-03-03,2013-11-29,,Allegion spun off by Ingersoll Rand.,fmp:sp500,
+JEF,Jefferies Financial Group Inc,2007-08-24,2019-09-25,Annual Re-ranking,JEF spun off SPB.,fmp:sp500,
+JHF,John Hancock Financial Services Inc,2001-06-27,2004-04-28,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+JKHY,Jack Henry & Associates,2018-11-12,,EQT spun off ETRN,,fmp:sp500,0000779152
+JNJ,Johnson & Johnson,1973-05-31,,Annual Re-ranking,,fmp:sp500,0000200406
+JNPR,Juniper Networks Inc,2006-06-01,2025-07-08,Albertsons acquired by SuperValu and CVS Corp.,S&P 500 constituent Hewlett Packard Enterprise Co. acquired Juniper Networks.,fmp:sp500,
+JNS,Janus Capital Group,2000-07-12,2011-11-22,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+JNY,Jones Group,2001-12-14,2009-03-03,Annual Re-ranking,"Capitalization rebalance.
+",fmp:sp500,
+JOY,Joy Manufacturing Co,2011-02-25,2015-10-07,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+JP,,1976-07-01,2006-03-31,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+JPM,JPMorgan Chase,1976-07-01,,Annual Re-ranking,,fmp:sp500,0000019617
+JWN,Nordstrom Inc,1986-08-07,2020-06-19,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+K,Kellanova,1989-09-11,2025-12-11,,Mars Inc. acquired Kellanova.,fmp:sp500,
+KATE,Kate Spade & Co,1984-10-25,2008-12-01,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+KBH,KB Home,1989-03-08,2009-12-18,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+KDP,Keurig Dr Pepper,2022-06-17,,Market capitalization change.,,fmp:sp500,0001418135
+KEY,KeyCorp,1994-03-01,,Annual Re-ranking,,fmp:sp500,0000091576
+KEYS,Keysight Technologies,2018-11-05,,CA acquired by Broadcom.,,fmp:sp500,0001601046
+KG,King Pharmaceuticals Inc.,2000-10-02,2010-12-17,Annual Re-ranking,Acquired by Pfizer.,fmp:sp500,
+KHC,Kraft Heinz,2012-10-01,,Kraft split into two companies,,fmp:sp500,0001637459
+KIM,Kimco Realty,2006-03-31,,Annual Re-ranking,,fmp:sp500,0000879101
+KKR,KKR,2024-06-24,,Market capitalization change.,,fmp:sp500,0001404912
+KLAC,KLA Corporation,1997-09-12,,Annual Re-ranking,,fmp:sp500,0000319201
+KMB,Kimberly-Clark,1957-03-04,,,,fmp:sp500,0000055785
+KMG,,1984-10-04,2006-08-10,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+KMI,Kinder Morgan,2000-12-11,2007-05-30,Annual Re-ranking,Annual Re-ranking,fmp:sp500,0001506307
+KMI,Kinder Morgan,2012-05-24,,Acquired by Kinder Morgan (KMI),,fmp:sp500,0001506307
+KMX,Carmax Inc.,2010-06-28,2025-10-31,Acquired by ExxonMobil,S&P Constituent Honeywell spun off Solstice Advance Materials.,fmp:sp500,
+KO,Coca-Cola Company (The),1957-03-04,,,,fmp:sp500,0000021344
+KODK,Eastman Kodak Co.,1957-03-03,2010-12-17,,Market Cap changes.,fmp:sp500,
+KR,Kroger,1957-03-04,,,,fmp:sp500,0000056873
+KRB,MBNA Corp.,1992-04-22,2005-12-30,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+KRI,,1975-12-11,2006-06-27,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+KSE,KeySpan Corp,2000-08-18,2007-08-24,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+KSS,Kohl's Corp.,1998-08-13,2020-09-18,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+KSU,Kansas City Southern,2013-05-23,2021-12-13,DF too small after spinoff of White Wave Foods,Canadian Pacific acquired Kansas City Southern.,fmp:sp500,
+KVUE,Kenvue,2023-08-24,,S&P 500 and S&P 100 constituent Johnson & Johnson offered to exchange the shares of Kenvue held for shares of Johnson & Johnson in a split-off exchange offer.,,fmp:sp500,0001944048
+L,Loews Corporation,1995-05-09,,Annual Re-ranking,,fmp:sp500,0000060086
+LDOS,Leidos,2009-12-18,2013-09-20,Annual Re-ranking,Market capitalization change.,fmp:sp500,0001336920
+LDOS,Leidos,2019-08-08,,S&P 500 & 100 constituent Occidental Petroleum Corp. (NYSE:OXY) acquired Anadarko Petroleum.,,fmp:sp500,0001336920
+LEG,Leggett & Platt Inc,1999-10-15,2021-12-17,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+LEHMQ,Lehman Brothers Holding,1998-01-09,2008-09-16,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+LEN,Lennar,2005-10-03,,Annual Re-ranking,,fmp:sp500,0000920760
+LH,LabCorp,2004-10-29,,Annual Re-ranking,,fmp:sp500,0000920148
+LHX,L3Harris,2008-09-19,,Annual Re-ranking,,fmp:sp500,0000202058
+LIFE,Life Technologies Corp,2008-11-21,2014-01-23,Annual Re-ranking,Life Technologies acquired by Thermo Fisher Scientific Inc,fmp:sp500,
+LII,Lennox International,2024-12-22,,Acquired by Novo Holdings A/S (NVO),,fmp:sp500,0001069202
+LIN,Linde plc,1992-07-02,,Annual Re-ranking,,fmp:sp500,0001707925
+LITE,Lumentum Holdings Inc.,2026-03-23,,Market capitalization change.,,fmp:sp500,0001633978
+LKQ,LKQ Corp,2016-05-20,2025-12-22,ARG acquired by Air Liquide,Market capitalization change.,fmp:sp500,
+LLL,L3 Technologies Inc,2004-11-30,2019-06-28,Annual Re-ranking,L3 purchased by Harris Corporation,fmp:sp500,
+LLTC,Linear Technology Corp.,2000-03-31,2017-03-13,Annual Re-ranking,S&P 500 constituent Analog Devices (NASD:ADI) acquired Linear Technology.,fmp:sp500,
+LLY,Lilly (Eli),1970-11-19,,Annual Re-ranking,,fmp:sp500,0000059478
+LM,Legg Mason Inc,2006-04-21,2016-12-01,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+LMT,Lockheed Martin,1984-07-19,,Annual Re-ranking,,fmp:sp500,0000936468
+LNC,Lincoln National Corp,1976-07-01,2023-09-15,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+LNT,Alliant Energy,2016-06-30,,GAS acquired by SO,,fmp:sp500,0000352541
+LO,Lorillard Inc.,2008-06-10,2015-06-11,Market Value Decline,Lorillard gets acquired.,fmp:sp500,
+LOW,Lowe's,1984-03-01,,Annual Re-ranking,,fmp:sp500,0000060667
+LPX,,1974-10-17,2006-11-09,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+LRCX,Lam Research,2012-06-05,,Acquired by Lam Research (LRCX),,fmp:sp500,0000707549
+LSI,LSI Corp,1995-12-13,2014-05-07,Annual Re-ranking,Avago acquires LSI,fmp:sp500,
+LU,Lucent Technology,1996-09-30,2006-11-30,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+LULU,Lululemon Athletica,2023-10-17,,S&P 500 and S&P 100 constituent Microsoft acquired Activision Blizzard.,,fmp:sp500,0001397187
+LUMN,Lumen Technologies Inc,1999-03-24,2023-03-17,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+LUV,Southwest Airlines,1994-07-12,,Annual Re-ranking,,fmp:sp500,0000092380
+LVLT,Level 3 Comm's Inc,2014-11-04,2017-10-12,Market cap changes,CenturyLink acquired LVLT.,fmp:sp500,
+LVS,Las Vegas Sands,2019-10-02,,Market capitalization change.,,fmp:sp500,0001300514
+LW,Lamb Weston Holdings Inc,2018-11-30,2026-03-23,UTX acquired COL,Market capitalization change.,fmp:sp500,
+LXK,Lexmark International Inc,1999-08-12,2012-09-28,Annual Re-ranking,Tyco spun off ADT,fmp:sp500,
+LYB,LyondellBasell,2012-09-04,,SHLD below public float threshold,,fmp:sp500,0001489393
+LYV,Live Nation Entertainment,2019-12-20,,Market capitalization change.,,fmp:sp500,0001335258
+M,Marcor Inc,1995-11-07,2020-04-06,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+MA,Mastercard,2008-07-17,,Annual Re-ranking,,fmp:sp500,0001141391
+MAA,Mid-America Apartment Communities,2016-12-01,,Market capitalization change.,,fmp:sp500,0000912595
+MAC,Macerich,2013-05-08,2019-12-20,Acquired by Aetna (AET),Market capitalization change.,fmp:sp500,
+MAR,Marriott International,1993-10-11,,Annual Re-ranking,,fmp:sp500,0001048286
+MAS,Masco,1981-06-18,,Annual Re-ranking,,fmp:sp500,0000062996
+MAT,Mattel Inc.,1982-03-11,2019-06-06,Annual Re-ranking,BMS changed to AMCR post merger with Amcor;,fmp:sp500,
+MAY,May Dept Stores,1957-03-02,2005-08-29,,Annual Re-ranking,fmp:sp500,
+MBC,MasterBrand Inc,2022-12-15,2022-12-19,S&P 500 constituent Fortune Brands Home & Security spun off MasterBrand.,Market capitalization change.,fmp:sp500,
+MBI,MBIA Inc,1996-12-02,2009-12-18,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+MCD,McDonald's,1970-06-25,,Annual Re-ranking,,fmp:sp500,0000063908
+MCHP,Microchip Technology,2007-09-07,,Annual Re-ranking,,fmp:sp500,0000827054
+MCK,McKesson Corporation,1999-01-12,,Annual Re-ranking,,fmp:sp500,0000927653
+MCO,Moody's Corporation,2000-10-02,,Annual Re-ranking,,fmp:sp500,0001059556
+MDLZ,Mondelez International,2007-03-30,,Taken Private,,fmp:sp500,0001103982
+MDP,Meredith Corp.,1957-03-02,2011-01-03,,Annual Re-ranking,fmp:sp500,
+MDT,Medtronic,1986-10-23,,Annual Re-ranking,,fmp:sp500,0001613103
+MEDI,MedImmune Inc.,2000-06-15,2007-05-31,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+MEE,Massey Energy Co.,2008-06-20,2011-06-01,Market capitalization change.,Alpha Natural Resources acquired Massey Energy.,fmp:sp500,
+MEL,Mellon Financial Corp,1976-07-01,2007-06-29,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+MER,Merrill Lynch & Co,1982-04-08,2008-12-31,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+MERQ,Mercury Interactive Corp,2000-06-28,2006-01-03,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+MET,MetLife,2000-12-08,,Annual Re-ranking,,fmp:sp500,0001099219
+META,Meta Platforms,2013-12-20,,Market capitalization changes.,,fmp:sp500,0001326801
+MFE,McAfee Inc.,2008-12-22,2011-02-28,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+MGM,MGM Resorts,2017-07-25,,British American Tobacco (NYSE MKT:BTI) acquired Reynolds American.,,fmp:sp500,0000789570
+MHK,Mohawk Industries Inc,2013-12-20,2025-12-22,Market capitalization changes.,Market capitalization change.,fmp:sp500,
+MHS,Marriott Corp.,2003-08-19,2012-04-03,Annual Re-ranking,Acquired by Express Scripts (ESRX),fmp:sp500,
+MI,Marshall & Ilsley Corp,2002-02-08,2011-07-05,Annual Re-ranking,Marshall & Iisley is being bought by Bank of Montreal,fmp:sp500,
+MIL,Millipore Corp,1988-07-14,2010-07-14,Annual Re-ranking,Acquired by Merck KGaA (MKGAY),fmp:sp500,
+MJN,Mead Johnson Nutrition Co,2009-12-18,2017-06-19,Market capitalization change.,Reckitt Benckiser acquired Mead Johnson Nutrition.,fmp:sp500,
+MKC,McCormick & Company,2003-03-20,,Annual Re-ranking,,fmp:sp500,0000063754
+MKTX,MarketAxess Holdings Inc,2019-06-28,2025-09-21,L3 purchased by Harris Corporation,Market capitalization changes,fmp:sp500,
+MLM,Martin Marietta Materials,2014-07-01,,Market capitalization changes,,fmp:sp500,0000916076
+MMI,Motorola Mobility,2011-01-03,2012-05-24,Annual Re-ranking,Acquired by Google (GOOG),fmp:sp500,
+MMM,3M,1957-03-04,,,,fmp:sp500,0000066740
+MNK,Mallinckrodt plc,2014-08-18,2017-07-25,Market cap changes,Market capitalization change.,fmp:sp500,
+MNST,Monster Beverage,2012-06-28,,Split up of Sara Lee,,fmp:sp500,0000865752
+MO,Altria,1957-03-04,,,,fmp:sp500,0000764180
+MOH,Mohasco Corp,2022-03-01,2026-03-23,S&P 500 constituent S&P Global Inc. acquired IHS Markit.,Market capitalization change.,fmp:sp500,
+MOLX,Molex Inc.,1999-11-30,2013-12-09,Annual Re-ranking,MOLX acquired by Koch Industries.,fmp:sp500,
+MON,Monsanto Co.,2002-08-13,2018-06-06,Annual Re-ranking,Bayer acquired Monsanto.,fmp:sp500,
+MOS,Mosaic Company (The),2011-09-23,,Acquired by Texas Instruments (TXN).,,fmp:sp500,0001285785
+MPC,Marathon Petroleum,2011-06-30,,Market capitalization adjustments.,,fmp:sp500,0001510295
+MPWR,Monolithic Power Systems,2021-02-11,,TechnipFMC was removed from the S&P 500 in anticipation of its announced spin-off of Technip Energies.,,fmp:sp500,0001280452
+MRK,Merck & Co.,1957-03-04,,,,fmp:sp500,0000310158
+MRNA,Moderna,2021-07-20,,AstraZeneca acquired Alexion Pharmaceuticals.,,fmp:sp500,0001682852
+MRO,Marathon Oil,1991-05-06,2024-11-25,Annual Re-ranking,"ConocoPhillips acquired Marathon Oil.
+",fmp:sp500,
+MRSH,"Marsh & McLennan Companies, Inc.",1987-08-30,,,,fmp:sp500,0000062709
+MRVL,"Marvell Technology, Inc.",2026-06-22,,Market capitalization change.,,fmp:sp500,0001835632
+MS,Morgan Stanley,1995-09-21,,Annual Re-ranking,,fmp:sp500,0000895421
+MSCI,MSCI,2018-04-03,,S&P 500 constituent General Dynamics (NYSE: GD) acquired CSRA.,,fmp:sp500,0001408198
+MSFT,Microsoft,1994-06-06,,Annual Re-ranking,,fmp:sp500,0000789019
+MSI,Motorola Solutions,1957-03-04,,,,fmp:sp500,0000068505
+MTB,M&T Bank,2004-02-26,,Annual Re-ranking,,fmp:sp500,0000036270
+MTCH,Match Group Inc,2021-09-17,2026-03-23,Market capitalization change.,Market capitalization change.,fmp:sp500,
+MTD,Mettler Toledo,2016-09-06,,TYC acquires JCI (and retains JCI ticker).,,fmp:sp500,0001037646
+MTG,MGIC Investment Corp,1996-07-18,2008-10-30,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+MTW,Manitowoc Inc,2007-11-15,2009-08-31,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+MU,Micron Technology,1994-09-26,,Annual Re-ranking,,fmp:sp500,0000723125
+MUR,Murphy Oil Corp,2005-08-12,2017-07-25,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+MWW,Monster Worldwide Inc.,2001-06-01,2011-12-16,Annual Re-ranking,"Market capitalization changes
+",fmp:sp500,
+MXIM,Maxim Integrated Products Inc,2000-05-09,2007-09-26,Annual Re-ranking,MXIM delisted from NASDAQ exchange.,fmp:sp500,
+MXIM,Maxim Integrated Products Inc,2018-11-30,2021-08-27,CVS acquired Aetna,S&P 500 constituent Analog Devices acquired Maxim Integrated Products.,fmp:sp500,
+MYG,Maytag Corp.,1957-03-02,2006-03-31,,Annual Re-ranking,fmp:sp500,
+NAV,Navistar Int'l Corp,1957-03-02,2006-12-19,,Annual Re-ranking,fmp:sp500,
+NAVI,Navient Corp,2014-05-01,2018-06-04,Navient Spun off from SLM,Westar Energy (NYSE: WR) acquired Great Plains Energy (NYSE: GXP) and changed name to Evergy.,fmp:sp500,
+NBL,Noble Energy Inc.,2007-10-05,2020-10-09,Annual Re-ranking,Chevron acquired Noble Energy.,fmp:sp500,
+NBR,Nabors Industries Ltd,2000-10-17,2015-03-20,Annual Re-ranking,"Market Capitalization Changes.
+",fmp:sp500,
+NCC,National City Corp.,1994-09-26,2008-12-31,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+NCLH,Norwegian Cruise Line Holdings,2017-10-12,,CenturyLink acquired LVLT.,,fmp:sp500,0001513761
+NCR,NCR Corp.,2000-01-03,2007-09-28,Annual Re-ranking,Teradata spun off by NCR Corporation.,fmp:sp500,
+NDAQ,"Nasdaq, Inc.",2008-10-21,,Annual Re-ranking,,fmp:sp500,0001120193
+NDSN,Nordson Corporation,2022-02-14,,S&P 500 constituent Advanced Micro Devices acquired Xilinx.,,fmp:sp500,0000072331
+NE,Noble Corp plc,2001-01-12,2009-03-26,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+NE,Noble Corp plc,2011-01-14,2015-07-17,Annual Re-ranking,PayPal Spun off by eBay,fmp:sp500,
+NEE,NextEra Energy,1976-07-01,,Annual Re-ranking,,fmp:sp500,0000753308
+NEM,Newmont,1969-06-30,,,,fmp:sp500,0001164727
+NFB,North Fork BanCorp,2002-07-16,2006-11-30,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+NFLX,Netflix,2010-12-17,,"Market Cap changes.
+",,fmp:sp500,0001065280
+NFX,Newfield Exploration Co.,2010-12-17,2019-02-14,"Market Cap changes.
+",ECA acquired NFX,fmp:sp500,
+NI,NiSource,2000-11-01,,Annual Re-ranking,,fmp:sp500,0001111711
+NKE,"Nike, Inc.",1988-11-03,,Annual Re-ranking,,fmp:sp500,0000320187
+NKTR,Nektar Therapeutics,2018-03-19,2019-10-02,Market capitalization change.,Market capitalization change.,fmp:sp500,
+NLSN,Nielsen Holdings PLC,2013-07-08,2022-10-11,Softbank consortium purchase results in public float below 50%,Elliot Management Corp acquired Nielsen Holdings.,fmp:sp500,
+NOC,Northrop Grumman,1985-06-13,,Annual Re-ranking,,fmp:sp500,0001133421
+NOV,National Oilwell Varco Inc.,2005-03-11,2021-09-17,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+NOVL,Novell Inc,1991-10-31,2011-04-27,Annual Re-ranking,Acquired by private equity firms.,fmp:sp500,
+NOW,ServiceNow,2019-11-20,,Bristol-Myers Squibb (NYSE:BMY) acquired Celgene.,,fmp:sp500,0001373715
+NRG,NRG Energy,2010-01-27,,Annual Re-ranking,,fmp:sp500,0001013871
+NSC,Norfolk Southern Railway,1982-06-03,,Annual Re-ranking,,fmp:sp500,0000702165
+NSM,National Semiconductor,1976-12-09,2011-09-23,Annual Re-ranking,Acquired by Texas Instruments (TXN).,fmp:sp500,
+NTAP,NetApp,1999-06-24,,Annual Re-ranking,,fmp:sp500,0001002047
+NTRS,Northern Trust,1998-01-29,,Annual Re-ranking,,fmp:sp500,0000073124
+NUE,Nucor,1985-04-18,,Annual Re-ranking,,fmp:sp500,0000073309
+NVDA,Nvidia,2001-11-29,,Annual Re-ranking,,fmp:sp500,0001045810
+NVLS,Novellus Systems Inc,2000-06-16,2012-06-05,Annual Re-ranking,Acquired by Lam Research (LRCX),fmp:sp500,
+NVR,"NVR, Inc.",2019-09-25,,JEF spun off SPB.,,fmp:sp500,0000906163
+NWL,Newell Brands Inc,1989-04-27,2023-09-15,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+NWS,News Corp (Class B),2015-09-18,,"Share class methodology change
+",,fmp:sp500,0001564708
+NWSA,News Corp (Class A),2013-06-28,,Apollo Group's market cap more representative of a mid-cap,,fmp:sp500,0001564708
+NXPI,NXP Semiconductors,2021-03-19,,Market capitalization change.,,fmp:sp500,0001413447
+NXTL,Nextel Communications Inc,1998-03-31,2005-08-12,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+NYT,New York Times Co,1984-11-23,2010-12-17,Annual Re-ranking,"Market Cap changes.
+",fmp:sp500,
+NYX,NYSE Euronext Inc,2007-10-24,2013-11-12,Annual Re-ranking,ICE Exchange acquired NYSE Euronext.,fmp:sp500,
+O,Realty Income,2015-04-06,,Market capitalization change.,,fmp:sp500,0000726728
+ODFL,Old Dominion,2019-12-06,,BB&T acquired SunTrust to form Truist Financial.,,fmp:sp500,0000878927
+ODP,Office Depot Inc.,1999-06-23,2010-12-17,Annual Re-ranking,"Market Cap changes.
+",fmp:sp500,
+OGN,Organon & Co,2021-06-02,2023-10-17,S&P 500/100 constituent Merck & Co. spun off Organon.,Market capitalization change.,fmp:sp500,
+OI,,2008-12-31,2016-12-01,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+OKE,ONEOK,2010-03-12,,Annual Re-ranking,,fmp:sp500,0001039684
+OMC,Omnicom Group,1997-12-23,,Annual Re-ranking,,fmp:sp500,0000029989
+OMX,OfficeMax Inc,1970-04-23,2008-06-20,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+ON,ON Semiconductor,2022-06-17,,Market capitalization change.,,fmp:sp500,0001097864
+ONE,Bank One Corp.,1988-04-28,2004-06-30,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+ORCL,Oracle Corporation,1989-08-03,,Annual Re-ranking,,fmp:sp500,0001341439
+ORLY,O'Reilly Auto Parts,2009-03-26,,Annual Re-ranking,,fmp:sp500,0000898173
+OTIS,Otis Worldwide,2020-04-02,,United Technologies spun off Otis and Carrier and acquired Raytheon Company.,,fmp:sp500,0001781335
+OXY,Occidental Petroleum,1982-12-09,,Annual Re-ranking,,fmp:sp500,0000797468
+PANW,Palo Alto Networks,2023-06-20,,Market capitalization change.,,fmp:sp500,0001327567
+PAR,PAR Technology Corp,1997-04-02,2006-12-29,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+PAYC,Paycom Software Inc,2020-01-27,2026-03-23,S&P 500 constituent Centene Corp. (NYSE: CNC) acquired Wellcare Health Plans.,Market capitalization change.,fmp:sp500,
+PAYX,Paychex,1998-09-30,,Annual Re-ranking,,fmp:sp500,0000723531
+PBCT,People's United Financial Inc,2008-11-12,2022-04-01,Annual Re-ranking,S&P 500 constituent M&T Bank Corp. acquired People's United Financial.,fmp:sp500,
+PBG,Pepsi Bottling Group Inc.,2001-05-11,2010-02-26,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+PBI,Pitney Bowes Inc,1957-03-03,2017-02-28,,CBOE acquires BATS,fmp:sp500,
+PCAR,Paccar,1980-10-02,,Annual Re-ranking,,fmp:sp500,0000075362
+PCG,PG&E Corporation,1957-03-02,2019-01-17,,PCG filed for bankruptcy,fmp:sp500,0001004980
+PCG,PG&E Corporation,2022-09-30,,Vista Equity Partners acquired Citrix Systems.,,fmp:sp500,0001004980
+PCL,Plum Creek Timber Company,2002-01-16,2016-02-19,Annual Re-ranking,PCL taken over by WY,fmp:sp500,
+PCP,Precision Castparts Corp,2007-05-31,2016-01-29,Annual Re-ranking,CFG replaces PCP,fmp:sp500,
+PCS,Sprint PCS Group,1998-11-23,2004-04-22,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+PD,Phelps Dodge Corp,1957-03-03,2007-03-19,,Annual Re-ranking,fmp:sp500,
+PDCO,Patterson Companies,2005-10-10,2018-03-19,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+PEG,Public Service Enterprise Group,1957-03-04,,,,fmp:sp500,0000788784
+PENN,Penn National Gaming Inc,2021-03-19,2022-09-16,Market capitalization change.,Market capitalization change.,fmp:sp500,
+PEP,PepsiCo,1957-03-04,,,,fmp:sp500,0000077476
+PETM,PetSmart Inc,2012-10-04,2015-03-11,Acquired by Energy Transfer Partners (ETP),PetSmart acquired by private equity consortium,fmp:sp500,
+PFE,Pfizer,1957-03-04,,,,fmp:sp500,0000078003
+PFG,Principal Financial Group,2002-07-19,,Annual Re-ranking,,fmp:sp500,0001126328
+PG,Procter & Gamble,1957-03-04,,,,fmp:sp500,0000080424
+PGL,Peoples Energy Corp,1957-03-02,2007-02-21,,Annual Re-ranking,fmp:sp500,
+PGN,Progress Energy Inc.,1989-08-24,2012-06-29,Annual Re-ranking,Acquired by Duke Energy (DUK),fmp:sp500,
+PGR,Progressive Corporation,1997-08-01,,Annual Re-ranking,,fmp:sp500,0000080661
+PH,Parker Hannifin,1985-11-07,,Annual Re-ranking,,fmp:sp500,0000076334
+PHM,PulteGroup,1984-04-12,,Annual Re-ranking,,fmp:sp500,0000822416
+PKG,Packaging Corporation of America,2017-07-25,,Market capitalization change.,,fmp:sp500,0000075677
+PLD,Prologis,2003-07-17,,Market capitalization changes,,fmp:sp500,0001045609
+PLL,Pall Corp.,1987-12-31,2015-08-28,Annual Re-ranking,Pall taken over,fmp:sp500,
+PLTR,Palantir Technologies,2024-09-23,,Market capitalization change.,,fmp:sp500,0001321655
+PM,Philip Morris International,2008-03-28,,Annual Re-ranking,,fmp:sp500,0001413329
+PMCS,,2001-08-02,2007-06-29,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+PNC,PNC Financial Services,1988-04-14,,Annual Re-ranking,,fmp:sp500,0000713676
+PNR,Pentair,2012-09-28,,Tyco spin-off merged w/Pentair,,fmp:sp500,0000077360
+PNW,Pinnacle West,1999-10-01,,Annual Re-ranking,,fmp:sp500,0000764622
+PODD,Insulet Corporation,2023-03-14,,"The FDIC placed SVB's main subsidiary, Silicon Valley Bank, into receivership.",,fmp:sp500,0001145197
+POM,Pepco Holdings Inc.,2007-11-08,2016-03-29,Annual Re-ranking,Exelon acquired Pepco.,fmp:sp500,
+POOL,Pool Corp,2020-10-06,2026-06-22,Morgan Stanley acquired E*Trade.,Market capitalization change.,fmp:sp500,
+PPG,PPG Industries,1957-03-04,,,,fmp:sp500,0000079879
+PPL,PPL Corporation,1995-11-24,,Annual Re-ranking,,fmp:sp500,0000922224
+PRGO,Perrigo Company Plc,2011-12-16,2021-09-17,"Market capitalization changes
+",Market capitalization change.,fmp:sp500,
+PRU,Prudential Financial,2002-07-19,,Annual Re-ranking,,fmp:sp500,0001137774
+PSA,Public Storage,2005-08-18,,Annual Re-ranking,,fmp:sp500,0001393311
+PSFT,People Soft Inc,1998-10-01,2004-12-28,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+PSKY,Paramount Skydance Corp,1994-09-30,,,,fmp:sp500,0002041610
+PSX,Phillips 66,2012-04-30,,ConocoPhillips spun off Phillips 66,,fmp:sp500,0001534701
+PTC,PTC Inc.,2021-04-19,,Siemens Healthineers acquired Varian Medical Systems.,,fmp:sp500,0000857005
+PTV,Pactiv Corp,1999-11-04,2010-11-16,Annual Re-ranking,Reynolds Group Holdings acquired Pactiv.,fmp:sp500,
+PVH,PVH Corp.,2013-02-13,2022-09-16,Market capitalization changes,Market capitalization change.,fmp:sp500,
+PVN,Providian Corp.,1976-07-01,2005-09-30,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+PWER,,2000-10-20,2005-03-11,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+PWR,Quanta Services,2009-06-30,,Annual Re-ranking,,fmp:sp500,0001050915
+PXD,Pioneer Natural Resources Co,2008-09-23,2024-05-08,Annual Re-ranking,S&P 500 and S&P 100 constituent ExxonMobil acquired Pioneer Natural Resources.,fmp:sp500,
+PYPL,PayPal,2015-07-17,,PayPal Spun off by eBay,,fmp:sp500,0001633917
+Q,"Qnity Electronics, Inc.",2000-07-05,2011-03-31,Annual Re-ranking,Acquired by CenturyLink,fmp:sp500,0000000000
+Q,"Qnity Electronics, Inc.",2025-11-04,,"S&P 500 constituent Dupont de Nemours, Inc. spun off Qnity Electronics. Market capitalization change.",,fmp:sp500,0000000000
+QCOM,Qualcomm,1999-07-21,,Annual Re-ranking,,fmp:sp500,0000804328
+QEP,QEP Resources Inc,2010-06-30,2015-06-30,"Company split. QEP retained, but ticker changed.",Baxalta spun off by Baxter.,fmp:sp500,
+QLGC,QLogic Corp.,2000-12-11,2011-01-14,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+QRVO,Qorvo Inc,2015-06-11,2024-12-22,Lorillard gets acquired.,Market capitalization change.,fmp:sp500,
+R,Ryder System Inc,1982-12-30,2017-06-19,Annual Re-ranking,Market capitalization changes.,fmp:sp500,
+RAI,Reynolds American Inc.,2002-09-03,2017-07-25,Annual Re-ranking,British American Tobacco (NYSE MKT:BTI) acquired Reynolds American.,fmp:sp500,
+RBK,Reebok Int'l Ltd,1987-01-08,2006-01-31,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+RCL,Royal Caribbean Group,2014-12-04,,Market cap changes,,fmp:sp500,0000884887
+RDC,Rowan Companies plc,1985-01-10,2014-08-18,Annual Re-ranking,Market cap changes,fmp:sp500,
+REG,Regency Centers,2017-03-01,,REG acquires EQY,,fmp:sp500,0000910606
+REGN,Regeneron Pharmaceuticals,2013-04-30,,A majority of MetroPCS was acquired by T-Mobile,,fmp:sp500,0000872589
+RF,Regions Financial Corporation,1998-08-27,,Annual Re-ranking,,fmp:sp500,0001281761
+RHI,Robert Half Int'l Inc,2000-12-04,2024-06-24,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+RHT,Red Hat Inc.,2009-07-24,2019-07-12,Annual Re-ranking,S&P 500 & 100 constituent IBM acquired Red Hat.,fmp:sp500,
+RIG,Transocean Ltd,1999-12-30,2008-12-18,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+RIG,Transocean Ltd,2013-10-28,2017-07-25,Founder Michael Dell and Silver Lake Partners acquired Dell.,Market capitalization change.,fmp:sp500,
+RJF,Raymond James Financial,2017-03-20,,Market capitalization change.,,fmp:sp500,0000720005
+RL,Ralph Lauren Corporation,2007-02-01,,Annual Re-ranking,,fmp:sp500,0001037038
+RLGY,Realogy Holdings Corp,2006-07-31,2007-04-09,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+RMD,ResMed,2017-07-25,,Market capitalization change.,,fmp:sp500,0000943819
+RMG,Cablevision Systems Corp.,2010-12-17,2016-06-23,Acquired by Pfizer.,Annual Re-ranking,fmp:sp500,
+ROH,Rohm & Hass Co,1982-09-16,2009-04-01,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+ROK,Rockwell Automation,2000-03-12,,,,fmp:sp500,0001024478
+ROL,"Rollins, Inc.",2018-09-28,,ANDV acquired by Marathon Petroleum.,,fmp:sp500,0000084839
+ROP,Roper Technologies,2009-12-22,,Annual Re-ranking,,fmp:sp500,0000882835
+ROST,Ross Stores,2009-12-18,,Market capitalization change.,,fmp:sp500,0000745732
+RRC,Range Resources Corp.,2007-12-20,2018-06-15,Taken private,Market capitalization change.,fmp:sp500,
+RRD,RR Donnelley & Sons Co,1984-07-19,2012-12-11,Annual Re-ranking,Market capitalization changes,fmp:sp500,
+RSG,Republic Services,2008-12-04,,Annual Re-ranking,,fmp:sp500,0001060391
+RSH,RadioShack Corp.,1973-03-01,2011-06-30,Annual Re-ranking,Market capitalization adjustments.,fmp:sp500,
+RTN,Raytheon Co.,1957-03-03,2020-04-06,,United Technologies spun off Otis and Carrier and acquired Raytheon Company.,fmp:sp500,
+RTX,RTX Corporation,1957-03-04,,,,fmp:sp500,0000101829
+RVTY,Revvity,1985-05-09,,Annual Re-ranking,,fmp:sp500,0000031791
+S,Sears Roebuck & Co,1989-07-27,2013-07-08,Annual Re-ranking,Softbank consortium purchase results in public float below 50%,fmp:sp500,
+SAF,Safeco Corp.,1976-07-01,2008-09-22,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+SANM,Sanmina Corp.,2000-06-20,2007-06-29,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+SBAC,SBA Communications,2017-08-31,,The Dow Chemical Company acquired DuPont.,,fmp:sp500,0001034054
+SBL,Symbol Technologies Inc,2000-12-08,2007-01-09,"Market Cap changes.
+",Acquired by Motorola,fmp:sp500,
+SBNY,Signature Bank,2021-12-17,2023-03-14,Market capitalization change.,The FDIC placed Signature Bank into FDIC Receivership.,fmp:sp500,
+SBUX,Starbucks,2000-06-07,,Siemens AG acquired Shared Medical Systems.,,fmp:sp500,0000829224
+SCG,SCANA Corp.,2008-12-31,2018-12-31,Annual Re-ranking,Dominion Energy acquired SCANA Corporation,fmp:sp500,
+SCHW,Charles Schwab Corporation,1997-05-30,,Annual Re-ranking,,fmp:sp500,0000316709
+SDS,Sungard Data Systems Inc,2002-07-19,2005-08-11,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+SE,Spectra Energy Corp.,2006-12-29,2017-02-27,Annual Re-ranking,SE acquired by ENB,fmp:sp500,
+SEBL,Siebel Systems Inc.,2000-05-04,2006-01-31,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+SEDG,SolarEdge Technologies Inc,2021-12-17,2023-12-15,Market capitalization change.,Market capitalization change.,fmp:sp500,
+SEE,Sealed Air Corp.,1998-03-31,2023-12-15,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+SFA,,1981-02-26,2006-02-24,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+SGP,,1957-03-02,2009-11-03,,Acquired by Merck & Co. (MRK),fmp:sp500,
+SHLD,Sears Holdings Corp,2005-03-24,2012-09-04,Annual Re-ranking,SHLD below public float threshold,fmp:sp500,
+SHW,Sherwin-Williams,1964-06-30,,,,fmp:sp500,0000089800
+SIAL,,1994-09-20,2015-11-18,Annual Re-ranking,Sigma-Aldrich acquired by Merck KGaA (MKGAY),fmp:sp500,
+SIG,Signet Jewelers Ltd,2015-07-28,2018-03-19,DirecTV acquired by AT&T.,Market capitalization change.,fmp:sp500,
+SII,Smith Int'l Inc,2006-09-29,2010-08-26,Annual Re-ranking,Acquired by Schlumberger (SLB),fmp:sp500,
+SITC,SITE Centers Corp,2007-03-22,2009-03-27,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+SIVB,SVB Financial Group,2018-03-19,2023-03-14,Market capitalization change.,"The FDIC placed SVB's main subsidiary, Silicon Valley Bank, into receivership.",fmp:sp500,
+SJM,J.M. Smucker Company (The),2008-11-05,,Annual Re-ranking,,fmp:sp500,0000091419
+SLB,Schlumberger,1957-03-04,,,,fmp:sp500,0000087347
+SLG,SL Green Realty,2015-03-20,2021-03-19,"Market Capitalization Changes.
+",Market capitalization change.,fmp:sp500,
+SLM,SLM Corp.,1998-06-30,2014-05-01,Annual Re-ranking,Navient Spun off from SLM,fmp:sp500,
+SLR,Solectron Corp.,1998-12-30,2007-10-01,Annual Re-ranking,Solectron acquired by Flextronics.,fmp:sp500,
+SMCI,Supermicro,2024-03-15,,Market capitalization change.,,fmp:sp500,0001375365
+SNA,Snap-on,1982-09-16,,Annual Re-ranking,,fmp:sp500,0000091440
+SNDK,Sandisk Corporation,2006-04-19,2016-05-12,Annual Re-ranking,SNDK acquired by WDC,fmp:sp500,0002023554
+SNDK,Sandisk Corporation,2025-11-28,,Omnicom Group Inc. (OMC) is acquiring (The) Interpublic Group,,fmp:sp500,0002023554
+SNI,Scripps Networks Interactive Inc,2008-06-30,2018-03-06,Annual Re-ranking,Discovery Communications acquired SNI.,fmp:sp500,
+SNPS,Synopsys,2017-03-15,,Samsung Electronics acquired Harman International Industries.,,fmp:sp500,0000883241
+SNV,Synovus Financial Corp.,1997-11-26,2007-12-31,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+SO,Southern Company,1957-03-04,,,,fmp:sp500,0000092122
+SOLS,Solstice Advanced Materials,1957-03-02,2025-12-22,,Market capitalization change.,fmp:sp500,
+SOLV,Solventum,2024-04-01,,S&P 500 and 100 constituent 3M Co. spun off Solventum.,,fmp:sp500,0001964738
+SOTR,SouthTrust Corp,1999-02-26,2004-10-29,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+SOV,Sovran Financial Corp.,2004-06-30,2009-01-29,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+SPG,Simon Property Group,2002-06-25,,Annual Re-ranking,,fmp:sp500,0001063761
+SPGI,S&P Global,1957-03-04,,,,fmp:sp500,0000064040
+SPLS,Staples Inc.,1998-10-06,2017-09-18,Annual Re-ranking,Sycamore Partners acquired Staples.,fmp:sp500,
+SRCL,Stericycle Inc.,2008-11-18,2018-11-30,Annual Re-ranking,Market Capitalization change,fmp:sp500,
+SRE,Sempra,1998-06-29,,Annual Re-ranking,,fmp:sp500,0001032208
+SSP,E. W. Scripps Co,2005-12-19,2008-06-30,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+STE,Steris,2019-12-20,,Market capitalization change.,,fmp:sp500,0001757898
+STI,SunTrust Banks Inc,1988-05-05,2019-12-06,Annual Re-ranking,BB&T acquired SunTrust to form Truist Financial.,fmp:sp500,
+STJ,St. Jude Medical Inc,1989-11-30,2017-01-04,Annual Re-ranking,S&P 100 & 500 constituent Abbott Laboratories (NYSE:ABT) acquired St. Jude Medical.,fmp:sp500,
+STLD,Steel Dynamics,2022-12-21,,S&P 500 constituent Johnson & Johnson acquired Abiomed.,,fmp:sp500,0001022671
+STR,Questar Corp.,2006-11-30,2010-06-30,Annual Re-ranking,"Company split. QEP retained, but ticker changed.",fmp:sp500,
+STT,State Street Corporation,1997-08-15,,Annual Re-ranking,,fmp:sp500,0000093751
+STX,Seagate Technology,2012-06-29,,Acquired by Duke Energy (DUK),,fmp:sp500,0001137789
+STZ,Constellation Brands,2005-07-01,,Acquired by Crompton Corp.,,fmp:sp500,0000016918
+SUN,Sunoco Inc,1957-03-02,2012-10-04,,Acquired by Energy Transfer Partners (ETP),fmp:sp500,
+SUNEQ,SunEdison Inc,2007-05-30,2011-12-16,Annual Re-ranking,"Market capitalization changes
+",fmp:sp500,
+SVU,Supervalu Inc.,1985-01-31,2012-04-30,Annual Re-ranking,ConocoPhillips spun off Phillips 66,fmp:sp500,
+SW,Smurfit WestRock,2024-07-05,,Smurfit Kappa and WestRock combined under SW.,,fmp:sp500,0002005951
+SWK,Stanley Black & Decker,1982-09-16,,Annual Re-ranking,,fmp:sp500,0000093556
+SWKS,Skyworks Solutions,2015-03-11,,PetSmart acquired by private equity consortium,,fmp:sp500,0000004127
+SWN,Southwestern Energy Co,2008-06-06,2017-04-03,Annual Re-ranking,"HPE spins off Everett, merged with CSC to form DXC",fmp:sp500,
+SWY,Safeway Inc.,1998-11-12,2015-01-26,Chrysler Corp. merged with Daimler-Benz,Safeway acquired by private equity consortium,fmp:sp500,
+SYF,Synchrony Financial,2015-11-17,,GE spinning off Synchrony Financial,,fmp:sp500,0001601712
+SYK,Stryker Corporation,2000-12-11,,Annual Re-ranking,,fmp:sp500,0000310764
+SYY,Sysco,1986-12-18,,Annual Re-ranking,,fmp:sp500,0000096021
+T,AT&T,1983-12-01,,Annual Re-ranking,,fmp:sp500,0000732717
+TAP,Molson Coors Beverage Company,1976-07-01,,Annual Re-ranking,,fmp:sp500,0000024545
+TAP-B,Travelers Property Casualty,2002-08-20,2004-04-01,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+TDC,Teradata Corp.,2007-09-28,2017-06-19,Teradata spun off by NCR Corporation.,Market capitalization changes.,fmp:sp500,
+TDG,TransDigm Group,2016-06-02,,SHPG acquiring BXLT,,fmp:sp500,0001260221
+TDY,Teledyne Technologies,2020-06-19,,Market capitalization change.,,fmp:sp500,0001094285
+TE,TECO Energy Inc,2001-10-09,2016-06-30,Annual Re-ranking,TE acquired by EMA,fmp:sp500,
+TECH,Bio-Techne,2021-08-27,,S&P 500 constituent Analog Devices acquired Maxim Integrated Products.,,fmp:sp500,0000842023
+TEG,Integrys Energy Group,2007-02-21,2015-06-30,Annual Re-ranking,Integrys taken over.,fmp:sp500,
+TEK,Tektronix Inc.,1957-03-02,2007-11-15,,Annual Re-ranking,fmp:sp500,
+TEL,TE Connectivity,2007-06-29,2009-06-25,Annual Re-ranking,"Tyco Electronics left the index because it was reincorporating in Switzerland, making it ineligible for inclusion.",fmp:sp500,0001385157
+TEL,TE Connectivity,2011-10-14,,Acquired by Teva Pharmaceutical Industries (TEVA).,,fmp:sp500,0001385157
+TER,Teradyne,1999-11-12,2013-12-20,Annual Re-ranking,Market capitalization changes.,fmp:sp500,0000097210
+TER,Teradyne,2020-09-18,,Market capitalization change.,,fmp:sp500,0000097210
+TEX,Terex Corp.,2006-12-19,2008-11-05,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+TFC,Truist Financial,1997-12-03,,Annual Re-ranking,,fmp:sp500,0000092230
+TFX,Teleflex Inc,2019-01-17,2025-03-23,PCG filed for bankruptcy,Market capitalization change.,fmp:sp500,
+TGNA,TEGNA Inc,1975-12-11,2017-06-01,Annual Re-ranking,TGNA spins off Cars.com,fmp:sp500,
+TGT,Target Corporation,1976-12-09,,Annual Re-ranking,,fmp:sp500,0000027419
+THC,Tenet Healthcare Corp.,1979-02-08,2016-04-15,Annual Re-ranking,Ulta replaces Tenet,fmp:sp500,
+TIE,Titanium Metal Corp,2007-10-26,2012-12-21,Annual Re-ranking,TIE acquired by Precision Cast Parts (PCP),fmp:sp500,
+TIF,Tiffany & Co.,2000-06-20,2021-01-06,Annual Re-ranking,LVMH Moet Hennessy-Louis Vuitton SE acquired Tiffany & Co.,fmp:sp500,
+TIN,,1986-12-18,2007-12-28,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+TJX,TJX Companies,1985-09-26,,Annual Re-ranking,,fmp:sp500,0000109198
+TKO,TKO Group Holdings,2025-03-23,,Market capitalization change.,,fmp:sp500,0001973266
+TLAB,Tellabs Inc.,1995-06-30,2011-12-20,Annual Re-ranking,Expedia spun off TripAdvisor.,fmp:sp500,
+TMO,Thermo Fisher Scientific,1996-12-31,,Annual Re-ranking,,fmp:sp500,0000097745
+TMUS,T-Mobile US,2009-06-29,2013-04-30,Annual Re-ranking,A majority of MetroPCS was acquired by T-Mobile,fmp:sp500,0001283699
+TMUS,T-Mobile US,2019-07-12,,S&P 500 & 100 constituent IBM acquired Red Hat.,,fmp:sp500,0001283699
+TNB,Thomas & Betts Corp,1974-10-17,2004-08-02,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+TOY,"Toys ""R"" Us, Inc.",1983-09-08,2005-07-21,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+TPL,Texas Pacific Land Corporation,2024-11-25,,"ConocoPhillips acquired Marathon Oil.
+",,fmp:sp500,0001811074
+TPR,"Tapestry, Inc.",2004-08-31,,Annual Re-ranking,,fmp:sp500,0001116132
+TRCO,Tribune Media Co,1986-01-30,2007-12-20,Annual Re-ranking,Taken private,fmp:sp500,
+TRGP,Targa Resources,2022-10-11,,Elliot Management Corp acquired Nielsen Holdings.,,fmp:sp500,0001389170
+TRIP,TripAdvisor Inc,2011-12-20,2019-12-20,Expedia spun off TripAdvisor.,Market capitalization change.,fmp:sp500,
+TRMB,Trimble Inc.,2021-01-20,,S&P 500/100 constituent ConocoPhillips acquired Concho Resources.,,fmp:sp500,0000864749
+TROW,T. Rowe Price,1999-10-12,,Annual Re-ranking,,fmp:sp500,0001113169
+TRV,Travelers Companies (The),1976-07-01,,Annual Re-ranking,,fmp:sp500,0000086312
+TSCO,Tractor Supply,2014-01-23,,Life Technologies acquired by Thermo Fisher Scientific Inc,,fmp:sp500,0000916365
+TSG,Sabre Holdings Corp,2000-03-15,2007-03-30,Annual Re-ranking,Taken Private,fmp:sp500,
+TSLA,"Tesla, Inc.",2020-12-18,,Apartment Investment and Management (Aimco) spun off Apartment Income REIT.,,fmp:sp500,0001318605
+TSN,Tyson Foods,2005-08-10,,Annual Re-ranking,,fmp:sp500,0000100493
+TSS,Total System Services Inc,2007-12-31,2019-09-20,Annual Re-ranking,S&P 500 constituent Global Payments (NYSE: GPN) acquired TSS.,fmp:sp500,
+TT,Trane Technologies,2002-05-10,2009-06-30,Annual Re-ranking,Annual Re-ranking,fmp:sp500,0001466258
+TT,Trane Technologies,2010-11-16,,Reynolds Group Holdings acquired Pactiv.,,fmp:sp500,0001466258
+TTD,"The Trade Desk, Inc.",2025-07-17,,S&P 500 constituent Synopsys Inc. acquired Ansys.,,fmp:sp500,0001671933
+TTWO,Take-Two Interactive,2018-03-19,,Market capitalization change.,,fmp:sp500,0000946581
+TUP,Tupperware Brands Corp,1996-05-30,2004-03-24,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+TWC,Time Warner Cable Inc.,2009-03-27,2016-05-17,Annual Re-ranking,TWC acquired by CHTR,fmp:sp500,
+TWTR,Twitter Inc,2018-06-06,2022-10-31,Bayer acquired Monsanto.,Elon Musk acquired Twitter.,fmp:sp500,
+TWX,Time Warner Inc.,1998-12-31,2018-06-19,Annual Re-ranking,AT&T acquired Time Warner.,fmp:sp500,
+TXN,Texas Instruments,2001-03-12,,,,fmp:sp500,0000097476
+TXT,Textron,1978-10-05,,Annual Re-ranking,,fmp:sp500,0000217346
+TXU,TXU Gas Co.,1957-03-02,2007-10-09,,Annual Re-ranking,fmp:sp500,
+TYC,Tyco International,1957-03-02,2016-09-06,,TYC acquires JCI (and retains JCI ticker).,fmp:sp500,
+TYL,Tyler Technologies,2020-06-19,,Market capitalization change.,,fmp:sp500,0000860731
+UA,Under Armour Inc Class A,2016-04-14,2022-06-17,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+UAL,United Airlines Holdings,2015-09-02,,Hospira taken over,,fmp:sp500,0000100517
+UBER,Uber,2023-12-15,,Market capitalization change.,,fmp:sp500,0001543151
+UCL,Unocal Co,1957-03-02,2005-08-10,,Annual Re-ranking,fmp:sp500,
+UDR,"UDR, Inc.",2016-03-04,,JAB Holding Company acquired Keurig Green Mountain,,fmp:sp500,0000074208
+UHS,Universal Health Services,2014-09-19,,"Market cap changes
+",,fmp:sp500,0000352915
+UIS,Unisys Corp.,1957-03-02,2008-11-10,,Annual Re-ranking,fmp:sp500,
+ULTA,Ulta Beauty,2016-04-15,,Ulta replaces Tenet,,fmp:sp500,0001403568
+UNH,UnitedHealth Group,1994-06-30,,Annual Re-ranking,,fmp:sp500,0000731766
+UNM,Unum Group,1994-03-10,2021-09-17,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+UNP,Union Pacific Corporation,1957-03-04,,,,fmp:sp500,0000100885
+UPC,Union Planters Corp.,1957-03-02,2004-06-30,,Annual Re-ranking,fmp:sp500,
+UPS,United Parcel Service,2002-07-19,,Annual Re-ranking,,fmp:sp500,0001090727
+URBN,Urban Outfitters Inc,2010-02-05,2017-03-19,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+URI,United Rentals,2014-09-19,,Market cap changes,,fmp:sp500,0001067701
+USB,U.S. Bancorp,1998-12-31,,Annual Re-ranking,,fmp:sp500,0000036104
+UST,UST Inc.,1987-04-09,2009-01-05,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+UVN,Univision Comm Inc,2001-02-06,2007-03-28,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+V,Visa Inc.,2009-12-18,,Market capitalization change.,,fmp:sp500,0001403161
+VAL,Valaris plc,2007-01-03,2009-12-22,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+VAL,Valaris plc,2012-07-30,2016-03-29,Goodrich acquired by United Technologies (UTX).,Centene acquired Health Net.,fmp:sp500,
+VAR,Varian Medical Systems Inc,2007-02-09,2021-04-19,Annual Re-ranking,Siemens Healthineers acquired Varian Medical Systems.,fmp:sp500,
+VC,Visteon Corp.,2000-06-28,2005-12-30,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+VEEV,Veeva Systems Inc.,2026-05-07,,Coterra Energy was removed due to its acquisition by Devon Energy.,,fmp:sp500,0001393052
+VFC,VF Corp,1979-05-03,2024-04-02,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+VIAB,Viacom Inc.,2005-12-30,2019-12-04,Annual Re-ranking,CBS acquired Viacom to form ViacomCBS.,fmp:sp500,
+VIAV,VIAVI Solutions Inc,2000-07-26,2013-12-20,Market Cap change.,Market capitalization changes.,fmp:sp500,
+VICI,Vici Properties,2022-06-07,,S&P 500 constituent Oracle Corp. acquired Cerner.,,fmp:sp500,0001705696
+VLO,Valero Energy,2004-04-28,,Annual Re-ranking,,fmp:sp500,0001035002
+VLTO,Veralto,2023-09-29,,S&P 500 and S&P 100 constituent Danaher Corporation spun off Veralto.,,fmp:sp500,0001967680
+VMC,Vulcan Materials Company,1999-06-30,,Annual Re-ranking,,fmp:sp500,0001396009
+VNO,Vornado Realty Trust,2005-08-11,2023-01-05,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+VNT,Vontier Corp.,2020-10-08,2021-03-19,S&P 500 constituent Fortive spun off Vontier.,Market capitalization change.,fmp:sp500,
+VRSK,Verisk Analytics,2015-10-07,,Market capitalization change.,,fmp:sp500,0001442145
+VRSN,Verisign,2006-01-31,,Annual Re-ranking,,fmp:sp500,0001014473
+VRT,Vertiv Holdings Co,2026-03-23,,Market capitalization change.,,fmp:sp500,0001674101
+VRTS,Veritas Software Corp,2000-03-31,2005-07-01,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+VRTX,Vertex Pharmaceuticals,2013-09-20,,Market capitalization change.,,fmp:sp500,0000875320
+VST,Vistra Corp.,2024-05-08,,S&P 500 and S&P 100 constituent ExxonMobil acquired Pioneer Natural Resources.,,fmp:sp500,0001692819
+VTR,Ventas,2009-03-03,,"Capitalization rebalance.
+",,fmp:sp500,0000740260
+VTRS,Viatris,2004-04-22,,Annual Re-ranking,,fmp:sp500,0001792044
+VZ,Verizon,1983-12-01,,Annual Re-ranking,,fmp:sp500,0000732712
+WAB,Wabtec,2019-02-26,,WAB acquired GE transportation business,,fmp:sp500,0000943452
+WAT,Waters Corporation,2001-12-31,,Annual Re-ranking,,fmp:sp500,0001000697
+WB,Wachovia Corp.,1993-09-30,2008-12-31,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+WBA,Walgreens Boots Alliance Inc,1979-10-11,2025-08-27,Annual Re-ranking,Sycamore acquired Walgreen Boots Alliance.,fmp:sp500,
+WBD,Warner Bros. Discovery,2010-02-26,,Annual Re-ranking,,fmp:sp500,0001437107
+WCG,WellCare Health Plans Inc,2018-09-14,2020-01-27,XL acquired by AXA.,S&P 500 constituent Centene Corp. (NYSE: CNC) acquired Wellcare Health Plans.,fmp:sp500,
+WDAY,"Workday, Inc.",2024-12-22,,Market capitalization change.,,fmp:sp500,0001327811
+WDC,Western Digital,2009-06-30,,Annual Re-ranking,,fmp:sp500,0000106040
+WEC,WEC Energy Group,2008-10-30,,Annual Re-ranking,,fmp:sp500,0000783325
+WELL,Welltower,2009-01-29,,Annual Re-ranking,,fmp:sp500,0000766704
+WEN,Wendy's International,1982-03-04,2008-09-29,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+WFC,Wells Fargo,1987-04-23,,Annual Re-ranking,,fmp:sp500,0000072971
+WFM,Whole Foods Market Inc,2005-12-30,2017-08-28,Annual Re-ranking,Amazon acquired Whole Foods Market.,fmp:sp500,
+WFT,Weatherford Int'l plc,2005-07-21,2009-02-25,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+WHR,Whirlpool Corp,1957-03-02,2024-03-15,,Market capitalization change.,fmp:sp500,
+WIN,Windstream Holdings Inc,2006-07-17,2015-04-06,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+WLP,Wellpoint Health Networks Inc,1999-06-08,2004-11-30,Harnischfeger filed for bankruptcy.,Annual Re-ranking,fmp:sp500,
+WM,Waste Management,1998-07-16,,Annual Re-ranking,,fmp:sp500,0000823768
+WMB,Williams Companies,1975-02-06,,Annual Re-ranking,,fmp:sp500,0000107263
+WMT,Walmart,1982-08-19,,Annual Re-ranking,,fmp:sp500,0000104169
+WOR,Worthington Industries Inc,1988-07-14,2004-12-17,Annual Re-ranking,Annual Re-ranking,fmp:sp500,
+WPX,WPX Energy Inc,2011-12-30,2014-03-21,Market capitalization changes,Market capitalization changes,fmp:sp500,
+WRB,W. R. Berkley Corporation,2019-12-04,,CBS acquired Viacom to form ViacomCBS.,,fmp:sp500,0000011544
+WRK,WestRock Co.,1957-03-02,2024-07-05,,Smurfit Kappa and WestRock combined under SW.,fmp:sp500,
+WSM,Williams-Sonoma,2025-03-23,,Market capitalization change.,,fmp:sp500,0000719955
+WST,West Pharmaceutical Services,2020-05-21,,Market capitalization change.,,fmp:sp500,0000105770
+WTW,Willis Towers Watson,2016-01-04,,WSH merges with TW (and renames to WLTW),,fmp:sp500,0001140536
+WU,Western Union Co.,2006-09-29,2021-12-17,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+WWY,Wrigley Co.,1957-03-03,2008-10-03,,Annual Re-ranking,fmp:sp500,
+WY,Weyerhaeuser,1979-10-01,,,,fmp:sp500,0000106535
+WYE,Wyeth Corp.,1957-03-02,2009-10-15,,Annual Re-ranking,fmp:sp500,
+WYND,Wyndham Destinations Inc,2006-07-31,2018-05-30,Annual Re-ranking,Wyndham Worldwide spun off Wyndham Hotels & Resorts (NYSE:WH).,fmp:sp500,
+WYNN,Wynn Resorts,2008-11-13,,Annual Re-ranking,,fmp:sp500,0001174922
+X,USX Corporation,1957-03-02,2014-07-01,,Market capitalization changes,fmp:sp500,
+XEC,Cimarex Energy Co,2014-06-20,2020-03-02,Market capitalization changes,"Gardner Denver acquired Ingersoll Rand's industrial businesses then changed its name to the ""new"" Ingersoll Rand Inc.",fmp:sp500,
+XEL,Xcel Energy,1957-03-04,,,,fmp:sp500,0000072903
+XL,XL Group Ltd,2001-08-31,2018-09-14,Annual Re-ranking,XL acquired by AXA.,fmp:sp500,
+XLNX,Xilinx Inc.,1999-11-05,2022-02-14,Annual Re-ranking,S&P 500 constituent Advanced Micro Devices acquired Xilinx.,fmp:sp500,
+XOM,ExxonMobil,1957-03-04,,,,fmp:sp500,0000034088
+XRAY,Dentsply Sirona Inc,2008-11-13,2024-04-02,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+XRX,Xerox Holdings Corp,1957-03-02,2021-03-19,,Market capitalization change.,fmp:sp500,
+XTO,XTO Energy Inc.,2004-12-28,2010-06-28,Annual Re-ranking,Acquired by ExxonMobil,fmp:sp500,
+XYL,Xylem Inc.,2011-10-31,,Spun off from ITT Corp.,,fmp:sp500,0001524472
+XYZ,"Block, Inc.",2025-07-22,,S&P 500 and S&P 100 constituent Chevron Corp. acquired Hess Corp.,,fmp:sp500,0001512673
+YHOO,Yahoo! Inc,1999-12-07,2017-06-19,Market capitalization change.,VZ acquired YHOO operations; remainder of YHOO converted to closed-end company known as Altaba.,fmp:sp500,
+YUM,Yum! Brands,1997-10-06,,Annual Re-ranking,,fmp:sp500,0001041061
+ZBH,Zimmer Biomet,2001-08-06,,Annual Re-ranking,,fmp:sp500,0001136869
+ZBRA,Zebra Technologies,2019-12-20,,Market capitalization change.,,fmp:sp500,0000877212
+ZION,Zion Bancorp,2001-06-22,2024-03-15,Annual Re-ranking,Market capitalization change.,fmp:sp500,
+ZTS,Zoetis,2013-06-21,,Zoetis spun off by Pfizer,,fmp:sp500,0001555280

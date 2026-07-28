@@ -4,7 +4,15 @@ Genetic programming over the project's **base grammar** (``factors.ops.BASE_OPS`
 + arithmetic).  Deterministic AutoAlpha-style search — random-tree seeding,
 subtree crossover, subtree/point/hoist mutation, hierarchical depth growth —
 scored by the **same** ``research_eval`` harness, NSGA-II controller and prerun
-persistence path the LLM arm uses, so the two are directly comparable.
+persistence path the LLM arm uses, so the two are directly comparable — the same
+four maximised objectives (``marginal_value``, ``independence``, ``parsimony``,
+``structural_novelty``) behind the same coverage/cost gates.
+
+Diversity structure is the one deliberate difference: the LLM arm organises its
+population into knowledge-graph **mechanism groups** each holding several demes,
+which the GP arm cannot do (it has no knowledge graph, so there is nothing to
+group *by*).  The GP therefore runs a single mechanism group containing
+``--islands`` classic flat demes with the usual ring migration.
 
 Like every research run it is a **prerun**: it persists its final Pareto archive
 into ``data/workspaces/<config>/preruns/<name>/`` (plus the evolution state +
@@ -69,19 +77,15 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--seed-pop", type=int, default=40,
                    help="Generation-0 random-tree budget.")
     p.add_argument("--children-per-generation", type=int, default=16)
-    p.add_argument("--islands", type=int, default=1)
+    p.add_argument("--islands", type=int, default=1,
+                   help="Independently evolving demes.  The GP arm has no "
+                        "knowledge graph, so it runs a single mechanism group "
+                        "and these are classic flat islands within it.")
     p.add_argument("--migration-every", type=int, default=5)
     p.add_argument("--seed", type=int, default=0, help="RNG seed.")
     p.add_argument("--depth-schedule", default="3,5",
                    help="Comma list of max tree depths per stage (AutoAlpha "
                         "hierarchical growth), e.g. '3,5,7'.")
-
-    # ── selection (reuses the controller) ──
-    p.add_argument("--selection", choices=["nsga2", "qd"], default="nsga2")
-    p.add_argument("--grid-dims", type=int, choices=[2, 3], default=2)
-    p.add_argument("--cell-capacity", type=int, default=3)
-    p.add_argument("--depth-gamma", type=float, default=0.0)
-    p.add_argument("--reuse-omega", type=float, default=0.0)
 
     # ── GP operator mix ──
     p.add_argument("--p-crossover", type=float, default=0.5)
@@ -93,20 +97,16 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--horizon", type=int, default=6)
     p.add_argument("--is-frac", type=float, default=0.6)
     p.add_argument("--val-frac", type=float, default=0.2)
-    p.add_argument("--cpcv-folds", type=int, default=6, dest="cpcv_groups")
-    p.add_argument("--cpcv-k", type=int, default=2)
-    p.add_argument("--embargo", type=int, default=0)
-    p.add_argument("--cpcv-model", default=None)
-    p.add_argument("--no-cpcv-fast", action="store_true")
+    p.add_argument("--stability-blocks", type=int, default=4,
+                   help="Number of contiguous VAL blocks used to measure the "
+                        "stability of the fixed marginal predictions (default 4; "
+                        "the marginal models are not refitted).")
     p.add_argument("--cutoff-date", default=None)
 
-    # ── fitness axes ──
+    # ── fitness axes (the same four the LLM arm maximises) ──
     p.add_argument("--independence-metric",
                    choices=["residual_ic", "delta_participation"],
                    default="residual_ic")
-    p.add_argument("--regime-kind", choices=["drawdown", "volatility"],
-                   default="drawdown")
-    p.add_argument("--regime-quantile", type=float, default=0.2)
     p.add_argument("--marginal-model", default="gradient_boosting")
     p.add_argument("--gate-turnover", type=float, default=None)
     p.add_argument("--cost-rate", type=float, default=5e-4)
@@ -170,23 +170,12 @@ def main() -> None:
         p_subtree=args.p_subtree,
         p_point=args.p_point,
         p_hoist=args.p_hoist,
-        selection=args.selection,
-        grid_dims=args.grid_dims,
-        cell_capacity=args.cell_capacity,
-        depth_gamma=args.depth_gamma,
-        reuse_omega=args.reuse_omega,
         target_horizon=args.horizon,
         is_frac=args.is_frac,
         val_frac=args.val_frac,
-        cpcv_groups=args.cpcv_groups,
-        cpcv_k=args.cpcv_k,
-        embargo=args.embargo,
-        cpcv_model=args.cpcv_model,
-        cpcv_fast=not args.no_cpcv_fast,
+        stability_blocks=args.stability_blocks,
         cutoff_date=args.cutoff_date,
         independence_metric=args.independence_metric,
-        regime_kind=args.regime_kind,
-        regime_quantile=args.regime_quantile,
         marginal_model=args.marginal_model,
         gate_turnover=args.gate_turnover,
         cost_rate=args.cost_rate,

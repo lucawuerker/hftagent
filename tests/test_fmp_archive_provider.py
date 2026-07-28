@@ -149,6 +149,28 @@ def test_reporting_lag_fallback_when_no_statement_matches(archive):
     assert pd.isna(pe.loc["2020-02-13"])
 
 
+def test_a_filing_date_at_the_period_end_is_rejected_as_a_leak(archive):
+    """FMP backfills old statements with `filingDate == date` — a 2-month leak.
+
+    Observed live: AAPL/ATVI carry `filingDate == date` for every quarter up to
+    1994. Taking it at face value would say the company filed the instant its
+    quarter closed, so it must fall back to the conservative lag instead.
+    """
+    archive.write(
+        ENDPOINTS["income_statement"],
+        [{"date": "2020-09-30", "symbol": "AAA", "filingDate": "2020-09-30",
+          "acceptedDate": "2020-09-30 00:00:00", "fiscalYear": "2020",
+          "period": "Q3", "revenue": 1500.0}],
+        symbol="AAA", period="quarter", merge=True,
+    )
+    revenue = _provider(archive, reporting_lag_days=60).load(
+        fields=["revenue", "close"])["revenue"]["AAA"]
+    # Taking the period-end filing date literally would show Q3 from 2020-10-01;
+    # the guard keeps the previous quarter's number visible until the lag elapses.
+    assert revenue.loc["2020-10-01"] == 1200.0, "period-end filing date taken literally"
+    assert revenue.loc["2020-11-30"] == 1500.0          # 2020-09-30 + 60d
+
+
 def test_earnings_surprise_is_derived_and_stamped_at_the_report(archive):
     panel = _provider(archive).load(fields=["epsSurprise", "revenueSurprise", "close"])
     surprise = panel["epsSurprise"]["AAA"]

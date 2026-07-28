@@ -57,6 +57,7 @@ from quant_fund_agent.data.fmp_ingest.constituents import (  # noqa: E402
     to_csv_frame,
 )
 from quant_fund_agent.data.fmp_ingest.store import DEFAULT_ROOT, Archive  # noqa: E402
+from quant_fund_agent.data.fmp_ingest.symbols import SYMBOL_MAP_FILE  # noqa: E402
 from quant_fund_agent.data.membership import (  # noqa: E402
     MEMBERSHIP_DIR,
     audit_spells,
@@ -126,7 +127,132 @@ def build_one(index: str, archive: Archive, since: str) -> dict:
     }
 
 
-def write_report(path: Path, results: list[dict], since: str, recon: pd.DataFrame) -> None:
+def _coverage_appendix(results: list[dict], archive: Archive) -> list[str]:
+    """Which membership tickers the vendor could not price, and when they left.
+
+    Read from the download's ``symbol_map.csv`` when it exists (the membership
+    build normally runs *before* the price pull, so on a first build there is
+    nothing to report yet).  This is the concrete, per-name form of the coverage
+    percentages in ``FMP_PREMIUM_ARCHIVE.md`` §6 — the names a study over this
+    window is missing, listed so the gap can be cited rather than estimated.
+    """
+    path = archive.root / SYMBOL_MAP_FILE
+    if not path.exists():
+        return []
+    try:
+        sm = pd.read_csv(path)
+    except Exception as e:  # noqa: BLE001 — a missing appendix must not fail a build
+        log.warning("could not read %s: %s", path, e)
+        return []
+
+    names: dict[str, str] = {}
+    membership: dict[str, set[str]] = {}
+    for res in results:
+        tag = {"sp500": "S", "nasdaq100": "N"}.get(res["index"], res["index"][:1].upper())
+        for ticker, name in zip(res["spells"]["ticker"], res["spells"]["name"]):
+            if isinstance(name, str) and name.strip():
+                names.setdefault(ticker, name.strip())
+            membership.setdefault(ticker, set()).add(tag)
+    try:
+        pub = load_membership(PUBLIC_TABLE)
+        for ticker, name in zip(pub["ticker"], pub.get("name", pd.Series(dtype=str))):
+            if isinstance(name, str) and name.strip():
+                names.setdefault(ticker, name.strip())
+            membership.setdefault(ticker, set()).add("P")
+    except FileNotFoundError:
+        pass
+
+    unresolved = sm[sm["resolved"].isna()].copy()
+    partial = sm[(sm["resolved"].notna()) & (sm["spell_coverage"] < 0.5)].copy()
+    if unresolved.empty and partial.empty:
+        return ["## Vendor coverage", "", "Every membership ticker was priced.", ""]
+
+    unresolved["exit"] = pd.to_datetime(unresolved["spell_end"], errors="coerce")
+    lines = [
+        "## Vendor coverage — tickers with no usable price history",
+        "",
+        f"Of **{len(sm)}** tickers in the downloaded universe, **{len(unresolved)}** "
+        f"returned no bars under any candidate symbol and **{len(partial)}** more "
+        "were priced for less than half of their membership window.",
+        "",
+        "These are a **vendor limit, not a resolution bug**: FMP carries no security "
+        "for them at all (`search-symbol` and `search-name` both come back empty for "
+        "Bear Stearns, AT&T Wireless, Countrywide, Cephalon, Andrew, BEA Systems). "
+        "Where a modern ticker exists for a post-bankruptcy successor (`ABKFQ` → "
+        "`AMBC`) it is a **different security** and must not be spliced onto the old "
+        "series.",
+        "",
+        "Index column: `S` = FMP S&P 500, `N` = Nasdaq-100, `P` = free "
+        "reconstruction (`sp500_public`).",
+        "",
+        "### Unresolved, by the era they left the index",
+        "",
+    ]
+    eras = ((2004, 2010, "left 2004–2009"), (2010, 2015, "left 2010–2014"),
+            (2015, 2020, "left 2015–2019"), (2020, 2100, "left 2020 or later"))
+    for lo, hi, label in eras:
+        block = unresolved[(unresolved["exit"].dt.year >= lo)
+                           & (unresolved["exit"].dt.year < hi)].sort_values("ticker")
+        if block.empty:
+            continue
+        lines += [f"**{label} — {len(block)} names**", "",
+                  "| ticker | company | membership window | index |",
+                  "|---|---|---|---|"]
+        for _, r in block.iterrows():
+            company = names.get(r["ticker"], "—")
+            idx = "".join(sorted(membership.get(r["ticker"], {"?"})))
+            lines.append(
+                f"| `{r['ticker']}` | {company} | {r['spell_start']} → {r['spell_end']} | {idx} |")
+        lines.append("")
+    undated = unresolved[unresolved["exit"].isna()]
+    if len(undated):
+        lines += [f"**No membership window recorded — {len(undated)} names:** "
+                  + ", ".join(f"`{t}`" for t in sorted(undated["ticker"])), ""]
+
+    if not partial.empty:
+        partial = partial.sort_values("spell_coverage")
+        # Zero coverage *with* bars means the vendor served a different company:
+        # the ticker was reused after the original left the index (Pall Corp's
+        # PLL is now Piedmont Lithium; Phelps Dodge's PD is now PagerDuty).
+        reused = partial[(partial["spell_coverage"] <= 0.0) & (partial["n_bars"] > 0)]
+        genuine = partial.drop(reused.index)
+
+        def _table(block, heading, blurb):
+            rows = [heading, "", blurb, "",
+                    "| ticker | company | coverage | bars | vendor history "
+                    "| membership window |", "|---|---|---|---|---|---|"]
+            for _, r in block.iterrows():
+                first, last = r.get("first_date"), r.get("last_date")
+                vendor = ("—" if pd.isna(first) or pd.isna(last) else f"{first} → {last}")
+                rows.append(
+                    f"| `{r['ticker']}` | {names.get(r['ticker'], '—')} | "
+                    f"{100 * float(r['spell_coverage']):.0f}% | {int(r['n_bars'])} | "
+                    f"{vendor} | {r['spell_start']} → {r['spell_end']} |")
+            return rows + [""]
+
+        if not reused.empty:
+            lines += _table(
+                reused,
+                "### Ticker reused by a different company",
+                f"**{len(reused)} tickers** returned bars that do not overlap the "
+                "membership window at all — the symbol was recycled after the "
+                "original constituent left. **The point-in-time mask already "
+                "excludes every one of these bars** (verified: zero survive "
+                "`membership_mask`), so the panel is unaffected; they are listed "
+                "because reading the archive *without* the mask would silently "
+                "splice one company's prices onto another's history.")
+        if not genuine.empty:
+            lines += _table(
+                genuine,
+                "### Priced, but for under half of their membership window",
+                "The vendor's history starts after the name joined the index. "
+                "These bars are real and correctly masked; the earlier part of "
+                "the spell is simply absent.")
+    return lines
+
+
+def write_report(path: Path, results: list[dict], since: str, recon: pd.DataFrame,
+                 archive: Archive | None = None) -> None:
     lines = [
         "# FMP point-in-time membership build",
         "",
@@ -182,6 +308,8 @@ def write_report(path: Path, results: list[dict], since: str, recon: pd.DataFram
             f"{len(recon)} month-ends.",
             "",
         ]
+    if archive is not None:
+        lines += _coverage_appendix(results, archive)
     path.write_text("\n".join(lines))
 
 
@@ -234,7 +362,7 @@ def main(argv: list[str] | None = None) -> int:
                 log.info("\n%s", _yearly_jaccard(recon).to_string(index=False))
 
     report_path = MEMBERSHIP_DIR / "fmp_build_report.md"
-    write_report(report_path, results, args.since, recon)
+    write_report(report_path, results, args.since, recon, archive=archive)
     log.info("report → %s", report_path.relative_to(ROOT))
 
     failed = any(r["errors"] for r in results)

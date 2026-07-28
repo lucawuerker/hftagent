@@ -10,11 +10,11 @@ Why this exists
 A prior GP run (``run_gp_factor_mining.py --generations 6 --depth-schedule 3,5,7
 --seed-pop 60``) took **>24 h**.  The evolutionary and GP arms share the
 deterministic evaluation harness byte-for-byte, and code review points at the
-CPCV / marginal-value model-refit loop: per candidate the harness fits
-``_combined_prediction`` twice for the marginal (LOCO) axis plus once per CPCV
-fold (``C(cpcv_groups, cpcv_k)`` folds, with a cached base fit) — i.e. ~17-30
-gradient-boosting fits per candidate, over a flattened ``(dev_bars × n_tickers)``
-matrix whose feature count grows with the archive.  This script *measures* that.
+marginal-value model-refit loop: per candidate the harness fits
+``_combined_prediction`` for the with/without book of the marginal (LOCO) axis
+and again for the jitter/perturbation probes, over a flattened
+``(dev_bars × n_tickers)`` matrix whose feature count grows with the archive.
+This script *measures* that.
 
 It forces the evaluation to run **in-process** (``QF_USE_MCP=0``) so the
 monkeypatches actually time the work, tags every LLM ``invoke`` for token/cost
@@ -197,9 +197,9 @@ def install_instrumentation(meter: LLMMeter) -> None:
         "evaluate_candidate", "evaluate_set",
         "_combined_prediction", "_pooled_ic",
         "_marginal_value", "_residual_ic", "_independence",
-        "_robustness", "_standalone_cpcv_ics", "_refit_cpcv_scores",
+        "_marginal_penalties", "_apply_marginal_penalties",
         "_structural_novelty", "_zoo_dedup", "_turnover_netcost",
-        "_behavior_descriptors", "_stress_mask", "_coverage",
+        "_coverage",
     ]
     for name in harness_fns:
         fn = getattr(harness, name, None)
@@ -447,11 +447,10 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--seed-ideas", type=int, default=6)
     p.add_argument("--seed-papers", type=int, default=0)
     p.add_argument("--horizon", type=int, default=6)
-    p.add_argument("--cpcv-folds", type=int, default=6, dest="cpcv_groups")
-    p.add_argument("--cpcv-k", type=int, default=2)
+    p.add_argument("--stability-blocks", type=int, default=4)
     p.add_argument("--marginal-model", default="gradient_boosting",
-                   help="Combiner for marginal/CPCV fits (try 'ridge' to price the "
-                        "nonlinear-model cost).")
+                   help="Combiner for the marginal (LOCO) fits (try 'ridge' to "
+                        "price the nonlinear-model cost).")
     p.add_argument("--model", default="gpt-4o-mini")
     p.add_argument("--max-cost-usd", type=float, default=3.0,
                    help="Hard cost ceiling; the run aborts if exceeded.")
@@ -505,8 +504,7 @@ def main() -> None:
         n_seed_ideas=args.seed_ideas,
         seed_papers=args.seed_papers,
         target_horizon=args.horizon,
-        cpcv_groups=args.cpcv_groups,
-        cpcv_k=args.cpcv_k,
+        stability_blocks=args.stability_blocks,
         marginal_model=args.marginal_model,
         n_tickers=args.n_tickers,
         out_dir=str(scope.dir / "evolution"),

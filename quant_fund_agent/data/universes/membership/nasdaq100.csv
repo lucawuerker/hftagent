@@ -1,0 +1,346 @@
+ticker,name,start_date,end_date,add_reason,remove_reason,source,cik
+AAL,American Airlines Group Inc,2014-12-22,2020-04-20,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+AAPL,Apple Inc.,1985-01-30,,Annual Re-ranking,,fmp:nasdaq100,0000320193
+ABNB,Airbnb,2021-12-20,,Annual Re-ranking,,fmp:nasdaq100,0001559720
+ADBE,Adobe Inc.,1986-08-19,,Annual Re-ranking,,fmp:nasdaq100,0000796343
+ADI,Analog Devices,2012-12-24,,Annual Re-ranking,,fmp:nasdaq100,0000006281
+ADP,ADP,2008-12-22,,Annual Re-ranking,,fmp:nasdaq100,0000008670
+ADSK,Autodesk,2004-12-20,,Annual Re-ranking,,fmp:nasdaq100,0000769397
+AEO,American Eagle Outfitters Inc,2006-12-12,2007-03-08,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+AEP,American Electric Power,2020-12-21,,Annual Re-ranking,,fmp:nasdaq100,0000004904
+AKAM,Akamai Technologies Inc,2006-04-20,2009-12-21,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+AKAM,Akamai Technologies Inc,2010-12-20,2017-12-08,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+ALAB,"Astera Labs, Inc. Common Stock",2026-06-22,,Quarterly rebalance,,fmp:nasdaq100,0001736297
+ALGN,Align Technology Inc,2017-10-23,2023-12-18,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+ALNY,Alnylam Pharmaceuticals,2025-12-21,,Annual Re-ranking,,fmp:nasdaq100,0001178670
+ALTR,Altera Corp.,1995-07-19,2015-10-07,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+ALXN,Alexion Pharmaceuticals Inc,2011-05-06,2021-07-21,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+AMAT,Applied Materials,1985-01-30,,,,fmp:nasdaq100,0000006951
+AMD,Advanced Micro Devices Inc.,2018-12-24,,Annual Re-ranking,,fmp:nasdaq100,0000002488
+AMGN,Amgen,1989-01-30,,Annual Re-ranking,,fmp:nasdaq100,0000318154
+AMLN,Amylin Pharmaceutical Corp,2006-01-09,2008-12-22,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+AMZN,Amazon,1998-12-21,,Annual Re-ranking,,fmp:nasdaq100,0001018724
+ANSS,ANSYS Inc,2019-12-23,2025-07-28,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+APCC,American Power Conversion Corp,2002-12-23,2007-02-14,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+APOL,Apollo Education Group,2001-12-17,2012-12-24,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+APP,Applovin Corp,2024-11-17,,Annual Re-ranking,,fmp:nasdaq100,0001751008
+ARM,Arm Holdings,2024-06-24,,Annual Re-ranking,,fmp:nasdaq100,0001973239
+ASML,ASML Holding,2017-12-08,,Annual Re-ranking,,fmp:nasdaq100,0000937966
+ATVI,Activision Blizzard Inc,2005-12-19,2023-07-17,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+ATYT,ATI Technologies Inc.,2003-12-22,2006-10-24,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+AVGO,Broadcom Inc.,2011-12-19,,Annual Re-ranking,,fmp:nasdaq100,0001730168
+AXON,Axon Enterprise Inc.,2024-12-22,,Annual Re-ranking,,fmp:nasdaq100,0001069183
+AZN,AstraZeneca plc (ADR),2022-02-22,2026-01-19,Annual Re-ranking,Walmart transferred its listing from NYSE to NASDAQ and replaced AstraZeneca in the index,fmp:nasdaq100,
+BATRA,Liberty Braves Group Series A,2016-04-18,2016-06-20,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+BATRK,Liberty Braves Group Series C,2016-04-18,2016-06-20,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+BB,BlackBerry Ltd,2003-12-22,2012-12-24,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+BBBY,Bed Bath & Beyond Inc,1996-12-23,2016-12-09,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+BEAS,BEA Systems Inc,2000-12-18,2008-04-30,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+BIDU,"Baidu.com, Inc.",2007-12-04,2022-12-19,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+BIIB,Biogen Idec Inc,2000-12-18,2025-12-21,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+BKNG,Booking Holdings,2009-10-29,,Annual Re-ranking,,fmp:nasdaq100,0001075531
+BKR,Baker Hughes,2022-12-19,,Annual Re-ranking,,fmp:nasdaq100,0001701605
+BMC,BMC Software Inc,2009-12-21,2013-07-25,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+BMET,Biomet Inc,1985-01-29,2007-07-12,,Annual Re-ranking,fmp:nasdaq100,
+BMRN,Biomarin Pharmaceutical Inc,2015-07-27,2020-12-21,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+BRCM,Broadcom Corp,2000-10-30,2015-11-11,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+CA,CA Inc,2008-05-19,2018-11-05,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+CCEP,Coca-Cola Europacific Partners,2023-12-18,,Annual Re-ranking,,fmp:nasdaq100,0001650107
+CDNS,Cadence Design Systems,2005-12-19,2008-12-22,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,0000813672
+CDNS,Cadence Design Systems,2017-12-08,,Annual Re-ranking,,fmp:nasdaq100,0000813672
+CDW,CDW Corp,2019-12-23,2021-12-20,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+CDW,CDW Corp,2023-12-18,2025-12-21,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+CDWC,CDW Corp,2001-12-24,2007-10-08,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+CEG,Constellation Energy,2022-02-02,,Annual Re-ranking,,fmp:nasdaq100,0001868275
+CELG,Celgene Corp,2005-07-01,2019-11-21,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+CEPH,Cephalon Inc,2001-12-24,2004-12-20,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+CEPH,Cephalon Inc,2007-06-01,2011-07-15,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+CERN,Cerner Corp,2009-07-17,2021-12-20,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+CHIR,Chiron Corp,1985-01-29,2006-04-20,,Annual Re-ranking,fmp:nasdaq100,
+CHKP,Check Point Ltd.,2000-12-18,2021-12-20,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+CHRW,C.H. Robinson Worldwide Inc,2002-12-23,2015-12-21,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+CHTR,Charter Communications Inc,2013-07-25,2026-06-22,Annual Re-ranking,Quarterly rebalance,fmp:nasdaq100,
+CKFR,Checkfree Corp,2005-12-19,2007-12-04,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+CMCSA,Comcast,2002-11-19,,Annual Re-ranking,,fmp:nasdaq100,0001166691
+CMCSK,Comcast Corp,2014-12-22,2015-12-15,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+CMVT,Comverse Technology Inc,1999-01-13,2007-02-01,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+COST,Costco,1988-12-31,,Annual Re-ranking,,fmp:nasdaq100,0000909832
+CPRT,Copart,2019-12-23,,Annual Re-ranking,,fmp:nasdaq100,0000900075
+CPWR,Compuware Corp,1985-01-29,2004-12-20,,Annual Re-ranking,fmp:nasdaq100,
+CRWD,CrowdStrike,2021-08-26,,Annual Re-ranking,,fmp:nasdaq100,0001535527
+CRWV,"CoreWeave, Inc. Class A Common Stock",2026-06-22,,Quarterly rebalance,,fmp:nasdaq100,0001769628
+CSCO,Cisco,2009-06-07,,Annual Re-ranking,,fmp:nasdaq100,0000858877
+CSGP,CoStar Group,2019-12-23,2020-07-20,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+CSGP,CoStar Group,2022-12-19,2026-05-17,Annual Re-ranking,CoStar did not meet the minimum monthly weight requirements.,fmp:nasdaq100,
+CSX,CSX Corporation,2016-02-22,,Annual Re-ranking,,fmp:nasdaq100,0000277948
+CTAS,Cintas,1985-01-31,2011-04-04,,Annual Re-ranking,fmp:nasdaq100,0000723254
+CTAS,Cintas,2016-12-09,,Annual Re-ranking,,fmp:nasdaq100,0000723254
+CTRX,Catamaran Corp.,2012-12-24,2015-07-29,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+CTSH,Cognizant Technology Solutions Corp,2004-12-29,2026-06-22,Annual Re-ranking,Quarterly rebalance,fmp:nasdaq100,
+CTXS,Citrix Systems Inc,1998-01-07,2020-12-21,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+DASH,DoorDash,2023-12-18,,Annual Re-ranking,,fmp:nasdaq100,0001792789
+DDOG,Datadog,2021-12-20,,Annual Re-ranking,,fmp:nasdaq100,0001561550
+DELL,"Dell, Inc.",1985-01-29,2013-10-29,,Annual Re-ranking,fmp:nasdaq100,
+DISCA,Discovery Communications Inc Series A,2005-12-19,2008-12-22,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+DISCA,Discovery Communications Inc Series A,2012-12-24,2017-12-08,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+DISCK,Discovery Communications Series C,2014-12-22,2017-12-08,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+DISH,DISH Network Corp,1999-12-20,2010-12-20,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+DISH,DISH Network Corp,2013-12-23,2018-07-23,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+DLTR,Dollar Tree Inc,2002-06-03,2005-12-19,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+DLTR,Dollar Tree Inc,2010-12-20,2024-11-17,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+DOCU,DocuSign Inc,2020-06-22,2022-12-19,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+DTV,DIRECTV,2008-04-30,2015-07-24,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+DXCM,DexCom,2020-04-20,,Annual Re-ranking,,fmp:nasdaq100,0001093557
+EA,Electronic Arts,1985-01-29,2012-12-24,,Annual Re-ranking,fmp:nasdaq100,0000712515
+EA,Electronic Arts,2014-12-22,,Annual Re-ranking,,fmp:nasdaq100,0000712515
+EBAY,eBay Inc,1999-10-06,2023-12-18,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+ENDP,Endo Int'l plc,2015-12-21,2016-07-18,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+ENPH,Enphase Energy Inc,2022-11-21,2023-12-18,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+EQIX,Equinix Inc,2012-12-24,2015-03-23,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+ERIC,Ericsson Telephone Company,2004-12-20,2007-12-24,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+ESRX,Express Scripts Holding Co,2001-12-24,2018-12-24,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+EXC,Exelon,2019-11-21,,Annual Re-ranking,,fmp:nasdaq100,0001109357
+EXPD,Expeditors Int'l of Washington Inc,2002-12-23,2015-12-21,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+EXPE,Expedia Inc,2005-12-19,2014-12-22,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+EXPE,Expedia Inc,2015-12-21,2020-12-21,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+FANG,Diamondback Energy,2022-12-19,,Annual Re-ranking,,fmp:nasdaq100,0001539838
+FAST,Fastenal,2002-12-23,,Annual Re-ranking,,fmp:nasdaq100,0000815556
+FER,Ferrovial SE,2025-12-21,,Annual Re-ranking,,fmp:nasdaq100,0001468522
+FFIV,F5 Networks Inc,2011-04-04,2014-12-22,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+FHCC,First Health Group Corp,2002-12-23,2004-12-20,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+FISV,Fiserv Inc,1996-12-23,2023-06-07,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+FLEX,Flex Ltd,2000-12-18,2012-12-24,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+FLIR,FLIR Systems Inc,2008-07-21,2011-12-19,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+FMCN,Focus Media Holding,2007-12-24,2009-01-20,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+FOSL,Fossil Group,2011-12-19,2013-12-23,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+FOX,Fox Corp,2014-12-22,2021-12-20,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+FOXA,21st Century Fox Class A,2009-01-20,2021-12-20,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+FSLR,First Solar Inc,2008-12-22,2012-04-23,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+FTNT,Fortinet,2021-12-20,,Annual Re-ranking,,fmp:nasdaq100,0001262039
+FWLT,Foster Wheeler AG,2007-07-12,2010-12-20,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+GEHC,GE HealthCare,2023-06-07,,Annual Re-ranking,,fmp:nasdaq100,0001932393
+GENZ,Genzyme Corp,1985-01-29,2011-05-06,,Annual Re-ranking,fmp:nasdaq100,
+GFS,GlobalFoundries Inc,2022-12-19,2025-12-21,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+GILD,Gilead Sciences,2001-10-05,,Annual Re-ranking,,fmp:nasdaq100,0000882095
+GMCR,Keurig Green Mountain Inc,2011-05-27,2012-12-24,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+GMCR,Keurig Green Mountain Inc,2013-08-22,2015-12-21,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+GNTX,Gentex Corp,2002-12-23,2004-12-20,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+GOLD,Randgold Resources,2011-12-19,2013-11-18,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+GOOG,Alphabet Inc. (Class C),2014-04-03,,Annual Re-ranking,,fmp:nasdaq100,0001652044
+GOOGL,Alphabet Inc. (Class A),2005-12-19,,Annual Re-ranking,,fmp:nasdaq100,0001652044
+GRMN,Garmin Ltd,2003-12-22,2015-12-21,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+HAS,Hasbro Inc,2016-12-09,2019-12-23,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+HOLX,Hologic Inc,2007-12-24,2010-12-20,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+HOLX,Hologic Inc,2016-12-09,2018-12-24,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+HON,Honeywell,2021-07-21,,Annual Re-ranking,,fmp:nasdaq100,0000773840
+HSIC,Henry Schein Inc,2002-12-23,2004-12-20,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+HSIC,Henry Schein Inc,2007-10-02,2019-12-23,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+IAC,IAC/InterActiveCorp,1998-09-15,2009-12-21,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+IDXX,Idexx Laboratories,2017-03-20,,Annual Re-ranking,,fmp:nasdaq100,0000874716
+ILMN,Illumina Inc,2008-12-22,2011-12-19,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+ILMN,Illumina Inc,2013-12-23,2024-12-22,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+INCY,Incyte Corp,2015-10-07,2021-12-20,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+INFY,Infosys Ltd,2006-12-18,2012-12-12,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+INSM,Insmed Incorporated,2025-12-21,2026-06-22,Annual Re-ranking,Quarterly rebalance,fmp:nasdaq100,
+INTC,Intel,1985-01-30,,Annual Re-ranking,,fmp:nasdaq100,0000050863
+INTU,Intuit,1998-12-21,,Annual Re-ranking,,fmp:nasdaq100,0000896878
+ISIL,Intersil Corp,2003-12-22,2005-12-19,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+ISRG,Intuitive Surgical,2006-02-01,,Annual Re-ranking,,fmp:nasdaq100,0001035267
+JAVA,Sun Microsystems,1985-01-29,2009-07-17,,Annual Re-ranking,fmp:nasdaq100,
+JBHT,J. B. Hunt Transport Services Inc,2008-12-22,2010-12-20,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+JBHT,J. B. Hunt Transport Services Inc,2017-02-07,2019-12-23,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+JD,JD.com,2015-07-29,2023-12-18,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+JDSU,JDS Uniphase Corp.,1999-05-05,2006-12-18,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+JNPR,Juniper Networks Inc,2000-09-07,2009-10-29,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+JOY,Joy Global Inc,2006-01-04,2011-12-06,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+KDP,Keurig Dr Pepper,2020-10-19,,Annual Re-ranking,,fmp:nasdaq100,0001418135
+KHC,Kraft Heinz,2013-03-18,,Annual Re-ranking,,fmp:nasdaq100,0001637459
+KLAC,KLA Corporation,1995-02-27,2016-02-22,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,0000319201
+KLAC,KLA Corporation,2016-12-09,,Annual Re-ranking,,fmp:nasdaq100,0000319201
+LAMR,Lamar Advertising Co,2002-12-23,2008-12-22,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+LBTYA,Liberty Global PLC Class A,2004-12-20,2009-12-21,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+LBTYA,Liberty Global PLC Class A,2012-12-24,2020-12-21,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+LBTYK,Liberty Global plc Class C,2014-12-22,2020-12-21,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+LCID,Lucid Group Inc,2021-12-20,2023-12-18,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+LIFE,Life Technologies,2001-12-24,2005-12-19,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+LIFE,Life Technologies,2008-12-22,2013-08-22,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+LILA,Liberty Global plc LiLAC Class A,2015-07-01,2015-12-21,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+LILAK,Liberty Global plc LiLAC Class C,2015-07-01,2015-12-21,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+LIN,Linde plc,2024-03-18,,Annual Re-ranking,,fmp:nasdaq100,0001707925
+LITE,Lumentum Holdings Inc.,2026-05-17,,CoStar did not meet the minimum monthly weight requirements.,,fmp:nasdaq100,0001633978
+LLTC,Linear Technology Corp,1985-01-29,2016-10-19,,Annual Re-ranking,fmp:nasdaq100,
+LMCA,Liberty Media Class A,2012-12-24,2013-01-15,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+LMCA,Liberty Media Class A,2013-06-05,2016-06-20,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+LMCK,Liberty Media C,2014-12-22,2016-06-20,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+LNCR,Lincare Holdings Inc,2002-07-24,2006-12-18,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+LOGI,Logitech International SA,2007-02-01,2010-12-20,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+LRCX,Lam Research,2003-12-22,2012-12-24,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,0000707549
+LRCX,Lam Research,2014-12-22,,Annual Re-ranking,,fmp:nasdaq100,0000707549
+LULU,Lululemon Athletica Inc,2018-12-24,2025-12-21,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+LVLT,Level 3 Comm's Inc,2003-12-22,2005-12-19,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+LVLT,Level 3 Comm's Inc,2006-12-18,2008-12-22,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+LVNTA,Liberty Ventures,2014-11-06,2018-03-08,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+LWIN,Leap Wireless Int'l Inc,2007-10-08,2008-12-22,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+MAR,Marriott International,2013-11-18,,Annual Re-ranking,,fmp:nasdaq100,0001048286
+MAT,Mattel Inc,2009-12-21,2017-10-23,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+MCHP,Microchip Technology,1997-06-04,2013-12-23,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,0000827054
+MCHP,Microchip Technology,2016-07-18,,Annual Re-ranking,,fmp:nasdaq100,0000827054
+MCIP,"MCI, Inc.",2004-12-20,2006-01-09,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+MDB,MongoDB Inc,2023-12-18,2025-05-18,Annual Re-ranking,MongoDB did not meet the minimum monthly weight requirements.,fmp:nasdaq100,
+MDLZ,Mondelez International,2012-07-23,,Annual Re-ranking,,fmp:nasdaq100,0001103982
+MEDI,Medimmune Inc,1999-12-20,2007-06-01,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+MELI,MercadoLibre,2017-06-19,,Annual Re-ranking,,fmp:nasdaq100,0001099590
+MERQ,Mercury Interactive Corp,2000-12-18,2006-01-04,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+META,Meta Platforms,2012-12-12,,Annual Re-ranking,,fmp:nasdaq100,0001326801
+MICC,Millicom Int'l Cellular,2006-05-08,2011-05-27,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+MLNM,Millennium Pharmaceuticals Inc,2000-12-18,2005-12-19,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+MNST,Monster Beverage,2007-12-24,2009-12-21,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,0000865752
+MNST,Monster Beverage,2011-12-19,,Annual Re-ranking,,fmp:nasdaq100,0000865752
+MOLX,Molex Inc,1985-01-29,2005-12-19,,Annual Re-ranking,fmp:nasdaq100,
+MPWR,Monolithic Power Systems,2025-12-21,,Annual Re-ranking,,fmp:nasdaq100,0001280452
+MRNA,Moderna Inc,2020-07-20,2024-12-22,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+MRVL,Marvell Technology,2003-12-22,2012-12-24,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,0001835632
+MRVL,Marvell Technology,2020-12-21,,Annual Re-ranking,,fmp:nasdaq100,0001835632
+MSFT,Microsoft,1986-03-12,,Annual Re-ranking,,fmp:nasdaq100,0000789019
+MSTR,MicroStrategy Inc.,2024-12-22,,Annual Re-ranking,,fmp:nasdaq100,0001050446
+MTCH,"Match Group, Inc",2020-12-21,2022-12-19,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+MU,Micron Technology,2010-12-20,,Annual Re-ranking,,fmp:nasdaq100,0000723125
+MWW,Monster Worldwide Inc,2005-12-19,2008-11-10,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+MXIM,Maxim Integrated Products Inc,1995-12-18,2007-10-02,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+MXIM,Maxim Integrated Products Inc,2008-12-22,2014-12-22,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+MXIM,Maxim Integrated Products Inc,2015-12-21,2021-08-26,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+NAN,,1985-01-29,2026-07-06,,"SpaceX was added to the index on an accelerated basis, due to updated rules aimed at incorporating newly public megacap companies at a faster pace.",fmp:nasdaq100,
+NBIS,Nebius Group N.V.,2026-06-22,,Quarterly rebalance,,fmp:nasdaq100,0001513845
+NCLH,Norwegian Cruise Line Holdings Ltd,2015-12-21,2017-12-08,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+NFLX,Netflix,2010-12-20,2012-12-24,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,0001065280
+NFLX,Netflix,2013-06-06,,Annual Re-ranking,,fmp:nasdaq100,0001065280
+NIHD,NII Holdings Inc,2005-12-19,2011-12-19,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+NLOK,NortonLifeLock Inc,2001-12-24,2019-12-23,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+NTAP,NetApp Inc,1999-12-20,2016-12-09,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+NTAP,NetApp Inc,2018-12-24,2020-08-24,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+NTES,NetEase Inc,2016-03-16,2022-12-19,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+NUAN,Nuance Comm's Inc,2011-12-19,2013-12-23,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+NVDA,Nvidia,2001-05-31,2004-12-20,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,0001045810
+NVDA,Nvidia,2005-12-19,,Annual Re-ranking,,fmp:nasdaq100,0001045810
+NVLS,Novellus Systems Inc.,2001-03-13,2005-12-19,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+NXPI,NXP Semiconductors,2013-12-23,2017-02-07,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,0001413447
+NXPI,NXP Semiconductors,2018-11-05,,Annual Re-ranking,,fmp:nasdaq100,0001413447
+NXTL,Nextel Communications Inc,1985-01-29,2005-08-15,,Annual Re-ranking,fmp:nasdaq100,
+ODFL,Old Dominion Freight Line,2022-01-24,,Annual Re-ranking,,fmp:nasdaq100,0000878927
+OKTA,Okta Inc,2020-12-21,2022-11-21,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+ON,ON Semiconductor Corp,2023-06-20,2025-12-21,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+ORCL,Oracle Corp,1985-01-29,2013-07-15,,Annual Re-ranking,fmp:nasdaq100,
+ORLY,O'Reilly Automotive,2008-12-22,,Annual Re-ranking,,fmp:nasdaq100,0000898173
+PANW,Palo Alto Networks,2021-12-20,,Annual Re-ranking,,fmp:nasdaq100,0001327567
+PAYX,Paychex,1993-12-31,,Annual Re-ranking,,fmp:nasdaq100,0000723531
+PCAR,Paccar,1985-01-30,,Annual Re-ranking,,fmp:nasdaq100,0000075362
+PDCO,Patterson Companies,2002-12-16,2010-12-20,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+PDD,PDD Holdings,2020-08-24,,Annual Re-ranking,,fmp:nasdaq100,0001737806
+PEP,PepsiCo,2018-07-23,,Annual Re-ranking,,fmp:nasdaq100,0000077476
+PETM,PetSmart Inc,2002-12-23,2008-12-22,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+PIXR,Pixar Inc,2002-12-23,2006-05-08,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+PLTR,Palantir Technologies,2024-12-22,,Annual Re-ranking,,fmp:nasdaq100,0001321655
+PPDI,Pharmaceutical Product Development,2008-12-22,2009-12-21,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+PRDO,Perdoceo Education Corp,2003-12-22,2005-12-19,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+PRGO,Perrigo Company Plc,2011-12-06,2013-06-06,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+PSFT,People Soft Inc,1995-12-18,2004-12-29,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+PTEN,,2002-12-23,2004-12-20,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+PTEN,,2005-12-19,2007-12-24,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+PTON,"Peloton Interactive, Inc",2020-12-21,2022-01-24,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+PYPL,PayPal,2015-11-11,,Annual Re-ranking,,fmp:nasdaq100,0001633917
+QCOM,Qualcomm,1985-06-30,,Annual Re-ranking,,fmp:nasdaq100,0000804328
+QGEN,Qiagen NV,2009-12-21,2011-12-19,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+QLGC,QLogic Corp,1999-12-20,2005-12-19,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+QRTEA,"Qurate Retail, Inc",2006-10-24,2018-12-24,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+REGN,Regeneron Pharmaceuticals,2012-12-24,,Annual Re-ranking,,fmp:nasdaq100,0000872589
+RHT,Red Hat Inc,2005-12-19,2006-12-12,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+RIVN,Rivian Automotive Inc,2022-12-19,2023-06-20,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+RKLB,"Rocket Lab USA, Inc.",2026-06-22,,Quarterly rebalance,,fmp:nasdaq100,0001819994
+ROP,Roper Technologies,2023-12-18,,Annual Re-ranking,,fmp:nasdaq100,0000882835
+ROST,Ross Stores,2002-12-23,2007-12-24,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,0000745732
+ROST,Ross Stores,2008-12-22,,Annual Re-ranking,,fmp:nasdaq100,0000745732
+RYAAY,Ryanair Holdings Plc,2002-12-23,2004-12-20,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+RYAAY,Ryanair Holdings Plc,2007-02-14,2009-12-21,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+SANM,Sanmina Corp,1998-12-30,2005-12-19,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+SBAC,SBA Comm's Corp,2012-12-24,2017-03-20,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+SBUX,Starbucks,1996-11-25,,Annual Re-ranking,,fmp:nasdaq100,0000829224
+SEBL,Siebel Systems Inc,1999-06-25,2006-02-01,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+SEPR,Sepracor Inc,2005-08-15,2007-12-24,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+SGEN,Seagen Inc,2019-12-23,2023-12-18,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+SHLD,Sears Holdings Corp,2004-08-19,2013-12-23,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+SHOP,Shopify,2025-05-18,,MongoDB did not meet the minimum monthly weight requirements.,,fmp:nasdaq100,0001594805
+SHPG,Shire PLC,2016-10-19,2018-12-24,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+SIAL,,2002-07-15,2015-07-31,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+SIRI,Sirius XM Holdings Inc,2004-12-20,2008-12-22,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+SIRI,Sirius XM Holdings Inc,2011-07-15,2024-06-24,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+SMCI,Super Micro Computer Inc,2024-07-21,2024-12-22,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+SNDK,Sandisk Corporation,2003-11-13,2008-12-22,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,0002023554
+SNDK,Sandisk Corporation,2009-12-21,2016-03-16,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,0002023554
+SNDK,Sandisk Corporation,2026-04-19,,Atlassian did not meet the minimum monthly weight requirements.,,fmp:nasdaq100,0002023554
+SNPS,Synopsys,2001-12-24,2005-12-19,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,0000883241
+SNPS,Synopsys,2017-12-08,,Annual Re-ranking,,fmp:nasdaq100,0000883241
+SOLS,Solstice Advanced Materials,2025-10-29,2025-11-05,Solstice Advanced Materials was spun off from Honeywell,Solstice Advanced Materials did not meet the minimum monthly weight requirements,fmp:nasdaq100,
+SPCX,Space Exploration Technologies Corp.,2026-07-06,,"SpaceX was added to the index on an accelerated basis, due to updated rules aimed at incorporating newly public megacap companies at a faster pace.",,fmp:nasdaq100,0001181412
+SPLK,Splunk Inc,2019-12-23,2022-12-19,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+SPLK,Splunk Inc,2023-12-18,2024-03-18,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+SPLS,Staples Inc,1985-01-29,2015-12-21,,Annual Re-ranking,fmp:nasdaq100,
+SPOT,Panamsat Inc,1997-10-15,2004-08-19,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+SRCL,Stericycle Inc,2007-12-24,2016-12-09,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+SSCCQ,Smurfit Stone Corp,1997-07-24,2005-12-19,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+STLD,Steel Dynamics Inc,2007-12-24,2009-12-21,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+STRZA,Starz Series,2013-01-15,2013-03-18,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+STX,Seagate Technology Holdings,2008-11-10,2018-12-24,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,0001137789
+STX,Seagate Technology Holdings,2025-12-21,,Annual Re-ranking,,fmp:nasdaq100,0001137789
+SWKS,Skyworks Solutions Inc,2015-08-03,2022-12-19,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+TCOM,Ctrip.com International,2010-12-20,2012-07-23,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+TCOM,Ctrip.com International,2015-12-21,2021-12-20,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+TEAM,Atlassian Corporation PLC,2020-12-21,2026-04-19,Annual Re-ranking,Atlassian did not meet the minimum monthly weight requirements.,fmp:nasdaq100,
+TER,"Teradyne, Inc.",2026-06-22,,Quarterly rebalance,,fmp:nasdaq100,0000097210
+TEVA,Teva Pharmaceutical Industries Ltd,2002-11-07,2012-05-30,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+TLAB,Tellabs Inc,1985-01-29,2008-05-19,,Annual Re-ranking,fmp:nasdaq100,
+TMUS,T-Mobile US,2015-12-21,,Annual Re-ranking,,fmp:nasdaq100,0001283699
+TRI,Thomson Reuters Corporation,2025-07-28,,Annual Re-ranking,,fmp:nasdaq100,0001075124
+TRIP,TripAdvisor Inc,2013-12-23,2017-04-24,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+TSCO,Tractor Supply Co,2013-12-23,2017-12-08,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+TSLA,"Tesla, Inc.",2013-07-15,,Annual Re-ranking,,fmp:nasdaq100,0001318605
+TTD,Trade Desk Inc,2023-07-17,2025-12-21,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+TTWO,Take-Two Interactive,2017-12-08,2020-12-21,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,0000946581
+TTWO,Take-Two Interactive,2023-12-18,,Annual Re-ranking,,fmp:nasdaq100,0000946581
+TXN,Texas Instruments,2012-04-23,,Annual Re-ranking,,fmp:nasdaq100,0000097476
+UAL,UAL Corp.,2007-03-08,2008-07-21,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+UAL,UAL Corp.,2018-12-24,2020-06-22,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+ULTA,Ulta Salon Cosmetics and Fragrance Inc,2015-12-21,2020-12-21,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+URBN,Urban Outfitters Inc,2005-12-19,2006-12-18,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+URBN,Urban Outfitters Inc,2008-12-22,2011-12-19,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+VEON,VEON Ltd,2013-10-29,2015-12-21,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+VIAB,Viacom Inc Class A,2012-05-30,2017-12-08,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+VMED,Virgin Media Inc,2004-12-20,2008-12-22,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+VMED,Virgin Media Inc,2009-12-21,2013-06-05,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+VOD,Vodafone Group plc,2009-12-21,2018-12-24,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+VRSK,Verisk Analytics Inc,2012-12-24,2026-06-22,Annual Re-ranking,Quarterly rebalance,fmp:nasdaq100,
+VRSN,Verisign Inc,2000-06-09,2012-12-24,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+VRSN,Verisign Inc,2018-12-24,2022-12-19,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+VRTS,VERITAS Software Corp.,1998-12-21,2005-07-01,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+VRTX,Vertex Pharmaceuticals,2006-12-18,,Annual Re-ranking,,fmp:nasdaq100,0000875320
+VSNT,,1985-01-29,2025-01-08,,Versant did not meet the minimum monthly weight requirements,fmp:nasdaq100,
+VTRS,Viatris Inc,2009-12-21,2019-12-23,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+WBA,Walgreens Boots Alliance Inc,2015-03-23,2024-07-21,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+WBD,Warner Bros. Discovery,2022-12-19,,Annual Re-ranking,,fmp:nasdaq100,0001437107
+WCRX,Warner Chilcott PLC,2008-12-22,2012-12-24,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+WDAY,"Workday, Inc.",2017-12-08,,Annual Re-ranking,,fmp:nasdaq100,0001327811
+WDC,Western Digital,2012-12-24,2020-10-19,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,0000106040
+WDC,Western Digital,2025-12-21,,Annual Re-ranking,,fmp:nasdaq100,0000106040
+WFM,Whole Foods Market Inc,2002-12-23,2008-12-22,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+WFM,Whole Foods Market Inc,2010-12-20,2016-12-09,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+WLTW,Willis Towers Watson,2018-12-24,2020-04-30,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+WMT,Walmart,2026-01-19,,Walmart transferred its listing from NYSE to NASDAQ and replaced AstraZeneca in the index,,fmp:nasdaq100,0000104169
+WYNN,Wynn Resorts Ltd,2004-12-20,2015-12-21,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+WYNN,Wynn Resorts Ltd,2017-04-24,2019-12-23,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+XEL,Xcel Energy,2018-11-19,,Annual Re-ranking,,fmp:nasdaq100,0000072903
+XLNX,Xilinx Inc,1985-01-29,2022-02-22,,Annual Re-ranking,fmp:nasdaq100,
+XMSR,XM Satellite Radio Holdings,2004-12-20,2007-12-24,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+XRAY,Dentsply Sirona Inc,2002-12-23,2013-12-23,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+XRAY,Dentsply Sirona Inc,2016-06-20,2018-11-19,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+YHOO,Yahoo! Inc,1998-09-16,2017-06-19,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+ZM,Zoom Video Communications Inc,2020-04-30,2023-12-18,Annual Re-ranking,Annual Re-ranking,fmp:nasdaq100,
+ZS,Zscaler Inc,2021-12-20,2026-06-22,Annual Re-ranking,Quarterly rebalance,fmp:nasdaq100,

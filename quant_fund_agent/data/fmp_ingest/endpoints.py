@@ -52,6 +52,12 @@ class Endpoint:
     params: dict[str, str | int] = field(default_factory=dict)
     #: column used as the parquet index (``None`` → RangeIndex, e.g. profile)
     date_field: str | None = "date"
+    #: how repeated index stamps are resolved when writing/merging.
+    #: ``"date"`` — one row per date, latest wins (statements, prices: a date IS
+    #: the key).  ``"row"`` — a date may legitimately repeat, so only *identical*
+    #: rows collapse (index change logs: several names enter and leave on the
+    #: same effective date, and dropping all but one silently loses events).
+    dedup: str = "date"
     #: chunk ``from``/``to`` into N-year requests (``None`` → single request)
     window_years: int | None = None
     #: whether the endpoint accepts ``from``/``to`` at all
@@ -251,6 +257,7 @@ _INDEX: tuple[Endpoint, ...] = (
         group="index",
         dest="index/historical-sp500-constituent",
         kind="global",
+        dedup="row",
         note="dated add/remove change log — backward-walked into membership spells",
     ),
     Endpoint(
@@ -268,6 +275,7 @@ _INDEX: tuple[Endpoint, ...] = (
         group="index",
         dest="index/historical-nasdaq-constituent",
         kind="global",
+        dedup="row",
     ),
     Endpoint(
         name="delisted_companies",
@@ -287,6 +295,7 @@ _INDEX: tuple[Endpoint, ...] = (
         dest="index/symbol-change",
         kind="global",
         limit=1000,
+        dedup="row",
         note="ticker renames — keeps a renamed name one continuous spell",
     ),
 )

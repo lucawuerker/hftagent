@@ -105,8 +105,23 @@ def coerce_frame(rows: list[dict]) -> pd.DataFrame:
     return df
 
 
-def _index_frame(df: pd.DataFrame, date_field: str | None) -> pd.DataFrame:
-    """Set/sort the date index and drop duplicate stamps (keep the latest row)."""
+def _dedup(df: pd.DataFrame, how: str) -> pd.DataFrame:
+    """Collapse repeats according to the endpoint's ``dedup`` policy.
+
+    ``"date"`` treats the stamp as the primary key (a price bar, a fiscal
+    period); ``"row"`` keeps every distinct row on a date, which index change
+    logs need — several names can enter and leave on one effective date, and
+    keeping only the last silently drops the rest of that day's events.
+    """
+    if df.empty:
+        return df
+    if how == "row":
+        return df[~df.reset_index().duplicated().to_numpy()]
+    return df[~df.index.duplicated(keep="last")]
+
+
+def _index_frame(df: pd.DataFrame, date_field: str | None, dedup: str = "date") -> pd.DataFrame:
+    """Set/sort the date index and collapse repeats per the dedup policy."""
     if df.empty or not date_field or date_field not in df.columns:
         return df
     out = df.copy()
@@ -115,7 +130,7 @@ def _index_frame(df: pd.DataFrame, date_field: str | None) -> pd.DataFrame:
     if out.empty:
         return out
     out = out.set_index(date_field).sort_index()
-    return out[~out.index.duplicated(keep="last")]
+    return _dedup(out, dedup)
 
 
 class Archive:
@@ -215,13 +230,12 @@ class Archive:
         endpoints, whose chunks arrive as separate requests.  Returns
         ``(n_rows, first_date, last_date)``.
         """
-        df = _index_frame(coerce_frame(rows), endpoint.date_field)
+        df = _index_frame(coerce_frame(rows), endpoint.date_field, endpoint.dedup)
         path = self.path_for(endpoint, symbol, period)
         if merge and path.exists() and endpoint.date_field:
             existing = self.read_path(path)
             if existing is not None and not existing.empty:
-                df = pd.concat([existing, df])
-                df = df[~df.index.duplicated(keep="last")].sort_index()
+                df = _dedup(pd.concat([existing, df]).sort_index(), endpoint.dedup)
         if df.empty:
             return 0, None, None
         path.parent.mkdir(parents=True, exist_ok=True)

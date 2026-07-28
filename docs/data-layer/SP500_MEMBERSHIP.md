@@ -178,8 +178,17 @@ model-comparison harness inherits it too. No per-agent or per-loop change needed
   as a one-segment discontinuity. The build report lists every applied/detected
   rename so the curated map can be extended.
 - **No stable security master** (PERMNO/FIGI) — identity is the (normalized)
-  ticker, so a ticker *reused* by a different company over time is a theoretical
-  edge case (none observed in the S&P 500 2010+ set).
+  ticker, so a ticker can be *reused* by a different company after the original
+  leaves. This is **not** a theoretical edge case: measuring the premium archive
+  against the 2004+ table found **95 recycled tickers** — Pall Corp's `PLL` is now
+  Piedmont Lithium, Phelps Dodge's `PD` is now PagerDuty, Bank One's `ONE` and
+  National Semiconductor's `NSM` likewise. **The per-bar membership mask already
+  neutralises all of them** (verified: zero of those bars survive
+  `membership_mask`, because the successor's history lies entirely outside the
+  original's spell), so any consumer going through `load_panel` is safe. Reading
+  the vendor archive *without* the mask is what would silently splice one
+  company's prices onto another's. Every instance is listed in
+  `universes/membership/fmp_build_report.md`.
 - **`auto_adjust` look-ahead** in yfinance prices is a pre-existing, documented
   data-layer limitation, orthogonal to membership.
 

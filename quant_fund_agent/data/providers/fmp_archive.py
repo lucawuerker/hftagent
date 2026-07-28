@@ -246,6 +246,26 @@ class FMPArchiveProvider(DataProvider):
                 return frame
         return None
 
+    @staticmethod
+    def _filed_on(record: dict) -> pd.Timestamp | None:
+        """A filing date, but only if it is actually *after* the period it reports.
+
+        FMP backfills pre-~1995 statements with ``filingDate == date`` (the fiscal
+        period end), which would imply a company filed the instant its quarter
+        closed — a two-month look-ahead for anything that reads it.  Those rows are
+        treated as having no filing date so the conservative
+        ``period_end + reporting_lag`` fallback applies instead.  Verified on the
+        live data: the last such row for AAPL/ATVI is 1994, so this is a guard for
+        windows earlier than the 2004 archive, not a correction to it.
+        """
+        filed = parse_date(pick(record, _FILING_KEYS))
+        if filed is None:
+            return None
+        period_end = parse_date(pick(record, _PERIOD_END_KEYS))
+        if period_end is not None and filed <= period_end:
+            return None
+        return filed
+
     def _filing_dates(self, symbol: str) -> dict[tuple, pd.Timestamp]:
         """``(fiscalYear, period) → filing date`` from the filed statements.
 
@@ -258,7 +278,7 @@ class FMPArchiveProvider(DataProvider):
             if frame is None:
                 continue
             for record in frame.reset_index().to_dict("records"):
-                filed = parse_date(pick(record, _FILING_KEYS))
+                filed = self._filed_on(record)
                 if filed is None:
                     continue
                 key = (str(record.get("fiscalYear")), str(record.get("period")))
@@ -279,7 +299,7 @@ class FMPArchiveProvider(DataProvider):
             return []
         out: list[dict] = []
         for record in frame.reset_index().to_dict("records"):
-            avail = parse_date(pick(record, _FILING_KEYS))
+            avail = self._filed_on(record)
             if avail is None and source in _UNFILED_SOURCES:
                 avail = filings.get((str(record.get("fiscalYear")), str(record.get("period"))))
             if avail is None:

@@ -364,11 +364,17 @@ class Downloader:
                                     retry_errors=self.config.retry_errors):
                 prior = self.archive.read("prices_adjusted", ticker)
                 has_bars = prior is not None and len(prior) > 0
+                dated = has_bars and isinstance(prior.index, pd.DatetimeIndex)
                 resolution = Resolution(
                     ticker=ticker,
                     resolved=ticker if has_bars else None,
                     method="cached" if has_bars else "unresolved",
                     n_bars=len(prior) if prior is not None else 0,
+                    # Carry the vendor's date range through on a resumed run too —
+                    # comparing it to the membership window is what exposes a
+                    # ticker later reused by a different company (PLL, PD, ONE).
+                    first_date=str(prior.index.min().date()) if dated else None,
+                    last_date=str(prior.index.max().date()) if dated else None,
                 )
                 price_done, skipped = True, skipped + 1
             else:

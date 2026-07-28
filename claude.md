@@ -37,32 +37,33 @@ closed-loop, retrieval-grounded, overfitting-controlled evolutionary Factor
 Researcher designed in `docs/research-evolution/DESIGN.md` (FunSearch/AlphaEvolve
 spirit: **the LLM mutates, a deterministic harness scores** — the LLM never
 influences its own reward) is fully implemented. **P0** `research_eval/`:
-IS/VAL/TEST `three_way_split` (fit IS, burn VAL, touch TEST once), CPCV
-`cpcv_folds` (purge+embargo) + `walk_forward_folds`; **N_trials-aware**
-`deflated_ic`, Bailey–López de Prado `deflated_sharpe_ratio`, and **`pbo_cscv`**
-(CSCV Probability of Backtest Overfitting); the CORE Pareto `ObjectiveVector` is
-now **5 axes** {LOCO marginal ΔOOS-IC (primary) − window-jitter **plateau penalty** −
+IS/VAL/TEST `three_way_split` (fit IS, burn VAL, touch TEST once) +
+`walk_forward_folds`; **N_trials-aware** `deflated_ic`, Bailey–López de Prado
+`deflated_sharpe_ratio`, and **`pbo_cscv`** (CSCV Probability of Backtest
+Overfitting); the CORE Pareto `ObjectiveVector` is **4 axes**
+`("marginal_value", "independence", "parsimony", "structural_novelty")` =
+{LOCO marginal ΔOOS-IC (primary) − window-jitter **plateau penalty** −
 perturbation-fidelity probe ± sign-consistency bonus (all IC-scale, folded onto the
-primary axis), residual (orthogonalised) IC independence, **`temporal_robustness`**
-(sign-aligned VAL/IS IC ratio clipped to [−1,1]), −AST-complexity parsimony,
-`structural_novelty`} behind hard **coverage (+ optional cost)** gates. The separate
-**`robustness` (PSR) axis was removed**: it was computed on the *same reused* VAL window
-every generation so it couldn't police the generational ratchet it was meant to control,
-folded IC-scale penalties into a [0,1] probability, and was a near-monotone transform of
-the primary axis — its plateau/perturbation/sign parts now fold onto `marginal_value`.
-The former OOS/IS **degradation hard gate** became the `temporal_robustness` axis
-(2026-07-16): too harsh as a gate (it excluded a marginal conditioning factor whose
-|IS IC| barely clears `min_is_ic` with the opposite sign on VAL), it is now traded off
-against the other objectives; deflation stays a *publish* filter, not a search gate.
+primary axis), residual (orthogonalised) IC independence scored on IS∪VAL,
+−AST-complexity parsimony, canonical-AST `structural_novelty`} behind hard
+**coverage (+ optional cost)** gates (`GateResults.GATES = ("coverage_ok",
+"deflation_ok", "cost_ok")`; deflation is a *publish* filter, not a search gate).
+Three axes were tried and removed: **`robustness` (PSR)** (scored on the *same
+reused* VAL window every generation, so it couldn't police the generational
+ratchet it existed for; its plateau/perturbation/sign parts folded onto
+`marginal_value`), **`regime_independence`** (superseded by `structural_novelty`),
+and **`temporal_robustness`** (the raw VAL/IS degradation ratio survives as a
+reflection diagnostic only, not a selection objective and not a gate).
 `evaluate_candidate` (signal-based, un-gameable) + `evaluate_set`
 (SET mode: the set's own combined-model OOS IC / internal PR / structural diversity).
 **P1** `agents/factor_research/evolution/`: `genome.py`
 (`FactorProgram` + SINGLE/SET `Genome`, id-masked dedup fingerprint);
 `controller.py` — **constrained NSGA-II** (feasibility → #failed-gates →
-dominance), crowding distance, tournament parents, islands + ring migration,
-gate-passing **Pareto archive = the accepted book** (the SINGLE marginal-value
-reference), `N_trials` billed per *scored* candidate only, full lineage,
-save/load; `mutation.py` — AST window-jitter (mutation op AND plateau probe) +
+dominance), crowding distance, tournament parents, the **two-level
+mechanism-group / deme population** (below) with within-group ring migration,
+gate-passing **per-group Pareto archives whose union is the accepted book** (the
+SINGLE marginal-value reference), `N_trials` billed per *scored* candidate only,
+full lineage, save/load; `mutation.py` — AST window-jitter (mutation op AND plateau probe) +
 LLM mutation/crossover prompts fed the parent's reflection brief;
 `reflection.py` — **deterministic** diagnostics→NL mutation brief (rule-based
 advice; no LLM writes it); `loop.py` — seed via the existing brainstorm/codegen
@@ -104,7 +105,45 @@ knowledge graph, then the ablation matrix (oneshot → +evolution → +RAG →
 +GraphRAG → +debate; single vs set) with the walk-forward pass for the results
 chapter. Live tracker: `docs/research-evolution/IMPLEMENTATION_PROGRESS.md`.
 
-**Evolutionary researcher — temporal-degradation gate → 5th Pareto axis (done,
+**Evolutionary researcher — knowledge-graph nested islands replace the QD grid;
+4-axis vector (done, 2026-07-21). THIS SUPERSEDES THE TWO BLOCKS BELOW.**
+Diversity is no longer maintained by a Quality-Diversity behavior grid but by a
+**two-level population hierarchy grounded in the knowledge graph**, and the CORE
+vector is back to **4 axes** `("marginal_value", "independence", "parsimony",
+"structural_novelty")` — `temporal_robustness` was removed as an axis (the raw
+VAL/IS `degradation_ratio` is a reflection diagnostic only, neither scored nor
+gated). **Upper level — mechanism groups**: `knowledge/graph_query.
+mechanism_group_specs` turns the graph's under-covered Louvain communities (plus
+their most paper-supported *computable* gap mechanisms) into `--mechanism-groups N`
+reserved groups, each with a focus brief spliced into that group's seeding and
+mutation prompts (`loop._group_context`); factors stamp `mechanism_group_id` /
+`mechanism` and link back into the graph. Because groups are *defined* by graph
+communities, `n_mechanism_groups > 1` **requires `--retrieval graphrag`** and
+raises if the graph cannot form that many usable groups — no silent fallback.
+**Lower level — demes**: `--demes-per-group M` classic independently-evolving
+islands inside each group; `controller.islands` is the flat `N × M` list addressed
+by `flat_island(group, deme)` / `coordinates(flat)`, ring migration runs **strictly
+within a group**, and the dedup fingerprint is scoped per `(group, deme)` so the
+same formula may be rediscovered in a different mechanism context. Each group keeps
+its **own reserved Pareto archive** (`controller.group_archives`); the accepted book
+is their union, so a strong group cannot dominate a weaker one out of existence.
+Groups mix **only** through the explicit low-probability synthesis operators
+`cross_group` / `cross_group_splice` (`--p-cross-group`, default 0.10, force-zeroed
+when there is one group). CLI: `--mechanism-groups 5 --demes-per-group 3
+--children-per-deme 4 --seed-ideas-per-group 6`; `--islands` survives as a hidden
+legacy alias meaning demes-per-group. **Removed**: `evolution/qd.py` (`QDArchive`),
+`--selection {nsga2,qd}`, `--grid-dims`, `--cell-capacity`, `--depth-gamma`,
+`--reuse-omega`, the `trend_reversal`/`signal_speed`/`stress_activation` behavior
+descriptors and `tests/test_evolution_qd.py`. `FitnessResult.behavior` remains as a
+vestigial empty dict for old-checkpoint round-tripping and has no selection role.
+Tests: `tests/test_evolution_mechanism_groups.py` (loop level: graph resolution,
+seed/child placement, reserved archives, cross-group operator, focus reaching the
+prompt, progressive reveal × groups), `test_evolution_controller.py` (controller
+level). Entrypoint drift from this refactor is now caught by
+`tests/test_entrypoint_config_kwargs.py`.
+
+**[SUPERSEDED by the block above — `temporal_robustness` was later removed.]
+Evolutionary researcher — temporal-degradation gate → 5th Pareto axis (done,
 2026-07-16).** The OOS/IS **degradation hard gate** became the `temporal_robustness`
 **Pareto axis**, so the CORE vector is now **5 axes** `("marginal_value",
 "independence", "temporal_robustness", "parsimony", "structural_novelty")` and the
@@ -160,7 +199,12 @@ lineage rows), and frees gate-failing fingerprints for **one** retry
 (config, index); `failed_fingerprints` persisted; frontier corruption guard). Flags:
 `--test-frac --seed-frac --reveal-every --val-blocks`. Tests:
 `tests/test_evolution_progressive.py`, updated `test_research_eval_{fitness,harness}`,
-`test_evolution_{controller,mutation,qd}`. Out of scope (deferred): Thresholdout/
+`test_evolution_{controller,mutation}` (the `qd` test file is gone with the grid) +
+`test_evolution_mechanism_groups.py` (progressive reveal × mechanism groups: the
+frontier still advances and each group archive is re-pruned separately).
+Progressive reveal is **opt-in** — `--progressive-reveal`, default OFF, so an
+un-flagged run is byte-identical to the non-progressive baseline.
+Out of scope (deferred): Thresholdout/
 select-guard gate, ε-dominance, GP-arm progressive reveal.
 
 **Evolutionary researcher — residual-IC + regime axes and two-stage curation
@@ -195,7 +239,9 @@ still drives parent selection and marginal scoring. Tests:
 metric (done).** The 5th CORE Pareto axis is now **`structural_novelty`**, which
 **replaced the `regime_independence` axis** (crash-complementarity stress lives on
 as the QD grid's leak-free `stress_activation` behavior descriptor, not a scored
-axis). `structural_novelty` = the minimum **canonical AST weighted-subtree
+axis — that descriptor died with the grid in 2026-07-21, so stress-conditional
+value is no longer measured anywhere).
+`structural_novelty` = the minimum **canonical AST weighted-subtree
 distance** to the nearest archive member (falling back to the reference-zoo when
 the book is empty); 0 = structural clone (same canonical computation), 1 = no
 shared canonical subtree. The measure is a dedicated module
@@ -223,8 +269,9 @@ nearest-book index now points at the original book position even when empty/inva
 codes are skipped. Tests: `tests/test_ast_novelty.py`, extended
 `tests/test_research_eval_harness.py`.
 
-**Evolutionary researcher — QD grid, selection-time deflation, economic reward,
-experience memory (done).** Five additions from a competitive-landscape review
+**[PARTLY SUPERSEDED — WS2 (the QD grid) was removed 2026-07-21; WS1/WS3/WS4/WS5
+still stand.] Evolutionary researcher — QD grid, selection-time deflation,
+economic reward, experience memory (done).** Five additions from a competitive-landscape review
 (`research_docs/`, gitignored; source attribution log in `research_docs/SOURCES.md`,
 which must be updated whenever an external idea is implemented). **(WS1) Deflation
 moved off the per-candidate search gate onto a shared *publish* filter**
@@ -234,7 +281,9 @@ marginal (LOCO)** statistic (never standalone `|val_ic|`, which would kill
 complementary factors) and prunes by marginal contribution. Search vs publish
 eligibility is now explicit (`search_selectable` = gates minus deflation;
 `publish_selectable` decided at the end). `--selection-deflation {off=discovery,
-on=validation}`. **(WS2) A Quality-Diversity behavior grid** (`evolution/qd.py`
+on=validation}`. **(WS2 — REMOVED 2026-07-21, replaced by knowledge-graph nested
+islands; kept here for the rationale trail.) A Quality-Diversity behavior grid**
+(`evolution/qd.py`
 `QDArchive`, `--selection {nsga2,qd}`, default nsga2) fills a *diverse* library where
 NSGA-II converges: cells keyed by leak-free behavior descriptors — `trend_reversal`
 (fade↔momentum), `signal_speed` (slow↔fast), `stress_activation` (3rd axis at
@@ -290,7 +339,18 @@ non-LLM row of the ablation matrix. SET-mode joint scoring, a canonical single-o
 IC arm, `indneutralize`/cross-sectional terminals, and PCA-directed seeding are documented
 extensions. Design: `docs/research-evolution/GP_BENCHMARK.md`; sources logged in
 `research_docs/SOURCES.md` (AutoAlpha IJCAI 2020, AlphaGen KDD 2023). Tests:
-`tests/test_gp_grammar.py`, `tests/test_gp_loop.py`.
+`tests/test_gp_grammar.py`, `tests/test_gp_loop.py`,
+`tests/test_entrypoint_config_kwargs.py`.
+**Diversity structure (2026-07-27):** the GP arm has no knowledge graph, so it has
+nothing to form mechanism groups *by* — it runs **one** mechanism group containing
+`--islands` classic flat demes with the usual within-group ring migration, while the
+LLM arm uses the full two-level hierarchy. This is the one deliberate structural
+asymmetry between the arms (alongside the grammar advantage) and should be stated
+when the ablation matrix is written up. Note also that `--progressive-reveal` is
+LLM-arm only; run the LLM arm without it if you want the two arms on identical
+splits. The entrypoint's argparse block had drifted twelve kwargs behind
+`GPRunConfig` (removed QD / CPCV / regime knobs) and died with a `TypeError` before
+any work; fixed 2026-07-27 and now guarded by the entrypoint test above.
 
 **Landing-page example generator (done).** `showcase_pipeline/landing_examples/`
 turns real pipeline runs into provenance-stamped marketing artifacts for the
@@ -515,8 +575,28 @@ to opt out. Live: AV's free tier delivers these; FMP's free tier serves only
 not built):** sentiment + macro — see `docs/data-layer/FUNDAMENTAL_AND_ALT_DATA.md`.
 
 **FMP Premium archive — local, survivorship-bias-free S&P 500 + Nasdaq-100 back to
-2004 (code done; the download itself is a one-time run).** With a Premium key the
-free path's two gaps close. `quant_fund_agent/data/fmp_ingest/` is a one-time,
+2004 (DONE, downloaded 2026-07-27).** The archive is **built and on disk**: 1 107
+tickers, ~37.6k calls, ~3.5 GB fetched → **1.0 GB parquet**, ~55 min at 600
+calls/min; 20 832 manifest rows (19 375 ok / 1 456 empty / 1 restricted). The
+headline result is the **point-in-time constituent coverage** — the share of each
+date's *actual* index members the archive can price: **100 % from 2020, 98 % from
+2016, 93 % 2012, 89 % 2008, 84 % 2004** (Nasdaq-100 tracks it within ~2 pts). So
+the panel is effectively survivorship-bias-free from ~2016 and 84–93 % complete
+before that; the residual is a **vendor limit, not a resolution bug** — FMP has no
+security at all for Bear Stearns/AT&T Wireless/Countrywide/Cephalon/Andrew/BEA
+(`search-symbol` + `search-name` both empty), and `ABKFQ` maps only to `AMBC`, the
+*post-bankruptcy* entity, which must NOT be spliced onto the old series. By exit
+decade: 57 % of names that left 2004–09 resolve, 61 % 2010–14, 78 % 2015–19,
+**100 %** for 2020+/still-members. The FMP and free tables resolve almost
+identically (837/955 = 87.6 % vs 845/979 = 86.3 %) and disagree mostly on *ticker
+vintage* (BNY/BK, BALL/BLL, BKR/BHGE, AA/ARNC, AMBC/ABKFQ), not membership — so
+the download ran over the **union of both**, making the choice of masking table a
+config change rather than a re-download. Verified end-to-end: `load_panel` through
+`fmp_archive` gives 5 676 bars × 837 tickers (53 % dense = the PIT mask working),
+ATVI dark after 2023-10-16 (Microsoft acquisition), `peRatio` stepping 90×
+(quarterly), `marketCap` daily — **~160 s for a 6-field 22-year load** (a known
+cost; cache assembled record frames if repeated loads bite). With a Premium key
+the free path's two gaps close. `quant_fund_agent/data/fmp_ingest/` is a one-time,
 **resumable** bulk downloader (`scripts/fmp_bulk_download.py`): an endpoint
 **registry** (`endpoints.py`), a rate-limited threaded `client.py` that classifies
 **402 plan-restriction (terminal, never retried) vs 429 (back off) vs transient**,

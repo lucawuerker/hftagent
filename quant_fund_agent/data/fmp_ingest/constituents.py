@@ -246,8 +246,14 @@ def build_intervals(
         start = row["start_date"]
         if row["ticker"] in pre_set and start <= pre_start:
             known = first_added.get(row["ticker"])
-            if known is not None and pd.notna(known):
-                start = pd.Timestamp(known).normalize()
+            known = pd.Timestamp(known).normalize() if pd.notna(known) else None
+            # `dateFirstAdded` is only usable when it actually falls inside this
+            # spell.  For a name that left and rejoined (DAL, PCG) the current
+            # list reports its *latest* addition, which lands after this spell
+            # ended — applying it blindly inverts the spell and makes it overlap
+            # the later one.  Fall back to the floor and flag it instead.
+            if known is not None and (pd.isna(row["end_date"]) or known < row["end_date"]):
+                start = known
             else:
                 left_censored.append(row["ticker"])
         starts.append(start)
