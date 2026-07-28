@@ -22,7 +22,7 @@ class QualityROE(BaseFactor):
         "high.  Requires data['roe']."
     )
     window_length = 1
-    inputs = ["roe"]
+    inputs = ["roe", "close"]
 
     def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:
         roe = data.get("roe")

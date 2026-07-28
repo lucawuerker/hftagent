@@ -7,7 +7,7 @@ neutralisation with a warning if absent.
 
 from __future__ import annotations
 
-import logging
+import warnings
 
 import pandas as pd
 
@@ -21,7 +21,6 @@ from quant_fund_agent.factors.ops import (
 )
 from quant_fund_agent.factors.registry import register_factor
 
-_log = logging.getLogger(__name__)
 
 
 @register_factor
@@ -35,7 +34,7 @@ class Alpha058(BaseFactor):
         "data['sector']."
     )
     window_length = 30
-    inputs = ["close", "high", "low", "volume"]
+    inputs = ["close", "high", "low", "volume", "sector"]
 
     def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:
         v = vwap(data)
@@ -44,7 +43,7 @@ class Alpha058(BaseFactor):
         if "sector" in data:
             v_neutral = indneutralize(v, data["sector"])
         else:
-            _log.warning(
+            warnings.warn(
                 "Alpha#58: data['sector'] not provided — skipping neutralisation."
             )
             v_neutral = v

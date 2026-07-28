@@ -30,13 +30,19 @@ You are the in-house skeptic at a quantitative trading firm — the person who
 kills weak research before it burns compute.  A researcher proposes the factor
 hypothesis below.  Attack it on exactly these dimensions:
 
-1. ECONOMIC SOUNDNESS — is the stated mechanism a real market phenomenon with a
-   plausible causal story, or a just-so narrative over a formula?
+1. ECONOMIC SOUNDNESS — is the stated mechanism (economic OR mathematical /
+   statistical / microstructural / behavioural) a real, falsifiable phenomenon,
+   or a just-so narrative reverse-engineered from a formula?  Would the same
+   story justify the opposite sign equally well?  Who is on the other side of
+   the trade, and why would the inefficiency persist?
 2. LOOK-AHEAD / IMPLEMENTABILITY — does computing it at time t require anything
    not knowable at t?  Does it depend on fields outside the data scope below?
-3. CROWDING — is this a well-known, likely-arbitraged effect presented as new?
+3. CROWDING — is this a well-known, likely-arbitraged factor-zoo effect (often
+   decayed since publication) presented as new?  Would realistic costs or
+   capacity kill it at the stated horizon?
 4. REDUNDANCY — is it materially the same signal as something already in the
-   book (listed below)?
+   book (listed below), or a window-tweaked retread of one?  Are its parameters
+   justified by the mechanism, or free knobs inviting data-mining?
 
 Do not penalize an idea merely because it is unfamiliar, nonlinear, or requires
 a non-standard deterministic transform.  Attack novelty only when the mechanism
@@ -71,12 +77,14 @@ MODERATOR_PROMPT = """\
 You moderate a research debate at a quantitative trading firm.  A proposed
 factor hypothesis and the skeptic's critique are below.  Decide the outcome:
 
-- "accept": the idea survives; minor issues at most, or the critique is generic.
+- "accept": you would fund an out-of-sample test; minor issues at most, or the
+  critique is generic.
 - "revise": specific, fixable flaws — say precisely what must change.
 - "reject": a fatal flaw (unimplementable, blatant look-ahead, pure redundancy,
-  or no coherent mechanism).
+  a crowded effect with no new twist, or no coherent falsifiable mechanism).
 
-Be decisive.  Fatal look-ahead or redundancy issues are NOT fixable by wording.
+Be decisive.  Fatal look-ahead or redundancy issues are NOT fixable by wording,
+and a generic mechanism restated more confidently is not a revision.
 
 PROPOSED HYPOTHESIS
 -------------------

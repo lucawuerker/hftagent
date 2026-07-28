@@ -19,10 +19,21 @@ defaults:
   reveal-every: 2
   test-frac: 0.2
   retrieval: graphrag
-  curation: greedy
+  # book survival: per-group front-1 Pareto archives survive (capped at 40 factors
+  # per group by crowding cull); publish-time deflation prunes the final book.
+  # greedy/elastic_net curation remain available as comparisons.
+  curation: archive
   selection-deflation: "on"
-  archive-cap: 25
+  archive-cap: 40
   creative-frac: 0.1
+  # LightGBM, not sklearn gradient_boosting: measured 0.86s vs 122s per combined
+  # fit at run scale (370k rows) with the same nonlinear-interaction property.
+  marginal-model: lightgbm
+  # the book always STARTS from the 101 formulaic alphas: LOCO marginal value is
+  # measured against them + the evolving archive, and structural novelty is
+  # measured against them too. Rebuild with scripts/build_formulaic_prebook.py.
+  fixed-book: data/prebooks/formulaic_101.json
+  reference-book: data/prebooks/formulaic_101.json
   n-tickers: 0
   horizon: 6
   max-cost-usd: 200

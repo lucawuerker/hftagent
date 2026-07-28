@@ -26,7 +26,7 @@ class EarningsSurpriseDrift(BaseFactor):
         "data['epsSurprise']."
     )
     window_length = 1
-    inputs = ["epsSurprise"]
+    inputs = ["epsSurprise", "close"]
 
     def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:
         surprise = data.get("epsSurprise")

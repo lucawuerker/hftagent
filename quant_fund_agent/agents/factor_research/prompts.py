@@ -461,54 +461,58 @@ RIGHT:
 """
 
 
-# A real seed factor used as a worked example.  Showing one complete,
-# working file is more effective than any amount of prose at teaching
-# the LLM the expected shape (decorator, class attributes, imports,
-# positional ops calls, defensive handling of sparse fields).
+# Two complete worked example files.  Showing working files is more effective
+# than any amount of prose at teaching the LLM the expected shape (decorator,
+# class attributes, imports, positional ops calls, defensive NaN handling) —
+# and both examples are mechanism-driven so they anchor the quality bar, not
+# just the format.
 EXAMPLE_FACTOR = '''\
 EXAMPLE OF A VALID FACTOR FILE
 ------------------------------
-This is a real factor that lives in ``factors/momentum/alpha_007.py``.
 Match this file structure exactly: imports, ``@register_factor`` decorator,
-class attributes, and a ``calc`` method returning an aligned DataFrame.  The
-mechanism does NOT need to look like this example; use richer helper functions
-when the paper calls for them.
+class attributes, and a ``calc`` method returning an aligned DataFrame.  Note
+the mechanism is stated up front and drives every modelling choice (windows,
+inputs, horizon); use richer helper functions when your mechanism calls for
+them.
 
-    """Alpha#7: signed-power of trailing close delta on high-volume bars."""
+    """Amihud illiquidity shock: a spike in price impact demands a premium.
+
+    Mechanism: when a name's price impact per dollar traded jumps relative to
+    its own recent norm, liquidity providers demand compensation to hold it —
+    subsequent returns are higher until impact normalises (Amihud 2002)."""
 
     from __future__ import annotations
 
-    import pandas as pd
     import numpy as np
+    import pandas as pd
 
     from quant_fund_agent.factors.base import BaseFactor
-    from quant_fund_agent.factors.ops import abs_, adv, delta, sign, ts_rank
+    from quant_fund_agent.factors.ops import rank, returns, ts_mean
     from quant_fund_agent.factors.registry import register_factor
 
 
     @register_factor
-    class Alpha007(BaseFactor):
-        factor_id = "alpha_007"
-        name = "Alpha#7"
-        category = "momentum"
+    class AmihudShock(BaseFactor):
+        factor_id = "amihud_shock"
+        name = "Amihud illiquidity shock"
+        category = "microstructure"
         description = (
-            "On high-volume bars (volume > 20-bar ADV) emit a momentum "
-            "signal: signed 60-bar rank of |7-bar close delta|.  Otherwise "
-            "fall back to a constant -1."
+            "Cross-sectional rank of short-run Amihud price impact "
+            "(5-bar mean of |return| per unit dollar volume) relative to its "
+            "own 60-bar level: long names whose impact just spiked."
         )
         window_length = 60
         inputs = ["close", "volume"]
-        prediction_horizon = 6          # bars ahead the momentum edge peaks
-        suggested_horizons = [1, 6, 60]
+        prediction_horizon = 6      # bars over which the liquidity premium accrues
+        suggested_horizons = [3, 6, 12]
 
         def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:
             close = data["close"]
-            volume = data["volume"]
-            adv20 = adv(volume, 20)
-            d7 = delta(close, 7)
-            active = (-1.0 * ts_rank(abs_(d7), 60)) * sign(d7)
-            fallback = pd.DataFrame(-1.0, index=close.index, columns=close.columns)
-            return active.where(adv20 < volume, fallback)
+            ret = returns(data)
+            dollar = (close * data["volume"]).replace(0.0, np.nan)
+            illiq = ret.abs() / dollar            # Amihud (2002) price impact
+            base = ts_mean(illiq, 60).replace(0.0, np.nan)
+            return rank(ts_mean(illiq, 5) / base)
 
 EXAMPLE OF A CUSTOM PAPER-MATH FACTOR (this is the encouraged pattern)
 ---------------------------------------------------------------------
@@ -592,10 +596,21 @@ a paper turns on truncated path signatures, Hawkes-process intensities,
 spectral / wavelet / entropy features, rolling eigen-structure, or any other
 richer transform, propose exactly that — the codegen step implements such maths
 directly as vectorised, causal numpy/scipy code, so do not pre-emptively flatten
-it into a rank/mean/delta.  You are not limited to minor recombinations of the
-existing seed alphas; creative, method-faithful mechanisms are precisely what
-this stage is for, as long as they remain computable from the listed fields and
-leak-free.
+it into a rank/mean/delta.  Creative, method-faithful mechanisms are precisely
+what this stage is for, as long as they remain computable from the listed
+fields and leak-free.
+
+NOVELTY & MECHANISM BAR
+-----------------------
+Propose ideas a discerning quant PM would respect — not the millionth 20-day
+momentum or moving-average-crossover variant.  Avoid the over-mined families
+(plain momentum, simple short-horizon reversal, textbook volatility / value
+ranks) unless you add a genuinely new conditioning variable, interaction, or
+transform.  Make each mechanism precise enough to be falsifiable: what
+observation would kill it, who is on the other side of the trade, and why the
+inefficiency persists (limits to arbitrage, structural or mandate constraints,
+behavioural bias, slow-moving capital).  Prefer under-explored relationships
+BETWEEN the listed fields over yet another transform of ``close`` alone.
 
 WHAT TO PRODUCE
 ---------------
@@ -620,9 +635,9 @@ Propose exactly {n_ideas} distinct factor ideas.  Each idea must:
   - be cross-sectional (return a DataFrame indexed by time, columns =
     tickers, like the seed alphas);
   - be computable from the fields listed in the DATA CONTEXT above;
-  - be reasonably diverse — do not propose two ideas that are minor
-    variations of the same signal, and do not merely rename a standard
-    rolling mean/rank/correlation as a sophisticated paper concept.
+  - be diverse — no two ideas may be minor variations of one signal, and
+    do not merely rename a standard rolling mean/rank/correlation as a
+    sophisticated paper concept.
 
 EXISTING FACTOR IDS (do NOT reuse)
 ----------------------------------

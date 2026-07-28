@@ -134,9 +134,41 @@ def _coerce_horizon_list(raw) -> list[int]:
     return out
 
 
+def _strip_trailing_commas(payload: str) -> str:
+    """Remove trailing commas before ``}``/``]`` — the most common way an LLM
+    emits almost-JSON — without touching commas inside string literals."""
+    out: list[str] = []
+    in_str = False
+    escape = False
+    for ch in payload:
+        if in_str:
+            out.append(ch)
+            if escape:
+                escape = False
+            elif ch == "\\":
+                escape = True
+            elif ch == '"':
+                in_str = False
+            continue
+        if ch == '"':
+            in_str = True
+            out.append(ch)
+            continue
+        if ch in "}]":
+            # drop any comma (plus whitespace) immediately preceding a closer
+            i = len(out) - 1
+            while i >= 0 and out[i] in " \t\r\n":
+                i -= 1
+            if i >= 0 and out[i] == ",":
+                del out[i]
+        out.append(ch)
+    return "".join(out)
+
+
 def _parse_json(content: str) -> dict:
-    """Tolerant JSON parser — first try direct, then strip a possible
-    markdown fence, then fall back to outermost { ... } slice."""
+    """Tolerant JSON parser — direct, then markdown-fence strip, then outermost
+    ``{ ... }`` slice, then trailing-comma repair.  A single almost-JSON reply
+    must never kill a long evolution run."""
     content = content.strip()
     try:
         return json.loads(content)
@@ -153,7 +185,11 @@ def _parse_json(content: str) -> dict:
     except json.JSONDecodeError:
         start = content.find("{")
         end = content.rfind("}") + 1
-        return json.loads(content[start:end])
+        sliced = content[start:end]
+        try:
+            return json.loads(sliced)
+        except json.JSONDecodeError:
+            return json.loads(_strip_trailing_commas(sliced))
 
 
 # ---------------------------------------------------------------------------

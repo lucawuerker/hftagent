@@ -395,13 +395,19 @@ def seed_programs(cfg: EvolutionRunConfig, data_context: str,
         if n_regular > 0:
             with set_llm_role("brainstorm"):
                 try:
-                    raw_ideas = retrieve_and_brainstorm(
-                        brainstorm_llm, store,
-                        allowed_scopes=allowed_scopes, **rb_kwargs)
-                except TypeError:
-                    # older retrieval signature without ``allowed_scopes``
-                    raw_ideas = retrieve_and_brainstorm(
-                        brainstorm_llm, store, **rb_kwargs)
+                    try:
+                        raw_ideas = retrieve_and_brainstorm(
+                            brainstorm_llm, store,
+                            allowed_scopes=allowed_scopes, **rb_kwargs)
+                    except TypeError:
+                        # older retrieval signature without ``allowed_scopes``
+                        raw_ideas = retrieve_and_brainstorm(
+                            brainstorm_llm, store, **rb_kwargs)
+                except Exception as e:  # noqa: BLE001 — a bad LLM reply costs
+                    # this group's grounded ideas, never the whole run
+                    log.warning("grounded seed brainstorm failed for group %s "
+                                "(%s) — continuing without it", group_id, e)
+                    raw_ideas = []
         mech_by_fid = {
             (raw.get("factor_id") or "").strip().lower(): str(raw["mechanism"])
             for raw in raw_ideas
@@ -417,19 +423,25 @@ def seed_programs(cfg: EvolutionRunConfig, data_context: str,
             except Exception as e:  # noqa: BLE001 — degrade to knowledge-only
                 log.warning("seed paper load failed (%s) — knowledge-only brainstorm", e)
 
+        def _safe_brainstorm(*args) -> list[dict]:
+            """One bad LLM reply must never kill a long run — skip the call."""
+            try:
+                return _brainstorm_one(brainstorm_llm, *args)
+            except Exception as e:  # noqa: BLE001
+                log.warning("seed brainstorm call failed (%s) — skipping", e)
+                return []
+
         with set_llm_role("brainstorm"):
             if papers and n_regular > 0:
                 per_paper = max(1, -(-n_regular // len(papers)))  # ceil division
                 for paper in papers:
                     if len(raw_ideas) >= n_regular:
                         break
-                    raw_ideas.extend(_brainstorm_one(
-                        brainstorm_llm, paper, per_paper, known, session_id,
-                        data_context))
+                    raw_ideas.extend(_safe_brainstorm(
+                        paper, per_paper, known, session_id, data_context))
             elif n_regular > 0:
-                raw_ideas = _brainstorm_one(
-                    brainstorm_llm, None, n_regular, known, session_id,
-                    data_context)
+                raw_ideas = _safe_brainstorm(
+                    None, n_regular, known, session_id, data_context)
 
     if n_creative > 0:
         # Creative slice: knowledge-only brainstorm with the novelty section.
@@ -439,9 +451,14 @@ def seed_programs(cfg: EvolutionRunConfig, data_context: str,
 
         creative_context = f"{data_context}\n\n{CREATIVE_NOVELTY_SECTION}"
         with set_llm_role("brainstorm"):
-            raw_ideas = list(raw_ideas) + _brainstorm_one(
-                brainstorm_llm, None, n_creative, known,
-                f"{session_id}-creative", creative_context)
+            try:
+                creative_ideas = _brainstorm_one(
+                    brainstorm_llm, None, n_creative, known,
+                    f"{session_id}-creative", creative_context)
+            except Exception as e:  # noqa: BLE001
+                log.warning("creative seed brainstorm failed (%s) — skipping", e)
+                creative_ideas = []
+        raw_ideas = list(raw_ideas) + creative_ideas
 
     ideas: list[FactorIdea] = []
     seen: set[str] = set()

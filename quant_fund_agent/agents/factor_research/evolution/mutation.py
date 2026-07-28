@@ -205,9 +205,11 @@ drawing on mathematics, statistics, signal processing, physics or behavioural
 reasoning (for example: Hawkes-process self-excitation of order flow, spectral
 coherence between volume and returns, Ornstein-Uhlenbeck relaxation rates,
 distributional entropy shifts, prospect-theory anchoring) — explicitly NOT just
-another trend-following / moving-average variant.  The mechanism must remain
-causal, leak-free and computable from the fields in the DATA CONTEXT, and you
-must respond with the exact same JSON schema requested in this prompt."""
+another trend-following / moving-average variant.  State it precisely enough to
+be falsifiable and say why it has not already been arbitraged away.  The
+mechanism must remain causal, leak-free and computable from the fields in the
+DATA CONTEXT, and you must respond with the exact same JSON schema requested in
+this prompt."""
 
 
 # ── hypothesis-only mutation (P3 agent split: Hypothesis → Debate → Codegen) ──
@@ -225,8 +227,10 @@ parent is redundant with the book, change the *mechanism*, not the constants.
 The mechanism may be 2-4 sentences and may be economic OR mathematical /
 statistical / microstructural / behavioural — reasoning like "Hawkes-process
 self-excitation describes clustering of order flow" is as valid as a classic
-economic story.  State a falsifiable directional claim (`expected_sign`) and
-when the effect should work or fail (`regime_dependence`).
+economic story.  State a falsifiable directional claim (`expected_sign`), when
+the effect should work or fail (`regime_dependence`), and why the inefficiency
+should persist — who is on the other side of the trade.  Do not retreat to an
+over-mined family (plain momentum / simple reversal) without a new twist.
 
 DATA CONTEXT
 ------------
@@ -325,11 +329,14 @@ Think like a scientist, not a curve-fitter: the child must embody a clearly
 stated mechanism (2-4 sentences), not just perturbed constants.  The mechanism
 may be economic OR mathematical / statistical / microstructural / behavioural —
 reasoning like "Hawkes-process self-excitation describes clustering of order
-flow" is as valid as a classic economic story.  If the report shows the parent is
-redundant with the book, change the *mechanism*, not the window.  If the edge
-decays instantly, look for a slower expression of the same idea (or declare a
-shorter horizon).  If the parent failed gates badly, it is fine to propose a
-substantially different factor inspired by the parent's weaknesses.
+flow" is as valid as a classic economic story — but it must be falsifiable, and
+you should say why the edge persists against arbitrage.  Do not retreat to an
+over-mined family (plain momentum / MA-crossover / simple reversal) unless the
+child adds a genuinely new conditioning variable or interaction.  If the report
+shows the parent is redundant with the book, change the *mechanism*, not the
+window.  If the edge decays instantly, look for a slower expression of the same
+idea (or declare a shorter horizon).  If the parent failed gates badly, it is
+fine to propose a substantially different factor inspired by its weaknesses.
 
 DATA CONTEXT
 ------------
@@ -372,7 +379,10 @@ alpha-factor programs.  Below are TWO parent factors with their deterministic
 evaluation reports.  Your task is to propose ONE child factor that *combines
 the complementary strengths* of both parents — a genuine synthesis of their
 mechanisms (e.g. one parent's signal conditioned on the other's state
-variable), not a naive average of their formulas.
+variable), not a naive average of their formulas.  State the child's mechanism
+in 2-4 sentences — economic OR mathematical / statistical / microstructural /
+behavioural — and say why the *interaction* carries edge neither parent has
+alone.
 
 DATA CONTEXT
 ------------

@@ -106,6 +106,7 @@ _ALLOWED_IMPORT_PREFIXES = (
     "quant_fund_agent.factors.base",
     "quant_fund_agent.factors.registry",
     "quant_fund_agent.factors.ops",
+    "quant_fund_agent.factors._labels",
     "__future__",
 )
 

@@ -7,7 +7,7 @@ is skipped and a warning is logged.
 
 from __future__ import annotations
 
-import logging
+import warnings
 
 import pandas as pd
 
@@ -22,7 +22,6 @@ from quant_fund_agent.factors.ops import (
 )
 from quant_fund_agent.factors.registry import register_factor
 
-_log = logging.getLogger(__name__)
 
 
 @register_factor
@@ -37,7 +36,7 @@ class Alpha048(BaseFactor):
         "data['subindustry']."
     )
     window_length = 252
-    inputs = ["close"]
+    inputs = ["close", "industry"]
 
     def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:
         close = data["close"]
@@ -47,9 +46,12 @@ class Alpha048(BaseFactor):
         numerator = correlation(d1, d1_lag, 250) * d1 / close.replace(0, float("nan"))
 
         if "subindustry" in data:
-            numerator = indneutralize(numerator, data["subindustry"])
+            labels = data.get("subindustry")
+            if labels is None or getattr(labels, "empty", False):
+                labels = data.get("industry")
+            numerator = indneutralize(numerator, labels)
         else:
-            _log.warning(
+            warnings.warn(
                 "Alpha#48: data['subindustry'] not provided — "
                 "skipping industry neutralisation."
             )

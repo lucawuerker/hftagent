@@ -7,7 +7,7 @@ to just vwap.  Fractional windows rounded to integers.  Requires
 
 from __future__ import annotations
 
-import logging
+import warnings
 
 import pandas as pd
 
@@ -21,7 +21,6 @@ from quant_fund_agent.factors.ops import (
 )
 from quant_fund_agent.factors.registry import register_factor
 
-_log = logging.getLogger(__name__)
 
 
 @register_factor
@@ -36,7 +35,7 @@ class Alpha059(BaseFactor):
         "longer smoothing.  Requires data['industry']."
     )
     window_length = 40
-    inputs = ["close", "high", "low", "volume"]
+    inputs = ["close", "high", "low", "volume", "industry"]
 
     def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:
         v = vwap(data)
@@ -45,7 +44,7 @@ class Alpha059(BaseFactor):
         if "industry" in data:
             v_neutral = indneutralize(v, data["industry"])
         else:
-            _log.warning(
+            warnings.warn(
                 "Alpha#59: data['industry'] not provided — skipping neutralisation."
             )
             v_neutral = v

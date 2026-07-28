@@ -130,7 +130,17 @@ notebook scaffold `notebooks/final_run_walkthrough.ipynb`; run configs
 `quant.config.{nasdaq100_2010,sp500_2010}.yaml` (panel verified 3,665×209,
 density 0.463). **Before any credits: build the +1000-paper corpus, re-embed
 with `QF_EMBEDDER=openai`, build the knowledge graph (missing → graphrag arms
-crash), then the plan's D1–D5 gates.**
+crash), then the plan's D1–D5 gates.** Revisions same day: marginal combiner is
+**`lightgbm`** (0.86s vs sklearn GB 121.9s per fit at run scale, same nonlinear
+interactions); archive cap **40 factors/group**; curation **`archive`** (per-group
+front-1 survives; greedy stays optional); **the 101 Kakushadze formulaic alphas
+are now COMPLETE** (15 IndNeutralize alphas implemented with FMP sector/industry,
+subindustry→industry fallback, eleven missing ×−1 signs restored vs the stale
+deferred table; `factors/_labels.py` helper; allow-listed for in-memory compile)
+and form the standing fixed book via `scripts/build_formulaic_prebook.py` →
+`data/prebooks/formulaic_101.json` (101 members validate) wired as
+`--fixed-book`/`--reference-book` in the matrix; researcher prompts sharpened to
+a novelty/falsifiability/PM-grade-skeptic bar (+7% tokens).
 
 **Evolutionary researcher — knowledge-graph nested islands replace the QD grid;
 4-axis vector (done, 2026-07-21). THIS SUPERSEDES THE TWO BLOCKS BELOW.**

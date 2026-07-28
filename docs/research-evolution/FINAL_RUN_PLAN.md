@@ -63,14 +63,36 @@ stage, and (E) the deliverables (results + walkthrough notebook).
 - Marginal model: keep `gradient_boosting` if the FMP timing probe (D2) shows acceptable
   per-candidate cost with the new speedups; else fall back per probe results (documented in run log).
 
-### A4. Survival / archive policy (changes from current behaviour)
+### A4. Survival / archive policy (changes from current behaviour; REVISED 2026-07-27 pm)
 
 - Keep Pareto front-1 archive semantics for *search*, but:
-  - **Per-group archive cap** (~25, crowding-distance cull; evictions logged to lineage).
-  - **End-of-run curation ON**: `--curation greedy` (book = greedy forward-selection on combined
-    VAL IC), `kept_pool` still saves every gate-passer (= "all factors of all runs are saved").
-  - **Publish-time deflation ON**: `--selection-deflation on`.
-  - **Fail-open bugs fixed**: curation/publish failures must not silently persist the unfiltered book.
+  - **Per-group archive cap = 40 factors per mechanism-group archive** (crowding-distance cull,
+    best-marginal member always kept, evictions logged to lineage). Semantics: the cap bounds the
+    number of FACTORS in each group's front-1 archive — nothing to do with islands/demes. With 4
+    groups the evolved book can reach 160 factors on top of the fixed 101.
+  - **Curation `archive` (the survival rule = per-group front-1 Pareto archives survive)** — per
+    Luca's preference; greedy/elastic_net stay available as comparisons. `kept_pool` still saves
+    every gate-passer ("all factors of all runs are saved"). NOTE on greedy (for the record): it
+    is forward-selection that keeps adding factors while the combined VAL IC improves — it does
+    NOT keep a single factor — but it can auto-size to small books, which is not the intended
+    survival semantics here.
+  - **Publish-time deflation ON**: `--selection-deflation on` (prunes the final book by deflated
+    combined statistic; this is the guard against lucky-noise survivors).
+  - **Fail-open bugs fixed**: curation/publish failures raise (fail closed).
+- **The book always STARTS from the 101 formulaic alphas** (Kakushadze) via
+  `--fixed-book data/prebooks/formulaic_101.json`: every candidate's LOCO marginal value is
+  measured against the 101 + the evolving archive, and `--reference-book` points novelty at them
+  too. The 101 set is COMPLETE as of 2026-07-27: the 15 IndNeutralize-blocked alphas
+  (#63/67/69/70/76/79/80/82/87/89/90/91/93/97/100) are implemented using FMP sector/industry
+  labels (subindustry→industry runtime fallback since FMP has no subindustry; formulas verified
+  against the paper — the old deferred table had dropped the outer ×−1 on eleven of them), the
+  4 fallback alphas were upgraded (#56 now uses daily marketCap), and
+  `scripts/build_formulaic_prebook.py` renders all 101 into the validator-passing prebook
+  (101 members, 0 failures). Rebuild the prebook whenever seed alphas change.
+- **Marginal-value combiner = `lightgbm`, NOT sklearn `gradient_boosting`** — measured at run
+  scale (370k rows × 10 features): LightGBM 0.86s/fit vs sklearn GB 121.9s/fit (~140×), same
+  nonlinear-interaction property. This retires the wall-clock crisis flagged in D1b; ridge
+  (0.23s) remains the linear ablation option only.
 - NOT adding a min-marginal admission threshold (protects conditioning factors).
 
 ### A5. Progressive reveal (ON for every evolution arm — hard requirement)
@@ -200,6 +222,17 @@ timing probe must confirm before launch.** Target ≤ ~4h/run, 2–3 runs in par
 - Coverage gate vs PIT mask: τ=0.5 is fine (a passing factor shows the denominator is
   mask-aware), but D2/D3 should log the gate pass-rate; if most candidates fail coverage on the
   PIT panel, recalibrate τ rather than letting the search starve.
+- **Throughput smoke (2026-07-27 pm, prerun `SMOKE_THROUGHPUT`)** — matrix-like settings
+  (lightgbm, 101-alpha fixed book, archive curation, deflation on, reveal-every 2, creative 0.1)
+  at 56 tickers: **26 scored candidates in 362s wall-clock (~14s/candidate all-in incl. LLM
+  latency), gate pass-rate 19/26 (73%), archive 2→8 over 3 gens, kept_pool 19, 8 persisted,
+  40 LLM calls / $0.054.** Operator mix as configured (1 creative of 13 llm_semantic ≈ 10%).
+  Projection at full 209-ticker cross-section: ~20–40s/candidate → ~6–10h per full run incl.
+  rescores — acceptable; D2 pins it and `--reveal-every 3` / archive-cap are the relief valves.
+  Note: only 3 of 8 seed ideas survived coerce+codegen with gpt-4o-mini — check seed survival
+  with the real models in D2/D3; raise `--seed-ideas-per-group` if it stays low.
+  Also fixed during smoking: tolerant JSON parsing (trailing-comma repair) + seeding brainstorm
+  calls are now non-fatal (a bad LLM reply costs ideas, never the run).
 - Pre-existing, unrelated test failures at clean HEAD (not introduced today, not blocking):
   `test_data_layer.py::test_routed_load_panel_matches_legacy` (LOBSTER synth-field drift) and
   `test_data_layer.py::test_settings_env_override` (QF_DATA_PROVIDER env override not applied).

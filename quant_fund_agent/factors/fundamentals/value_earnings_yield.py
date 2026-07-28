@@ -24,7 +24,7 @@ class ValueEarningsYield(BaseFactor):
         "names rank high.  Requires data['peRatio']."
     )
     window_length = 1
-    inputs = ["peRatio"]
+    inputs = ["peRatio", "close"]
 
     def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:
         pe = data.get("peRatio")
