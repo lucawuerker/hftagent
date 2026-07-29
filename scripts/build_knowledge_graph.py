@@ -75,7 +75,11 @@ def main() -> None:
     log.info("corpus: %d paper(s)", len(docs))
     llm = make_chat_llm(temperature=0.1, timeout=120, max_retries=4)
 
-    graph = build_graph(llm, docs, graph=graph, max_papers=args.max_papers)
+    # Checkpoint into the real graph path every 25 papers: a crash or an LLM
+    # budget-ceiling stop keeps all paid-for extractions, and re-running
+    # resumes (ingested papers are skipped).
+    graph = build_graph(llm, docs, graph=graph, max_papers=args.max_papers,
+                        checkpoint_path=path)
     summaries = detect_and_summarize_communities(
         graph, llm=llm if args.llm_summaries else None)
     graph.save(path)

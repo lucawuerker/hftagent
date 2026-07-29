@@ -1,0 +1,134 @@
+{
+  "factors": [
+    {
+      "id": "risk_narrative_reaction",
+      "name": "Risk Narrative Reaction",
+      "class_name": "",
+      "description": "This factor computes the cross-sectional rank of the difference between earnings surprises and subsequent returns, capturing stocks that have adjusted negatively to risk narratives more significantly than expected.",
+      "formula": "",
+      "trading_idea": "When analysts react strongly to negative risk narratives, it signals potential mispricing in stock valuations. By measuring the magnitude of the reaction in terms of earnings surprises and subsequent price adjustments, we can identify stocks that are likely to experience a price decline as the market corrects itself to align with the newly perceived risks.",
+      "trading_idea_ids": [],
+      "category": "other",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.008659,
+        "ic_std": 0.128693,
+        "ic_ir": 0.067284,
+        "ic_hit_rate": 0.5291,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.014089,
+            "ic_std": 0.127779,
+            "ic_ir": 0.110262,
+            "ic_hit_rate": 0.5478,
+            "n_timestamps": 3664
+          },
+          "6": {
+            "ic": 0.008659,
+            "ic_std": 0.128693,
+            "ic_ir": 0.067284,
+            "ic_hit_rate": 0.5291,
+            "n_timestamps": 3659
+          },
+          "60": {
+            "ic": -0.00486,
+            "ic_std": 0.12326,
+            "ic_ir": -0.039433,
+            "ic_hit_rate": 0.4951,
+            "n_timestamps": 3605
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 3659,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "corporate_earnings_calls_and_analyst_beliefs"
+      ],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:SMOKE_GRAPHRAG",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/risk_narrative_reaction.py",
+      "required_inputs": [
+        "epsSurprise",
+        "returns"
+      ],
+      "required_tier": "events",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-07-28T21:51:00.767982",
+      "metadata": {
+        "llm_model": "gpt-4o-mini",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g1-risk_narrative_reaction-8f250e",
+          "generation": 1,
+          "operator": "llm_semantic",
+          "parent_ids": [
+            "g0-risk_narrative_underreaction-d9cf7c"
+          ],
+          "expected_sign": -1,
+          "objective": {
+            "marginal_value": 0.004487670992907203,
+            "independence": 0.012411359806999749,
+            "parsimony": -9.0,
+            "structural_novelty": 0.9078992490691207
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 17,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.012363567997527677,
+            "deflated": {
+              "best_ic": 0.012364,
+              "deflated_ic": 0.003295,
+              "deflated_t": 0.896405,
+              "luck_ic": 0.009069,
+              "n_obs": 74033,
+              "n_trials": 21
+            },
+            "n_trials": 21,
+            "dropped": [
+              "momentum_growth_spillover"
+            ],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/SMOKE_GRAPHRAG",
+          "config_hash": "bf753df7d67f",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2024-07-27"
+          ],
+          "stamped_at": "2026-07-28T21:51:00+00:00"
+        }
+      }
+    }
+  ],
+  "trading_ideas": []
+}

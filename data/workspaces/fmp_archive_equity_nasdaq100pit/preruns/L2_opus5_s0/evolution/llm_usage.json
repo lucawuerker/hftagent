@@ -1,0 +1,39 @@
+{
+  "by_role": {
+    "brainstorm": {
+      "calls": 1,
+      "input_tokens": 30750,
+      "output_tokens": 27774,
+      "cost_usd": 0.8481,
+      "errors": 0
+    },
+    "codegen": {
+      "calls": 1,
+      "input_tokens": 119944,
+      "output_tokens": 84186,
+      "cost_usd": 2.7043700000000004,
+      "errors": 0
+    },
+    "crossover": {
+      "calls": 63,
+      "input_tokens": 7281749,
+      "output_tokens": 3066363,
+      "cost_usd": 113.06782000000011,
+      "errors": 34
+    },
+    "mutation": {
+      "calls": 145,
+      "input_tokens": 14119775,
+      "output_tokens": 10596383,
+      "cost_usd": 335.50844999999987,
+      "errors": 54
+    }
+  },
+  "total": {
+    "calls": 210,
+    "input_tokens": 21552218,
+    "output_tokens": 13774706,
+    "cost_usd": 452.12874,
+    "errors": 88
+  }
+}

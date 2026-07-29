@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import json
 import logging
+from pathlib import Path
 from typing import Any, Sequence
 
 from quant_fund_agent.knowledge.embed_store import CorpusDoc
@@ -135,12 +136,21 @@ def build_graph(
     graph: KnowledgeGraph | None = None,
     field_vocab: Sequence[str] | None = None,
     max_papers: int | None = None,
+    checkpoint_path: str | Path | None = None,
+    checkpoint_every: int = 25,
 ) -> KnowledgeGraph:
     """Extraction pass over ``docs`` (skipping already-ingested papers).
 
     ``field_vocab`` defaults to the run's usable fields so the ``needs`` edges
     stay within what any run could actually serve.  Failures on single papers
     are logged and skipped — a 1k-paper build must survive flaky calls.
+
+    ``checkpoint_path`` (optional) saves the graph every ``checkpoint_every``
+    newly-ingested papers, so a crash or an LLM budget-ceiling stop never
+    loses paid-for extractions — re-running resumes from the checkpoint
+    because ingested papers are skipped.  An ``LLMBudgetExceeded`` from the
+    meter stops the extraction loop cleanly (progress kept) instead of
+    burning one warning per remaining paper.
     """
     graph = graph or KnowledgeGraph()
     if field_vocab is None:
@@ -163,8 +173,21 @@ def build_graph(
             n = ingest_paper(graph, doc, payload, field_vocab)
             done += 1
             log.info("[graph_build] %s → %d mechanism(s)", doc.paper_id, n)
+            if checkpoint_path and done % checkpoint_every == 0:
+                graph.save(checkpoint_path)
+                log.info("[graph_build] checkpoint saved (%d new paper(s))", done)
         except Exception as e:  # noqa: BLE001 — one flaky paper must not kill the build
+            try:
+                from quant_fund_agent.llm import LLMBudgetExceeded
+            except Exception:  # pragma: no cover - llm layer always importable
+                LLMBudgetExceeded = ()  # type: ignore[assignment]
+            if isinstance(e, LLMBudgetExceeded):
+                log.warning("[graph_build] LLM budget ceiling hit after %d new "
+                            "paper(s) — stopping extraction (progress kept)", done)
+                break
             log.warning("[graph_build] %s failed: %s", doc.paper_id, e)
+    if checkpoint_path and done:
+        graph.save(checkpoint_path)
     return graph
 
 

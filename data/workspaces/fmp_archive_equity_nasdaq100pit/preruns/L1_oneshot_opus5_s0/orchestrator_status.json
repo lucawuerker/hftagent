@@ -1,0 +1,26 @@
+{
+  "status": "ok",
+  "returncode": 0,
+  "elapsed_sec": 19413.0,
+  "argv": [
+    "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/bin/python",
+    "run_factor_research.py",
+    "--name",
+    "L1_oneshot_opus5_s0",
+    "--model",
+    "claude-opus-5",
+    "--n-tickers",
+    "0",
+    "--horizon",
+    "6",
+    "--prediction-horizon-mode",
+    "fixed",
+    "--dedup-scope",
+    "prerun",
+    "--max-cost-usd",
+    "404.96",
+    "--llm-provider",
+    "anthropic"
+  ],
+  "finished_at": "2026-07-29T03:19:52"
+}

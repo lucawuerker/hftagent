@@ -640,11 +640,21 @@ def _apply_marginal_penalties(
 
 
 def _coverage(sig: pd.DataFrame, close: pd.DataFrame, mask: np.ndarray) -> float:
-    """Fraction of (date,ticker) cells in ``mask`` where the signal is finite."""
+    """Fraction of DATA-BEARING cells on ``mask`` rows where the signal is finite.
+
+    The denominator is restricted to cells with a finite ``close`` — on a
+    point-in-time membership panel most (date, ticker) cells are structurally
+    empty (the name was not an index member), so a raw cell count caps
+    attainable coverage at the panel density (~0.46 for Nasdaq-100 PIT 2010–24)
+    and makes any τ ≥ 0.5 unpassable for every candidate.  A signal can only
+    ever exist where data exists; coverage measures it there.
+    """
     s = sig.reindex(index=close.index, columns=close.columns).to_numpy(dtype=float)[mask]
-    if s.size == 0:
+    c = close.to_numpy(dtype=float)[mask]
+    data_cells = np.isfinite(c)
+    if not data_cells.any():
         return 0.0
-    return float(np.isfinite(s).mean())
+    return float(np.isfinite(s[data_cells]).mean())
 
 
 def _turnover_netcost(sig: pd.DataFrame, close: pd.DataFrame, h: int,

@@ -141,6 +141,22 @@ def _infer_seconds_per_bar(data_dir: str) -> float | None:
     panel, API-only provider, …) returns ``None`` → feed-agnostic prompt wording.
     """
     try:
+        # The ACTIVE CONFIG wins: probing ``data_dir`` on a non-LOBSTER run
+        # reads whatever LOBSTER CSVs happen to sit in ticker_data/ and told a
+        # daily FMP run it was on 10-SECOND bars — poisoning every horizon /
+        # mechanism prompt. API providers declare their frequency directly.
+        import pandas as pd
+
+        from quant_fund_agent.config import get_settings
+
+        settings = get_settings()
+        if settings.data.provider != "lobster":
+            sec = pd.Timedelta(settings.data.frequency).total_seconds()
+            if sec > 0:
+                return float(sec)
+    except Exception as e:  # noqa: BLE001 — fall through to the local probe
+        log.warning("could not read configured bar size (%s)", e)
+    try:
         from quant_fund_agent.backtesting.data_loader import load_panel
         from quant_fund_agent.data.frequency import _median_bar_seconds
 

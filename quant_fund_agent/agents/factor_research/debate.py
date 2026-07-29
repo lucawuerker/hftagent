@@ -35,8 +35,16 @@ hypothesis below.  Attack it on exactly these dimensions:
    or a just-so narrative reverse-engineered from a formula?  Would the same
    story justify the opposite sign equally well?  Who is on the other side of
    the trade, and why would the inefficiency persist?
-2. LOOK-AHEAD / IMPLEMENTABILITY — does computing it at time t require anything
-   not knowable at t?  Does it depend on fields outside the data scope below?
+2. LOOK-AHEAD / IMPLEMENTABILITY — does the FORMULA ITSELF peek forward in
+   time (future bars, future returns, next period's value)?  Does it depend on
+   fields outside the data scope below?  NOTE the platform guarantee: every
+   field in the data scope — including fundamentals, analyst estimates and
+   earnings-event fields (epsEstimate, epsSurprise, revenue, …) — is delivered
+   POINT-IN-TIME by the data layer: each value is stamped at its public
+   availability date (filing/report date plus lag) and forward-filled, so the
+   value of ``data[field]`` at time t was publicly known at t.  "This field
+   would not be known at time t" is therefore NOT a valid critique; only
+   structural look-ahead inside the formula is.
 3. CROWDING — is this a well-known, likely-arbitraged factor-zoo effect (often
    decayed since publication) presented as new?  Would realistic costs or
    capacity kill it at the stated horizon?
@@ -75,16 +83,28 @@ An empty "issues" list means you found nothing substantive to attack.
 
 MODERATOR_PROMPT = """\
 You moderate a research debate at a quantitative trading firm.  A proposed
-factor hypothesis and the skeptic's critique are below.  Decide the outcome:
+factor hypothesis and the skeptic's critique are below.  Every accepted idea
+is subsequently SCORED EMPIRICALLY by a deterministic backtesting harness with
+multiple-testing deflation — the debate does not need to pre-judge whether the
+idea will work; the harness measures that.  Your job is to cheaply kill ideas
+that are STRUCTURALLY broken (untestable) and to sharpen the rest.  Decide:
 
-- "accept": you would fund an out-of-sample test; minor issues at most, or the
-  critique is generic.
+- "accept": testable and computable; minor or speculative concerns at most.
+  Doubts about economic plausibility, crowding, or empirical merit are NOT
+  grounds for rejection — the harness settles those.
 - "revise": specific, fixable flaws — say precisely what must change.
-- "reject": a fatal flaw (unimplementable, blatant look-ahead, pure redundancy,
-  a crowded effect with no new twist, or no coherent falsifiable mechanism).
+- "reject": RESERVED for objectively fatal, unfixable flaws only:
+  uncomputable from the data scope, structural look-ahead inside the formula
+  (uses future bars/returns), an exact duplicate of a factor already in the
+  book, or no coherent falsifiable mechanism at all.
 
 Be decisive.  Fatal look-ahead or redundancy issues are NOT fixable by wording,
-and a generic mechanism restated more confidently is not a revision.
+and a generic mechanism restated more confidently is not a revision.  NOTE:
+all data-scope fields (fundamentals, analyst estimates, earnings events
+included) are point-in-time aligned by the data layer — values are stamped at
+their public availability date — so a critique of the form "field X would not
+be known at time t" is INVALID and must not drive the verdict; only look-ahead
+structurally inside the formula (using future bars/returns) is fatal.
 
 PROPOSED HYPOTHESIS
 -------------------
@@ -214,10 +234,15 @@ def run_debate(
             return "accept", current, transcript
         if verdict == "reject":
             return "reject", current, transcript
-        if round_no >= max_revisions:  # unresolved revise → reject (≤1 loop)
+        if round_no >= max_revisions:
+            # Unresolved "revise" fails OPEN: the deterministic harness is the
+            # arbiter of empirical merit — the debate's job is to kill
+            # structurally broken ideas cheaply and *improve* the rest, not to
+            # pre-judge value.  The latest revision goes forward, flagged.
             transcript.append({"round": round_no, "note":
-                               "revision budget exhausted — treated as reject"})
-            return "reject", current, transcript
+                               "revision budget exhausted — accepted (fail-open) "
+                               "with the latest revision"})
+            return "accept", current, transcript
 
         try:
             current = _invoke_json(llm, REVISION_PROMPT.format(

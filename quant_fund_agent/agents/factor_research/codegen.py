@@ -548,13 +548,16 @@ def _make_synthetic_panel(
     trade = _df(rng.integers(-1000, 1000, (n_bars, n_tickers)).astype(float))
     volume = trade.abs()
 
-    return {
+    panel = {
         # OHLCV view
         "open": open_,
         "high": high,
         "low": low,
         "close": close,
         "volume": volume,
+        # synthesized derived fields load_panel always provides
+        "vwap": (high + low + close) / 3.0,
+        "returns": close.pct_change(),
         # raw LOBSTER passthroughs
         "trade": trade,
         "orderFlow": _df(rng.integers(-2000, 2000, (n_bars, n_tickers)).astype(float)),
@@ -571,6 +574,33 @@ def _make_synthetic_panel(
         "nbHidden": _df(rng.integers(0, 5, (n_bars, n_tickers)).astype(float)),
         "nbTrades": _df(rng.integers(0, 20, (n_bars, n_tickers)).astype(float)),
     }
+
+    # Fundamental / estimate / event fields (the FMP-archive canonical
+    # vocabulary): a factor reading any in-scope field must be smoke-testable —
+    # without these, every fundamentals-based factor dies with a KeyError at
+    # validation, silently biasing research toward price-only signals.
+    try:
+        from quant_fund_agent.data.fields import ARCHIVE_FIELD_SPECS
+
+        label_pool = ("Technology", "Financials", "Health Care", "Energy",
+                      "Industrials", "Consumer Staples")
+        for spec in ARCHIVE_FIELD_SPECS:
+            if spec.name in panel:
+                continue
+            if spec.group == "labels":
+                row = [label_pool[i % len(label_pool)] for i in range(n_tickers)]
+                panel[spec.name] = pd.DataFrame([row] * n_bars,
+                                                index=idx, columns=cols)
+            else:
+                # quarterly-stepped positive-ish series (fundamentals cadence)
+                n_q = max(1, n_bars // 60)
+                steps = rng.uniform(0.5, 50.0, (n_q + 1, n_tickers)) * \
+                    (1 + rng.normal(0, 0.2, (n_q + 1, n_tickers)))
+                vals = np.repeat(steps, 60, axis=0)[:n_bars]
+                panel[spec.name] = _df(vals)
+    except Exception:  # noqa: BLE001 — archive vocabulary is optional here
+        pass
+    return panel
 
 
 def smoke_test(factor_id: str) -> None:

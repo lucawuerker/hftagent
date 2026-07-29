@@ -598,3 +598,113 @@ def test_persist_fails_closed_on_publish_failure(wired_loop, monkeypatch):
         p.factor_id for eg in loop.controller.archive for p in eg.genome.programs}
     for rec in persisted["kept"]:
         assert rec["metadata"]["evolution"]["publish_failed"] is True
+
+
+def test_parallel_llm_workers_matches_sequential_semantics(
+        synthetic_panel, tmp_path, monkeypatch):
+    """llm_workers>1 pools only the LLM round-trips: admissions still happen
+    sequentially in child order, every billed row carries parents, and no two
+    candidates are ever handed the same factor id."""
+    monkeypatch.setenv("QF_USE_MCP", "0")
+
+    from quant_fund_agent.mcp import research_service as svc
+
+    monkeypatch.setattr(svc, "_load_panel_cached",
+                        lambda data_dir, fields, n_tickers: synthetic_panel)
+    monkeypatch.setattr(svc, "_panel_cache_key",
+                        lambda data_dir, fields, n_tickers: ("test-panel-par",))
+    svc._SIGNAL_CACHE.clear()
+
+    fake = FakeLLM()
+    import quant_fund_agent.agents.factor_research.evolution.loop as loop_mod
+
+    monkeypatch.setattr(loop_mod, "_get_llm",
+                        lambda temperature, role=None: fake)
+
+    cfg = EvolutionRunConfig(
+        generations=2, population_size=6, children_per_generation=6,
+        seed=11, target_horizon=1, stability_blocks=4,
+        n_tickers=None, out_dir=str(tmp_path / "evolution"),
+        llm_workers=4,
+    )
+    loop = EvolutionLoop(cfg, data_context="TEST DATA CONTEXT",
+                         fields=["open", "high", "low", "close", "volume"])
+    loop._load_known_ids = lambda: None
+    summary = loop.run(initial_programs=_seeds())
+
+    assert summary["generations"] == 2
+    assert fake.calls > 0
+    assert summary["archive"], "archive should not be empty on a momentum panel"
+
+    lineage = [json.loads(l) for l in
+               (tmp_path / "evolution" / "lineage.jsonl").read_text().splitlines()]
+    billed = [r for r in lineage if "event" not in r]
+    assert len(billed) == summary["n_trials"]
+    # no two admitted candidates share a factor id (the id-reservation lock)
+    fids = [fid for r in billed for fid in r["factor_ids"]]
+    assert len(fids) == len(set(fids))
+    child_rows = [r for r in billed if r["generation"] > 0]
+    assert all(r["parent_ids"] for r in child_rows if r["operator"] != "seed")
+
+
+def test_checkpoint_resume_continues_not_restarts(
+        synthetic_panel, tmp_path, monkeypatch):
+    """A second loop constructed over an existing checkpoint and run with
+    resume=True must CONTINUE (generation and n_trials advance from the
+    checkpoint) — never re-seed. Guards the entrypoint resume wiring: a
+    silent restart re-spends every prior generation."""
+    monkeypatch.setenv("QF_USE_MCP", "0")
+
+    from quant_fund_agent.mcp import research_service as svc
+
+    monkeypatch.setattr(svc, "_load_panel_cached",
+                        lambda data_dir, fields, n_tickers: synthetic_panel)
+    monkeypatch.setattr(svc, "_panel_cache_key",
+                        lambda data_dir, fields, n_tickers: ("test-panel-res",))
+    svc._SIGNAL_CACHE.clear()
+
+    fake = FakeLLM()
+    import quant_fund_agent.agents.factor_research.evolution.loop as loop_mod
+
+    monkeypatch.setattr(loop_mod, "_get_llm",
+                        lambda temperature, role=None: fake)
+
+    out_dir = str(tmp_path / "evolution")
+    cfg1 = EvolutionRunConfig(
+        generations=2, population_size=6, children_per_generation=4,
+        seed=11, target_horizon=1, stability_blocks=4,
+        n_tickers=None, out_dir=out_dir)
+    loop1 = EvolutionLoop(cfg1, data_context="TEST DATA CONTEXT",
+                          fields=["open", "high", "low", "close", "volume"])
+    loop1._load_known_ids = lambda: None
+    s1 = loop1.run(initial_programs=_seeds())
+    assert s1["generations"] == 2
+    trials_after_first = s1["n_trials"]
+
+    # second process: same out_dir, MORE generations, controller from checkpoint
+    from quant_fund_agent.agents.factor_research.evolution.controller import (
+        EvolutionController,
+    )
+    cfg2 = EvolutionRunConfig(
+        generations=4, population_size=6, children_per_generation=4,
+        seed=11, target_horizon=1, stability_blocks=4,
+        n_tickers=None, out_dir=out_dir)
+    loop2 = EvolutionLoop(cfg2, data_context="TEST DATA CONTEXT",
+                          fields=["open", "high", "low", "close", "volume"])
+    loop2._load_known_ids = lambda: None
+    loop2.controller = EvolutionController.load(tmp_path / "evolution" / "state.json")
+    assert loop2.controller.generation == 2
+    s2 = loop2.run(resume=True)
+
+    assert s2["generations"] == 4                       # continued, not restarted
+    assert s2["n_trials"] >= trials_after_first         # counter carried over
+    lineage = [json.loads(l) for l in
+               (tmp_path / "evolution" / "lineage.jsonl").read_text().splitlines()]
+    billed = [r for r in lineage if "event" not in r]
+    gens = {r["generation"] for r in billed}
+    # pre-resume history preserved AND post-resume generations billed (middle
+    # gens can legitimately be empty: the cycling FakeLLM's children dedup out)
+    assert 0 in gens and max(gens) > 2
+    # seeds were NOT re-evaluated: exactly one gen-0 row per seed
+    gen0 = [r for r in billed if r["generation"] == 0]
+    assert len(gen0) == 2

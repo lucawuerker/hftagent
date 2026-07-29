@@ -1,0 +1,25 @@
+[preflight] config=quant.config.nasdaq100_2010.yaml provider=fmp_archive membership=nasdaq100 2010-01-01->2024-07-27
+[preflight] panel 3665 bars x 209 tickers, density 0.463
+[preflight] all checks passed
+[budget] spent $419.33 of $600.00 ($180.67 remaining)
+[run] L2_opus5_s0: /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/bin/python run_factor_evolution.py --name L2_opus5_s0 --config quant.config.nasdaq100_2010.yaml --seed 0 --model claude-opus-5 --generations 20 --mechanism-groups 1 --mechanism-groups-mode max --demes-per-group 4 --children-per-deme 12 --population 16 --seed-ideas-per-group 6 --progressive-reveal --reveal-every 2 --test-frac 0.2 --retrieval none --curation archive --selection-deflation on --archive-cap 40 --creative-frac 0.1 --marginal-model lightgbm --fixed-book data/prebooks/formulaic_101.json --reference-book data/prebooks/formulaic_101.json --n-tickers 0 --horizon 6 --llm-workers 8 --max-cost-usd 180.67 --llm-provider anthropic
+[done] L2_opus5_s0: ok in 122.6 min (log: data/comparisons/final_matrix/logs/L2_opus5_s0.log)
+[budget] final spend $513.95 of $600.00
+                arm provider  seed  n_factors  n_trials     llm_model  cost_usd  tokens_in  tokens_out status  elapsed_min
+           L0_gp_s0      NaN     0       14.0     326.0            gp      0.00        NaN         NaN     ok         14.7
+L1_oneshot_opus5_s0    opus5     0      119.0       NaN claude-opus-5     61.82  4523853.0   1568014.0     ok        323.6
+        L2_opus5_s0    opus5     0       18.0     825.0 claude-opus-5    452.13 21552218.0  13774706.0     ok        122.6
+        L3_opus5_s0    opus5     0        NaN       NaN           NaN       NaN        NaN         NaN    NaN          NaN
+        L4_opus5_s0    opus5     0        NaN       NaN           NaN       NaN        NaN         NaN    NaN          NaN
+        L5_opus5_s0    opus5     0        NaN       NaN           NaN       NaN        NaN         NaN    NaN          NaN
+        L6_opus5_s0    opus5     0        NaN       NaN           NaN       NaN        NaN         NaN    NaN          NaN
+        L7_opus5_s0    opus5     0        NaN       NaN           NaN       NaN        NaN         NaN    NaN          NaN
+           L0_gp_s1      NaN     1        NaN       NaN           NaN       NaN        NaN         NaN    NaN          NaN
+L1_oneshot_opus5_s1    opus5     1        NaN       NaN           NaN       NaN        NaN         NaN    NaN          NaN
+        L2_opus5_s1    opus5     1        NaN       NaN           NaN       NaN        NaN         NaN    NaN          NaN
+        L3_opus5_s1    opus5     1        NaN       NaN           NaN       NaN        NaN         NaN    NaN          NaN
+        L4_opus5_s1    opus5     1        NaN       NaN           NaN       NaN        NaN         NaN    NaN          NaN
+        L5_opus5_s1    opus5     1        NaN       NaN           NaN       NaN        NaN         NaN    NaN          NaN
+        L6_opus5_s1    opus5     1        NaN       NaN           NaN       NaN        NaN         NaN    NaN          NaN
+        L7_opus5_s1    opus5     1        NaN       NaN           NaN       NaN        NaN         NaN    NaN          NaN
+[aggregate] wrote /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/data/comparisons/final_matrix/matrix_summary.csv

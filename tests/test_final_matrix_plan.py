@@ -21,7 +21,8 @@ import pytest
 import yaml
 
 REPO = Path(__file__).resolve().parents[1]
-PLAN_PATH = REPO / "matrix" / "final_matrix.yaml"
+PLAN_PATHS = [REPO / "matrix" / "final_matrix.yaml",
+              REPO / "matrix" / "opus_ladder.yaml"]
 
 run_ablation_matrix = importlib.import_module("run_ablation_matrix")
 
@@ -59,9 +60,9 @@ def _parser_spec(script: Path) -> dict[str, dict]:
     return spec
 
 
-@pytest.fixture(scope="module")
-def plan() -> dict:
-    return yaml.safe_load(PLAN_PATH.read_text())
+@pytest.fixture(scope="module", params=PLAN_PATHS, ids=lambda p: p.stem)
+def plan(request) -> dict:
+    return yaml.safe_load(request.param.read_text())
 
 
 @pytest.fixture(scope="module")
@@ -121,9 +122,12 @@ def test_every_arm_argv_parses_against_its_entrypoint(plan, parser_specs):
 def test_evolution_defaults_do_not_leak_into_gp_or_oneshot(plan):
     """The regression this file exists for: L0/L1 arms must never inherit the
     evolution ``defaults`` block."""
+    # NB --max-cost-usd is deliberately absent: oneshot accepts it too (per-run
+    # LLM cost ceiling), and only GP (no LLM) must never receive it — covered
+    # by the argparse check above.
     evolution_only = {"--retrieval", "--mechanism-groups", "--progressive-reveal",
                       "--archive-cap", "--creative-frac", "--fixed-book",
-                      "--debate", "--max-cost-usd"}
+                      "--debate"}
     for arm in plan["arms"]:
         if arm.get("entrypoint", "evolution") == "evolution":
             continue

@@ -41,6 +41,7 @@ import argparse
 import json
 import logging
 import os
+import sys
 
 from dotenv import load_dotenv
 
@@ -217,6 +218,13 @@ def main() -> None:
     print(f"GP factor-mining run '{scope.label}' complete")
     print(json.dumps(summary, indent=2, default=str))
     print("=" * 80)
+
+    # An empty archive after a full search means every candidate failed a gate
+    # (e.g. a miscalibrated coverage τ) — exit nonzero so an orchestrator never
+    # records the run as a completed arm.
+    if not persisted["kept_factor_ids"]:
+        log.error("GP run persisted ZERO factors — exiting with failure status")
+        sys.exit(3)
 
 
 if __name__ == "__main__":

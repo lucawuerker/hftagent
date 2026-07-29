@@ -49,6 +49,7 @@ import json
 import logging
 import os
 import threading
+import time
 from typing import Any
 
 log = logging.getLogger(__name__)
@@ -128,6 +129,7 @@ DEFAULT_PRICES: dict[str, tuple[float, float]] = {
     "claude-opus-5": (5.0, 25.0),
     "claude-sonnet-5": (3.0, 15.0),
     "claude-fable-5": (10.0, 50.0),
+    "claude-haiku-4-5": (1.0, 5.0),
     "muse-spark": (1.25, 4.25),
 }
 
@@ -246,6 +248,30 @@ def reset_usage() -> None:
     _METER.reset()
 
 
+def budget_exhausted() -> bool:
+    """True once cumulative metered cost has reached the hard ceiling.
+
+    Cheap pre-flight check for pooled workers: a queued proposal that consults
+    this before its LLM call exits instantly instead of spending money on a
+    call whose completion handler would raise anyway.
+    """
+    ceiling = _max_cost_usd()
+    return ceiling is not None and _METER.total_cost() >= ceiling
+
+
+def seed_usage(summary: dict) -> None:
+    """Preload the meter from a persisted ``usage_summary()`` dict.
+
+    Called on RESUME so the per-run cost ceiling and the recorded usage are
+    cumulative across process restarts instead of resetting to zero.
+    """
+    for role, rec in (summary.get("by_role") or {}).items():
+        _METER.record(role,
+                      int(rec.get("input_tokens", 0) or 0),
+                      int(rec.get("output_tokens", 0) or 0),
+                      float(rec.get("cost_usd", 0.0) or 0.0))
+
+
 def _extract_tokens(response: Any) -> tuple[int, int]:
     """Best-effort (input, output) token counts from a LangChain ``LLMResult``.
 
@@ -292,32 +318,52 @@ def _transcript_path() -> str | None:
     return os.getenv("QF_LLM_TRANSCRIPT_PATH") or None
 
 
+_TRANSCRIPT_LOCK = threading.Lock()   # one JSONL line at a time across threads
+
+
 def _make_usage_handler(model: str, default_role: str | None):
     """A LangChain callback handler metering one model instance into ``_METER``."""
     from langchain_core.callbacks import BaseCallbackHandler
 
     class _UsageHandler(BaseCallbackHandler):
         raise_error = True  # let LLMBudgetExceeded propagate out of the run
-        _last_prompts: list[str] = []
+
+        def __init__(self) -> None:
+            super().__init__()
+            # Keyed by LangChain run_id so concurrent calls through the SAME
+            # model instance (parallel child generation) never mismatch a
+            # prompt with another call's response.
+            self._prompts_by_run: dict[Any, list[str]] = {}
+            self._prompts_lock = threading.Lock()
 
         def _role(self) -> str:
             return llm_role.get() or default_role or "default"
 
-        def on_llm_start(self, serialized: Any, prompts: list[str], **kwargs: Any) -> None:
-            if _transcript_path():
-                self._last_prompts = list(prompts)
+        def _stash(self, run_id: Any, prompts: list[str]) -> None:
+            with self._prompts_lock:
+                self._prompts_by_run[run_id] = prompts
+                if len(self._prompts_by_run) > 64:   # never grow unbounded
+                    self._prompts_by_run.pop(next(iter(self._prompts_by_run)))
 
-        def on_chat_model_start(self, serialized: Any, messages: Any, **kwargs: Any) -> None:
+        def on_llm_start(self, serialized: Any, prompts: list[str],
+                         *, run_id: Any = None, **kwargs: Any) -> None:
+            if _transcript_path():
+                self._stash(run_id, list(prompts))
+
+        def on_chat_model_start(self, serialized: Any, messages: Any,
+                                *, run_id: Any = None, **kwargs: Any) -> None:
             if _transcript_path():
                 try:
-                    self._last_prompts = [
-                        "\n".join(getattr(m, "content", str(m)) for m in batch)
+                    self._stash(run_id, [
+                        "\n".join(content_text(getattr(m, "content", str(m)))
+                                  for m in batch)
                         for batch in messages
-                    ]
+                    ])
                 except Exception:  # transcript is best-effort, never fatal
-                    self._last_prompts = []
+                    self._stash(run_id, [])
 
-        def _write_transcript(self, response: Any, in_tok: int, out_tok: int) -> None:
+        def _write_transcript(self, response: Any, in_tok: int, out_tok: int,
+                              run_id: Any) -> None:
             path = _transcript_path()
             if not path:
                 return
@@ -326,29 +372,35 @@ def _make_usage_handler(model: str, default_role: str | None):
                 for gens in getattr(response, "generations", []) or []:
                     for g in gens:
                         msg = getattr(g, "message", None)
-                        texts.append(getattr(msg, "content", None) or getattr(g, "text", ""))
+                        raw = getattr(msg, "content", None) or getattr(g, "text", "")
+                        # thinking-enabled Anthropic content is a block LIST
+                        texts.append(content_text(raw))
+                with self._prompts_lock:
+                    prompts = self._prompts_by_run.pop(run_id, [])
                 row = {
                     "role": self._role(),
                     "model": model,
-                    "prompt": "\n\n---\n\n".join(self._last_prompts),
+                    "prompt": "\n\n---\n\n".join(prompts),
                     "response": "\n\n---\n\n".join(t for t in texts if t),
                     "input_tokens": in_tok,
                     "output_tokens": out_tok,
                 }
                 from pathlib import Path
                 Path(path).parent.mkdir(parents=True, exist_ok=True)
-                with open(path, "a") as fh:
-                    fh.write(json.dumps(row) + "\n")
+                line = json.dumps(row) + "\n"
+                with _TRANSCRIPT_LOCK, open(path, "a") as fh:
+                    fh.write(line)
             except Exception:  # pragma: no cover - never break a run for logging
                 log.warning("failed to append LLM transcript row", exc_info=True)
 
-        def on_llm_end(self, response: Any, **kwargs: Any) -> None:
+        def on_llm_end(self, response: Any, *, run_id: Any = None,
+                       **kwargs: Any) -> None:
             in_tok, out_tok = _extract_tokens(response)
             price = resolve_price(model)
             cost = 0.0
             if price is not None:
                 cost = (in_tok * price[0] + out_tok * price[1]) / 1e6
-            self._write_transcript(response, in_tok, out_tok)
+            self._write_transcript(response, in_tok, out_tok, run_id)
             total = _METER.record(self._role(), in_tok, out_tok, cost)
             ceiling = _max_cost_usd()
             if ceiling is not None and total > ceiling:
@@ -366,6 +418,99 @@ def _make_usage_handler(model: str, default_role: str | None):
 # ════════════════════════════════════════════════════════════════════════════
 # Factory
 # ════════════════════════════════════════════════════════════════════════════
+
+# Claude models on which `temperature`/`top_p`/`top_k` return a 400 (sampling
+# parameters were removed on Opus 4.7+ and the whole 5-family). Substring match
+# so Bedrock ids ("anthropic.claude-opus-5", "us.anthropic....") hit too.
+_NO_SAMPLING_MODELS = (
+    "claude-opus-5", "claude-fable-5", "claude-mythos-5", "claude-sonnet-5",
+    "claude-opus-4-7", "claude-opus-4-8",
+)
+
+
+def _rejects_sampling_params(model: str) -> bool:
+    m = (model or "").lower()
+    return any(s in m for s in _NO_SAMPLING_MODELS)
+
+
+def content_text(content: Any) -> str:
+    """Flatten a chat-message ``content`` to plain text.
+
+    Anthropic models with thinking enabled return ``content`` as a LIST of
+    typed blocks (thinking + text); every consumer in this codebase expects a
+    plain string.  Text blocks are concatenated; thinking/other blocks are
+    dropped (their tokens are still metered).
+    """
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        parts: list[str] = []
+        for block in content:
+            if isinstance(block, str):
+                parts.append(block)
+            elif isinstance(block, dict) and block.get("type") == "text":
+                parts.append(str(block.get("text", "")))
+        return "\n".join(p for p in parts if p)
+    return str(content)
+
+
+#: Outage tolerance: connection-level failures retry with capped exponential
+#: backoff for up to ~30 minutes TOTAL per call, so a WiFi drop STALLS a run
+#: instead of starving whole generations (a starved generation still burns its
+#: progressive-reveal window). Overridable via env for tests.
+_CONN_RETRY_SCHEDULE = (15, 30, 60, 120, 300, 300, 300, 300, 300)
+
+
+def _is_connection_error(e: BaseException) -> bool:
+    """Best-effort: transport/DNS/timeouts — NOT HTTP 4xx/5xx or budget stops."""
+    if isinstance(e, LLMBudgetExceeded):
+        return False
+    names = {type(x).__name__ for x in (e, e.__cause__, e.__context__) if x}
+    markers = ("APIConnectionError", "APITimeoutError", "ConnectError",
+               "ConnectTimeout", "ReadTimeout", "ReadError", "WriteError",
+               "PoolTimeout", "RemoteProtocolError", "ConnectionError",
+               "TimeoutException", "gaierror", "TransportError")
+    return any(any(m in n for m in markers) for n in names)
+
+
+class _TextContentModel:
+    """Proxy for Anthropic-family chat models with two behaviours:
+
+    1. flattens list-content responses to plain-text ``content`` (the contract
+       every ``_parse_json`` call site in the agents assumes);
+    2. persistent connection-error retries with capped backoff — an internet
+       outage pauses the call for up to ~30 min instead of failing it.
+    """
+
+    def __init__(self, inner: Any) -> None:
+        self._inner = inner
+
+    def invoke(self, *args: Any, **kwargs: Any):
+        attempt = 0
+        while True:
+            try:
+                resp = self._inner.invoke(*args, **kwargs)
+                break
+            except Exception as e:  # noqa: BLE001 — classify then re-raise
+                if not _is_connection_error(e) or attempt >= len(_CONN_RETRY_SCHEDULE):
+                    raise
+                delay = _CONN_RETRY_SCHEDULE[attempt]
+                attempt += 1
+                log.warning(
+                    "connection problem on LLM call (%s: %s) — waiting %ds and "
+                    "retrying (outage retry %d/%d)", type(e).__name__, e, delay,
+                    attempt, len(_CONN_RETRY_SCHEDULE))
+                time.sleep(delay)
+        try:
+            if not isinstance(getattr(resp, "content", None), str):
+                resp.content = content_text(resp.content)
+        except Exception:  # noqa: BLE001 — never break the response path
+            pass
+        return resp
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._inner, name)
+
 
 def make_chat_llm(
     model: str | None = None,
@@ -402,16 +547,36 @@ def make_chat_llm(
         kwargs["base_url"] = effective_base_url
     callbacks = list(kwargs.pop("callbacks", None) or [])
     callbacks.append(_make_usage_handler(model, role))
+    # Long-thinking Claude calls routinely exceed 2 minutes; a 120s client
+    # timeout aborts and retries them forever (the aborted attempt may still
+    # be billed server-side). Floor the timeout for Anthropic-family providers
+    # — this also overrides call sites that hard-code timeout=120.
+    if (provider or infer_provider(model)) in (
+            "anthropic", "bedrock_converse", "bedrock"):
+        if timeout is not None and timeout < 600:
+            timeout = 600
+    # Claude 4.7+/5-family models REJECT sampling parameters with a 400
+    # ("`temperature` is deprecated for this model") — never send them there.
+    sampling: dict[str, Any] = {}
+    if not _rejects_sampling_params(model):
+        sampling["temperature"] = temperature
+    else:
+        for k in ("top_p", "top_k"):
+            kwargs.pop(k, None)
     try:
-        return init_chat_model(
+        chat = init_chat_model(
             model,
             model_provider=provider,
-            temperature=temperature,
             timeout=timeout,
             max_retries=max_retries,
             callbacks=callbacks,
+            **sampling,
             **kwargs,
         )
+        if (provider or infer_provider(model)) in (
+                "anthropic", "bedrock_converse", "bedrock"):
+            chat = _TextContentModel(chat)
+        return chat
     except ImportError as e:
         pkg = _PROVIDER_PACKAGE.get(provider or "", f"langchain-{provider}")
         raise ImportError(

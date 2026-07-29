@@ -69,16 +69,54 @@ def hashing_embedder(texts: Sequence[str], dim: int = 512) -> np.ndarray:
 
 
 def openai_embedder(texts: Sequence[str], model: str = OPENAI_EMBED_MODEL,
-                    batch: int = 128) -> np.ndarray:
-    """OpenAI embeddings, batched; unit-normalised."""
+                    batch: int = 128,
+                    max_chars_per_text: int = 23_000,
+                    max_tokens_per_request: int = 250_000) -> np.ndarray:
+    """OpenAI embeddings, batched; unit-normalised.
+
+    Batches are bounded BOTH by item count and by a conservative token
+    estimate (chars/3): the API caps each request at 300k tokens total and
+    each input at 8,192 tokens, so 128 full papers in one request is a 400.
+    ``max_chars_per_text=23,000`` keeps a worst-case dense text under the
+    per-input cap; whole-paper vectors only do retrieval routing, so the
+    truncation is harmless.
+    """
     from openai import OpenAI  # lazy: only needed when actually embedding
 
     client = OpenAI()
+
+    # Exact per-input truncation: char heuristics under-count on math/LaTeX
+    # heavy papers (< 2 chars/token), which 400s the whole request.
+    try:
+        import tiktoken
+
+        enc = tiktoken.get_encoding("cl100k_base")
+
+        def _clip(t: str) -> tuple[str, int]:
+            toks = enc.encode((t or " ")[:max_chars_per_text] or " ",
+                              disallowed_special=())
+            if len(toks) > 8_000:   # hard API cap is 8,192/input
+                toks = toks[:8_000]
+                return enc.decode(toks), 8_000
+            return (t or " ")[:max_chars_per_text] or " ", max(1, len(toks))
+    except Exception:  # pragma: no cover - tiktoken is installed in the venv
+        def _clip(t: str) -> tuple[str, int]:
+            s = (t or " ")[:12_000] or " "   # ~8k tokens even at 1.5 chars/tok
+            return s, max(1, len(s) // 2)
+
+    clipped, n_toks = zip(*(_clip(t) for t in texts)) if len(texts) else ((), ())
     vecs: list[list[float]] = []
-    for lo in range(0, len(texts), batch):
-        chunk = [t[:32_000] or " " for t in texts[lo:lo + batch]]
-        resp = client.embeddings.create(model=model, input=chunk)
+    lo = 0
+    while lo < len(clipped):
+        hi, est_tokens = lo, 0
+        while hi < len(clipped) and hi - lo < batch:
+            if est_tokens + n_toks[hi] > max_tokens_per_request and hi > lo:
+                break
+            est_tokens += n_toks[hi]
+            hi += 1
+        resp = client.embeddings.create(model=model, input=list(clipped[lo:hi]))
         vecs.extend(d.embedding for d in resp.data)
+        lo = hi
     arr = np.asarray(vecs, dtype=np.float32)
     norms = np.linalg.norm(arr, axis=1, keepdims=True)
     norms[norms == 0] = 1.0

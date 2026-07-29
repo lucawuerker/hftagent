@@ -160,6 +160,44 @@ defaults) and an order-dependent `test_mcp_modeling` failure
 `QF_DATA_TICKERS` etc. process-wide; `test_comparison.py` now snapshots and
 restores).
 
+**FINAL RUN — EXECUTION STARTED 2026-07-28 (Anthropic API, $500 credit).** The
+ladder now runs on **Claude Opus 5 via the direct Anthropic API** (NOT Bedrock)
+from `matrix/opus_ladder.yaml` — `budget_usd: 440` enforced GLOBALLY by
+`run_ablation_matrix.py` (cumulative spend read from every arm's checkpointed
+`llm_usage.json`; each launch's `--max-cost-usd` clamped to the remainder;
+sweep stops when exhausted; full seed-0 ladder ordered before any seed-1 arm).
+Prerequisites DONE: +709 papers harvested (corpus 1,723; scopes fundamental/
+general; legacy `data_scope=None` always passes the retrieval mask); OpenAI
+re-embed (`text-embedding-3-small`, token-aware batching + tiktoken per-input
+truncation — the old char-based batching 400'd); knowledge graph built with
+**claude-haiku-4-5** (~$13, 1,723 papers → 2,295 mechanisms, resolves the FULL
+8 mechanism groups → `children-per-deme` trimmed 4→3 per plan §C;
+`build_graph` now checkpoints every 25 papers + stops cleanly on
+`LLMBudgetExceeded`). D2 timing: **9.6s/candidate** all-in on the full 209-
+ticker panel (lightgbm combined fit 1.4s). D3 graphrag smoke + D4 kill/resume
+verified (lineage/prequential no dupes). **Critical launch-blocking fixes made
+in-session:** (1) Claude 4.7+/5-family REJECTS `temperature`/`top_p`/`top_k` —
+`make_chat_llm` now strips sampling params for those models
+(`_NO_SAMPLING_MODELS`); (2) Anthropic thinking returns `content` as a LIST of
+blocks — `_TextContentModel` wrapper flattens to `str` for every
+`resp.content` consumer; (3) debate was killing 100% of ideas: the 4o-mini-
+class moderator invents look-ahead objections (PIT fields; causal ffill) and
+rejects on empirical-merit grounds — the moderator prompt now states the PIT
+data guarantee and reserves "reject" for structurally fatal flaws (harness
+judges merit, per FunSearch division of labour), and an unresolved revise now
+FAILS OPEN (accept latest revision) — verified with Opus 5 as judge: correct
+causality reasoning, accepts-with-revisions (~$0.3/idea); (4)
+`codegen._make_synthetic_panel` lacked ALL fundamentals fields so every
+fundamentals factor died at validation with KeyError — now includes the full
+~137-field archive vocabulary (labels as strings, quarterly-stepped numerics)
++ `vwap`/`returns`; (5) evolution entrypoint persists the archive on
+`LLMBudgetExceeded` (never discards paid work) and exits rc=3 when a run
+scored ZERO candidates (orchestrator must not mark it ok); (6) oneshot
+`run_factor_research.py` gained `--max-cost-usd` + budget-graceful stop +
+`llm_usage` in manifest. NOTE: this environment kills background tasks every
+~30 min — the orchestrator is simply relaunched (arms auto-resume from
+checkpoints; completed arms skipped).
+
 **Evolutionary researcher — knowledge-graph nested islands replace the QD grid;
 4-axis vector (done, 2026-07-21). THIS SUPERSEDES THE TWO BLOCKS BELOW.**
 Diversity is no longer maintained by a Quality-Diversity behavior grid but by a

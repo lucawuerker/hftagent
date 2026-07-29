@@ -77,11 +77,14 @@ def test_debate_revise_then_accept_uses_revised_idea():
     assert any("revised_idea" in t for t in transcript)
 
 
-def test_debate_unresolved_revise_becomes_reject():
+def test_debate_unresolved_revise_fails_open():
+    """An exhausted revision budget ACCEPTS the latest revision (fail-open):
+    the deterministic harness — not the debate — is the arbiter of empirical
+    merit, so an unresolved 'revise' must never starve the run."""
     llm = ScriptedDebateLLM(["revise"])
     verdict, _, transcript = run_debate(llm, IDEA, data_context="ctx",
                                         max_revisions=0)
-    assert verdict == "reject"
+    assert verdict == "accept"
     assert any("budget exhausted" in str(t.get("note", "")) for t in transcript)
 
 

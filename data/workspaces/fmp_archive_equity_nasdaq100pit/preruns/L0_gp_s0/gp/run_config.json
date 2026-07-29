@@ -1,0 +1,59 @@
+{
+  "generations": 8,
+  "population_size": 16,
+  "children_per_generation": 12,
+  "n_islands": 3,
+  "migration_every": 5,
+  "seed": 0,
+  "seed_pop": 40,
+  "depth_schedule": [
+    3,
+    5,
+    7
+  ],
+  "p_crossover": 0.5,
+  "p_subtree": 0.25,
+  "p_point": 0.15,
+  "p_hoist": 0.1,
+  "window_pool": [
+    2,
+    3,
+    5,
+    10,
+    15,
+    20,
+    30,
+    40,
+    60
+  ],
+  "const_pool": [
+    0.5,
+    1.0,
+    2.0,
+    3.0
+  ],
+  "category": "statistical_arbitrage",
+  "max_resample_tries": 12,
+  "target_horizon": 6,
+  "is_frac": 0.6,
+  "val_frac": 0.2,
+  "stability_blocks": 4,
+  "plateau_scales": [
+    0.9,
+    1.1
+  ],
+  "cutoff_date": null,
+  "independence_metric": "residual_ic",
+  "marginal_model": "lightgbm",
+  "gate_turnover": null,
+  "cost_rate": 0.0005,
+  "perturbation_weight": 0.0,
+  "perturbation_sigma": 0.5,
+  "curation": "archive",
+  "n_keep": null,
+  "selection_deflation": "on",
+  "data_dir": "ticker_data",
+  "n_tickers": null,
+  "reference_book": [],
+  "out_dir": "data/workspaces/fmp_archive_equity_nasdaq100pit/preruns/L0_gp_s0/gp"
+}

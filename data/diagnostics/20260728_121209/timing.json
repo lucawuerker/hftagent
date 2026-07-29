@@ -1,0 +1,163 @@
+{
+  "config": {
+    "config_file": "quant.config.nasdaq100_2010.yaml",
+    "config_name": null,
+    "name": "timing_diag",
+    "n_tickers": null,
+    "generations": 2,
+    "population": 8,
+    "children_per_gen": 4,
+    "seed_ideas": 6,
+    "seed_papers": 0,
+    "horizon": 6,
+    "stability_blocks": 4,
+    "marginal_model": "lightgbm",
+    "model": "gpt-4o-mini",
+    "max_cost_usd": 1.0,
+    "no_persist": false
+  },
+  "wall_sec": 215.73493891599355,
+  "phases": {
+    "panel_load_sec": 60.062518373990315,
+    "seed_sec": 72.90877237499808,
+    "evaluate_total_sec": 76.52654133201577,
+    "generations": 2,
+    "n_trials": 8,
+    "n_eval_failures": 0,
+    "archive_size": 0
+  },
+  "llm": {
+    "total_cost_usd": 0.0257406,
+    "budget_usd": 1.0,
+    "total_calls": 20,
+    "by_role": {
+      "brainstorm": {
+        "calls": 1.0,
+        "seconds": 11.915189666004153,
+        "input_tokens": 3604.0,
+        "output_tokens": 1088.0,
+        "cost": 0.0011933999999999998
+      },
+      "codegen": {
+        "calls": 11.0,
+        "seconds": 59.97861637597089,
+        "input_tokens": 68196.0,
+        "output_tokens": 4234.0,
+        "cost": 0.0127698
+      },
+      "mutate": {
+        "calls": 5.0,
+        "seconds": 43.07759816800535,
+        "input_tokens": 35129.0,
+        "output_tokens": 3111.0,
+        "cost": 0.007135949999999999
+      },
+      "crossover": {
+        "calls": 3.0,
+        "seconds": 20.929036707995692,
+        "input_tokens": 23287.0,
+        "output_tokens": 1914.0,
+        "cost": 0.00464145
+      }
+    }
+  },
+  "evaluation": {
+    "n_candidates_scored": 8,
+    "model_fits_total": 8,
+    "model_fits_per_candidate": 1.0,
+    "mean_eval_sec_per_candidate": 9.565817666501971,
+    "self_time_sum_sec": 12.155262666012277,
+    "metrics": [
+      {
+        "metric": "_combined_prediction",
+        "self_sec": 11.492233333963668,
+        "inclusive_sec": 11.492233333963668,
+        "count": 8,
+        "mean_ms": 1436.5291667454585
+      },
+      {
+        "metric": "_pooled_ic",
+        "self_sec": 0.3586255439877277,
+        "inclusive_sec": 0.3586255439877277,
+        "count": 86,
+        "mean_ms": 4.170064464973578
+      },
+      {
+        "metric": "_turnover_netcost",
+        "self_sec": 0.2322762500261888,
+        "inclusive_sec": 0.2322762500261888,
+        "count": 8,
+        "mean_ms": 29.0345312532736
+      },
+      {
+        "metric": "_independence",
+        "self_sec": 0.04464441600430291,
+        "inclusive_sec": 0.04464441600430291,
+        "count": 8,
+        "mean_ms": 5.580552000537864
+      },
+      {
+        "metric": "_structural_novelty",
+        "self_sec": 0.011868165995110758,
+        "inclusive_sec": 0.011868165995110758,
+        "count": 8,
+        "mean_ms": 1.4835207493888447
+      },
+      {
+        "metric": "_coverage",
+        "self_sec": 0.007787250011460856,
+        "inclusive_sec": 0.007787250011460856,
+        "count": 8,
+        "mean_ms": 0.973406251432607
+      },
+      {
+        "metric": "evaluate_candidate",
+        "self_sec": 0.005608954990748316,
+        "inclusive_sec": 12.155262666012277,
+        "count": 8,
+        "mean_ms": 1519.4078332515346
+      },
+      {
+        "metric": "_marginal_penalties",
+        "self_sec": 0.0017165829631267115,
+        "inclusive_sec": 0.05196808297478128,
+        "count": 8,
+        "mean_ms": 6.49601037184766
+      },
+      {
+        "metric": "_marginal_value",
+        "self_sec": 0.00032912408642005175,
+        "inclusive_sec": 11.527965168017545,
+        "count": 8,
+        "mean_ms": 1440.995646002193
+      },
+      {
+        "metric": "_residual_ic",
+        "self_sec": 0.00010287501208949834,
+        "inclusive_sec": 0.05840991603326984,
+        "count": 8,
+        "mean_ms": 7.30123950415873
+      },
+      {
+        "metric": "_apply_marginal_penalties",
+        "self_sec": 6.170797860249877e-05,
+        "inclusive_sec": 6.170797860249877e-05,
+        "count": 8,
+        "mean_ms": 0.007713497325312346
+      },
+      {
+        "metric": "_zoo_dedup",
+        "self_sec": 8.46099283080548e-06,
+        "inclusive_sec": 8.46099283080548e-06,
+        "count": 8,
+        "mean_ms": 0.001057624103850685
+      }
+    ],
+    "scaling_by_book_size": {
+      "00-04": {
+        "n": 8,
+        "mean_sec": 9.565841098996316
+      }
+    }
+  }
+}

@@ -43,6 +43,7 @@ from __future__ import annotations
 import argparse
 import logging
 import os
+import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -98,6 +99,10 @@ def _parse_args() -> argparse.Namespace:
                         "('package', default) or only THIS prerun's factors "
                         "('prerun', so the brainstorm isn't anchored by other "
                         "preruns — fairer for an A/B of research models).")
+    p.add_argument("--max-cost-usd", type=float, default=None,
+                   help="Hard LLM cost ceiling for this run (sets "
+                        "QF_MAX_LLM_COST_USD; the meter aborts the session "
+                        "loop when reached — progress up to then is kept).")
     p.add_argument("--data-dir", default=os.getenv("DATA_DIR", "ticker_data"))
     p.add_argument("--reset", action="store_true",
                    help="Purge this prerun's factors + code + read-log before starting "
@@ -129,11 +134,18 @@ def main() -> None:
         os.environ["FACTOR_RESEARCH_LLM_MODEL"] = args.model
     if args.llm_provider:
         os.environ["FACTOR_RESEARCH_LLM_PROVIDER"] = args.llm_provider
+    if args.max_cost_usd is not None:
+        os.environ["QF_MAX_LLM_COST_USD"] = str(args.max_cost_usd)
     os.environ["DATA_DIR"] = args.data_dir
 
     from quant_fund_agent import pipeline
     from quant_fund_agent.config import default_config_name, get_settings
-    from quant_fund_agent.llm import resolve_research_model, resolve_research_provider
+    from quant_fund_agent.llm import (
+        LLMBudgetExceeded,
+        resolve_research_model,
+        resolve_research_provider,
+        usage_summary,
+    )
     from quant_fund_agent.workspace import Scope
 
     # ── resolve the (config, prerun) scope research persists into ──
@@ -156,12 +168,33 @@ def main() -> None:
         scope.purge()
         scope.ensure()
 
+    # RESUME: preload prior spend from the manifest so cost accounting is
+    # cumulative and the ceiling is incremental per invocation (same semantics
+    # as run_factor_evolution.py).
+    manifest_path = scope.dir / "manifest.json"
+    if manifest_path.exists() and not args.reset:
+        try:
+            from quant_fund_agent.llm import seed_usage
+            prior_usage = (json.loads(manifest_path.read_text())
+                           .get("llm_usage") or {})
+            if prior_usage:
+                seed_usage(prior_usage)
+                prior = float((prior_usage.get("total") or {}).get("cost_usd", 0))
+                if prior and os.environ.get("QF_MAX_LLM_COST_USD"):
+                    os.environ["QF_MAX_LLM_COST_USD"] = str(
+                        float(os.environ["QF_MAX_LLM_COST_USD"]) + prior)
+                    log.info("resume: prior spend $%.2f preloaded; ceiling "
+                             "raised accordingly", prior)
+        except Exception as e:  # noqa: BLE001
+            log.warning("could not preload prior LLM usage (%s)", e)
+
     model = resolve_research_model()
     provider = resolve_research_provider(model)
     label = f"scope '{scope.label}'"
     log.info("Researching into %s at %s (model=%s, provider=%s); target %d",
              label, factor_db_path, model, provider, args.target_factors)
 
+    budget_stopped = False
     for i in range(1, args.max_sessions + 1):
         have = _researcher_count(factor_db_path) if factor_db_path.exists() else 0
         if have >= args.target_factors:
@@ -190,14 +223,34 @@ def main() -> None:
                 target_factors=args.target_factors,
                 n_factors=_researcher_count(factor_db_path),
                 sessions=i,
+                llm_usage=usage_summary(),
             )
             if not rs.get("selected_papers"):
                 log.warning("No papers left to read — stopping early.")
                 break
+        except LLMBudgetExceeded as e:
+            # Hard cost ceiling reached: stop cleanly, keep everything persisted
+            # so far, and record the final usage for the orchestrator's budget.
+            log.warning("LLM budget ceiling reached — stopping: %s", e)
+            scope.write_manifest(
+                llm_model=model, llm_provider=provider,
+                target_factors=args.target_factors,
+                n_factors=(_researcher_count(factor_db_path)
+                           if factor_db_path.exists() else 0),
+                sessions=i, budget_exceeded=True,
+                llm_usage=usage_summary(),
+            )
+            budget_stopped = True
+            break
         except Exception as e:  # noqa: BLE001 — one bad session must not abort the prerun
             log.warning("session %d failed: %s", i, e)
 
     _summarise(factor_db_path, label, model)
+    if budget_stopped:
+        # incomplete: exit 4 so an orchestrator resumes it when budget returns
+        log.warning("run stopped on the LLM budget ceiling — progress "
+                    "persisted; exiting 4 (resumable)")
+        sys.exit(4)
 
 
 def _summarise(factor_db_path: Path, label: str, model: str) -> None:

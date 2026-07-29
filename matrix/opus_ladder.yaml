@@ -1,0 +1,89 @@
+# Ablation ladder L0-L7 on Claude Opus 5 via the ANTHROPIC API (not Bedrock —
+# the $500 direct Anthropic credit is the funding pool for these runs).
+# Derived from matrix/final_matrix.yaml; the model sweep (Sol/Luna/Sonnet/
+# Fable/Muse) stays in the full matrix for later.
+#
+# Budget: budget_usd is a HARD GLOBAL cap enforced by run_ablation_matrix.py —
+# cumulative spend is read from each run's checkpointed llm_usage.json, each
+# launch's per-run ceiling is clamped to what remains, and the sweep stops when
+# the budget is exhausted (remaining arms stay pending; resumable).
+#
+# Arm order: the FULL seed-0 ladder runs before any seed-1 arm, so if the
+# budget runs out we have every ladder level at one seed rather than half the
+# levels at two.
+
+config_file: quant.config.nasdaq100_2010.yaml
+budget_usd: 470
+
+defaults:
+  generations: 20
+  # 8 is a HARD UPPER LIMIT: with mechanism-groups-mode=max the run uses however
+  # many usable mechanism communities the knowledge graph actually forms.
+  mechanism-groups: 8
+  mechanism-groups-mode: max
+  demes-per-group: 3
+  # graph build (2026-07-28) resolved the FULL 8 usable groups -> per the plan
+  # (section C), children-per-deme is trimmed 4->3 (72 children/gen instead of
+  # 96) to keep per-run cost inside the budget.
+  children-per-deme: 3
+  population: 16
+  seed-ideas-per-group: 6
+  progressive-reveal: true
+  reveal-every: 2
+  test-frac: 0.2
+  retrieval: graphrag
+  curation: archive
+  selection-deflation: "on"
+  archive-cap: 40
+  creative-frac: 0.1
+  marginal-model: lightgbm
+  fixed-book: data/prebooks/formulaic_101.json
+  reference-book: data/prebooks/formulaic_101.json
+  n-tickers: 0
+  horizon: 6
+  # parallel LLM proposal calls (selection/admission stay sequential); the
+  # account has 10M in / 2M out TPM headroom, latency is the only bottleneck
+  llm-workers: 8
+
+gp_defaults:
+  n-tickers: 0
+  horizon: 6
+  depth-schedule: "3,5,7"
+  islands: 3
+  population: 16
+  children-per-generation: 12
+  marginal-model: lightgbm
+  curation: archive
+  selection-deflation: "on"
+
+oneshot_defaults:
+  n-tickers: 0
+  horizon: 6
+  prediction-horizon-mode: fixed
+  dedup-scope: prerun
+
+providers:
+  # Anthropic API directly: bare model id -> provider inferred "anthropic";
+  # ANTHROPIC_API_KEY from .env. Meter prices claude-opus-5 at $5/$25 per MTok.
+  opus5: {model: "claude-opus-5", llm-provider: anthropic}
+
+arms:
+  # ---- seed 0: the whole ladder first --------------------------------------
+  - {name: L0_gp_s0, entrypoint: gp, seed: 0, flags: {generations: 8}}
+  - {name: L1_oneshot_opus5_s0, entrypoint: oneshot, provider: opus5, seed: 0, flags: {}}
+  - {name: L2_opus5_s0, provider: opus5, seed: 0, flags: {retrieval: none, mechanism-groups: 1, demes-per-group: 4, children-per-deme: 12}}
+  - {name: L3_opus5_s0, provider: opus5, seed: 0, flags: {retrieval: rag, mechanism-groups: 1, demes-per-group: 4, children-per-deme: 12}}
+  - {name: L4_opus5_s0, provider: opus5, seed: 0, flags: {}}
+  - {name: L5_opus5_s0, provider: opus5, seed: 0, flags: {debate: "on"}}
+  - {name: L6_opus5_s0, provider: opus5, seed: 0, flags: {debate: "on", evolution-unit: set, set-size: 3}}
+  - {name: L7_opus5_s0, provider: opus5, seed: 0, flags: {debate: "on", memory: true, memory-key: L7_opus5}}
+
+  # ---- seed 1: second pass over the ladder ---------------------------------
+  - {name: L0_gp_s1, entrypoint: gp, seed: 1, flags: {generations: 8}}
+  - {name: L1_oneshot_opus5_s1, entrypoint: oneshot, provider: opus5, seed: 1, flags: {}}
+  - {name: L2_opus5_s1, provider: opus5, seed: 1, flags: {retrieval: none, mechanism-groups: 1, demes-per-group: 4, children-per-deme: 12}}
+  - {name: L3_opus5_s1, provider: opus5, seed: 1, flags: {retrieval: rag, mechanism-groups: 1, demes-per-group: 4, children-per-deme: 12}}
+  - {name: L4_opus5_s1, provider: opus5, seed: 1, flags: {}}
+  - {name: L5_opus5_s1, provider: opus5, seed: 1, flags: {debate: "on"}}
+  - {name: L6_opus5_s1, provider: opus5, seed: 1, flags: {debate: "on", evolution-unit: set, set-size: 3}}
+  - {name: L7_opus5_s1, provider: opus5, seed: 1, flags: {debate: "on", memory: true, memory-key: L7_opus5}}

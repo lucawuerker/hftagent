@@ -38,6 +38,8 @@ import argparse
 import json
 import logging
 import os
+import sys
+from pathlib import Path
 
 from dotenv import load_dotenv
 
@@ -120,6 +122,13 @@ def _parse_args() -> argparse.Namespace:
                    help="Classic independently evolving islands within each group.")
     p.add_argument("--children-per-deme", type=int, default=4,
                    help="Children proposed by every deme in every generation.")
+    p.add_argument("--llm-workers", type=int, default=1,
+                   help="Concurrent LLM proposal calls per generation (and per "
+                        "seeding group). 1 = sequential legacy behaviour. RNG "
+                        "draws, parent selection and admissions stay "
+                        "sequential, so selection/scoring semantics are "
+                        "unchanged — only wall-clock drops. Ignored in SET "
+                        "mode.")
     p.add_argument("--children-per-gen", type=int, default=None,
                    help=argparse.SUPPRESS)
     p.add_argument("--islands", type=int, default=None, help=argparse.SUPPRESS)
@@ -370,6 +379,7 @@ def main() -> None:
         children_per_generation=args.children_per_gen or 8,
         children_per_deme=(None if args.children_per_gen is not None
                            else args.children_per_deme),
+        llm_workers=args.llm_workers,
         n_mechanism_groups=args.mechanism_groups,
         mechanism_groups_mode=args.mechanism_groups_mode,
         demes_per_group=(args.islands if args.islands is not None
@@ -444,8 +454,61 @@ def main() -> None:
         print("=" * 80)
         return
 
+    # RESUME: preload the meter from the checkpointed usage so recorded spend
+    # is cumulative across process restarts. The --max-cost-usd ceiling is
+    # INCREMENTAL per invocation: it is raised by the preloaded prior spend, so
+    # "ceiling $X" always means "spend at most $X more in THIS invocation" —
+    # which is exactly the remaining-global-budget clamp the orchestrator sends.
+    usage_path = Path(cfg.out_dir) / "llm_usage.json"
+    if usage_path.exists() and not args.reset:
+        try:
+            from quant_fund_agent.llm import seed_usage, usage_summary
+            seed_usage(json.loads(usage_path.read_text()))
+            prior = usage_summary()["total"]["cost_usd"]
+            if prior and os.environ.get("QF_MAX_LLM_COST_USD"):
+                bumped = float(os.environ["QF_MAX_LLM_COST_USD"]) + prior
+                os.environ["QF_MAX_LLM_COST_USD"] = str(bumped)
+                log.info("resume: prior spend $%.2f preloaded; ceiling now "
+                         "$%.2f cumulative", prior, bumped)
+        except Exception as e:  # noqa: BLE001 — accounting must not block a run
+            log.warning("could not preload prior LLM usage (%s)", e)
+
+    # RESUME: a checkpointed controller continues from its recorded generation
+    # instead of re-seeding (which would silently re-spend every prior
+    # generation and truncate the lineage). ``--reset`` starts over explicitly.
     loop = EvolutionLoop(cfg)
-    summary = loop.run()
+    state_path = Path(cfg.out_dir) / "state.json"
+    resume = False
+    if state_path.exists() and not args.reset:
+        try:
+            from quant_fund_agent.agents.factor_research.evolution.controller import (
+                EvolutionController,
+            )
+            ctrl = EvolutionController.load(state_path)
+            if ctrl.generation > 0 and ctrl.population():
+                loop.controller = ctrl
+                resume = True
+                log.info("resuming from checkpoint: generation=%d, archive=%d, "
+                         "n_trials=%d", ctrl.generation, len(ctrl.archive),
+                         ctrl.n_trials)
+            else:
+                log.info("checkpoint present but empty — starting fresh")
+        except Exception as e:  # noqa: BLE001 — a corrupt checkpoint falls back
+            log.warning("could not load checkpoint (%s) — starting fresh", e)
+    try:
+        summary = loop.run(resume=resume)
+    except Exception as e:
+        # A hard LLM budget ceiling (or any late failure) must never discard
+        # the paid-for archive: fall through to curation/persist with whatever
+        # the controller holds (per-generation checkpoints are already on disk,
+        # so the run also stays resumable).
+        from quant_fund_agent.llm import LLMBudgetExceeded
+        if not isinstance(e, LLMBudgetExceeded):
+            raise
+        log.warning("LLM budget ceiling reached mid-run (%s) — persisting the "
+                    "archive as-is", e)
+        summary = {"generations": None, "n_trials": loop.controller.n_trials,
+                   "aborted": "llm_budget"}
     session_id = f"evolution:{config_name}:{prerun}"
     persisted = persist_archive(
         loop.controller, session_id=session_id,
@@ -479,6 +542,23 @@ def main() -> None:
     print(f"Evolution run '{scope.label}' complete")
     print(json.dumps(summary, indent=2, default=str))
     print("=" * 80)
+
+    # A run that never scored a single candidate is a FAILURE (e.g. every seed
+    # idea rejected/failed): exit nonzero so an orchestrator never records it
+    # as a completed arm.
+    if not persisted["kept_factor_ids"] and not (summary.get("n_trials") or 0):
+        log.error("run scored ZERO candidates and persisted nothing — "
+                  "exiting with failure status")
+        sys.exit(3)
+
+    # A run that stopped on the cost ceiling is INCOMPLETE: archive persisted,
+    # checkpoints intact — exit 4 so an orchestrator re-runs (=resumes) it once
+    # more budget is available instead of recording it as done.
+    from quant_fund_agent.llm import budget_exhausted
+    if summary.get("aborted") == "llm_budget" or budget_exhausted():
+        log.warning("run stopped on the LLM budget ceiling — progress "
+                    "persisted; exiting 4 (resumable)")
+        sys.exit(4)
 
 
 if __name__ == "__main__":

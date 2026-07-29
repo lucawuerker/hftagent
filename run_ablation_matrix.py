@@ -15,6 +15,9 @@ Usage
 The plan file is YAML::
 
     config_file: quant.config.nasdaq100_2010.yaml
+    budget_usd: 450           # optional GLOBAL cap across all runs (see below);
+                              # per-run ceilings are clamped to what remains and
+                              # the sweep stops when it is exhausted
     defaults:                 # merged into every EVOLUTION arm's flags
       generations: 20
       mechanism-groups: 4
@@ -73,8 +76,10 @@ import time
 from pathlib import Path
 
 import yaml
+from dotenv import load_dotenv
 
 REPO = Path(__file__).resolve().parent
+load_dotenv(REPO / ".env")   # provider keys for the preflight probes + subprocesses
 STATUS_OK = "ok"
 
 
@@ -229,6 +234,60 @@ def scope_dir(plan: dict, prerun: str) -> Path:
     return REPO / "data" / "workspaces" / cfg_name / "preruns" / prerun
 
 
+# ---------------------------------------------------------------------------
+# global budget (across ALL runs in the plan)
+# ---------------------------------------------------------------------------
+#
+# Per-run --max-cost-usd ceilings alone cannot bound total spend: N runs at a
+# $C ceiling can spend N*C.  The orchestrator therefore tracks CUMULATIVE
+# spend from each arm's on-disk usage records (llm_usage.json is checkpointed
+# every generation, so even a killed run's spend is visible) and, before each
+# launch, clamps that run's ceiling to the remaining global budget.  The
+# in-process meter hard-stops each run at its ceiling, so the sum can never
+# exceed the budget.
+
+_BUDGET_STOP_FLOOR_USD = 2.0   # don't bother launching a run with less than this
+
+
+def _arm_spent_usd(sdir: Path) -> float:
+    """Best-known LLM spend of one arm from its persisted usage records."""
+    spent = 0.0
+    for rel in ("evolution/llm_usage.json", "manifest.json"):
+        p = sdir / rel
+        if not p.exists():
+            continue
+        try:
+            payload = json.loads(p.read_text())
+            usage = payload if rel.endswith("llm_usage.json") else payload.get("llm_usage") or {}
+            spent = max(spent, float((usage.get("total") or {}).get("cost_usd", 0.0)))
+        except Exception:  # noqa: BLE001 - a corrupt record must not kill the sweep
+            pass
+    return spent
+
+
+def total_spent_usd(plan: dict) -> float:
+    return sum(_arm_spent_usd(scope_dir(plan, a["name"])) for a in plan["arms"])
+
+
+def clamp_arm_budget(plan: dict, arm: dict, remaining: float) -> dict:
+    """Return a copy of ``arm`` whose per-run cost ceiling fits ``remaining``.
+
+    The effective per-run ceiling is the arm's own ``max-cost-usd`` flag, else
+    the entrypoint-defaults value; the clamp only ever LOWERS it.
+    """
+    entry = arm.get("entrypoint", "evolution")
+    if entry == "gp":  # no LLM, no spend
+        return arm
+    arm = copy.deepcopy(arm)
+    flags = arm.setdefault("flags", {})
+    current = flags.get(
+        "max-cost-usd",
+        (plan.get(_DEFAULTS_KEY[entry]) or {}).get("max-cost-usd"))
+    ceiling = remaining if current is None else min(float(current), remaining)
+    flags["max-cost-usd"] = round(ceiling, 2)
+    return arm
+
+
 def run_arm(plan: dict, arm: dict, log_dir: Path) -> dict:
     argv, extra_env, name = arm_command(plan, arm)
     sdir = scope_dir(plan, name)
@@ -296,6 +355,11 @@ def main() -> None:
     ap.add_argument("--preflight-only", action="store_true")
     ap.add_argument("--no-probes", action="store_true",
                     help="skip the 1-call provider probes in preflight")
+    ap.add_argument("--budget-usd", type=float, default=None,
+                    help="Global LLM budget across ALL runs in the plan "
+                         "(overrides the plan's budget_usd). Each run's "
+                         "per-run ceiling is clamped to what remains; the "
+                         "sweep stops when the budget is exhausted.")
     ap.add_argument("--log-dir", default="data/comparisons/final_matrix/logs")
     args = ap.parse_args()
 
@@ -304,12 +368,26 @@ def main() -> None:
     if args.preflight_only:
         return
 
+    budget = args.budget_usd if args.budget_usd is not None else plan.get("budget_usd")
     only = set(args.only.split(",")) if args.only else None
     results = []
     for arm in plan["arms"]:
         if only and arm["name"] not in only:
             continue
+        if budget is not None:
+            spent = total_spent_usd(plan)
+            remaining = budget - spent
+            print(f"[budget] spent ${spent:.2f} of ${budget:.2f} "
+                  f"(${remaining:.2f} remaining)")
+            if remaining < _BUDGET_STOP_FLOOR_USD and arm.get("entrypoint", "evolution") != "gp":
+                print(f"[budget] EXHAUSTED — stopping before {arm['name']}; "
+                      "remaining arms stay pending (re-run to resume after "
+                      "adding budget)")
+                break
+            arm = clamp_arm_budget(plan, arm, remaining)
         results.append(run_arm(plan, arm, Path(args.log_dir)))
+    if budget is not None:
+        print(f"[budget] final spend ${total_spent_usd(plan):.2f} of ${budget:.2f}")
     aggregate(plan, results)
 
 

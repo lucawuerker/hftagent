@@ -33,6 +33,7 @@ from __future__ import annotations
 
 import json
 import logging
+import threading
 import time
 import uuid
 from dataclasses import asdict, dataclass, field, replace
@@ -87,6 +88,13 @@ class EvolutionRunConfig:
     population_size: int = 10          # per island
     children_per_generation: int = 8   # candidates proposed per generation
     children_per_deme: int | None = None  # grouped mode; None preserves legacy total
+    # Concurrent LLM proposal calls per generation (1 = fully sequential,
+    # byte-identical legacy behaviour). Children within a generation are
+    # independent given generation-start state: RNG draws and parent selection
+    # stay sequential in the main thread, only the LLM round-trips (and the
+    # per-idea seeding debate/codegen calls) fan out; admissions/evaluation
+    # stay sequential in child-index order so scoring semantics are unchanged.
+    llm_workers: int = 1
     n_mechanism_groups: int = 1
     # "exact": the graph must yield exactly n_mechanism_groups usable groups (raise
     # otherwise — legacy behaviour).  "max": n_mechanism_groups is a HARD UPPER
@@ -283,6 +291,23 @@ def _invoke(llm: Any, prompt: str) -> str:
 
 
 # ── seeding via the existing brainstorm/codegen path ──────────────────────────
+
+def _parallel_map(fn: Callable[[Any], Any], items: Sequence[Any],
+                  workers: int) -> list[Any]:
+    """Order-preserving map with a thread pool (``workers`` ≤ 1 = plain loop).
+
+    Used for independent LLM round-trips (seeding debate/codegen, per-child
+    proposals): items must not mutate shared loop state — RNG draws and
+    admissions stay in the caller's thread.
+    """
+    items = list(items)
+    if workers <= 1 or len(items) <= 1:
+        return [fn(x) for x in items]
+    from concurrent.futures import ThreadPoolExecutor
+
+    with ThreadPoolExecutor(max_workers=min(workers, len(items))) as ex:
+        return list(ex.map(fn, items))
+
 
 def _codegen_program(
     llm: Any,
@@ -499,29 +524,43 @@ def seed_programs(cfg: EvolutionRunConfig, data_context: str,
         from quant_fund_agent.agents.factor_research.debate import run_debate
 
         debate_llm = _get_llm(temperature=0.3, role="debate")
-        surviving: list[FactorIdea] = []
-        for idea in ideas:
+
+        def _debate_one(idea: FactorIdea) -> FactorIdea | None:
+            from quant_fund_agent.llm import budget_exhausted
+
+            if budget_exhausted():
+                return None
             with set_llm_role("debate"):
                 verdict, final, _ = run_debate(
                     debate_llm, _idea_payload(idea), data_context=data_context,
                     book=[])
             if verdict == "reject":
                 log.info("[seed:%s] rejected in debate", idea.factor_id)
-                continue
-            surviving.append(_apply_idea_revision(
+                return None
+            return _apply_idea_revision(
                 idea, final, cfg.target_horizon,
-                force_horizon=cfg.force_prediction_horizon))
+                force_horizon=cfg.force_prediction_horizon)
+
+        surviving = [i for i in _parallel_map(_debate_one, ideas,
+                                              cfg.llm_workers) if i is not None]
         log.info("debate kept %d/%d seed idea(s)", len(surviving), len(ideas))
         ideas = surviving
 
     codegen_llm = _get_llm(temperature=0.2, role="codegen")
-    programs = []
     fixed_horizon = cfg.target_horizon if cfg.force_prediction_horizon else None
-    for idea in ideas:
+
+    def _codegen_one(idea: FactorIdea) -> FactorProgram | None:
+        from quant_fund_agent.llm import budget_exhausted
+
+        if budget_exhausted():
+            return None
         with set_llm_role("codegen"):
-            prog = _codegen_program(
+            return _codegen_program(
                 codegen_llm, idea, data_context,
                 expected_prediction_horizon=fixed_horizon)
+
+    programs = []
+    for prog in _parallel_map(_codegen_one, ideas, cfg.llm_workers):
         if prog is not None:
             prog.mechanism_group_id = group_id
             prog.mechanism = mech_by_fid.get(prog.factor_id, "")
@@ -684,6 +723,11 @@ class EvolutionLoop:
         self.data_context = data_context or self._build_data_context()
         self.out_dir = Path(cfg.out_dir)
         self.known_ids: set[str] = set()
+        # Parallel proposal support: guards factor-id allocation, and holds ids
+        # handed out this generation but not yet admitted (so two concurrent
+        # children can never be given the same id).
+        self._id_lock = threading.Lock()
+        self._pending_ids: set[str] = set()
         self.failures: list[dict[str, Any]] = []
 
         # ── experience memory (WS5): load the per-config graph, read the exhausted /
@@ -797,14 +841,19 @@ class EvolutionLoop:
 
     def _unique_id(self, base: str) -> str:
         base = (base or "factor").strip().lower()[:48] or "factor"
-        fid = base
-        k = 1
-        taken = self.known_ids | {
-            p.factor_id for eg in self.controller.population() for p in eg.genome.programs}
-        while fid in taken:
-            fid = f"{base}_{k}"
-            k += 1
-        return fid
+        with self._id_lock:
+            fid = base
+            k = 1
+            taken = self.known_ids | self._pending_ids | {
+                p.factor_id for eg in self.controller.population()
+                for p in eg.genome.programs}
+            while fid in taken:
+                fid = f"{base}_{k}"
+                k += 1
+            if self.cfg.llm_workers > 1:
+                # reserve so a concurrent sibling can't be handed the same id
+                self._pending_ids.add(fid)
+            return fid
 
     def _group_context(self, mechanism_group_id: int) -> str:
         spec = self.mechanism_groups[
@@ -1260,8 +1309,10 @@ class EvolutionLoop:
 
     def _child_llm_semantic(self, llm: Any, island: int,
                             creative: bool = False,
+                            parents: list[EvaluatedGenome] | None = None,
                             ) -> tuple[FactorProgram, list[str]] | None:
-        parents = self.controller.select_parents(1, island)
+        if parents is None:   # parallel path pre-selects in the main thread
+            parents = self.controller.select_parents(1, island)
         if not parents:
             return None
         parent = parents[0]
@@ -1326,17 +1377,23 @@ class EvolutionLoop:
         return prog
 
     def _child_crossover(self, llm: Any, island: int,
+                         parents: list[EvaluatedGenome] | None = None,
                          ) -> tuple[FactorProgram, list[str]] | None:
-        parents = self.controller.select_parents(2, island)
-        if len(parents) < 2:
-            return None
-        a, b = parents[0], parents[1]
-        if a.genome.genome_id == b.genome.genome_id:
-            others = [p for p in self.controller.population(island)
-                      if p.genome.genome_id != a.genome.genome_id]
-            if not others:
+        if parents is None:   # parallel path pre-selects in the main thread
+            parents = self.controller.select_parents(2, island)
+            if len(parents) < 2:
                 return None
-            b = others[int(self.rng.integers(0, len(others)))]
+            a, b = parents[0], parents[1]
+            if a.genome.genome_id == b.genome.genome_id:
+                others = [p for p in self.controller.population(island)
+                          if p.genome.genome_id != a.genome.genome_id]
+                if not others:
+                    return None
+                b = others[int(self.rng.integers(0, len(others)))]
+        else:
+            if len(parents) < 2:
+                return None
+            a, b = parents[0], parents[1]
         group_id, _ = self.controller.coordinates(island)
         context = self._group_context(group_id)
         prompt = build_crossover_prompt(
@@ -1363,24 +1420,30 @@ class EvolutionLoop:
         return child, [a.genome.genome_id, b.genome.genome_id]
 
     def _child_cross_group(self, llm: Any, island: int,
+                           parents: list[EvaluatedGenome] | None = None,
+                           other_group: int | None = None,
                            ) -> tuple[FactorProgram, list[str]] | None:
         """Synthesize parents from two reserved knowledge-graph groups."""
-        if self.cfg.n_mechanism_groups < 2:
-            return self._child_crossover(llm, island)
         group_id, _ = self.controller.coordinates(island)
-        local = self.controller.select_parents(1, island)
-        other_groups = [
-            g for g in range(self.cfg.n_mechanism_groups)
-            if g != group_id and self.controller.population(mechanism_group_id=g)
-        ]
-        if not local or not other_groups:
-            return self._child_crossover(llm, island)
-        other_group = int(self.rng.choice(other_groups))
-        remote = self.controller.select_parents(
-            1, mechanism_group_id=other_group)
-        if not remote:
-            return None
-        a, b = local[0], remote[0]
+        if parents is not None and other_group is not None:
+            # parallel path: selection (incl. fallback decisions) done upstream
+            a, b = parents[0], parents[1]
+        else:
+            if self.cfg.n_mechanism_groups < 2:
+                return self._child_crossover(llm, island)
+            local = self.controller.select_parents(1, island)
+            other_groups = [
+                g for g in range(self.cfg.n_mechanism_groups)
+                if g != group_id and self.controller.population(mechanism_group_id=g)
+            ]
+            if not local or not other_groups:
+                return self._child_crossover(llm, island)
+            other_group = int(self.rng.choice(other_groups))
+            remote = self.controller.select_parents(
+                1, mechanism_group_id=other_group)
+            if not remote:
+                return None
+            a, b = local[0], remote[0]
         context = (
             self._group_context(group_id)
             + "\n\nCROSS-GROUP SYNTHESIS\nCombine the focal group with this "
@@ -1435,6 +1498,10 @@ class EvolutionLoop:
                     expected_prediction_horizon=expected_horizon)
                 break
             except Exception as e:  # noqa: BLE001 — feed the error back once
+                from quant_fund_agent.llm import LLMBudgetExceeded
+
+                if isinstance(e, LLMBudgetExceeded):
+                    raise   # a budget stop is not a fixable code error — never retry
                 program = None
                 if attempt == 0:
                     log.info("child attempt failed (%s) — retrying with feedback", e)
@@ -1450,6 +1517,104 @@ class EvolutionLoop:
         program.source_paper_ids = sorted({
             pid for p in parents for pid in p.genome.program.source_paper_ids})
         return program
+
+    # ── parallel child proposal (llm_workers > 1) ─────────────────────────────
+    #
+    # Children within a generation are independent given generation-start
+    # state, so only the LLM round-trips fan out to threads.  All RNG draws
+    # (operator, creative flag, parent selection incl. fallback decisions)
+    # happen SEQUENTIALLY in the main thread via _prep_child_job, and
+    # admissions/evaluation happen sequentially in child order afterwards —
+    # selection and scoring semantics are identical to the sequential path;
+    # only wall-clock (and the LLM's own sampling) differs.
+
+    def _prep_child_job(self, op: str, island: int) -> dict[str, Any] | None:
+        """Main-thread RNG phase: returns a thread-safe job spec (or None)."""
+        if op == "jitter":
+            # no LLM involved — run it here so its RNG use stays sequential
+            return {"kind": "done", "island": island, "op_label": op,
+                    "result": self._child_jitter(island)}
+        if op == "crossover":
+            parents = self.controller.select_parents(2, island)
+            if len(parents) < 2:
+                return None
+            a, b = parents[0], parents[1]
+            if a.genome.genome_id == b.genome.genome_id:
+                others = [p for p in self.controller.population(island)
+                          if p.genome.genome_id != a.genome.genome_id]
+                if not others:
+                    return None
+                b = others[int(self.rng.integers(0, len(others)))]
+            return {"kind": "crossover", "island": island, "op_label": op,
+                    "parents": [a, b]}
+        if op == "cross_group":
+            if self.cfg.n_mechanism_groups < 2:
+                job = self._prep_child_job("crossover", island)
+                if job is not None:
+                    job["op_label"] = op
+                return job
+            group_id, _ = self.controller.coordinates(island)
+            local = self.controller.select_parents(1, island)
+            other_groups = [
+                g for g in range(self.cfg.n_mechanism_groups)
+                if g != group_id
+                and self.controller.population(mechanism_group_id=g)
+            ]
+            if not local or not other_groups:
+                job = self._prep_child_job("crossover", island)
+                if job is not None:
+                    job["op_label"] = op
+                return job
+            other_group = int(self.rng.choice(other_groups))
+            remote = self.controller.select_parents(
+                1, mechanism_group_id=other_group)
+            if not remote:
+                return None
+            return {"kind": "cross_group", "island": island, "op_label": op,
+                    "parents": [local[0], remote[0]],
+                    "other_group": other_group}
+        # semantic mutation (default op)
+        creative = False
+        if self.cfg.creative_frac > 0:
+            creative = bool(float(self.rng.random()) < self.cfg.creative_frac)
+        parents = self.controller.select_parents(1, island)
+        if not parents:
+            return None
+        return {"kind": "semantic", "island": island,
+                "op_label": "llm_semantic_creative" if creative else op,
+                "parents": parents, "creative": creative}
+
+    def _run_child_job(self, job: dict[str, Any]
+                       ) -> tuple[FactorProgram, list[str]] | None:
+        """Worker phase: LLM round-trips only; no shared-state mutation."""
+        from quant_fund_agent.llm import budget_exhausted
+
+        kind = job["kind"]
+        if kind == "done":
+            return job.get("result")
+        if budget_exhausted():
+            # hard block: queued proposals stop spending the moment the
+            # ceiling trips — only calls already in flight can overshoot
+            return None
+        try:
+            llm = self._role_llm("hypothesis", 0.6)
+            if kind == "crossover":
+                return self._child_crossover(llm, job["island"],
+                                             parents=job["parents"])
+            if kind == "cross_group":
+                return self._child_cross_group(llm, job["island"],
+                                               parents=job["parents"],
+                                               other_group=job["other_group"])
+            return self._child_llm_semantic(llm, job["island"],
+                                            creative=job["creative"],
+                                            parents=job["parents"])
+        except Exception as e:  # noqa: BLE001 — one child must not kill the gen
+            from quant_fund_agent.llm import LLMBudgetExceeded
+
+            if isinstance(e, LLMBudgetExceeded):
+                raise
+            log.warning("parallel child proposal failed (%s)", e)
+            return None
 
     def _child_jitter(self, island: int) -> tuple[FactorProgram, list[str]] | None:
         parents = self.controller.select_parents(1, island)
@@ -1744,6 +1909,16 @@ class EvolutionLoop:
         op_names = [n for n, _ in ops]
         op_probs = [p / total_p for _, p in ops]
 
+        if cfg.llm_workers > 1 and cfg.unit != "set":
+            # Pre-warm the per-role chat-model cache so worker threads only
+            # ever READ it (lazy construction from multiple threads races).
+            for role, temp in (("hypothesis", 0.6), ("debate", 0.3),
+                               ("codegen", 0.2)):
+                try:
+                    self._role_llm(role, temp)
+                except Exception as e:  # noqa: BLE001 — surfaced on first use
+                    log.warning("could not pre-build %s LLM (%s)", role, e)
+
         for gen in range(start_gen + 1, cfg.generations + 1):
             self.controller.generation = gen
             # progressive reveal: on a reveal generation, run the prequential probe,
@@ -1763,7 +1938,33 @@ class EvolutionLoop:
                     k % len(self.controller.islands)
                     for k in range(cfg.children_per_generation)
                 ]
-            for island in child_islands:
+            if cfg.llm_workers > 1 and cfg.unit != "set":
+                # Parallel proposals: RNG/selection in the main thread,
+                # LLM round-trips pooled, admissions sequential in order.
+                jobs = [self._prep_child_job(
+                            str(self.rng.choice(op_names, p=op_probs)), island)
+                        for island in child_islands]
+                live = [j for j in jobs if j is not None]
+                results = iter(_parallel_map(self._run_child_job, live,
+                                             cfg.llm_workers))
+                for job in jobs:
+                    if job is None:
+                        continue
+                    made_child = next(results)
+                    if made_child is None:
+                        continue
+                    child, parent_ids = made_child
+                    eg = self._admit(child, generation=gen,
+                                     island=job["island"],
+                                     operator=job["op_label"],
+                                     parent_ids=parent_ids)
+                    if eg is not None:
+                        made += 1
+                self._pending_ids.clear()
+                child_loop_done = True
+            else:
+                child_loop_done = False
+            for island in (child_islands if not child_loop_done else []):
                 op = str(self.rng.choice(op_names, p=op_probs))
                 if cfg.unit == "set":
                     made_set = self._child_set(op, island)

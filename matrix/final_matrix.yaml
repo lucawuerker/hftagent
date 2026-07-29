@@ -19,7 +19,9 @@ defaults:
   mechanism-groups: 8
   mechanism-groups-mode: max
   demes-per-group: 3
-  children-per-deme: 4
+  # graph build (2026-07-28) resolved the FULL 8 usable groups -> per the plan
+  # (section C), children-per-deme is trimmed 4->3 (72 children/gen).
+  children-per-deme: 3
   population: 16
   seed-ideas-per-group: 6
   progressive-reveal: true
@@ -43,6 +45,8 @@ defaults:
   reference-book: data/prebooks/formulaic_101.json
   n-tickers: 0
   horizon: 6
+  # parallel LLM proposal calls (selection/admission stay sequential)
+  llm-workers: 8
   max-cost-usd: 200
 
 # The GP and oneshot entrypoints accept a much smaller flag vocabulary than

@@ -1,0 +1,897 @@
+21:56:19  WARNING  run_factor_research     could not preload prior LLM usage (name 'json' is not defined)
+21:56:19  INFO     run_factor_research     Researching into scope 'fmp_archive_equity_nasdaq100pit/L1_oneshot_opus5_s0' at data/workspaces/fmp_archive_equity_nasdaq100pit/preruns/L1_oneshot_opus5_s0/factors/factor_db.json (model=claude-opus-5, provider=anthropic); target 100
+21:56:19  INFO     run_factor_research     ── session 1/12  (have 22, want 100) ──
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/langgraph/cache/base/__init__.py:8: LangChainPendingDeprecationWarning: The default value of `allowed_objects` will change in a future version. Pass an explicit value (e.g., allowed_objects='messages' or allowed_objects='core') to suppress this warning.
+  from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
+21:56:20  INFO     backtesting.data_loader  capping universe at 1 tickers (was 10)
+21:56:22  INFO     backtesting.data_loader  loaded 1 tickers, skipped 0
+21:56:22  INFO     pipeline                Factor research session 'prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:001' (papers=25, ideas=25, IC@6 recorded, not gated; prediction horizon fixed at 6; 144 data fields in scope)
+21:56:25  INFO     research.service        fetched full text for on_transfer_learning_for_chatter_detection_in_turning_using_ from https://arxiv.org/pdf/1905.01982v2 (97473 chars, 2.8s)
+21:56:26  INFO     research.service        fetched full text for inferring_financial_stock_returns_correlation_from_complex_n from https://arxiv.org/pdf/2407.20380v1 (37048 chars, 0.8s)
+21:56:26  INFO     research.service        fetched full text for bayesian_logistic_betting_strategy_against_probability_forec from https://arxiv.org/pdf/1204.3496v1 (36032 chars, 0.5s)
+21:56:27  INFO     research.service        fetched full text for construct_sparse_portfolio_with_mutual_fund_s_favourite_stoc from https://arxiv.org/pdf/2305.01642v1 (24889 chars, 0.8s)
+21:56:28  INFO     research.service        fetched full text for map_support_detection_for_greedy_sparse_signal_recovery_algo from https://arxiv.org/pdf/1508.00964v2 (57228 chars, 0.8s)
+21:56:28  INFO     research.service        fetched full text for variable_lag_granger_causality_for_time_series_analysis from https://arxiv.org/pdf/1912.10829v1 (52379 chars, 0.4s)
+21:56:30  INFO     research.service        fetched full text for confirmatory_bayesian_online_change_point_detection_in_the_c from https://arxiv.org/pdf/1905.13168v2 (42877 chars, 1.9s)
+21:56:32  INFO     research.service        fetched full text for u_s_long_term_earnings_outcomes_by_sex_race_ethnicity_and_pl from https://arxiv.org/pdf/2112.05822v1 (137115 chars, 2.0s)
+21:56:32  INFO     research.service        fetched full text for an_investigation_into_laboucheres_betting_system_to_improve_ from https://arxiv.org/pdf/1707.00529v1 (44378 chars, 0.5s)
+21:56:33  INFO     research.service        fetched full text for stabilizing_queuing_networks_with_model_data_independent_con from https://arxiv.org/pdf/2011.11788v6 (46675 chars, 0.7s)
+21:56:34  INFO     research.service        fetched full text for a_random_matrix_theoretic_approach_to_handling_singular_cova from https://arxiv.org/pdf/1010.0601v1 (54516 chars, 0.8s)
+21:56:35  INFO     research.service        fetched full text for sigbert_combining_narrative_medical_reports_and_rough_path_s from https://arxiv.org/pdf/2507.22941v1 (45641 chars, 1.1s)
+21:56:37  INFO     research.service        fetched full text for non_stationary_transformers_exploring_the_stationarity_in_ti from https://arxiv.org/pdf/2205.14415v4 (81522 chars, 2.4s)
+21:56:38  INFO     research.service        fetched full text for stochastic_optimal_control_with_measurable_coefficients_and_ from https://arxiv.org/pdf/2502.02352v3 (49814 chars, 1.0s)
+21:56:42  INFO     research.service        fetched full text for residual_dynamic_mode_decomposition_robust_and_verified_koop from https://arxiv.org/pdf/2205.09779v1 (115405 chars, 3.7s)
+21:56:43  INFO     research.service        fetched full text for on_controller_stopper_problems_with_jumps_and_their_applicat from https://arxiv.org/pdf/1212.4894v3 (69843 chars, 1.0s)
+21:56:43  INFO     research.service        fetched full text for the_cross_section_of_expected_returns_on_penny_stocks_are_lo from https://arxiv.org/pdf/1610.01338v1 (44614 chars, 0.4s)
+21:56:43  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:001] selected 25/25 papers: ['follow_the_leader_enhancing_systematic_trend_following_using', 'on_transfer_learning_for_chatter_detection_in_turning_using_', 'inferring_financial_stock_returns_correlation_from_complex_n', 'bayesian_logistic_betting_strategy_against_probability_forec', 'construct_sparse_portfolio_with_mutual_fund_s_favourite_stoc', 'map_support_detection_for_greedy_sparse_signal_recovery_algo', 'towards_time_series_reasoning_with_llms', 'variable_lag_granger_causality_for_time_series_analysis', 'graph_neural_ordinary_differential_equations', 'confirmatory_bayesian_online_change_point_detection_in_the_c', 'long_term_memory_and_volatility_clustering_in_daily_and_high', 'u_s_long_term_earnings_outcomes_by_sex_race_ethnicity_and_pl', 'an_investigation_into_laboucheres_betting_system_to_improve_', 'stabilizing_queuing_networks_with_model_data_independent_con', 'a_random_matrix_theoretic_approach_to_handling_singular_cova', 'sigbert_combining_narrative_medical_reports_and_rough_path_s', 'conditional_information_inequalities_for_entropic_and_almost', 'non_stationary_transformers_exploring_the_stationarity_in_ti', 'towards_self_supervised_foundation_models_for_critical_care_', 'sequential_tracking_of_a_hidden_markov_chain_using_point_pro', 'stochastic_optimal_control_with_measurable_coefficients_and_', 'residual_dynamic_mode_decomposition_robust_and_verified_koop', 'continuous_time_modeling_of_bid_ask_spread_and_price_dynamic', 'on_controller_stopper_problems_with_jumps_and_their_applicat', 'the_cross_section_of_expected_returns_on_penny_stocks_are_lo']
+21:56:43  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:001] brainstorming up to 25 idea(s) across 25 paper(s), one call each (dedup against prerun, 22 known id(s)) …
+21:57:19  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+21:57:19  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:001] brainstorm call (follow_the_leader_enhancing_systematic_trend_following_using, asked 1, 24913 tok): 35.3s
+21:58:05  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+21:58:05  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:001] brainstorm call (on_transfer_learning_for_chatter_detection_in_turning_using_, asked 1, 35217 tok): 45.5s
+21:58:45  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+21:58:45  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:001] brainstorm call (inferring_financial_stock_returns_correlation_from_complex_n, asked 1, 12367 tok): 39.8s
+21:59:25  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+21:59:25  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:001] brainstorm call (bayesian_logistic_betting_strategy_against_probability_forec, asked 1, 16285 tok): 40.1s
+22:00:17  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:00:17  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:001] brainstorm call (construct_sparse_portfolio_with_mutual_fund_s_favourite_stoc, asked 1, 9648 tok): 52.6s
+22:01:03  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:01:03  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:001] brainstorm call (map_support_detection_for_greedy_sparse_signal_recovery_algo, asked 1, 23152 tok): 45.2s
+22:01:43  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:01:43  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:001] brainstorm call (towards_time_series_reasoning_with_llms, asked 1, 11724 tok): 39.9s
+22:02:14  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:02:15  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:001] brainstorm call (variable_lag_granger_causality_for_time_series_analysis, asked 1, 18553 tok): 31.8s
+22:03:14  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:03:14  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:001] brainstorm call (graph_neural_ordinary_differential_equations, asked 1, 18938 tok): 59.9s
+22:03:55  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:03:56  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:001] brainstorm call (confirmatory_bayesian_online_change_point_detection_in_the_c, asked 1, 19615 tok): 41.1s
+22:04:34  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:04:34  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:001] brainstorm call (long_term_memory_and_volatility_clustering_in_daily_and_high, asked 1, 10577 tok): 38.1s
+22:05:20  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:05:20  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:001] brainstorm call (u_s_long_term_earnings_outcomes_by_sex_race_ethnicity_and_pl, asked 1, 48685 tok): 46.5s
+22:06:11  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:06:11  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:001] brainstorm call (an_investigation_into_laboucheres_betting_system_to_improve_, asked 1, 14751 tok): 50.9s
+22:06:54  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:06:54  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:001] brainstorm call (stabilizing_queuing_networks_with_model_data_independent_con, asked 1, 17127 tok): 43.3s
+22:07:33  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:07:33  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:001] brainstorm call (a_random_matrix_theoretic_approach_to_handling_singular_cova, asked 1, 22061 tok): 38.4s
+22:08:37  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:08:37  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:001] brainstorm call (sigbert_combining_narrative_medical_reports_and_rough_path_s, asked 1, 14507 tok): 64.7s
+22:09:33  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:09:33  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:001] brainstorm call (conditional_information_inequalities_for_entropic_and_almost, asked 1, 31180 tok): 56.0s
+22:10:11  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:10:11  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:001] brainstorm call (non_stationary_transformers_exploring_the_stationarity_in_ti, asked 1, 32432 tok): 37.2s
+22:10:49  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:10:49  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:001] brainstorm call (towards_self_supervised_foundation_models_for_critical_care_, asked 1, 17401 tok): 38.8s
+22:11:21  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:11:21  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:001] brainstorm call (sequential_tracking_of_a_hidden_markov_chain_using_point_pro, asked 1, 31427 tok): 31.9s
+22:11:55  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:11:55  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:001] brainstorm call (stochastic_optimal_control_with_measurable_coefficients_and_, asked 1, 20219 tok): 33.6s
+22:12:24  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:12:24  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:001] brainstorm call (residual_dynamic_mode_decomposition_robust_and_verified_koop, asked 1, 47989 tok): 29.3s
+22:13:28  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:13:28  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:001] brainstorm call (continuous_time_modeling_of_bid_ask_spread_and_price_dynamic, asked 1, 23393 tok): 63.7s
+22:14:11  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:14:11  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:001] brainstorm call (on_controller_stopper_problems_with_jumps_and_their_applicat, asked 1, 36415 tok): 42.6s
+22:14:58  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:14:58  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:001] brainstorm call (the_cross_section_of_expected_returns_on_penny_stocks_are_lo, asked 1, 14303 tok): 47.0s
+22:14:58  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:001] kept 25 idea(s) from 25 paper-call(s)
+22:16:49  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:16:49  INFO     factor_research.codegen  validated levy_area_follower_rank_untraded_spillover (class LevyAreaFollowerRankUntradedSpillover)
+22:16:49  INFO     factor_research         [levy_area_follower_rank_untraded_spillover] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/levy_area_follower_rank_untraded_spillover.py
+22:19:38  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:19:39  INFO     factor_research.codegen  validated chatter_band_phase_extrapolation_gate (class ChatterBandPhaseExtrapolationGate)
+22:19:39  INFO     factor_research         [chatter_band_phase_extrapolation_gate] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/chatter_band_phase_extrapolation_gate.py
+22:22:00  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:22:00  INFO     factor_research.codegen  validated rmt_noise_shock_clustering_redundancy_switch (class RmtNoiseShockClusteringRedundancySwitch)
+22:22:00  INFO     factor_research         [rmt_noise_shock_clustering_redundancy_switch] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/rmt_noise_shock_clustering_redundancy_switch.py
+22:25:06  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:25:06  INFO     factor_research.codegen  validated logit_calibration_trust_betting_tilt (class LogitCalibrationTrustBettingTilt)
+22:25:07  INFO     factor_research         [logit_calibration_trust_betting_tilt] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/logit_calibration_trust_betting_tilt.py
+22:27:34  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:27:34  INFO     factor_research.codegen  validated stability_selected_sparse_basket_lag_gap (class StabilitySelectedSparseBasketLagGap)
+22:27:34  INFO     factor_research         [stability_selected_sparse_basket_lag_gap] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/stability_selected_sparse_basket_lag_gap.py
+22:30:28  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:30:28  INFO     factor_research.codegen  validated map_support_pursuit_factor_impulse_split (class MapSupportPursuitFactorImpulseSplit)
+22:30:28  INFO     factor_research         [map_support_pursuit_factor_impulse_split] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/map_support_pursuit_factor_impulse_split.py
+22:31:58  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:31:58  INFO     factor_research.codegen  validated patch_shape_basis_scale_context_gate (class PatchShapeBasisScaleContextGate)
+22:31:58  INFO     factor_research         [patch_shape_basis_scale_context_gate] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/patch_shape_basis_scale_context_gate.py
+22:37:39  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:37:39  INFO     factor_research.codegen  validated vl_granger_dtw_backlog_catchup (class VLGrangerDTWBacklogCatchup)
+22:37:39  INFO     factor_research         [vl_granger_dtw_backlog_catchup] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/vl_granger_dtw_backlog_catchup.py
+22:39:48  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:39:48  INFO     factor_research.codegen  validated second_order_peer_graph_flow_event_clock_damping (class SecondOrderPeerGraphFlowEventClockDamping)
+22:39:48  INFO     factor_research         [second_order_peer_graph_flow_event_clock_damping] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/second_order_peer_graph_flow_event_clock_damping.py
+22:41:04  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:41:04  INFO     factor_research.codegen  validated gp_covar_break_persistence_flip (class GpCovarBreakPersistenceFlip)
+22:41:04  INFO     factor_research         [gp_covar_break_persistence_flip] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/gp_covar_break_persistence_flip.py
+22:44:30  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:44:30  INFO     factor_research.codegen  validated garch_filtered_magnitude_memory_flip (class GarchFilteredMagnitudeMemoryFlip)
+22:44:31  INFO     factor_research         [garch_filtered_magnitude_memory_flip] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/garch_filtered_magnitude_memory_flip.py
+22:47:07  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:47:07  INFO     factor_research.codegen  validated quantile_coefficient_share_dislocation_gate (class QuantileCoefficientShareDislocationGate)
+22:47:07  INFO     factor_research         [quantile_coefficient_share_dislocation_gate] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/quantile_coefficient_share_dislocation_gate.py
+22:48:49  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:48:49  INFO     factor_research.codegen  validated labouchere_ruin_proximity_capitulation_drift (class LabouchereRuinProximityCapitulationDrift)
+22:48:49  INFO     factor_research         [labouchere_ruin_proximity_capitulation_drift] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/labouchere_ruin_proximity_capitulation_drift.py
+22:51:18  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:51:18  INFO     factor_research.codegen  validated backpressure_bottleneck_queue_discharge_gate (class BackpressureBottleneckQueueDischargeGate)
+22:51:18  INFO     factor_research         [backpressure_bottleneck_queue_discharge_gate] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/backpressure_bottleneck_queue_discharge_gate.py
+22:53:57  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:53:57  INFO     factor_research.codegen  validated haar_projection_ensemble_precision_dislocation (class HaarProjectionEnsemblePrecisionDislocation)
+22:53:57  INFO     factor_research         [haar_projection_ensemble_precision_dislocation] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/haar_projection_ensemble_precision_dislocation.py
+22:56:04  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:56:04  INFO     factor_research.codegen  validated sif_rare_token_path_signature_impact_split (class SifRareTokenPathSignatureImpactSplit)
+22:56:04  INFO     factor_research         [sif_rare_token_path_signature_impact_split] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/sif_rare_token_path_signature_impact_split.py
+22:59:58  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+22:59:58  INFO     factor_research.codegen  validated ingleton_slack_conditional_independence_trust_gate (class IngletonSlackConditionalIndependenceTrustGate)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/ingleton_slack_conditional_independence_trust_gate.py:280: RuntimeWarning: Mean of empty slice
+  box_null = np.nanmean(stack, axis=0)
+22:59:58  INFO     factor_research         [ingleton_slack_conditional_independence_trust_gate] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/ingleton_slack_conditional_independence_trust_gate.py
+23:02:43  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:02:43  INFO     factor_research.codegen  validated destationary_analog_attention_rescaled_drift (class DestationaryAnalogAttentionRescaledDrift)
+23:02:43  INFO     factor_research         [destationary_analog_attention_rescaled_drift] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/destationary_analog_attention_rescaled_drift.py
+23:03:52  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:03:52  INFO     factor_research.codegen  validated informative_missingness_masked_drift_split (class InformativeMissingnessMaskedDriftSplit)
+23:03:52  INFO     factor_research         [informative_missingness_masked_drift_split] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/informative_missingness_masked_drift_split.py
+23:05:30  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:05:30  INFO     factor_research.codegen  validated mmpp_belief_hysteresis_wedge_drift (class MMPPBeliefHysteresisWedgeDrift)
+23:05:30  INFO     factor_research         [mmpp_belief_hysteresis_wedge_drift] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/mmpp_belief_hysteresis_wedge_drift.py
+23:07:53  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:07:53  INFO     factor_research.codegen  validated measurable_drift_bin_hjb_feedback_gain (class MeasurableDriftBinHjbFeedbackGain)
+23:07:53  INFO     factor_research         [measurable_drift_bin_hjb_feedback_gain] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/measurable_drift_bin_hjb_feedback_gain.py
+23:11:31  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:11:31  INFO     factor_research.codegen  validated resdmd_verified_koopman_mode_forecast_gate (class ResDMDVerifiedKoopmanModeForecastGate)
+23:11:31  INFO     factor_research         [resdmd_verified_koopman_mode_forecast_gate] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/resdmd_verified_koopman_mode_forecast_gate.py
+23:12:26  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:12:26  INFO     factor_research.codegen  validated fleeting_quote_drift_spread_state_reversal (class FleetingQuoteDriftSpreadStateReversal)
+23:12:26  INFO     factor_research         [fleeting_quote_drift_spread_state_reversal] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/fleeting_quote_drift_spread_state_reversal.py
+23:14:05  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:14:05  INFO     factor_research.codegen  validated jump_reset_exercise_boundary_survival_flip (class JumpResetExerciseBoundarySurvivalFlip)
+23:14:05  INFO     factor_research         [jump_reset_exercise_boundary_survival_flip] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/jump_reset_exercise_boundary_survival_flip.py
+23:15:43  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:15:43  INFO     factor_research.codegen  validated tick_grid_binding_pennyness_flow_flip (class TickGridBindingPennynessFlowFlip)
+23:15:43  INFO     factor_research         [tick_grid_binding_pennyness_flow_flip] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/tick_grid_binding_pennyness_flow_flip.py
+23:15:43  INFO     research.service        Loading panel from ticker_data (fields=['assetGrowth', 'close', 'debtToAssets', 'debtToEquity', 'earningsYield', 'freeCashFlowYield', 'grossMargin', 'high', 'industry', 'low', 'marketCap', 'open', 'pbRatio', 'roe', 'sector', 'volume'], n_tickers=all) …
+23:16:23  INFO     research.service        Panel loaded in 39.7s (209 tickers, 16 fields)
+23:16:23  INFO     research.service        [levy_area_follower_rank_untraded_spillover] backtest 0.6s IC@6=0.003266 ICIR@6=0.025716
+23:16:25  INFO     research.service        [chatter_band_phase_extrapolation_gate] backtest 1.8s IC@6=0.002005 ICIR@6=0.014136
+23:16:26  INFO     research.service        [rmt_noise_shock_clustering_redundancy_switch] backtest 0.3s IC@6=0.002606 ICIR@6=0.023129
+23:16:26  INFO     research.service        [logit_calibration_trust_betting_tilt] backtest 0.9s IC@6=0.011061 ICIR@6=0.080566
+23:16:27  INFO     research.service        [stability_selected_sparse_basket_lag_gap] backtest 0.5s IC@6=0.012978 ICIR@6=0.081887
+23:16:28  WARNING  research.service        [map_support_pursuit_factor_impulse_split] backtest failed: operands could not be broadcast together with shapes (3665,208) (3665,209) 
+23:16:28  INFO     research.service        [patch_shape_basis_scale_context_gate] backtest 0.2s IC@6=-3e-05 ICIR@6=-0.000231
+23:16:31  INFO     research.service        [vl_granger_dtw_backlog_catchup] backtest 2.6s IC@6=-0.000707 ICIR@6=-0.006995
+23:16:31  INFO     research.service        [second_order_peer_graph_flow_event_clock_damping] backtest 0.4s IC@6=0.009345 ICIR@6=0.077266
+23:16:32  INFO     research.service        [gp_covar_break_persistence_flip] backtest 0.3s IC@6=-0.001947 ICIR@6=-0.017947
+23:16:33  INFO     research.service        [garch_filtered_magnitude_memory_flip] backtest 1.0s IC@6=0.003677 ICIR@6=0.027868
+23:16:34  INFO     research.service        [quantile_coefficient_share_dislocation_gate] backtest 1.6s IC@6=0.005402 ICIR@6=0.036206
+23:16:34  INFO     research.service        [labouchere_ruin_proximity_capitulation_drift] backtest 0.3s IC@6=-0.004735 ICIR@6=-0.036311
+23:16:35  INFO     research.service        [backpressure_bottleneck_queue_discharge_gate] backtest 0.3s IC@6=0.002355 ICIR@6=0.022146
+23:16:37  INFO     research.service        [haar_projection_ensemble_precision_dislocation] backtest 1.9s IC@6=0.002869 ICIR@6=0.028932
+23:16:37  INFO     research.service        [sif_rare_token_path_signature_impact_split] backtest 0.7s IC@6=-0.003351 ICIR@6=-0.02919
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/ingleton_slack_conditional_independence_trust_gate.py:280: RuntimeWarning: Mean of empty slice
+  box_null = np.nanmean(stack, axis=0)
+23:16:41  INFO     research.service        [ingleton_slack_conditional_independence_trust_gate] backtest 3.6s IC@6=0.002135 ICIR@6=0.01953
+23:16:42  INFO     research.service        [destationary_analog_attention_rescaled_drift] backtest 1.6s IC@6=-0.002131 ICIR@6=-0.014673
+23:16:43  INFO     research.service        [informative_missingness_masked_drift_split] backtest 0.3s IC@6=-0.008927 ICIR@6=-0.058003
+23:16:43  INFO     research.service        [mmpp_belief_hysteresis_wedge_drift] backtest 0.4s IC@6=0.009428 ICIR@6=0.082173
+23:16:44  INFO     research.service        [measurable_drift_bin_hjb_feedback_gain] backtest 0.7s IC@6=-0.003311 ICIR@6=-0.027173
+23:16:48  INFO     research.service        [resdmd_verified_koopman_mode_forecast_gate] backtest 3.7s IC@6=-0.000168 ICIR@6=-0.00141
+23:16:48  INFO     research.service        [fleeting_quote_drift_spread_state_reversal] backtest 0.6s IC@6=-0.008318 ICIR@6=-0.053772
+23:16:49  INFO     research.service        [jump_reset_exercise_boundary_survival_flip] backtest 0.4s IC@6=0.002675 ICIR@6=0.023555
+23:16:49  INFO     research.service        [tick_grid_binding_pennyness_flow_flip] backtest 0.4s IC@6=-0.00964 ICIR@6=-0.092459
+23:16:49  WARNING  factor_research         [map_support_pursuit_factor_impulse_split] backtest failed: operands could not be broadcast together with shapes (3665,208) (3665,209) 
+23:16:49  INFO     factor_research         [levy_area_follower_rank_untraded_spillover] KEPT  (|IC@6|=0.0033, IC not gated)
+23:16:49  INFO     factor_research         [chatter_band_phase_extrapolation_gate] KEPT  (|IC@6|=0.0020, IC not gated)
+23:16:49  INFO     factor_research         [rmt_noise_shock_clustering_redundancy_switch] KEPT  (|IC@6|=0.0026, IC not gated)
+23:16:49  INFO     factor_research         [logit_calibration_trust_betting_tilt] KEPT  (|IC@6|=0.0111, IC not gated)
+23:16:49  INFO     factor_research         [stability_selected_sparse_basket_lag_gap] KEPT  (|IC@6|=0.0130, IC not gated)
+23:16:49  INFO     factor_research         [map_support_pursuit_factor_impulse_split] REJECTED (backtest failed: operands could not be broadcast together with shapes (3665,208) (3665,209) )
+23:16:49  INFO     factor_research         [patch_shape_basis_scale_context_gate] KEPT  (|IC@6|=0.0000, IC not gated)
+23:16:49  INFO     factor_research         [vl_granger_dtw_backlog_catchup] KEPT  (|IC@6|=0.0007, IC not gated)
+23:16:49  INFO     factor_research         [second_order_peer_graph_flow_event_clock_damping] KEPT  (|IC@6|=0.0093, IC not gated)
+23:16:49  INFO     factor_research         [gp_covar_break_persistence_flip] KEPT  (|IC@6|=0.0019, IC not gated)
+23:16:49  INFO     factor_research         [garch_filtered_magnitude_memory_flip] KEPT  (|IC@6|=0.0037, IC not gated)
+23:16:49  INFO     factor_research         [quantile_coefficient_share_dislocation_gate] KEPT  (|IC@6|=0.0054, IC not gated)
+23:16:49  INFO     factor_research         [labouchere_ruin_proximity_capitulation_drift] KEPT  (|IC@6|=0.0047, IC not gated)
+23:16:49  INFO     factor_research         [backpressure_bottleneck_queue_discharge_gate] KEPT  (|IC@6|=0.0024, IC not gated)
+23:16:49  INFO     factor_research         [haar_projection_ensemble_precision_dislocation] KEPT  (|IC@6|=0.0029, IC not gated)
+23:16:49  INFO     factor_research         [sif_rare_token_path_signature_impact_split] KEPT  (|IC@6|=0.0034, IC not gated)
+23:16:49  INFO     factor_research         [ingleton_slack_conditional_independence_trust_gate] KEPT  (|IC@6|=0.0021, IC not gated)
+23:16:49  INFO     factor_research         [destationary_analog_attention_rescaled_drift] KEPT  (|IC@6|=0.0021, IC not gated)
+23:16:49  INFO     factor_research         [informative_missingness_masked_drift_split] KEPT  (|IC@6|=0.0089, IC not gated)
+23:16:49  INFO     factor_research         [mmpp_belief_hysteresis_wedge_drift] KEPT  (|IC@6|=0.0094, IC not gated)
+23:16:49  INFO     factor_research         [measurable_drift_bin_hjb_feedback_gain] KEPT  (|IC@6|=0.0033, IC not gated)
+23:16:49  INFO     factor_research         [resdmd_verified_koopman_mode_forecast_gate] KEPT  (|IC@6|=0.0002, IC not gated)
+23:16:49  INFO     factor_research         [fleeting_quote_drift_spread_state_reversal] KEPT  (|IC@6|=0.0083, IC not gated)
+23:16:49  INFO     factor_research         [jump_reset_exercise_boundary_survival_flip] KEPT  (|IC@6|=0.0027, IC not gated)
+23:16:49  INFO     factor_research         [tick_grid_binding_pennyness_flow_flip] KEPT  (|IC@6|=0.0096, IC not gated)
+23:16:49  INFO     research.service        research session persisted: 24 kept, 1 rejected
+23:16:49  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:001] research session complete: 24 kept, 1 rejected
+23:16:49  INFO     run_factor_research     session 1 kept 24 factor(s): ['levy_area_follower_rank_untraded_spillover', 'chatter_band_phase_extrapolation_gate', 'rmt_noise_shock_clustering_redundancy_switch', 'logit_calibration_trust_betting_tilt', 'stability_selected_sparse_basket_lag_gap', 'patch_shape_basis_scale_context_gate', 'vl_granger_dtw_backlog_catchup', 'second_order_peer_graph_flow_event_clock_damping', 'gp_covar_break_persistence_flip', 'garch_filtered_magnitude_memory_flip', 'quantile_coefficient_share_dislocation_gate', 'labouchere_ruin_proximity_capitulation_drift', 'backpressure_bottleneck_queue_discharge_gate', 'haar_projection_ensemble_precision_dislocation', 'sif_rare_token_path_signature_impact_split', 'ingleton_slack_conditional_independence_trust_gate', 'destationary_analog_attention_rescaled_drift', 'informative_missingness_masked_drift_split', 'mmpp_belief_hysteresis_wedge_drift', 'measurable_drift_bin_hjb_feedback_gain', 'resdmd_verified_koopman_mode_forecast_gate', 'fleeting_quote_drift_spread_state_reversal', 'jump_reset_exercise_boundary_survival_flip', 'tick_grid_binding_pennyness_flow_flip']
+23:16:49  INFO     run_factor_research     ── session 2/12  (have 46, want 100) ──
+23:16:49  INFO     backtesting.data_loader  capping universe at 1 tickers (was 10)
+23:16:52  INFO     backtesting.data_loader  loaded 1 tickers, skipped 0
+23:16:52  INFO     pipeline                Factor research session 'prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:002' (papers=25, ideas=25, IC@6 recorded, not gated; prediction horizon fixed at 6; 144 data fields in scope)
+23:16:53  INFO     research.service        fetched full text for a_koopman_operator_framework_for_nonlinear_epidemic_dynamics from https://arxiv.org/pdf/2508.16766v1 (46188 chars, 0.9s)
+23:16:54  INFO     research.service        fetched full text for a_growth_adjusted_price_earnings_ratio from https://arxiv.org/pdf/2001.08240v1 (66900 chars, 1.1s)
+23:16:55  INFO     research.service        fetched full text for risk_aware_safe_reinforcement_learning_for_control_of_stocha from https://arxiv.org/pdf/2505.09734v1 (93163 chars, 1.8s)
+23:16:56  INFO     research.service        fetched full text for a_moment_estimate_of_the_derivative_process_in_rough_path_th from https://arxiv.org/pdf/1007.4651v1 (19905 chars, 0.5s)
+23:17:03  INFO     research.service        fetched full text for investor_emotions_and_earnings_announcements from https://arxiv.org/pdf/2006.13934v2 (131324 chars, 6.7s)
+23:17:03  INFO     research.service        fetched full text for persistent_homology_of_time_series_through_complex_networks from https://arxiv.org/pdf/2605.01624v1 (85185 chars, 0.7s)
+23:17:04  INFO     research.service        fetched full text for universal_approximation_by_signatures_for_infinite_dimension from https://arxiv.org/pdf/2603.03058v1 (143565 chars, 0.9s)
+23:17:07  INFO     research.service        fetched full text for rough_volatility_evidence_from_range_volatility_estimators from https://arxiv.org/pdf/2312.01426v2 (57207 chars, 2.3s)
+23:17:07  INFO     research.service        fetched full text for the_value_of_information_in_financial_markets_an_agent_based from https://arxiv.org/pdf/0712.2687v1 (38494 chars, 0.5s)
+23:17:08  INFO     research.service        fetched full text for temporal_relation_extraction_in_clinical_texts_a_span_based_ from https://arxiv.org/pdf/2503.18085v2 (95236 chars, 0.7s)
+23:17:09  INFO     research.service        fetched full text for an_equilibrium_model_for_the_cross_section_of_liquidity_prem from https://arxiv.org/pdf/2011.13625v1 (81001 chars, 0.9s)
+23:17:09  INFO     research.service        fetched full text for profit_warnings_and_stock_returns_evidence_from_moroccan_sto from https://arxiv.org/pdf/2111.06655v1 (35084 chars, 0.4s)
+23:17:10  INFO     research.service        fetched full text for heterogeneous_effects_of_job_displacement_on_earnings from https://arxiv.org/pdf/2006.04968v2 (88305 chars, 0.7s)
+23:17:11  INFO     research.service        fetched full text for continuous_time_portfolio_choice_under_monotone_mean_varianc from https://arxiv.org/pdf/1403.3212v2 (55870 chars, 0.8s)
+23:17:11  INFO     research.service        fetched full text for convergence_of_persistence_diagram_in_the_sparse_regime from https://arxiv.org/pdf/2103.12943v2 (68360 chars, 0.7s)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 6 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 8 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 10 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 23 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 25 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 27 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 29 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 31 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 33 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 35 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 45 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 48 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 50 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 63 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 65 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 67 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 92 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 113 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 129 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 131 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 141 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 145 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 147 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 156 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 175 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 177 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 179 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 186 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 204 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 206 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 208 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 216 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 218 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 225 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 258 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 260 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 262 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 267 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 277 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 287 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 298 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 300 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 302 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 304 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 306 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 308 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 310 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 340 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 354 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 369 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 385 0 (offset 0)
+23:17:12  WARNING  pypdf._reader           Ignoring wrong pointing object 395 0 (offset 0)
+23:17:14  INFO     research.service        fetched full text for how_do_managers_non_responses_during_earnings_calls_affect_a from https://arxiv.org/pdf/2505.18419v1 (133147 chars, 2.3s)
+23:17:15  INFO     research.service        fetched full text for learning_latent_causal_structures_with_a_redundant_input_neu from https://arxiv.org/pdf/2003.13135v3 (77510 chars, 1.7s)
+23:17:17  INFO     research.service        fetched full text for gdsr_global_detail_integration_through_dual_branch_network_w from https://arxiv.org/pdf/2501.01460v4 (80169 chars, 1.7s)
+23:17:18  INFO     research.service        fetched full text for fine_tuning_large_language_models_for_stock_return_predictio from https://arxiv.org/pdf/2407.18103v2 (55326 chars, 0.8s)
+23:17:19  INFO     research.service        fetched full text for world_stock_market_more_sizeable_trend_reversal_likely_in_fe from https://arxiv.org/pdf/0909.0418v3 (14551 chars, 1.5s)
+23:17:20  INFO     research.service        fetched full text for interventional_time_series_priors_for_causal_foundation_mode from https://arxiv.org/pdf/2603.11090v2 (45870 chars, 0.5s)
+23:17:21  INFO     research.service        fetched full text for the_joint_distribution_of_stock_returns_is_not_elliptical from https://arxiv.org/pdf/1009.1100v3 (57894 chars, 1.6s)
+23:17:21  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:002] selected 25/25 papers: ['a_koopman_operator_framework_for_nonlinear_epidemic_dynamics', 'a_growth_adjusted_price_earnings_ratio', 'risk_aware_safe_reinforcement_learning_for_control_of_stocha', 'a_moment_estimate_of_the_derivative_process_in_rough_path_th', 'investor_emotions_and_earnings_announcements', 'persistent_homology_of_time_series_through_complex_networks', 'universal_approximation_by_signatures_for_infinite_dimension', 'rough_volatility_evidence_from_range_volatility_estimators', 'the_value_of_information_in_financial_markets_an_agent_based', 'temporal_relation_extraction_in_clinical_texts_a_span_based_', 'a_lattice_framework_for_pricing_display_advertisement_option', 'an_equilibrium_model_for_the_cross_section_of_liquidity_prem', 'precise_deviations_for_discrete_marked_hawkes_processes', 'profit_warnings_and_stock_returns_evidence_from_moroccan_sto', 'no_arbitrage_conditions_and_absolutely_continuous_changes_of', 'heterogeneous_effects_of_job_displacement_on_earnings', 'continuous_time_portfolio_choice_under_monotone_mean_varianc', 'convergence_of_persistence_diagram_in_the_sparse_regime', 'how_do_managers_non_responses_during_earnings_calls_affect_a', 'learning_latent_causal_structures_with_a_redundant_input_neu', 'gdsr_global_detail_integration_through_dual_branch_network_w', 'fine_tuning_large_language_models_for_stock_return_predictio', 'world_stock_market_more_sizeable_trend_reversal_likely_in_fe', 'interventional_time_series_priors_for_causal_foundation_mode', 'the_joint_distribution_of_stock_returns_is_not_elliptical']
+23:17:21  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:002] brainstorming up to 25 idea(s) across 25 paper(s), one call each (dedup against prerun, 46 known id(s)) …
+23:17:59  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:17:59  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:002] brainstorm call (a_koopman_operator_framework_for_nonlinear_epidemic_dynamics, asked 1, 15962 tok): 37.4s
+23:18:42  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:18:42  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:002] brainstorm call (a_growth_adjusted_price_earnings_ratio, asked 1, 21431 tok): 43.5s
+23:19:26  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:19:26  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:002] brainstorm call (risk_aware_safe_reinforcement_learning_for_control_of_stocha, asked 1, 28987 tok): 43.1s
+23:20:16  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:20:16  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:002] brainstorm call (a_moment_estimate_of_the_derivative_process_in_rough_path_th, asked 1, 11355 tok): 50.0s
+23:21:05  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:21:05  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:002] brainstorm call (investor_emotions_and_earnings_announcements, asked 1, 45843 tok): 49.4s
+23:21:56  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:21:56  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:002] brainstorm call (persistent_homology_of_time_series_through_complex_networks, asked 1, 26908 tok): 51.4s
+23:22:42  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:22:42  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:002] brainstorm call (universal_approximation_by_signatures_for_infinite_dimension, asked 1, 55945 tok): 45.7s
+23:24:08  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:24:08  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:002] brainstorm call (rough_volatility_evidence_from_range_volatility_estimators, asked 1, 22184 tok): 85.5s
+23:24:55  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:24:55  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:002] brainstorm call (the_value_of_information_in_financial_markets_an_agent_based, asked 1, 13938 tok): 47.5s
+23:25:25  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:25:25  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:002] brainstorm call (temporal_relation_extraction_in_clinical_texts_a_span_based_, asked 1, 28816 tok): 29.9s
+23:26:14  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:26:14  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:002] brainstorm call (a_lattice_framework_for_pricing_display_advertisement_option, asked 1, 22880 tok): 49.4s
+23:27:01  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:27:01  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:002] brainstorm call (an_equilibrium_model_for_the_cross_section_of_liquidity_prem, asked 1, 38416 tok): 46.2s
+23:28:11  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:28:11  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:002] brainstorm call (precise_deviations_for_discrete_marked_hawkes_processes, asked 1, 21741 tok): 70.8s
+23:28:50  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:28:50  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:002] brainstorm call (profit_warnings_and_stock_returns_evidence_from_moroccan_sto, asked 1, 12215 tok): 38.8s
+23:29:34  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:29:34  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:002] brainstorm call (no_arbitrage_conditions_and_absolutely_continuous_changes_of, asked 1, 16401 tok): 43.4s
+23:30:09  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:30:09  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:002] brainstorm call (heterogeneous_effects_of_job_displacement_on_earnings, asked 1, 25421 tok): 35.0s
+23:31:13  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:31:13  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:002] brainstorm call (continuous_time_portfolio_choice_under_monotone_mean_varianc, asked 1, 25513 tok): 64.4s
+23:32:10  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:32:11  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:002] brainstorm call (convergence_of_persistence_diagram_in_the_sparse_regime, asked 1, 32698 tok): 57.4s
+23:33:01  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:33:01  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:002] brainstorm call (how_do_managers_non_responses_during_earnings_calls_affect_a, asked 1, 38768 tok): 50.6s
+23:33:44  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:33:44  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:002] brainstorm call (learning_latent_causal_structures_with_a_redundant_input_neu, asked 1, 24649 tok): 42.7s
+23:34:36  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:34:36  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:002] brainstorm call (gdsr_global_detail_integration_through_dual_branch_network_w, asked 1, 29080 tok): 52.1s
+23:35:16  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:35:16  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:002] brainstorm call (fine_tuning_large_language_models_for_stock_return_predictio, asked 1, 19826 tok): 40.1s
+23:35:41  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:35:41  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:002] brainstorm call (world_stock_market_more_sizeable_trend_reversal_likely_in_fe, asked 1, 7837 tok): 24.7s
+23:36:26  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:36:26  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:002] brainstorm call (interventional_time_series_priors_for_causal_foundation_mode, asked 1, 16243 tok): 44.7s
+23:37:10  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:37:10  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:002] brainstorm call (the_joint_distribution_of_stock_returns_is_not_elliptical, asked 1, 20811 tok): 44.6s
+23:37:10  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:002] kept 25 idea(s) from 25 paper-call(s)
+23:39:51  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:39:51  INFO     factor_research.codegen  validated sirsd_contagion_susceptible_ignition_flow (class SirsdContagionSusceptibleIgnitionFlow)
+23:39:51  INFO     factor_research         [sirsd_contagion_susceptible_ignition_flow] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/sirsd_contagion_susceptible_ignition_flow.py
+23:41:58  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:41:58  INFO     factor_research.codegen  validated gape_payback_duration_factor_residual_snapback (class GapePaybackDurationFactorResidualSnapback)
+23:41:58  INFO     factor_research         [gape_payback_duration_factor_residual_snapback] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/gape_payback_duration_factor_residual_snapback.py
+23:43:38  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:43:38  INFO     factor_research.codegen  validated chance_constrained_safe_set_margin_policy_blend (class ChanceConstrainedSafeSetMarginPolicyBlend)
+23:43:38  INFO     factor_research         [chance_constrained_safe_set_margin_policy_blend] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/chance_constrained_safe_set_margin_policy_blend.py
+23:45:52  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:45:52  INFO     factor_research.codegen  validated rde_jacobian_gain_ordered_flow_propagation (class RdeJacobianGainOrderedFlowPropagation)
+23:45:52  INFO     factor_research         [rde_jacobian_gain_ordered_flow_propagation] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/rde_jacobian_gain_ordered_flow_propagation.py
+23:47:30  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:47:31  INFO     factor_research.codegen  validated arousal_valence_emotion_share_glamour_reversal (class ArousalValenceEmotionShareGlamourReversal)
+23:47:31  INFO     factor_research         [arousal_valence_emotion_share_glamour_reversal] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/arousal_valence_emotion_share_glamour_reversal.py
+23:51:09  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:51:09  INFO     factor_research.codegen  validated volume_weighted_opn_loop_persistence_flip (class VolumeWeightedOpnLoopPersistenceFlip)
+23:51:09  INFO     factor_research         [volume_weighted_opn_loop_persistence_flip] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/volume_weighted_opn_loop_persistence_flip.py
+23:54:23  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:54:23  INFO     factor_research.codegen  validated infdim_curve_signature_rotation_gate (class InfDimCurveSignatureRotationGate)
+23:54:24  INFO     factor_research         [infdim_curve_signature_rotation_gate] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/infdim_curve_signature_rotation_gate.py
+23:55:49  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:55:49  INFO     factor_research.codegen  validated range_rv_noise_plateau_roughness_reversal_gate (class RangeRvNoisePlateauRoughnessReversalGate)
+23:55:49  INFO     factor_research         [range_rv_noise_plateau_roughness_reversal_gate] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/range_rv_noise_plateau_roughness_reversal_gate.py
+23:58:28  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+23:58:28  INFO     factor_research.codegen  validated fundamentalist_chartist_switch_hysteresis_blend (class FundamentalistChartistSwitchHysteresisBlend)
+23:58:28  INFO     factor_research         [fundamentalist_chartist_switch_hysteresis_blend] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/fundamentalist_chartist_switch_hysteresis_blend.py
+00:01:33  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:01:33  INFO     factor_research.codegen  validated transitive_leadlag_closure_landmark_event_relay (class TransitiveLeadLagClosureLandmarkEventRelay)
+00:01:33  INFO     factor_research         [transitive_leadlag_closure_landmark_event_relay] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/transitive_leadlag_closure_landmark_event_relay.py
+00:03:07  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:03:08  INFO     factor_research.codegen  validated censored_lattice_probability_pinning_drift (class CensoredLatticeProbabilityPinningDrift)
+00:03:08  INFO     factor_research         [censored_lattice_probability_pinning_drift] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/censored_lattice_probability_pinning_drift.py
+00:04:39  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:04:39  INFO     factor_research.codegen  validated quadratic_cost_wedge_ou_flow_decay_reversal (class QuadraticCostWedgeOUFlowDecayReversal)
+00:04:39  INFO     factor_research         [quadratic_cost_wedge_ou_flow_decay_reversal] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/quadratic_cost_wedge_ou_flow_decay_reversal.py
+00:07:00  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:07:00  INFO     factor_research.codegen  validated hawkes_saddle_saturation_cascade_impact_flip (class HawkesSaddleSaturationCascadeImpactFlip)
+00:07:00  INFO     factor_research         [hawkes_saddle_saturation_cascade_impact_flip] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/hawkes_saddle_saturation_cascade_impact_flip.py
+00:08:44  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:08:44  INFO     factor_research.codegen  validated vague_badnews_precision_gated_impulse_split (class VagueBadNewsPrecisionGatedImpulseSplit)
+00:08:44  INFO     factor_research         [vague_badnews_precision_gated_impulse_split] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/vague_badnews_precision_gated_impulse_split.py
+00:10:24  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:10:24  INFO     factor_research.codegen  validated deflator_degeneracy_continuity_split_drift (class DeflatorDegeneracyContinuitySplitDrift)
+00:10:24  INFO     factor_research         [deflator_degeneracy_continuity_split_drift] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/deflator_degeneracy_continuity_split_drift.py
+00:13:46  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:13:46  INFO     factor_research.codegen  validated rank_invariant_counterfactual_displacement_gap (class RankInvariantCounterfactualDisplacementGap)
+00:13:46  INFO     factor_research         [rank_invariant_counterfactual_displacement_gap] codegen attempt 1 failed (validation failed: calc() raised on synthetic data: solve: Input operand 1 has a mismatch in its core dimension 0, with gufunc signature (m,m),(m,n)->(m,n) (size 200 is different from 3)) — retrying with feedback
+00:16:51  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:16:51  INFO     factor_research.codegen  validated rank_invariant_counterfactual_displacement_gap (class RankInvariantCounterfactualDisplacementGap)
+00:16:51  INFO     factor_research         [rank_invariant_counterfactual_displacement_gap] materialised on attempt 2 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/rank_invariant_counterfactual_displacement_gap.py
+00:22:07  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:22:07  INFO     factor_research.codegen  validated mmv_hedging_demand_elasticity_flip (class MmvHedgingDemandElasticityFlip)
+00:22:08  INFO     factor_research         [mmv_hedging_demand_elasticity_flip] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/mmv_hedging_demand_elasticity_flip.py
+00:24:34  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:24:34  INFO     factor_research.codegen  validated sparse_regime_h0_persistence_scaling_gate (class SparseRegimeH0PersistenceScalingGate)
+00:24:34  INFO     factor_research         [sparse_regime_h0_persistence_scaling_gate] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/sparse_regime_h0_persistence_scaling_gate.py
+00:26:25  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:26:25  INFO     factor_research.codegen  validated gricean_relevance_deficit_opacity_drift (class GriceanRelevanceDeficitOpacityDrift)
+00:26:25  INFO     factor_research         [gricean_relevance_deficit_opacity_drift] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/gricean_relevance_deficit_opacity_drift.py
+00:30:32  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:30:32  INFO     factor_research.codegen  validated rinn_mediation_depth_sparse_path_flip (class RinnMediationDepthSparsePathFlip)
+00:30:32  INFO     factor_research         [rinn_mediation_depth_sparse_path_flip] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/rinn_mediation_depth_sparse_path_flip.py
+00:32:49  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:32:49  INFO     factor_research.codegen  validated wavelet_cascade_degradation_detail_per_volume_flip (class WaveletCascadeDegradationDetailPerVolumeFlip)
+00:32:49  INFO     factor_research         [wavelet_cascade_degradation_detail_per_volume_flip] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/wavelet_cascade_degradation_detail_per_volume_flip.py
+00:34:23  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:34:23  INFO     factor_research.codegen  validated pooled_path_embedding_vs_terminal_collapse_gap (class PooledPathEmbeddingVsTerminalCollapseGap)
+00:34:23  INFO     factor_research         [pooled_path_embedding_vs_terminal_collapse_gap] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/pooled_path_embedding_vs_terminal_collapse_gap.py
+00:36:32  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:36:32  INFO     factor_research.codegen  validated log_periodic_contraction_critical_time_reversal (class LogPeriodicContractionCriticalTimeReversal)
+00:36:32  INFO     factor_research         [log_periodic_contraction_critical_time_reversal] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/log_periodic_contraction_critical_time_reversal.py
+00:41:00  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:41:00  INFO     factor_research.codegen  validated interventional_shock_propagation_gain_gate (class InterventionalShockPropagationGainGate)
+00:41:00  INFO     factor_research         [interventional_shock_propagation_gain_gate] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/interventional_shock_propagation_gain_gate.py
+00:41:59  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:41:59  INFO     factor_research.codegen  validated sign_concordance_beta_wedge_catchup_flip (class SignConcordanceBetaWedgeCatchupFlip)
+00:41:59  INFO     factor_research         [sign_concordance_beta_wedge_catchup_flip] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/sign_concordance_beta_wedge_catchup_flip.py
+00:41:59  INFO     research.service        Loading panel from ticker_data (fields=['close', 'dividendYield', 'earningsYield', 'eps', 'epsEstimate', 'epsGrowth', 'epsSurprise', 'evToEbitda', 'freeCashFlowGrowth', 'freeCashFlowYield', 'goodwill', 'high', 'incomeQuality', 'industry', 'intangiblesToAssets', 'low', 'marketCap', 'netIncomeGrowth', 'netIncomeGrowth3Y', 'netMargin', 'open', 'pbRatio', 'psRatio', 'rdToRevenue', 'revenue', 'revenueEstimate', 'revenueSurprise', 'roic', 'sector', 'totalAssets', 'volume'], n_tickers=all) …
+00:42:57  INFO     research.service        Panel loaded in 57.7s (209 tickers, 31 fields)
+00:42:58  INFO     research.service        [sirsd_contagion_susceptible_ignition_flow] backtest 0.9s IC@6=0.006534 ICIR@6=0.051132
+00:42:58  INFO     research.service        [gape_payback_duration_factor_residual_snapback] backtest 0.3s IC@6=0.011424 ICIR@6=0.075221
+00:42:58  INFO     research.service        [chance_constrained_safe_set_margin_policy_blend] backtest 0.4s IC@6=-0.003479 ICIR@6=-0.018253
+00:42:59  INFO     research.service        [rde_jacobian_gain_ordered_flow_propagation] backtest 0.7s IC@6=-0.006408 ICIR@6=-0.043842
+00:43:00  INFO     research.service        [arousal_valence_emotion_share_glamour_reversal] backtest 0.5s IC@6=0.003282 ICIR@6=0.026149
+00:43:08  INFO     research.service        [volume_weighted_opn_loop_persistence_flip] backtest 8.2s IC@6=-0.002741 ICIR@6=-0.026128
+00:43:08  INFO     research.service        [infdim_curve_signature_rotation_gate] backtest 0.2s IC@6=0.000604 ICIR@6=0.004053
+00:43:08  INFO     research.service        [range_rv_noise_plateau_roughness_reversal_gate] backtest 0.2s IC@6=0.007582 ICIR@6=0.067544
+00:43:09  INFO     research.service        [fundamentalist_chartist_switch_hysteresis_blend] backtest 0.7s IC@6=0.002647 ICIR@6=0.016884
+00:43:09  INFO     research.service        [transitive_leadlag_closure_landmark_event_relay] backtest 0.2s IC@6=0.005303 ICIR@6=0.047189
+00:43:09  INFO     research.service        [censored_lattice_probability_pinning_drift] backtest 0.2s IC@6=-0.00299 ICIR@6=-0.025707
+00:43:10  INFO     research.service        [quadratic_cost_wedge_ou_flow_decay_reversal] backtest 0.3s IC@6=0.017525 ICIR@6=0.119031
+00:43:10  INFO     research.service        [hawkes_saddle_saturation_cascade_impact_flip] backtest 0.5s IC@6=-0.011839 ICIR@6=-0.082897
+00:43:11  INFO     research.service        [vague_badnews_precision_gated_impulse_split] backtest 0.5s IC@6=-0.001434 ICIR@6=-0.011614
+00:43:11  INFO     research.service        [deflator_degeneracy_continuity_split_drift] backtest 0.4s IC@6=-0.00559 ICIR@6=-0.045688
+00:43:11  WARNING  research.service        [rank_invariant_counterfactual_displacement_gap] backtest failed: Shape of passed values is (3665, 208), indices imply (3665, 209)
+00:43:13  INFO     research.service        [mmv_hedging_demand_elasticity_flip] backtest 1.5s IC@6=0.004774 ICIR@6=0.032007
+00:43:15  INFO     research.service        [sparse_regime_h0_persistence_scaling_gate] backtest 2.5s IC@6=-4.3e-05 ICIR@6=-0.000397
+00:43:16  INFO     research.service        [gricean_relevance_deficit_opacity_drift] backtest 0.4s IC@6=0.000237 ICIR@6=0.001804
+00:43:16  INFO     research.service        [rinn_mediation_depth_sparse_path_flip] backtest 0.6s IC@6=-0.001053 ICIR@6=-0.009123
+00:43:17  INFO     research.service        [wavelet_cascade_degradation_detail_per_volume_flip] backtest 0.3s IC@6=0.004517 ICIR@6=0.036637
+00:43:17  INFO     research.service        [pooled_path_embedding_vs_terminal_collapse_gap] backtest 0.6s IC@6=-0.002253 ICIR@6=-0.016268
+00:43:19  INFO     research.service        [log_periodic_contraction_critical_time_reversal] backtest 1.2s IC@6=0.003106 ICIR@6=0.029357
+00:43:19  INFO     research.service        [interventional_shock_propagation_gain_gate] backtest 0.9s IC@6=0.002134 ICIR@6=0.020397
+00:43:20  INFO     research.service        [sign_concordance_beta_wedge_catchup_flip] backtest 0.3s IC@6=-0.003699 ICIR@6=-0.031908
+00:43:20  WARNING  factor_research         [rank_invariant_counterfactual_displacement_gap] backtest failed: Shape of passed values is (3665, 208), indices imply (3665, 209)
+00:43:20  INFO     factor_research         [sirsd_contagion_susceptible_ignition_flow] KEPT  (|IC@6|=0.0065, IC not gated)
+00:43:20  INFO     factor_research         [gape_payback_duration_factor_residual_snapback] KEPT  (|IC@6|=0.0114, IC not gated)
+00:43:20  INFO     factor_research         [chance_constrained_safe_set_margin_policy_blend] KEPT  (|IC@6|=0.0035, IC not gated)
+00:43:20  INFO     factor_research         [rde_jacobian_gain_ordered_flow_propagation] KEPT  (|IC@6|=0.0064, IC not gated)
+00:43:20  INFO     factor_research         [arousal_valence_emotion_share_glamour_reversal] KEPT  (|IC@6|=0.0033, IC not gated)
+00:43:20  INFO     factor_research         [volume_weighted_opn_loop_persistence_flip] KEPT  (|IC@6|=0.0027, IC not gated)
+00:43:20  INFO     factor_research         [infdim_curve_signature_rotation_gate] KEPT  (|IC@6|=0.0006, IC not gated)
+00:43:20  INFO     factor_research         [range_rv_noise_plateau_roughness_reversal_gate] KEPT  (|IC@6|=0.0076, IC not gated)
+00:43:20  INFO     factor_research         [fundamentalist_chartist_switch_hysteresis_blend] KEPT  (|IC@6|=0.0026, IC not gated)
+00:43:20  INFO     factor_research         [transitive_leadlag_closure_landmark_event_relay] KEPT  (|IC@6|=0.0053, IC not gated)
+00:43:20  INFO     factor_research         [censored_lattice_probability_pinning_drift] KEPT  (|IC@6|=0.0030, IC not gated)
+00:43:20  INFO     factor_research         [quadratic_cost_wedge_ou_flow_decay_reversal] KEPT  (|IC@6|=0.0175, IC not gated)
+00:43:20  INFO     factor_research         [hawkes_saddle_saturation_cascade_impact_flip] KEPT  (|IC@6|=0.0118, IC not gated)
+00:43:20  INFO     factor_research         [vague_badnews_precision_gated_impulse_split] KEPT  (|IC@6|=0.0014, IC not gated)
+00:43:20  INFO     factor_research         [deflator_degeneracy_continuity_split_drift] KEPT  (|IC@6|=0.0056, IC not gated)
+00:43:20  INFO     factor_research         [rank_invariant_counterfactual_displacement_gap] REJECTED (backtest failed: Shape of passed values is (3665, 208), indices imply (3665, 209))
+00:43:20  INFO     factor_research         [mmv_hedging_demand_elasticity_flip] KEPT  (|IC@6|=0.0048, IC not gated)
+00:43:20  INFO     factor_research         [sparse_regime_h0_persistence_scaling_gate] KEPT  (|IC@6|=0.0000, IC not gated)
+00:43:20  INFO     factor_research         [gricean_relevance_deficit_opacity_drift] KEPT  (|IC@6|=0.0002, IC not gated)
+00:43:20  INFO     factor_research         [rinn_mediation_depth_sparse_path_flip] KEPT  (|IC@6|=0.0011, IC not gated)
+00:43:20  INFO     factor_research         [wavelet_cascade_degradation_detail_per_volume_flip] KEPT  (|IC@6|=0.0045, IC not gated)
+00:43:20  INFO     factor_research         [pooled_path_embedding_vs_terminal_collapse_gap] KEPT  (|IC@6|=0.0023, IC not gated)
+00:43:20  INFO     factor_research         [log_periodic_contraction_critical_time_reversal] KEPT  (|IC@6|=0.0031, IC not gated)
+00:43:20  INFO     factor_research         [interventional_shock_propagation_gain_gate] KEPT  (|IC@6|=0.0021, IC not gated)
+00:43:20  INFO     factor_research         [sign_concordance_beta_wedge_catchup_flip] KEPT  (|IC@6|=0.0037, IC not gated)
+00:43:20  INFO     research.service        research session persisted: 24 kept, 1 rejected
+00:43:20  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:002] research session complete: 24 kept, 1 rejected
+00:43:20  INFO     run_factor_research     session 2 kept 24 factor(s): ['sirsd_contagion_susceptible_ignition_flow', 'gape_payback_duration_factor_residual_snapback', 'chance_constrained_safe_set_margin_policy_blend', 'rde_jacobian_gain_ordered_flow_propagation', 'arousal_valence_emotion_share_glamour_reversal', 'volume_weighted_opn_loop_persistence_flip', 'infdim_curve_signature_rotation_gate', 'range_rv_noise_plateau_roughness_reversal_gate', 'fundamentalist_chartist_switch_hysteresis_blend', 'transitive_leadlag_closure_landmark_event_relay', 'censored_lattice_probability_pinning_drift', 'quadratic_cost_wedge_ou_flow_decay_reversal', 'hawkes_saddle_saturation_cascade_impact_flip', 'vague_badnews_precision_gated_impulse_split', 'deflator_degeneracy_continuity_split_drift', 'mmv_hedging_demand_elasticity_flip', 'sparse_regime_h0_persistence_scaling_gate', 'gricean_relevance_deficit_opacity_drift', 'rinn_mediation_depth_sparse_path_flip', 'wavelet_cascade_degradation_detail_per_volume_flip', 'pooled_path_embedding_vs_terminal_collapse_gap', 'log_periodic_contraction_critical_time_reversal', 'interventional_shock_propagation_gain_gate', 'sign_concordance_beta_wedge_catchup_flip']
+00:43:20  INFO     run_factor_research     ── session 3/12  (have 70, want 100) ──
+00:43:20  INFO     backtesting.data_loader  capping universe at 1 tickers (was 10)
+00:43:22  INFO     backtesting.data_loader  loaded 1 tickers, skipped 0
+00:43:22  INFO     pipeline                Factor research session 'prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:003' (papers=25, ideas=25, IC@6 recorded, not gated; prediction horizon fixed at 6; 144 data fields in scope)
+00:43:24  INFO     research.service        fetched full text for an_energy_concentrated_wavelet_transform_for_time_frequency_ from https://arxiv.org/pdf/2202.10690v1 (79330 chars, 1.6s)
+00:43:24  INFO     research.service        fetched full text for corporate_bankruptcy_prediction_with_domain_adapted_bert from https://arxiv.org/pdf/2312.03194v1 (45318 chars, 0.3s)
+00:43:25  INFO     research.service        fetched full text for a_stock_selection_method_based_on_earning_yield_forecast_usi from https://arxiv.org/pdf/1905.04842v1 (27544 chars, 0.5s)
+00:43:25  INFO     research.service        fetched full text for joint_news_attention_spillover_and_stock_returns from https://arxiv.org/pdf/1703.02715v6 (160807 chars, 0.7s)
+00:43:26  INFO     research.service        fetched full text for eigenvalue_distribution_of_nonlinear_models_of_random_matric from https://arxiv.org/pdf/1904.03090v3 (93619 chars, 0.8s)
+00:43:26  INFO     research.service        fetched full text for fully_probabilistic_design_for_optimal_transport from https://arxiv.org/pdf/2212.13912v1 (17937 chars, 0.3s)
+00:43:27  INFO     research.service        fetched full text for stock_returns_versus_trading_volume_is_the_correspondence_mo from https://arxiv.org/pdf/1310.7018v1 (36216 chars, 0.9s)
+00:43:28  INFO     research.service        fetched full text for macroeconomic_forecasting_and_machine_learning from https://arxiv.org/pdf/2510.11008v1 (85724 chars, 1.1s)
+00:43:29  INFO     research.service        fetched full text for universal_and_nonuniversal_allometric_scaling_behaviors_in_t from https://arxiv.org/pdf/0910.2524v1 (30770 chars, 0.9s)
+00:43:30  INFO     research.service        fetched full text for better_to_stay_apart_asset_commonality_bipartite_network_cen from https://arxiv.org/pdf/1811.01624v1 (98210 chars, 0.7s)
+00:43:32  INFO     research.service        fetched full text for sovereign_debt_default_and_climate_risk from https://arxiv.org/pdf/2501.11552v1 (83288 chars, 1.6s)
+00:43:33  INFO     research.service        fetched full text for optional_p_lya_trees_posterior_rates_and_uncertainty_quantif from https://arxiv.org/pdf/2110.05265v1 (86778 chars, 1.1s)
+00:43:34  INFO     research.service        fetched full text for sector_rotation_by_factor_model_and_fundamental_analysis from https://arxiv.org/pdf/2401.00001v1 (27129 chars, 0.8s)
+00:43:34  INFO     research.service        fetched full text for quantitative_probing_validating_causal_models_using_quantita from https://arxiv.org/pdf/2209.03013v1 (54924 chars, 0.3s)
+00:43:34  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:003] selected 25/25 papers: ['an_energy_concentrated_wavelet_transform_for_time_frequency_', 'corporate_bankruptcy_prediction_with_domain_adapted_bert', 'a_stock_selection_method_based_on_earning_yield_forecast_usi', 'a_deterministic_limit_order_book_simulator_with_hawkes_drive', 'fast_mean_reversion_asymptotics_for_large_portfolios_of_stoc', 'joint_news_attention_spillover_and_stock_returns', 'invariance_through_latent_alignment', 'clam_continuous_latent_action_models_for_robot_learning_from', 'a_tick_by_tick_solution_for_concentrated_liquidity_provision', 'exploring_a_gradient_based_explainable_ai_technique_for_time', 'eigenvalue_distribution_of_nonlinear_models_of_random_matric', 'fully_probabilistic_design_for_optimal_transport', 'stock_returns_versus_trading_volume_is_the_correspondence_mo', 'macroeconomic_forecasting_and_machine_learning', 'universal_and_nonuniversal_allometric_scaling_behaviors_in_t', 'a_persistent_homology_based_turbulence_index_some_applicatio', 'better_to_stay_apart_asset_commonality_bipartite_network_cen', 'sovereign_debt_default_and_climate_risk', 'byzantine_resilient_high_dimensional_federated_learning', 'intraday_seasonalities_and_nonstationarity_of_trading_volume', 'optional_p_lya_trees_posterior_rates_and_uncertainty_quantif', 'sector_rotation_by_factor_model_and_fundamental_analysis', 'multifractality_in_bitcoin_realised_volatility_implications_', 'dms_ae_daa_methods_and_applications_of_adaptive_time_series_', 'quantitative_probing_validating_causal_models_using_quantita']
+00:43:34  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:003] brainstorming up to 25 idea(s) across 25 paper(s), one call each (dedup against prerun, 70 known id(s)) …
+00:44:19  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:44:19  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:003] brainstorm call (an_energy_concentrated_wavelet_transform_for_time_frequency_, asked 1, 45853 tok): 45.3s
+00:44:57  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:44:57  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:003] brainstorm call (corporate_bankruptcy_prediction_with_domain_adapted_bert, asked 1, 15451 tok): 37.6s
+00:45:45  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:45:46  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:003] brainstorm call (a_stock_selection_method_based_on_earning_yield_forecast_usi, asked 1, 11194 tok): 48.7s
+00:46:22  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:46:22  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:003] brainstorm call (a_deterministic_limit_order_book_simulator_with_hawkes_drive, asked 1, 18529 tok): 36.7s
+00:47:19  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:47:19  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:003] brainstorm call (fast_mean_reversion_asymptotics_for_large_portfolios_of_stoc, asked 1, 40542 tok): 56.6s
+00:47:56  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:47:56  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:003] brainstorm call (joint_news_attention_spillover_and_stock_returns, asked 1, 48160 tok): 37.1s
+00:48:51  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:48:51  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:003] brainstorm call (invariance_through_latent_alignment, asked 1, 17223 tok): 55.5s
+00:49:47  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:49:47  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:003] brainstorm call (clam_continuous_latent_action_models_for_robot_learning_from, asked 1, 25946 tok): 55.6s
+00:50:46  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:50:46  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:003] brainstorm call (a_tick_by_tick_solution_for_concentrated_liquidity_provision, asked 1, 10259 tok): 59.4s
+00:51:35  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:51:35  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:003] brainstorm call (exploring_a_gradient_based_explainable_ai_technique_for_time, asked 1, 9077 tok): 48.3s
+00:52:22  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:52:22  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:003] brainstorm call (eigenvalue_distribution_of_nonlinear_models_of_random_matric, asked 1, 35751 tok): 47.3s
+00:52:58  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:52:58  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:003] brainstorm call (fully_probabilistic_design_for_optimal_transport, asked 1, 9173 tok): 35.8s
+00:53:33  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:53:33  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:003] brainstorm call (stock_returns_versus_trading_volume_is_the_correspondence_mo, asked 1, 16093 tok): 34.6s
+00:54:34  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:54:34  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:003] brainstorm call (macroeconomic_forecasting_and_machine_learning, asked 1, 28026 tok): 61.8s
+00:55:30  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:55:30  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:003] brainstorm call (universal_and_nonuniversal_allometric_scaling_behaviors_in_t, asked 1, 13713 tok): 55.6s
+00:56:10  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:56:10  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:003] brainstorm call (a_persistent_homology_based_turbulence_index_some_applicatio, asked 1, 15700 tok): 40.3s
+00:56:42  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:56:42  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:003] brainstorm call (better_to_stay_apart_asset_commonality_bipartite_network_cen, asked 1, 38243 tok): 32.2s
+00:57:45  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:57:45  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:003] brainstorm call (sovereign_debt_default_and_climate_risk, asked 1, 26508 tok): 62.4s
+00:58:17  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:58:17  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:003] brainstorm call (byzantine_resilient_high_dimensional_federated_learning, asked 1, 42547 tok): 31.8s
+00:58:48  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:58:48  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:003] brainstorm call (intraday_seasonalities_and_nonstationarity_of_trading_volume, asked 1, 22982 tok): 31.4s
+00:59:33  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+00:59:33  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:003] brainstorm call (optional_p_lya_trees_posterior_rates_and_uncertainty_quantif, asked 1, 36763 tok): 45.2s
+01:00:19  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+01:00:20  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:003] brainstorm call (sector_rotation_by_factor_model_and_fundamental_analysis, asked 1, 10633 tok): 46.2s
+01:01:01  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+01:01:01  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:003] brainstorm call (multifractality_in_bitcoin_realised_volatility_implications_, asked 1, 33666 tok): 41.3s
+01:01:44  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+01:01:44  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:003] brainstorm call (dms_ae_daa_methods_and_applications_of_adaptive_time_series_, asked 1, 17201 tok): 43.2s
+01:02:26  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+01:02:26  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:003] brainstorm call (quantitative_probing_validating_causal_models_using_quantita, asked 1, 16162 tok): 41.9s
+01:02:26  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:003] kept 25 idea(s) from 25 paper-call(s)
+01:05:07  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+01:05:08  INFO     factor_research.codegen  validated gd_reassigned_transient_age_concentration_flip (class GdReassignedTransientAgeConcentrationFlip)
+01:05:08  INFO     factor_research         [gd_reassigned_transient_age_concentration_flip] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/gd_reassigned_transient_age_concentration_flip.py
+01:06:11  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+01:06:11  INFO     factor_research.codegen  validated hazard_state_gated_flow_convexity_entropy_filter (class HazardStateGatedFlowConvexityEntropyFilter)
+01:06:11  INFO     factor_research         [hazard_state_gated_flow_convexity_entropy_filter] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/hazard_state_gated_flow_convexity_entropy_filter.py
+01:07:52  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+01:07:52  INFO     factor_research.codegen  validated ev_elasticity_earning_yield_overshoot_snapback (class EvElasticityEarningYieldOvershootSnapback)
+01:07:52  INFO     factor_research         [ev_elasticity_earning_yield_overshoot_snapback] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/ev_elasticity_earning_yield_overshoot_snapback.py
+01:10:24  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+01:10:24  INFO     factor_research.codegen  validated sign_split_hawkes_branching_asymmetry_cascade (class SignSplitHawkesBranchingAsymmetryCascade)
+01:10:24  INFO     factor_research         [sign_split_hawkes_branching_asymmetry_cascade] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/sign_split_hawkes_branching_asymmetry_cascade.py
+01:11:30  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+01:11:30  INFO     factor_research.codegen  validated vol_timescale_jensen_gap_barrier_bounce_flip (class VolTimescaleJensenGapBarrierBounceFlip)
+01:11:30  INFO     factor_research         [vol_timescale_jensen_gap_barrier_bounce_flip] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/vol_timescale_jensen_gap_barrier_bounce_flip.py
+01:13:58  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+01:13:59  INFO     factor_research.codegen  validated coburst_attention_spillover_centrality_reversal (class CoBurstAttentionSpilloverCentralityReversal)
+01:13:59  INFO     factor_research         [coburst_attention_spillover_centrality_reversal] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/coburst_attention_spillover_centrality_reversal.py
+01:16:21  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+01:16:21  INFO     factor_research.codegen  validated latent_alignment_ood_gated_dynamics_residual (class LatentAlignmentOODGatedDynamicsResidual)
+01:16:21  INFO     factor_research         [latent_alignment_ood_gated_dynamics_residual] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/latent_alignment_ood_gated_dynamics_residual.py
+01:18:31  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+01:18:32  INFO     factor_research.codegen  validated latent_action_manifold_grounded_offpolicy_split (class LatentActionManifoldGroundedOffPolicySplit)
+01:18:32  INFO     factor_research         [latent_action_manifold_grounded_offpolicy_split] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/latent_action_manifold_grounded_offpolicy_split.py
+01:22:00  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+01:22:00  INFO     factor_research.codegen  validated waterfill_provision_centroid_yield_dislocation (class WaterfillProvisionCentroidYieldDislocation)
+01:22:00  INFO     factor_research         [waterfill_provision_centroid_yield_dislocation] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/waterfill_provision_centroid_yield_dislocation.py
+01:23:49  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+01:23:50  INFO     factor_research.codegen  validated saliency_pivot_frame_opposition_volume_gate (class SaliencyPivotFrameOppositionVolumeGate)
+01:23:50  INFO     factor_research         [saliency_pivot_frame_opposition_volume_gate] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/saliency_pivot_frame_opposition_volume_gate.py
+01:25:44  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+01:25:44  INFO     factor_research.codegen  validated theta_gated_saturated_eigen_residual_reversal (class ThetaGatedSaturatedEigenResidualReversal)
+01:25:44  INFO     factor_research         [theta_gated_saturated_eigen_residual_reversal] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/theta_gated_saturated_eigen_residual_reversal.py
+01:28:57  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+01:28:57  INFO     factor_research.codegen  validated sinkhorn_transport_coherence_displacement_gate (class SinkhornTransportCoherenceDisplacementGate)
+01:28:57  INFO     factor_research         [sinkhorn_transport_coherence_displacement_gate] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/sinkhorn_transport_coherence_displacement_gate.py
+01:30:37  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+01:30:37  INFO     factor_research.codegen  validated sqrt_impact_law_residual_tail_ratio_gate (class SqrtImpactLawResidualTailRatioGate)
+01:30:37  INFO     factor_research         [sqrt_impact_law_residual_tail_ratio_gate] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/sqrt_impact_law_residual_tail_ratio_gate.py
+01:33:16  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+01:33:16  INFO     factor_research.codegen  validated pinball_tail_asymmetry_validated_drift (class PinballTailAsymmetryValidatedDrift)
+01:33:16  INFO     factor_research         [pinball_tail_asymmetry_validated_drift] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/pinball_tail_asymmetry_validated_drift.py
+01:36:13  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+01:36:13  INFO     factor_research.codegen  validated visibility_graph_allometry_spike_split (class VisibilityGraphAllometrySpikeSplit)
+01:36:13  INFO     factor_research         [visibility_graph_allometry_spike_split] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/visibility_graph_allometry_spike_split.py
+01:38:51  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+01:38:51  INFO     factor_research.codegen  validated h0_dendrogram_attachment_gated_cluster_snapback (class H0DendrogramAttachmentGatedClusterSnapback)
+01:38:51  INFO     factor_research         [h0_dendrogram_attachment_gated_cluster_snapback] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/h0_dendrogram_attachment_gated_cluster_snapback.py
+01:40:40  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+01:40:41  INFO     factor_research.codegen  validated bipartite_bar_commonality_niche_flow_split (class BipartiteBarCommonalityNicheFlowSplit)
+01:40:41  INFO     factor_research         [bipartite_bar_commonality_niche_flow_split] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/bipartite_bar_commonality_niche_flow_split.py
+01:43:36  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+01:43:37  INFO     factor_research.codegen  validated depletion_stock_hazard_premium_fiscal_space_wedge (class DepletionStockHazardPremiumFiscalSpaceWedge)
+01:43:37  INFO     factor_research         [depletion_stock_hazard_premium_fiscal_space_wedge] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/depletion_stock_hazard_premium_fiscal_space_wedge.py
+01:45:12  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+01:45:12  INFO     factor_research.codegen  validated rage_filtered_consensus_residual_volume_split (class RageFilteredConsensusResidualVolumeSplit)
+01:45:12  INFO     factor_research         [rage_filtered_consensus_residual_volume_split] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/rage_filtered_consensus_residual_volume_split.py
+01:46:47  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+01:46:47  INFO     factor_research.codegen  validated cs_volume_kurtosis_wayward_cohesive_flip (class CsVolumeKurtosisWaywardCohesiveFlip)
+01:46:47  INFO     factor_research         [cs_volume_kurtosis_wayward_cohesive_flip] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/cs_volume_kurtosis_wayward_cohesive_flip.py
+01:50:34  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+01:50:34  INFO     factor_research.codegen  validated opt_median_tree_profile_pull_vacuum_split (class OptMedianTreeProfilePullVacuumSplit)
+01:50:34  INFO     factor_research         [opt_median_tree_profile_pull_vacuum_split] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/opt_median_tree_profile_pull_vacuum_split.py
+01:52:31  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+01:52:31  INFO     factor_research.codegen  validated sector_basket_drag_fundamental_atypicality_snapback (class SectorBasketDragFundamentalAtypicalitySnapback)
+01:52:32  INFO     factor_research         [sector_basket_drag_fundamental_atypicality_snapback] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/sector_basket_drag_fundamental_atypicality_snapback.py
+01:53:49  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+01:53:49  INFO     factor_research.codegen  validated multifractal_width_shuffle_residual_trend_flip (class MultifractalWidthShuffleResidualTrendFlip)
+01:53:49  INFO     factor_research         [multifractal_width_shuffle_residual_trend_flip] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/multifractal_width_shuffle_residual_trend_flip.py
+01:55:57  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+01:55:57  INFO     factor_research.codegen  validated ae_loss_weighted_model_bank_memory_regime_gate (class AeLossWeightedModelBankMemoryRegimeGate)
+01:55:58  INFO     factor_research         [ae_loss_weighted_model_bank_memory_regime_gate] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/ae_loss_weighted_model_bank_memory_regime_gate.py
+01:57:19  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+01:57:19  INFO     factor_research.codegen  validated probe_hitrate_trust_gated_impact_estimand (class ProbeHitRateTrustGatedImpactEstimand)
+01:57:19  INFO     factor_research         [probe_hitrate_trust_gated_impact_estimand] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/probe_hitrate_trust_gated_impact_estimand.py
+01:57:19  INFO     research.service        Loading panel from ticker_data (fields=['assetTurnover', 'cashRatio', 'close', 'debtToAssets', 'debtToEquity', 'earningsYield', 'ebit', 'ebitGrowth', 'enterpriseValue', 'evToEbitda', 'freeCashFlowYield', 'grossMargin', 'high', 'incomeQuality', 'interestCoverage', 'low', 'marketCap', 'netMargin', 'open', 'pbRatio', 'quickRatio', 'retainedEarnings', 'revenue', 'revenueGrowth', 'roe', 'sector', 'totalAssets', 'totalLiabilities', 'volume', 'workingCapital'], n_tickers=all) …
+01:58:17  INFO     research.service        Panel loaded in 57.9s (209 tickers, 30 fields)
+01:58:18  INFO     research.service        [gd_reassigned_transient_age_concentration_flip] backtest 0.8s IC@6=-0.001164 ICIR@6=-0.010651
+01:58:18  INFO     research.service        [hazard_state_gated_flow_convexity_entropy_filter] backtest 0.4s IC@6=-0.005461 ICIR@6=-0.047166
+01:58:19  INFO     research.service        [ev_elasticity_earning_yield_overshoot_snapback] backtest 0.6s IC@6=0.011748 ICIR@6=0.071281
+01:58:19  INFO     research.service        [sign_split_hawkes_branching_asymmetry_cascade] backtest 0.5s IC@6=-0.007216 ICIR@6=-0.068326
+01:58:20  INFO     research.service        [vol_timescale_jensen_gap_barrier_bounce_flip] backtest 0.3s IC@6=None ICIR@6=None
+01:58:20  INFO     research.service        [coburst_attention_spillover_centrality_reversal] backtest 0.3s IC@6=0.002721 ICIR@6=0.024797
+01:58:22  INFO     research.service        [latent_alignment_ood_gated_dynamics_residual] backtest 2.0s IC@6=-0.000629 ICIR@6=-0.005712
+01:58:23  INFO     research.service        [latent_action_manifold_grounded_offpolicy_split] backtest 1.2s IC@6=0.007723 ICIR@6=0.052978
+01:58:26  INFO     research.service        [waterfill_provision_centroid_yield_dislocation] backtest 3.0s IC@6=0.005629 ICIR@6=0.043972
+01:58:27  INFO     research.service        [saliency_pivot_frame_opposition_volume_gate] backtest 0.4s IC@6=0.002649 ICIR@6=0.021076
+01:58:28  INFO     research.service        [theta_gated_saturated_eigen_residual_reversal] backtest 1.2s IC@6=0.002857 ICIR@6=0.024365
+01:58:29  INFO     research.service        [sinkhorn_transport_coherence_displacement_gate] backtest 1.5s IC@6=0.002855 ICIR@6=0.019714
+01:58:32  INFO     research.service        [sqrt_impact_law_residual_tail_ratio_gate] backtest 2.8s IC@6=0.006451 ICIR@6=0.049843
+01:58:35  INFO     research.service        [pinball_tail_asymmetry_validated_drift] backtest 2.3s IC@6=-0.00299 ICIR@6=-0.029479
+01:58:36  INFO     research.service        [visibility_graph_allometry_spike_split] backtest 1.4s IC@6=0.000457 ICIR@6=0.004065
+01:58:36  INFO     research.service        [h0_dendrogram_attachment_gated_cluster_snapback] backtest 0.2s IC@6=0.007592 ICIR@6=0.064591
+01:58:37  INFO     research.service        [bipartite_bar_commonality_niche_flow_split] backtest 0.4s IC@6=0.014239 ICIR@6=0.116382
+01:58:38  INFO     research.service        [depletion_stock_hazard_premium_fiscal_space_wedge] backtest 1.5s IC@6=0.008152 ICIR@6=0.066544
+01:58:39  INFO     research.service        [rage_filtered_consensus_residual_volume_split] backtest 1.0s IC@6=0.001683 ICIR@6=0.010239
+01:58:39  INFO     research.service        [cs_volume_kurtosis_wayward_cohesive_flip] backtest 0.4s IC@6=7.1e-05 ICIR@6=0.000515
+01:58:46  INFO     research.service        [opt_median_tree_profile_pull_vacuum_split] backtest 6.4s IC@6=-0.006555 ICIR@6=-0.052863
+01:58:47  INFO     research.service        [sector_basket_drag_fundamental_atypicality_snapback] backtest 0.9s IC@6=-0.000966 ICIR@6=-0.008412
+01:58:47  INFO     research.service        [multifractal_width_shuffle_residual_trend_flip] backtest 0.5s IC@6=-0.000499 ICIR@6=-0.004858
+01:58:48  INFO     research.service        [ae_loss_weighted_model_bank_memory_regime_gate] backtest 1.0s IC@6=0.002994 ICIR@6=0.019269
+01:58:49  INFO     research.service        [probe_hitrate_trust_gated_impact_estimand] backtest 0.7s IC@6=0.002966 ICIR@6=0.026219
+01:58:49  INFO     factor_research         [gd_reassigned_transient_age_concentration_flip] KEPT  (|IC@6|=0.0012, IC not gated)
+01:58:49  INFO     factor_research         [hazard_state_gated_flow_convexity_entropy_filter] KEPT  (|IC@6|=0.0055, IC not gated)
+01:58:49  INFO     factor_research         [ev_elasticity_earning_yield_overshoot_snapback] KEPT  (|IC@6|=0.0117, IC not gated)
+01:58:49  INFO     factor_research         [sign_split_hawkes_branching_asymmetry_cascade] KEPT  (|IC@6|=0.0072, IC not gated)
+01:58:49  INFO     factor_research         [vol_timescale_jensen_gap_barrier_bounce_flip] KEPT  (|IC@6|=NA, IC not gated)
+01:58:49  INFO     factor_research         [coburst_attention_spillover_centrality_reversal] KEPT  (|IC@6|=0.0027, IC not gated)
+01:58:49  INFO     factor_research         [latent_alignment_ood_gated_dynamics_residual] KEPT  (|IC@6|=0.0006, IC not gated)
+01:58:49  INFO     factor_research         [latent_action_manifold_grounded_offpolicy_split] KEPT  (|IC@6|=0.0077, IC not gated)
+01:58:49  INFO     factor_research         [waterfill_provision_centroid_yield_dislocation] KEPT  (|IC@6|=0.0056, IC not gated)
+01:58:49  INFO     factor_research         [saliency_pivot_frame_opposition_volume_gate] KEPT  (|IC@6|=0.0026, IC not gated)
+01:58:49  INFO     factor_research         [theta_gated_saturated_eigen_residual_reversal] KEPT  (|IC@6|=0.0029, IC not gated)
+01:58:49  INFO     factor_research         [sinkhorn_transport_coherence_displacement_gate] KEPT  (|IC@6|=0.0029, IC not gated)
+01:58:49  INFO     factor_research         [sqrt_impact_law_residual_tail_ratio_gate] KEPT  (|IC@6|=0.0065, IC not gated)
+01:58:49  INFO     factor_research         [pinball_tail_asymmetry_validated_drift] KEPT  (|IC@6|=0.0030, IC not gated)
+01:58:49  INFO     factor_research         [visibility_graph_allometry_spike_split] KEPT  (|IC@6|=0.0005, IC not gated)
+01:58:49  INFO     factor_research         [h0_dendrogram_attachment_gated_cluster_snapback] KEPT  (|IC@6|=0.0076, IC not gated)
+01:58:49  INFO     factor_research         [bipartite_bar_commonality_niche_flow_split] KEPT  (|IC@6|=0.0142, IC not gated)
+01:58:49  INFO     factor_research         [depletion_stock_hazard_premium_fiscal_space_wedge] KEPT  (|IC@6|=0.0082, IC not gated)
+01:58:49  INFO     factor_research         [rage_filtered_consensus_residual_volume_split] KEPT  (|IC@6|=0.0017, IC not gated)
+01:58:49  INFO     factor_research         [cs_volume_kurtosis_wayward_cohesive_flip] KEPT  (|IC@6|=0.0001, IC not gated)
+01:58:49  INFO     factor_research         [opt_median_tree_profile_pull_vacuum_split] KEPT  (|IC@6|=0.0066, IC not gated)
+01:58:49  INFO     factor_research         [sector_basket_drag_fundamental_atypicality_snapback] KEPT  (|IC@6|=0.0010, IC not gated)
+01:58:49  INFO     factor_research         [multifractal_width_shuffle_residual_trend_flip] KEPT  (|IC@6|=0.0005, IC not gated)
+01:58:49  INFO     factor_research         [ae_loss_weighted_model_bank_memory_regime_gate] KEPT  (|IC@6|=0.0030, IC not gated)
+01:58:49  INFO     factor_research         [probe_hitrate_trust_gated_impact_estimand] KEPT  (|IC@6|=0.0030, IC not gated)
+01:58:49  INFO     research.service        research session persisted: 25 kept, 0 rejected
+01:58:49  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:003] research session complete: 25 kept, 0 rejected
+01:58:49  INFO     run_factor_research     session 3 kept 25 factor(s): ['gd_reassigned_transient_age_concentration_flip', 'hazard_state_gated_flow_convexity_entropy_filter', 'ev_elasticity_earning_yield_overshoot_snapback', 'sign_split_hawkes_branching_asymmetry_cascade', 'vol_timescale_jensen_gap_barrier_bounce_flip', 'coburst_attention_spillover_centrality_reversal', 'latent_alignment_ood_gated_dynamics_residual', 'latent_action_manifold_grounded_offpolicy_split', 'waterfill_provision_centroid_yield_dislocation', 'saliency_pivot_frame_opposition_volume_gate', 'theta_gated_saturated_eigen_residual_reversal', 'sinkhorn_transport_coherence_displacement_gate', 'sqrt_impact_law_residual_tail_ratio_gate', 'pinball_tail_asymmetry_validated_drift', 'visibility_graph_allometry_spike_split', 'h0_dendrogram_attachment_gated_cluster_snapback', 'bipartite_bar_commonality_niche_flow_split', 'depletion_stock_hazard_premium_fiscal_space_wedge', 'rage_filtered_consensus_residual_volume_split', 'cs_volume_kurtosis_wayward_cohesive_flip', 'opt_median_tree_profile_pull_vacuum_split', 'sector_basket_drag_fundamental_atypicality_snapback', 'multifractal_width_shuffle_residual_trend_flip', 'ae_loss_weighted_model_bank_memory_regime_gate', 'probe_hitrate_trust_gated_impact_estimand']
+01:58:49  INFO     run_factor_research     ── session 4/12  (have 95, want 100) ──
+01:58:49  INFO     backtesting.data_loader  capping universe at 1 tickers (was 10)
+01:58:51  INFO     backtesting.data_loader  loaded 1 tickers, skipped 0
+01:58:51  INFO     pipeline                Factor research session 'prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:004' (papers=25, ideas=25, IC@6 recorded, not gated; prediction horizon fixed at 6; 144 data fields in scope)
+01:58:52  INFO     research.service        fetched full text for international_trade_finance_from_the_origins_to_the_present_ from https://arxiv.org/pdf/2009.08668v1 (77080 chars, 0.7s)
+01:58:52  INFO     research.service        fetched full text for uncertainty_quantification_of_darcy_flow_through_porous_medi from https://arxiv.org/pdf/2011.01647v2 (70464 chars, 0.5s)
+01:59:06  INFO     research.service        fetched full text for rich_get_richer_platform_attention_and_earnings_inequality_u from https://arxiv.org/pdf/2509.26523v3 (83866 chars, 14.0s)
+01:59:07  INFO     research.service        fetched full text for application_of_deep_learning_for_factor_timing_in_asset_mana from https://arxiv.org/pdf/2404.18017v1 (15107 chars, 0.4s)
+01:59:08  INFO     research.service        fetched full text for continual_learning_for_recurrent_neural_networks_an_empirica from https://arxiv.org/pdf/2103.07492v4 (105684 chars, 1.1s)
+01:59:10  INFO     research.service        fetched full text for wasserstein_distances_made_explainable_insights_into_dataset from https://arxiv.org/pdf/2505.06123v2 (108514 chars, 2.2s)
+01:59:11  INFO     research.service        fetched full text for supervise_thyself_examining_self_supervised_representations_ from https://arxiv.org/pdf/1906.11951v1 (30797 chars, 0.7s)
+01:59:11  INFO     research.service        fetched full text for lets_gzsl_a_latent_embedding_model_for_time_series_generaliz from https://arxiv.org/pdf/2207.12007v1 (40975 chars, 0.4s)
+01:59:13  INFO     research.service        fetched full text for bootstrap_aggregation_and_confidence_measures_to_improve_tim from https://arxiv.org/pdf/2306.08946v2 (74333 chars, 2.0s)
+01:59:13  INFO     research.service        fetched full text for time_reversal_invariance_in_finance from https://arxiv.org/pdf/0708.4022v1 (40142 chars, 0.4s)
+01:59:14  INFO     research.service        fetched full text for ai_premium from https://arxiv.org/pdf/2606.30583v2 (178743 chars, 1.0s)
+01:59:15  INFO     research.service        fetched full text for comparison_of_classical_and_nonlinear_models_for_short_term_ from https://arxiv.org/pdf/1805.05431v1 (46063 chars, 0.8s)
+01:59:16  INFO     research.service        fetched full text for the_effect_of_antitrust_enforcement_on_venture_capital_inves from https://arxiv.org/pdf/2312.13564v2 (53840 chars, 0.8s)
+01:59:17  INFO     research.service        fetched full text for risk_management_and_return_prediction from https://arxiv.org/pdf/2007.01194v1 (19649 chars, 1.0s)
+01:59:18  INFO     research.service        fetched full text for sampling_and_recovery_of_graph_signals from https://arxiv.org/pdf/1712.09310v1 (61686 chars, 1.0s)
+01:59:18  INFO     research.service        fetched full text for on_the_overestimation_of_the_largest_eigenvalue_of_a_covaria from https://arxiv.org/pdf/1708.03551v1 (21691 chars, 0.3s)
+01:59:19  INFO     research.service        fetched full text for garch_informed_neural_networks_for_volatility_prediction_in_ from https://arxiv.org/pdf/2410.00288v1 (43806 chars, 0.4s)
+01:59:22  INFO     research.service        fetched full text for why_when_and_how_fast_innovations_are_adopted from https://arxiv.org/pdf/1208.2589v1 (42718 chars, 3.3s)
+01:59:23  INFO     research.service        fetched full text for combining_domain_knowledge_and_statistical_models_in_time_se from https://arxiv.org/pdf/math/0702814v1 (49992 chars, 0.8s)
+01:59:24  INFO     research.service        fetched full text for beating_the_house_identifying_inefficiencies_in_sports_betti from https://arxiv.org/pdf/1910.08858v2 (60425 chars, 1.5s)
+01:59:24  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:004] selected 25/25 papers: ['international_trade_finance_from_the_origins_to_the_present_', 'uncertainty_quantification_of_darcy_flow_through_porous_medi', 'rich_get_richer_platform_attention_and_earnings_inequality_u', 'rough_path_stability_of_semi_linear_spdes', 'application_of_deep_learning_for_factor_timing_in_asset_mana', 'a_multi_horizon_quantile_recurrent_forecaster', 'continual_learning_for_recurrent_neural_networks_an_empirica', 'wasserstein_distances_made_explainable_insights_into_dataset', 'supervise_thyself_examining_self_supervised_representations_', 'lets_gzsl_a_latent_embedding_model_for_time_series_generaliz', 'bootstrap_aggregation_and_confidence_measures_to_improve_tim', 'time_reversal_invariance_in_finance', 'ai_premium', 'comparison_of_classical_and_nonlinear_models_for_short_term_', 'algebraic_groups_in_non_commutative_probability_theory_revis', 'the_effect_of_antitrust_enforcement_on_venture_capital_inves', 'risk_management_and_return_prediction', 'sampling_and_recovery_of_graph_signals', 'on_the_overestimation_of_the_largest_eigenvalue_of_a_covaria', 'garch_informed_neural_networks_for_volatility_prediction_in_', 'why_when_and_how_fast_innovations_are_adopted', 'the_inverse_problem_for_rough_controlled_differential_equati', 'combining_domain_knowledge_and_statistical_models_in_time_se', 'stochastic_inequalities_for_single_server_loss_queueing_syst', 'beating_the_house_identifying_inefficiencies_in_sports_betti']
+01:59:24  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:004] brainstorming up to 25 idea(s) across 25 paper(s), one call each (dedup against prerun, 95 known id(s)) …
+02:00:16  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:00:16  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:004] brainstorm call (international_trade_finance_from_the_origins_to_the_present_, asked 1, 21461 tok): 52.2s
+02:01:05  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:01:05  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:004] brainstorm call (uncertainty_quantification_of_darcy_flow_through_porous_medi, asked 1, 25017 tok): 48.5s
+02:02:01  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:02:01  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:004] brainstorm call (rich_get_richer_platform_attention_and_earnings_inequality_u, asked 1, 24486 tok): 55.8s
+02:02:46  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:02:46  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:004] brainstorm call (rough_path_stability_of_semi_linear_spdes, asked 1, 31489 tok): 45.5s
+02:03:28  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:03:28  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:004] brainstorm call (application_of_deep_learning_for_factor_timing_in_asset_mana, asked 1, 7926 tok): 42.2s
+02:04:10  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:04:10  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:004] brainstorm call (a_multi_horizon_quantile_recurrent_forecaster, asked 1, 13717 tok): 41.4s
+02:04:52  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:04:53  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:004] brainstorm call (continual_learning_for_recurrent_neural_networks_an_empirica, asked 1, 33738 tok): 42.7s
+02:05:47  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:05:47  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:004] brainstorm call (wasserstein_distances_made_explainable_insights_into_dataset, asked 1, 36145 tok): 54.1s
+02:06:27  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:06:27  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:004] brainstorm call (supervise_thyself_examining_self_supervised_representations_, asked 1, 12592 tok): 40.8s
+02:07:03  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:07:03  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:004] brainstorm call (lets_gzsl_a_latent_embedding_model_for_time_series_generaliz, asked 1, 15062 tok): 35.2s
+02:07:35  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:07:36  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:004] brainstorm call (bootstrap_aggregation_and_confidence_measures_to_improve_tim, asked 1, 25532 tok): 32.8s
+02:08:32  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:08:32  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:004] brainstorm call (time_reversal_invariance_in_finance, asked 1, 14918 tok): 57.0s
+02:09:07  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:09:07  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:004] brainstorm call (ai_premium, asked 1, 62899 tok): 34.5s
+02:09:50  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:09:50  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:004] brainstorm call (comparison_of_classical_and_nonlinear_models_for_short_term_, asked 1, 15695 tok): 42.7s
+02:11:16  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:11:16  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:004] brainstorm call (algebraic_groups_in_non_commutative_probability_theory_revis, asked 1, 29807 tok): 86.8s
+02:11:50  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:11:50  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:004] brainstorm call (the_effect_of_antitrust_enforcement_on_venture_capital_inves, asked 1, 17143 tok): 33.1s
+02:12:31  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:12:31  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:004] brainstorm call (risk_management_and_return_prediction, asked 1, 9720 tok): 41.8s
+02:13:25  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:13:25  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:004] brainstorm call (sampling_and_recovery_of_graph_signals, asked 1, 22535 tok): 53.4s
+02:14:12  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:14:12  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:004] brainstorm call (on_the_overestimation_of_the_largest_eigenvalue_of_a_covaria, asked 1, 12558 tok): 47.2s
+02:15:07  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:15:07  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:004] brainstorm call (garch_informed_neural_networks_for_volatility_prediction_in_, asked 1, 15967 tok): 54.8s
+02:15:46  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:15:46  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:004] brainstorm call (why_when_and_how_fast_innovations_are_adopted, asked 1, 16784 tok): 39.1s
+02:16:30  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:16:30  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:004] brainstorm call (the_inverse_problem_for_rough_controlled_differential_equati, asked 1, 20659 tok): 44.5s
+02:17:25  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:17:25  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:004] brainstorm call (combining_domain_knowledge_and_statistical_models_in_time_se, asked 1, 19568 tok): 54.1s
+02:18:16  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:18:16  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:004] brainstorm call (stochastic_inequalities_for_single_server_loss_queueing_syst, asked 1, 14725 tok): 51.4s
+02:19:01  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:19:01  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:004] brainstorm call (beating_the_house_identifying_inefficiencies_in_sports_betti, asked 1, 23672 tok): 44.8s
+02:19:01  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:004] kept 25 idea(s) from 25 paper-call(s)
+02:20:22  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:20:22  INFO     factor_research.codegen  validated acceptance_eligibility_gated_negotiable_flow_split (class AcceptanceEligibilityGatedNegotiableFlowSplit)
+02:20:22  INFO     factor_research         [acceptance_eligibility_gated_negotiable_flow_split] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/acceptance_eligibility_gated_negotiable_flow_split.py
+02:22:20  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:22:20  INFO     factor_research.codegen  validated darcy_pressure_permeability_flow_residual (class DarcyPressurePermeabilityFlowResidual)
+02:22:20  INFO     factor_research         [darcy_pressure_permeability_flow_residual] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/darcy_pressure_permeability_flow_residual.py
+02:23:31  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:23:31  INFO     factor_research.codegen  validated preferential_attachment_attention_residual_split (class PreferentialAttachmentAttentionResidualSplit)
+02:23:31  INFO     factor_research         [preferential_attachment_attention_residual_split] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/preferential_attachment_attention_residual_split.py
+02:25:44  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:25:44  INFO     factor_research.codegen  validated wong_zakai_area_anomaly_subblock_rotation_drift (class WongZakaiAreaAnomalySubBlockRotationDrift)
+02:25:44  INFO     factor_research         [wong_zakai_area_anomaly_subblock_rotation_drift] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/wong_zakai_area_anomaly_subblock_rotation_drift.py
+02:28:13  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:28:13  INFO     factor_research.codegen  validated cma_investment_factor_premium_ar_timing_tilt (class CmaInvestmentFactorPremiumArTimingTilt)
+02:28:13  INFO     factor_research         [cma_investment_factor_premium_ar_timing_tilt] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/cma_investment_factor_premium_ar_timing_tilt.py
+02:31:39  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:31:39  INFO     factor_research.codegen  validated direct_vs_recursive_multistep_forecast_wedge (class DirectVsRecursiveMultistepForecastWedge)
+02:31:39  INFO     factor_research         [direct_vs_recursive_multistep_forecast_wedge] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/direct_vs_recursive_multistep_forecast_wedge.py
+02:34:16  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:34:16  INFO     factor_research.codegen  validated ewc_consolidated_vs_plastic_forecast_wedge (class EwcConsolidatedVsPlasticForecastWedge)
+02:34:16  INFO     factor_research         [ewc_consolidated_vs_plastic_forecast_wedge] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/ewc_consolidated_vs_plastic_forecast_wedge.py
+02:37:11  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:37:12  INFO     factor_research.codegen  validated wax_sliced_transport_broadness_volume_gate (class WaxSlicedTransportBroadnessVolumeGate)
+02:37:12  INFO     factor_research         [wax_sliced_transport_broadness_volume_gate] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/wax_sliced_transport_broadness_volume_gate.py
+02:38:52  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:38:52  INFO     factor_research.codegen  validated arrow_of_time_ordinal_asymmetry_action_gate (class ArrowOfTimeOrdinalAsymmetryActionGate)
+02:38:52  INFO     factor_research         [arrow_of_time_ordinal_asymmetry_action_gate] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/arrow_of_time_ordinal_asymmetry_action_gate.py
+02:41:57  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:41:57  INFO     factor_research.codegen  validated zsl_prototype_attribute_novelty_calibrated_drift (class ZslPrototypeAttributeNoveltyCalibratedDrift)
+02:41:57  INFO     factor_research         [zsl_prototype_attribute_novelty_calibrated_drift] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/zsl_prototype_attribute_novelty_calibrated_drift.py
+02:45:21  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:45:21  INFO     factor_research.codegen  validated bagged_mci_leadlag_edge_confidence_relay (class BaggedMciLeadLagEdgeConfidenceRelay)
+02:45:21  INFO     factor_research         [bagged_mci_leadlag_edge_confidence_relay] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/bagged_mci_leadlag_edge_confidence_relay.py
+02:46:13  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:46:13  INFO     factor_research.codegen  validated vol_granularity_cascade_asymmetry_gate (class VolGranularityCascadeAsymmetryGate)
+02:46:13  INFO     factor_research         [vol_granularity_cascade_asymmetry_gate] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/vol_granularity_cascade_asymmetry_gate.py
+02:48:31  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:48:31  INFO     factor_research.codegen  validated intensive_margin_flow_beta_premium_split (class IntensiveMarginFlowBetaPremiumSplit)
+02:48:31  INFO     factor_research         [intensive_margin_flow_beta_premium_split] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/intensive_margin_flow_beta_premium_split.py
+02:51:21  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:51:21  INFO     factor_research.codegen  validated lsboost_nonlinear_residual_leaf_confidence_wedge (class LSBoostNonlinearResidualLeafConfidenceWedge)
+02:51:21  INFO     factor_research         [lsboost_nonlinear_residual_leaf_confidence_wedge] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/lsboost_nonlinear_residual_leaf_confidence_wedge.py
+02:54:25  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:54:25  INFO     factor_research.codegen  validated nc_partition_lattice_cumulant_wedge_regime_gate (class NcPartitionLatticeCumulantWedgeRegimeGate)
+02:54:25  INFO     factor_research         [nc_partition_lattice_cumulant_wedge_regime_gate] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/nc_partition_lattice_cumulant_wedge_regime_gate.py
+02:56:23  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:56:23  INFO     factor_research.codegen  validated dominance_gated_fringe_predation_relay (class DominanceGatedFringePredationRelay)
+02:56:24  INFO     factor_research         [dominance_gated_fringe_predation_relay] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/dominance_gated_fringe_predation_relay.py
+02:57:37  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+02:57:37  INFO     factor_research.codegen  validated spt_diversity_weight_displacement_excess_growth_gate (class SptDiversityWeightDisplacementExcessGrowthGate)
+02:57:37  INFO     factor_research         [spt_diversity_weight_displacement_excess_growth_gate] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/spt_diversity_weight_displacement_excess_growth_gate.py
+03:00:26  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+03:00:26  INFO     factor_research         [graph_bandlimited_anchor_interpolation_wedge] codegen attempt 1 failed (validation failed: class 'GraphBandlimitedAnchorInterpolationWedge' is missing a class attribute `inputs = ["field1", "field2", ...]`.  This list tells the agent which data fields to load for the backtest, so it MUST enumerate every field accessed via ``data["..."]`` inside calc().) — retrying with feedback
+03:03:03  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+03:03:03  INFO     factor_research.codegen  validated graph_bandlimited_anchor_interpolation_wedge (class GraphBandlimitedAnchorInterpolationWedge)
+03:03:03  INFO     factor_research         [graph_bandlimited_anchor_interpolation_wedge] materialised on attempt 2 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/graph_bandlimited_anchor_interpolation_wedge.py
+03:04:56  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+03:04:56  INFO     factor_research.codegen  validated mp_edge_spike_trust_common_mode_flip (class MPEdgeSpikeTrustCommonModeFlip)
+03:04:56  INFO     factor_research         [mp_edge_spike_trust_common_mode_flip] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/mp_edge_spike_trust_common_mode_flip.py
+03:07:04  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+03:07:04  INFO     factor_research.codegen  validated gjr_leverage_wedge_gated_downside_continuation (class GjrLeverageWedgeGatedDownsideContinuation)
+03:07:04  INFO     factor_research         [gjr_leverage_wedge_gated_downside_continuation] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/gjr_leverage_wedge_gated_downside_continuation.py
+03:09:23  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+03:09:23  INFO     factor_research.codegen  validated adoption_payoff_coupling_resistance_saturation_flip (class AdoptionPayoffCouplingResistanceSaturationFlip)
+03:09:23  INFO     factor_research         [adoption_payoff_coupling_resistance_saturation_flip] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/adoption_payoff_coupling_resistance_saturation_flip.py
+03:11:52  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+03:11:52  INFO     factor_research.codegen  validated inverse_rde_reconstructed_area_residual_gate (class InverseRdeReconstructedAreaResidualGate)
+03:11:52  INFO     factor_research         [inverse_rde_reconstructed_area_residual_gate] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/inverse_rde_reconstructed_area_residual_gate.py
+03:14:10  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+03:14:10  INFO     factor_research.codegen  validated logistic_ceiling_participation_residual_gate (class LogisticCeilingParticipationResidualGate)
+03:14:10  INFO     factor_research         [logistic_ceiling_participation_residual_gate] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/logistic_ceiling_participation_residual_gate.py
+03:15:27  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+03:15:27  INFO     factor_research.codegen  validated finite_buffer_loss_implied_depth_burst_split (class FiniteBufferLossImpliedDepthBurstSplit)
+03:15:27  INFO     factor_research         [finite_buffer_loss_implied_depth_burst_split] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/finite_buffer_loss_implied_depth_burst_split.py
+03:18:39  INFO     httpx                   HTTP Request: POST https://api.anthropic.com/v1/messages "HTTP/1.1 200 OK"
+03:18:39  INFO     factor_research.codegen  validated empirical_winrate_calibrated_dislocation_consensus_gate (class EmpiricalWinrateCalibratedDislocationConsensusGate)
+03:18:39  INFO     factor_research         [empirical_winrate_calibrated_dislocation_consensus_gate] materialised on attempt 1 → /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/empirical_winrate_calibrated_dislocation_consensus_gate.py
+03:18:39  INFO     research.service        Loading panel from ticker_data (fields=['assetGrowth', 'capexToRevenue', 'cashRatio', 'close', 'currentRatio', 'debtGrowth', 'debtToAssets', 'debtToEquity', 'grossMargin', 'high', 'industry', 'interestCoverage', 'low', 'marketCap', 'netMargin', 'netStockIssuance', 'open', 'pbRatio', 'peRatio', 'psRatio', 'rdToRevenue', 'roe', 'sector', 'sharesOutstanding', 'volume'], n_tickers=all) …
+03:19:33  INFO     research.service        Panel loaded in 54.1s (209 tickers, 25 fields)
+03:19:33  INFO     research.service        [acceptance_eligibility_gated_negotiable_flow_split] backtest 0.6s IC@6=0.005257 ICIR@6=0.043122
+03:19:34  INFO     research.service        [darcy_pressure_permeability_flow_residual] backtest 0.4s IC@6=0.012772 ICIR@6=0.085797
+03:19:34  INFO     research.service        [preferential_attachment_attention_residual_split] backtest 0.2s IC@6=0.003196 ICIR@6=0.025207
+03:19:34  INFO     research.service        [wong_zakai_area_anomaly_subblock_rotation_drift] backtest 0.4s IC@6=-0.002011 ICIR@6=-0.018337
+03:19:35  INFO     research.service        [cma_investment_factor_premium_ar_timing_tilt] backtest 0.3s IC@6=0.002959 ICIR@6=0.016885
+03:19:35  INFO     research.service        [direct_vs_recursive_multistep_forecast_wedge] backtest 0.4s IC@6=0.005318 ICIR@6=0.034225
+03:19:36  INFO     research.service        [ewc_consolidated_vs_plastic_forecast_wedge] backtest 0.9s IC@6=0.001539 ICIR@6=0.013447
+03:19:39  INFO     research.service        [wax_sliced_transport_broadness_volume_gate] backtest 3.4s IC@6=-0.000343 ICIR@6=-0.003244
+03:19:40  INFO     research.service        [arrow_of_time_ordinal_asymmetry_action_gate] backtest 0.2s IC@6=-0.000895 ICIR@6=-0.008511
+03:19:40  INFO     research.service        [zsl_prototype_attribute_novelty_calibrated_drift] backtest 0.8s IC@6=0.001452 ICIR@6=0.010286
+03:19:42  INFO     research.service        [bagged_mci_leadlag_edge_confidence_relay] backtest 1.3s IC@6=0.004691 ICIR@6=0.046192
+03:19:42  INFO     research.service        [vol_granularity_cascade_asymmetry_gate] backtest 0.2s IC@6=-0.002644 ICIR@6=-0.023806
+03:19:42  INFO     research.service        [intensive_margin_flow_beta_premium_split] backtest 0.5s IC@6=-0.002048 ICIR@6=-0.013821
+03:19:44  INFO     research.service        [lsboost_nonlinear_residual_leaf_confidence_wedge] backtest 1.5s IC@6=0.005036 ICIR@6=0.043334
+03:19:44  INFO     research.service        [nc_partition_lattice_cumulant_wedge_regime_gate] backtest 0.5s IC@6=0.001531 ICIR@6=0.013359
+03:19:45  INFO     research.service        [dominance_gated_fringe_predation_relay] backtest 0.4s IC@6=0.010089 ICIR@6=0.078115
+03:19:45  INFO     research.service        [spt_diversity_weight_displacement_excess_growth_gate] backtest 0.2s IC@6=0.002851 ICIR@6=0.016342
+03:19:45  INFO     research.service        [graph_bandlimited_anchor_interpolation_wedge] backtest 0.3s IC@6=0.01168 ICIR@6=0.083084
+03:19:46  WARNING  research.service        [mp_edge_spike_trust_common_mode_flip] backtest failed: Array conditional must be same shape as self
+03:19:46  INFO     research.service        [gjr_leverage_wedge_gated_downside_continuation] backtest 0.3s IC@6=-0.003063 ICIR@6=-0.025072
+03:19:47  INFO     research.service        [adoption_payoff_coupling_resistance_saturation_flip] backtest 0.8s IC@6=0.003161 ICIR@6=0.028644
+03:19:47  INFO     research.service        [inverse_rde_reconstructed_area_residual_gate] backtest 0.6s IC@6=None ICIR@6=None
+03:19:48  INFO     research.service        [logistic_ceiling_participation_residual_gate] backtest 0.8s IC@6=-0.001683 ICIR@6=-0.01458
+03:19:49  INFO     research.service        [finite_buffer_loss_implied_depth_burst_split] backtest 0.9s IC@6=-0.002096 ICIR@6=-0.016733
+03:19:50  INFO     research.service        [empirical_winrate_calibrated_dislocation_consensus_gate] backtest 0.8s IC@6=-0.000595 ICIR@6=-0.005065
+03:19:50  WARNING  factor_research         [mp_edge_spike_trust_common_mode_flip] backtest failed: Array conditional must be same shape as self
+03:19:50  INFO     factor_research         [acceptance_eligibility_gated_negotiable_flow_split] KEPT  (|IC@6|=0.0053, IC not gated)
+03:19:50  INFO     factor_research         [darcy_pressure_permeability_flow_residual] KEPT  (|IC@6|=0.0128, IC not gated)
+03:19:50  INFO     factor_research         [preferential_attachment_attention_residual_split] KEPT  (|IC@6|=0.0032, IC not gated)
+03:19:50  INFO     factor_research         [wong_zakai_area_anomaly_subblock_rotation_drift] KEPT  (|IC@6|=0.0020, IC not gated)
+03:19:50  INFO     factor_research         [cma_investment_factor_premium_ar_timing_tilt] KEPT  (|IC@6|=0.0030, IC not gated)
+03:19:50  INFO     factor_research         [direct_vs_recursive_multistep_forecast_wedge] KEPT  (|IC@6|=0.0053, IC not gated)
+03:19:50  INFO     factor_research         [ewc_consolidated_vs_plastic_forecast_wedge] KEPT  (|IC@6|=0.0015, IC not gated)
+03:19:50  INFO     factor_research         [wax_sliced_transport_broadness_volume_gate] KEPT  (|IC@6|=0.0003, IC not gated)
+03:19:50  INFO     factor_research         [arrow_of_time_ordinal_asymmetry_action_gate] KEPT  (|IC@6|=0.0009, IC not gated)
+03:19:50  INFO     factor_research         [zsl_prototype_attribute_novelty_calibrated_drift] KEPT  (|IC@6|=0.0015, IC not gated)
+03:19:50  INFO     factor_research         [bagged_mci_leadlag_edge_confidence_relay] KEPT  (|IC@6|=0.0047, IC not gated)
+03:19:50  INFO     factor_research         [vol_granularity_cascade_asymmetry_gate] KEPT  (|IC@6|=0.0026, IC not gated)
+03:19:50  INFO     factor_research         [intensive_margin_flow_beta_premium_split] KEPT  (|IC@6|=0.0020, IC not gated)
+03:19:50  INFO     factor_research         [lsboost_nonlinear_residual_leaf_confidence_wedge] KEPT  (|IC@6|=0.0050, IC not gated)
+03:19:50  INFO     factor_research         [nc_partition_lattice_cumulant_wedge_regime_gate] KEPT  (|IC@6|=0.0015, IC not gated)
+03:19:50  INFO     factor_research         [dominance_gated_fringe_predation_relay] KEPT  (|IC@6|=0.0101, IC not gated)
+03:19:50  INFO     factor_research         [spt_diversity_weight_displacement_excess_growth_gate] KEPT  (|IC@6|=0.0029, IC not gated)
+03:19:50  INFO     factor_research         [graph_bandlimited_anchor_interpolation_wedge] KEPT  (|IC@6|=0.0117, IC not gated)
+03:19:50  INFO     factor_research         [mp_edge_spike_trust_common_mode_flip] REJECTED (backtest failed: Array conditional must be same shape as self)
+03:19:50  INFO     factor_research         [gjr_leverage_wedge_gated_downside_continuation] KEPT  (|IC@6|=0.0031, IC not gated)
+03:19:50  INFO     factor_research         [adoption_payoff_coupling_resistance_saturation_flip] KEPT  (|IC@6|=0.0032, IC not gated)
+03:19:50  INFO     factor_research         [inverse_rde_reconstructed_area_residual_gate] KEPT  (|IC@6|=NA, IC not gated)
+03:19:50  INFO     factor_research         [logistic_ceiling_participation_residual_gate] KEPT  (|IC@6|=0.0017, IC not gated)
+03:19:50  INFO     factor_research         [finite_buffer_loss_implied_depth_burst_split] KEPT  (|IC@6|=0.0021, IC not gated)
+03:19:50  INFO     factor_research         [empirical_winrate_calibrated_dislocation_consensus_gate] KEPT  (|IC@6|=0.0006, IC not gated)
+03:19:50  INFO     research.service        research session persisted: 24 kept, 1 rejected
+03:19:50  INFO     factor_research         [session prerun:fmp_archive_equity_nasdaq100pit:L1_oneshot_opus5_s0:004] research session complete: 24 kept, 1 rejected
+03:19:50  INFO     run_factor_research     session 4 kept 24 factor(s): ['acceptance_eligibility_gated_negotiable_flow_split', 'darcy_pressure_permeability_flow_residual', 'preferential_attachment_attention_residual_split', 'wong_zakai_area_anomaly_subblock_rotation_drift', 'cma_investment_factor_premium_ar_timing_tilt', 'direct_vs_recursive_multistep_forecast_wedge', 'ewc_consolidated_vs_plastic_forecast_wedge', 'wax_sliced_transport_broadness_volume_gate', 'arrow_of_time_ordinal_asymmetry_action_gate', 'zsl_prototype_attribute_novelty_calibrated_drift', 'bagged_mci_leadlag_edge_confidence_relay', 'vol_granularity_cascade_asymmetry_gate', 'intensive_margin_flow_beta_premium_split', 'lsboost_nonlinear_residual_leaf_confidence_wedge', 'nc_partition_lattice_cumulant_wedge_regime_gate', 'dominance_gated_fringe_predation_relay', 'spt_diversity_weight_displacement_excess_growth_gate', 'graph_bandlimited_anchor_interpolation_wedge', 'gjr_leverage_wedge_gated_downside_continuation', 'adoption_payoff_coupling_resistance_saturation_flip', 'inverse_rde_reconstructed_area_residual_gate', 'logistic_ceiling_participation_residual_gate', 'finite_buffer_loss_implied_depth_burst_split', 'empirical_winrate_calibrated_dislocation_consensus_gate']
+03:19:50  INFO     run_factor_research     Target reached (119 ≥ 100) — stopping.
+
+================================================================================
+Factor scope 'fmp_archive_equity_nasdaq100pit/L1_oneshot_opus5_s0': data/workspaces/fmp_archive_equity_nasdaq100pit/preruns/L1_oneshot_opus5_s0/factors/factor_db.json  (research model: claude-opus-5)
+  seed factors      : 0
+  researcher factors: 119
+  by category       : {'statistical_arbitrage': 54, 'carry': 1, 'microstructure': 51, 'mean_reversion': 3, 'other': 1, 'volatility': 6, 'sentiment': 3}
+================================================================================
