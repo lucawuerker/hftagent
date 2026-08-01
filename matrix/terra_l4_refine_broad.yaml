@@ -1,0 +1,56 @@
+# L4RB: BROAD-COVERAGE refinement arm (user directive 2026-08-01: "lift the
+# 8-group limit, create a very broad initial set — as many knowledge-graph
+# areas as possible represented").
+#
+# vs matrix/terra_l4_refine.yaml (L4R):
+#   * mechanism-groups 8 -> 64 (mode max — the graph currently forms 64 usable
+#     communities, so the cap is effectively lifted; every community gets a
+#     reserved Pareto archive that cannot be dominated away)
+#   * demes-per-group 3 -> 1 (demes are bookkeeping in refine mode; one deme
+#     per group keeps the slot budget = group count)
+#   * seed-ideas-per-group 12 -> 8, but over 64 groups -> ~512-factor initial
+#     book (vs 96), THE broad seed set
+#   * generations 20/reveal-every 2 -> 10/reveal-every 1: VERIFIED to produce
+#     byte-identical reveal-block boundaries (10 blocks, same calendar as
+#     L4/L4R), so prequential tracks stay directly comparable while halving
+#     the refine-slot budget
+#   * population 16 -> 32 (island truncation headroom: 8 seeds + ~10 children)
+#   * refine-rounds 2: every lineage gets round 1 (512 slots of 640); ~128
+#     get round 2 — breadth over depth, per the directive
+#
+# Est. ~1,150 trials ≈ $150 at L4R's realised $0.128/trial; hard cap $200.
+
+config_file: quant.config.nasdaq100_2010.yaml
+budget_usd: 200
+
+defaults:
+  variant: refine
+  refine-rounds: 2
+  generations: 10
+  mechanism-groups: 64
+  mechanism-groups-mode: max
+  demes-per-group: 1
+  children-per-deme: 1
+  population: 32
+  seed-ideas-per-group: 8
+  p-cross-group: 0.10
+  progressive-reveal: true
+  reveal-every: 1
+  test-frac: 0.2
+  retrieval: graphrag
+  curation: archive
+  selection-deflation: "on"
+  archive-cap: 40
+  creative-frac: 0.1
+  marginal-model: lightgbm
+  fixed-book: data/prebooks/formulaic_101.json
+  reference-book: data/prebooks/formulaic_101.json
+  n-tickers: 0
+  horizon: 6
+  llm-workers: 8
+
+providers:
+  terra: {model: "gpt-5.6-terra", llm-provider: openai}
+
+arms:
+  - {name: L4RB_terra_s0, provider: terra, seed: 0, flags: {}}

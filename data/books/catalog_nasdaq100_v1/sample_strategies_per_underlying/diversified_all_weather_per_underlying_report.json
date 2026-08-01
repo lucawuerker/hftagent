@@ -1,0 +1,105 @@
+{
+  "label": "diversified_all_weather_per_underlying",
+  "construction": "per_underlying",
+  "factor_ids": [
+    "index_weight_flow_elasticity_beta_wedge_snapback",
+    "liquidity_cost_confirmed_smoothed_displacement_r",
+    "clock_consensus_asymmetric_slowness_deviation_fa",
+    "christie_elasticity_gap_gated_move_snapback",
+    "payout_clientele_beta_catchup_carry",
+    "program_gated_elasticity_factor_return_snapback",
+    "rice_inverted_ar1_kernel_volume_stream_forecast",
+    "corporate_hinge_side_split_excursion_clock_match",
+    "delevered_semivol_burst_vacuum_snapback",
+    "horizon_matched_lag_kernel_catchup_staleness_gat",
+    "tsrv_kalman_gain_transient_deviation_memory_h6",
+    "ou_halflife_matched_multiscale_transient_fade",
+    "merton_leverage_implied_semivol_asymmetry_residual",
+    "clientele_gap_repair_hazard_participation_relay",
+    "asym_impact_cost_vacuum_leverage_bucket_snapback",
+    "xs_commonality_share_regime_flip_hedged_reversal",
+    "pooled_xs_response_coef_clientele_activity_gate",
+    "peer_propagator_leg_grid_interaction_wedge",
+    "corporate_net_demand_hinge_asymmetric_dislocatio",
+    "clientele_routed_overdelivery_sign_split_catchup",
+    "clientele_beta_backlog_channel_credit_disagree",
+    "delevered_asset_shock_vacuum_gated_reversal",
+    "pecking_order_rank_inversion_density_snapback",
+    "seam_absorption_conditioned_pooled_push_response"
+  ],
+  "n_factors": 24,
+  "models_raced": [
+    "ridge",
+    "elastic_net",
+    "random_forest",
+    "lightgbm"
+  ],
+  "race": {
+    "ridge": {
+      "val_ic": 0.01329503578570785,
+      "val_sharpe": -0.26905013922346627,
+      "val_ann_ret": -0.04296748664398118,
+      "val_ann_vol": 0.15970066682735842,
+      "val_max_dd": -0.253769673066251,
+      "val_n_bars": 502
+    },
+    "elastic_net": {
+      "val_ic": 0.012202391365306224,
+      "val_sharpe": -0.43040568305868954,
+      "val_ann_ret": -0.07176143238829424,
+      "val_ann_vol": 0.1667297510532847,
+      "val_max_dd": -0.26417711300361546,
+      "val_n_bars": 502
+    },
+    "random_forest": {
+      "val_ic": 0.062189449145002004,
+      "val_sharpe": 1.1488272508293547,
+      "val_ann_ret": 0.29154312561793155,
+      "val_ann_vol": 0.2537745561027235,
+      "val_max_dd": -0.1568695587312836,
+      "val_n_bars": 502
+    },
+    "lightgbm": {
+      "val_ic": 0.06973248086374859,
+      "val_sharpe": 1.1275901154242163,
+      "val_ann_ret": 0.26589717898672793,
+      "val_ann_vol": 0.2358101364578683,
+      "val_max_dd": -0.11908773075251089,
+      "val_n_bars": 502
+    }
+  },
+  "winner": "lightgbm",
+  "n_trials_strategy": 9,
+  "pbo_cscv_val": 0.08333333333333333,
+  "forward_gross": {
+    "sharpe": 0.514566771581462,
+    "ann_ret": 0.1437185891405614,
+    "ann_vol": 0.2793001745893129,
+    "max_dd": -0.21635724645079923,
+    "n_bars": 499
+  },
+  "forward": {
+    "ic": 0.03372300141375153,
+    "sharpe": 0.3642734059431459,
+    "ann_ret": 0.10171858914056141,
+    "ann_vol": 0.2792369343493529,
+    "max_dd": -0.2229602727453699,
+    "n_bars": 499,
+    "window": [
+      "2024-07-29",
+      "2026-07-27"
+    ],
+    "deflated_sharpe_prob": 0.13805071258098967
+  },
+  "in_panel_net": {
+    "sharpe": 2.158933009026052,
+    "ann_ret": 0.6430465944575299,
+    "ann_vol": 0.29785388975437643,
+    "max_dd": -0.17939654381050862,
+    "n_bars": 3659
+  },
+  "mean_daily_turnover": 0.32839617355107265,
+  "persona_prompt": "Give me your most diversified strategy \u2014 many independent signals, nothing dominating, robust in every regime.",
+  "selected_before_prune": 24,
+  "catalog_n_trials_global": 825
+}

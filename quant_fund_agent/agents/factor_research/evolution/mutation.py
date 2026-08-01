@@ -373,6 +373,62 @@ STRICT REQUIREMENTS
 """
 
 
+REFINE_PROMPT = """\
+You are a senior quantitative researcher iterating on ONE alpha-factor program.
+Below is the CURRENT VERSION of the factor and the deterministic evaluation
+report our research harness produced for it.  Your task is to propose ONE
+REFINED VERSION of THIS SAME factor: same economic mechanism, same hypothesis —
+a better implementation of it.
+
+This is refinement, NOT mutation: do NOT switch to a different mechanism or
+propose an unrelated factor, even if the report is harsh.  Within the stated
+mechanism you may: fix implementation weaknesses the report identifies, change
+how the raw effect is measured (a more robust statistic, a cleaner
+normalisation, better handling of sparse fields), add or improve a conditioning
+variable that gates WHEN the same mechanism should fire, adjust windows away
+from knife-edges toward plateaus, reduce needless complexity, or flip/confirm
+the expected sign if the evidence says the direction was wrong.  If the report
+says the factor is redundant with the existing book, sharpen the part of the
+mechanism the book does NOT already capture (its unique conditioning,
+cross-sectional twist or timing) rather than abandoning the mechanism.  State
+the (refined) hypothesis in 2-4 sentences; it should read as a better-argued
+version of the current one, not a new idea.
+
+DATA CONTEXT
+------------
+{data_context}
+
+{operator_reference}
+
+{example_factor}
+
+CURRENT VERSION
+---------------
+factor_id: {parent_id}
+hypothesis: {parent_idea}
+expected_sign: {parent_sign}
+prediction_horizon: {parent_horizon}
+
+```python
+{parent_code}
+```
+
+EVALUATION REPORT (deterministic, out-of-sample)
+------------------------------------------------
+{brief}
+
+EXISTING FACTOR IDS (do NOT reuse)
+----------------------------------
+{existing_ids}
+
+STRICT REQUIREMENTS
+-------------------
+{strict_requirements}
+
+{child_schema}
+"""
+
+
 CROSSOVER_PROMPT = """\
 You are a senior quantitative researcher running an evolutionary search over
 alpha-factor programs.  Below are TWO parent factors with their deterministic
@@ -478,6 +534,32 @@ def build_mutation_prompt(parent: FactorProgram, brief: str, data_context: str,
     if creative:
         prompt = f"{prompt}\n\n{CREATIVE_NOVELTY_SECTION}"
     return prompt
+
+
+def build_refine_prompt(parent: FactorProgram, brief: str, data_context: str,
+                        existing_ids: Sequence[str]) -> str:
+    """The refinement-only operator's prompt: same factor, same mechanism,
+    better implementation (the ``--variant refine`` counterpart of
+    :func:`build_mutation_prompt`, which is allowed to change the mechanism)."""
+    from quant_fund_agent.agents.factor_research.prompts import (
+        EXAMPLE_FACTOR,
+        OPERATOR_REFERENCE,
+    )
+
+    return REFINE_PROMPT.format(
+        data_context=data_context,
+        operator_reference=OPERATOR_REFERENCE,
+        example_factor=EXAMPLE_FACTOR,
+        parent_id=parent.factor_id,
+        parent_idea=parent.trading_idea or parent.description or "(none recorded)",
+        parent_sign=parent.expected_sign if parent.expected_sign is not None else "(none)",
+        parent_horizon=parent.prediction_horizon,
+        parent_code=parent.code,
+        brief=brief or "(first evaluation pending)",
+        existing_ids=", ".join(sorted(existing_ids)) if existing_ids else "(none)",
+        strict_requirements=STRICT_REQUIREMENTS,
+        child_schema=CHILD_SCHEMA,
+    )
 
 
 def build_crossover_prompt(parent_a: FactorProgram, brief_a: str,

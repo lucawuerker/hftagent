@@ -55,6 +55,7 @@ from quant_fund_agent.agents.factor_research.evolution.genome import (
 from quant_fund_agent.agents.factor_research.evolution.mutation import (
     build_crossover_prompt,
     build_mutation_prompt,
+    build_refine_prompt,
     jitter_variants,
     parse_child_response,
     random_jitter_child,
@@ -84,6 +85,19 @@ class EvolutionRunConfig:
     """Every knob of one evolutionary research run (serialised for the record)."""
 
     # ── search shape ──
+    # "evolve" (default): the full evolutionary search — NSGA-II tournament
+    # parent selection, semantic mutation, crossover, jitter, migration.
+    # "refine": the non-evolutionary ablation — every seeded factor is refined
+    # by the LLM against its own deterministic evaluation report (same factor,
+    # same mechanism, at most ``refine_rounds`` times), demes continuously
+    # re-seed fresh graphrag-grounded ideas when they run out of refinement
+    # work, and the only combination operator is the occasional explicit
+    # cross-group synthesis (``p_cross_group``).  No tournament selection, no
+    # same-group crossover, no jitter mutation, no migration; scoring, gates,
+    # Pareto archives, progressive reveal, curation and publish deflation are
+    # identical to "evolve".
+    variant: str = "evolve"            # "evolve" | "refine"
+    refine_rounds: int = 2             # max LLM refinements per lineage (refine)
     generations: int = 5
     population_size: int = 10          # per island
     children_per_generation: int = 8   # candidates proposed per generation
@@ -164,6 +178,10 @@ class EvolutionRunConfig:
     seed_frac: float = 0.45      # fraction of DEV visible at generation 0
     reveal_every: int = 1        # generations between reveals
     val_blocks: int = 2          # sliding VAL = last val_blocks blocks
+    # --final-holdout: keep one extra dev block hidden from EVERY generation and
+    # reveal it only in a terminal rescore-only step after the last generation,
+    # so the final front is ranked on data no selection pressure ever queried.
+    final_holdout: bool = False
 
     # ── fitness: four Pareto axes ──
     independence_metric: str = "residual_ic"   # "residual_ic" | "delta_participation"
@@ -765,6 +783,14 @@ class EvolutionLoop:
         # the existing files, so a resumed run never duplicates a row)
         self._prequential_done: set[int] | None = None
         self._gen_quality_done: set[int] | None = None
+        # refinement variant: island → ordered lineage entries, each the latest
+        # version of one factor lineage plus how many refinements it has used
+        # ({"eg": EvaluatedGenome, "refines": int, "last_gen": int}).
+        if cfg.variant not in ("evolve", "refine"):
+            raise ValueError(f"unknown variant {cfg.variant!r}")
+        if cfg.variant == "refine" and cfg.unit != "single":
+            raise ValueError("variant='refine' supports unit='single' only")
+        self._refine_entries: dict[int, list[dict[str, Any]]] = {}
 
     def _lineage_event(self, event: dict) -> None:
         """Controller event sink: archive events land in the run lineage.
@@ -1019,8 +1045,10 @@ class EvolutionLoop:
         self._schedule = build_schedule(
             index, generations=self.cfg.generations, test_frac=self.cfg.test_frac,
             seed_frac=self.cfg.seed_frac, reveal_every=self.cfg.reveal_every,
-            val_blocks=self.cfg.val_blocks)
-        g = min(self.controller.generation, len(self._schedule) - 1)
+            val_blocks=self.cfg.val_blocks, holdout_last=self.cfg.final_holdout)
+        # The schedule addresses generations 0..G (+ a terminal G+1 window under
+        # --final-holdout); the controller never advances past G.
+        g = min(self.controller.generation, self.cfg.generations)
         self._window = self._schedule[g]
         # Resume corruption guard: the recomputed frontier must match the checkpoint.
         prog_path = self.out_dir / "progressive.json"
@@ -1028,11 +1056,17 @@ class EvolutionLoop:
             stored = json.loads(prog_path.read_text())
             if stored.get("frontier_ts") and \
                     stored["frontier_ts"] != self._window.val_end_ts:
-                raise RuntimeError(
-                    f"progressive-reveal resume mismatch at generation "
-                    f"{self.controller.generation}: recomputed frontier "
-                    f"{self._window.val_end_ts} != checkpointed "
-                    f"{stored['frontier_ts']}.")
+                if self.cfg.final_holdout and \
+                        stored["frontier_ts"] == self._schedule[-1].val_end_ts:
+                    # The terminal holdout rescore already ran before this resume;
+                    # restore its window (the rescore-only step is idempotent).
+                    self._window = self._schedule[-1]
+                else:
+                    raise RuntimeError(
+                        f"progressive-reveal resume mismatch at generation "
+                        f"{self.controller.generation}: recomputed frontier "
+                        f"{self._window.val_end_ts} != checkpointed "
+                        f"{stored['frontier_ts']}.")
         log.info("progressive reveal: %d windows; generation %d frontier through %s",
                  len(self._schedule), self.controller.generation,
                  self._window.val_end_ts)
@@ -1093,6 +1127,8 @@ class EvolutionLoop:
         )
 
         gens = reveal_generations(self.cfg.generations, max(1, self.cfg.reveal_every))
+        if self.cfg.final_holdout and gen == self.cfg.generations + 1:
+            return len(gens)   # the terminal holdout reveal follows the last in-run one
         return gens.index(gen) if gen in gens else None
 
     def _rescore_archive_on_window(self, gen: int) -> None:
@@ -1158,6 +1194,27 @@ class EvolutionLoop:
         if released:
             log.info("generation %d: released %d gate-failing fingerprint(s) for retry",
                      gen, released)
+
+    def _terminal_holdout_rescore(self) -> None:
+        """--final-holdout: reveal the held-out last block AFTER the final generation.
+
+        Prequential-score it (honest — no selection ever queried it), advance the
+        frontier to the full dev window and re-score the archive there — and then
+        STOP: no child is proposed on this window, so the final front is ranked on
+        data untouched by selection pressure.  Idempotent on resume (the prequential
+        row dedups by generation; the rescore is a pure recompute, no N_trials)."""
+        new_window = self._schedule[-1]
+        if self._window is not None and \
+                self._window.val_end_ts == new_window.val_end_ts:
+            return   # resumed after the terminal step already ran
+        gen_t = self.cfg.generations + 1
+        log.info("final holdout: terminal rescore-only reveal %s → %s",
+                 self._window.val_end_ts, new_window.val_end_ts)
+        self._prequential_score(gen_t, self._window.val_end_ts,
+                                new_window.val_end_ts)
+        self._window = new_window
+        self._rescore_archive_on_window(gen_t)
+        self._checkpoint()
 
     def _admit(self, program: FactorProgram, *, generation: int, island: int,
                operator: str, parent_ids: Sequence[str]) -> EvaluatedGenome | None:
@@ -1598,6 +1655,9 @@ class EvolutionLoop:
             return None
         try:
             llm = self._role_llm("hypothesis", 0.6)
+            if kind == "refine":
+                return self._child_refine(llm, job["island"],
+                                          job["parents"][0])
             if kind == "crossover":
                 return self._child_crossover(llm, job["island"],
                                              parents=job["parents"])
@@ -1624,6 +1684,208 @@ class EvolutionLoop:
         new_id = self._unique_id(f"{parent.genome.program.factor_id}_j")
         child = random_jitter_child(parent.genome.program, self.rng, new_id)
         return (child, [parent.genome.genome_id]) if child is not None else None
+
+    # ── refinement variant (--variant refine): non-evolutionary ablation ──
+
+    def _register_lineage(self, island: int, eg: EvaluatedGenome,
+                          refines: int = 0, last_gen: int = -1) -> None:
+        self._refine_entries.setdefault(island, []).append(
+            {"eg": eg, "refines": int(refines), "last_gen": int(last_gen)})
+
+    def _next_refine_entry(self, island: int, gen: int) -> dict[str, Any] | None:
+        """The pending lineage to refine on this slot: fewest refinements first
+        (FIFO among ties), at most one refinement per lineage per generation."""
+        entries = self._refine_entries.get(island, [])
+        eligible = [e for e in entries
+                    if e["refines"] < max(0, self.cfg.refine_rounds)
+                    and e["last_gen"] != gen]
+        if not eligible:
+            return None
+        return min(eligible, key=lambda e: e["refines"])
+
+    def _prune_refine_entries(self) -> None:
+        for island, entries in self._refine_entries.items():
+            self._refine_entries[island] = [
+                e for e in entries
+                if e["refines"] < max(0, self.cfg.refine_rounds)]
+
+    def _child_refine(self, llm: Any, island: int, parent: EvaluatedGenome,
+                      ) -> tuple[FactorProgram, list[str]] | None:
+        """Refine the SAME factor against its latest evaluation report."""
+        group_id, _ = self.controller.coordinates(island)
+        prompt = build_refine_prompt(
+            parent.genome.program, self._brief_for(parent),
+            self._group_context(group_id), sorted(self.known_ids))
+        with set_llm_role("mutation"):
+            child = self._parse_and_validate_child(llm, prompt, [parent])
+        return (child, [parent.genome.genome_id]) if child is not None else None
+
+    def _prep_refine_slot(self, island: int, gen: int) -> dict[str, Any] | None:
+        """Main-thread RNG/selection phase for one refine-variant child slot.
+
+        Returns a job for the worker pool, ``{"kind": "fresh_seed"}`` when the
+        deme has no refinement work left (handled per-group afterwards), or
+        ``None`` when nothing can be proposed.
+        """
+        # Occasional explicit cross-group synthesis — the ONLY combination
+        # operator in this variant.  No fallback to same-group crossover: when
+        # cross-group parents are unavailable the slot refines instead.
+        if self.cfg.n_mechanism_groups > 1 and self.cfg.p_cross_group > 0 \
+                and float(self.rng.random()) < self.cfg.p_cross_group:
+            group_id, _ = self.controller.coordinates(island)
+            local = self.controller.select_parents(1, island)
+            other_groups = [
+                g for g in range(self.cfg.n_mechanism_groups)
+                if g != group_id
+                and self.controller.population(mechanism_group_id=g)
+            ]
+            if local and other_groups:
+                other_group = int(self.rng.choice(other_groups))
+                remote = self.controller.select_parents(
+                    1, mechanism_group_id=other_group)
+                if remote:
+                    return {"kind": "cross_group", "island": island,
+                            "op_label": "cross_group",
+                            "parents": [local[0], remote[0]],
+                            "other_group": other_group}
+        entry = self._next_refine_entry(island, gen)
+        if entry is None:
+            return {"kind": "fresh_seed", "island": island}
+        # Bill the attempt now (a failed child still consumes a round) and
+        # refresh the brief from the CURRENT fitness so refinement reacts to
+        # the latest progressive-reveal rescore, not the stale first report.
+        entry["refines"] += 1
+        entry["last_gen"] = gen
+        parent = entry["eg"]
+        self.briefs[parent.genome.genome_id] = self._with_memory(
+            mutation_brief(
+                parent.fitness, book_size=self._book_size(),
+                fixed_prediction_horizon=(
+                    self.cfg.target_horizon
+                    if self.cfg.force_prediction_horizon else None),
+            ))
+        return {"kind": "refine", "island": island, "op_label": "refine",
+                "parents": [parent], "entry": entry}
+
+    def _seed_fresh_lineages(self, gen: int, needed_by_group: dict[int, int],
+                             ) -> int:
+        """Mid-run graphrag re-seeding: one brainstorm/codegen batch per group
+        that ran out of refinement work, each survivor starting a new lineage."""
+        made = 0
+        for group_id in sorted(needed_by_group):
+            n = needed_by_group[group_id]
+            if n <= 0:
+                continue
+            spec = self.mechanism_groups[group_id % len(self.mechanism_groups)]
+            per_cfg = replace(self.cfg, n_seed_ideas=n)
+            try:
+                programs = seed_programs(
+                    per_cfg, self._group_context(group_id), self.known_ids,
+                    self.fields, mechanism_group=spec)
+            except Exception as e:  # noqa: BLE001 — a bad seeding batch must
+                from quant_fund_agent.llm import LLMBudgetExceeded
+                if isinstance(e, LLMBudgetExceeded):
+                    raise
+                log.warning("fresh seeding failed for group %d (%s)", group_id, e)
+                continue
+            self.known_ids.update(p.factor_id for p in programs)
+            for k, prog in enumerate(programs):
+                deme = k % self.cfg.effective_demes_per_group
+                island = self.controller.flat_island(group_id, deme)
+                eg = self._admit(prog, generation=gen, island=island,
+                                 operator="seed", parent_ids=[])
+                if eg is not None:
+                    made += 1
+                    self._register_lineage(island, eg)
+        return made
+
+    def _refine_generation(self, gen: int) -> tuple[int, int]:
+        """One refine-variant generation → (children admitted, slots offered).
+
+        Slot mix per deme (``children_per_deme`` slots): occasional cross-group
+        synthesis, else one refinement of the deme's least-refined pending
+        lineage, else a fresh graphrag seed for the deme's mechanism group.
+        LLM round-trips fan out to ``llm_workers`` threads exactly like the
+        evolve path (RNG/selection sequential, admissions sequential).
+        """
+        cfg = self.cfg
+        made = 0
+        slots = [island
+                 for island in range(len(self.controller.islands))
+                 for _ in range(max(1, cfg.children_per_deme
+                                    if cfg.children_per_deme is not None else 1))]
+        jobs: list[dict[str, Any]] = []
+        fresh_needed: dict[int, int] = {}
+        for island in slots:
+            job = self._prep_refine_slot(island, gen)
+            if job is None:
+                continue
+            if job["kind"] == "fresh_seed":
+                group_id, _ = self.controller.coordinates(island)
+                fresh_needed[group_id] = fresh_needed.get(group_id, 0) + 1
+                continue
+            jobs.append(job)
+        results = _parallel_map(self._run_child_job, jobs, cfg.llm_workers)
+        for job, result in zip(jobs, results):
+            if result is None:
+                continue
+            child, parent_ids = result
+            eg = self._admit(child, generation=gen, island=job["island"],
+                             operator=job["op_label"], parent_ids=parent_ids)
+            if eg is None:
+                continue
+            made += 1
+            if job["kind"] == "refine":
+                # The lineage continues from its latest version.
+                job["entry"]["eg"] = eg
+            else:
+                # A cross-group synthesis starts a lineage of its own.
+                self._register_lineage(job["island"], eg)
+        self._prune_refine_entries()
+        self._pending_ids.clear()
+        made += self._seed_fresh_lineages(gen, fresh_needed)
+        return made, len(slots)
+
+    # ── refine-variant persistence (resume safety) ──
+
+    def _save_refine_state(self) -> None:
+        payload = {
+            str(island): [{"genome_id": e["eg"].genome.genome_id,
+                           "refines": e["refines"],
+                           "last_gen": e["last_gen"]}
+                          for e in entries]
+            for island, entries in self._refine_entries.items()
+        }
+        (self.out_dir / "refine_state.json").write_text(
+            json.dumps(payload, indent=2))
+
+    def _load_refine_state(self) -> None:
+        path = self.out_dir / "refine_state.json"
+        self._refine_entries = {}
+        if not path.exists():
+            log.warning("refine variant resume: %s missing — every deme "
+                        "restarts with fresh seeding", path)
+            return
+        by_id: dict[str, EvaluatedGenome] = {}
+        for eg in [*self.controller.population(), *self.controller.archive,
+                   *self.controller.kept_pool]:
+            by_id.setdefault(eg.genome.genome_id, eg)
+        payload = json.loads(path.read_text())
+        dropped = 0
+        for island_key, entries in payload.items():
+            island = int(island_key)
+            for row in entries:
+                eg = by_id.get(str(row.get("genome_id")))
+                if eg is None:
+                    dropped += 1
+                    continue
+                self._register_lineage(island, eg,
+                                       refines=int(row.get("refines", 0)),
+                                       last_gen=int(row.get("last_gen", -1)))
+        n = sum(len(v) for v in self._refine_entries.values())
+        log.info("refine variant resume: restored %d pending lineage(s)%s",
+                 n, f" ({dropped} dropped — genome pruned everywhere)"
+                 if dropped else "")
 
     # ── SET-mode operators (structural; deterministic given the seed) ──
 
@@ -1741,6 +2003,8 @@ class EvolutionLoop:
                 "frontier_ts": self._window.val_end_ts,
                 "visible_end": self._window.visible_end,
             }, indent=2))
+        if self.cfg.variant == "refine":
+            self._save_refine_state()
 
     def _write_gen_quality(self) -> None:
         """Append one cheap per-generation quality row to ``gen_quality.jsonl``.
@@ -1788,6 +2052,46 @@ class EvolutionLoop:
 
     # ── main drive ──
 
+    def _reload_lineage(self) -> None:
+        """Reload lineage.jsonl on resume (the controller checkpoint does not
+        carry it) so the "w"-rewrite at the next checkpoint keeps the full
+        history instead of truncating it to the resumed rows."""
+        lineage_path = self.out_dir / "lineage.jsonl"
+        if self.controller.lineage or not lineage_path.exists():
+            return
+        rows: list[dict[str, Any]] = []
+        for line in lineage_path.read_text().splitlines():
+            try:
+                rows.append(json.loads(line))
+            except json.JSONDecodeError:
+                log.warning("skipping corrupt lineage row on resume: %r",
+                            line[:120])
+        self.controller.lineage = rows
+        log.info("resume: reloaded %d lineage row(s) from %s",
+                 len(rows), lineage_path)
+
+    def _admit_seed_group(self, group_id: int,
+                          group_programs: Sequence[FactorProgram]) -> None:
+        """Admit one mechanism group's generation-0 seeds (single or SET)."""
+        cfg = self.cfg
+        if cfg.unit == "set":
+            size = max(1, cfg.set_size)
+            for k in range(0, len(group_programs), size):
+                chunk = list(group_programs[k:k + size])
+                if chunk:
+                    deme = (k // size) % cfg.effective_demes_per_group
+                    island = self.controller.flat_island(group_id, deme)
+                    self._admit_set(chunk, generation=0, island=island,
+                                    operator="seed", parent_ids=[])
+        else:
+            for k, prog in enumerate(group_programs):
+                deme = k % cfg.effective_demes_per_group
+                island = self.controller.flat_island(group_id, deme)
+                eg = self._admit(prog, generation=0, island=island,
+                                 operator="seed", parent_ids=[])
+                if cfg.variant == "refine" and eg is not None:
+                    self._register_lineage(island, eg)
+
     def run(self, initial_programs: Sequence[FactorProgram] | None = None,
             *, resume: bool = False) -> dict[str, Any]:
         """Run the whole evolutionary search; returns a summary dict.
@@ -1818,24 +2122,32 @@ class EvolutionLoop:
             # The controller checkpoint does not carry the lineage; reload it from
             # lineage.jsonl so the "w"-rewrite at the next checkpoint keeps the
             # full history instead of truncating it to the resumed rows.
-            lineage_path = self.out_dir / "lineage.jsonl"
-            if not self.controller.lineage and lineage_path.exists():
-                rows: list[dict[str, Any]] = []
-                for line in lineage_path.read_text().splitlines():
-                    try:
-                        rows.append(json.loads(line))
-                    except json.JSONDecodeError:
-                        log.warning("skipping corrupt lineage row on resume: %r",
-                                    line[:120])
-                self.controller.lineage = rows
-                log.info("resume: reloaded %d lineage row(s) from %s",
-                         len(rows), lineage_path)
+            self._reload_lineage()
             log.info("resuming from generation %d: population=%d, archive=%d, "
                      "n_trials=%d", start_gen, len(self.controller.population()),
                      len(self.controller.archive), self.controller.n_trials)
+            if cfg.variant == "refine":
+                self._load_refine_state()
         else:
             start_gen = 0
             # ── generation 0: seed ──
+            # Mid-seeding resume: a run killed DURING generation-0 seeding left a
+            # checkpoint with generation == 0 and a partial population (seeding
+            # checkpoints after every mechanism group below).  Restore run state
+            # and skip the groups that were already seeded, so a restart never
+            # re-spends their LLM calls.
+            mid_seed_resume = resume and bool(self.controller.population())
+            if mid_seed_resume:
+                self._reload_lineage()
+                if cfg.variant == "refine":
+                    self._load_refine_state()
+                for eg in self.controller.population():
+                    for p in eg.genome.programs:
+                        self.known_ids.add(p.factor_id)
+                        self._program_pool.setdefault(p.factor_id, p)
+                log.info("resuming mid-seeding: %d genome(s), %d trial(s) "
+                         "already admitted", len(self.controller.population()),
+                         self.controller.n_trials)
             grouped_programs: dict[int, list[FactorProgram]] = {}
             if initial_programs is not None:
                 # Tests/manual resumes can supply programs directly.  Respect an
@@ -1846,6 +2158,11 @@ class EvolutionLoop:
                         % max(1, cfg.n_mechanism_groups)
                     program.mechanism_group_id = group_id
                     grouped_programs.setdefault(group_id, []).append(program)
+                for prog in [p for g in sorted(grouped_programs)
+                             for p in grouped_programs[g]]:
+                    self._program_pool.setdefault(prog.factor_id, prog)
+                for group_id, group_programs in grouped_programs.items():
+                    self._admit_seed_group(group_id, group_programs)
             else:
                 self.mechanism_groups = (self._resolved_groups
                                          or resolve_mechanism_groups(cfg, self.fields))
@@ -1853,33 +2170,21 @@ class EvolutionLoop:
                     cfg, n_seed_ideas=cfg.effective_seed_ideas_per_group)
                 for spec in self.mechanism_groups:
                     group_id = int(spec["mechanism_group_id"])
+                    if mid_seed_resume and self.controller.population(
+                            mechanism_group_id=group_id):
+                        log.info("group %d already seeded before restart — "
+                                 "skipped", group_id)
+                        continue
                     programs_for_group = seed_programs(
                         per_group_cfg, self._group_context(group_id),
                         self.known_ids, self.fields, mechanism_group=spec)
-                    grouped_programs[group_id] = programs_for_group
-                    self.known_ids.update(p.factor_id for p in programs_for_group)
-            programs = [p for group in sorted(grouped_programs)
-                        for p in grouped_programs[group]]
-            for prog in programs:  # the pool SET-structural ops draw from
-                self._program_pool.setdefault(prog.factor_id, prog)
-            for group_id, group_programs in grouped_programs.items():
-                if cfg.unit == "set":
-                    size = max(1, cfg.set_size)
-                    for k in range(0, len(group_programs), size):
-                        chunk = group_programs[k:k + size]
-                        if chunk:
-                            deme = (k // size) % cfg.effective_demes_per_group
-                            island = self.controller.flat_island(group_id, deme)
-                            self._admit_set(
-                                chunk, generation=0, island=island,
-                                operator="seed", parent_ids=[])
-                else:
-                    for k, prog in enumerate(group_programs):
-                        deme = k % cfg.effective_demes_per_group
-                        island = self.controller.flat_island(group_id, deme)
-                        self._admit(
-                            prog, generation=0, island=island,
-                            operator="seed", parent_ids=[])
+                    self.known_ids.update(
+                        p.factor_id for p in programs_for_group)
+                    for prog in programs_for_group:
+                        self._program_pool.setdefault(prog.factor_id, prog)
+                    self._admit_seed_group(group_id, programs_for_group)
+                    # Kill-resilience: a restart re-seeds at most one group.
+                    self._checkpoint()
             self._write_gen_quality()
             self._checkpoint()
             log.info("generation 0: population=%d, archive=%d, n_trials=%d",
@@ -1926,6 +2231,16 @@ class EvolutionLoop:
             # retry — all BEFORE any child is proposed this generation.
             if cfg.progressive and self._schedule[gen].reveal:
                 self._advance_reveal(gen)
+            if cfg.variant == "refine":
+                # Non-evolutionary ablation: refine-in-place / cross-group /
+                # fresh graphrag seeding; no tournament ops, no migration.
+                made, offered = self._refine_generation(gen)
+                self._write_gen_quality()
+                self._checkpoint()
+                log.info("generation %d (refine): %d/%d children admitted; "
+                         "archive=%d; n_trials=%d", gen, made, offered,
+                         len(self.controller.archive), self.controller.n_trials)
+                continue
             made = 0
             if cfg.children_per_deme is not None:
                 child_islands = [
@@ -2015,6 +2330,8 @@ class EvolutionLoop:
                      gen, made, len(child_islands),
                      len(self.controller.archive), self.controller.n_trials)
 
+        if cfg.progressive and cfg.final_holdout and self._schedule is not None:
+            self._terminal_holdout_rescore()
         self._write_memory()   # WS5: persist survivors + attempt tallies for the next run
         return self.summary(time.time() - t0)
 

@@ -103,6 +103,21 @@ def _parse_args() -> argparse.Namespace:
                         "signal-processing/behavioural reasoning. Default 0 = off.")
 
     # ── search shape ──
+    p.add_argument("--variant", choices=["evolve", "refine"], default="evolve",
+                   help="evolve (default): full evolutionary search (tournament "
+                        "selection, mutation, crossover, jitter, migration). "
+                        "refine: non-evolutionary ablation — every seeded factor "
+                        "is refined by the LLM against its own deterministic "
+                        "evaluation report (same factor, same mechanism, at most "
+                        "--refine-rounds times), demes continuously re-seed fresh "
+                        "retrieval-grounded ideas, and the only combination "
+                        "operator is the occasional cross-group synthesis "
+                        "(--p-cross-group). Scoring, gates, Pareto axes, "
+                        "progressive reveal, curation and publish deflation are "
+                        "identical.")
+    p.add_argument("--refine-rounds", type=int, default=2,
+                   help="refine variant: max LLM refinements per factor lineage "
+                        "(default 2).")
     p.add_argument("--evolution-unit", choices=["single", "set"], default="single",
                    help="Evolve one factor program (scored by what it adds to the "
                         "archive) or a whole set/'alpha program' (scored jointly).")
@@ -222,6 +237,12 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument("--val-blocks", type=int, default=2,
                    help="Progressive mode: sliding VAL spans the last this-many "
                         "revealed blocks (default 2).")
+    p.add_argument("--final-holdout", action="store_true",
+                   help="Progressive mode: keep one extra dev block hidden from "
+                        "EVERY generation and reveal it only in a terminal "
+                        "rescore-only step after the last generation, so the "
+                        "final front is ranked on data no selection pressure "
+                        "ever queried (no child is fitted after it).")
     p.add_argument("--walk-forward", default=None,
                    help="Comma list of ascending ISO dates d0,d1,…: re-run the "
                         "WHOLE loop per fold (evolve < d_i, touch-once score on "
@@ -374,6 +395,8 @@ def main() -> None:
                  len(reference_book), args.reference_book)
 
     cfg = EvolutionRunConfig(
+        variant=args.variant,
+        refine_rounds=args.refine_rounds,
         generations=args.generations,
         population_size=args.population,
         children_per_generation=args.children_per_gen or 8,
@@ -409,6 +432,7 @@ def main() -> None:
         seed_frac=args.seed_frac,
         reveal_every=args.reveal_every,
         val_blocks=args.val_blocks,
+        final_holdout=args.final_holdout,
         force_prediction_horizon=(args.prediction_horizon_mode == "fixed"),
         independence_metric=args.independence_metric,
         marginal_model=args.marginal_model,
@@ -485,12 +509,16 @@ def main() -> None:
                 EvolutionController,
             )
             ctrl = EvolutionController.load(state_path)
-            if ctrl.generation > 0 and ctrl.population():
+            if ctrl.population():
+                # generation > 0: resume the generation loop.  generation == 0
+                # with a non-empty population: a run killed DURING seeding —
+                # the loop skips the already-seeded mechanism groups.
                 loop.controller = ctrl
                 resume = True
-                log.info("resuming from checkpoint: generation=%d, archive=%d, "
-                         "n_trials=%d", ctrl.generation, len(ctrl.archive),
-                         ctrl.n_trials)
+                log.info("resuming from checkpoint: generation=%d, "
+                         "population=%d, archive=%d, n_trials=%d",
+                         ctrl.generation, len(ctrl.population()),
+                         len(ctrl.archive), ctrl.n_trials)
             else:
                 log.info("checkpoint present but empty — starting fresh")
         except Exception as e:  # noqa: BLE001 — a corrupt checkpoint falls back

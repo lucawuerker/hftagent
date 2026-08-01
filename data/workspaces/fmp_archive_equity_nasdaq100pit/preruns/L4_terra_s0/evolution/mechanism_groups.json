@@ -1,0 +1,52 @@
+[
+  {
+    "mechanism_group_id": 0,
+    "community_id": 1,
+    "focus": "Community 1: 34 mechanism(s) (analyst sentiment revision drift, compounding amplification, cross-channel loading anti-alignment, cross-contract momentum spillover, cross-sectional momentum, cross-sectional momentum signal extraction\u2026) across 12 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 1,
+    "community_id": 2,
+    "focus": "Community 2: 35 mechanism(s) (Common shock propagation, Samuelson correlation effect, Samuelson effect (intensity acceleration), Samuelson effect (volatility acceleration near maturity), Samuelson effect (volatility increase near maturity), Sparse liquidity constraint on price formation\u2026) across 13 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 2,
+    "community_id": 3,
+    "focus": "Community 3: 29 mechanism(s) (bubble-driven phase transitions, buffer-regulated order intensity, contagion-driven intensity acceleration, correlated event interaction prediction, cross-excitation between order types, cross-exciting order flow contagion\u2026) across 14 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 3,
+    "community_id": 5,
+    "focus": "Community 5: 20 mechanism(s) (arrival rate asymmetry, cross-asset volatility synchronization, flash crash liquidity evaporation, information richness effect, liquidity depth volatility, liquidity shock precursor to jumps\u2026) across 9 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 4,
+    "community_id": 6,
+    "focus": "Community 6: 14 mechanism(s) (LLM forecast overvaluation premium, LLM momentum extrapolation bias, LLM risk miscalibration, cross-asset pattern transfer, cross-sectional relative momentum ranking, momentum spillover via lead-lag relationships\u2026) across 5 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 5,
+    "community_id": 7,
+    "focus": "Community 7: 14 mechanism(s) (asymmetric excitation of downward orders, asymmetric innovation distribution in volatility estimation, bad-news amplification during crises, bid-ask liquidity asymmetry, crisis amplification of volatility persistence, critical endogeneity and superlinear volatility mean reversion\u2026) across 4 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 6,
+    "community_id": 8,
+    "focus": "Community 8: 10 mechanism(s) (excess volatility from investor belief disagreement, heavy-tailed consumption growth distribution, predictability from Stratonovich integral structure, product design risk premium, risk aversion measurement correction, risk aversion mismatch correction\u2026) across 7 paper(s). target mechanisms: heavy-tailed consumption growth distribution",
+    "mechanisms": [
+      "heavy-tailed consumption growth distribution"
+    ]
+  },
+  {
+    "mechanism_group_id": 7,
+    "community_id": 9,
+    "focus": "Community 9: 13 mechanism(s) (informed trader execution scheduling, limit order arrival and cancellation impact, liquidity depletion at best level, market depth dampening effect, market opening liquidity shock, multi-level order flow imbalance\u2026) across 6 paper(s).",
+    "mechanisms": []
+  }
+]

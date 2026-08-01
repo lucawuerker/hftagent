@@ -198,6 +198,41 @@ scored ZERO candidates (orchestrator must not mark it ok); (6) oneshot
 ~30 min — the orchestrator is simply relaunched (arms auto-resume from
 checkpoints; completed arms skipped).
 
+**Non-evolutionary "refine" variant + L4R comparison arm (built 2026-07-31).**
+To test whether the evolutionary machinery earns its cost with strong models,
+`run_factor_evolution.py --variant refine` (default `evolve` = byte-identical)
+swaps ONLY the operators: every seeded factor starts a *lineage* refined by the
+LLM against its own deterministic evaluation report at most `--refine-rounds`
+(default 2) times via the new `build_refine_prompt` (*same factor, same
+mechanism, better implementation* — mechanism switches forbidden, unlike the
+mutation prompt); a deme out of refinement work re-seeds fresh graphrag-grounded
+ideas every generation (coverage keeps broadening); the only combination
+operator is the occasional explicit cross-group synthesis (`--p-cross-group`,
+parents via the existing per-group Pareto tournament; children start their own
+lineage). No same-group crossover, no jitter, no migration, no tournament-bred
+descent; harness scoring, 4-axis Pareto, gates, group archives + cap,
+progressive reveal (refine briefs are refreshed from the post-rescore fitness),
+N_trials billing, curation and publish deflation are identical. Resume-safe via
+`evolution/refine_state.json` (single-unit only; SET mode raises). Failed
+refinements still consume a round. Tests: `tests/test_evolution_refine.py`;
+`tests/test_final_matrix_plan.py` now also guards `matrix/terra_l4.yaml` +
+`matrix/terra_l4_refine.yaml`. **Comparison run**: `L4_terra_s0` (GPT-5.6
+Terra, full L4 config) finished 2026-07-30 — 44 factors, 798 trials, $86.70,
+903 min; the ablation arm `L4R_terra_s0` (`matrix/terra_l4_refine.yaml`: same
+config/seed/reveal schedule, `variant: refine`, `children-per-deme 1` →
+deliberately cheaper, budget $120 from the OpenAI pool) **completed 2026-08-01:
+62 factors, 468 trials, $59.71, 329 min**, full post-analysis suite run.
+Headline (`docs/research-evolution/L4_VS_L4R_COMPARISON.md`): at 69% of the
+cost the refine arm's honest OOS record (prequential blocks, TEST tail,
+forward-reserve Sharpe 0.66 vs 0.47, DSR prob 0.77 vs 0.50, cross-sectional)
+matches or beats evolution, with a much smaller in-panel→forward overfitting
+gap — while evolution wins every in-search metric and the per-underlying
+construction. Decision record in
+`docs/research-evolution/L4R_REFINE_ARM_DECISIONS.md`. Side hardening from
+this run: generation-0 seeding now checkpoints per mechanism group and resumes
+mid-seeding (kill-resilient; `_admit_seed_group`); the figure suite's category
+palette gained `carry` + `.get` fallbacks.
+
 **Evolutionary researcher — knowledge-graph nested islands replace the QD grid;
 4-axis vector (done, 2026-07-21). THIS SUPERSEDES THE TWO BLOCKS BELOW.**
 Diversity is no longer maintained by a Quality-Diversity behavior grid but by a
@@ -297,6 +332,15 @@ lineage rows), and frees gate-failing fingerprints for **one** retry
 frontier still advances and each group archive is re-pruned separately).
 Progressive reveal is **opt-in** — `--progressive-reveal`, default OFF, so an
 un-flagged run is byte-identical to the non-progressive baseline.
+**`--final-holdout` (added 2026-07-30, default OFF):** without it the last
+revealed block is both selected-on (the post-reveal generations) and ranked-on,
+so the final front tilts toward it.  The flag splits the dev remainder into
+R+1 blocks, keeps the last hidden from EVERY generation, and reveals it only in
+a terminal rescore-only step after the final generation (`schedule[G+1]`:
+prequential row + archive rescore at generation G+1, no child fitted after) —
+the final front is ranked on data no selection pressure ever queried.
+Resume-safe (terminal step idempotent; `_init_progressive` recognises the
+post-terminal frontier). Tests in `tests/test_evolution_progressive.py`.
 Out of scope (deferred): Thresholdout/
 select-guard gate, ε-dominance, GP-arm progressive reveal.
 

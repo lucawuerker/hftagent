@@ -1,0 +1,97 @@
+{
+  "label": "earnings_events",
+  "construction": "cross_sectional",
+  "factor_ids": [
+    "stale_surprise_fear_state_cascade_diffusion",
+    "downside_excitation_volume_drought",
+    "earnings_downside_auction_persistence_gate",
+    "earnings_turnover_impedance_resolution",
+    "revision_extrapolation_collection_break",
+    "moderate_rupture_cash_revision_assimilation",
+    "consensus_revision_unassimilated_gap",
+    "asymmetric_variance_relaxation_gap",
+    "dilution_disclosure_attention_lag_j",
+    "common_shock_revision_confirmation_lag",
+    "quiet_dual_estimate_assimilation",
+    "cash_confirmed_surprise_absorption_drift_j",
+    "sector_shock_cash_wedge_diffusion",
+    "linear_trend_fundamental_validation_gap_j_j",
+    "operating_leverage_efficiency_disclosure_drift",
+    "consumption_tail_semibeta_buffered_derisking"
+  ],
+  "n_factors": 16,
+  "models_raced": [
+    "ridge",
+    "elastic_net",
+    "random_forest",
+    "lightgbm"
+  ],
+  "race": {
+    "ridge": {
+      "val_ic": 0.025037109653926255,
+      "val_sharpe": 1.0625818922818921,
+      "val_ann_ret": 0.06880867970597698,
+      "val_ann_vol": 0.06475611922786535,
+      "val_max_dd": -0.06585430892194644,
+      "val_n_bars": 502
+    },
+    "elastic_net": {
+      "val_ic": 0.03411681591183451,
+      "val_sharpe": 0.829606419356379,
+      "val_ann_ret": 0.05422027614363636,
+      "val_ann_vol": 0.0653566255980773,
+      "val_max_dd": -0.0857199627808567,
+      "val_n_bars": 502
+    },
+    "random_forest": {
+      "val_ic": 0.034961282842539194,
+      "val_sharpe": -0.34470268490664036,
+      "val_ann_ret": -0.02611745892634904,
+      "val_ann_vol": 0.07576807512660576,
+      "val_max_dd": -0.20003198904252284,
+      "val_n_bars": 502
+    },
+    "lightgbm": {
+      "val_ic": 0.030597236871682434,
+      "val_sharpe": 0.2595082086252044,
+      "val_ann_ret": 0.017310405513869826,
+      "val_ann_vol": 0.06670465495320974,
+      "val_max_dd": -0.09978441973294305,
+      "val_n_bars": 502
+    }
+  },
+  "winner": "random_forest",
+  "n_trials_strategy": 5,
+  "pbo_cscv_val": 0.4246031746031746,
+  "forward_gross": {
+    "sharpe": 0.8790598273061515,
+    "ann_ret": 0.056270340102946834,
+    "ann_vol": 0.06401195726960399,
+    "max_dd": -0.06472513474596542,
+    "n_bars": 499
+  },
+  "forward": {
+    "ic": 0.031540114547489916,
+    "sharpe": 0.4736239794873638,
+    "ann_ret": 0.030321241906554032,
+    "ann_vol": 0.06401965107293095,
+    "max_dd": -0.06643531391649138,
+    "n_bars": 499,
+    "window": [
+      "2024-07-29",
+      "2026-07-27"
+    ],
+    "deflated_sharpe_prob": 0.40274357658929527
+  },
+  "in_panel_net": {
+    "sharpe": 1.7894224069747238,
+    "ann_ret": 0.10272844048949924,
+    "ann_vol": 0.05740871472777435,
+    "max_dd": -0.06404210641331998,
+    "n_bars": 3659
+  },
+  "mean_daily_turnover": 0.20076408901697085,
+  "persona_prompt": "I believe money is made around earnings \u2014 build me a strategy that trades earnings surprises and analyst behaviour.",
+  "selected_before_prune": 16,
+  "catalog_n_trials_global": 798
+}

@@ -170,3 +170,8 @@ FileNotFoundError: [Errno 2] No such file or directory: 'data/workspaces/fmp_arc
    Connection-error backoff retries added for future runs (~30 min outage tolerance).
 8. **Cost:** $452.13 total (mutation $335 / crossover $113 / seeds+codegen $4); ~80% of
    spend is Opus thinking tokens. 825 scored candidates -> ~$0.55/candidate all-in.
+
+## Figures
+
+Thesis-ready figure suite (22 figures, PDF for LaTeX + 300-dpi PNG, no titles)
+in `figures/` next to this report; generator script: `scripts/plot_l2_run_figures.py`.

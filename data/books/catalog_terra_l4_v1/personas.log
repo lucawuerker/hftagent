@@ -1,0 +1,137 @@
+18:43:52  INFO     Loading panel from ticker_data (fields=['accountsPayable', 'acquisitionsNet', 'assetGrowth', 'assetTurnover', 'bookValuePerShare', 'bookValuePerShareGrowth', 'capex', 'capexPerShare', 'capexToOperatingCashFlow', 'capexToRevenue', 'cash', 'cashConversionCycle', 'cashPerShare', 'cashRatio', 'changeInWorkingCapital', 'close', 'costOfRevenue', 'currentRatio', 'daysInventoryOutstanding', 'daysPayablesOutstanding', 'daysSalesOutstanding', 'debtGrowth', 'debtToAssets', 'debtToCapital', 'debtToEquity', 'depreciationAmortization', 'dividendPayoutRatio', 'dividendPerShareGrowth', 'dividendYield', 'dividendsPaid', 'earningsYield', 'ebit', 'ebitGrowth', 'ebitMargin', 'ebitda', 'ebitdaGrowth', 'ebitdaMargin', 'enterpriseValue', 'eps', 'epsActual', 'epsDiluted', 'epsDilutedGrowth', 'epsEstimate', 'epsGrowth', 'epsSurprise', 'evToEbitda', 'evToFreeCashFlow', 'evToOperatingCashFlow', 'evToSales', 'financialLeverage', 'freeCashFlow', 'freeCashFlowGrowth', 'freeCashFlowPerShare', 'freeCashFlowYield', 'goodwill', 'grahamNumber', 'grossMargin', 'grossProfit', 'grossProfitGrowth', 'high', 'incomeBeforeTax', 'incomeQuality', 'incomeTaxExpense', 'industry', 'intangibleAssets', 'intangiblesToAssets', 'interestCoverage', 'interestExpense', 'inventory', 'inventoryGrowth', 'inventoryTurnover', 'investedCapital', 'longTermDebt', 'low', 'marketCap', 'netDebtIssuance', 'netDebtToEbitda', 'netIncome', 'netIncomeGrowth', 'netIncomeGrowth3Y', 'netIncomeGrowth5Y', 'netIncomePerShare', 'netMargin', 'netStockIssuance', 'open', 'operatingCashFlow', 'operatingCashFlowGrowth', 'operatingCashFlowPerShare', 'operatingCycle', 'operatingExpenses', 'operatingIncome', 'operatingIncomeGrowth', 'operatingMargin', 'payablesTurnover', 'pbRatio', 'peRatio', 'pegRatio', 'pfcfRatio', 'pocfRatio', 'ppe', 'pretaxMargin', 'psRatio', 'quickRatio', 'rdExpense', 'rdExpenseGrowth', 'rdToRevenue', 'receivables', 'receivablesGrowth', 'receivablesTurnover', 'retainedEarnings', 'returns', 'revenue', 'revenueActual', 'revenueEstimate', 'revenueGrowth', 'revenueGrowth3Y', 'revenueGrowth5Y', 'revenuePerShare', 'revenueSurprise', 'roa', 'roce', 'roe', 'roic', 'sbcToRevenue', 'sector', 'sgaExpense', 'sgaExpenseGrowth', 'sgaToRevenue', 'shareRepurchase', 'sharesDiluted', 'sharesGrowth', 'sharesOutstanding', 'shortTermDebt', 'stockBasedCompensation', 'tangibleBookValuePerShare', 'totalAssets', 'totalCurrentAssets', 'totalCurrentLiabilities', 'totalDebt', 'totalEquity', 'totalLiabilities', 'volume', 'vwap', 'workingCapital'], n_tickers=all) …
+18:45:08  INFO     Panel loaded in 76.8s (232 tickers, 144 fields)
+18:45:09  INFO     [aggressive_short_term] selected 20 factors from catalog
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:1663: FutureWarning: 'n_alphas' was deprecated in 1.7 and will be removed in 1.9. 'alphas' now accepts an integer value which removes the need to pass 'n_alphas'. The default value of 'alphas' will change from None to 100 in 1.9. Pass an explicit value to 'alphas' and leave 'n_alphas' to its default value to silence this warning.
+  warnings.warn(
+18:45:32  INFO     [aggressive_short_term] lasso-prune kept 20/20
+18:45:32  INFO     [aggressive_short_term] IS<2022-07-28 VAL<2024-07-28 FORWARD 2024-07-29->2026-07-27
+18:45:53  INFO     [aggressive_short_term] 20/20 factors computable
+18:45:54  INFO     [aggressive_short_term] ridge: VAL IC=0.0338 sharpe=-0.030221301466670566
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:1663: FutureWarning: 'n_alphas' was deprecated in 1.7 and will be removed in 1.9. 'alphas' now accepts an integer value which removes the need to pass 'n_alphas'. The default value of 'alphas' will change from None to 100 in 1.9. Pass an explicit value to 'alphas' and leave 'n_alphas' to its default value to silence this warning.
+  warnings.warn(
+18:45:56  INFO     [aggressive_short_term] elastic_net: VAL IC=0.0356 sharpe=0.0795456319215874
+18:46:24  INFO     [aggressive_short_term] random_forest: VAL IC=0.0393 sharpe=-0.3149907705906338
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+18:46:26  INFO     [aggressive_short_term] lightgbm: VAL IC=0.0331 sharpe=-0.8095466197184853
+18:46:26  INFO     [aggressive_short_term] winner on VAL IC: random_forest (n_trials=5)
+18:47:02  INFO     [defensive_low_turnover] selected 14 factors from catalog
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:1663: FutureWarning: 'n_alphas' was deprecated in 1.7 and will be removed in 1.9. 'alphas' now accepts an integer value which removes the need to pass 'n_alphas'. The default value of 'alphas' will change from None to 100 in 1.9. Pass an explicit value to 'alphas' and leave 'n_alphas' to its default value to silence this warning.
+  warnings.warn(
+18:47:10  INFO     [defensive_low_turnover] lasso-prune kept 14/14
+18:47:10  INFO     [defensive_low_turnover] IS<2022-07-28 VAL<2024-07-28 FORWARD 2024-07-29->2026-07-27
+18:47:17  INFO     [defensive_low_turnover] 14/14 factors computable
+18:47:17  INFO     [defensive_low_turnover] ridge: VAL IC=0.0056 sharpe=-0.48415173460218736
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:1663: FutureWarning: 'n_alphas' was deprecated in 1.7 and will be removed in 1.9. 'alphas' now accepts an integer value which removes the need to pass 'n_alphas'. The default value of 'alphas' will change from None to 100 in 1.9. Pass an explicit value to 'alphas' and leave 'n_alphas' to its default value to silence this warning.
+  warnings.warn(
+18:47:18  INFO     [defensive_low_turnover] elastic_net: VAL IC=-0.0000 sharpe=-1.0045119604307633
+18:47:35  INFO     [defensive_low_turnover] random_forest: VAL IC=0.0153 sharpe=0.3932840804624312
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+18:47:37  INFO     [defensive_low_turnover] lightgbm: VAL IC=0.0174 sharpe=0.6833686922773672
+18:47:37  INFO     [defensive_low_turnover] winner on VAL IC: lightgbm (n_trials=5)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+18:47:39  INFO     [earnings_events] selected 16 factors from catalog
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:1663: FutureWarning: 'n_alphas' was deprecated in 1.7 and will be removed in 1.9. 'alphas' now accepts an integer value which removes the need to pass 'n_alphas'. The default value of 'alphas' will change from None to 100 in 1.9. Pass an explicit value to 'alphas' and leave 'n_alphas' to its default value to silence this warning.
+  warnings.warn(
+18:48:01  INFO     [earnings_events] lasso-prune kept 16/16
+18:48:01  INFO     [earnings_events] IS<2022-07-28 VAL<2024-07-28 FORWARD 2024-07-29->2026-07-27
+18:48:22  INFO     [earnings_events] 16/16 factors computable
+18:48:23  INFO     [earnings_events] ridge: VAL IC=0.0250 sharpe=1.0625818922818921
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:1663: FutureWarning: 'n_alphas' was deprecated in 1.7 and will be removed in 1.9. 'alphas' now accepts an integer value which removes the need to pass 'n_alphas'. The default value of 'alphas' will change from None to 100 in 1.9. Pass an explicit value to 'alphas' and leave 'n_alphas' to its default value to silence this warning.
+  warnings.warn(
+18:48:24  INFO     [earnings_events] elastic_net: VAL IC=0.0341 sharpe=0.829606419356379
+18:48:42  INFO     [earnings_events] random_forest: VAL IC=0.0350 sharpe=-0.34470268490664036
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+18:48:44  INFO     [earnings_events] lightgbm: VAL IC=0.0306 sharpe=0.2595082086252044
+18:48:44  INFO     [earnings_events] winner on VAL IC: random_forest (n_trials=5)
+18:49:06  INFO     [diversified_all_weather] selected 24 factors from catalog
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:1663: FutureWarning: 'n_alphas' was deprecated in 1.7 and will be removed in 1.9. 'alphas' now accepts an integer value which removes the need to pass 'n_alphas'. The default value of 'alphas' will change from None to 100 in 1.9. Pass an explicit value to 'alphas' and leave 'n_alphas' to its default value to silence this warning.
+  warnings.warn(
+18:49:40  INFO     [diversified_all_weather] lasso-prune kept 24/24
+18:49:40  INFO     [diversified_all_weather] IS<2022-07-28 VAL<2024-07-28 FORWARD 2024-07-29->2026-07-27
+18:50:11  INFO     [diversified_all_weather] 24/24 factors computable
+18:50:12  INFO     [diversified_all_weather] ridge: VAL IC=0.0395 sharpe=1.0093647592019466
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:1663: FutureWarning: 'n_alphas' was deprecated in 1.7 and will be removed in 1.9. 'alphas' now accepts an integer value which removes the need to pass 'n_alphas'. The default value of 'alphas' will change from None to 100 in 1.9. Pass an explicit value to 'alphas' and leave 'n_alphas' to its default value to silence this warning.
+  warnings.warn(
+18:50:14  INFO     [diversified_all_weather] elastic_net: VAL IC=-0.0000 sharpe=-1.0045119604307633
+18:50:44  INFO     [diversified_all_weather] random_forest: VAL IC=0.0521 sharpe=0.03741529380692281
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+18:50:47  INFO     [diversified_all_weather] lightgbm: VAL IC=0.0453 sharpe=-0.2501942496952276
+18:50:47  INFO     [diversified_all_weather] winner on VAL IC: random_forest (n_trials=5)
+18:51:27  INFO     [contrarian_dip_buyer] selected 18 factors from catalog
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/pandas/core/internals/blocks.py:347: RuntimeWarning: divide by zero encountered in log
+  result = func(self.values, **kwargs)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:1663: FutureWarning: 'n_alphas' was deprecated in 1.7 and will be removed in 1.9. 'alphas' now accepts an integer value which removes the need to pass 'n_alphas'. The default value of 'alphas' will change from None to 100 in 1.9. Pass an explicit value to 'alphas' and leave 'n_alphas' to its default value to silence this warning.
+  warnings.warn(
+18:51:46  INFO     [contrarian_dip_buyer] lasso-prune kept 18/18
+18:51:46  INFO     [contrarian_dip_buyer] IS<2022-07-28 VAL<2024-07-28 FORWARD 2024-07-29->2026-07-27
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/pandas/core/internals/blocks.py:347: RuntimeWarning: divide by zero encountered in log
+  result = func(self.values, **kwargs)
+18:52:04  INFO     [contrarian_dip_buyer] 18/18 factors computable
+18:52:05  INFO     [contrarian_dip_buyer] ridge: VAL IC=0.0249 sharpe=-0.5559985332280825
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:1663: FutureWarning: 'n_alphas' was deprecated in 1.7 and will be removed in 1.9. 'alphas' now accepts an integer value which removes the need to pass 'n_alphas'. The default value of 'alphas' will change from None to 100 in 1.9. Pass an explicit value to 'alphas' and leave 'n_alphas' to its default value to silence this warning.
+  warnings.warn(
+18:52:06  INFO     [contrarian_dip_buyer] elastic_net: VAL IC=0.0247 sharpe=-0.5850335953217357
+18:52:30  INFO     [contrarian_dip_buyer] random_forest: VAL IC=0.0363 sharpe=0.6412151663324654
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+18:52:33  INFO     [contrarian_dip_buyer] lightgbm: VAL IC=0.0417 sharpe=1.210433326348715
+18:52:33  INFO     [contrarian_dip_buyer] winner on VAL IC: lightgbm (n_trials=5)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+{
+  "persona": "aggressive_short_term",
+  "n_factors": 20,
+  "winner": "random_forest",
+  "val_ic": 0.03931487753332105,
+  "fwd_sharpe": -0.13676775794692633,
+  "fwd_ic": 0.02419719476771584,
+  "dsr": 0.22064992033054887,
+  "pbo_val": 0.39285714285714285
+}
+{
+  "persona": "defensive_low_turnover",
+  "n_factors": 14,
+  "winner": "lightgbm",
+  "val_ic": 0.01744956264871447,
+  "fwd_sharpe": 0.9949850216281214,
+  "fwd_ic": 0.0343149620162597,
+  "dsr": 0.6042749358943089,
+  "pbo_val": 0.3055555555555556
+}
+{
+  "persona": "earnings_events",
+  "n_factors": 16,
+  "winner": "random_forest",
+  "val_ic": 0.034961282842539194,
+  "fwd_sharpe": 0.4736239794873638,
+  "fwd_ic": 0.031540114547489916,
+  "dsr": 0.40274357658929527,
+  "pbo_val": 0.4246031746031746
+}
+{
+  "persona": "diversified_all_weather",
+  "n_factors": 24,
+  "winner": "random_forest",
+  "val_ic": 0.05214357086662953,
+  "fwd_sharpe": 0.43678506874924544,
+  "fwd_ic": 0.0475427681214681,
+  "dsr": 0.2748158458866228,
+  "pbo_val": 0.19047619047619047
+}
+{
+  "persona": "contrarian_dip_buyer",
+  "n_factors": 18,
+  "winner": "lightgbm",
+  "val_ic": 0.04172970758559678,
+  "fwd_sharpe": 0.8075213271290885,
+  "fwd_ic": 0.0362319516089939,
+  "dsr": 0.4346631627368009,
+  "pbo_val": 0.031746031746031744
+}
+
+ALL PERSONAS DONE -> /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/data/books/catalog_terra_l4_v1/sample_strategies/summary.json

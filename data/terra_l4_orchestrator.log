@@ -1,0 +1,11 @@
+[preflight] config=quant.config.nasdaq100_2010.yaml provider=fmp_archive membership=nasdaq100 2010-01-01->2024-07-27
+[preflight] panel 3665 bars x 209 tickers, density 0.463
+[preflight] probe terra:gpt-5.6-terra -> 'OK' (13in/4out, $0.00009)
+[preflight] all checks passed
+[budget] spent $19.97 of $400.00 ($380.03 remaining)
+[run] L4_terra_s0: /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/bin/python run_factor_evolution.py --name L4_terra_s0 --config quant.config.nasdaq100_2010.yaml --seed 0 --model gpt-5.6-terra --generations 20 --mechanism-groups 8 --mechanism-groups-mode max --demes-per-group 3 --children-per-deme 2 --population 16 --seed-ideas-per-group 12 --progressive-reveal --reveal-every 2 --test-frac 0.2 --retrieval graphrag --curation archive --selection-deflation on --archive-cap 40 --creative-frac 0.1 --marginal-model lightgbm --fixed-book data/prebooks/formulaic_101.json --reference-book data/prebooks/formulaic_101.json --n-tickers 0 --horizon 6 --llm-workers 8 --max-cost-usd 380.03 --llm-provider openai
+[done] L4_terra_s0: ok in 903.4 min (log: data/comparisons/final_matrix/logs/L4_terra_s0.log)
+[budget] final spend $86.70 of $400.00
+        arm provider  seed  n_factors  n_trials     llm_model  cost_usd  tokens_in  tokens_out status  elapsed_min
+L4_terra_s0    terra     0         44       798 gpt-5.6-terra      86.7   13884640     3466182     ok        903.4
+[aggregate] wrote /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/data/comparisons/final_matrix/matrix_summary.csv

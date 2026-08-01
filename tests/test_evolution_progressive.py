@@ -101,11 +101,32 @@ def test_schedule_is_deterministic():
     assert build_schedule(idx, **kw) == build_schedule(idx, **kw)
 
 
+def test_final_holdout_schedule_reserves_terminal_block():
+    idx = _index(1000)
+    kw = dict(generations=4, test_frac=0.2, seed_frac=0.5, reveal_every=1, val_blocks=2)
+    base = build_schedule(idx, **kw)
+    held = build_schedule(idx, **kw, holdout_last=True)
+    # one extra terminal rescore-only window at generation G+1
+    assert len(held) == len(base) + 1
+    assert held[-1].generation == 5 and held[-1].reveal is True
+    # dev_len=800, seed_end=400, R=4 reveals + 1 holdout → block_len = 400//5 = 80
+    assert [w.visible_end for w in held[:-1]] == [400, 480, 560, 640, 720]
+    # NO in-run window ever reaches the dev end — the last block stays hidden …
+    assert max(w.visible_end for w in held[:-1]) < 800
+    # … until the terminal window reveals exactly it
+    assert held[-1].visible_end == 800
+    assert held[-1].block_bounds == (idx[720].isoformat(), idx[800].isoformat())
+    # default OFF stays byte-identical
+    assert build_schedule(idx, **kw) == base
+
+
 def test_schedule_config_validation_errors():
     idx = _index(1000)
     base = dict(generations=4, test_frac=0.2, seed_frac=0.5, reveal_every=1, val_blocks=2)
     for bad in (
-        {"test_frac": 0.0}, {"test_frac": 1.0},
+        # test_frac == 0.0 is now LEGAL (no in-panel TEST tail; the only
+        # holdout is the forward reserve beyond the config end date)
+        {"test_frac": -0.1}, {"test_frac": 1.0},
         {"seed_frac": 0.0}, {"seed_frac": 1.0},
         {"reveal_every": 0}, {"val_blocks": 0}, {"generations": 0},
     ):
@@ -528,3 +549,44 @@ def test_resume_recomputes_frontier_and_continues(prog_loop):
                (tmp_path / "evolution" / "gen_quality.jsonl")
                .read_text().splitlines()]
     assert gq_gens == sorted(set(gq_gens))
+
+
+def test_final_holdout_terminal_rescore_after_last_generation(prog_loop):
+    """--final-holdout: the held-out block is revealed AFTER the last generation
+    as a rescore-only step — prequential row at G+1, rescore lineage rows at G+1,
+    and no candidate is ever billed on the terminal window."""
+    make, tmp_path = prog_loop
+    loop = make(final_holdout=True)
+    summary = loop.run(initial_programs=_seeds())
+    assert summary["generations"] == 2
+
+    idx = pd.date_range("2024-01-01", periods=N_BARS, freq="D")
+    # dev_len=384, seed_end=192, R=2 reveals + 1 holdout → block_len=64:
+    # in-run frontiers 256, 320; terminal reveal 320→384 at generation 3
+    preq = tmp_path / "evolution" / "prequential.jsonl"
+    rows = [json.loads(l) for l in preq.read_text().splitlines()]
+    assert [r["generation"] for r in rows] == [1, 2, 3]
+    assert [r["visible_end"] for r in rows] == [256, 320, 384]
+    assert rows[-1]["reveal_index"] == 2          # follows the last in-run reveal
+    assert rows[-1]["start"] == idx[320].isoformat()
+    assert rows[-1]["end"] == idx[384].isoformat()
+
+    # the archive was re-scored on the full dev window at the terminal step …
+    rescored_t = [r for r in loop.controller.lineage
+                  if r.get("event") == "rescore" and r["generation"] == 3]
+    assert rescored_t
+    # … but NO candidate was ever billed on it (billing stops at generation 2)
+    billed = [r for r in loop.controller.lineage if "event" not in r]
+    assert max(r["generation"] for r in billed) <= 2
+
+    # idempotent: re-entering the terminal step (resume) is a no-op
+    n_rows = len(preq.read_text().splitlines())
+    loop._terminal_holdout_rescore()
+    assert len(preq.read_text().splitlines()) == n_rows
+
+    # resume guard: a fresh instance restarted after the terminal checkpoint
+    # restores the terminal window instead of raising a frontier mismatch
+    loop2 = make(final_holdout=True)
+    loop2.controller.generation = 2
+    loop2._init_progressive()
+    assert loop2._window.val_end_ts == idx[384].isoformat()

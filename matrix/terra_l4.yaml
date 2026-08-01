@@ -1,0 +1,42 @@
+# L4 (graphrag + mechanism groups) on GPT-5.6 Terra via the OpenAI API —
+# funded by the $2,500 OpenAI credit (separate pool from the Anthropic ladder).
+#
+# Same ladder defaults as matrix/opus_ladder.yaml with two deliberate
+# deviations requested 2026-07-29:
+#   * seed-ideas-per-group 6 -> 12  (broader mechanism-targeted seeding)
+#   * children-per-deme     3 -> 2  (48 children/gen at 8 groups x 3 demes)
+#
+# Budget: hard global cap for THIS plan; Terra at $2.5/$15 per MTok with the
+# L2-measured token profile (~22M in / ~14M out) estimates ~$265/run.
+
+config_file: quant.config.nasdaq100_2010.yaml
+budget_usd: 400
+
+defaults:
+  generations: 20
+  mechanism-groups: 8
+  mechanism-groups-mode: max
+  demes-per-group: 3
+  children-per-deme: 2
+  population: 16
+  seed-ideas-per-group: 12
+  progressive-reveal: true
+  reveal-every: 2
+  test-frac: 0.2
+  retrieval: graphrag
+  curation: archive
+  selection-deflation: "on"
+  archive-cap: 40
+  creative-frac: 0.1
+  marginal-model: lightgbm
+  fixed-book: data/prebooks/formulaic_101.json
+  reference-book: data/prebooks/formulaic_101.json
+  n-tickers: 0
+  horizon: 6
+  llm-workers: 8
+
+providers:
+  terra: {model: "gpt-5.6-terra", llm-provider: openai}
+
+arms:
+  - {name: L4_terra_s0, provider: terra, seed: 0, flags: {}}

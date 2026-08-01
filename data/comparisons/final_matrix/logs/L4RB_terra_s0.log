@@ -1,0 +1,181 @@
+09:10:51  INFO     run_factor_evolution    Evolution run into scope 'fmp_archive_equity_nasdaq100pit/L4RB_terra_s0' (model=gpt-5.6-terra, provider=openai)
+09:10:51  INFO     run_factor_evolution    progressive reveal ON (test_frac=0.20, seed_frac=0.45, reveal_every=1, val_blocks=2) — --is-frac/--val-frac are ignored; the split follows the per-generation calendar schedule.
+09:10:52  INFO     research.service        Loading panel from ticker_data (fields=['accountsPayable', 'acquisitionsNet', 'assetGrowth', 'assetTurnover', 'bookValuePerShare', 'bookValuePerShareGrowth', 'capex', 'capexPerShare', 'capexToOperatingCashFlow', 'capexToRevenue', 'cash', 'cashConversionCycle', 'cashPerShare', 'cashRatio', 'changeInWorkingCapital', 'close', 'costOfRevenue', 'currentRatio', 'daysInventoryOutstanding', 'daysPayablesOutstanding', 'daysSalesOutstanding', 'debtGrowth', 'debtToAssets', 'debtToCapital', 'debtToEquity', 'depreciationAmortization', 'dividendPayoutRatio', 'dividendPerShareGrowth', 'dividendYield', 'dividendsPaid', 'earningsYield', 'ebit', 'ebitGrowth', 'ebitMargin', 'ebitda', 'ebitdaGrowth', 'ebitdaMargin', 'enterpriseValue', 'eps', 'epsActual', 'epsDiluted', 'epsDilutedGrowth', 'epsEstimate', 'epsGrowth', 'epsSurprise', 'evToEbitda', 'evToFreeCashFlow', 'evToOperatingCashFlow', 'evToSales', 'financialLeverage', 'freeCashFlow', 'freeCashFlowGrowth', 'freeCashFlowPerShare', 'freeCashFlowYield', 'goodwill', 'grahamNumber', 'grossMargin', 'grossProfit', 'grossProfitGrowth', 'high', 'incomeBeforeTax', 'incomeQuality', 'incomeTaxExpense', 'industry', 'intangibleAssets', 'intangiblesToAssets', 'interestCoverage', 'interestExpense', 'inventory', 'inventoryGrowth', 'inventoryTurnover', 'investedCapital', 'longTermDebt', 'low', 'marketCap', 'netDebtIssuance', 'netDebtToEbitda', 'netIncome', 'netIncomeGrowth', 'netIncomeGrowth3Y', 'netIncomeGrowth5Y', 'netIncomePerShare', 'netMargin', 'netStockIssuance', 'open', 'operatingCashFlow', 'operatingCashFlowGrowth', 'operatingCashFlowPerShare', 'operatingCycle', 'operatingExpenses', 'operatingIncome', 'operatingIncomeGrowth', 'operatingMargin', 'payablesTurnover', 'pbRatio', 'peRatio', 'pegRatio', 'pfcfRatio', 'pocfRatio', 'ppe', 'pretaxMargin', 'psRatio', 'quickRatio', 'rdExpense', 'rdExpenseGrowth', 'rdToRevenue', 'receivables', 'receivablesGrowth', 'receivablesTurnover', 'retainedEarnings', 'returns', 'revenue', 'revenueActual', 'revenueEstimate', 'revenueGrowth', 'revenueGrowth3Y', 'revenueGrowth5Y', 'revenuePerShare', 'revenueSurprise', 'roa', 'roce', 'roe', 'roic', 'sbcToRevenue', 'sector', 'sgaExpense', 'sgaExpenseGrowth', 'sgaToRevenue', 'shareRepurchase', 'sharesDiluted', 'sharesGrowth', 'sharesOutstanding', 'shortTermDebt', 'stockBasedCompensation', 'tangibleBookValuePerShare', 'totalAssets', 'totalCurrentAssets', 'totalCurrentLiabilities', 'totalDebt', 'totalEquity', 'totalLiabilities', 'volume', 'vwap', 'workingCapital'], n_tickers=all) …
+09:11:56  INFO     research.service        Panel loaded in 64.1s (209 tickers, 144 fields)
+09:11:56  INFO     evolution.loop          progressive reveal: 11 windows; generation 0 frontier through 2015-04-01T00:00:00
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/langgraph/cache/base/__init__.py:8: LangChainPendingDeprecationWarning: The default value of `allowed_objects` will change in a future version. Pass an explicit value (e.g., allowed_objects='messages' or allowed_objects='core') to suppress this warning.
+  from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
+09:11:57  INFO     evolution.loop          graphrag group 0 seeding: focus='Community 1: 34 mechanism(s) (analyst sentiment revision drift, compounding amplification, cross-channel loading anti-al' mechanisms=[]
+09:11:58  INFO     knowledge.embed_store   embed cache hit: 1723 papers, 12025 chunks
+09:12:03  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+09:12:03  INFO     knowledge.retrieval     retrieved 4 paper(s) [application_of_deep_learning_for_factor_timing_in_asset_mana, statistical_arbitrage_in_multi_pair_trading_strategy_based_o, value_matters_predictability_of_stock_index_returns, risk_management_and_return_prediction] for cardinality=1toN
+09:12:38  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:12:53  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:13:22  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:13:52  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:14:12  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:14:13  INFO     factor_research         [session evo-seed-0-group-0-creative] brainstorm call (own-knowledge, asked 1, 6510 tok): 20.4s
+09:14:23  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:14:32  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:14:57  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:14:58  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:14:59  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:15:01  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:15:03  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:15:12  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:15:12  INFO     evolution.loop          seeded 8/8 program(s) from 8 idea(s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:15:16  INFO     evolution.loop          [sector_flow_loading_anti_alignment_reversal] evaluation failed: candidate signal failed: Boolean index has wrong length: 208 instead of 209
+09:15:16  INFO     evolution.loop          [signed_cluster_residual_half_life] evaluation failed: candidate signal failed: Length of values (208) does not match length of index (209)
+09:15:17  INFO     evolution.loop          [fundamental_graph_surprise_diffusion_lag] evaluation failed: candidate signal failed: shape mismatch: indexing arrays could not be broadcast together with shapes (192,1) (208,12) 
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:15:27  INFO     evolution.loop          graphrag group 1 seeding: focus='Community 2: 35 mechanism(s) (Common shock propagation, Samuelson correlation effect, Samuelson effect (intensity accele' mechanisms=[]
+09:15:28  INFO     knowledge.embed_store   embed cache hit: 1723 papers, 12025 chunks
+09:15:28  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+09:15:28  INFO     knowledge.retrieval     retrieved 4 paper(s) [application_of_deep_learning_for_factor_timing_in_asset_mana, statistical_arbitrage_in_multi_pair_trading_strategy_based_o, risk_management_and_return_prediction, hidden_order_in_trades_predicts_the_size_of_price_moves] for cardinality=1toN
+09:15:58  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:16:13  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:16:51  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:17:20  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:17:39  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:17:39  INFO     factor_research         [session evo-seed-0-group-1-creative] brainstorm call (own-knowledge, asked 1, 6586 tok): 18.2s
+09:17:47  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:17:47  INFO     evolution.loop          [seed:financing_fragility_common_shock_amplifier] codegen attempt failed (calc() raised on synthetic data: DataFrame.groupby() got an unexpected keyword argument 'axis')
+09:17:47  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:18:16  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:18:20  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:18:21  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:18:25  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:18:27  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:18:28  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:18:31  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:18:31  INFO     evolution.loop          seeded 8/8 program(s) from 8 idea(s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+<factor:causal_sector_phase_lag_shock_relay>:41: RuntimeWarning: invalid value encountered in divide
+<factor:causal_sector_phase_lag_shock_relay_jit0>:33: RuntimeWarning: invalid value encountered in divide
+09:18:34  WARNING  research.service        [evaluate_fitness] jitter probe causal_sector_phase_lag_shock_relay_jit0 failed (min_periods 3 must be <= window 2) — skipped
+<factor:causal_sector_phase_lag_shock_relay_jit1>:33: RuntimeWarning: invalid value encountered in divide
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:18:35  INFO     evolution.loop          [localized_common_mode_delayed_response] evaluation failed: candidate signal failed: Unalignable boolean Series provided as indexer (index of the boolean Series and of the indexed object do not match).
+09:18:35  WARNING  research.service        [evaluate_fitness] jitter probe financing_fragility_common_shock_amplifier_jit0 failed (min_periods 3 must be <= window 2) — skipped
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:18:38  INFO     evolution.loop          [peer_cost_inflation_inventory_repricing] evaluation failed: candidate signal failed: "['Packaged Foods'] not in index"
+09:18:38  INFO     evolution.loop          [sector_eigenmode_response_deficit] evaluation failed: candidate signal failed: "['SNDK'] not in index"
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:18:39  INFO     evolution.loop          graphrag group 2 seeding: focus='Community 3: 29 mechanism(s) (bubble-driven phase transitions, buffer-regulated order intensity, contagion-driven intens' mechanisms=[]
+09:18:40  INFO     knowledge.embed_store   embed cache hit: 1723 papers, 12025 chunks
+09:18:40  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+09:18:40  INFO     knowledge.retrieval     retrieved 4 paper(s) [application_of_deep_learning_for_factor_timing_in_asset_mana, statistical_arbitrage_in_multi_pair_trading_strategy_based_o, hidden_order_in_trades_predicts_the_size_of_price_moves, cross_sectional_topological_anomaly_scores_and_intraday_retu] for cardinality=1toN
+09:19:00  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:19:18  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:19:53  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:20:19  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:20:33  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:20:33  INFO     factor_research         [session evo-seed-0-group-2-creative] brainstorm call (own-knowledge, asked 1, 6656 tok): 14.0s
+09:21:03  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:21:04  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:21:06  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/pandas/core/internals/blocks.py:347: RuntimeWarning: divide by zero encountered in log
+  result = func(self.values, **kwargs)
+09:21:10  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:21:13  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:21:14  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:21:14  INFO     evolution.loop          [seed:conditional_path_manifold_escape_reversal] codegen attempt failed (calc() raised on synthetic data: output array is read-only)
+09:21:16  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:21:18  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:21:49  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:21:50  INFO     evolution.loop          [seed:conditional_path_manifold_escape_reversal] codegen attempt failed (calc() raised on synthetic data: axis 1 is out of bounds for array of dimension 1)
+09:21:50  INFO     evolution.loop          seeded 7/8 program(s) from 8 idea(s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/pandas/core/internals/blocks.py:347: RuntimeWarning: divide by zero encountered in log
+  result = func(self.values, **kwargs)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/pandas/core/internals/blocks.py:347: RuntimeWarning: divide by zero encountered in log
+  result = func(self.values, **kwargs)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/pandas/core/internals/blocks.py:347: RuntimeWarning: divide by zero encountered in log
+  result = func(self.values, **kwargs)
+09:21:52  WARNING  research.service        [evaluate_fitness] jitter probe valuation_critical_slowing_deleveraging_jit0 failed (min_periods 10 must be <= window 9) — skipped
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/pandas/core/internals/blocks.py:347: RuntimeWarning: divide by zero encountered in log
+  result = func(self.values, **kwargs)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/pandas/core/internals/blocks.py:347: RuntimeWarning: divide by zero encountered in log
+  result = func(self.values, **kwargs)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:21:56  WARNING  research.service        [evaluate_fitness] jitter probe cluster_coherence_weighted_residual_relay_jit0 failed (min_periods 3 must be <= window 2) — skipped
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:22:01  WARNING  research.service        [evaluate_fitness] jitter probe compressible_flow_surprise_alignment_drift_jit0 failed (min_periods 5 must be <= window 4) — skipped
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:22:04  INFO     evolution.loop          [peer_readthrough_accrual_contradiction_reversal] evaluation failed: candidate signal failed: Length mismatch: Expected axis has 208 elements, new values have 192 elements
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:22:06  INFO     evolution.loop          graphrag group 3 seeding: focus='Community 5: 20 mechanism(s) (arrival rate asymmetry, cross-asset volatility synchronization, flash crash liquidity evap' mechanisms=[]
+09:22:07  INFO     knowledge.embed_store   embed cache hit: 1723 papers, 12025 chunks
+09:22:07  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+09:22:07  INFO     knowledge.retrieval     retrieved 4 paper(s) [application_of_deep_learning_for_factor_timing_in_asset_mana, statistical_arbitrage_in_multi_pair_trading_strategy_based_o, risk_management_and_return_prediction, hidden_order_in_trades_predicts_the_size_of_price_moves] for cardinality=1toN
+09:22:21  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:22:49  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:23:05  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:23:21  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:23:25  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:23:26  INFO     factor_research         [session evo-seed-0-group-3-creative] brainstorm call (own-knowledge, asked 1, 6716 tok): 4.8s
+09:23:33  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:23:33  INFO     evolution.loop          [seed:liquidity_resilience_synchrony_break_hazard] codegen attempt failed (calc() raised on synthetic data: DataFrame.groupby() got an unexpected keyword argument 'axis')
+09:23:36  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:23:43  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:23:47  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:23:52  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:24:00  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:24:04  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:24:05  INFO     evolution.loop          [seed:correlation_bridge_forcedflow_reversal] codegen attempt failed (calc() raised on synthetic data: underlying array is read-only)
+09:24:05  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:24:11  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:24:32  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:24:32  INFO     evolution.loop          seeded 8/8 program(s) from 8 idea(s)
+09:24:34  INFO     evolution.loop          [sector_sync_laggard_impulse_relay] evaluation failed: candidate signal failed: Length mismatch: Expected axis has 208 elements, new values have 209 elements
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:24:49  INFO     evolution.loop          [liquidity_resilience_synchrony_break_hazard] evaluation failed: candidate signal failed: operands could not be broadcast together with shapes (209,) (208,) 
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:24:54  WARNING  research.service        [evaluate_fitness] jitter probe compressed_flow_release_directional_pressure_jit0 failed (min_periods 5 must be <= window 4) — skipped
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:24:56  WARNING  research.service        [evaluate_fitness] jitter probe return_volume_phase_locking_break_jit0 failed (min_periods 5 must be <= window 4) — skipped
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:24:58  INFO     evolution.loop          graphrag group 4 seeding: focus='Community 6: 14 mechanism(s) (LLM forecast overvaluation premium, LLM momentum extrapolation bias, LLM risk miscalibrati' mechanisms=[]
+09:24:58  INFO     knowledge.embed_store   embed cache hit: 1723 papers, 12025 chunks
+09:25:02  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/embeddings "HTTP/1.1 200 OK"
+09:25:02  INFO     knowledge.retrieval     retrieved 4 paper(s) [application_of_deep_learning_for_factor_timing_in_asset_mana, statistical_arbitrage_in_multi_pair_trading_strategy_based_o, a_multi_factor_market_neutral_investment_strategy_for_new_yo, risk_management_and_return_prediction] for cardinality=1toN
+09:25:28  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:25:55  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:26:08  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:26:31  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:26:48  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:26:48  INFO     factor_research         [session evo-seed-0-group-4-creative] brainstorm call (own-knowledge, asked 1, 6800 tok): 17.6s
+09:26:55  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+09:26:57  INFO     httpx                   HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"

@@ -1,0 +1,100 @@
+{
+  "label": "aggressive_short_term",
+  "factor_ids": [
+    "index_weight_flow_elasticity_beta_wedge_snapback",
+    "program_gated_elasticity_factor_return_snapback",
+    "horizon_matched_lag_kernel_catchup_staleness_gat",
+    "clientele_gap_repair_hazard_participation_relay",
+    "pooled_xs_response_coef_clientele_activity_gate",
+    "liquidity_cost_confirmed_smoothed_displacement_r",
+    "clientele_routed_overdelivery_sign_split_catchup",
+    "rice_inverted_ar1_kernel_volume_stream_forecast",
+    "pecking_order_rank_inversion_density_snapback",
+    "netting_counterparty_capacity_gated_peer_snapbac",
+    "tsrv_kalman_gain_transient_deviation_memory_h6",
+    "asym_impact_cost_vacuum_leverage_bucket_snapback",
+    "footprint_attributed_overpush_only_beta_purged_r",
+    "eb_shrunk_h6_selfcalibrated_peer_displacement_sl",
+    "peer_propagator_leg_grid_interaction_wedge",
+    "comparable_basket_repair_rate_activity_clock_h6",
+    "increment_shape_switched_peer_displacement_fade_",
+    "clientele_beta_backlog_channel_credit_disagree",
+    "seam_absorption_conditioned_pooled_push_response",
+    "concord_underreaction_lagshare_nonresp_hazard"
+  ],
+  "n_factors": 20,
+  "models_raced": [
+    "ridge",
+    "elastic_net",
+    "random_forest",
+    "lightgbm"
+  ],
+  "race": {
+    "ridge": {
+      "val_ic": 0.04734571645767107,
+      "val_sharpe": -0.010320937309121961,
+      "val_ann_ret": -0.0007388102423147491,
+      "val_ann_vol": 0.0715836382090768,
+      "val_max_dd": -0.13206075639791093,
+      "val_n_bars": 502
+    },
+    "elastic_net": {
+      "val_ic": -4.362849340500092e-19,
+      "val_sharpe": -1.0045119604307633,
+      "val_ann_ret": -0.05245580590103727,
+      "val_ann_vol": 0.052220190467958914,
+      "val_max_dd": -0.13642025220820253,
+      "val_n_bars": 502
+    },
+    "random_forest": {
+      "val_ic": 0.056367985671189814,
+      "val_sharpe": 0.846601469940144,
+      "val_ann_ret": 0.06872674345134262,
+      "val_ann_vol": 0.08117957018926712,
+      "val_max_dd": -0.08738034325186195,
+      "val_n_bars": 502
+    },
+    "lightgbm": {
+      "val_ic": 0.04653306128214406,
+      "val_sharpe": 0.4444023503450546,
+      "val_ann_ret": 0.028277216468959202,
+      "val_ann_vol": 0.06362976353973705,
+      "val_max_dd": -0.0799972458531214,
+      "val_n_bars": 502
+    }
+  },
+  "winner": "random_forest",
+  "n_trials_strategy": 5,
+  "pbo_cscv_val": 0.42857142857142855,
+  "forward_gross": {
+    "sharpe": 0.45213469574482384,
+    "ann_ret": 0.048327027879401546,
+    "ann_vol": 0.10688635120069706,
+    "max_dd": -0.10007797530558449,
+    "n_bars": 499
+  },
+  "forward": {
+    "ic": 0.035947969078819725,
+    "sharpe": 0.204193380877189,
+    "ann_ret": 0.021818210244131,
+    "ann_vol": 0.10685072234174647,
+    "max_dd": -0.10941815096101026,
+    "n_bars": 499,
+    "window": [
+      "2024-07-29",
+      "2026-07-27"
+    ],
+    "deflated_sharpe_prob": 0.19021114717308818
+  },
+  "in_panel_net": {
+    "sharpe": 1.743910272186018,
+    "ann_ret": 0.1488123404207696,
+    "ann_vol": 0.08533256715910682,
+    "max_dd": -0.11981904674505528,
+    "n_bars": 3659
+  },
+  "mean_daily_turnover": 0.22602865834133848,
+  "persona_prompt": "I want an aggressive short-term trading strategy that turns over quickly and squeezes alpha out of market microstructure.",
+  "selected_before_prune": 20,
+  "catalog_n_trials_global": 825
+}

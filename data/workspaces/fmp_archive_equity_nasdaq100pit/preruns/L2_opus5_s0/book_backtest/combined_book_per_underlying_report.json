@@ -1,0 +1,96 @@
+{
+  "label": "combined_book_per_underlying",
+  "construction": "per_underlying",
+  "factor_ids": [
+    "absorption_depth_gated_wick_asymmetry_fresh",
+    "sqrt_law_weighted_flow_pressure_freshness_wedge",
+    "volume_evenness_entropy_innovation_gated_path_ef",
+    "wilcoxon_drift_mood_compression_metaorder_wedge",
+    "absorbed_wick_routed_unowed_transient_snapback",
+    "program_gated_elasticity_factor_return_snapback",
+    "corporate_net_demand_hinge_asymmetric_dislocatio",
+    "comparable_basket_repair_rate_activity_clock_h6",
+    "roundnumber_lattice_barrier_breach_asymmetry_h6",
+    "tsrv_kalman_gain_transient_deviation_memory_h6",
+    "churn_resilience_gated_sweep_debt_snapback_h6",
+    "rice_consistency_wedge_gated_crossing_clock_fade",
+    "run_surprisal_vs_flip_baseline_exhaustion_h6",
+    "program_flow_vs_name_flow_volume_split_reversal_",
+    "volume_at_level_wall_vacuum_idio_dislocation_fli",
+    "reignition_hazard_pending_spell_vs_paid_split_h6",
+    "backing_split_bivariate_var_window_mass_gate_h6",
+    "delivery_capped_valuation_repair_flow_attributed"
+  ],
+  "n_factors": 18,
+  "models_raced": [
+    "ridge",
+    "elastic_net",
+    "random_forest",
+    "lightgbm"
+  ],
+  "race": {
+    "ridge": {
+      "val_ic": 0.04294571042820022,
+      "val_sharpe": 0.3489594561800494,
+      "val_ann_ret": 0.0741823022281981,
+      "val_ann_vol": 0.2125814357927098,
+      "val_max_dd": -0.22914382596614102,
+      "val_n_bars": 502
+    },
+    "elastic_net": {
+      "val_ic": 0.04328147673592445,
+      "val_sharpe": 0.28766029516498637,
+      "val_ann_ret": 0.06118728438725035,
+      "val_ann_vol": 0.2127067426950829,
+      "val_max_dd": -0.22689753937689994,
+      "val_n_bars": 502
+    },
+    "random_forest": {
+      "val_ic": 0.04250083923997581,
+      "val_sharpe": -0.06544563259895705,
+      "val_ann_ret": -0.012994282072188838,
+      "val_ann_vol": 0.19855079026917247,
+      "val_max_dd": -0.2679230235922144,
+      "val_n_bars": 502
+    },
+    "lightgbm": {
+      "val_ic": 0.046524118916622,
+      "val_sharpe": 0.3466123955416519,
+      "val_ann_ret": 0.06507952083591445,
+      "val_ann_vol": 0.18775878091207485,
+      "val_max_dd": -0.25434233723261024,
+      "val_n_bars": 502
+    }
+  },
+  "winner": "lightgbm",
+  "n_trials_strategy": 8,
+  "pbo_cscv_val": 0.8373015873015873,
+  "forward_gross": {
+    "sharpe": 0.3311708543350928,
+    "ann_ret": 0.07235354201827114,
+    "ann_vol": 0.21847798823824255,
+    "max_dd": -0.28424821210320883,
+    "n_bars": 499
+  },
+  "forward": {
+    "ic": 0.03692008966684466,
+    "sharpe": -0.024861074551381663,
+    "ann_ret": -0.005432730526819071,
+    "ann_vol": 0.21852356041936033,
+    "max_dd": -0.33980132160451837,
+    "n_bars": 499,
+    "window": [
+      "2024-07-29",
+      "2026-07-27"
+    ],
+    "deflated_sharpe_prob": 0.34905659156572
+  },
+  "in_panel_net": {
+    "sharpe": 1.5113285371389527,
+    "ann_ret": 0.39511813514247623,
+    "ann_vol": 0.2614376195730822,
+    "max_dd": -0.30038927605663257,
+    "n_bars": 3659
+  },
+  "mean_daily_turnover": 0.8113464617355107
+}

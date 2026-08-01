@@ -1,0 +1,56 @@
+# L4R: the NON-EVOLUTIONARY ablation of L4_terra_s0 on GPT-5.6 Terra (OpenAI
+# credit pool, same as matrix/terra_l4.yaml).
+#
+# Question (user, 2026-07-31): does the evolutionary machinery add value over
+# "good model + knowledge graph + statistical harness + light refinement"?
+# This arm keeps EVERYTHING in L4 except evolution:
+#   * graphrag retrieval + 8/max mechanism groups (broad KG coverage)
+#   * 4-axis Pareto scoring, gates, archives, archive cap
+#   * progressive reveal (same schedule: 20 generations, reveal-every 2,
+#     test-frac 0.2 — identical calendar splits to L4_terra_s0)
+#   * curation archive + publish-time selection deflation (N_trials-aware)
+# and replaces the operators with `--variant refine`:
+#   * each seeded factor is refined by the LLM against its own deterministic
+#     evaluation report, at most twice, ALWAYS the same factor/mechanism
+#   * demes continuously re-seed fresh graphrag-grounded ideas from papers
+#   * only combination operator: occasional cross-group synthesis (p=0.10)
+#   * no tournament selection, no same-group crossover, no jitter, no migration
+#
+# children-per-deme 1 (vs L4's 2): the arm is deliberately CHEAPER — the
+# hypothesis under test is that first solutions are good and heavy iteration
+# is wasted spend.  Expected ~550-650 trials vs L4's 798, ~$55-70 vs $86.70.
+
+config_file: quant.config.nasdaq100_2010.yaml
+budget_usd: 120
+
+defaults:
+  variant: refine
+  refine-rounds: 2
+  generations: 20
+  mechanism-groups: 8
+  mechanism-groups-mode: max
+  demes-per-group: 3
+  children-per-deme: 1
+  population: 16
+  seed-ideas-per-group: 12
+  p-cross-group: 0.10
+  progressive-reveal: true
+  reveal-every: 2
+  test-frac: 0.2
+  retrieval: graphrag
+  curation: archive
+  selection-deflation: "on"
+  archive-cap: 40
+  creative-frac: 0.1
+  marginal-model: lightgbm
+  fixed-book: data/prebooks/formulaic_101.json
+  reference-book: data/prebooks/formulaic_101.json
+  n-tickers: 0
+  horizon: 6
+  llm-workers: 8
+
+providers:
+  terra: {model: "gpt-5.6-terra", llm-provider: openai}
+
+arms:
+  - {name: L4R_terra_s0, provider: terra, seed: 0, flags: {}}

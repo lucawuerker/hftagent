@@ -1,0 +1,120 @@
+{
+  "0": [
+    {
+      "genome_id": "g0-quality_spread_state_conditioned_tilt-4f3d4d",
+      "refines": 0,
+      "last_gen": -1
+    },
+    {
+      "genome_id": "g0-adaptive_valuation_anchor_restoring_speed-984c66",
+      "refines": 0,
+      "last_gen": -1
+    },
+    {
+      "genome_id": "g0-fundamental_reanchor_unassimilated_drift-f4d558",
+      "refines": 0,
+      "last_gen": -1
+    },
+    {
+      "genome_id": "g0-rd_margin_revision_latency-4c52fa",
+      "refines": 0,
+      "last_gen": -1
+    },
+    {
+      "genome_id": "g0-cash_margin_phase_orientation_drift-6c9bc1",
+      "refines": 0,
+      "last_gen": -1
+    }
+  ],
+  "1": [
+    {
+      "genome_id": "g0-refinancing_buffer_common_shock_convexity-390c40",
+      "refines": 0,
+      "last_gen": -1
+    },
+    {
+      "genome_id": "g0-causal_sector_phase_lag_shock_relay-533f3f",
+      "refines": 0,
+      "last_gen": -1
+    },
+    {
+      "genome_id": "g0-financing_fragility_common_shock_amplifier-13a0be",
+      "refines": 0,
+      "last_gen": -1
+    },
+    {
+      "genome_id": "g0-cap_weighted_sector_impulse_laggard_relay-85b7c7",
+      "refines": 0,
+      "last_gen": -1
+    },
+    {
+      "genome_id": "g0-sector_turnover_concentration_passive_spillover-dec1fa",
+      "refines": 0,
+      "last_gen": -1
+    }
+  ],
+  "2": [
+    {
+      "genome_id": "g0-valuation_critical_slowing_deleveraging-b2096f",
+      "refines": 0,
+      "last_gen": -1
+    },
+    {
+      "genome_id": "g0-industry_operating_leverage_incoming_excitation-003767",
+      "refines": 0,
+      "last_gen": -1
+    },
+    {
+      "genome_id": "g0-cluster_coherence_weighted_residual_relay-e5495e",
+      "refines": 0,
+      "last_gen": -1
+    },
+    {
+      "genome_id": "g0-bispectral_volume_cascade_impulse-166324",
+      "refines": 0,
+      "last_gen": -1
+    },
+    {
+      "genome_id": "g0-compressible_flow_surprise_alignment_drift-616958",
+      "refines": 0,
+      "last_gen": -1
+    },
+    {
+      "genome_id": "g0-causal_spectral_impact_phase_lead-e03abb",
+      "refines": 0,
+      "last_gen": -1
+    }
+  ],
+  "3": [
+    {
+      "genome_id": "g0-range_volume_elasticity_thinning_drift-b99c8a",
+      "refines": 0,
+      "last_gen": -1
+    },
+    {
+      "genome_id": "g0-correlation_bridge_forcedflow_reversal-1af98e",
+      "refines": 0,
+      "last_gen": -1
+    },
+    {
+      "genome_id": "g0-synchronized_impact_convexity_directional_release-7fb11f",
+      "refines": 0,
+      "last_gen": -1
+    },
+    {
+      "genome_id": "g0-volume_arrival_asymmetry_information_persistence-30ba58",
+      "refines": 0,
+      "last_gen": -1
+    },
+    {
+      "genome_id": "g0-compressed_flow_release_directional_pressure-c05aa7",
+      "refines": 0,
+      "last_gen": -1
+    },
+    {
+      "genome_id": "g0-return_volume_phase_locking_break-b9f6ec",
+      "refines": 0,
+      "last_gen": -1
+    }
+  ]
+}

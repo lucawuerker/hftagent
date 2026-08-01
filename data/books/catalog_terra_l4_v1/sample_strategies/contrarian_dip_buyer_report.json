@@ -1,0 +1,99 @@
+{
+  "label": "contrarian_dip_buyer",
+  "construction": "cross_sectional",
+  "factor_ids": [
+    "hawkes_cooling_metaorder_completion_reversal",
+    "rupture_isolated_absorption_arrival_reversal",
+    "cooling_impact_overshoot_completion_reversal",
+    "downside_excitation_exhaustion_repair",
+    "fear_conditioned_rollover_relief_continuation",
+    "ambiguity_gated_hawkes_completion_reversal",
+    "opening_dislocation_recovery_participation",
+    "hawkes_absorption_buffer_clock_repair",
+    "earnings_disambiguated_sector_liquidity_repair_j",
+    "sector_stress_conditioned_rupture_absorption_reb",
+    "idio_shock_relaxation_replenishment_phase",
+    "cascade_maturity_absorption_rebound",
+    "funding_gated_absorbed_flow_polarity",
+    "directional_state_entropy_breakout",
+    "idiosyncratic_refill_inventory_unwind",
+    "spectral_flow_transfer_response_h6",
+    "fear_gated_idio_excitation_extinction_repair",
+    "salient_cost_basis_anchor"
+  ],
+  "n_factors": 18,
+  "models_raced": [
+    "ridge",
+    "elastic_net",
+    "random_forest",
+    "lightgbm"
+  ],
+  "race": {
+    "ridge": {
+      "val_ic": 0.024917776003951824,
+      "val_sharpe": -0.5559985332280825,
+      "val_ann_ret": -0.03626914212808191,
+      "val_ann_vol": 0.06523244210287069,
+      "val_max_dd": -0.14006309974307873,
+      "val_n_bars": 502
+    },
+    "elastic_net": {
+      "val_ic": 0.024717928473806546,
+      "val_sharpe": -0.5850335953217357,
+      "val_ann_ret": -0.03952774134356663,
+      "val_ann_vol": 0.06756490851064474,
+      "val_max_dd": -0.14404391611305856,
+      "val_n_bars": 502
+    },
+    "random_forest": {
+      "val_ic": 0.036345985278594777,
+      "val_sharpe": 0.6412151663324654,
+      "val_ann_ret": 0.048509658715639455,
+      "val_ann_vol": 0.07565270015851051,
+      "val_max_dd": -0.08563641151486767,
+      "val_n_bars": 502
+    },
+    "lightgbm": {
+      "val_ic": 0.04172970758559678,
+      "val_sharpe": 1.210433326348715,
+      "val_ann_ret": 0.07925974366009472,
+      "val_ann_vol": 0.06548047045200134,
+      "val_max_dd": -0.04535145220736858,
+      "val_n_bars": 502
+    }
+  },
+  "winner": "lightgbm",
+  "n_trials_strategy": 5,
+  "pbo_cscv_val": 0.031746031746031744,
+  "forward_gross": {
+    "sharpe": 1.1907159411060213,
+    "ann_ret": 0.0819637870143554,
+    "ann_vol": 0.06883571823034605,
+    "max_dd": -0.04524619779805705,
+    "n_bars": 499
+  },
+  "forward": {
+    "ic": 0.0362319516089939,
+    "sharpe": 0.8075213271290885,
+    "ann_ret": 0.05557280505042754,
+    "ann_vol": 0.06881899360850417,
+    "max_dd": -0.050322744364369454,
+    "n_bars": 499,
+    "window": [
+      "2024-07-29",
+      "2026-07-27"
+    ],
+    "deflated_sharpe_prob": 0.4346631627368009
+  },
+  "in_panel_net": {
+    "sharpe": 2.693956447238228,
+    "ann_ret": 0.2528471732362824,
+    "ann_vol": 0.09385718670229232,
+    "max_dd": -0.08724768311656672,
+    "n_bars": 3659
+  },
+  "mean_daily_turnover": 0.1849463656740314,
+  "persona_prompt": "I like buying panic and selling euphoria. Build me a contrarian strategy that fades overreactions.",
+  "selected_before_prune": 18,
+  "catalog_n_trials_global": 798
+}

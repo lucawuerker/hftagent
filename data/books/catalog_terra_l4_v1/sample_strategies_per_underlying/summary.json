@@ -1,0 +1,52 @@
+[
+  {
+    "persona": "aggressive_short_term",
+    "n_factors": 20,
+    "winner": "random_forest",
+    "val_ic": 0.03931487753332105,
+    "fwd_sharpe": 0.14715021786127686,
+    "fwd_ic": 0.02419719476771584,
+    "dsr": 0.3683616966004999,
+    "pbo_val": 0.28174603174603174
+  },
+  {
+    "persona": "defensive_low_turnover",
+    "n_factors": 14,
+    "winner": "lightgbm",
+    "val_ic": 0.01744956264871447,
+    "fwd_sharpe": 0.054724820399826,
+    "fwd_ic": 0.0343149620162597,
+    "dsr": 0.416615083297201,
+    "pbo_val": 0.8492063492063492
+  },
+  {
+    "persona": "earnings_events",
+    "n_factors": 16,
+    "winner": "random_forest",
+    "val_ic": 0.034961282842539194,
+    "fwd_sharpe": 0.24830527699926822,
+    "fwd_ic": 0.031540114547489916,
+    "dsr": 0.5575988024335562,
+    "pbo_val": 0.8095238095238095
+  },
+  {
+    "persona": "diversified_all_weather",
+    "n_factors": 24,
+    "winner": "random_forest",
+    "val_ic": 0.05214357086662953,
+    "fwd_sharpe": 0.2735960237126504,
+    "fwd_ic": 0.0475427681214681,
+    "dsr": 0.5632980113607081,
+    "pbo_val": 0.8333333333333334
+  },
+  {
+    "persona": "contrarian_dip_buyer",
+    "n_factors": 18,
+    "winner": "lightgbm",
+    "val_ic": 0.04172970758559678,
+    "fwd_sharpe": 0.6336717436460626,
+    "fwd_ic": 0.0362319516089939,
+    "dsr": 0.5440666698862856,
+    "pbo_val": 0.3373015873015873
+  }
+]

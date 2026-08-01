@@ -1,0 +1,101 @@
+{
+  "label": "aggressive_short_term_per_underlying",
+  "construction": "per_underlying",
+  "factor_ids": [
+    "downside_excitation_volume_drought",
+    "earnings_downside_auction_persistence_gate",
+    "earnings_turnover_impedance_resolution",
+    "asymmetric_range_relaxation_flow_completion_h6_j",
+    "hawkes_cooling_metaorder_completion_reversal",
+    "balance_sheet_shock_amplification",
+    "fresh_collection_tail_execution_unwind",
+    "cash_anchor_orderly_sell_absorption_transition",
+    "scheduled_sell_intensity_recovery_trap",
+    "tail_state_quality_update_mode_alignment",
+    "sector_shock_cash_wedge_diffusion",
+    "endogenous_sell_cluster_relaxation",
+    "participation_weighted_downside_kernel_release",
+    "rupture_isolated_absorption_arrival_reversal",
+    "cooling_impact_overshoot_completion_reversal",
+    "fragility_gated_spectral_downside_lag",
+    "endogenous_cascade_reignition_continuation",
+    "fundamental_style_eigenmode_premium_cast",
+    "downside_excitation_exhaustion_repair",
+    "conversion_gated_spectral_peer_lag"
+  ],
+  "n_factors": 20,
+  "models_raced": [
+    "ridge",
+    "elastic_net",
+    "random_forest",
+    "lightgbm"
+  ],
+  "race": {
+    "ridge": {
+      "val_ic": 0.033821745457886035,
+      "val_sharpe": -0.34709550324610483,
+      "val_ann_ret": -0.09486080327015001,
+      "val_ann_vol": 0.2732988540127812,
+      "val_max_dd": -0.4862390878290668,
+      "val_n_bars": 502
+    },
+    "elastic_net": {
+      "val_ic": 0.035630930065385175,
+      "val_sharpe": -0.27714928491417457,
+      "val_ann_ret": -0.07261785862635807,
+      "val_ann_vol": 0.26201712426877016,
+      "val_max_dd": -0.4737730970067354,
+      "val_n_bars": 502
+    },
+    "random_forest": {
+      "val_ic": 0.03931487753332105,
+      "val_sharpe": 0.4608971587428997,
+      "val_ann_ret": 0.10557860678268145,
+      "val_ann_vol": 0.2290719410608819,
+      "val_max_dd": -0.1867063594323498,
+      "val_n_bars": 502
+    },
+    "lightgbm": {
+      "val_ic": 0.03310802441877682,
+      "val_sharpe": -0.004124990309707214,
+      "val_ann_ret": -0.0009844731111450088,
+      "val_ann_vol": 0.238660708809007,
+      "val_max_dd": -0.259780053026034,
+      "val_n_bars": 502
+    }
+  },
+  "winner": "random_forest",
+  "n_trials_strategy": 5,
+  "pbo_cscv_val": 0.28174603174603174,
+  "forward_gross": {
+    "sharpe": 0.3115420480626767,
+    "ann_ret": 0.07690490767329877,
+    "ann_vol": 0.246852417359171,
+    "max_dd": -0.19450152205699267,
+    "n_bars": 499
+  },
+  "forward": {
+    "ic": 0.02419719476771584,
+    "sharpe": 0.14715021786127686,
+    "ann_ret": 0.036253705268489124,
+    "ann_vol": 0.24637208014647072,
+    "max_dd": -0.22479950778954594,
+    "n_bars": 499,
+    "window": [
+      "2024-07-29",
+      "2026-07-27"
+    ],
+    "deflated_sharpe_prob": 0.3683616966004999
+  },
+  "in_panel_net": {
+    "sharpe": 0.8088860761428508,
+    "ann_ret": 0.24465977184088972,
+    "ann_vol": 0.3024650554099566,
+    "max_dd": -0.3430239141570952,
+    "n_bars": 3659
+  },
+  "mean_daily_turnover": 0.32565241754723023,
+  "persona_prompt": "I want an aggressive short-term trading strategy that turns over quickly and squeezes alpha out of market microstructure.",
+  "selected_before_prune": 20,
+  "catalog_n_trials_global": 798
+}

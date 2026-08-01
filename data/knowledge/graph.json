@@ -32033,6 +32033,463 @@
    "ingested": true,
    "community": 1013,
    "id": "paper:data_driven_prediction_of_a_multi_scale_lorenz_96_chaotic_sy"
+  },
+  {
+   "type": "factor",
+   "name": "consensus_silence_fundamental_decay",
+   "category": "",
+   "id": "factor:consensus_silence_fundamental_decay"
+  },
+  {
+   "type": "factor",
+   "name": "estimate_bridge_incoherence_repair",
+   "category": "",
+   "id": "factor:estimate_bridge_incoherence_repair"
+  },
+  {
+   "type": "factor",
+   "name": "opacity_gated_bad_news_assimilation",
+   "category": "",
+   "id": "factor:opacity_gated_bad_news_assimilation"
+  },
+  {
+   "type": "factor",
+   "name": "stale_consensus_surprise_amplification",
+   "category": "",
+   "id": "factor:stale_consensus_surprise_amplification"
+  },
+  {
+   "type": "factor",
+   "name": "industry_consensus_lag_opacity_relay",
+   "category": "",
+   "id": "factor:industry_consensus_lag_opacity_relay"
+  },
+  {
+   "type": "factor",
+   "name": "working_capital_opacity_surprise_drift",
+   "category": "",
+   "id": "factor:working_capital_opacity_surprise_drift"
+  },
+  {
+   "type": "factor",
+   "name": "cashflow_consensus_revision_divergence",
+   "category": "",
+   "id": "factor:cashflow_consensus_revision_divergence"
+  },
+  {
+   "type": "factor",
+   "name": "quality_fragile_positive_surprise_reversal",
+   "category": "",
+   "id": "factor:quality_fragile_positive_surprise_reversal"
+  },
+  {
+   "type": "factor",
+   "name": "complexity_gated_forecast_silence_drift",
+   "category": "",
+   "id": "factor:complexity_gated_forecast_silence_drift"
+  },
+  {
+   "type": "factor",
+   "name": "stale_consensus_cash_confirmed_surprise",
+   "category": "",
+   "id": "factor:stale_consensus_cash_confirmed_surprise"
+  },
+  {
+   "type": "factor",
+   "name": "industry_estimate_void_readthrough",
+   "category": "",
+   "id": "factor:industry_estimate_void_readthrough"
+  },
+  {
+   "type": "field",
+   "name": "epsEstimate",
+   "id": "field:epsEstimate"
+  },
+  {
+   "type": "field",
+   "name": "revenueEstimate",
+   "id": "field:revenueEstimate"
+  },
+  {
+   "type": "field",
+   "name": "operatingMargin",
+   "id": "field:operatingMargin"
+  },
+  {
+   "type": "field",
+   "name": "revenueGrowth",
+   "id": "field:revenueGrowth"
+  },
+  {
+   "type": "field",
+   "name": "freeCashFlowGrowth",
+   "id": "field:freeCashFlowGrowth"
+  },
+  {
+   "type": "field",
+   "name": "operatingCashFlowGrowth",
+   "id": "field:operatingCashFlowGrowth"
+  },
+  {
+   "type": "field",
+   "name": "sector",
+   "id": "field:sector"
+  },
+  {
+   "type": "field",
+   "name": "grossMargin",
+   "id": "field:grossMargin"
+  },
+  {
+   "type": "field",
+   "name": "sharesGrowth",
+   "id": "field:sharesGrowth"
+  },
+  {
+   "type": "field",
+   "name": "interestExpense",
+   "id": "field:interestExpense"
+  },
+  {
+   "type": "field",
+   "name": "epsSurprise",
+   "id": "field:epsSurprise"
+  },
+  {
+   "type": "field",
+   "name": "revenueSurprise",
+   "id": "field:revenueSurprise"
+  },
+  {
+   "type": "field",
+   "name": "revenue",
+   "id": "field:revenue"
+  },
+  {
+   "type": "field",
+   "name": "intangiblesToAssets",
+   "id": "field:intangiblesToAssets"
+  },
+  {
+   "type": "field",
+   "name": "sbcToRevenue",
+   "id": "field:sbcToRevenue"
+  },
+  {
+   "type": "field",
+   "name": "incomeQuality",
+   "id": "field:incomeQuality"
+  },
+  {
+   "type": "field",
+   "name": "netIncomeGrowth",
+   "id": "field:netIncomeGrowth"
+  },
+  {
+   "type": "field",
+   "name": "industry",
+   "id": "field:industry"
+  },
+  {
+   "type": "field",
+   "name": "receivablesGrowth",
+   "id": "field:receivablesGrowth"
+  },
+  {
+   "type": "field",
+   "name": "inventoryGrowth",
+   "id": "field:inventoryGrowth"
+  },
+  {
+   "type": "field",
+   "name": "operatingCashFlow",
+   "id": "field:operatingCashFlow"
+  },
+  {
+   "type": "field",
+   "name": "freeCashFlow",
+   "id": "field:freeCashFlow"
+  },
+  {
+   "type": "field",
+   "name": "netIncome",
+   "id": "field:netIncome"
+  },
+  {
+   "type": "field",
+   "name": "stockBasedCompensation",
+   "id": "field:stockBasedCompensation"
+  },
+  {
+   "type": "field",
+   "name": "cashConversionCycle",
+   "id": "field:cashConversionCycle"
+  },
+  {
+   "type": "field",
+   "name": "rdToRevenue",
+   "id": "field:rdToRevenue"
+  },
+  {
+   "type": "field",
+   "name": "changeInWorkingCapital",
+   "id": "field:changeInWorkingCapital"
+  },
+  {
+   "type": "field",
+   "name": "epsActual",
+   "id": "field:epsActual"
+  },
+  {
+   "type": "field",
+   "name": "receivables",
+   "id": "field:receivables"
+  },
+  {
+   "type": "field",
+   "name": "inventory",
+   "id": "field:inventory"
+  },
+  {
+   "type": "field",
+   "name": "marketCap",
+   "id": "field:marketCap"
+  },
+  {
+   "type": "factor",
+   "name": "cash_confirmation_headline_gap",
+   "category": "",
+   "id": "factor:cash_confirmation_headline_gap"
+  },
+  {
+   "type": "factor",
+   "name": "fear_state_downside_beta_rotation",
+   "category": "",
+   "id": "factor:fear_state_downside_beta_rotation"
+  },
+  {
+   "type": "factor",
+   "name": "fear_liquidity_shelter_reallocation",
+   "category": "",
+   "id": "factor:fear_liquidity_shelter_reallocation"
+  },
+  {
+   "type": "factor",
+   "name": "panic_graph_isolation_repair",
+   "category": "",
+   "id": "factor:panic_graph_isolation_repair"
+  },
+  {
+   "type": "factor",
+   "name": "panic_liquidity_quality_snapback",
+   "category": "",
+   "id": "factor:panic_liquidity_quality_snapback"
+  },
+  {
+   "type": "factor",
+   "name": "fear_anchor_dislocation_repair",
+   "category": "",
+   "id": "factor:fear_anchor_dislocation_repair"
+  },
+  {
+   "type": "mechanism",
+   "name": "asymmetric fear-beta deleveraging",
+   "description": "",
+   "id": "mechanism:asymmetric_fear_beta_deleveraging"
+  },
+  {
+   "type": "factor",
+   "name": "asymmetric_fear_beta_deleveraging",
+   "category": "",
+   "id": "factor:asymmetric_fear_beta_deleveraging"
+  },
+  {
+   "type": "factor",
+   "name": "panic_absorption_volume_rebound",
+   "category": "",
+   "id": "factor:panic_absorption_volume_rebound"
+  },
+  {
+   "type": "factor",
+   "name": "downside_fear_beta_balance_sheet_defense",
+   "category": "",
+   "id": "factor:downside_fear_beta_balance_sheet_defense"
+  },
+  {
+   "type": "factor",
+   "name": "fear_path_entropy_forced_sale_continuation",
+   "category": "",
+   "id": "factor:fear_path_entropy_forced_sale_continuation"
+  },
+  {
+   "type": "factor",
+   "name": "tail_dependence_fear_transmission_gap",
+   "category": "",
+   "id": "factor:tail_dependence_fear_transmission_gap"
+  },
+  {
+   "type": "factor",
+   "name": "fundamental_buffer_panic_oversell_repair",
+   "category": "",
+   "id": "factor:fundamental_buffer_panic_oversell_repair"
+  },
+  {
+   "type": "field",
+   "name": "cashRatio",
+   "id": "field:cashRatio"
+  },
+  {
+   "type": "field",
+   "name": "currentRatio",
+   "id": "field:currentRatio"
+  },
+  {
+   "type": "field",
+   "name": "interestCoverage",
+   "id": "field:interestCoverage"
+  },
+  {
+   "type": "field",
+   "name": "freeCashFlowYield",
+   "id": "field:freeCashFlowYield"
+  },
+  {
+   "type": "field",
+   "name": "debtToEquity",
+   "id": "field:debtToEquity"
+  },
+  {
+   "type": "field",
+   "name": "netDebtToEbitda",
+   "id": "field:netDebtToEbitda"
+  },
+  {
+   "type": "field",
+   "name": "earningsYield",
+   "id": "field:earningsYield"
+  },
+  {
+   "type": "field",
+   "name": "roic",
+   "id": "field:roic"
+  },
+  {
+   "type": "field",
+   "name": "debtToAssets",
+   "id": "field:debtToAssets"
+  },
+  {
+   "type": "field",
+   "name": "totalDebt",
+   "id": "field:totalDebt"
+  },
+  {
+   "type": "factor",
+   "name": "loss_response_relaxation_fear_premium",
+   "category": "",
+   "id": "factor:loss_response_relaxation_fear_premium"
+  },
+  {
+   "type": "factor",
+   "name": "left_tail_cashflow_absorption_repair",
+   "category": "",
+   "id": "factor:left_tail_cashflow_absorption_repair"
+  },
+  {
+   "type": "factor",
+   "name": "right_tail_issuance_lottery_unwind",
+   "category": "",
+   "id": "factor:right_tail_issuance_lottery_unwind"
+  },
+  {
+   "type": "factor",
+   "name": "tail_regime_resilient_revision_recovery",
+   "category": "",
+   "id": "factor:tail_regime_resilient_revision_recovery"
+  },
+  {
+   "type": "factor",
+   "name": "tail_state_liquidity_insurance_rotation",
+   "category": "",
+   "id": "factor:tail_state_liquidity_insurance_rotation"
+  },
+  {
+   "type": "factor",
+   "name": "tail_network_unpriced_contagion_gap",
+   "category": "",
+   "id": "factor:tail_network_unpriced_contagion_gap"
+  },
+  {
+   "type": "factor",
+   "name": "demand_tail_workingcapital_convexity",
+   "category": "",
+   "id": "factor:demand_tail_workingcapital_convexity"
+  },
+  {
+   "type": "factor",
+   "name": "inventory_tail_demand_overhang",
+   "category": "",
+   "id": "factor:inventory_tail_demand_overhang"
+  },
+  {
+   "type": "factor",
+   "name": "downside_tail_beta_financing_wedge",
+   "category": "",
+   "id": "factor:downside_tail_beta_financing_wedge"
+  },
+  {
+   "type": "factor",
+   "name": "tail_revision_operating_leverage_cascade",
+   "category": "",
+   "id": "factor:tail_revision_operating_leverage_cascade"
+  },
+  {
+   "type": "factor",
+   "name": "cashflow_lower_tail_insurance_spread",
+   "category": "",
+   "id": "factor:cashflow_lower_tail_insurance_spread"
+  },
+  {
+   "type": "factor",
+   "name": "tail_copanic_buffered_overshoot_repair",
+   "category": "",
+   "id": "factor:tail_copanic_buffered_overshoot_repair"
+  },
+  {
+   "type": "field",
+   "name": "netStockIssuance",
+   "id": "field:netStockIssuance"
+  },
+  {
+   "type": "field",
+   "name": "quickRatio",
+   "id": "field:quickRatio"
+  },
+  {
+   "type": "field",
+   "name": "totalCurrentLiabilities",
+   "id": "field:totalCurrentLiabilities"
+  },
+  {
+   "type": "field",
+   "name": "debtToCapital",
+   "id": "field:debtToCapital"
+  },
+  {
+   "type": "field",
+   "name": "sgaToRevenue",
+   "id": "field:sgaToRevenue"
+  },
+  {
+   "type": "field",
+   "name": "evToFreeCashFlow",
+   "id": "field:evToFreeCashFlow"
+  },
+  {
+   "type": "factor",
+   "name": "cashflow_tail_survival_repricing",
+   "category": "",
+   "id": "factor:cashflow_tail_survival_repricing"
   }
  ],
  "edges": [
@@ -44842,6 +45299,56 @@
    "target": "mechanism:market_sentiment_fear_gauge_signal"
   },
   {
+   "relation": "realized_by",
+   "source": "mechanism:market_sentiment_fear_gauge_signal",
+   "target": "factor:fear_state_downside_beta_rotation"
+  },
+  {
+   "relation": "realized_by",
+   "source": "mechanism:market_sentiment_fear_gauge_signal",
+   "target": "factor:fear_liquidity_shelter_reallocation"
+  },
+  {
+   "relation": "realized_by",
+   "source": "mechanism:market_sentiment_fear_gauge_signal",
+   "target": "factor:panic_graph_isolation_repair"
+  },
+  {
+   "relation": "realized_by",
+   "source": "mechanism:market_sentiment_fear_gauge_signal",
+   "target": "factor:panic_liquidity_quality_snapback"
+  },
+  {
+   "relation": "realized_by",
+   "source": "mechanism:market_sentiment_fear_gauge_signal",
+   "target": "factor:fear_anchor_dislocation_repair"
+  },
+  {
+   "relation": "realized_by",
+   "source": "mechanism:market_sentiment_fear_gauge_signal",
+   "target": "factor:panic_absorption_volume_rebound"
+  },
+  {
+   "relation": "realized_by",
+   "source": "mechanism:market_sentiment_fear_gauge_signal",
+   "target": "factor:downside_fear_beta_balance_sheet_defense"
+  },
+  {
+   "relation": "realized_by",
+   "source": "mechanism:market_sentiment_fear_gauge_signal",
+   "target": "factor:fear_path_entropy_forced_sale_continuation"
+  },
+  {
+   "relation": "realized_by",
+   "source": "mechanism:market_sentiment_fear_gauge_signal",
+   "target": "factor:tail_dependence_fear_transmission_gap"
+  },
+  {
+   "relation": "realized_by",
+   "source": "mechanism:market_sentiment_fear_gauge_signal",
+   "target": "factor:fundamental_buffer_panic_oversell_repair"
+  },
+  {
    "relation": "proposes",
    "source": "paper:autoencoder_enhanced_realised_garch_on_volatility_forecastin",
    "target": "mechanism:intraday_volatility_information_content"
@@ -45905,6 +46412,61 @@
    "relation": "needs",
    "source": "mechanism:predictability_from_stratonovich_integral_structure",
    "target": "field:returns"
+  },
+  {
+   "relation": "realized_by",
+   "source": "mechanism:heavy_tailed_consumption_growth_distribution",
+   "target": "factor:left_tail_cashflow_absorption_repair"
+  },
+  {
+   "relation": "realized_by",
+   "source": "mechanism:heavy_tailed_consumption_growth_distribution",
+   "target": "factor:right_tail_issuance_lottery_unwind"
+  },
+  {
+   "relation": "realized_by",
+   "source": "mechanism:heavy_tailed_consumption_growth_distribution",
+   "target": "factor:tail_regime_resilient_revision_recovery"
+  },
+  {
+   "relation": "realized_by",
+   "source": "mechanism:heavy_tailed_consumption_growth_distribution",
+   "target": "factor:tail_state_liquidity_insurance_rotation"
+  },
+  {
+   "relation": "realized_by",
+   "source": "mechanism:heavy_tailed_consumption_growth_distribution",
+   "target": "factor:tail_network_unpriced_contagion_gap"
+  },
+  {
+   "relation": "realized_by",
+   "source": "mechanism:heavy_tailed_consumption_growth_distribution",
+   "target": "factor:demand_tail_workingcapital_convexity"
+  },
+  {
+   "relation": "realized_by",
+   "source": "mechanism:heavy_tailed_consumption_growth_distribution",
+   "target": "factor:inventory_tail_demand_overhang"
+  },
+  {
+   "relation": "realized_by",
+   "source": "mechanism:heavy_tailed_consumption_growth_distribution",
+   "target": "factor:downside_tail_beta_financing_wedge"
+  },
+  {
+   "relation": "realized_by",
+   "source": "mechanism:heavy_tailed_consumption_growth_distribution",
+   "target": "factor:tail_revision_operating_leverage_cascade"
+  },
+  {
+   "relation": "realized_by",
+   "source": "mechanism:heavy_tailed_consumption_growth_distribution",
+   "target": "factor:cashflow_lower_tail_insurance_spread"
+  },
+  {
+   "relation": "realized_by",
+   "source": "mechanism:heavy_tailed_consumption_growth_distribution",
+   "target": "factor:tail_copanic_buffered_overshoot_repair"
   },
   {
    "relation": "needs",
@@ -60472,6 +61034,56 @@
    "target": "mechanism:post_earnings_drift_from_mispricing"
   },
   {
+   "relation": "realized_by",
+   "source": "mechanism:information_avoidance_increases_analyst_uncertainty",
+   "target": "factor:consensus_silence_fundamental_decay"
+  },
+  {
+   "relation": "realized_by",
+   "source": "mechanism:information_avoidance_increases_analyst_uncertainty",
+   "target": "factor:estimate_bridge_incoherence_repair"
+  },
+  {
+   "relation": "realized_by",
+   "source": "mechanism:information_avoidance_increases_analyst_uncertainty",
+   "target": "factor:opacity_gated_bad_news_assimilation"
+  },
+  {
+   "relation": "realized_by",
+   "source": "mechanism:information_avoidance_increases_analyst_uncertainty",
+   "target": "factor:stale_consensus_surprise_amplification"
+  },
+  {
+   "relation": "realized_by",
+   "source": "mechanism:information_avoidance_increases_analyst_uncertainty",
+   "target": "factor:industry_consensus_lag_opacity_relay"
+  },
+  {
+   "relation": "realized_by",
+   "source": "mechanism:information_avoidance_increases_analyst_uncertainty",
+   "target": "factor:working_capital_opacity_surprise_drift"
+  },
+  {
+   "relation": "realized_by",
+   "source": "mechanism:information_avoidance_increases_analyst_uncertainty",
+   "target": "factor:cashflow_consensus_revision_divergence"
+  },
+  {
+   "relation": "realized_by",
+   "source": "mechanism:information_avoidance_increases_analyst_uncertainty",
+   "target": "factor:complexity_gated_forecast_silence_drift"
+  },
+  {
+   "relation": "realized_by",
+   "source": "mechanism:information_avoidance_increases_analyst_uncertainty",
+   "target": "factor:stale_consensus_cash_confirmed_surprise"
+  },
+  {
+   "relation": "realized_by",
+   "source": "mechanism:information_avoidance_increases_analyst_uncertainty",
+   "target": "factor:industry_estimate_void_readthrough"
+  },
+  {
    "relation": "needs",
    "source": "mechanism:post_earnings_drift_from_mispricing",
    "target": "field:returns"
@@ -60960,6 +61572,11 @@
    "relation": "related_to",
    "source": "mechanism:analyst_overreaction_to_optimistic_sentiment",
    "target": "mechanism:analyst_underreaction_to_risk_narrative"
+  },
+  {
+   "relation": "realized_by",
+   "source": "mechanism:analyst_overreaction_to_optimistic_sentiment",
+   "target": "factor:quality_fragile_positive_surprise_reversal"
   },
   {
    "relation": "needs",
@@ -73330,6 +73947,366 @@
    "relation": "needs",
    "source": "mechanism:chaotic_dynamics_prediction_alpha",
    "target": "field:returns"
+  },
+  {
+   "relation": "realized_by",
+   "source": "mechanism:asymmetric_fear_beta_deleveraging",
+   "target": "factor:asymmetric_fear_beta_deleveraging"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:left_tail_cashflow_absorption_repair",
+   "target": "field:close"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:left_tail_cashflow_absorption_repair",
+   "target": "field:sector"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:left_tail_cashflow_absorption_repair",
+   "target": "field:freeCashFlowYield"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:left_tail_cashflow_absorption_repair",
+   "target": "field:cashRatio"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:left_tail_cashflow_absorption_repair",
+   "target": "field:debtToAssets"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:right_tail_issuance_lottery_unwind",
+   "target": "field:close"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:right_tail_issuance_lottery_unwind",
+   "target": "field:netStockIssuance"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:right_tail_issuance_lottery_unwind",
+   "target": "field:sharesGrowth"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:right_tail_issuance_lottery_unwind",
+   "target": "field:sbcToRevenue"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:tail_regime_resilient_revision_recovery",
+   "target": "field:close"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:tail_regime_resilient_revision_recovery",
+   "target": "field:epsEstimate"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:tail_regime_resilient_revision_recovery",
+   "target": "field:revenueEstimate"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:tail_regime_resilient_revision_recovery",
+   "target": "field:cashRatio"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:tail_regime_resilient_revision_recovery",
+   "target": "field:currentRatio"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:tail_regime_resilient_revision_recovery",
+   "target": "field:debtToEquity"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:tail_regime_resilient_revision_recovery",
+   "target": "field:interestCoverage"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:tail_state_liquidity_insurance_rotation",
+   "target": "field:close"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:tail_state_liquidity_insurance_rotation",
+   "target": "field:cashRatio"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:tail_state_liquidity_insurance_rotation",
+   "target": "field:quickRatio"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:tail_state_liquidity_insurance_rotation",
+   "target": "field:operatingCashFlow"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:tail_state_liquidity_insurance_rotation",
+   "target": "field:freeCashFlow"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:tail_state_liquidity_insurance_rotation",
+   "target": "field:totalDebt"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:tail_state_liquidity_insurance_rotation",
+   "target": "field:totalCurrentLiabilities"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:tail_state_liquidity_insurance_rotation",
+   "target": "field:sector"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:tail_network_unpriced_contagion_gap",
+   "target": "field:close"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:tail_network_unpriced_contagion_gap",
+   "target": "field:sector"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:demand_tail_workingcapital_convexity",
+   "target": "field:close"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:demand_tail_workingcapital_convexity",
+   "target": "field:volume"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:demand_tail_workingcapital_convexity",
+   "target": "field:receivables"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:demand_tail_workingcapital_convexity",
+   "target": "field:inventory"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:demand_tail_workingcapital_convexity",
+   "target": "field:revenue"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:demand_tail_workingcapital_convexity",
+   "target": "field:cashConversionCycle"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:demand_tail_workingcapital_convexity",
+   "target": "field:operatingCashFlow"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:demand_tail_workingcapital_convexity",
+   "target": "field:netIncome"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:demand_tail_workingcapital_convexity",
+   "target": "field:industry"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:inventory_tail_demand_overhang",
+   "target": "field:close"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:inventory_tail_demand_overhang",
+   "target": "field:sector"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:inventory_tail_demand_overhang",
+   "target": "field:inventoryGrowth"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:inventory_tail_demand_overhang",
+   "target": "field:revenueGrowth"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:inventory_tail_demand_overhang",
+   "target": "field:currentRatio"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:inventory_tail_demand_overhang",
+   "target": "field:cashRatio"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:downside_tail_beta_financing_wedge",
+   "target": "field:close"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:downside_tail_beta_financing_wedge",
+   "target": "field:sector"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:downside_tail_beta_financing_wedge",
+   "target": "field:netDebtToEbitda"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:downside_tail_beta_financing_wedge",
+   "target": "field:interestCoverage"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:downside_tail_beta_financing_wedge",
+   "target": "field:cashRatio"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:downside_tail_beta_financing_wedge",
+   "target": "field:debtToCapital"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:tail_revision_operating_leverage_cascade",
+   "target": "field:close"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:tail_revision_operating_leverage_cascade",
+   "target": "field:revenueEstimate"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:tail_revision_operating_leverage_cascade",
+   "target": "field:epsEstimate"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:tail_revision_operating_leverage_cascade",
+   "target": "field:sgaToRevenue"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:tail_revision_operating_leverage_cascade",
+   "target": "field:rdToRevenue"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:tail_revision_operating_leverage_cascade",
+   "target": "field:operatingMargin"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:tail_revision_operating_leverage_cascade",
+   "target": "field:sector"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:cashflow_lower_tail_insurance_spread",
+   "target": "field:close"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:cashflow_lower_tail_insurance_spread",
+   "target": "field:operatingCashFlow"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:cashflow_lower_tail_insurance_spread",
+   "target": "field:grossMargin"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:cashflow_lower_tail_insurance_spread",
+   "target": "field:revenue"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:cashflow_lower_tail_insurance_spread",
+   "target": "field:evToFreeCashFlow"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:cashflow_lower_tail_insurance_spread",
+   "target": "field:freeCashFlowYield"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:tail_copanic_buffered_overshoot_repair",
+   "target": "field:close"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:tail_copanic_buffered_overshoot_repair",
+   "target": "field:sector"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:tail_copanic_buffered_overshoot_repair",
+   "target": "field:cashRatio"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:tail_copanic_buffered_overshoot_repair",
+   "target": "field:currentRatio"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:tail_copanic_buffered_overshoot_repair",
+   "target": "field:operatingCashFlow"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:tail_copanic_buffered_overshoot_repair",
+   "target": "field:debtToAssets"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:cashflow_tail_survival_repricing",
+   "target": "field:close"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:cashflow_tail_survival_repricing",
+   "target": "field:revenueGrowth"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:cashflow_tail_survival_repricing",
+   "target": "field:operatingCashFlowGrowth"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:cashflow_tail_survival_repricing",
+   "target": "field:revenueSurprise"
+  },
+  {
+   "relation": "uses",
+   "source": "factor:cashflow_tail_survival_repricing",
+   "target": "field:cashRatio"
   }
  ]
 }

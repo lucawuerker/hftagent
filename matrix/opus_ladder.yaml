@@ -30,7 +30,9 @@ defaults:
   seed-ideas-per-group: 6
   progressive-reveal: true
   reveal-every: 2
-  test-frac: 0.2
+  # 2026-07-29 decision: NO in-panel TEST tail — the only held-out frame is
+  # the 2-year forward reserve beyond the config end date.
+  test-frac: 0.0
   retrieval: graphrag
   curation: archive
   selection-deflation: "on"

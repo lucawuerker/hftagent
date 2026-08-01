@@ -22,7 +22,10 @@ import yaml
 
 REPO = Path(__file__).resolve().parents[1]
 PLAN_PATHS = [REPO / "matrix" / "final_matrix.yaml",
-              REPO / "matrix" / "opus_ladder.yaml"]
+              REPO / "matrix" / "opus_ladder.yaml",
+              REPO / "matrix" / "terra_l4.yaml",
+              REPO / "matrix" / "terra_l4_refine.yaml",
+              REPO / "matrix" / "terra_l4_refine_broad.yaml"]
 
 run_ablation_matrix = importlib.import_module("run_ablation_matrix")
 

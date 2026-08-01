@@ -1,0 +1,401 @@
+[
+  {
+    "mechanism_group_id": 0,
+    "community_id": 1,
+    "focus": "Community 1: 34 mechanism(s) (analyst sentiment revision drift, compounding amplification, cross-channel loading anti-alignment, cross-contract momentum spillover, cross-sectional momentum, cross-sectional momentum signal extraction\u2026) across 12 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 1,
+    "community_id": 2,
+    "focus": "Community 2: 35 mechanism(s) (Common shock propagation, Samuelson correlation effect, Samuelson effect (intensity acceleration), Samuelson effect (volatility acceleration near maturity), Samuelson effect (volatility increase near maturity), Sparse liquidity constraint on price formation\u2026) across 13 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 2,
+    "community_id": 3,
+    "focus": "Community 3: 29 mechanism(s) (bubble-driven phase transitions, buffer-regulated order intensity, contagion-driven intensity acceleration, correlated event interaction prediction, cross-excitation between order types, cross-exciting order flow contagion\u2026) across 14 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 3,
+    "community_id": 5,
+    "focus": "Community 5: 20 mechanism(s) (arrival rate asymmetry, cross-asset volatility synchronization, flash crash liquidity evaporation, information richness effect, liquidity depth volatility, liquidity shock precursor to jumps\u2026) across 9 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 4,
+    "community_id": 6,
+    "focus": "Community 6: 14 mechanism(s) (LLM forecast overvaluation premium, LLM momentum extrapolation bias, LLM risk miscalibration, cross-asset pattern transfer, cross-sectional relative momentum ranking, momentum spillover via lead-lag relationships\u2026) across 5 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 5,
+    "community_id": 7,
+    "focus": "Community 7: 14 mechanism(s) (asymmetric excitation of downward orders, asymmetric innovation distribution in volatility estimation, bad-news amplification during crises, bid-ask liquidity asymmetry, crisis amplification of volatility persistence, critical endogeneity and superlinear volatility mean reversion\u2026) across 4 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 6,
+    "community_id": 9,
+    "focus": "Community 9: 13 mechanism(s) (informed trader execution scheduling, limit order arrival and cancellation impact, liquidity depletion at best level, market depth dampening effect, market opening liquidity shock, multi-level order flow imbalance\u2026) across 6 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 7,
+    "community_id": 10,
+    "focus": "Community 10: 11 mechanism(s) (competitive excess trading, information signal exploitation with rapid decay, inventory-averse position unwinding, inventory-driven trading pressure, latent liquidity adjustment, market depth encapsulation of liquidity risk\u2026) across 4 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 8,
+    "community_id": 11,
+    "focus": "Community 11: 11 mechanism(s) (cluster-based predictability, industry-driven information cascade, information diffusion delay across coupled stocks, intraday-daily frequency arbitrage gap, lead-lag information diffusion, lead-lag price momentum spillover\u2026) across 4 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 9,
+    "community_id": 12,
+    "focus": "Community 12: 11 mechanism(s) (adverse selection cost, bid-ask spread capture, directional bet adjustment, instantaneous execution cost, inventory risk premium, liquidation cost convexity\u2026) across 4 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 10,
+    "community_id": 13,
+    "focus": "Community 13: 9 mechanism(s) (asynchronous cross-asset momentum overlap, bid-ask bounce negative autocorrelation, cross-correlation asymmetry reduction, lead-lag correlation decay, long-memory price momentum, non-Poissonian trade clustering\u2026) across 3 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 11,
+    "community_id": 14,
+    "focus": "Community 14: 8 mechanism(s) (horizon-dependent predictability decay, limit order passive market impact via queue dynamics, market order intensity response to queue depletion, microstructure information leakage, microstructure noise reduction via mid-price smoothing, order book imbalance predictability\u2026) across 3 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 12,
+    "community_id": 15,
+    "focus": "Community 15: 7 mechanism(s) (Agent heterogeneity amplification of price volatility, Demand forecast convergence volatility, Production outage precautionary position adjustment, forecast-driven demand pressure, imbalance penalty amplification, linear permanent market impact\u2026) across 2 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 13,
+    "community_id": 16,
+    "focus": "Community 16: 6 mechanism(s) (liquidity-dependent reversal profitability, long-term mean reversion overreaction, macroeconomic uncertainty-dependent reversal profitability, market trend-dependent reversal profitability, short-term momentum underreaction, volatility-dependent reversal profitability) across 2 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 14,
+    "community_id": 17,
+    "focus": "Community 17: 7 mechanism(s) (cross-sectional volatility spillover, limit order book information content, neighboring product price spillover, order flow clustering and self-exciting arrivals, order flow volatility coupling, short-term price momentum from recent transactions\u2026) across 3 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 15,
+    "community_id": 18,
+    "focus": "Community 18: 5 mechanism(s) (mean reversion of cointegrated spreads, mean reversion within correlation clusters, multicollinearity detection via condition number, optimal position sizing via Kelly criterion, signal quality filtering) across 3 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 16,
+    "community_id": 19,
+    "focus": "Community 19: 5 mechanism(s) (cointegration mean reversion, copula-based mispricing detection, cross-sectional clustering stability, multi-factor portfolio similarity, volatility clustering reduction) across 3 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 17,
+    "community_id": 20,
+    "focus": "Community 20: 5 mechanism(s) (mean-reversion of relative size, size factor risk premium, size-driven beta variation, volatility normalization, volatility normalization of returns) across 2 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 18,
+    "community_id": 21,
+    "focus": "Community 21: 6 mechanism(s) (adverse selection cost from informed trading, multi-tick price moves in sparse LOBs, order clustering at economically meaningful price levels, queue position time priority value, tick-size constraint on spread, volume imbalance predictive power) across 2 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 19,
+    "community_id": 22,
+    "focus": "Community 22: 5 mechanism(s) (cross-asset volatility co-movement with heterogeneous persistence, implied volatility smoothing bias, long-memory persistence in volatility, rough volatility mean reversion, volatility clustering with long memory) across 3 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 20,
+    "community_id": 23,
+    "focus": "Community 23: 4 mechanism(s) (distance-dependent revelation incentive, latent liquidity revelation lag, order book depth instability, price impact nonlinearity) across 1 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 21,
+    "community_id": 24,
+    "focus": "Community 24: 5 mechanism(s) (cross-exciting order flow interaction, order flow imbalance regime switching, order intensity mean reversion with inhibitory lags, self-exciting order arrival clustering, volatility scaling with order flow intensity) across 2 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 22,
+    "community_id": 25,
+    "focus": "Community 25: 3 mechanism(s) (chartist-fundamental strategy divergence, mean-reverting microstructure pressure, volatility clustering via order flow persistence) across 1 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 23,
+    "community_id": 26,
+    "focus": "Community 26: 5 mechanism(s) (inflation expectations pricing, macroeconomic fundamentals volatility transmission, policy uncertainty level vs. change asymmetry, policy uncertainty volatility spillover, realized volatility feedback) across 2 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 24,
+    "community_id": 27,
+    "focus": "Community 27: 5 mechanism(s) (correlation-induced renormalization bias, leverage effect correlation, microstructure-driven rough volatility, rough volatility path dependence, time-varying roughness regime switching) across 2 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 25,
+    "community_id": 28,
+    "focus": "Community 28: 4 mechanism(s) (asymmetric reaction to positive vs negative news, information leakage ahead of macroeconomic announcements, institutional ownership dampening of negative news, risk-on bias in retail-dominated markets) across 1 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 26,
+    "community_id": 29,
+    "focus": "Community 29: 4 mechanism(s) (benchmark dataset selection bias, multi-period mean reversion, single-period mean reversion, transaction cost erosion of rebalancing profits) across 1 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 27,
+    "community_id": 30,
+    "focus": "Community 30: 4 mechanism(s) (hype-driven price discovery, information asymmetry in decentralized markets, secondary market liquidity hoarding, wash-trading artificial inflation) across 1 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 28,
+    "community_id": 31,
+    "focus": "Community 31: 4 mechanism(s) (behavioral bias amplification in drift regimes, drift regime liquidity improvement, short-term reversal in cross-section, value signal activation in drift regimes) across 1 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 29,
+    "community_id": 32,
+    "focus": "Community 32: 5 mechanism(s) (adverse selection effects, bid-ask bounce noise, common liquidity factor pricing, inventory control effects, liquidity-noise covariation) across 1 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 30,
+    "community_id": 33,
+    "focus": "Community 33: 5 mechanism(s) (cluster-neutral factor exposure, cross-sectional return demeaning, risk-adjusted position sizing, temporary correlation breakdown mean-reversion, volatility-adjusted alpha suppression) across 1 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 31,
+    "community_id": 34,
+    "focus": "Community 34: 4 mechanism(s) (after-hours information jump, intraday range volatility, option mispricing exploitation, pathwise price dynamics approximation) across 2 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 32,
+    "community_id": 35,
+    "focus": "Community 35: 3 mechanism(s) (nonlinear price impact from order book shape, order resilience and market maker order placement, time-varying liquidity depth effect on price manipulation) across 1 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 33,
+    "community_id": 36,
+    "focus": "Community 36: 4 mechanism(s) (discretization error in volatility approximation, mean-reverting volatility clustering, microstructure noise masking, rough volatility persistence) across 2 paper(s). target mechanisms: discretization error in volatility approximation, mean-reverting volatility clustering",
+    "mechanisms": [
+      "discretization error in volatility approximation",
+      "mean-reverting volatility clustering"
+    ]
+  },
+  {
+    "mechanism_group_id": 34,
+    "community_id": 37,
+    "focus": "Community 37: 4 mechanism(s) (bid-ask bounce, liquidity risk aversion, market sentiment aggregation, volatility-driven order cancellation) across 1 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 35,
+    "community_id": 38,
+    "focus": "Community 38: 4 mechanism(s) (long-range dependence exploitation, path-dependent mean reversion under friction, transaction cost threshold for arbitrage elimination, volatility clustering prediction) across 2 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 36,
+    "community_id": 39,
+    "focus": "Community 39: 4 mechanism(s) (intraday liquidity-driven pricing, intraday mean reversion, intraday momentum exhaustion, multi-horizon return autocorrelation) across 2 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 37,
+    "community_id": 40,
+    "focus": "Community 40: 4 mechanism(s) (depth concentration by market fundamentals, longshot spread premium, self-counterparty wash trading, trade direction inference noise) across 1 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 38,
+    "community_id": 41,
+    "focus": "Community 41: 4 mechanism(s) (conditional expectation violations across measures, mean reversion breakdown in pairs trading, model ambiguity in probability measures, trading cost friction exploitation) across 1 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 39,
+    "community_id": 42,
+    "focus": "Community 42: 3 mechanism(s) (conditional latent factor mispricing, law of one price violation, temporal pattern exploitation via deep learning) across 3 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 40,
+    "community_id": 43,
+    "focus": "Community 43: 4 mechanism(s) (merit-order regime volatility amplification, renewable forecast update information efficiency, time-to-delivery volatility acceleration, trading activity tail risk) across 1 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 41,
+    "community_id": 44,
+    "focus": "Community 44: 4 mechanism(s) (consumer sentiment underreaction, fundamental cash flow forecasting via consumer feedback, fundamental surprise prediction, information asymmetry exploitation) across 2 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 42,
+    "community_id": 45,
+    "focus": "Community 45: 4 mechanism(s) (asymmetric leverage effect, frequency-dependent forecast degradation, long-memory volatility clustering, regime switching volatility clustering) across 2 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 43,
+    "community_id": 46,
+    "focus": "Community 46: 3 mechanism(s) (structural break detection lag, subsampling-enhanced detection robustness, variance regime shift detection) across 3 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 44,
+    "community_id": 47,
+    "focus": "Community 47: 4 mechanism(s) (bid-ask spread component, price impact from participation rate, trading limit constraint, two-regime market impact) across 1 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 45,
+    "community_id": 48,
+    "focus": "Community 48: 4 mechanism(s) (characteristic-driven factor structure, factor-based mispricing identification, residual mean reversion, trading cost optimization in factor selection) across 1 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 46,
+    "community_id": 49,
+    "focus": "Community 49: 4 mechanism(s) (convexity correction via variance swap replication, historical volatility adjustment for seasoned swaps, skew-adjusted delta hedging, zero vanna smile extraction) across 1 paper(s). target mechanisms: convexity correction via variance swap replication, historical volatility adjustment for seasoned swaps, zero vanna smile extraction",
+    "mechanisms": [
+      "convexity correction via variance swap replication",
+      "historical volatility adjustment for seasoned swaps",
+      "zero vanna smile extraction"
+    ]
+  },
+  {
+    "mechanism_group_id": 47,
+    "community_id": 50,
+    "focus": "Community 50: 4 mechanism(s) (cost stochasticity and irreducible prediction noise, interaction turn overaction, listed price-actual cost decoupling, thinking token consumption heterogeneity) across 1 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 48,
+    "community_id": 51,
+    "focus": "Community 51: 4 mechanism(s) (firm relocation attractiveness friction, investor capital reallocation momentum, real economy inertia misprice, sectoral capital flow transition) across 1 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 49,
+    "community_id": 52,
+    "focus": "Community 52: 3 mechanism(s) (duration-dependent volatility coupling, information flow intensity in price discovery, self-exciting clustering in order flow) across 2 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 50,
+    "community_id": 53,
+    "focus": "Community 53: 3 mechanism(s) (habit-driven time-varying risk aversion, long-run consumption uncertainty premium, rare disaster risk premium) across 1 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 51,
+    "community_id": 54,
+    "focus": "Community 54: 4 mechanism(s) (regime switch from diversification to non-diversification, second-order regular variation dominance, second-order subexponentiality dominance, slow convergence to asymptotic diversification benefit) across 1 paper(s). target mechanisms: regime switch from diversification to non-diversification, second-order regular variation dominance, second-order subexponentiality dominance, slow convergence to asymptotic diversification benefit",
+    "mechanisms": [
+      "regime switch from diversification to non-diversification",
+      "second-order regular variation dominance",
+      "second-order subexponentiality dominance",
+      "slow convergence to asymptotic diversification benefit"
+    ]
+  },
+  {
+    "mechanism_group_id": 52,
+    "community_id": 55,
+    "focus": "Community 55: 4 mechanism(s) (leverage-enhanced returns with financial discipline, management incentive alignment, operational improvement capture, sale timing and valuation discretion) across 1 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 53,
+    "community_id": 56,
+    "focus": "Community 56: 3 mechanism(s) (contagion propagation through network paths, crisis-amplified sensitivity to network position, risk-dependent network centrality shift) across 1 paper(s). target mechanisms: contagion propagation through network paths, risk-dependent network centrality shift",
+    "mechanisms": [
+      "contagion propagation through network paths",
+      "risk-dependent network centrality shift"
+    ]
+  },
+  {
+    "mechanism_group_id": 54,
+    "community_id": 57,
+    "focus": "Community 57: 3 mechanism(s) (opinion reinforcement in illiquid markets, predictable volatility suppresses intraday mean reversion, unexpected volatility amplifies intraday mean reversion) across 1 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 55,
+    "community_id": 58,
+    "focus": "Community 58: 4 mechanism(s) (cross-session momentum decay, gap continuation pressure, opening range breakout mean reversion, volume-driven liquidity grab) across 1 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 56,
+    "community_id": 59,
+    "focus": "Community 59: 4 mechanism(s) (sentiment-driven mispricing by firm size, sentiment-driven mispricing by investment intensity, sentiment-driven mispricing by profitability, sentiment-driven mispricing by valuation) across 1 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 57,
+    "community_id": 60,
+    "focus": "Community 60: 4 mechanism(s) (feedback-driven trading activity, price mean reversion, trade arrival self-excitation, trade impact on price) across 1 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 58,
+    "community_id": 61,
+    "focus": "Community 61: 4 mechanism(s) (illiquidity-driven wide spreads, low-confidence price quoting, market maker liquidity provision improves microstructure, order execution scarcity from order-book mismatch) across 1 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 59,
+    "community_id": 62,
+    "focus": "Community 62: 4 mechanism(s) (geographic size effect, momentum-driven spatial arbitrage, speculative expectations extrapolation, underdiversification idiosyncratic risk premium) across 1 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 60,
+    "community_id": 63,
+    "focus": "Community 63: 4 mechanism(s) (cross-order-type feedback, order clustering and self-excitation, order imbalance state-dependence, volatility clustering from order dependencies) across 1 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 61,
+    "community_id": 64,
+    "focus": "Community 64: 3 mechanism(s) (asymmetric information between option and spot traders, moneyness-dependent predictability differential, variance risk premium as return predictor) across 1 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 62,
+    "community_id": 65,
+    "focus": "Community 65: 4 mechanism(s) (auction opacity prevents selective liquidity taking, discrete price grid zero impact, linear impact regime, slow trader clustering at auction price) across 1 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 63,
+    "community_id": 66,
+    "focus": "Community 66: 4 mechanism(s) (inverse-uncertainty sizing failure in ranking, model-specific regime failure under thematic shifts, rank displacement under score extremity, tail-risk concentration in epistemic uncertainty) across 1 paper(s).",
+    "mechanisms": []
+  }
+]

@@ -1,0 +1,21 @@
+# FORWARD-VALIDATION config — identical to quant.config.nasdaq100_2010.yaml but
+# extending through the 2-year forward reserve (archive downloaded 2026-07-27).
+#
+# STRICTLY for one-shot out-of-sample evaluation of ALREADY-FINAL strategies /
+# books (scripts/backtest_combined_book.py, scripts/simulate_user_strategies.py).
+# NO research run, fit, or model-selection step may ever load this config:
+# models are fit and selected on the in-panel window (<= 2024-07-27) only, and
+# the 2024-07-28 -> 2026-07-27 rows are touched exactly once per final strategy.
+data:
+  provider: fmp_archive
+  asset_class: equity
+  frequency: 1d
+  start: '2010-01-01'
+  end: '2026-07-27'
+  archive_dir: data/vendor/fmp
+  membership: nasdaq100
+  fundamentals: true
+  fundamentals_period: quarter
+  fundamentals_staleness_days: 400
+  reporting_lag_days: 60
+  dtype: float32
