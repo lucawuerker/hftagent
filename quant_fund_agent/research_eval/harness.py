@@ -183,12 +183,14 @@ def _fit_cache_key(
 ) -> tuple:
     """Cache key uniquely determining a :func:`_combined_prediction` output.
 
-    The per-signal keys are kept in the caller's **ordered** X-column order on
-    purpose: the fitted prediction is NOT bit-invariant to a column permutation
-    (verified empirically — ridge differs at ~1e-13, gradient boosting at ~1e-17
-    under a feature permutation), so a sorted/set key could silently swap in a
-    prediction computed from a differently-ordered X.  Ordered keys mean identical
-    ordered calls hit and differently-ordered calls miss — strictly safe.
+    The per-signal keys are kept in the X-column order the fit actually used: the
+    fitted prediction is NOT bit-invariant to a column permutation (verified
+    empirically — ridge differs at ~1e-13, gradient boosting at ~1e-17 under a
+    feature permutation), so the key must never equate two differently-ordered
+    fits.  Order-insensitivity is instead provided one level up:
+    :func:`_marginal_value` sorts its signals canonically (by key) before fitting,
+    so every caller presenting the same signal SET fits — and therefore keys —
+    in the same order and shares one cached prediction.
 
     Besides the signal identities the key pins everything else the fit reads: the
     model name, ``cfg.target_horizon`` (the label), ``cfg.fit_standardize`` (the
@@ -253,15 +255,43 @@ def _combined_prediction(
     n_rows, n_cols = len(index), len(cols)
     is_idx = index[is_mask]
 
+    standardize = getattr(cfg, "fit_standardize", "per_underlying")
+    feat_scope = None
+    if cache_key is not None:
+        # Columns are standardised with IS-window stats over this exact panel
+        # grid, so the feature key carries the same window + IS-mask identity as
+        # the fit key — a caller-owned dict spanning two windows can never serve
+        # a column standardised under the other window's stats.
+        feat_scope = (
+            (n_rows, str(index[0]) if n_rows else None,
+             str(index[-1]) if n_rows else None, tuple(cols)),
+            np.asarray(is_mask, dtype=bool).tobytes(),
+            standardize,
+        )
     feats = []
-    for sig in signals:
+    for pos, sig in enumerate(signals):
+        # Per-signal standardised feature COLUMN cache (namespaced into the same
+        # dict as the prediction cache, so eviction/invalidation ride along): the
+        # X matrix of every fit in a window is assembled from shared columns
+        # instead of re-standardising the whole book per fit.
+        feat_key = None
+        if feat_scope is not None:
+            feat_key = ("feat", signal_keys[pos], feat_scope)
+            hit = fit_cache.get(feat_key, _FIT_CACHE_MISS)
+            if hit is not _FIT_CACHE_MISS:
+                feats.append(hit)
+                continue
         s = sig.reindex(index=index, columns=cols).replace([np.inf, -np.inf], np.nan)
-        if getattr(cfg, "fit_standardize", "per_underlying") == "cross_sectional":
+        if standardize == "cross_sectional":
             z = normalise_factor_signals({"_": s})["_"]
         else:
             z = per_underlying_zscore(s, is_idx)
-        feats.append(z.to_numpy(dtype=float).ravel())
-    X = np.nan_to_num(np.column_stack(feats), nan=0.0, posinf=0.0, neginf=0.0)
+        col = np.nan_to_num(z.to_numpy(dtype=float).ravel(),
+                            nan=0.0, posinf=0.0, neginf=0.0)
+        if feat_key is not None:
+            fit_cache[feat_key] = col
+        feats.append(col)
+    X = np.column_stack(feats)
     y = forward_returns(close, horizon=cfg.target_horizon).to_numpy(dtype=float).ravel()
 
     fit_mask = np.asarray(is_mask) & _label_available_mask(is_mask, cfg.target_horizon)
@@ -344,10 +374,26 @@ def _marginal_value(
                and book_keys is not None and len(book_keys) == len(book)
                and all(k is not None for k in book_keys))
     cache = fit_cache if keys_ok else None
-    with_keys = [*book_keys, candidate_key] if keys_ok else None
-    base_keys = list(book_keys) if keys_ok else None
+    if keys_ok:
+        # Canonical (sorted-by-key) signal order, so the fit-cache key depends on
+        # the signal SET, not the caller's ordering.  Every archive member's LOCO
+        # "with" book during a rescore is the same set → ONE shared fit instead of
+        # one per member.  Feature order only affects boosting tie-breaks, so the
+        # fitted prediction is statistically identical either way.
+        order = sorted(range(len(book)), key=lambda i: str(book_keys[i]))
+        book = [book[i] for i in order]
+        book_keys = [book_keys[i] for i in order]
+        with_pairs = sorted([*zip(book_keys, book), (candidate_key, candidate)],
+                            key=lambda kv: str(kv[0]))
+        with_keys = [k for k, _ in with_pairs]
+        with_signals = [s for _, s in with_pairs]
+        base_keys = list(book_keys)
+    else:
+        with_keys = None
+        base_keys = None
+        with_signals = [*book, candidate]
 
-    with_pred = _combined_prediction([*book, candidate], close, is_mask, cfg, model,
+    with_pred = _combined_prediction(with_signals, close, is_mask, cfg, model,
                                      fit_cache=cache, signal_keys=with_keys)
     with_ic = (
         _pooled_ic(with_pred, close, h, val_mask, is_mask, available_mask)[0]

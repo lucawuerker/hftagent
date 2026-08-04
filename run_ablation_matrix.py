@@ -125,6 +125,11 @@ def arm_command(plan: dict, arm: dict) -> tuple[list[str], dict, str]:
     if entry not in _DEFAULTS_KEY:
         raise SystemExit(f"unknown entrypoint {entry!r} for arm {name}")
     seed = arm.get("seed", 0)
+    # Per-arm config override (e.g. the oneshot baseline researching only on the
+    # WF ladder's pre-walk-forward span).  Same provider/universe as the plan
+    # config — scope naming ignores the timespan, so the prerun lands in the
+    # same workspace.
+    config_file = arm.get("config", plan["config_file"])
     env: dict[str, str] = {}
 
     flags = copy.deepcopy(plan.get(_DEFAULTS_KEY[entry]) or {})
@@ -142,17 +147,17 @@ def arm_command(plan: dict, arm: dict) -> tuple[list[str], dict, str]:
 
     if entry == "evolution":
         argv = [sys.executable, "run_factor_evolution.py", "--name", name,
-                "--config", plan["config_file"], "--seed", str(seed)]
+                "--config", config_file, "--seed", str(seed)]
         if model:
             argv += ["--model", model]
     elif entry == "gp":
         argv = [sys.executable, "run_gp_factor_mining.py", "--name", name,
-                "--config", plan["config_file"], "--seed", str(seed)]
+                "--config", config_file, "--seed", str(seed)]
     else:  # oneshot
         argv = [sys.executable, "run_factor_research.py", "--name", name]
         if model:
             argv += ["--model", model]
-        env["QF_CONFIG_FILE"] = plan["config_file"]
+        env["QF_CONFIG_FILE"] = config_file
     _emit_flags(argv, flags)
     return argv, env, name
 
@@ -171,9 +176,15 @@ def preflight(plan: dict, run_probes: bool = True) -> None:
     print(f"[preflight] config={plan['config_file']} provider={settings.data.provider} "
           f"membership={settings.data.membership} {settings.data.start}->{settings.data.end}")
 
-    # 1. forward reserve: panel must end >= 2 years before today
+    # 1. forward reserve: panel must end >= 2 years before today.  A plan may
+    # opt out EXPLICITLY (allow_no_forward_reserve: true) when its OOS evidence
+    # comes from elsewhere — the WF ladder's prequential walk-forward blocks
+    # (decision 2026-08-01) replace the static reserve.
     end = dt.date.fromisoformat(str(settings.data.end))
-    if end > dt.date.today() - dt.timedelta(days=2 * 365 - 5):
+    if plan.get("allow_no_forward_reserve"):
+        print(f"[preflight] forward-reserve check SKIPPED by plan decision "
+              f"(allow_no_forward_reserve; config end {end})")
+    elif end > dt.date.today() - dt.timedelta(days=2 * 365 - 5):
         raise SystemExit(f"[preflight] FORWARD RESERVE VIOLATED: config end {end} is within 2y of today")
 
     # 2. membership mask density (ambient settings via QF_CONFIG_FILE —
@@ -288,6 +299,40 @@ def clamp_arm_budget(plan: dict, arm: dict, remaining: float) -> dict:
     return arm
 
 
+def _pid_alive(pid: int) -> bool:
+    try:
+        os.kill(pid, 0)
+    except (ProcessLookupError, PermissionError, ValueError):
+        return False
+    return True
+
+
+def _acquire_lock(sdir: Path, name: str) -> Path | None:
+    """Per-arm launch lock so several orchestrator lanes can share one plan.
+
+    Returns the lock path on success, None when another live orchestrator on
+    this host holds the arm.  A stale lock (dead pid) is reclaimed."""
+    lock = sdir / "orchestrator.lock"
+    if lock.exists():
+        try:
+            holder = int(json.loads(lock.read_text()).get("pid", -1))
+        except Exception:  # noqa: BLE001 — corrupt lock == stale
+            holder = -1
+        if holder > 0 and _pid_alive(holder):
+            return None
+        print(f"[lock] {name}: reclaiming stale lock (pid {holder} dead)")
+        lock.unlink(missing_ok=True)
+    lock.parent.mkdir(parents=True, exist_ok=True)
+    try:  # O_EXCL: atomic — two lanes racing the same arm cannot both win
+        fd = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+    except FileExistsError:
+        return None
+    with os.fdopen(fd, "w") as fh:
+        fh.write(json.dumps({"pid": os.getpid(),
+                             "at": dt.datetime.now().isoformat(timespec="seconds")}))
+    return lock
+
+
 def run_arm(plan: dict, arm: dict, log_dir: Path) -> dict:
     argv, extra_env, name = arm_command(plan, arm)
     sdir = scope_dir(plan, name)
@@ -296,27 +341,50 @@ def run_arm(plan: dict, arm: dict, log_dir: Path) -> dict:
         print(f"[skip] {name} already ok")
         return {"name": name, "status": "skipped"}
 
-    env = os.environ.copy()
-    env.update(extra_env)
-    env.setdefault("QF_USE_MCP", "0")
-    env["QF_LLM_TRANSCRIPT_PATH"] = str(sdir / "evolution" / "llm_transcript.jsonl")
-    log_path = log_dir / f"{name}.log"
-    log_path.parent.mkdir(parents=True, exist_ok=True)
-    (sdir / "evolution").mkdir(parents=True, exist_ok=True)
+    # Cross-arm dependency (e.g. the L7 memory arm of seed 1 must see seed 0's
+    # persisted experience): not ready -> leave it for a later supervisor pass.
+    dep = arm.get("after")
+    if dep:
+        dep_status = scope_dir(plan, dep) / "orchestrator_status.json"
+        if not (dep_status.exists()
+                and json.loads(dep_status.read_text()).get("status") == STATUS_OK):
+            print(f"[blocked] {name}: waiting for {dep} (retried next pass)")
+            return {"name": name, "status": "blocked"}
 
-    print(f"[run] {name}: {' '.join(argv)}")
-    t0 = time.time()
-    with open(log_path, "w") as log_fh:
-        proc = subprocess.run(argv, cwd=REPO, env=env, stdout=log_fh,
-                              stderr=subprocess.STDOUT, check=False)
-    elapsed = time.time() - t0
-    status = {"status": STATUS_OK if proc.returncode == 0 else "failed",
-              "returncode": proc.returncode, "elapsed_sec": round(elapsed, 1),
-              "argv": argv, "finished_at": dt.datetime.now().isoformat(timespec="seconds")}
-    status_path.parent.mkdir(parents=True, exist_ok=True)
-    status_path.write_text(json.dumps(status, indent=2))
-    print(f"[done] {name}: {status['status']} in {elapsed/60:.1f} min (log: {log_path})")
-    return {"name": name, **status}
+    lock = _acquire_lock(sdir, name)
+    if lock is None:
+        print(f"[locked] {name}: another orchestrator lane is running it")
+        return {"name": name, "status": "locked"}
+
+    try:
+        env = os.environ.copy()
+        env.update(extra_env)
+        env.setdefault("QF_USE_MCP", "0")
+        # Parallel lanes share the host: cap each arm's thread pools (lightgbm/
+        # OpenMP + BLAS) so two concurrent arms don't oversubscribe the cores.
+        for var in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS",
+                    "MKL_NUM_THREADS", "NUMEXPR_NUM_THREADS"):
+            env.setdefault(var, "4")
+        env["QF_LLM_TRANSCRIPT_PATH"] = str(sdir / "evolution" / "llm_transcript.jsonl")
+        log_path = log_dir / f"{name}.log"
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+        (sdir / "evolution").mkdir(parents=True, exist_ok=True)
+
+        print(f"[run] {name}: {' '.join(argv)}")
+        t0 = time.time()
+        with open(log_path, "w") as log_fh:
+            proc = subprocess.run(argv, cwd=REPO, env=env, stdout=log_fh,
+                                  stderr=subprocess.STDOUT, check=False)
+        elapsed = time.time() - t0
+        status = {"status": STATUS_OK if proc.returncode == 0 else "failed",
+                  "returncode": proc.returncode, "elapsed_sec": round(elapsed, 1),
+                  "argv": argv, "finished_at": dt.datetime.now().isoformat(timespec="seconds")}
+        status_path.parent.mkdir(parents=True, exist_ok=True)
+        status_path.write_text(json.dumps(status, indent=2))
+        print(f"[done] {name}: {status['status']} in {elapsed/60:.1f} min (log: {log_path})")
+        return {"name": name, **status}
+    finally:
+        lock.unlink(missing_ok=True)
 
 
 def aggregate(plan: dict, results: list[dict]) -> None:

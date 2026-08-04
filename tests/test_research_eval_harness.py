@@ -540,7 +540,9 @@ def test_fit_cache_reduces_fits_and_preserves_numbers_exactly(monkeypatch):
                              book_keys=["b0", "b1"])
     # candidate 2's base (book-only) fit is served from the cache: 4 fits → 3
     assert len(fits) == 3
-    assert len(cache) == 3                      # (b0,b1,c1), (b0,b1), (b0,b1,c2)
+    # 3 prediction frames — (b0,b1,c1), (b0,b1), (b0,b1,c2) — plus the 4 shared
+    # standardised feature columns (b0, b1, c1, c2) under ("feat", …) keys
+    assert len(cache) == 7
     _assert_nested_exact(r1.to_dict(), r1c.to_dict())
     _assert_nested_exact(r2.to_dict(), r2c.to_dict())
 
@@ -588,7 +590,10 @@ def test_fit_cache_does_not_leak_across_windows(monkeypatch):
     evaluate_candidate(cand, book, panel, cfg, split=split_b, params=params,
                        candidate_id="c", **keys)
     assert len(fits) == 4                       # window B: all misses, no leak
-    assert len(cache) == 4                      # 2 entries per window
+    # per window: 2 prediction frames + 2 feature columns (the IS mask is part of
+    # the feature key too — a column standardised under window A's stats is never
+    # served for window B)
+    assert len(cache) == 8
     fits.clear()
     r_a2 = evaluate_candidate(cand, book, panel, cfg, split=split_a, params=params,
                               candidate_id="c", **keys)
@@ -596,10 +601,12 @@ def test_fit_cache_does_not_leak_across_windows(monkeypatch):
     _assert_nested_exact(r_a.to_dict(), r_a2.to_dict())
 
 
-def test_fit_cache_key_is_ordered_so_permuted_books_miss(monkeypatch):
-    """The cache key keeps the caller's X-column ORDER: the fitted prediction is not
-    bit-invariant to a feature permutation, so a permuted book must MISS (never
-    silently serve a prediction fitted on differently-ordered X)."""
+def test_fit_cache_canonical_order_makes_permuted_books_hit(monkeypatch):
+    """``_marginal_value`` sorts its signals canonically (by key) before fitting,
+    so a permuted book presenting the SAME signal set is the SAME fit — a full
+    cache hit serving identical prediction frames.  (This is what lets every
+    member of an archive rescore share one whole-archive "with" fit instead of
+    fitting it once per member.)"""
     panel, rng = _panel(seed=33)
     cfg = _cfg()
     split = three_way_split(panel["close"].index, is_frac=0.6, val_frac=0.2)
@@ -609,17 +616,20 @@ def test_fit_cache_key_is_ordered_so_permuted_books_miss(monkeypatch):
     fits = _spy_build_estimator(monkeypatch)
 
     cache: dict = {}
-    evaluate_candidate(cand, [b0, b1], panel, cfg, split=split, params=params,
-                       fit_cache=cache, candidate_key="c", book_keys=["b0", "b1"])
+    r_first = evaluate_candidate(cand, [b0, b1], panel, cfg, split=split,
+                                 params=params, fit_cache=cache,
+                                 candidate_key="c", book_keys=["b0", "b1"])
     n = len(fits)
+    assert n == 2                               # with + base
     r_perm = evaluate_candidate(cand, [b1, b0], panel, cfg, split=split,
                                 params=params, fit_cache=cache, candidate_key="c",
                                 book_keys=["b1", "b0"])
-    assert len(fits) == 2 * n                   # permuted order → all misses
-    # and the permuted cached run equals its own uncached run exactly
-    r_perm_ref = evaluate_candidate(cand, [b1, b0], panel, cfg, split=split,
-                                    params=params, candidate_id=r_perm.candidate_id)
-    _assert_nested_exact(r_perm.to_dict(), r_perm_ref.to_dict())
+    assert len(fits) == n                       # permuted order → full hit, no refit
+    # the marginal family is served from the same cached predictions bit-for-bit
+    for key in ("with_ic", "base_ic", "marginal_value_raw"):
+        _assert_nested_exact(r_first.diagnostics[key], r_perm.diagnostics[key])
+    _assert_nested_exact(r_first.objective.marginal_value,
+                         r_perm.objective.marginal_value)
 
 
 # ── service-level fit cache (research_service._FIT_CACHE) ─────────────────────
@@ -690,17 +700,23 @@ def test_service_fit_cache_hits_across_calls_and_stays_one_window(monkeypatch):
         "cand_a", "close.pct_change().rolling(5).mean().fillna(0.0)")}
     r1 = svc.evaluate_fitness(cand_a, **common)
     assert r1["ok"], r1.get("error")
-    assert svc._FIT_CACHE_STATS["hits"] == 0    # first call: cold cache
+    # cold prediction cache; the base fit reuses the with-fit's 2 book feature
+    # columns (the only hits a first call can produce)
+    assert svc._FIT_CACHE_STATS["hits"] == 2
 
     cand_b = {"factor_id": "cand_b", "code": _service_factor_code(
         "cand_b", "(close / close.rolling(10).mean() - 1.0).fillna(0.0)")}
     r2 = svc.evaluate_fitness(cand_b, **common)
     assert r2["ok"], r2.get("error")
-    # the shared book-only base fit was served from the cache on the second call
-    assert svc._FIT_CACHE_STATS["hits"] == 1
+    # the shared book-only base PREDICTION was served from the cache (+1), and the
+    # with fit reused the 2 book feature columns (+2)
+    assert svc._FIT_CACHE_STATS["hits"] == 5
     assert len(svc._FIT_CACHE) == 1             # one window dict
     (window_dict,) = svc._FIT_CACHE.values()
-    assert len(window_dict) == 3                # base + the two with-candidate fits
+    preds = [k for k in window_dict
+             if not (isinstance(k, tuple) and k and k[0] == "feat")]
+    assert len(preds) == 3                      # base + the two with-candidate fits
+    assert len(window_dict) == 7                # + 4 feature columns
 
     # a different calendar window (rescore after a frontier advance) starts empty:
     # the previous window's fits are dropped and nothing is reused across windows
@@ -708,7 +724,10 @@ def test_service_fit_cache_hits_across_calls_and_stays_one_window(monkeypatch):
     r3 = svc.evaluate_fitness(cand_a, **common, is_end=idx[240].isoformat(),
                               val_end=idx[360].isoformat())
     assert r3["ok"], r3.get("error")
-    assert svc._FIT_CACHE_STATS["hits"] == hits_before
+    # nothing from the OLD window was reused — the only 2 hits are r3's own base
+    # fit picking up the book feature columns its with-fit cached moments earlier
+    # (feature keys carry the IS mask, so old-window columns can never serve)
+    assert svc._FIT_CACHE_STATS["hits"] == hits_before + 2
     assert len(svc._FIT_CACHE) == 1             # only the NEW window is retained
     (new_window_dict,) = svc._FIT_CACHE.values()
     assert new_window_dict is not window_dict

@@ -1,0 +1,14 @@
+[
+  {
+    "mechanism_group_id": 0,
+    "community_id": 1,
+    "focus": "Community 1: 34 mechanism(s) (analyst sentiment revision drift, compounding amplification, cross-channel loading anti-alignment, cross-contract momentum spillover, cross-sectional momentum, cross-sectional momentum signal extraction\u2026) across 12 paper(s).",
+    "mechanisms": []
+  },
+  {
+    "mechanism_group_id": 1,
+    "community_id": 2,
+    "focus": "Community 2: 35 mechanism(s) (Common shock propagation, Samuelson correlation effect, Samuelson effect (intensity acceleration), Samuelson effect (volatility acceleration near maturity), Samuelson effect (volatility increase near maturity), Sparse liquidity constraint on price formation\u2026) across 13 paper(s).",
+    "mechanisms": []
+  }
+]

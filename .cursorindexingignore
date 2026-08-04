@@ -1,0 +1,25 @@
+# Keep Cursor's codebase index off the bulky data trees. These files stay
+# openable and @-referencable in chat; they are just never semantically
+# indexed (unlike .cursorignore, which would hide them from the AI too).
+
+# Market data + run artifacts (multi-GB, and jsonl logs are appended to by
+# live evolution runs, which forces constant re-indexing)
+ticker_data/
+data/
+binSamples/
+fillSamples/
+
+# Environments / generated
+venv/
+__pycache__/
+diagrams/
+prelim_files/
+
+# Bulky file types wherever they live
+*.jsonl
+*.parquet
+*.7z
+*.joblib
+*.log
+*.pdf
+*.png

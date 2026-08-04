@@ -203,20 +203,35 @@ def main() -> None:
     panel = svc._load_panel_cached("ticker_data", fields, n_tickers=None)
     close = panel["close"]
     idx = close.index
+    # WF-ladder runs (wf_blocks > 0) have NO forward reserve and NO test tail:
+    # the run panel is the full config panel and the walk-forward blocks reach
+    # its edge (decision 2026-08-01).
+    wf_mode = bool(rc.get("wf_blocks"))
     forward_start = pd.Timestamp(PANEL_END)
-    run_idx = idx[idx < forward_start]
+    run_idx = idx if wf_mode else idx[idx < forward_start]
     schedule = build_schedule(
         run_idx, generations=rc["generations"], test_frac=rc["test_frac"],
         seed_frac=rc["seed_frac"], reveal_every=rc["reveal_every"],
-        val_blocks=rc["val_blocks"])
+        val_blocks=rc["val_blocks"],
+        holdout_last=rc.get("final_holdout", False),
+        wf_blocks=rc.get("wf_blocks", 0),
+        wf_block_bars=rc.get("wf_block_bars", 126))
     prog = json.loads((evo_dir / "progressive.json").read_text())
     assert schedule[rc["generations"]].visible_end == prog["visible_end"], \
         "recomputed schedule disagrees with the run's recorded frontier"
     test_start_ts = pd.Timestamp(schedule[rc["generations"]].val_end_ts)
-    log.info("schedule verified: dev frontier %s (bar %d), TEST tail %s -> %s, "
-             "forward %s -> %s", test_start_ts.date(), prog["visible_end"],
-             test_start_ts.date(), forward_start.date(), forward_start.date(),
-             idx[-1].date())
+    if wf_mode:
+        # both extra frames are empty — the blocks cover everything
+        forward_start = idx[-1] + pd.Timedelta(days=1)
+        test_start_ts = forward_start
+        log.info("schedule verified (wf mode): dev frontier reaches the panel "
+                 "edge %s (bar %d); no TEST tail, no forward reserve",
+                 idx[-1].date(), prog["visible_end"])
+    else:
+        log.info("schedule verified: dev frontier %s (bar %d), TEST tail %s -> %s, "
+                 "forward %s -> %s", test_start_ts.date(), prog["visible_end"],
+                 test_start_ts.date(), forward_start.date(), forward_start.date(),
+                 idx[-1].date())
 
     # segments: (snapshot_gen, fit_end_ts, eval_start_ts, eval_end_ts, tag)
     segments = []
@@ -224,9 +239,10 @@ def main() -> None:
         b = schedule[sg + 1].block_bounds       # block revealed at gen sg+1
         segments.append((sg, pd.Timestamp(b[0]), pd.Timestamp(b[0]),
                          pd.Timestamp(b[1]), f"block@gen{sg + 1}"))
-    segments.append((20, test_start_ts, test_start_ts, forward_start, "test_tail"))
-    segments.append((20, forward_start, forward_start,
-                     idx[-1] + pd.Timedelta(days=1), "forward_reserve"))
+    if not wf_mode:
+        segments.append((20, test_start_ts, test_start_ts, forward_start, "test_tail"))
+        segments.append((20, forward_start, forward_start,
+                         idx[-1] + pd.Timedelta(days=1), "forward_reserve"))
 
     # ── compute signals once for the union of all snapshot books ──
     discover_factors()
@@ -287,11 +303,13 @@ def main() -> None:
         ser = ser[~ser.index.duplicated()]
         ser.to_csv(out_dir / f"stitched_net_{cname}.csv")
         report[f"stitched_{cname}"] = ann_stats(ser)
-        # sub-splits: within-run (reveal blocks) vs test vs forward
+        # sub-splits: within-run (reveal blocks) vs test vs forward — the
+        # latter two don't exist for wf-mode runs (blocks cover everything)
         report[f"stitched_{cname}_blocks"] = ann_stats(ser[ser.index < test_start_ts])
-        report[f"stitched_{cname}_test"] = ann_stats(
-            ser[(ser.index >= test_start_ts) & (ser.index < forward_start)])
-        report[f"stitched_{cname}_forward"] = ann_stats(ser[ser.index >= forward_start])
+        if not wf_mode:
+            report[f"stitched_{cname}_test"] = ann_stats(
+                ser[(ser.index >= test_start_ts) & (ser.index < forward_start)])
+            report[f"stitched_{cname}_forward"] = ann_stats(ser[ser.index >= forward_start])
     pred_all = pd.concat(stitched_pred).sort_index()
     pred_all = pred_all[~pred_all.index.duplicated()]
     pred_all.to_csv(out_dir / "stitched_prediction.csv")

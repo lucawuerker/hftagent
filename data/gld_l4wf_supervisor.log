@@ -1,0 +1,93 @@
+2026-08-03 23:24:10 supervisor started (pid 12243)
+2026-08-03 23:24:10 launch #1
+2026-08-03 23:24:10 evolution pid 12249
+2026-08-04 00:29:13 evolution exited rc=137
+2026-08-04 00:29:33 launch #2
+2026-08-04 00:29:33 evolution pid 14835
+2026-08-04 00:46:34 evolution exited rc=137
+2026-08-04 00:46:54 launch #3
+2026-08-04 00:46:54 evolution pid 15460
+2026-08-04 00:50:47 supervisor started (pid 15638)
+2026-08-04 00:50:47 launch #1
+2026-08-04 00:50:47 evolution pid 15647
+2026-08-04 01:29:18 evolution exited rc=137
+2026-08-04 01:29:38 launch #2
+2026-08-04 01:29:38 evolution pid 16993
+2026-08-04 01:30:36 supervisor started (pid 17069)
+2026-08-04 01:30:36 launch #1
+2026-08-04 01:30:36 evolution pid 17078
+2026-08-04 02:21:39 planned recycle: 2 generation(s) completed this launch (RSS 1063MB) — restarting at checkpoint boundary
+2026-08-04 02:21:59 evolution exited rc=143
+2026-08-04 02:22:19 launch #2
+2026-08-04 02:22:19 evolution pid 18780
+2026-08-04 02:37:20 evolution exited rc=137
+2026-08-04 02:37:40 launch #3
+2026-08-04 02:37:40 evolution pid 19336
+2026-08-04 02:40:40 supervisor started (pid 19477)
+2026-08-04 02:40:40 launch #1
+2026-08-04 02:40:40 evolution pid 19485
+2026-08-04 03:04:11 planned recycle: 1 generation(s) completed this launch (RSS 2057MB) — restarting at checkpoint boundary
+2026-08-04 03:04:31 evolution exited rc=143
+2026-08-04 03:04:51 launch #2
+2026-08-04 03:04:51 evolution pid 20322
+2026-08-04 03:35:23 planned recycle: 1 generation(s) completed this launch (RSS 1864MB) — restarting at checkpoint boundary
+2026-08-04 03:35:43 evolution exited rc=143
+2026-08-04 03:36:03 launch #3
+2026-08-04 03:36:03 evolution pid 21341
+2026-08-04 03:55:34 evolution exited rc=137
+2026-08-04 03:55:54 launch #4
+2026-08-04 03:55:54 evolution pid 22708
+2026-08-04 04:13:55 evolution exited rc=137
+2026-08-04 04:14:15 launch #5
+2026-08-04 04:14:15 evolution pid 23393
+2026-08-04 04:16:36 supervisor started (pid 23584)
+2026-08-04 04:16:36 launch #1
+2026-08-04 04:16:36 evolution pid 23590
+2026-08-04 04:45:08 planned recycle: 1 generation(s) completed this launch (RSS 966MB) — restarting at checkpoint boundary
+2026-08-04 04:45:28 evolution exited rc=143
+2026-08-04 04:45:48 launch #2
+2026-08-04 04:45:48 evolution pid 25238
+2026-08-04 05:15:50 evolution exited rc=137
+2026-08-04 05:16:10 launch #3
+2026-08-04 05:16:10 evolution pid 28437
+2026-08-04 05:20:41 supervisor started (pid 28794)
+2026-08-04 05:20:41 launch #1
+2026-08-04 05:20:41 evolution pid 28800
+2026-08-04 05:56:43 evolution exited rc=137
+2026-08-04 05:57:03 launch #2
+2026-08-04 05:57:03 evolution pid 32568
+2026-08-04 06:58:38 planned recycle: 1 generation(s) completed this launch (RSS 141MB) — restarting at checkpoint boundary
+2026-08-04 06:58:58 evolution exited rc=143
+2026-08-04 06:59:18 launch #3
+2026-08-04 06:59:18 evolution pid 39028
+2026-08-04 08:18:25 planned recycle: 1 generation(s) completed this launch (RSS 285MB) — restarting at checkpoint boundary
+2026-08-04 08:18:45 evolution exited rc=143
+2026-08-04 08:19:05 launch #4
+2026-08-04 08:19:05 evolution pid 44366
+2026-08-04 10:04:20 planned recycle: 1 generation(s) completed this launch (RSS 286MB) — restarting at checkpoint boundary
+2026-08-04 10:04:40 evolution exited rc=143
+2026-08-04 10:05:00 launch #5
+2026-08-04 10:05:00 evolution pid 50113
+2026-08-04 12:09:39 planned recycle: 1 generation(s) completed this launch (RSS 805MB) — restarting at checkpoint boundary
+2026-08-04 12:09:59 evolution exited rc=143
+2026-08-04 12:10:19 launch #6
+2026-08-04 12:10:19 evolution pid 55109
+2026-08-04 13:50:02 planned recycle: 1 generation(s) completed this launch (RSS 579MB) — restarting at checkpoint boundary
+2026-08-04 13:50:22 evolution exited rc=143
+2026-08-04 13:50:42 launch #7
+2026-08-04 13:50:42 evolution pid 61628
+2026-08-04 14:33:48 evolution exited rc=137
+2026-08-04 14:34:08 launch #8
+2026-08-04 14:34:08 evolution pid 63989
+2026-08-04 15:08:40 planned recycle: 1 generation(s) completed this launch (RSS 788MB) — restarting at checkpoint boundary
+2026-08-04 15:09:00 evolution exited rc=143
+2026-08-04 15:09:21 launch #9
+2026-08-04 15:09:21 evolution pid 65115
+2026-08-04 23:30:47 planned recycle: 1 generation(s) completed this launch (RSS 835MB) — restarting at checkpoint boundary
+2026-08-04 23:31:07 evolution exited rc=143
+2026-08-04 23:31:27 launch #10
+2026-08-04 23:31:27 evolution pid 67908
+2026-08-05 00:11:30 planned recycle: 1 generation(s) completed this launch (RSS 479MB) — restarting at checkpoint boundary
+2026-08-05 00:11:50 evolution exited rc=143
+2026-08-05 00:12:10 launch #11
+2026-08-05 00:12:10 evolution pid 75800

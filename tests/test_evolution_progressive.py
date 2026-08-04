@@ -395,6 +395,56 @@ def test_rescore_does_not_bill_ntrials_and_stamps_window(prog_loop):
         assert eg.fitness.diagnostics.get("window_generation") is not None
 
 
+def test_rescore_skips_probes_and_carries_plateau_dock(prog_loop):
+    """The archive rescore drops the jitter/reference work (already computed at
+    admission; re-executing every member's jittered code dominated the rescore
+    wall-clock) and instead carries each member's admission-time plateau dock
+    forward onto the freshly rescored marginal axis."""
+    make, _ = prog_loop
+    loop = make()
+    loop.run(initial_programs=_seeds())
+    assert loop.controller.archive
+
+    dock = 0.25
+    for eg in loop.controller.archive:
+        eg.fitness.diagnostics["plateau_penalty"] = dock
+
+    calls: list[dict] = []
+    raw_marginal: dict[str, float | None] = {}
+    orig = loop._score_program
+
+    def spy(program, book, n_trials, **kw):
+        calls.append(kw)
+        res = orig(program, book, n_trials, **kw)
+        if res.get("ok"):
+            raw_marginal[program.factor_id] = \
+                res["fitness"]["objective"]["marginal_value"]
+        return res
+
+    loop._score_program = spy
+    loop._rescore_archive_on_window(2)
+
+    assert calls
+    assert all(kw.get("include_probes") is False
+               and kw.get("include_reference") is False for kw in calls)
+    for eg in loop.controller.archive:
+        d = eg.fitness.diagnostics
+        assert d.get("plateau_penalty") is None      # probes were NOT recomputed
+        raw = raw_marginal.get(eg.genome.program.factor_id)
+        if raw is not None:
+            # …but the admission dock was carried forward and applied
+            assert d.get("plateau_penalty_carried") == dock
+            assert eg.fitness.objective.marginal_value == pytest.approx(raw - dock)
+    # a SECOND rescore keeps the dock alive via the carried stamp
+    raw_marginal.clear()
+    loop._rescore_archive_on_window(2)
+    for eg in loop.controller.archive:
+        raw = raw_marginal.get(eg.genome.program.factor_id)
+        if raw is not None:
+            assert eg.fitness.diagnostics.get("plateau_penalty_carried") == dock
+            assert eg.fitness.objective.marginal_value == pytest.approx(raw - dock)
+
+
 def test_failed_rescore_emits_visible_lineage_row(prog_loop):
     """A rescore that errors out appends a rescore_failed row (stale fitness kept)."""
     make, _ = prog_loop
@@ -590,3 +640,84 @@ def test_final_holdout_terminal_rescore_after_last_generation(prog_loop):
     loop2.controller.generation = 2
     loop2._init_progressive()
     assert loop2._window.val_end_ts == idx[384].isoformat()
+
+
+# ── group 5: two-phase walk-forward schedule (wf_blocks > 0) ───────────────────
+
+def test_two_phase_layout_final_run_shape():
+    """The 2026-08-01 final-run shape: 20 gens, 10 fit + 10 half-year WF blocks."""
+    idx = _index(4170)
+    sched = build_schedule(idx, generations=20, test_frac=0.0, seed_frac=0.45,
+                           reveal_every=1, val_blocks=2,
+                           wf_blocks=10, wf_block_bars=126)
+    assert [w.generation for w in sched] == list(range(21))
+    # dev_len=4170, wf_start=2910, seed_end=floor(2910*0.45)=1309, block1=160
+    assert sched[0].visible_end == 1309 and sched[0].reveal is False
+    assert sched[0].val_start == 1309 - 2 * 160
+    # phase 1: gens 1..10 all reveal, equal blocks, gen 10 lands exactly on wf_start
+    for g in range(1, 11):
+        assert sched[g].reveal is True
+    assert [sched[g].visible_end for g in (1, 2, 9)] == [1469, 1629, 2749]
+    assert sched[10].visible_end == 2910          # last phase-1 block absorbs remainder
+    # phase 2: gens 11..20 each reveal exactly 126 bars up to the panel edge
+    for j, g in enumerate(range(11, 21), start=1):
+        assert sched[g].reveal is True
+        assert sched[g].visible_end == 2910 + j * 126
+    assert sched[20].visible_end == 4170
+    # frontier past the last bar → exclusive-bound timestamp one second beyond
+    assert sched[20].val_end_ts == (idx[-1] + pd.Timedelta(seconds=1)).isoformat()
+    # sliding VAL = last 2 revealed blocks across the heterogeneous boundary
+    assert sched[11].val_start == sched[9].visible_end       # blocks 10 (161) + 11 (126)
+    assert sched[20].val_start == 2910 + 8 * 126
+    # expanding window, never shrinking
+    ends = [w.visible_end for w in sched]
+    assert ends == sorted(ends)
+    # prequential block bounds: gen 11's block is [wf_start, wf_start+126)
+    assert sched[11].block_bounds == (idx[2910].isoformat(), idx[3036].isoformat())
+
+
+def test_two_phase_reveal_every_applies_to_phase_one_only():
+    idx = _index(4170)
+    sched = build_schedule(idx, generations=20, test_frac=0.0, seed_frac=0.45,
+                           reveal_every=2, val_blocks=2,
+                           wf_blocks=10, wf_block_bars=126)
+    # phase 1 cadence: reveals at 1,3,5,7,9 (5 blocks), none at 2,4,6,8,10
+    assert [g for g in range(1, 11) if sched[g].reveal] == [1, 3, 5, 7, 9]
+    assert sched[9].visible_end == 2910
+    assert sched[10].visible_end == 2910          # non-reveal gen keeps the frontier
+    # phase 2 ignores the cadence: every generation reveals a 126-bar block
+    assert all(sched[g].reveal for g in range(11, 21))
+    assert sched[20].visible_end == 4170
+
+
+def test_two_phase_validation_errors():
+    idx = _index(4170)
+    with pytest.raises(ValueError, match="final-holdout"):
+        build_schedule(idx, generations=20, test_frac=0.0, seed_frac=0.45,
+                       reveal_every=1, val_blocks=2, holdout_last=True,
+                       wf_blocks=10, wf_block_bars=126)
+    with pytest.raises(ValueError, match="generations"):
+        build_schedule(idx, generations=5, test_frac=0.0, seed_frac=0.45,
+                       reveal_every=1, val_blocks=2, wf_blocks=10)
+    with pytest.raises(ValueError, match="phase-1"):
+        # WF span swallows nearly the whole panel: no room for a seed window
+        build_schedule(_index(1300), generations=10, test_frac=0.0, seed_frac=0.45,
+                       reveal_every=1, val_blocks=2, wf_blocks=10, wf_block_bars=128)
+
+
+def test_two_phase_off_is_byte_identical_to_classic():
+    idx = _index(1000)
+    kw = dict(generations=4, test_frac=0.2, seed_frac=0.5, reveal_every=1,
+              val_blocks=2)
+    assert build_schedule(idx, **kw) == build_schedule(idx, wf_blocks=0, **kw)
+
+
+def test_two_phase_all_generations_walk_forward():
+    """generations == wf_blocks: no phase 1 — the whole pre-WF span is the seed."""
+    idx = _index(2000)
+    sched = build_schedule(idx, generations=5, test_frac=0.0, seed_frac=0.45,
+                           reveal_every=1, val_blocks=2,
+                           wf_blocks=5, wf_block_bars=100)
+    assert sched[0].visible_end == 1500           # seed = everything before the WF tail
+    assert [sched[g].visible_end for g in range(1, 6)] == \
+        [1600, 1700, 1800, 1900, 2000]

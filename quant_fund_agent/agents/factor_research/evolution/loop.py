@@ -182,6 +182,18 @@ class EvolutionRunConfig:
     # reveal it only in a terminal rescore-only step after the last generation,
     # so the final front is ranked on data no selection pressure ever queried.
     final_holdout: bool = False
+    # Two-phase walk-forward schedule (2026-08-01): when wf_blocks > 0 the LAST
+    # wf_blocks generations each reveal one fixed wf_block_bars-bar block at the
+    # dev tail (prequentially scored before the archive may adapt to it); the
+    # earlier generations reveal [seed_end, wf_start) in equal blocks at the
+    # reveal_every cadence.  Incompatible with final_holdout.
+    wf_blocks: int = 0
+    wf_block_bars: int = 126
+
+    # --graph-readonly: never write factor provenance back into the knowledge
+    # graph (comparison ladders need every arm to rank mechanism groups from the
+    # identical graph snapshot; the ranking is factor-coverage-based).
+    graph_readonly: bool = False
 
     # ── fitness: four Pareto axes ──
     independence_metric: str = "residual_ic"   # "residual_ic" | "delta_participation"
@@ -588,30 +600,47 @@ def seed_programs(cfg: EvolutionRunConfig, data_context: str,
 
     # GraphRAG provenance link-back: Paper → Mechanism → Factor → Field.
     if graph is not None and mech_by_fid:
-        from quant_fund_agent.knowledge.empirical_edges import (
-            link_factor_to_mechanism,
-            refresh_field_usage,
-        )
-        from quant_fund_agent.factors.inmem import compile_factor
-
-        inputs_by_fid: dict[str, list[str]] = {}
-        for prog in programs:
-            mech = mech_by_fid.get(prog.factor_id)
-            if mech:
-                link_factor_to_mechanism(graph, prog.factor_id, mech)
-            try:
-                cls = compile_factor(prog.code, prog.factor_id)
-                inputs_by_fid[prog.factor_id] = list(
-                    getattr(cls, "inputs", None) or ["close"])
-            except Exception:  # noqa: BLE001 — provenance is best-effort
-                pass
-        if inputs_by_fid:
-            refresh_field_usage(graph, inputs_by_fid)
-        try:
-            graph.save()
-        except Exception as e:  # noqa: BLE001
-            log.warning("could not save knowledge graph: %s", e)
+        link_programs_into_graph(graph, programs, mech_by_fid,
+                                 readonly=cfg.graph_readonly)
     return programs
+
+
+def link_programs_into_graph(graph, programs, mech_by_fid, *,
+                             readonly: bool = False) -> None:
+    """Provenance link-back of seeded programs (Paper → Mechanism → Factor → Field).
+
+    ``readonly=True`` (``--graph-readonly``) is a strict no-op — neither the
+    in-memory graph nor ``graph.json`` is touched, so every arm of a comparison
+    ladder resolves its mechanism groups from the identical graph snapshot
+    (the group ranking is coverage-based and factor nodes shift it).
+    """
+    if readonly:
+        log.info("graph read-only: skipping provenance link-back of %d program(s)",
+                 len(programs))
+        return
+    from quant_fund_agent.knowledge.empirical_edges import (
+        link_factor_to_mechanism,
+        refresh_field_usage,
+    )
+    from quant_fund_agent.factors.inmem import compile_factor
+
+    inputs_by_fid: dict[str, list[str]] = {}
+    for prog in programs:
+        mech = mech_by_fid.get(prog.factor_id)
+        if mech:
+            link_factor_to_mechanism(graph, prog.factor_id, mech)
+        try:
+            cls = compile_factor(prog.code, prog.factor_id)
+            inputs_by_fid[prog.factor_id] = list(
+                getattr(cls, "inputs", None) or ["close"])
+        except Exception:  # noqa: BLE001 — provenance is best-effort
+            pass
+    if inputs_by_fid:
+        refresh_field_usage(graph, inputs_by_fid)
+    try:
+        graph.save()
+    except Exception as e:  # noqa: BLE001
+        log.warning("could not save knowledge graph: %s", e)
 
 
 def coerce_idea(
@@ -931,15 +960,26 @@ class EvolutionLoop:
 
     def _score_program(self, program: FactorProgram, book: list[dict[str, Any]],
                        n_trials: int, *, is_end: str | None,
-                       val_end: str | None) -> dict[str, Any]:
-        """The shared client call for SINGLE scoring (billed eval AND re-score)."""
+                       val_end: str | None, include_probes: bool = True,
+                       include_reference: bool = True) -> dict[str, Any]:
+        """The shared client call for SINGLE scoring (billed eval AND re-score).
+
+        ``include_probes=False`` / ``include_reference=False`` drop the jitter
+        plateau probes and the reference-zoo diagnostics from the call — used by
+        the archive rescore, where both were already computed at admission and
+        re-executing every member's jittered code on the new window dominates the
+        rescore's wall-clock (the admission-time plateau dock is carried forward
+        by the caller instead).
+        """
         from quant_fund_agent.mcp import research_client
 
-        probes = [{"factor_id": pid, "code": pcode}
-                  for pid, pcode in jitter_variants(program, self.cfg.plateau_scales)]
-        reference = [{"factor_id": r["factor_id"], "code": r["code"]}
-                     for r in self.cfg.reference_book
-                     if r.get("factor_id") != program.factor_id]
+        probes = ([{"factor_id": pid, "code": pcode}
+                   for pid, pcode in jitter_variants(program, self.cfg.plateau_scales)]
+                  if include_probes else [])
+        reference = ([{"factor_id": r["factor_id"], "code": r["code"]}
+                      for r in self.cfg.reference_book
+                      if r.get("factor_id") != program.factor_id]
+                     if include_reference else [])
         return research_client.evaluate_fitness(
             candidate={"factor_id": program.factor_id, "code": program.code,
                        "expected_sign": program.expected_sign},
@@ -1045,7 +1085,8 @@ class EvolutionLoop:
         self._schedule = build_schedule(
             index, generations=self.cfg.generations, test_frac=self.cfg.test_frac,
             seed_frac=self.cfg.seed_frac, reveal_every=self.cfg.reveal_every,
-            val_blocks=self.cfg.val_blocks, holdout_last=self.cfg.final_holdout)
+            val_blocks=self.cfg.val_blocks, holdout_last=self.cfg.final_holdout,
+            wf_blocks=self.cfg.wf_blocks, wf_block_bars=self.cfg.wf_block_bars)
         # The schedule addresses generations 0..G (+ a terminal G+1 window under
         # --final-holdout); the controller never advances past G.
         g = min(self.controller.generation, self.cfg.generations)
@@ -1122,6 +1163,11 @@ class EvolutionLoop:
 
     def _reveal_index(self, gen: int) -> int | None:
         """Position of ``gen`` among this run's reveal generations (None if not one)."""
+        if self._schedule is not None:
+            # The schedule is the source of truth (required for the two-phase
+            # walk-forward layout, identical to the cadence formula otherwise).
+            gens = [w.generation for w in self._schedule if w.reveal]
+            return gens.index(gen) if gen in gens else None
         from quant_fund_agent.agents.factor_research.evolution.progressive import (
             reveal_generations,
         )
@@ -1153,7 +1199,9 @@ class EvolutionLoop:
                 book = self._book_for(eg.genome.program, snapshot)
                 res = self._score_program(eg.genome.program, book,
                                           self.controller.n_trials,
-                                          is_end=is_end, val_end=val_end)
+                                          is_end=is_end, val_end=val_end,
+                                          include_probes=False,
+                                          include_reference=False)
             if not res.get("ok"):
                 # Visible failure (stale fitness kept — behaviour unchanged).
                 self.controller.lineage.append({
@@ -1165,6 +1213,20 @@ class EvolutionLoop:
                             eg.genome.genome_id, res.get("error"))
                 continue
             fitness = self._stamp_window(FitnessResult.from_dict(res["fitness"]))
+            if eg.genome.unit != "set":
+                # Jitter probes are skipped at rescore, so the plateau penalty is
+                # not recomputed on the new window — carry the member's most recent
+                # dock forward instead (admission-time, or an earlier carry), so a
+                # knife-edge factor keeps its marginal-axis penalty for as long as
+                # it lives in the archive.
+                prev = eg.fitness.diagnostics or {}
+                carried = prev.get("plateau_penalty")
+                if carried is None:
+                    carried = prev.get("plateau_penalty_carried")
+                if carried and fitness.objective.marginal_value is not None:
+                    fitness.objective.marginal_value = (
+                        float(fitness.objective.marginal_value) - float(carried))
+                    fitness.diagnostics["plateau_penalty_carried"] = float(carried)
             new_fitness[eg.genome.genome_id] = fitness
             diags = fitness.diagnostics or {}
             self.controller.lineage.append({

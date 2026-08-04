@@ -1,0 +1,125 @@
+15:07:27  INFO    replay VERIFIED: final archive 19/19, evictions 169/169 match
+15:07:28  INFO    Loading panel from ticker_data (fields=['accountsPayable', 'acquisitionsNet', 'assetGrowth', 'assetTurnover', 'bookValuePerShare', 'bookValuePerShareGrowth', 'capex', 'capexPerShare', 'capexToOperatingCashFlow', 'capexToRevenue', 'cash', 'cashConversionCycle', 'cashPerShare', 'cashRatio', 'changeInWorkingCapital', 'close', 'costOfRevenue', 'currentRatio', 'daysInventoryOutstanding', 'daysPayablesOutstanding', 'daysSalesOutstanding', 'debtGrowth', 'debtToAssets', 'debtToCapital', 'debtToEquity', 'depreciationAmortization', 'dividendPayoutRatio', 'dividendPerShareGrowth', 'dividendYield', 'dividendsPaid', 'earningsYield', 'ebit', 'ebitGrowth', 'ebitMargin', 'ebitda', 'ebitdaGrowth', 'ebitdaMargin', 'enterpriseValue', 'eps', 'epsActual', 'epsDiluted', 'epsDilutedGrowth', 'epsEstimate', 'epsGrowth', 'epsSurprise', 'evToEbitda', 'evToFreeCashFlow', 'evToOperatingCashFlow', 'evToSales', 'financialLeverage', 'freeCashFlow', 'freeCashFlowGrowth', 'freeCashFlowPerShare', 'freeCashFlowYield', 'goodwill', 'grahamNumber', 'grossMargin', 'grossProfit', 'grossProfitGrowth', 'high', 'incomeBeforeTax', 'incomeQuality', 'incomeTaxExpense', 'industry', 'intangibleAssets', 'intangiblesToAssets', 'interestCoverage', 'interestExpense', 'inventory', 'inventoryGrowth', 'inventoryTurnover', 'investedCapital', 'longTermDebt', 'low', 'marketCap', 'netDebtIssuance', 'netDebtToEbitda', 'netIncome', 'netIncomeGrowth', 'netIncomeGrowth3Y', 'netIncomeGrowth5Y', 'netIncomePerShare', 'netMargin', 'netStockIssuance', 'open', 'operatingCashFlow', 'operatingCashFlowGrowth', 'operatingCashFlowPerShare', 'operatingCycle', 'operatingExpenses', 'operatingIncome', 'operatingIncomeGrowth', 'operatingMargin', 'payablesTurnover', 'pbRatio', 'peRatio', 'pegRatio', 'pfcfRatio', 'pocfRatio', 'ppe', 'pretaxMargin', 'psRatio', 'quickRatio', 'rdExpense', 'rdExpenseGrowth', 'rdToRevenue', 'receivables', 'receivablesGrowth', 'receivablesTurnover', 'retainedEarnings', 'returns', 'revenue', 'revenueActual', 'revenueEstimate', 'revenueGrowth', 'revenueGrowth3Y', 'revenueGrowth5Y', 'revenuePerShare', 'revenueSurprise', 'roa', 'roce', 'roe', 'roic', 'sbcToRevenue', 'sector', 'sgaExpense', 'sgaExpenseGrowth', 'sgaToRevenue', 'shareRepurchase', 'sharesDiluted', 'sharesGrowth', 'sharesOutstanding', 'shortTermDebt', 'stockBasedCompensation', 'tangibleBookValuePerShare', 'totalAssets', 'totalCurrentAssets', 'totalCurrentLiabilities', 'totalDebt', 'totalEquity', 'totalLiabilities', 'volume', 'vwap', 'workingCapital'], n_tickers=all) …
+15:09:56  INFO    Panel loaded in 148.8s (232 tickers, 144 fields)
+15:09:58  INFO    computing 78 unique factor signals
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/pandas/core/internals/blocks.py:347: RuntimeWarning: divide by zero encountered in log
+  result = func(self.values, **kwargs)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+15:10:53  INFO    [master_long30|block@gen11] 15 factors  sharpe=1.59  turn=0.239  pos=102
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+15:11:19  INFO    [master_long30|block@gen12] 18 factors  sharpe=-1.13  turn=0.092  pos=102
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+15:11:46  INFO    [master_long30|block@gen13] 19 factors  sharpe=-0.51  turn=0.101  pos=102
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+15:12:17  INFO    [master_long30|block@gen14] 19 factors  sharpe=1.52  turn=0.113  pos=101
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+15:12:46  INFO    [master_long30|block@gen15] 21 factors  sharpe=2.36  turn=0.204  pos=101
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+15:13:11  INFO    [master_long30|block@gen16] 16 factors  sharpe=1.91  turn=0.270  pos=101
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+15:13:44  INFO    [master_long30|block@gen17] 19 factors  sharpe=0.08  turn=0.105  pos=101
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+15:14:14  INFO    [master_long30|block@gen18] 17 factors  sharpe=-0.34  turn=0.120  pos=101
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+15:14:44  INFO    [master_long30|block@gen19] 16 factors  sharpe=2.06  turn=0.277  pos=101
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+15:15:24  INFO    [master_long30|block@gen20] 22 factors  sharpe=2.58  turn=0.134  pos=101
+15:15:24  INFO    [master_long30] STITCHED sharpe=0.9791314881495111 ann_ret=0.10066933193732898 vol=0.10281492644832296
+15:15:24  INFO    [master_long60|block@gen11] 15 factors  sharpe=0.90  turn=0.191  pos=102
+15:15:25  INFO    [master_long60|block@gen12] 18 factors  sharpe=-1.06  turn=0.074  pos=102
+15:15:25  INFO    [master_long60|block@gen13] 19 factors  sharpe=-0.26  turn=0.064  pos=102
+15:15:25  INFO    [master_long60|block@gen14] 19 factors  sharpe=2.21  turn=0.086  pos=101
+15:15:25  INFO    [master_long60|block@gen15] 21 factors  sharpe=1.73  turn=0.153  pos=101
+15:15:26  INFO    [master_long60|block@gen16] 16 factors  sharpe=1.68  turn=0.234  pos=101
+15:15:26  INFO    [master_long60|block@gen17] 19 factors  sharpe=0.25  turn=0.084  pos=101
+15:15:26  INFO    [master_long60|block@gen18] 17 factors  sharpe=-0.27  turn=0.094  pos=101
+15:15:26  INFO    [master_long60|block@gen19] 16 factors  sharpe=1.22  turn=0.233  pos=101
+15:15:27  INFO    [master_long60|block@gen20] 22 factors  sharpe=1.81  turn=0.120  pos=101
+15:15:27  INFO    [master_long60] STITCHED sharpe=0.7662383855794245 ann_ret=0.10242960562840334 vol=0.13367850992083455
+15:15:27  INFO    [master_long100|block@gen11] 15 factors  sharpe=0.53  turn=0.117  pos=52
+15:15:27  INFO    [master_long100|block@gen12] 18 factors  sharpe=-1.00  turn=0.048  pos=56
+15:15:27  INFO    [master_long100|block@gen13] 19 factors  sharpe=-0.13  turn=0.034  pos=42
+15:15:27  INFO    [master_long100|block@gen14] 19 factors  sharpe=2.46  turn=0.053  pos=49
+15:15:28  INFO    [master_long100|block@gen15] 21 factors  sharpe=1.26  turn=0.091  pos=51
+15:15:28  INFO    [master_long100|block@gen16] 16 factors  sharpe=1.53  turn=0.149  pos=57
+15:15:28  INFO    [master_long100|block@gen17] 19 factors  sharpe=0.40  turn=0.055  pos=49
+15:15:28  INFO    [master_long100|block@gen18] 17 factors  sharpe=-0.14  turn=0.058  pos=53
+15:15:28  INFO    [master_long100|block@gen19] 16 factors  sharpe=0.76  turn=0.149  pos=55
+15:15:29  INFO    [master_long100|block@gen20] 22 factors  sharpe=1.25  turn=0.076  pos=57
+15:15:29  INFO    [master_long100] STITCHED sharpe=0.6325057714407896 ann_ret=0.10373277040749747 vol=0.16400288359615095
+15:15:29  INFO    [retail_balanced_long|block@gen11] 15 factors  sharpe=0.37  turn=0.117  pos=23
+15:15:29  INFO    [retail_balanced_long|block@gen12] 18 factors  sharpe=-0.97  turn=0.049  pos=24
+15:15:30  INFO    [retail_balanced_long|block@gen13] 19 factors  sharpe=-0.20  turn=0.021  pos=23
+15:15:30  INFO    [retail_balanced_long|block@gen14] 19 factors  sharpe=2.22  turn=0.047  pos=23
+15:15:30  INFO    [retail_balanced_long|block@gen15] 21 factors  sharpe=1.45  turn=0.083  pos=24
+15:15:31  INFO    [retail_balanced_long|block@gen16] 16 factors  sharpe=2.32  turn=0.161  pos=23
+15:15:31  INFO    [retail_balanced_long|block@gen17] 19 factors  sharpe=0.63  turn=0.047  pos=23
+15:15:31  INFO    [retail_balanced_long|block@gen18] 17 factors  sharpe=-0.22  turn=0.068  pos=24
+15:15:31  INFO    [retail_balanced_long|block@gen19] 16 factors  sharpe=0.69  turn=0.132  pos=23
+15:15:32  INFO    [retail_balanced_long|block@gen20] 22 factors  sharpe=1.35  turn=0.088  pos=23
+15:15:32  INFO    [retail_balanced_long] STITCHED sharpe=0.6891756461226115 ann_ret=0.0843669932186362 vol=0.12241725849323822
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+15:15:52  INFO    [retail_defensive_long|block@gen11] 14 factors  sharpe=0.23  turn=0.054  pos=14
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+15:16:15  INFO    [retail_defensive_long|block@gen12] 14 factors  sharpe=-0.54  turn=0.026  pos=14
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+15:16:34  INFO    [retail_defensive_long|block@gen13] 14 factors  sharpe=-0.18  turn=0.015  pos=15
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+15:16:56  INFO    [retail_defensive_long|block@gen14] 14 factors  sharpe=2.20  turn=0.026  pos=14
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+15:17:17  INFO    [retail_defensive_long|block@gen15] 14 factors  sharpe=1.41  turn=0.052  pos=14
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+15:17:40  INFO    [retail_defensive_long|block@gen16] 14 factors  sharpe=2.27  turn=0.047  pos=14
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+15:18:02  INFO    [retail_defensive_long|block@gen17] 14 factors  sharpe=0.72  turn=0.029  pos=14
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+15:18:26  INFO    [retail_defensive_long|block@gen18] 14 factors  sharpe=-0.08  turn=0.027  pos=14
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+15:18:50  INFO    [retail_defensive_long|block@gen19] 14 factors  sharpe=-0.02  turn=0.042  pos=14
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+15:19:14  INFO    [retail_defensive_long|block@gen20] 14 factors  sharpe=0.07  turn=0.035  pos=13
+15:19:14  INFO    [retail_defensive_long] STITCHED sharpe=0.5682161687195558 ann_ret=0.0529633542099932 vol=0.09320986822557907
+15:19:14  INFO    [retail_aggressive_long|block@gen11] theme matched 0 — falling back to full book
+15:19:15  INFO    [retail_aggressive_long|block@gen11] 15 factors  sharpe=0.39  turn=0.254  pos=17
+15:19:15  INFO    [retail_aggressive_long|block@gen12] theme matched 0 — falling back to full book
+15:19:15  INFO    [retail_aggressive_long|block@gen12] 18 factors  sharpe=-0.83  turn=0.124  pos=17
+15:19:15  INFO    [retail_aggressive_long|block@gen13] theme matched 0 — falling back to full book
+15:19:16  INFO    [retail_aggressive_long|block@gen13] 19 factors  sharpe=-0.28  turn=0.068  pos=18
+15:19:16  INFO    [retail_aggressive_long|block@gen14] theme matched 1 — falling back to full book
+15:19:16  INFO    [retail_aggressive_long|block@gen14] 19 factors  sharpe=2.67  turn=0.111  pos=18
+15:19:16  INFO    [retail_aggressive_long|block@gen15] theme matched 1 — falling back to full book
+15:19:16  INFO    [retail_aggressive_long|block@gen15] 21 factors  sharpe=1.57  turn=0.211  pos=18
+15:19:16  INFO    [retail_aggressive_long|block@gen16] theme matched 2 — falling back to full book
+15:19:17  INFO    [retail_aggressive_long|block@gen16] 16 factors  sharpe=1.32  turn=0.381  pos=17
+15:19:17  INFO    [retail_aggressive_long|block@gen17] theme matched 2 — falling back to full book
+15:19:17  INFO    [retail_aggressive_long|block@gen17] 19 factors  sharpe=0.54  turn=0.092  pos=17
+15:19:17  INFO    [retail_aggressive_long|block@gen18] theme matched 2 — falling back to full book
+15:19:17  INFO    [retail_aggressive_long|block@gen18] 17 factors  sharpe=-0.35  turn=0.168  pos=18
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+15:19:28  INFO    [retail_aggressive_long|block@gen19] 3 factors  sharpe=-0.40  turn=0.285  pos=18
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+15:19:38  INFO    [retail_aggressive_long|block@gen20] 3 factors  sharpe=0.41  turn=0.225  pos=18
+15:19:38  INFO    [retail_aggressive_long] STITCHED sharpe=0.4490562680091965 ann_ret=0.08290529504165692 vol=0.1846211732200096
+15:19:38  INFO    wrote data/workspaces/fmp_archive_equity_nasdaq100pit/preruns/L2WF_terra_s0/persona_strategies_netlong/report.md

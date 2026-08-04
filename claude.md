@@ -233,6 +233,219 @@ this run: generation-0 seeding now checkpoints per mechanism group and resumes
 mid-seeding (kill-resilient; `_admit_seed_group`); the figure suite's category
 palette gained `carry` + `.get` fallbacks.
 
+**Factor-book cross-analysis Terra-L4 vs Opus-5 (2026-08-04).**
+`scripts/analyze_l4_factor_books.py` + `plot_l4_factor_books.py` →
+`data/comparisons/l4_factor_analysis/` (REPORT.md + 9 figures + CSVs): pure
+factor-level comparison of `L4_terra_s0` (44 F.) vs `L2_opus5_s0` (18 F. — the
+only completed Opus evolution run; **there is NO Opus L4**, the $600 Anthropic
+budget died after L2, so model and ladder rung are confounded) vs the 101
+formulaic alphas, on the forward panel with the runs' own 60/20/20 split
+(DEV→2021-08, TEST→2024-07, FORWARD→2026-07). Headline: Opus book = best OOS
+generalisation (combined lightgbm TEST pooled IC 0.045 vs Terra 0.024 / zoo
+0.026; only book with positive cross-sectional OOS IC; eff. N 12.7/18); Terra
+book = marginal-value play (alone at zoo level, but lifts zoo FORWARD 0.024→
+0.041; biggest diversity add, median max|ρ| to zoo 0.28); the two books are
+near-orthogonal (cross ø|ρ| 0.056). All three books' cs-IC collapses jointly
+at the 2021 TEST boundary (regime shift, not pure overfit). 4/44 Terra factors
+are degenerate on the forward panel. Best single factor OOS: Opus
+`comparable_basket_repair_rate_activity` (TEST 0.062). Extended same day:
+Terra+Opus combined (62 F.) TEST 0.041 / FWD 0.039, +101 alphas (163) 0.039/
+0.040 — the union beats either book alone; the DEV→TEST combined-IC collapse
+is a combining-MODEL artefact, not factor overfitting (per-factor ICs hold or
+rise OOS). English editable report (no cs-IC columns, per user):
+**`factor_book_analysis.tex` → `.pdf`** (compile with `tectonic`, brew-installed
+2026-08-04; hand-editable LaTeX, no AI traces incl. PDF metadata) +
+`figures_en/` via `scripts/plot_l4_factor_books_en.py`; a `.docx` variant
+(`scripts/build_l4_report_docx.py`) also exists.
+
+**WALK-FORWARD TERRA LADDER — LAUNCHED 2026-08-01 on the Hostinger VPS
+(`ssh lagias`, 8 vCPU/31 GB, repo at `/root/QuantFundAgent`).** The ablation
+ladder now runs on **GPT-5.6 Terra** (OpenAI pool, global cap **$2,000**) from
+**`matrix/terra_wf_ladder.yaml`** with a NEW two-phase progressive-reveal
+schedule (user decisions 2026-08-01): panel extended to **2010→2026-07-27**
+(`quant.config.nasdaq100_2010_wf.yaml`, 4,165 bars × 232 tickers, density
+0.420), **NO forward reserve and NO test tail** — the OOS evidence is the
+schedule itself. `--wf-blocks 10 --wf-block-bars 126`
+(`progressive.build_schedule` two-phase branch + `_build_two_phase_schedule`):
+generations 1–10 reveal 2015-03-16→2021-07-20 in ~160-bar blocks (reveal-every
+1; seed window 2010→2015-03-16 = 45% of PHASE-1 span), generations 11–20 each
+reveal one 126-bar (~6-month) block of 2021-07-20→2026-07-27 that is
+**prequentially scored (traded) BEFORE the archive may adapt to it**
+(`_advance_reveal` order was already prequential→advance→rescore) — a 5-year
+live walk-forward record per arm in `prequential.jsonl`. Incompatible with
+`--final-holdout` (raises). Supporting changes: **`--graph-readonly`**
+(`loop.link_programs_into_graph(readonly=)` — no factor-provenance write-back,
+so every arm ranks mechanism groups from the identical graph snapshot; the
+ranking is factor-coverage-based and 36 factor nodes from earlier runs already
+sit in the graph), plan key **`allow_no_forward_reserve`** (explicit preflight
+opt-out), **per-arm `config:` override** in `run_ablation_matrix.py`, and
+`_reveal_index` now reads the schedule (source of truth) instead of the cadence
+formula. Arms (all Terra-L4 setup: 8 groups max × 3 demes × 2 children, 12
+seed-ideas/group, archive-cap 40; full s0 ladder before s1): L1WF oneshot on
+**`quant.config.nasdaq100_2010_to2021.yaml`** (2010→2021-07-19 = exactly the
+evolution arms' pre-WF data; its book is to be forward-deployed 2021-07-20→
+2026-07-27 post-hoc with periodic deterministic re-weighting/re-curation — no
+new factors), L2WF (retrieval none, 1×4×12), L4WF, L5WF (debate), L6WF (set 3),
+L7WF (memory). **No L0 (GP) and no L3 (rag)** — both deliberately dropped
+(user 2026-08-01; GP deferred, graphrag is the only retrieval arm kept). The
+old L4RB_terra_s0 refine-broad run was stopped locally mid-run (user will
+finish it later; checkpoint intact). Server: tmux sessions `ladder`
+(supervisor while-loop relaunching the orchestrator every 300s —
+`data/wf_ladder_orchestrator.log`), `status` (regenerates
+`scripts/matrix_status.py` HTML every 60s), `httpd` (port 8899, ufw-opened);
+phone dashboard at `http://31.97.141.166:8899/wf-2b505d86a0f2/`. Tests:
+5 new two-phase cases in `tests/test_evolution_progressive.py`, graph-readonly
+cases in `test_evolution_mechanism_groups.py`, plan guarded in
+`test_final_matrix_plan.py`. **Multi-lane parallelism (same day):**
+`run_ablation_matrix.py` gained an atomic per-arm `orchestrator.lock`
+(O_EXCL + stale-pid reclaim, released in `finally`) and an `after:` arm key
+(dependency not `ok` → `[blocked]`, retried on the next supervisor pass), so
+N supervisor lanes can run the SAME plan concurrently and self-partition the
+arms — the server runs tmux `lane-a` + `lane-b` via
+`scripts/ladder_lane.sh <lane> [delay]` (two arms in flight at all times,
+separate logs `data/wf_ladder_lane{A,B}.log`). `L7WF_terra_s1` declares
+`after: L7WF_terra_s0` (shared `memory-key` — the cross-run memory ablation
+needs s0's experience persisted first and must not race). Caveat: with
+concurrent lanes the global budget clamp is per-launch, so total spend can
+overshoot `budget_usd` by at most the in-flight arms' `max-cost-usd` (bounded
+at $250/arm; irrelevant at expected ~$700–900 total spend). Lock/blocked
+tests appended to `tests/test_final_matrix_plan.py`.
+**Rescore-cost hardening (2026-08-03).** By generation ~8 the every-generation
+archive rescore had blown up to 9h+/generation on L4WF (L2WF's last generations
+quietly took 5–8h too): each of the ~57 members re-ran its 2 jittered code
+variants on the grown window and paid 2 uncached LightGBM combined fits
+(~30s each at 550k×158), with the whole-archive "with" fit refit per member
+because the fit-cache key was caller-order-sensitive. Three fixes, deployed
+mid-run (arms killed + resumed from checkpoints; scp deploy — the server repo
+is NOT a git checkout): (1) `harness._marginal_value` now sorts its signals
+canonically by fingerprint before fitting, so every rescore member shares ONE
+cached whole-archive "with" prediction (the fit key stays ordered; canonical
+order is imposed one level up); (2) `_combined_prediction` memoises per-signal
+standardised feature COLUMNS (namespaced `("feat", key, window-scope)` entries
+in the same per-window fit cache; `_FIT_CACHE_MAX` 128→384, worst ~2 GB,
+freed on frontier advance) so X is assembled from shared columns; (3) the
+archive rescore skips jitter probes + reference-zoo diagnostics
+(`_score_program(include_probes=False, include_reference=False)`) — both were
+already computed at admission — and carries the member's admission-time
+plateau dock forward (`plateau_penalty_carried` diagnostic, subtracted from
+the rescored marginal axis; survives successive rescores). Admission-time
+child evaluation is UNCHANGED (full probes). Tests: harness fit-cache tests
+updated to the canonical-order contract (+ feature-column counts),
+`test_rescore_skips_probes_and_carries_plateau_dock` in
+`tests/test_evolution_progressive.py`.
+**Root cause found 2026-08-04:** the dominant slowdown was NOT algorithmic —
+`lagias-research.slice` (`CPUQuota=200%`, created 2026-08-03 09:02 after a
+Hostinger fair-use throttle; see the comment block in `scripts/ladder_lane.sh`)
+caps ALL research at 2 absolute cores, and inside it each arm's LightGBM
+(`n_jobs=-1` → 8 OpenMP threads × 2 arms) thrashed: an identical 150k×140 fit
+measures 23s on the VPS vs 2.7s on the M2, while `OMP_NUM_THREADS=1` restores
+~6s. `ladder_lane.sh` now exports `OMP/OPENBLAS/MKL/NUMEXPR_NUM_THREADS=1`
+(2 arms × 1 thread = the quota exactly); running supervisors must be restarted
+to pick it up (done 2026-08-04 04:04 — both arms resumed on OMP=1). Do NOT
+raise the quota without moving research off the box — it protects Lagias
+production AND keeps the fair-use monitor quiet. **Temporary lift (user
+decision 2026-08-04):** the quota is lifted RUNTIME-ONLY
+(`systemctl set-property --runtime … CPUQuota=`; slice file on disk unchanged)
+until `L7WF_terra_s0` completes — `/etc/cron.d/restore-quota-l7s0` →
+`scripts/restore_quota_after_l7s0.sh` polls its `orchestrator_status.json`
+every 10 min, restores `CPUQuota=200%` on ok, logs to
+`/root/quota_restore.log` and removes itself (a reboot also restores it). Secondary
+factors, in order: wf `reveal-every 1` doubles rescore+signal-warmup events vs
+old L4's `reveal-every 2`; organic archive×window growth (fixed above); 232 vs
+209 tickers; L5 debate latency (children phase only).
+
+**STRATEGY COMPILER — factors → sellable strategies (built + first results
+2026-08-03).** The Selector/Architect route is set aside for the product: a
+deterministic, LLM-free compiler (`backtesting/strategy_compiler.py`, design
+`docs/research-evolution/FACTOR_TO_STRATEGY_DESIGN.md`) turns a factor book
+into positions — blended **RF(0.6)+LightGBM(0.4)** prediction (`rf_gbm`; no
+ridge, user decision) → cs z-score → EWMA smoothing (halflife≈horizon) →
+sector demean → 1/σ risk scaling → beta neutralisation of the RANKING
+(projection against the DEMEANED beta — projecting raw beta then demeaning
+reintroduces the market bet; test-caught bug) → dollar-neutral LS leg → net
+exposure **from stock picking, NOT an index sleeve** (long leg gross (1+ν)/2
+overweights best-ranked names, short leg (1−ν)/2; ν=1 = long-only picking;
+user decision) → `max_positions` concentration with entry/exit hysteresis
+(retail books 12–20 names; `exit_buffer` rank N·1.5 stops edge churn) →
+no-trade band → causal vol targeting. Personas = theme filter
+(`select_factors` categories/keywords over the book) + risk params only:
+`personas.yaml` (5 product personas + master) and `personas_netlong.yaml`
+(master_long30/60/100 + 3 retail netlong). Runner
+`scripts/compile_strategy.py --prerun X [--personas-file …]` reuses
+`replay_snapshots` (book@gen g trades block g+1) + `_combined_prediction`;
+equal-weight buy&hold benchmark row included; `prequential_deployment.py` is
+now wf-mode aware (no test/forward frames when `wf_blocks>0`). Tests:
+`tests/test_strategy_compiler.py` (9). **First honest results** (net 5bps,
+walk-forward): L2WF 2021–26 master MN **0.69** (old construction 0.12);
+**master_long30 0.98** @10% vol vs EW-benchmark 0.51 @21% vol (same return,
+half the risk); L4 untouched forward 2024–26: MN **1.57**, long30 1.45,
+retail_balanced 0.99 (old construction 0.47). 2016–21 segments stay weak
+(immature mid-run books). Pending: `strategy_lab` construction grid with
+PBO/DSR, L4WF/L5WF books through the compiler, sp100_inject bias bridge.
+NOTE: old `data/backtests/sp100_inject` Sharpe 1.40 is NOT a benchmark —
+static survivorship-biased universe + factors IC-validated on the full
+backtest window (`prerun_inject` look-ahead) + light costs.
+
+**Supervisor walkthrough notebook (built + executed 2026-08-04).**
+`notebooks/evolution_walkthrough_for_supervisor.ipynb` — a clone-runnable guided
+demo of the evolutionary researcher for the thesis supervisor (only an OpenAI key
+in `.env` is needed; ~$1–2/pass, hard `QF_MAX_LLM_COST_USD` ceiling in setup).
+Flow: graph snapshot → gap queries/`mechanism_group_specs` → one live seeded
+factor with verbatim LLM prompts/replies (via `QF_LLM_TRANSCRIPT_PATH`) →
+codegen → 4-axis Pareto scoring explained per-axis (marginal-value decomposition
++ jitter figures, AST-novelty clone demo) → reflection brief → mutation
+parent-vs-child → one live generation (`EvolutionLoop`, graphrag, 2 groups
+max-mode, `graph_readonly=True`, scratch `out_dir`, metered cost/per-role
+table) → real `L4_terra_s0` survivors (code from `state.json`, lineage, rescore
+drift plot). Demo data: `quant.config.sp100.yaml` yfinance OHLCV via
+`QF_CONFIG_FILE`; fixed book = 8 OHLCV-only formulaic alphas. Runs on a fresh
+clone because graph/embeddings/paper index/prebook/L4 artifacts are committed
+(fulltext_cache + data/market are not → abstracts-only re-embed for cents +
+yfinance download). Generated by a builder script (nbformat); executed outputs
+saved in the notebook. Gotcha fixed in-session: a notebook cell calling
+`parse_child_response` directly must wrap it in a resample-retry loop (Terra
+occasionally emits JSON with unescaped newlines; the loop's
+`_parse_and_validate_child` already retries internally).
+
+**GLD HIGH-FREQUENCY L4WF RUN — launched locally overnight 2026-08-03.** The
+server ladder's L4WF arm replicated on **single-ticker GLD 10s LOBSTER bars**
+(`quant.config.gld_hf.yaml`: lobster provider, tickers [GLD], fundamentals
+off; panel 1,409,220 bars × 41 fields 2024-01→2026-06-01, level-5 book) as
+prerun `lobster_equity_gld_hf/L4WF_gld_s0` on GPT-5.6 Terra. Same L4WF shape
+(20 gens, 8 groups max × 3 demes × 2 children, 12 seeds/group, archive-cap 40,
+graphrag + `--graph-readonly`, curation archive, selection-deflation on,
+lightgbm) with HF deltas: **forecast horizon 60 bars (=10 min)**;
+`--wf-blocks 10 --wf-block-bars 42000` → seed 2024-01→2024-10, phase 1 gens
+1–10 → 2025-09, phase 2 gens 11–20 = 10 prequential ~18-day blocks →
+2026-06; **no fixed/reference book** (the daily formulaic zoo is meaningless
+for one HF name); max-cost $150. Retrieval auto-masks to price/general scope
+(no fundamental field in scope → `allowed_scopes={"price","general"}`; the
+legacy corpus carries ~259 microstructure/HF papers, and graphrag's gap query
+filters mechanisms to those *computable* from the LOBSTER fields). Supporting
+seams added (all default-off/byte-identical): **`QF_EXECUTION_LAG_BARS`** in
+`backtesting/data_loader.forward_returns` — the label becomes
+`close[t+L+h]/close[t+L]−1`, so a signal observed at bar t is only acted on L
+bars (run: 3 = 30 s) later, uniformly across IC/marginal/combined-model/
+comparison consumers; **`QF_SIGNAL_CACHE_MAX`** env cap for the server-side
+signal cache (run: 48 — each HF signal ≈ 12 MB and the local 8 GB Mac cannot
+hold the default 512); `LobsterProvider.available_fields` now **sniffs the
+on-disk CSV headers** and stops advertising per-level book columns the feed
+lacks (GLD has 5 levels, the tier advertised 10 → factors on phantom fields
+were all-NaN); `codegen._make_synthetic_panel` gained the per-level
+askPrice/askDepth/bidPrice/bidDepth 1–10 columns so per-level factors survive
+the smoke test. Ops: `scripts/gld_overnight_supervisor.sh` under
+`nohup caffeinate -ims` — relaunch-on-crash (checkpoint resume), RSS watchdog
+(4.8 GB → TERM + resume), `QF_USE_MCP=0` (in-process eval; an MCP subprocess
+would hold a second panel copy), rc=3 zero-candidates stop / rc=4 budget
+stop, then chains `run_model_comparison.py --preruns L4WF_gld_s0 --tickers
+GLD --horizon 60 --holding-period 60 --no-downstream` (per-underlying IC +
+combined-signal strategy backtest) into `data/comparisons/gld_hf_l4wf/`.
+Logs `data/gld_l4wf_{supervisor,run,comparison}.log`. Live smoke
+(`smoke_gld`, $0.53) verified graphrag→Terra→codegen→eval→prequential→persist
+end-to-end. Known quirk: persist-time `backtest IC@60` is None on a 1-ticker
+panel (cross-sectional grid) — the harness/comparison per-underlying ICs are
+the meaningful ones.
+
 **Evolutionary researcher — knowledge-graph nested islands replace the QD grid;
 4-axis vector (done, 2026-07-21). THIS SUPERSEDES THE TWO BLOCKS BELOW.**
 Diversity is no longer maintained by a Quality-Diversity behavior grid but by a

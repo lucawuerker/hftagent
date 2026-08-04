@@ -172,6 +172,11 @@ def _parse_args() -> argparse.Namespace:
                         "NtoM: N papers, M ideas.")
     p.add_argument("--rag-k", type=int, default=4,
                    help="Papers retrieved per grounded brainstorm.")
+    p.add_argument("--graph-readonly", action="store_true",
+                   help="Never write factor provenance back into the knowledge "
+                        "graph — every arm of a comparison ladder then resolves "
+                        "its mechanism groups from the identical graph snapshot "
+                        "(the group ranking is factor-coverage-based).")
 
     # ── agent split + debate (P3) ──
     p.add_argument("--debate", choices=["on", "off"], default="off",
@@ -243,6 +248,17 @@ def _parse_args() -> argparse.Namespace:
                         "rescore-only step after the last generation, so the "
                         "final front is ranked on data no selection pressure "
                         "ever queried (no child is fitted after it).")
+    p.add_argument("--wf-blocks", type=int, default=0,
+                   help="Progressive mode: two-phase walk-forward schedule — the "
+                        "LAST this-many generations each reveal one fixed "
+                        "--wf-block-bars block at the dev tail (prequentially "
+                        "scored before the archive adapts to it); earlier "
+                        "generations reveal the pre-walk-forward span in equal "
+                        "blocks at the --reveal-every cadence (0 = classic "
+                        "schedule; incompatible with --final-holdout).")
+    p.add_argument("--wf-block-bars", type=int, default=126,
+                   help="Progressive mode: bars per walk-forward block when "
+                        "--wf-blocks > 0 (default 126 ≈ 6 months of trading days).")
     p.add_argument("--walk-forward", default=None,
                    help="Comma list of ascending ISO dates d0,d1,…: re-run the "
                         "WHOLE loop per fold (evolve < d_i, touch-once score on "
@@ -433,6 +449,9 @@ def main() -> None:
         reveal_every=args.reveal_every,
         val_blocks=args.val_blocks,
         final_holdout=args.final_holdout,
+        wf_blocks=args.wf_blocks,
+        wf_block_bars=args.wf_block_bars,
+        graph_readonly=args.graph_readonly,
         force_prediction_horizon=(args.prediction_horizon_mode == "fixed"),
         independence_metric=args.independence_metric,
         marginal_model=args.marginal_model,

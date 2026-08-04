@@ -25,7 +25,8 @@ PLAN_PATHS = [REPO / "matrix" / "final_matrix.yaml",
               REPO / "matrix" / "opus_ladder.yaml",
               REPO / "matrix" / "terra_l4.yaml",
               REPO / "matrix" / "terra_l4_refine.yaml",
-              REPO / "matrix" / "terra_l4_refine_broad.yaml"]
+              REPO / "matrix" / "terra_l4_refine_broad.yaml",
+              REPO / "matrix" / "terra_wf_ladder.yaml"]
 
 run_ablation_matrix = importlib.import_module("run_ablation_matrix")
 
@@ -137,3 +138,58 @@ def test_evolution_defaults_do_not_leak_into_gp_or_oneshot(plan):
         argv, _env, _name = run_ablation_matrix.arm_command(plan, arm)
         leaked = evolution_only & set(argv)
         assert not leaked, f"{arm['name']} inherited evolution flags: {leaked}"
+
+
+# ── multi-lane orchestration: per-arm lock + after-dependency (2026-08-01) ────
+
+def _patch_scope(monkeypatch, tmp_path):
+    monkeypatch.setattr(run_ablation_matrix, "scope_dir",
+                        lambda plan, name: tmp_path / name)
+
+
+def _never_launch(monkeypatch):
+    def _boom(*a, **k):  # pragma: no cover - failure path
+        raise AssertionError("subprocess must not be launched")
+    monkeypatch.setattr(run_ablation_matrix.subprocess, "run", _boom)
+
+
+_MINI_PLAN = {"config_file": "quant.config.nasdaq100_2010_wf.yaml",
+              "providers": {"terra": {"model": "m"}},
+              "arms": []}
+
+
+def test_after_dependency_blocks_until_dep_ok(tmp_path, monkeypatch):
+    _patch_scope(monkeypatch, tmp_path)
+    _never_launch(monkeypatch)
+    arm = {"name": "B", "after": "A", "flags": {}}
+    res = run_ablation_matrix.run_arm(_MINI_PLAN, arm, tmp_path / "logs")
+    assert res["status"] == "blocked"
+    # dep failed -> still blocked
+    (tmp_path / "A").mkdir(parents=True)
+    (tmp_path / "A" / "orchestrator_status.json").write_text('{"status": "failed"}')
+    assert run_ablation_matrix.run_arm(
+        _MINI_PLAN, arm, tmp_path / "logs")["status"] == "blocked"
+
+
+def test_live_lock_skips_arm_and_stale_lock_is_reclaimed(tmp_path, monkeypatch):
+    import json as _json
+    import os as _os
+    _patch_scope(monkeypatch, tmp_path)
+    arm = {"name": "A", "flags": {}}
+    sdir = tmp_path / "A"
+    sdir.mkdir(parents=True)
+    # live pid (this test process) -> locked, no launch
+    (sdir / "orchestrator.lock").write_text(_json.dumps({"pid": _os.getpid()}))
+    _never_launch(monkeypatch)
+    assert run_ablation_matrix.run_arm(
+        _MINI_PLAN, arm, tmp_path / "logs")["status"] == "locked"
+    # stale pid -> reclaimed, arm launches, lock released afterwards
+    (sdir / "orchestrator.lock").write_text(_json.dumps({"pid": 2 ** 30}))
+
+    class _Proc:
+        returncode = 0
+    monkeypatch.setattr(run_ablation_matrix.subprocess, "run",
+                        lambda *a, **k: _Proc())
+    res = run_ablation_matrix.run_arm(_MINI_PLAN, arm, tmp_path / "logs")
+    assert res["status"] == "ok"
+    assert not (sdir / "orchestrator.lock").exists()

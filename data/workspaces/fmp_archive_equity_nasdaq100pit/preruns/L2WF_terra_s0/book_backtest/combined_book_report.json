@@ -1,0 +1,97 @@
+{
+  "label": "combined_book",
+  "construction": "cross_sectional",
+  "factor_ids": [
+    "cash_return_accrual_roic_residual",
+    "cash_collected_sales_acceleration_lag",
+    "quiet_operating_leverage_delivery_drift",
+    "cash_confirmed_margin_step_diffusion_v2",
+    "deleveraging_validated_earnings_attention_gap",
+    "silent_acceptance_credit_cash_audit_unwind",
+    "orthogonal_volume_relaxation_displacement_revers",
+    "estimate_revision_relative_reaction_gap",
+    "report_congestion_cash_conversion_resolution",
+    "incremental_roic_filing_diffusion",
+    "rolling_transfer_deficit_signal",
+    "muted_productivity_innovation_assimilation",
+    "validated_trade_credit_capacity_diffusion",
+    "liquidation_sourced_cash_roic_correction",
+    "trade_credit_optionality_unpriced_response",
+    "renewal_inventory_delayed_transfer_state",
+    "working_capital_harvest_disclosure_decay",
+    "surprise_credit_extension_trap_j_2",
+    "cash_validated_efficiency_transfer_diffusion_j"
+  ],
+  "n_factors": 19,
+  "models_raced": [
+    "ridge",
+    "elastic_net",
+    "random_forest",
+    "lightgbm"
+  ],
+  "race": {
+    "ridge": {
+      "val_ic": 0.027427743011163404,
+      "val_sharpe": 0.4287804841871188,
+      "val_ann_ret": 0.027589275623602694,
+      "val_ann_vol": 0.06434358988121018,
+      "val_max_dd": -0.05220841110562613,
+      "val_n_bars": 502
+    },
+    "elastic_net": {
+      "val_ic": 0.028948247891510463,
+      "val_sharpe": 0.6898252422598411,
+      "val_ann_ret": 0.04372413162738676,
+      "val_ann_vol": 0.06338436019555936,
+      "val_max_dd": -0.04723128780229391,
+      "val_n_bars": 502
+    },
+    "random_forest": {
+      "val_ic": -0.009290694136401424,
+      "val_sharpe": 0.10979298186599123,
+      "val_ann_ret": 0.009540125462353437,
+      "val_ann_vol": 0.08689194245582765,
+      "val_max_dd": -0.07965213830474038,
+      "val_n_bars": 502
+    },
+    "lightgbm": {
+      "val_ic": -0.009394546936076387,
+      "val_sharpe": 0.4264498002949996,
+      "val_ann_ret": 0.031865429284943035,
+      "val_ann_vol": 0.07472257992124726,
+      "val_max_dd": -0.06538260860476752,
+      "val_n_bars": 502
+    }
+  },
+  "winner": "elastic_net",
+  "n_trials_strategy": 4,
+  "pbo_cscv_val": 0.7063492063492064,
+  "forward_gross": {
+    "sharpe": 0.546204488848788,
+    "ann_ret": 0.04848601328347154,
+    "ann_vol": 0.08876897622292239,
+    "max_dd": -0.11679870199165487,
+    "n_bars": 499
+  },
+  "forward": {
+    "ic": 0.0253886162851487,
+    "sharpe": 0.21836893413654324,
+    "ann_ret": 0.019389019295495597,
+    "ann_vol": 0.08879019065675295,
+    "max_dd": -0.12704949502291718,
+    "n_bars": 499,
+    "window": [
+      "2024-07-29",
+      "2026-07-27"
+    ],
+    "deflated_sharpe_prob": 0.5011913349794782
+  },
+  "in_panel_net": {
+    "sharpe": 0.3959171334111986,
+    "ann_ret": 0.025666491767844725,
+    "ann_vol": 0.06482793898486724,
+    "max_dd": -0.1205842049818141,
+    "n_bars": 3659
+  },
+  "mean_daily_turnover": 0.24358389369196284
+}

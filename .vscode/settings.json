@@ -1,0 +1,26 @@
+{
+  // Cursor/VS Code file watcher + search: the data trees hold multi-GB
+  // archives and jsonl logs that live runs append to continuously; watching
+  // them is the main editor RAM/CPU churn.
+  "files.watcherExclude": {
+    "**/ticker_data/**": true,
+    "**/data/**": true,
+    "**/venv/**": true,
+    "**/__pycache__/**": true,
+    "**/binSamples/**": true,
+    "**/fillSamples/**": true,
+    "**/diagrams/**": true
+  },
+  "search.exclude": {
+    "**/ticker_data/**": true,
+    "**/data/vendor/**": true,
+    "**/data/workspaces/**": true,
+    "**/data/comparisons/**": true,
+    "**/data/papers/**": true,
+    "**/venv/**": true,
+    "**/*.jsonl": true
+  },
+  "files.exclude": {
+    "**/__pycache__": true
+  }
+}

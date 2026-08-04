@@ -1,0 +1,28 @@
+{
+  "config_hash": "60b96db9943e",
+  "config_name": "lobster_equity_gld_hf",
+  "written_at": "2026-08-03T22:13:29+00:00",
+  "data": {
+    "provider": "lobster",
+    "asset_class": "equity",
+    "frequency": "10s",
+    "data_dir": "ticker_data",
+    "lobster_level": 3,
+    "cache_dir": "data/market",
+    "n_tickers": null,
+    "tickers": [
+      "GLD"
+    ],
+    "universe_preset": null,
+    "membership": null,
+    "start": null,
+    "end": null,
+    "dtype": "float32",
+    "fundamentals": false,
+    "reporting_lag_days": 60,
+    "fundamentals_staleness_days": 400,
+    "fundamentals_ttl_days": 90,
+    "fundamentals_period": "quarter",
+    "archive_dir": "data/vendor/fmp"
+  }
+}

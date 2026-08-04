@@ -1,0 +1,112 @@
+12:39:00  INFO     Loading panel from ticker_data (fields=['accountsPayable', 'acquisitionsNet', 'assetGrowth', 'assetTurnover', 'bookValuePerShare', 'bookValuePerShareGrowth', 'capex', 'capexPerShare', 'capexToOperatingCashFlow', 'capexToRevenue', 'cash', 'cashConversionCycle', 'cashPerShare', 'cashRatio', 'changeInWorkingCapital', 'close', 'costOfRevenue', 'currentRatio', 'daysInventoryOutstanding', 'daysPayablesOutstanding', 'daysSalesOutstanding', 'debtGrowth', 'debtToAssets', 'debtToCapital', 'debtToEquity', 'depreciationAmortization', 'dividendPayoutRatio', 'dividendPerShareGrowth', 'dividendYield', 'dividendsPaid', 'earningsYield', 'ebit', 'ebitGrowth', 'ebitMargin', 'ebitda', 'ebitdaGrowth', 'ebitdaMargin', 'enterpriseValue', 'eps', 'epsActual', 'epsDiluted', 'epsDilutedGrowth', 'epsEstimate', 'epsGrowth', 'epsSurprise', 'evToEbitda', 'evToFreeCashFlow', 'evToOperatingCashFlow', 'evToSales', 'financialLeverage', 'freeCashFlow', 'freeCashFlowGrowth', 'freeCashFlowPerShare', 'freeCashFlowYield', 'goodwill', 'grahamNumber', 'grossMargin', 'grossProfit', 'grossProfitGrowth', 'high', 'incomeBeforeTax', 'incomeQuality', 'incomeTaxExpense', 'industry', 'intangibleAssets', 'intangiblesToAssets', 'interestCoverage', 'interestExpense', 'inventory', 'inventoryGrowth', 'inventoryTurnover', 'investedCapital', 'longTermDebt', 'low', 'marketCap', 'netDebtIssuance', 'netDebtToEbitda', 'netIncome', 'netIncomeGrowth', 'netIncomeGrowth3Y', 'netIncomeGrowth5Y', 'netIncomePerShare', 'netMargin', 'netStockIssuance', 'open', 'operatingCashFlow', 'operatingCashFlowGrowth', 'operatingCashFlowPerShare', 'operatingCycle', 'operatingExpenses', 'operatingIncome', 'operatingIncomeGrowth', 'operatingMargin', 'payablesTurnover', 'pbRatio', 'peRatio', 'pegRatio', 'pfcfRatio', 'pocfRatio', 'ppe', 'pretaxMargin', 'psRatio', 'quickRatio', 'rdExpense', 'rdExpenseGrowth', 'rdToRevenue', 'receivables', 'receivablesGrowth', 'receivablesTurnover', 'retainedEarnings', 'returns', 'revenue', 'revenueActual', 'revenueEstimate', 'revenueGrowth', 'revenueGrowth3Y', 'revenueGrowth5Y', 'revenuePerShare', 'revenueSurprise', 'roa', 'roce', 'roe', 'roic', 'sbcToRevenue', 'sector', 'sgaExpense', 'sgaExpenseGrowth', 'sgaToRevenue', 'shareRepurchase', 'sharesDiluted', 'sharesGrowth', 'sharesOutstanding', 'shortTermDebt', 'stockBasedCompensation', 'tangibleBookValuePerShare', 'totalAssets', 'totalCurrentAssets', 'totalCurrentLiabilities', 'totalDebt', 'totalEquity', 'totalLiabilities', 'volume', 'vwap', 'workingCapital'], n_tickers=all) …
+12:45:01  INFO     Panel loaded in 361.5s (232 tickers, 144 fields)
+12:45:01  INFO     [combined_book_per_underlying] IS<2022-07-28 VAL<2024-07-28 FORWARD 2024-07-29->2026-07-27
+12:45:25  INFO     [combined_book_per_underlying] 19/19 factors computable
+12:45:29  INFO     [combined_book_per_underlying] ridge: VAL IC=0.0274 sharpe=-0.4497834081830004
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:1663: FutureWarning: 'n_alphas' was deprecated in 1.7 and will be removed in 1.9. 'alphas' now accepts an integer value which removes the need to pass 'n_alphas'. The default value of 'alphas' will change from None to 100 in 1.9. Pass an explicit value to 'alphas' and leave 'n_alphas' to its default value to silence this warning.
+  warnings.warn(
+12:45:34  INFO     [combined_book_per_underlying] elastic_net: VAL IC=0.0289 sharpe=-0.378065217101031
+12:47:09  INFO     [combined_book_per_underlying] random_forest: VAL IC=-0.0093 sharpe=-0.9338567362956847
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+12:47:20  INFO     [combined_book_per_underlying] lightgbm: VAL IC=-0.0094 sharpe=-0.9664445479732533
+12:47:20  INFO     [combined_book_per_underlying] winner on VAL IC: elastic_net (n_trials=4)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:1663: FutureWarning: 'n_alphas' was deprecated in 1.7 and will be removed in 1.9. 'alphas' now accepts an integer value which removes the need to pass 'n_alphas'. The default value of 'alphas' will change from None to 100 in 1.9. Pass an explicit value to 'alphas' and leave 'n_alphas' to its default value to silence this warning.
+  warnings.warn(
+{
+  "label": "combined_book_per_underlying",
+  "construction": "per_underlying",
+  "factor_ids": [
+    "cash_return_accrual_roic_residual",
+    "cash_collected_sales_acceleration_lag",
+    "quiet_operating_leverage_delivery_drift",
+    "cash_confirmed_margin_step_diffusion_v2",
+    "deleveraging_validated_earnings_attention_gap",
+    "silent_acceptance_credit_cash_audit_unwind",
+    "orthogonal_volume_relaxation_displacement_revers",
+    "estimate_revision_relative_reaction_gap",
+    "report_congestion_cash_conversion_resolution",
+    "incremental_roic_filing_diffusion",
+    "rolling_transfer_deficit_signal",
+    "muted_productivity_innovation_assimilation",
+    "validated_trade_credit_capacity_diffusion",
+    "liquidation_sourced_cash_roic_correction",
+    "trade_credit_optionality_unpriced_response",
+    "renewal_inventory_delayed_transfer_state",
+    "working_capital_harvest_disclosure_decay",
+    "surprise_credit_extension_trap_j_2",
+    "cash_validated_efficiency_transfer_diffusion_j"
+  ],
+  "n_factors": 19,
+  "models_raced": [
+    "ridge",
+    "elastic_net",
+    "random_forest",
+    "lightgbm"
+  ],
+  "race": {
+    "ridge": {
+      "val_ic": 0.027427743011163404,
+      "val_sharpe": -0.4497834081830004,
+      "val_ann_ret": -0.1250223664993309,
+      "val_ann_vol": 0.27796126807875465,
+      "val_max_dd": -0.4544812706140541,
+      "val_n_bars": 502
+    },
+    "elastic_net": {
+      "val_ic": 0.028948247891510463,
+      "val_sharpe": -0.378065217101031,
+      "val_ann_ret": -0.0976153262985655,
+      "val_ann_vol": 0.25819705670643484,
+      "val_max_dd": -0.4046459581806565,
+      "val_n_bars": 502
+    },
+    "random_forest": {
+      "val_ic": -0.009290694136401424,
+      "val_sharpe": -0.9338567362956847,
+      "val_ann_ret": -0.7054772748062811,
+      "val_ann_vol": 0.7554448636358153,
+      "val_max_dd": -0.9163114628303545,
+      "val_n_bars": 502
+    },
+    "lightgbm": {
+      "val_ic": -0.009394546936076387,
+      "val_sharpe": -0.9664445479732533,
+      "val_ann_ret": -0.5726789802450581,
+      "val_ann_vol": 0.5925626891331041,
+      "val_max_dd": -0.8241423945550944,
+      "val_n_bars": 502
+    }
+  },
+  "winner": "elastic_net",
+  "n_trials_strategy": 4,
+  "pbo_cscv_val": 0.21825396825396826,
+  "forward_gross": {
+    "sharpe": 0.24408464220815473,
+    "ann_ret": 0.07633475417603468,
+    "ann_vol": 0.3127388658518573,
+    "max_dd": -0.2772509275223386,
+    "n_bars": 499
+  },
+  "forward": {
+    "ic": 0.0253886162851487,
+    "sharpe": -0.11967663847706417,
+    "ann_ret": -0.037429273880077496,
+    "ann_vol": 0.3127533857600016,
+    "max_dd": -0.3359067921521016,
+    "n_bars": 499,
+    "window": [
+      "2024-07-29",
+      "2026-07-27"
+    ],
+    "deflated_sharpe_prob": 0.28728040340324423
+  },
+  "in_panel_net": {
+    "sharpe": 0.2506547696759126,
+    "ann_ret": 0.058582263818677247,
+    "ann_vol": 0.23371693223481033,
+    "max_dd": -0.5318126727697168,
+    "n_bars": 3659
+  },
+  "mean_daily_turnover": 1.1682112552033304
+}

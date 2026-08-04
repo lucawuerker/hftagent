@@ -10,10 +10,15 @@ to live in ``backtesting/data_loader.py`` (also still importable directly for
 
 from __future__ import annotations
 
+import re
+from pathlib import Path
+
 import pandas as pd
 
 from quant_fund_agent.data.providers.base import DataProvider
 from quant_fund_agent.data.tiers import lobster_fields_for_level
+
+_PER_LEVEL_RE = re.compile(r"(?:ask|bid)(?:Price|Depth)\d+$")
 
 
 class LobsterProvider(DataProvider):
@@ -29,7 +34,48 @@ class LobsterProvider(DataProvider):
         # Level-2 feed exposes only book-derivable fields, a Level-3 feed adds
         # the trade/message-stream fields (see ``data.lobster_level``).
         level = int(getattr(self.data, "lobster_level", 3) or 3)
-        return lobster_fields_for_level(level)
+        fields = lobster_fields_for_level(level)
+        # The tier advertises book levels 1-10, but the feed on disk may carry
+        # fewer (e.g. a level-5 export).  Advertising a per-level column the
+        # CSVs don't have makes the researcher invent factors whose signals
+        # are all-NaN — sniff the CSV headers and drop absent per-level
+        # columns.  Fail-open: any surprise keeps the static advertisement.
+        try:
+            discovered = self._discovered_per_level_fields()
+            if discovered is not None:
+                fields = frozenset(
+                    f for f in fields
+                    if not _PER_LEVEL_RE.fullmatch(f) or f in discovered)
+        except Exception:  # noqa: BLE001 — advertisement must never crash
+            pass
+        return fields
+
+    def _discovered_per_level_fields(self) -> frozenset[str] | None:
+        """Union of per-level book columns present in the on-disk CSV headers.
+
+        Reads one header line per configured ticker directory (cheap).  Returns
+        ``None`` when nothing could be sniffed (no dirs / no CSVs) so the
+        caller keeps the static tier advertisement.
+        """
+        root = Path(self.data.data_dir)
+        if not root.is_dir():
+            return None
+        tickers = self.data.tickers
+        dirs = ([root / t for t in tickers] if tickers
+                else [d for d in sorted(root.iterdir()) if d.is_dir()])
+        found: set[str] = set()
+        sniffed = False
+        for d in dirs:
+            if not d.is_dir():
+                continue
+            csvs = sorted(d.glob("bin*.csv"))
+            if not csvs:
+                continue
+            with open(csvs[0], "r", encoding="utf-8", errors="replace") as fh:
+                header = fh.readline().strip().split(",")
+            sniffed = True
+            found.update(c for c in header if _PER_LEVEL_RE.fullmatch(c))
+        return frozenset(found) if sniffed else None
 
     def load(self, *, fields: list[str] | None = None) -> dict[str, pd.DataFrame]:
         from quant_fund_agent.backtesting.data_loader import load_panel

@@ -173,15 +173,18 @@ def elabel(ax, x, y, text, color=INK, bg="white"):
 def build():
     fig, ax = plt.subplots(figsize=(12.4, 9.4))
     ax.set_xlim(-0.9, 15.0)
-    ax.set_ylim(-2.55, 10.15)
+    ax.set_ylim(-2.55, 10.62)
     ax.set_aspect("equal")
     ax.axis("off")
 
     # ---- Entry path I: ideation ------------------------------------------
-    retrieval = box(ax, 0.95, 8.35, 1.7, 0.95, "Literature\nretrieval", "agent")
-    hypothesis = box(ax, 2.95, 8.35, 1.7, 0.95, "Hypothesis\nagent", "agent")
-    debate = box(ax, 4.95, 8.35, 1.7, 0.95, "Debate\nagents", "agent")
-    codegen = box(ax, 6.95, 8.35, 1.7, 0.95, "Code-gen\nagent", "agent")
+    # the row is shifted so the last box (code-gen) sits exactly on the
+    # deterministic spine (x = 6.9) — its feed into the compiler is then a
+    # clean vertical drop rather than a slanted segment.
+    retrieval = box(ax, 0.90, 8.35, 1.7, 0.95, "Literature\nretrieval", "agent")
+    hypothesis = box(ax, 2.90, 8.35, 1.7, 0.95, "Hypothesis\nagent", "agent")
+    debate = box(ax, 4.90, 8.35, 1.7, 0.95, "Debate\nagents", "agent")
+    codegen = box(ax, 6.90, 8.35, 1.7, 0.95, "Code-gen\nagent", "agent")
     for a, b in [(retrieval, hypothesis), (hypothesis, debate), (debate, codegen)]:
         arrow(ax, anchor(a, "E"), anchor(b, "W"), "flow")
 
@@ -211,8 +214,8 @@ def build():
     arrow(ax, anchor(selection, "S"), anchor(book, "N"), "flow")
 
     # both entry paths feed the compiler
-    elbow(ax, [anchor(codegen, "S"), (6.9, 6.55), anchor(compile_, "N")], "flow")
-    elabel(ax, 7.75, 6.55, "new program")
+    arrow(ax, anchor(codegen, "S"), anchor(compile_, "N"), "flow")
+    elabel(ax, 7.70, 6.55, "new program")
     # evolution feed leaves the mutation box slightly left of centre, enters
     # the compiler from the east (down, then left)
     elbow(ax, [(10.2, anchor(variate, "S")[1]), (10.2, 5.55),
@@ -239,19 +242,24 @@ def build():
 
     # ---- group frames + agent boundary -----------------------------------
     AGENT_FILL_LIGHT = "#F3F6FC"
-    group_frame(ax, 0.1, 7.88, 7.8, 8.82, AGENT, AGENT_FILL_LIGHT)
-    group_frame(ax, 9.28, 7.18, 14.25, 9.47, AGENT, AGENT_FILL_LIGHT)
+    # (x0, y0, x1, y1) of the box extents; group_frame pads by PAD on each side,
+    # so the drawn top edge is y1 + PAD and each title sits just above it.
+    PAD = 0.18
+    ide_x0, ide_y1 = 0.05, 8.82
+    evo_x0, evo_y1 = 9.5, 9.47
+    group_frame(ax, ide_x0, 7.88, 7.75, ide_y1, AGENT, AGENT_FILL_LIGHT, pad=PAD)
+    group_frame(ax, evo_x0, 7.18, 14.25, evo_y1, AGENT, AGENT_FILL_LIGHT, pad=PAD)
     # boundary encloses the two proposer groups only; kept inside the axes so
     # both vertical borders render, with headroom above the group titles.
-    group_frame(ax, 0.1, 7.18, 14.25, 9.72, AGENT, None, pad=0.28,
+    group_frame(ax, 0.1, 7.18, 14.25, 10.02, AGENT, None, pad=0.28,
                 ls=(0, (5, 3)), lw=1.2)
 
-    ax.text(0.1, 8.98, "Ideation  (literature-grounded)", fontsize=9,
-            weight="bold", color=AGENT, ha="left", va="bottom")
-    ax.text(9.28, 9.58, "Evolution  (self-improvement)", fontsize=9,
-            weight="bold", color=AGENT, ha="left", va="bottom")
-    ax.text(14.45, 9.93, "Agent boundary (LLM)", fontsize=8.5, style="italic",
-            color=AGENT, ha="right", va="top")
+    ax.text(ide_x0, ide_y1 + PAD + 0.06, "Ideation  (literature-grounded)",
+            fontsize=9, weight="bold", color=AGENT, ha="left", va="bottom")
+    ax.text(evo_x0, evo_y1 + PAD + 0.06, "Evolution  (self-improvement)",
+            fontsize=9, weight="bold", color=AGENT, ha="left", va="bottom")
+    ax.text(14.53, 10.36, "Agent boundary (LLM)", fontsize=8.5, style="italic",
+            color=AGENT, ha="right", va="bottom")
 
     # ---- legend: compact two-row horizontal band -------------------------
     _horizontal_legend(ax, y_top=-0.95)

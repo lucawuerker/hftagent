@@ -1,0 +1,26 @@
+# WALK-FORWARD LADDER config — survivorship-bias-free Nasdaq-100, 2010 → 2026-07-27.
+#
+# EXPLICIT DECISION 2026-08-01 (supersedes decision A3 for the WF ladder): this
+# ladder keeps NO forward reserve and NO in-panel TEST tail.  The out-of-sample
+# evidence is the two-phase progressive-reveal schedule itself (--wf-blocks 10
+# --wf-block-bars 126): the final 10 generations each reveal one ~6-month block
+# of the 2021→2026 tail which is PREQUENTIALLY scored (traded) before the
+# archive may adapt to it — a 5-year live walk-forward record replaces the
+# static reserve.  Research runs may load this config ONLY with
+# --progressive-reveal and the wf schedule; anything else would train on 2026.
+#
+# Same FMP archive as quant.config.nasdaq100_2010.yaml — only the end date
+# differs (archive downloaded 2026-07-27).
+data:
+  provider: fmp_archive
+  asset_class: equity
+  frequency: 1d
+  start: '2010-01-01'
+  end: '2026-07-27'
+  archive_dir: data/vendor/fmp
+  membership: nasdaq100
+  fundamentals: true
+  fundamentals_period: quarter
+  fundamentals_staleness_days: 400
+  reporting_lag_days: 60
+  dtype: float32

@@ -1,0 +1,234 @@
+12:53:23  INFO     replay VERIFIED: final archive 19/19, evictions 169/169 match
+12:53:23  INFO     Loading panel from ticker_data (fields=['accountsPayable', 'acquisitionsNet', 'assetGrowth', 'assetTurnover', 'bookValuePerShare', 'bookValuePerShareGrowth', 'capex', 'capexPerShare', 'capexToOperatingCashFlow', 'capexToRevenue', 'cash', 'cashConversionCycle', 'cashPerShare', 'cashRatio', 'changeInWorkingCapital', 'close', 'costOfRevenue', 'currentRatio', 'daysInventoryOutstanding', 'daysPayablesOutstanding', 'daysSalesOutstanding', 'debtGrowth', 'debtToAssets', 'debtToCapital', 'debtToEquity', 'depreciationAmortization', 'dividendPayoutRatio', 'dividendPerShareGrowth', 'dividendYield', 'dividendsPaid', 'earningsYield', 'ebit', 'ebitGrowth', 'ebitMargin', 'ebitda', 'ebitdaGrowth', 'ebitdaMargin', 'enterpriseValue', 'eps', 'epsActual', 'epsDiluted', 'epsDilutedGrowth', 'epsEstimate', 'epsGrowth', 'epsSurprise', 'evToEbitda', 'evToFreeCashFlow', 'evToOperatingCashFlow', 'evToSales', 'financialLeverage', 'freeCashFlow', 'freeCashFlowGrowth', 'freeCashFlowPerShare', 'freeCashFlowYield', 'goodwill', 'grahamNumber', 'grossMargin', 'grossProfit', 'grossProfitGrowth', 'high', 'incomeBeforeTax', 'incomeQuality', 'incomeTaxExpense', 'industry', 'intangibleAssets', 'intangiblesToAssets', 'interestCoverage', 'interestExpense', 'inventory', 'inventoryGrowth', 'inventoryTurnover', 'investedCapital', 'longTermDebt', 'low', 'marketCap', 'netDebtIssuance', 'netDebtToEbitda', 'netIncome', 'netIncomeGrowth', 'netIncomeGrowth3Y', 'netIncomeGrowth5Y', 'netIncomePerShare', 'netMargin', 'netStockIssuance', 'open', 'operatingCashFlow', 'operatingCashFlowGrowth', 'operatingCashFlowPerShare', 'operatingCycle', 'operatingExpenses', 'operatingIncome', 'operatingIncomeGrowth', 'operatingMargin', 'payablesTurnover', 'pbRatio', 'peRatio', 'pegRatio', 'pfcfRatio', 'pocfRatio', 'ppe', 'pretaxMargin', 'psRatio', 'quickRatio', 'rdExpense', 'rdExpenseGrowth', 'rdToRevenue', 'receivables', 'receivablesGrowth', 'receivablesTurnover', 'retainedEarnings', 'returns', 'revenue', 'revenueActual', 'revenueEstimate', 'revenueGrowth', 'revenueGrowth3Y', 'revenueGrowth5Y', 'revenuePerShare', 'revenueSurprise', 'roa', 'roce', 'roe', 'roic', 'sbcToRevenue', 'sector', 'sgaExpense', 'sgaExpenseGrowth', 'sgaToRevenue', 'shareRepurchase', 'sharesDiluted', 'sharesGrowth', 'sharesOutstanding', 'shortTermDebt', 'stockBasedCompensation', 'tangibleBookValuePerShare', 'totalAssets', 'totalCurrentAssets', 'totalCurrentLiabilities', 'totalDebt', 'totalEquity', 'totalLiabilities', 'volume', 'vwap', 'workingCapital'], n_tickers=all) …
+12:58:56  INFO     Panel loaded in 332.6s (232 tickers, 144 fields)
+12:58:56  INFO     schedule verified (wf mode): dev frontier reaches the panel edge 2026-07-27 (bar 4165); no TEST tail, no forward reserve
+12:58:59  INFO     computing 78 unique factor signals over the union of books
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/pandas/core/internals/blocks.py:347: RuntimeWarning: divide by zero encountered in log
+  result = func(self.values, **kwargs)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+13:01:06  INFO     [block@gen11] book@gen10 (15 factors)  fit<2021-07-20  eval 2021-07-20->2022-01-14  IC=0.0221  cs_sharpe=0.30  pu_sharpe=0.51
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+13:01:23  INFO     [block@gen12] book@gen11 (18 factors)  fit<2022-01-18  eval 2022-01-18->2022-07-19  IC=0.1025  cs_sharpe=0.13  pu_sharpe=1.87
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+13:01:35  INFO     [block@gen13] book@gen12 (19 factors)  fit<2022-07-20  eval 2022-07-20->2023-01-18  IC=-0.0821  cs_sharpe=-0.21  pu_sharpe=-1.42
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+13:01:47  INFO     [block@gen14] book@gen13 (19 factors)  fit<2023-01-19  eval 2023-01-19->2023-07-20  IC=0.0362  cs_sharpe=-1.88  pu_sharpe=-2.45
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+13:02:00  INFO     [block@gen15] book@gen14 (21 factors)  fit<2023-07-21  eval 2023-07-21->2024-01-19  IC=-0.0253  cs_sharpe=-0.09  pu_sharpe=-1.91
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+13:02:10  INFO     [block@gen16] book@gen15 (16 factors)  fit<2024-01-22  eval 2024-01-22->2024-07-22  IC=0.0438  cs_sharpe=-0.35  pu_sharpe=0.87
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+13:02:22  INFO     [block@gen17] book@gen16 (19 factors)  fit<2024-07-23  eval 2024-07-23->2025-01-22  IC=-0.0038  cs_sharpe=-0.29  pu_sharpe=-1.75
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+13:02:33  INFO     [block@gen18] book@gen17 (17 factors)  fit<2025-01-23  eval 2025-01-23->2025-07-24  IC=0.0486  cs_sharpe=-0.99  pu_sharpe=-2.20
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+13:02:45  INFO     [block@gen19] book@gen18 (16 factors)  fit<2025-07-25  eval 2025-07-25->2026-01-23  IC=-0.0396  cs_sharpe=1.35  pu_sharpe=-2.20
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+13:03:01  INFO     [block@gen20] book@gen19 (22 factors)  fit<2026-01-26  eval 2026-01-26->2026-07-27  IC=0.0470  cs_sharpe=3.32  pu_sharpe=0.87
+{
+  "prerun": "L2WF_terra_s0",
+  "model": "lightgbm",
+  "segments": [
+    {
+      "segment": "block@gen11",
+      "book_generation": 10,
+      "n_factors": 15,
+      "fit_end": "2021-07-20",
+      "eval_start": "2021-07-20",
+      "eval_end": "2022-01-14",
+      "n_eval_bars": 126,
+      "pooled_ic": 0.022054756663702442,
+      "cross_sectional_sharpe": 0.30229977594570007,
+      "cross_sectional_ann_ret": 0.031965246415138225,
+      "cross_sectional_turnover": 0.22804232804232805,
+      "per_underlying_sharpe": 0.5067662704999101,
+      "per_underlying_ann_ret": 0.13038236760298402,
+      "per_underlying_turnover": 0.8413359788359789
+    },
+    {
+      "segment": "block@gen12",
+      "book_generation": 11,
+      "n_factors": 18,
+      "fit_end": "2022-01-18",
+      "eval_start": "2022-01-18",
+      "eval_end": "2022-07-19",
+      "n_eval_bars": 126,
+      "pooled_ic": 0.10247939784986496,
+      "cross_sectional_sharpe": 0.13130232730604569,
+      "cross_sectional_ann_ret": 0.014176679865519237,
+      "cross_sectional_turnover": 0.2313492063492063,
+      "per_underlying_sharpe": 1.8733509689353616,
+      "per_underlying_ann_ret": 0.9090996936400731,
+      "per_underlying_turnover": 0.9197751322751322
+    },
+    {
+      "segment": "block@gen13",
+      "book_generation": 12,
+      "n_factors": 19,
+      "fit_end": "2022-07-20",
+      "eval_start": "2022-07-20",
+      "eval_end": "2023-01-18",
+      "n_eval_bars": 126,
+      "pooled_ic": -0.08209150662507629,
+      "cross_sectional_sharpe": -0.2116211460481567,
+      "cross_sectional_ann_ret": -0.015455958517392497,
+      "cross_sectional_turnover": 0.19735449735449742,
+      "per_underlying_sharpe": -1.4204861703727871,
+      "per_underlying_ann_ret": -0.65437427529494,
+      "per_underlying_turnover": 0.8439814814814813
+    },
+    {
+      "segment": "block@gen14",
+      "book_generation": 13,
+      "n_factors": 19,
+      "fit_end": "2023-01-19",
+      "eval_start": "2023-01-19",
+      "eval_end": "2023-07-20",
+      "n_eval_bars": 126,
+      "pooled_ic": 0.03617655757538705,
+      "cross_sectional_sharpe": -1.8787558572370293,
+      "cross_sectional_ann_ret": -0.20567235391139985,
+      "cross_sectional_turnover": 0.19682539682539676,
+      "per_underlying_sharpe": -2.449416233156071,
+      "per_underlying_ann_ret": -1.4434177869558336,
+      "per_underlying_turnover": 0.7638888888888888
+    },
+    {
+      "segment": "block@gen15",
+      "book_generation": 14,
+      "n_factors": 21,
+      "fit_end": "2023-07-21",
+      "eval_start": "2023-07-21",
+      "eval_end": "2024-01-19",
+      "n_eval_bars": 126,
+      "pooled_ic": -0.025342144008200833,
+      "cross_sectional_sharpe": -0.08742241085539802,
+      "cross_sectional_ann_ret": -0.004003818066914855,
+      "cross_sectional_turnover": 0.23835978835978838,
+      "per_underlying_sharpe": -1.9128759726200888,
+      "per_underlying_ann_ret": -0.4280503164370856,
+      "per_underlying_turnover": 1.0686507936507936
+    },
+    {
+      "segment": "block@gen16",
+      "book_generation": 15,
+      "n_factors": 16,
+      "fit_end": "2024-01-22",
+      "eval_start": "2024-01-22",
+      "eval_end": "2024-07-22",
+      "n_eval_bars": 126,
+      "pooled_ic": 0.04384103708055149,
+      "cross_sectional_sharpe": -0.35273227664172613,
+      "cross_sectional_ann_ret": -0.021136397965749096,
+      "cross_sectional_turnover": 0.1921957671957672,
+      "per_underlying_sharpe": 0.8738688604799938,
+      "per_underlying_ann_ret": 0.10771833894252775,
+      "per_underlying_turnover": 0.6681878306878306
+    },
+    {
+      "segment": "block@gen17",
+      "book_generation": 16,
+      "n_factors": 19,
+      "fit_end": "2024-07-23",
+      "eval_start": "2024-07-23",
+      "eval_end": "2025-01-22",
+      "n_eval_bars": 126,
+      "pooled_ic": -0.0037934433439161166,
+      "cross_sectional_sharpe": -0.29267303907074055,
+      "cross_sectional_ann_ret": -0.022301192760467558,
+      "cross_sectional_turnover": 0.17923280423280424,
+      "per_underlying_sharpe": -1.7535304461234873,
+      "per_underlying_ann_ret": -0.6546116170883177,
+      "per_underlying_turnover": 0.6593915343915343
+    },
+    {
+      "segment": "block@gen18",
+      "book_generation": 17,
+      "n_factors": 17,
+      "fit_end": "2025-01-23",
+      "eval_start": "2025-01-23",
+      "eval_end": "2025-07-24",
+      "n_eval_bars": 126,
+      "pooled_ic": 0.048612680235050505,
+      "cross_sectional_sharpe": -0.985915671584601,
+      "cross_sectional_ann_ret": -0.09262228362560271,
+      "cross_sectional_turnover": 0.2226190476190476,
+      "per_underlying_sharpe": -2.1991616566561936,
+      "per_underlying_ann_ret": -0.3008414837201435,
+      "per_underlying_turnover": 0.6419312169312169
+    },
+    {
+      "segment": "block@gen19",
+      "book_generation": 18,
+      "n_factors": 16,
+      "fit_end": "2025-07-25",
+      "eval_start": "2025-07-25",
+      "eval_end": "2026-01-23",
+      "n_eval_bars": 126,
+      "pooled_ic": -0.039604238456359145,
+      "cross_sectional_sharpe": 1.354546794743097,
+      "cross_sectional_ann_ret": 0.09504613517125449,
+      "cross_sectional_turnover": 0.20185185185185184,
+      "per_underlying_sharpe": -2.199174588783363,
+      "per_underlying_ann_ret": -0.3314232126474381,
+      "per_underlying_turnover": 0.7321428571428571
+    },
+    {
+      "segment": "block@gen20",
+      "book_generation": 19,
+      "n_factors": 22,
+      "fit_end": "2026-01-26",
+      "eval_start": "2026-01-26",
+      "eval_end": "2026-07-27",
+      "n_eval_bars": 126,
+      "pooled_ic": 0.04700231946624372,
+      "cross_sectional_sharpe": 3.3248569053976307,
+      "cross_sectional_ann_ret": 0.32621741396598813,
+      "cross_sectional_turnover": 0.15986666666666668,
+      "per_underlying_sharpe": 0.8658826281016454,
+      "per_underlying_ann_ret": 0.19141303565597537,
+      "per_underlying_turnover": 1.049
+    }
+  ],
+  "stitched_cross_sectional": {
+    "sharpe": 0.11964135590922677,
+    "ann_ret": 0.010370675042018326,
+    "ann_vol": 0.08668135665301782,
+    "max_dd": -0.23412704878256052,
+    "n_bars": 1259
+  },
+  "stitched_cross_sectional_blocks": {
+    "sharpe": 0.11964135590922677,
+    "ann_ret": 0.010370675042018326,
+    "ann_vol": 0.08668135665301782,
+    "max_dd": -0.23412704878256052,
+    "n_bars": 1259
+  },
+  "stitched_per_underlying": {
+    "sharpe": -0.7266102533434692,
+    "ann_ret": -0.24775907492433116,
+    "ann_vol": 0.34097932665315045,
+    "max_dd": -0.8805367721567621,
+    "n_bars": 1259
+  },
+  "stitched_per_underlying_blocks": {
+    "sharpe": -0.7266102533434692,
+    "ann_ret": -0.24775907492433116,
+    "ann_vol": 0.34097932665315045,
+    "max_dd": -0.8805367721567621,
+    "n_bars": 1259
+  }
+}
+
+DONE -> /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/data/workspaces/fmp_archive_equity_nasdaq100pit/preruns/L2WF_terra_s0/prequential_deployment
+wrote figures into /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/data/workspaces/fmp_archive_equity_nasdaq100pit/preruns/L2WF_terra_s0/prequential_deployment

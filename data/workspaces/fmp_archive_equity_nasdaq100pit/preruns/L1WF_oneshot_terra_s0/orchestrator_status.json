@@ -1,0 +1,26 @@
+{
+  "status": "ok",
+  "returncode": 0,
+  "elapsed_sec": 8639.4,
+  "argv": [
+    "/root/QuantFundAgent/venv/bin/python",
+    "run_factor_research.py",
+    "--name",
+    "L1WF_oneshot_terra_s0",
+    "--model",
+    "gpt-5.6-terra",
+    "--n-tickers",
+    "0",
+    "--horizon",
+    "6",
+    "--prediction-horizon-mode",
+    "fixed",
+    "--dedup-scope",
+    "prerun",
+    "--max-cost-usd",
+    "50.0",
+    "--llm-provider",
+    "openai"
+  ],
+  "finished_at": "2026-08-01T20:05:55"
+}

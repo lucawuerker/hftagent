@@ -89,6 +89,31 @@ also covers `matrix/terra_l4.yaml` + `matrix/terra_l4_refine.yaml`.
     restructure is order-identical for uninterrupted runs; guarded by
     `test_mid_seeding_kill_resumes_without_reseeding_done_groups`.
 
+## L4RB — broad-coverage arm (user directive 2026-08-01, decisions D13–D17)
+
+Directive: lift the 8-group limit, create a very broad initial factor set, as
+many knowledge-graph areas as possible represented. Arm **`L4RB_terra_s0`**
+(`matrix/terra_l4_refine_broad.yaml`), launched 2026-08-01.
+
+13. **D13 — mechanism-groups 64, mode max.** Probed the graph: it forms ≥64
+    usable communities (the top ~32 hold ~73% of all mechanisms; the tail is
+    small 3–5-mechanism niches, some off-equity-domain — included anyway per
+    the directive). Every community gets its own reserved Pareto archive.
+14. **D14 — breadth over depth in the slot budget**: demes-per-group 1,
+    children-per-deme 1, seed-ideas-per-group 8 → ~512-factor initial book
+    over 64 groups (vs 96 over 8); refine-rounds stays 2 but only ~128
+    lineages will get a second round (least-refined-first queue).
+15. **D15 — generations 10 / reveal-every 1**: VERIFIED byte-identical
+    reveal-block boundaries to L4/L4R's 20/2 schedule (same 10 calendar
+    blocks), so prequential tracks remain directly comparable while halving
+    the refine-slot budget to fit the breadth in.
+16. **D16 — population 32/deme** (truncation headroom for 8 seeds + ~10
+    children per single-deme group; refine mode uses population only for the
+    cross-group tournament pool and bookkeeping).
+17. **D17 — budget $200 hard cap** (est. ~1,150 trials ≈ $150 at L4R's
+    realised $0.128/trial; OpenAI pool has ≈ $2.3k remaining), ~13 h wall
+    clock expected.
+
 ## How to compare (after the run)
 
 Standard post-analysis suite on `L4R_terra_s0` (analyze → figures → combined

@@ -408,3 +408,50 @@ def test_progressive_reveal_rescores_every_group_archive(grouped_loop):
         for eg in archive:
             assert eg.genome.mechanism_group_id == group_id
             assert eg.fitness.diagnostics.get("scored_through") is not None
+
+
+# ── graph read-only mode (--graph-readonly, 2026-08-01) ───────────────────────
+
+class _SpyGraph:
+    """Fails the test if any mutating call reaches it in read-only mode."""
+
+    def __init__(self):
+        self.saved = False
+
+    def save(self):
+        self.saved = True
+
+
+def test_graph_readonly_is_a_strict_noop():
+    from quant_fund_agent.agents.factor_research.evolution.loop import (
+        link_programs_into_graph,
+    )
+    from quant_fund_agent.agents.factor_research.evolution.genome import FactorProgram
+
+    graph = _SpyGraph()
+    prog = FactorProgram(factor_id="f1", code="def calc(data):\n    return 0\n")
+    # readonly: nothing is linked, nothing is saved (no attribute of the spy is
+    # touched beyond existence — link/refresh would raise AttributeError on it)
+    link_programs_into_graph(graph, [prog], {"f1": "some_mechanism"}, readonly=True)
+    assert graph.saved is False
+
+
+def test_graph_linkback_still_saves_when_writable(tmp_path, monkeypatch):
+    from quant_fund_agent.agents.factor_research.evolution import loop as loop_mod
+
+    calls = {"link": 0, "save": 0}
+
+    class _G:
+        def save(self):
+            calls["save"] += 1
+
+    monkeypatch.setattr(
+        "quant_fund_agent.knowledge.empirical_edges.link_factor_to_mechanism",
+        lambda graph, fid, mech: calls.__setitem__("link", calls["link"] + 1))
+    monkeypatch.setattr(
+        "quant_fund_agent.knowledge.empirical_edges.refresh_field_usage",
+        lambda graph, inputs: None)
+    from quant_fund_agent.agents.factor_research.evolution.genome import FactorProgram
+    prog = FactorProgram(factor_id="f1", code="def calc(data):\n    return 0\n")
+    loop_mod.link_programs_into_graph(_G(), [prog], {"f1": "m"}, readonly=False)
+    assert calls == {"link": 1, "save": 1}

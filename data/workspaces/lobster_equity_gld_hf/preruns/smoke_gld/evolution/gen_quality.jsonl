@@ -1,0 +1,2 @@
+{"generation": 0, "archive_size_total": 3, "archive_size_per_group": [2, 1], "kept_pool_size": 4, "n_trials": 4, "mean_marginal_value": -0.0032999617381496804, "max_marginal_value": 0.0, "mean_structural_novelty": 0.8897269750547228}
+{"generation": 1, "archive_size_total": 4, "archive_size_per_group": [2, 2], "kept_pool_size": 6, "n_trials": 6, "mean_marginal_value": -0.002630152678992141, "max_marginal_value": 0.0, "mean_structural_novelty": 0.8576583754440082}

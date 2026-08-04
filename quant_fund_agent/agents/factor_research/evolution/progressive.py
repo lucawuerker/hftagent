@@ -82,12 +82,23 @@ def build_schedule(
     reveal_every: int,
     val_blocks: int,
     holdout_last: bool = False,
+    wf_blocks: int = 0,
+    wf_block_bars: int = 126,
 ) -> list[GenerationWindow]:
     """Compute the per-generation reveal schedule (see the module docstring).
 
     ``index`` is the panel ``DatetimeIndex`` (after any ``cutoff_date`` slicing).
     Raises ``ValueError`` for any illegal configuration (out-of-range fractions, a
     degenerate block length, or a generation-0 window that cannot keep ≥ 30 IS bars).
+
+    ``wf_blocks > 0`` switches to the TWO-PHASE walk-forward schedule (final-run
+    decision 2026-08-01): the LAST ``wf_blocks`` generations each reveal exactly one
+    fixed-size block of ``wf_block_bars`` bars covering the tail of the dev window
+    (the "live walk-forward" phase — each block is prequentially scored before the
+    archive may adapt to it), while generations ``1..G−wf_blocks`` reveal the earlier
+    span ``[seed_end, wf_start)`` in equal blocks at the ``reveal_every`` cadence
+    (``seed_frac`` is the fraction of the PHASE-1 span visible at generation 0).
+    Incompatible with ``holdout_last``.
     """
     if generations < 1:
         raise ValueError(f"generations must be ≥ 1 (got {generations}).")
@@ -103,6 +114,12 @@ def build_schedule(
         raise ValueError(f"reveal_every must be ≥ 1 (got {reveal_every}).")
     if val_blocks < 1:
         raise ValueError(f"val_blocks must be ≥ 1 (got {val_blocks}).")
+    if wf_blocks:
+        return _build_two_phase_schedule(
+            index, generations=generations, test_frac=test_frac,
+            seed_frac=seed_frac, reveal_every=reveal_every, val_blocks=val_blocks,
+            holdout_last=holdout_last, wf_blocks=wf_blocks,
+            wf_block_bars=wf_block_bars)
 
     n = len(index)
     test_start = int(math.floor(n * (1.0 - test_frac)))
@@ -178,4 +195,126 @@ def build_schedule(
         # Terminal rescore-only window: reveals the held-out block AFTER the
         # final generation (``schedule[generations + 1]``).
         windows.append(make(generations + 1, n_blocks, reveal=True))
+    return windows
+
+
+def _build_two_phase_schedule(
+    index,
+    *,
+    generations: int,
+    test_frac: float,
+    seed_frac: float,
+    reveal_every: int,
+    val_blocks: int,
+    holdout_last: bool,
+    wf_blocks: int,
+    wf_block_bars: int,
+) -> list[GenerationWindow]:
+    """The two-phase walk-forward schedule (``build_schedule`` with ``wf_blocks > 0``).
+
+    Layout over the dev window ``[0, dev_len)``::
+
+        [0 .. seed_end)                      visible at generation 0
+        [seed_end .. wf_start)               phase 1: equal blocks, one per reveal
+                                             generation in ``1..G−wf_blocks``
+                                             (``reveal_every`` cadence)
+        [wf_start .. dev_len)                phase 2: the last ``wf_blocks``
+                                             generations reveal one fixed
+                                             ``wf_block_bars``-bar block each
+
+    ``seed_end = floor(wf_start · seed_frac)`` — the seed fraction is of the
+    PHASE-1 span, so the walk-forward tail never shrinks the fitting window.
+    The sliding VAL keeps its meaning (last ``val_blocks`` revealed blocks; block
+    lengths are heterogeneous across the phase boundary).
+    """
+    if holdout_last:
+        raise ValueError("wf_blocks is incompatible with --final-holdout: the "
+                         "walk-forward tail already ends at the panel edge and "
+                         "every block is prequentially scored before adaptation.")
+    if wf_blocks < 1:
+        raise ValueError(f"wf_blocks must be ≥ 1 (got {wf_blocks}).")
+    if wf_block_bars < 1:
+        raise ValueError(f"wf_block_bars must be ≥ 1 (got {wf_block_bars}).")
+    if generations < wf_blocks:
+        raise ValueError(
+            f"generations ({generations}) must be ≥ wf_blocks ({wf_blocks}) — the "
+            f"last wf_blocks generations each reveal one walk-forward block.")
+
+    n = len(index)
+    dev_len = int(math.floor(n * (1.0 - test_frac)))
+    wf_start = dev_len - wf_blocks * wf_block_bars
+    if wf_start < MIN_IS_BARS + 1:
+        raise ValueError(
+            f"walk-forward span {wf_blocks}·{wf_block_bars} bars leaves only "
+            f"{wf_start} phase-1 bars (dev {dev_len}); need > {MIN_IS_BARS}.  "
+            f"Shrink wf_blocks/wf_block_bars or lengthen the panel.")
+
+    p1_gens = generations - wf_blocks
+    p1_reveal_gens = [g for g in range(1, p1_gens + 1) if (g - 1) % reveal_every == 0]
+    r1 = len(p1_reveal_gens)
+    if r1:
+        seed_end = int(math.floor(wf_start * seed_frac))
+        block1 = (wf_start - seed_end) // r1
+        if block1 < 1:
+            raise ValueError(
+                f"phase-1 block_len {block1} < 1 — phase-1 span {wf_start} bars with "
+                f"seed_end {seed_end} cannot be split into {r1} reveal blocks.")
+    else:
+        # No phase-1 generations: the whole pre-walk-forward span is the seed.
+        seed_end = wf_start
+        block1 = wf_block_bars
+
+    # Cumulative frontier after k blocks revealed: r1 phase-1 blocks (last absorbs
+    # the remainder so block r1 lands exactly on wf_start), then wf_blocks fixed ones.
+    ends = [seed_end]
+    for k in range(1, r1 + 1):
+        ends.append(wf_start if k == r1 else seed_end + k * block1)
+    for j in range(1, wf_blocks + 1):
+        ends.append(wf_start + j * wf_block_bars)   # ends[-1] == dev_len
+
+    def _ts(pos: int) -> str:
+        if pos >= len(index):
+            import pandas as pd  # local: this module is otherwise pandas-free
+            return (index[-1] + pd.Timedelta(seconds=1)).isoformat()
+        return index[pos].isoformat()
+
+    def make(gen: int, k: int, reveal: bool) -> GenerationWindow:
+        visible_end = ends[k]
+        if k >= val_blocks:
+            val_start = ends[k - val_blocks]
+        else:
+            # Before val_blocks blocks exist, extend virtually into the seed window
+            # at the phase-1 block length (mirrors the classic constant val_span):
+            # VAL = the k real blocks plus (val_blocks − k) virtual seed blocks.
+            val_start = ends[0] - (val_blocks - k) * block1
+        if val_start < MIN_IS_BARS:
+            val_start = MIN_IS_BARS
+        block_bounds = None
+        if reveal:
+            block_bounds = (_ts(ends[k - 1]), _ts(visible_end))
+        return GenerationWindow(
+            generation=gen,
+            visible_end=visible_end,
+            val_start=val_start,
+            is_end_ts=_ts(val_start),
+            val_end_ts=_ts(visible_end),
+            reveal=reveal,
+            block_bounds=block_bounds,
+        )
+
+    gen0 = make(0, 0, reveal=False)
+    if gen0.val_start < MIN_IS_BARS or (gen0.visible_end - gen0.val_start) < 1:
+        raise ValueError(
+            f"generation-0 window is degenerate (IS={gen0.val_start}, "
+            f"VAL={gen0.visible_end - gen0.val_start}); need IS ≥ {MIN_IS_BARS} and "
+            f"VAL ≥ 1.  Raise seed_frac or lengthen the panel.")
+
+    windows = [gen0]
+    k = 0
+    p1_reveals = set(p1_reveal_gens)
+    for g in range(1, generations + 1):
+        reveal = g in p1_reveals or g > p1_gens
+        if reveal:
+            k += 1
+        windows.append(make(g, k, reveal=reveal))
     return windows

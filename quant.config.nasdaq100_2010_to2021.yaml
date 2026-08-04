@@ -1,0 +1,22 @@
+# L1 ONESHOT BASELINE config — survivorship-bias-free Nasdaq-100, 2010 → 2021-07-19.
+#
+# Companion to quant.config.nasdaq100_2010_wf.yaml (decision 2026-08-01): the
+# WF ladder's walk-forward tail starts at panel bar 2905 = 2021-07-20, so the
+# no-adaptation oneshot baseline researches on EXACTLY the data the evolution
+# arms may fit on before their first walk-forward block (2010-01-04 →
+# 2021-07-19).  Its book is then forward-deployed over 2021-07-20 → 2026-07-27
+# post-hoc (periodic re-weighting/re-curation, no new factors) so the 5-year
+# comparison window is out-of-sample for every arm.
+data:
+  provider: fmp_archive
+  asset_class: equity
+  frequency: 1d
+  start: '2010-01-01'
+  end: '2021-07-19'
+  archive_dir: data/vendor/fmp
+  membership: nasdaq100
+  fundamentals: true
+  fundamentals_period: quarter
+  fundamentals_staleness_days: 400
+  reporting_lag_days: 60
+  dtype: float32

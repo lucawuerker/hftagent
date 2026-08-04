@@ -1,0 +1,775 @@
+{
+  "prerun": "L2WF_terra_s0",
+  "model": "rf_gbm",
+  "snap_gens": [
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "benchmark_ew": {
+    "sharpe": 0.508185034300687,
+    "ann_ret": 0.10540477186441422,
+    "ann_vol": 0.20741416611980842,
+    "max_dd": -0.31173938512802124,
+    "n_bars": 1259
+  },
+  "personas": {
+    "master_long30": {
+      "risk": {
+        "vol_target": 0.1,
+        "net_exposure": 0.3,
+        "max_leverage": 2.5,
+        "halflife": 6,
+        "band": 0.1,
+        "max_positions": null,
+        "exit_buffer": 1.5,
+        "vol_halflife": 20,
+        "beta_neutral": true,
+        "sector_neutral": true
+      },
+      "stitched": {
+        "sharpe": 0.9791314881495111,
+        "ann_ret": 0.10066933193732898,
+        "ann_vol": 0.10281492644832296,
+        "max_dd": -0.16942118502104941,
+        "n_bars": 1259,
+        "mean_turnover": 0.1654409955363529,
+        "mean_positions": 101.3
+      },
+      "segments": [
+        {
+          "segment": "block@gen11",
+          "book_generation": 10,
+          "n_factors": 15,
+          "sharpe": 1.5854520269387207,
+          "ann_ret": 0.1752394901306963,
+          "ann_vol": 0.11052967049974924,
+          "turnover": 0.23927765959542036,
+          "mean_positions": 102
+        },
+        {
+          "segment": "block@gen12",
+          "book_generation": 11,
+          "n_factors": 18,
+          "sharpe": -1.1266614267307986,
+          "ann_ret": -0.12574742887974835,
+          "ann_vol": 0.11161066305840087,
+          "turnover": 0.09202613863755418,
+          "mean_positions": 102
+        },
+        {
+          "segment": "block@gen13",
+          "book_generation": 12,
+          "n_factors": 19,
+          "sharpe": -0.5094427575998828,
+          "ann_ret": -0.04926788227622307,
+          "ann_vol": 0.09670935849267319,
+          "turnover": 0.10088516401159055,
+          "mean_positions": 102
+        },
+        {
+          "segment": "block@gen14",
+          "book_generation": 13,
+          "n_factors": 19,
+          "sharpe": 1.5244216555169587,
+          "ann_ret": 0.13932614021955889,
+          "ann_vol": 0.091396064674974,
+          "turnover": 0.11337198829345503,
+          "mean_positions": 101
+        },
+        {
+          "segment": "block@gen15",
+          "book_generation": 14,
+          "n_factors": 21,
+          "sharpe": 2.3621052473871638,
+          "ann_ret": 0.23013002375325414,
+          "ann_vol": 0.09742581284547414,
+          "turnover": 0.20353629441876755,
+          "mean_positions": 101
+        },
+        {
+          "segment": "block@gen16",
+          "book_generation": 15,
+          "n_factors": 16,
+          "sharpe": 1.9065575867290685,
+          "ann_ret": 0.20171623782616555,
+          "ann_vol": 0.10580128249482057,
+          "turnover": 0.2699920849758967,
+          "mean_positions": 101
+        },
+        {
+          "segment": "block@gen17",
+          "book_generation": 16,
+          "n_factors": 19,
+          "sharpe": 0.08027351783727488,
+          "ann_ret": 0.007800818143050296,
+          "ann_vol": 0.09717797790877429,
+          "turnover": 0.10468467823021876,
+          "mean_positions": 101
+        },
+        {
+          "segment": "block@gen18",
+          "book_generation": 17,
+          "n_factors": 17,
+          "sharpe": -0.3428494518755725,
+          "ann_ret": -0.03923884997203387,
+          "ann_vol": 0.11444921307989872,
+          "turnover": 0.11969615386302025,
+          "mean_positions": 101
+        },
+        {
+          "segment": "block@gen19",
+          "book_generation": 18,
+          "n_factors": 16,
+          "sharpe": 2.063510827919145,
+          "ann_ret": 0.2005012568956357,
+          "ann_vol": 0.09716511015249782,
+          "turnover": 0.2773026260575465,
+          "mean_positions": 101
+        },
+        {
+          "segment": "block@gen20",
+          "book_generation": 19,
+          "n_factors": 22,
+          "sharpe": 2.583136154010543,
+          "ann_ret": 0.26755802698569886,
+          "ann_vol": 0.10357875506108799,
+          "turnover": 0.13363716728005898,
+          "mean_positions": 101
+        }
+      ]
+    },
+    "master_long60": {
+      "risk": {
+        "vol_target": 0.13,
+        "net_exposure": 0.6,
+        "max_leverage": 2.0,
+        "halflife": 6,
+        "band": 0.1,
+        "max_positions": null,
+        "exit_buffer": 1.5,
+        "vol_halflife": 20,
+        "beta_neutral": true,
+        "sector_neutral": true
+      },
+      "stitched": {
+        "sharpe": 0.7662383855794245,
+        "ann_ret": 0.10242960562840334,
+        "ann_vol": 0.13367850992083455,
+        "max_dd": -0.20527965481028143,
+        "n_bars": 1259,
+        "mean_turnover": 0.13332612128736449,
+        "mean_positions": 101.3
+      },
+      "segments": [
+        {
+          "segment": "block@gen11",
+          "book_generation": 10,
+          "n_factors": 15,
+          "sharpe": 0.8993069910655025,
+          "ann_ret": 0.12835622427929394,
+          "ann_vol": 0.1427279288991371,
+          "turnover": 0.1906625966384639,
+          "mean_positions": 102
+        },
+        {
+          "segment": "block@gen12",
+          "book_generation": 11,
+          "n_factors": 18,
+          "sharpe": -1.0552876430877318,
+          "ann_ret": -0.1565504264365427,
+          "ann_vol": 0.14834858293088893,
+          "turnover": 0.07427313651895792,
+          "mean_positions": 102
+        },
+        {
+          "segment": "block@gen13",
+          "book_generation": 12,
+          "n_factors": 19,
+          "sharpe": -0.2597165872313276,
+          "ann_ret": -0.03280321631982785,
+          "ann_vol": 0.12630389406206957,
+          "turnover": 0.06428845162934553,
+          "mean_positions": 102
+        },
+        {
+          "segment": "block@gen14",
+          "book_generation": 13,
+          "n_factors": 19,
+          "sharpe": 2.2124269355580855,
+          "ann_ret": 0.2546304726041535,
+          "ann_vol": 0.1150910199617159,
+          "turnover": 0.08621109266812772,
+          "mean_positions": 101
+        },
+        {
+          "segment": "block@gen15",
+          "book_generation": 14,
+          "n_factors": 21,
+          "sharpe": 1.726614627626629,
+          "ann_ret": 0.22182692726852515,
+          "ann_vol": 0.12847506543683357,
+          "turnover": 0.15322415275828208,
+          "mean_positions": 101
+        },
+        {
+          "segment": "block@gen16",
+          "book_generation": 15,
+          "n_factors": 16,
+          "sharpe": 1.679104051001569,
+          "ann_ret": 0.22410072774295273,
+          "ann_vol": 0.13346446732069933,
+          "turnover": 0.23371300295500877,
+          "mean_positions": 101
+        },
+        {
+          "segment": "block@gen17",
+          "book_generation": 16,
+          "n_factors": 19,
+          "sharpe": 0.2549390452477744,
+          "ann_ret": 0.0340358738964503,
+          "ann_vol": 0.13350592830286528,
+          "turnover": 0.08350985133549388,
+          "mean_positions": 101
+        },
+        {
+          "segment": "block@gen18",
+          "book_generation": 17,
+          "n_factors": 17,
+          "sharpe": -0.27136092205716406,
+          "ann_ret": -0.04062700362078715,
+          "ann_vol": 0.1497157487260778,
+          "turnover": 0.09446994761466482,
+          "mean_positions": 101
+        },
+        {
+          "segment": "block@gen19",
+          "book_generation": 18,
+          "n_factors": 16,
+          "sharpe": 1.2204664019949378,
+          "ann_ret": 0.15139169006731493,
+          "ann_vol": 0.12404412757274974,
+          "turnover": 0.23325015502671295,
+          "mean_positions": 101
+        },
+        {
+          "segment": "block@gen20",
+          "book_generation": 19,
+          "n_factors": 22,
+          "sharpe": 1.8104955093895294,
+          "ann_ret": 0.24103482825189312,
+          "ann_vol": 0.13313196691284052,
+          "turnover": 0.11965882572858712,
+          "mean_positions": 101
+        }
+      ]
+    },
+    "master_long100": {
+      "risk": {
+        "vol_target": 0.16,
+        "net_exposure": 1.0,
+        "max_leverage": 1.5,
+        "halflife": 8,
+        "band": 0.12,
+        "max_positions": null,
+        "exit_buffer": 1.5,
+        "vol_halflife": 20,
+        "beta_neutral": true,
+        "sector_neutral": true
+      },
+      "stitched": {
+        "sharpe": 0.6325057714407896,
+        "ann_ret": 0.10373277040749747,
+        "ann_vol": 0.16400288359615095,
+        "max_dd": -0.23965010203559267,
+        "n_bars": 1259,
+        "mean_turnover": 0.08294297679112508,
+        "mean_positions": 52.1
+      },
+      "segments": [
+        {
+          "segment": "block@gen11",
+          "book_generation": 10,
+          "n_factors": 15,
+          "sharpe": 0.5273533291016091,
+          "ann_ret": 0.09123219583055286,
+          "ann_vol": 0.17300013254107,
+          "turnover": 0.11655434252595884,
+          "mean_positions": 52
+        },
+        {
+          "segment": "block@gen12",
+          "book_generation": 11,
+          "n_factors": 18,
+          "sharpe": -0.996856926128963,
+          "ann_ret": -0.1823541227781936,
+          "ann_vol": 0.18292908239732944,
+          "turnover": 0.04788277057666867,
+          "mean_positions": 56
+        },
+        {
+          "segment": "block@gen13",
+          "book_generation": 12,
+          "n_factors": 19,
+          "sharpe": -0.1284889772673333,
+          "ann_ret": -0.020113168357055143,
+          "ann_vol": 0.1565361386230651,
+          "turnover": 0.033625116999111915,
+          "mean_positions": 42
+        },
+        {
+          "segment": "block@gen14",
+          "book_generation": 13,
+          "n_factors": 19,
+          "sharpe": 2.4635259660545663,
+          "ann_ret": 0.344750653282845,
+          "ann_vol": 0.13994196043931972,
+          "turnover": 0.052807703516630625,
+          "mean_positions": 49
+        },
+        {
+          "segment": "block@gen15",
+          "book_generation": 14,
+          "n_factors": 21,
+          "sharpe": 1.264833136105802,
+          "ann_ret": 0.20276108226816122,
+          "ann_vol": 0.16030658628412187,
+          "turnover": 0.09072315183338908,
+          "mean_positions": 51
+        },
+        {
+          "segment": "block@gen16",
+          "book_generation": 15,
+          "n_factors": 16,
+          "sharpe": 1.5252239807508519,
+          "ann_ret": 0.2416856428283755,
+          "ann_vol": 0.15845911543391564,
+          "turnover": 0.14945813947556139,
+          "mean_positions": 57
+        },
+        {
+          "segment": "block@gen17",
+          "book_generation": 16,
+          "n_factors": 19,
+          "sharpe": 0.3951539591454126,
+          "ann_ret": 0.06707515359696035,
+          "ann_vol": 0.16974435418038514,
+          "turnover": 0.05453645568740052,
+          "mean_positions": 49
+        },
+        {
+          "segment": "block@gen18",
+          "book_generation": 17,
+          "n_factors": 17,
+          "sharpe": -0.14285716414882163,
+          "ann_ret": -0.026108786691581357,
+          "ann_vol": 0.18276147960197853,
+          "turnover": 0.05812988711969559,
+          "mean_positions": 53
+        },
+        {
+          "segment": "block@gen19",
+          "book_generation": 18,
+          "n_factors": 16,
+          "sharpe": 0.7613213307057449,
+          "ann_ret": 0.11507370151673793,
+          "ann_vol": 0.151149976856769,
+          "turnover": 0.14925522414464606,
+          "mean_positions": 55
+        },
+        {
+          "segment": "block@gen20",
+          "book_generation": 19,
+          "n_factors": 22,
+          "sharpe": 1.2490665135665553,
+          "ann_ret": 0.20412209323553723,
+          "ann_vol": 0.16341971465770208,
+          "turnover": 0.07645697603218814,
+          "mean_positions": 57
+        }
+      ]
+    },
+    "retail_balanced_long": {
+      "risk": {
+        "vol_target": 0.12,
+        "net_exposure": 0.5,
+        "max_leverage": 2.0,
+        "halflife": 8,
+        "band": 0.15,
+        "max_positions": 20,
+        "exit_buffer": 1.5,
+        "vol_halflife": 20,
+        "beta_neutral": true,
+        "sector_neutral": true
+      },
+      "stitched": {
+        "sharpe": 0.6891756461226115,
+        "ann_ret": 0.0843669932186362,
+        "ann_vol": 0.12241725849323822,
+        "max_dd": -0.18700248508505235,
+        "n_bars": 1259,
+        "mean_turnover": 0.08135238041317372,
+        "mean_positions": 23.3
+      },
+      "segments": [
+        {
+          "segment": "block@gen11",
+          "book_generation": 10,
+          "n_factors": 15,
+          "sharpe": 0.3704584646848054,
+          "ann_ret": 0.04890625390283332,
+          "ann_vol": 0.13201548504079638,
+          "turnover": 0.11736928417943128,
+          "mean_positions": 23
+        },
+        {
+          "segment": "block@gen12",
+          "book_generation": 11,
+          "n_factors": 18,
+          "sharpe": -0.9712702789847687,
+          "ann_ret": -0.13470374417175307,
+          "ann_vol": 0.1386882179824896,
+          "turnover": 0.04926415872901023,
+          "mean_positions": 24
+        },
+        {
+          "segment": "block@gen13",
+          "book_generation": 12,
+          "n_factors": 19,
+          "sharpe": -0.20037342830923763,
+          "ann_ret": -0.02354895586496132,
+          "ann_vol": 0.11752534287439584,
+          "turnover": 0.02148056262099656,
+          "mean_positions": 23
+        },
+        {
+          "segment": "block@gen14",
+          "book_generation": 13,
+          "n_factors": 19,
+          "sharpe": 2.222528863220356,
+          "ann_ret": 0.2363314510235763,
+          "ann_vol": 0.10633448003061767,
+          "turnover": 0.0470731883814549,
+          "mean_positions": 23
+        },
+        {
+          "segment": "block@gen15",
+          "book_generation": 14,
+          "n_factors": 21,
+          "sharpe": 1.4523334728031974,
+          "ann_ret": 0.17300282279106668,
+          "ann_vol": 0.11912059181363367,
+          "turnover": 0.08264116241598096,
+          "mean_positions": 24
+        },
+        {
+          "segment": "block@gen16",
+          "book_generation": 15,
+          "n_factors": 16,
+          "sharpe": 2.320025740155695,
+          "ann_ret": 0.2584096518455095,
+          "ann_vol": 0.11138223484889778,
+          "turnover": 0.1610461525479098,
+          "mean_positions": 23
+        },
+        {
+          "segment": "block@gen17",
+          "book_generation": 16,
+          "n_factors": 19,
+          "sharpe": 0.6306460480959996,
+          "ann_ret": 0.0782651872199818,
+          "ann_vol": 0.12410319141184559,
+          "turnover": 0.04692739295022624,
+          "mean_positions": 23
+        },
+        {
+          "segment": "block@gen18",
+          "book_generation": 17,
+          "n_factors": 17,
+          "sharpe": -0.21994838770979222,
+          "ann_ret": -0.030915103339092417,
+          "ann_vol": 0.1405561716591572,
+          "turnover": 0.06799039708342366,
+          "mean_positions": 24
+        },
+        {
+          "segment": "block@gen19",
+          "book_generation": 18,
+          "n_factors": 16,
+          "sharpe": 0.6930421134280336,
+          "ann_ret": 0.0783643787841191,
+          "ann_vol": 0.11307304024643022,
+          "turnover": 0.1319114556024835,
+          "mean_positions": 23
+        },
+        {
+          "segment": "block@gen20",
+          "book_generation": 19,
+          "n_factors": 22,
+          "sharpe": 1.3513803632726835,
+          "ann_ret": 0.16015951796929356,
+          "ann_vol": 0.11851549890915232,
+          "turnover": 0.08782004962081999,
+          "mean_positions": 23
+        }
+      ]
+    },
+    "retail_defensive_long": {
+      "risk": {
+        "vol_target": 0.09,
+        "net_exposure": 0.6,
+        "max_leverage": 1.5,
+        "halflife": 12,
+        "band": 0.25,
+        "max_positions": 12,
+        "exit_buffer": 1.5,
+        "vol_halflife": 20,
+        "beta_neutral": true,
+        "sector_neutral": true
+      },
+      "stitched": {
+        "sharpe": 0.5682161687195558,
+        "ann_ret": 0.0529633542099932,
+        "ann_vol": 0.09320986822557907,
+        "max_dd": -0.1227528435463956,
+        "n_bars": 1259,
+        "mean_turnover": 0.035380338237137494,
+        "mean_positions": 14.0
+      },
+      "segments": [
+        {
+          "segment": "block@gen11",
+          "book_generation": 10,
+          "n_factors": 14,
+          "sharpe": 0.2271065275972907,
+          "ann_ret": 0.023228451810292646,
+          "ann_vol": 0.10227998312528361,
+          "turnover": 0.05435686204159678,
+          "mean_positions": 14
+        },
+        {
+          "segment": "block@gen12",
+          "book_generation": 11,
+          "n_factors": 14,
+          "sharpe": -0.5427540755925226,
+          "ann_ret": -0.056123554037771965,
+          "ann_vol": 0.10340512685510854,
+          "turnover": 0.026210974214374027,
+          "mean_positions": 14
+        },
+        {
+          "segment": "block@gen13",
+          "book_generation": 12,
+          "n_factors": 14,
+          "sharpe": -0.1818724152130221,
+          "ann_ret": -0.016098013393650898,
+          "ann_vol": 0.08851267178035627,
+          "turnover": 0.014848639663900093,
+          "mean_positions": 15
+        },
+        {
+          "segment": "block@gen14",
+          "book_generation": 13,
+          "n_factors": 14,
+          "sharpe": 2.202345876941447,
+          "ann_ret": 0.18283994026943992,
+          "ann_vol": 0.0830205383195135,
+          "turnover": 0.026433566973352838,
+          "mean_positions": 14
+        },
+        {
+          "segment": "block@gen15",
+          "book_generation": 14,
+          "n_factors": 14,
+          "sharpe": 1.4125059201244017,
+          "ann_ret": 0.13076791881292762,
+          "ann_vol": 0.09257866954738901,
+          "turnover": 0.05191841513087345,
+          "mean_positions": 14
+        },
+        {
+          "segment": "block@gen16",
+          "book_generation": 15,
+          "n_factors": 14,
+          "sharpe": 2.268635671539293,
+          "ann_ret": 0.20007242190677668,
+          "ann_vol": 0.08819063563918374,
+          "turnover": 0.046767116362775585,
+          "mean_positions": 14
+        },
+        {
+          "segment": "block@gen17",
+          "book_generation": 16,
+          "n_factors": 14,
+          "sharpe": 0.7215030371842024,
+          "ann_ret": 0.06758001245373181,
+          "ann_vol": 0.09366559663764573,
+          "turnover": 0.028947592156846214,
+          "mean_positions": 14
+        },
+        {
+          "segment": "block@gen18",
+          "book_generation": 17,
+          "n_factors": 14,
+          "sharpe": -0.07643749404160424,
+          "ann_ret": -0.007790335343182189,
+          "ann_vol": 0.10191772298215296,
+          "turnover": 0.027261467890163687,
+          "mean_positions": 14
+        },
+        {
+          "segment": "block@gen19",
+          "book_generation": 18,
+          "n_factors": 14,
+          "sharpe": -0.019942075619900558,
+          "ann_ret": -0.0016243787409777697,
+          "ann_vol": 0.08145484812808416,
+          "turnover": 0.04160894285972228,
+          "mean_positions": 14
+        },
+        {
+          "segment": "block@gen20",
+          "book_generation": 19,
+          "n_factors": 14,
+          "sharpe": 0.06684079697551551,
+          "ann_ret": 0.006411620155564985,
+          "ann_vol": 0.09592375384024267,
+          "turnover": 0.03544980507777,
+          "mean_positions": 13
+        }
+      ]
+    },
+    "retail_aggressive_long": {
+      "risk": {
+        "vol_target": 0.18,
+        "net_exposure": 0.7,
+        "max_leverage": 2.5,
+        "halflife": 4,
+        "band": 0.06,
+        "max_positions": 15,
+        "exit_buffer": 1.5,
+        "vol_halflife": 20,
+        "beta_neutral": true,
+        "sector_neutral": true
+      },
+      "stitched": {
+        "sharpe": 0.4490562680091965,
+        "ann_ret": 0.08290529504165692,
+        "ann_vol": 0.1846211732200096,
+        "max_dd": -0.25587399590059623,
+        "n_bars": 1259,
+        "mean_turnover": 0.1917986430433231,
+        "mean_positions": 17.6
+      },
+      "segments": [
+        {
+          "segment": "block@gen11",
+          "book_generation": 10,
+          "n_factors": 15,
+          "sharpe": 0.39300915987854385,
+          "ann_ret": 0.07743773115163102,
+          "ann_vol": 0.19703798042662035,
+          "turnover": 0.2535663611777214,
+          "mean_positions": 17
+        },
+        {
+          "segment": "block@gen12",
+          "book_generation": 11,
+          "n_factors": 18,
+          "sharpe": -0.832336944066304,
+          "ann_ret": -0.17250373815928383,
+          "ann_vol": 0.20725229054057484,
+          "turnover": 0.12359667838333323,
+          "mean_positions": 17
+        },
+        {
+          "segment": "block@gen13",
+          "book_generation": 12,
+          "n_factors": 19,
+          "sharpe": -0.27659413604113375,
+          "ann_ret": -0.04883427541319455,
+          "ann_vol": 0.17655571485410002,
+          "turnover": 0.06839875273302963,
+          "mean_positions": 18
+        },
+        {
+          "segment": "block@gen14",
+          "book_generation": 13,
+          "n_factors": 19,
+          "sharpe": 2.6660185154272664,
+          "ann_ret": 0.42937642042733537,
+          "ann_vol": 0.1610553032331517,
+          "turnover": 0.11103468901259662,
+          "mean_positions": 18
+        },
+        {
+          "segment": "block@gen15",
+          "book_generation": 14,
+          "n_factors": 21,
+          "sharpe": 1.5690244006980232,
+          "ann_ret": 0.27929975927164785,
+          "ann_vol": 0.17800855050271608,
+          "turnover": 0.21083796464812382,
+          "mean_positions": 18
+        },
+        {
+          "segment": "block@gen16",
+          "book_generation": 15,
+          "n_factors": 16,
+          "sharpe": 1.3237014367702906,
+          "ann_ret": 0.22850665568304426,
+          "ann_vol": 0.1726270360789057,
+          "turnover": 0.38050214094312146,
+          "mean_positions": 17
+        },
+        {
+          "segment": "block@gen17",
+          "book_generation": 16,
+          "n_factors": 19,
+          "sharpe": 0.5403251868600609,
+          "ann_ret": 0.10046108837547034,
+          "ann_vol": 0.18592708764747778,
+          "turnover": 0.09161725993273227,
+          "mean_positions": 17
+        },
+        {
+          "segment": "block@gen18",
+          "book_generation": 17,
+          "n_factors": 17,
+          "sharpe": -0.3537323882952201,
+          "ann_ret": -0.07350529708140958,
+          "ann_vol": 0.2077991711068965,
+          "turnover": 0.16776999688767366,
+          "mean_positions": 18
+        },
+        {
+          "segment": "block@gen19",
+          "book_generation": 18,
+          "n_factors": 3,
+          "sharpe": -0.39590537982163876,
+          "ann_ret": -0.06730910752234984,
+          "ann_vol": 0.17001311665093713,
+          "turnover": 0.285246702342271,
+          "mean_positions": 18
+        },
+        {
+          "segment": "block@gen20",
+          "book_generation": 19,
+          "n_factors": 3,
+          "sharpe": 0.4063581566883484,
+          "ann_ret": 0.07606946103281396,
+          "ann_vol": 0.187198065993676,
+          "turnover": 0.22541588437262833,
+          "mean_positions": 18
+        }
+      ]
+    }
+  }
+}

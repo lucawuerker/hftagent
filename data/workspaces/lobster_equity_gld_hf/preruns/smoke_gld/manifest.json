@@ -1,0 +1,65 @@
+{
+  "config": "lobster_equity_gld_hf",
+  "prerun": "smoke_gld",
+  "created_at": "2026-08-03T22:23:23+00:00",
+  "updated_at": "2026-08-03T22:23:23+00:00",
+  "llm_model": "gpt-5.6-terra",
+  "llm_provider": "openai",
+  "engine": "evolution",
+  "generations": 1,
+  "n_trials": 6,
+  "n_factors": 4,
+  "llm_roles": {
+    "hypothesis": {
+      "model": "gpt-5.6-terra",
+      "provider": "openai"
+    },
+    "debate": {
+      "model": "gpt-5.6-terra",
+      "provider": "openai"
+    },
+    "codegen": {
+      "model": "gpt-5.6-terra",
+      "provider": "openai"
+    }
+  },
+  "llm_usage": {
+    "by_role": {
+      "brainstorm": {
+        "calls": 4,
+        "input_tokens": 32576,
+        "output_tokens": 2160,
+        "cost_usd": 0.11384,
+        "errors": 0
+      },
+      "codegen": {
+        "calls": 4,
+        "input_tokens": 19842,
+        "output_tokens": 15374,
+        "cost_usd": 0.28021500000000005,
+        "errors": 0
+      },
+      "crossover": {
+        "calls": 1,
+        "input_tokens": 12134,
+        "output_tokens": 2111,
+        "cost_usd": 0.062,
+        "errors": 0
+      },
+      "mutation": {
+        "calls": 1,
+        "input_tokens": 11178,
+        "output_tokens": 3134,
+        "cost_usd": 0.074955,
+        "errors": 0
+      }
+    },
+    "total": {
+      "calls": 10,
+      "input_tokens": 75730,
+      "output_tokens": 22779,
+      "cost_usd": 0.53101,
+      "errors": 0
+    }
+  }
+}

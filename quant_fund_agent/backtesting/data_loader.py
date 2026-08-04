@@ -65,6 +65,7 @@ Returns ``dict[str, pd.DataFrame]`` where each DataFrame has:
 from __future__ import annotations
 
 import logging
+import os
 import re
 from pathlib import Path
 
@@ -362,5 +363,17 @@ def forward_returns(
     """Compute forward returns *horizon* bars ahead.
 
     ``ret[t] = close[t+horizon] / close[t] - 1``
+
+    ``QF_EXECUTION_LAG_BARS`` (default 0 = byte-identical) delays execution by
+    L bars: the label becomes ``close[t+L+horizon] / close[t+L] - 1``, i.e. a
+    signal observed at bar ``t`` is only acted on ``L`` bars later — realistic
+    for high-frequency bars where signal computation itself takes seconds.
+    Every consumer (IC, marginal value, combined-model labels, curation, the
+    comparison tracks) reads the same seam, so research and evaluation cannot
+    drift.
     """
-    return close.shift(-horizon) / close.replace(0, float("nan")) - 1.0
+    lag = int(os.environ.get("QF_EXECUTION_LAG_BARS", "0") or 0)
+    base = close.replace(0, float("nan"))
+    if lag > 0:
+        return base.shift(-(horizon + lag)) / base.shift(-lag) - 1.0
+    return close.shift(-horizon) / base - 1.0

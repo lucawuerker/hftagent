@@ -1,78 +1,68 @@
 {
   "0": [
     {
-      "genome_id": "g0-quality_spread_state_conditioned_tilt-4f3d4d",
-      "refines": 0,
-      "last_gen": -1
+      "genome_id": "g2-acute_value_anchor_divergence_repair-4adf4a",
+      "refines": 1,
+      "last_gen": 2
     },
     {
-      "genome_id": "g0-adaptive_valuation_anchor_restoring_speed-984c66",
-      "refines": 0,
-      "last_gen": -1
+      "genome_id": "g3-fundamental_reanchor_skepticism_drift-34d635",
+      "refines": 1,
+      "last_gen": 3
     },
     {
-      "genome_id": "g0-fundamental_reanchor_unassimilated_drift-f4d558",
-      "refines": 0,
-      "last_gen": -1
-    },
-    {
-      "genome_id": "g0-rd_margin_revision_latency-4c52fa",
-      "refines": 0,
-      "last_gen": -1
+      "genome_id": "g4-rd_margin_fresh_upgrade_assimilation-d523d2",
+      "refines": 1,
+      "last_gen": 4
     },
     {
       "genome_id": "g0-cash_margin_phase_orientation_drift-6c9bc1",
-      "refines": 0,
-      "last_gen": -1
+      "refines": 1,
+      "last_gen": 5
     }
   ],
   "1": [
     {
-      "genome_id": "g0-refinancing_buffer_common_shock_convexity-390c40",
-      "refines": 0,
-      "last_gen": -1
-    },
-    {
       "genome_id": "g0-causal_sector_phase_lag_shock_relay-533f3f",
-      "refines": 0,
-      "last_gen": -1
+      "refines": 1,
+      "last_gen": 2
     },
     {
-      "genome_id": "g0-financing_fragility_common_shock_amplifier-13a0be",
-      "refines": 0,
-      "last_gen": -1
+      "genome_id": "g3-financing_fragility_loo_shock_overreaction-cab8fb",
+      "refines": 1,
+      "last_gen": 3
     },
     {
-      "genome_id": "g0-cap_weighted_sector_impulse_laggard_relay-85b7c7",
-      "refines": 0,
-      "last_gen": -1
+      "genome_id": "g4-fresh_cap_leader_sector_follower_relay-fca782",
+      "refines": 1,
+      "last_gen": 4
     },
     {
       "genome_id": "g0-sector_turnover_concentration_passive_spillover-dec1fa",
-      "refines": 0,
-      "last_gen": -1
+      "refines": 1,
+      "last_gen": 5
     }
   ],
   "2": [
     {
-      "genome_id": "g0-valuation_critical_slowing_deleveraging-b2096f",
-      "refines": 0,
-      "last_gen": -1
+      "genome_id": "g2-valuation_fragility_adverse_flow_trigger-1817bf",
+      "refines": 1,
+      "last_gen": 2
     },
     {
-      "genome_id": "g0-industry_operating_leverage_incoming_excitation-003767",
-      "refines": 0,
-      "last_gen": -1
+      "genome_id": "g3-industry_peer_burst_buffered_response_gap-3f80b7",
+      "refines": 1,
+      "last_gen": 3
     },
     {
       "genome_id": "g0-cluster_coherence_weighted_residual_relay-e5495e",
-      "refines": 0,
-      "last_gen": -1
+      "refines": 1,
+      "last_gen": 4
     },
     {
-      "genome_id": "g0-bispectral_volume_cascade_impulse-166324",
-      "refines": 0,
-      "last_gen": -1
+      "genome_id": "g6-phase_locked_volume_cascade_terminal_fade-8c2acc",
+      "refines": 1,
+      "last_gen": 6
     },
     {
       "genome_id": "g0-compressible_flow_surprise_alignment_drift-616958",
@@ -83,36 +73,976 @@
       "genome_id": "g0-causal_spectral_impact_phase_lead-e03abb",
       "refines": 0,
       "last_gen": -1
+    },
+    {
+      "genome_id": "g1-bridge_state_phase_lead_polarity-aab36a",
+      "refines": 0,
+      "last_gen": -1
     }
   ],
   "3": [
     {
-      "genome_id": "g0-range_volume_elasticity_thinning_drift-b99c8a",
+      "genome_id": "g1-thin_depth_elasticity_extreme_reversal-3ee023",
+      "refines": 1,
+      "last_gen": 1
+    },
+    {
+      "genome_id": "g2-acute_positive_bridge_flow_fade-fc3b7d",
+      "refines": 1,
+      "last_gen": 2
+    },
+    {
+      "genome_id": "g3-leave_one_out_sector_absorption_release-3ee7a7",
+      "refines": 1,
+      "last_gen": 3
+    },
+    {
+      "genome_id": "g4-coherent_excess_volume_arrival_reversal-64536d",
+      "refines": 1,
+      "last_gen": 4
+    },
+    {
+      "genome_id": "g5-compressed_predictable_flow_absorption_reversal_-169635",
+      "refines": 1,
+      "last_gen": 5
+    },
+    {
+      "genome_id": "g6-abrupt_return_volume_decoherence_fade_h6-b777da",
+      "refines": 1,
+      "last_gen": 6
+    }
+  ],
+  "4": [
+    {
+      "genome_id": "g1-quality_premium_crowding_reversal_tilt-5f760c",
+      "refines": 1,
+      "last_gen": 1
+    },
+    {
+      "genome_id": "g2-stable_directed_peer_innovation_deficit-b669b4",
+      "refines": 1,
+      "last_gen": 2
+    },
+    {
+      "genome_id": "g3-industry_consensus_price_extrapolation_gap-9fb469",
+      "refines": 1,
+      "last_gen": 3
+    },
+    {
+      "genome_id": "g4-relative_strength_residual_ascent_fade-6d7f1a",
+      "refines": 1,
+      "last_gen": 4
+    },
+    {
+      "genome_id": "g5-fresh_profitability_inflection_assimilation_gap-f22d37",
+      "refines": 1,
+      "last_gen": 5
+    },
+    {
+      "genome_id": "g6-issuer_accounting_contrast_muted_drift-ab1104",
+      "refines": 1,
+      "last_gen": 6
+    }
+  ],
+  "5": [
+    {
+      "genome_id": "g1-downside_cascade_cooling_rebound_h6-e0feee",
+      "refines": 1,
+      "last_gen": 1
+    },
+    {
+      "genome_id": "g2-cash_coverage_gap_recovery_exhaustion-915e16",
+      "refines": 1,
+      "last_gen": 2
+    },
+    {
+      "genome_id": "g0-sector_downshock_entropy_contagion-d10795",
+      "refines": 1,
+      "last_gen": 3
+    },
+    {
+      "genome_id": "g4-liquidity_buffer_downside_impact_persistence-ae3b45",
+      "refines": 1,
+      "last_gen": 4
+    },
+    {
+      "genome_id": "g5-cash_buffer_conditional_sell_saturation_rebound_-255a27",
+      "refines": 1,
+      "last_gen": 5
+    },
+    {
+      "genome_id": "g6-downside_variance_lag_mass_derisking-e8ca08",
+      "refines": 1,
+      "last_gen": 6
+    },
+    {
+      "genome_id": "g0-downside_volume_hysteresis_loop_pressure-210605",
+      "refines": 0,
+      "last_gen": -1
+    }
+  ],
+  "6": [
+    {
+      "genome_id": "g1-scheduled_flow_terminal_decay_h6-c7e38a",
+      "refines": 1,
+      "last_gen": 1
+    },
+    {
+      "genome_id": "g2-coherent_schedule_acceleration_fade-91977c",
+      "refines": 1,
+      "last_gen": 2
+    },
+    {
+      "genome_id": "g3-smoothed_quadratic_supply_curve_pressure-3445cc",
+      "refines": 1,
+      "last_gen": 3
+    },
+    {
+      "genome_id": "g4-compressible_execution_completion_rebound-f95a0a",
+      "refines": 1,
+      "last_gen": 4
+    },
+    {
+      "genome_id": "g5-dilution_execution_clock_supply_pressure-c76911",
+      "refines": 1,
+      "last_gen": 5
+    },
+    {
+      "genome_id": "g0-concave_metaorder_impact_completion-0e1d71",
       "refines": 0,
       "last_gen": -1
     },
     {
-      "genome_id": "g0-correlation_bridge_forcedflow_reversal-1af98e",
+      "genome_id": "g0-stealth_participation_impact_suppression_drift-e879f9",
       "refines": 0,
       "last_gen": -1
     },
     {
-      "genome_id": "g0-synchronized_impact_convexity_directional_release-7fb11f",
+      "genome_id": "g6-dilution_fragility_absorption_terminal_repair-1bd60f",
+      "refines": 0,
+      "last_gen": -1
+    }
+  ],
+  "7": [
+    {
+      "genome_id": "g1-flow_aligned_transient_displacement_release-90fbb8",
+      "refines": 1,
+      "last_gen": 1
+    },
+    {
+      "genome_id": "g2-liquidity_depth_replenishment_pressure-e29cb5",
+      "refines": 1,
+      "last_gen": 2
+    },
+    {
+      "genome_id": "g3-acute_common_liquidity_beta_withdrawal-a148aa",
+      "refines": 1,
+      "last_gen": 3
+    },
+    {
+      "genome_id": "g4-binary_flow_entropy_terminal_fade-b49da9",
+      "refines": 1,
+      "last_gen": 4
+    },
+    {
+      "genome_id": "g5-square_root_depth_breach_inventory_reversal-79667b",
+      "refines": 1,
+      "last_gen": 5
+    },
+    {
+      "genome_id": "g6-delayed_participation_asymmetry_continuation_h6-405a15",
+      "refines": 1,
+      "last_gen": 6
+    }
+  ],
+  "8": [
+    {
+      "genome_id": "g0-transfer_entropy_industry_leader_follower_residual-e6fa57",
+      "refines": 1,
+      "last_gen": 1
+    },
+    {
+      "genome_id": "g2-soft_boundary_peer_impulse_gap_h6-6e2d3d",
+      "refines": 1,
+      "last_gen": 2
+    },
+    {
+      "genome_id": "g3-robust_peer_path_lag_anomaly-6e8875",
+      "refines": 1,
+      "last_gen": 3
+    },
+    {
+      "genome_id": "g5-regularized_partial_leadlag_follower_gap-0d89b9",
+      "refines": 1,
+      "last_gen": 5
+    },
+    {
+      "genome_id": "g4-directed_relay_resilience_filtered_gap-0e4290",
+      "refines": 1,
+      "last_gen": 6
+    }
+  ],
+  "9": [
+    {
+      "genome_id": "g0-impact_curve_excess_displacement_reversal-23424a",
+      "refines": 1,
+      "last_gen": 1
+    },
+    {
+      "genome_id": "g0-uninformed_flow_absorption_unwind-4fa19e",
+      "refines": 1,
+      "last_gen": 2
+    },
+    {
+      "genome_id": "g3-roll_cost_state_directional_followthrough-a230a0",
+      "refines": 1,
+      "last_gen": 3
+    },
+    {
+      "genome_id": "g4-normalized_roll_bounce_reversal-df5f6f",
+      "refines": 1,
+      "last_gen": 4
+    },
+    {
+      "genome_id": "g5-funding_fragility_absorption_efficiency_repair-b5a002",
+      "refines": 1,
+      "last_gen": 5
+    },
+    {
+      "genome_id": "g6-event_accepted_impact_information_drift-4a4d43",
+      "refines": 1,
+      "last_gen": 6
+    },
+    {
+      "genome_id": "g0-float_cohort_costbasis_entropy_release-1db79d",
+      "refines": 0,
+      "last_gen": -1
+    }
+  ],
+  "10": [
+    {
+      "genome_id": "g0-multiscale_overlap_lagged_impulse_residual-c02e3e",
+      "refines": 1,
+      "last_gen": 2
+    },
+    {
+      "genome_id": "g3-clustered_absorption_terminal_unwind_h6-ad050f",
+      "refines": 1,
+      "last_gen": 3
+    },
+    {
+      "genome_id": "g4-reciprocity_validated_peer_response_gap-164409",
+      "refines": 1,
+      "last_gen": 4
+    },
+    {
+      "genome_id": "g5-renewal_mark_surprise_drift_h6-07cf12",
+      "refines": 1,
+      "last_gen": 5
+    },
+    {
+      "genome_id": "g0-volume_clock_memory_excess_continuation-baceb2",
       "refines": 0,
       "last_gen": -1
     },
     {
-      "genome_id": "g0-volume_arrival_asymmetry_information_persistence-30ba58",
+      "genome_id": "g0-sector_conditioned_delay_shape_anomaly-42e590",
       "refines": 0,
       "last_gen": -1
     },
     {
-      "genome_id": "g0-compressed_flow_release_directional_pressure-c05aa7",
+      "genome_id": "g0-cyclostationary_impact_sideband_pressure-6dad53",
       "refines": 0,
       "last_gen": -1
     },
     {
-      "genome_id": "g0-return_volume_phase_locking_break-b9f6ec",
+      "genome_id": "g1-quality_state_gated_peer_lag_gap-9572e5",
+      "refines": 0,
+      "last_gen": -1
+    },
+    {
+      "genome_id": "g6-reciprocal_peer_gap_characteristic_confirmation-c36e57",
+      "refines": 0,
+      "last_gen": -1
+    }
+  ],
+  "11": [
+    {
+      "genome_id": "g1-robust_absorption_acceleration_state-44af68",
+      "refines": 1,
+      "last_gen": 1
+    },
+    {
+      "genome_id": "g2-terminal_leg_dominance_liquidity_fade-ff5a01",
+      "refines": 1,
+      "last_gen": 2
+    },
+    {
+      "genome_id": "g3-robust_participation_weighted_directional_run-b6534e",
+      "refines": 1,
+      "last_gen": 3
+    },
+    {
+      "genome_id": "g4-report_aligned_anticipatory_flow_drift-fe5189",
+      "refines": 1,
+      "last_gen": 4
+    },
+    {
+      "genome_id": "g5-relative_attention_peer_impulse_deficit_h6-19d52b",
+      "refines": 1,
+      "last_gen": 5
+    },
+    {
+      "genome_id": "g6-square_root_impact_deficit_acceleration_release-ffa1b4",
+      "refines": 1,
+      "last_gen": 6
+    },
+    {
+      "genome_id": "g0-sector_homology_boundary_reversal-722bc5",
+      "refines": 0,
+      "last_gen": -1
+    },
+    {
+      "genome_id": "g0-auction_leakage_calibrated_pressure_drift-11224c",
+      "refines": 0,
+      "last_gen": -1
+    }
+  ],
+  "12": [
+    {
+      "genome_id": "g2-industry_revision_response_deficit-52687e",
+      "refines": 1,
+      "last_gen": 2
+    },
+    {
+      "genome_id": "g3-lagged_impact_deficit_execution_coherence_h6-735b17",
+      "refines": 1,
+      "last_gen": 3
+    },
+    {
+      "genome_id": "g5-demand_revision_supply_alignment_drift-a70229",
+      "refines": 1,
+      "last_gen": 5
+    },
+    {
+      "genome_id": "g6-revision_stateful_absorption_impact_backlog-c00b12",
+      "refines": 1,
+      "last_gen": 6
+    },
+    {
+      "genome_id": "g0-entropy_resolved_report_flow_drift-8f9990",
+      "refines": 0,
+      "last_gen": -1
+    },
+    {
+      "genome_id": "g1-peer_revision_clock_completion-3a400d",
+      "refines": 0,
+      "last_gen": -1
+    },
+    {
+      "genome_id": "g4-surprise_flow_impact_acceptance_drift-e66f21",
+      "refines": 0,
+      "last_gen": -1
+    }
+  ],
+  "13": [
+    {
+      "genome_id": "g1-fundamental_confirmation_idio_selloff_reversal-0de01a",
+      "refines": 1,
+      "last_gen": 1
+    },
+    {
+      "genome_id": "g2-coarse_regime_residual_persistence_fade-d59b41",
+      "refines": 1,
+      "last_gen": 2
+    },
+    {
+      "genome_id": "g0-spectral_peer_residual_liquidity_repair-22bc26",
+      "refines": 1,
+      "last_gen": 3
+    },
+    {
+      "genome_id": "g4-cash_resilience_acute_relative_snapback-6319c5",
+      "refines": 1,
+      "last_gen": 4
+    },
+    {
+      "genome_id": "g5-lagged_sector_value_trend_confirmation-82dfe4",
+      "refines": 1,
+      "last_gen": 5
+    },
+    {
+      "genome_id": "g6-solvency_confirmed_selloff_rebound-e2df5a",
+      "refines": 1,
+      "last_gen": 6
+    },
+    {
+      "genome_id": "g0-cohort_anchor_loss_aversion_rebound-c3951c",
+      "refines": 0,
+      "last_gen": -1
+    }
+  ],
+  "14": [
+    {
+      "genome_id": "g1-coherent_clv_hawkes_impact_deficit-7fdaa8",
+      "refines": 1,
+      "last_gen": 1
+    },
+    {
+      "genome_id": "g2-inventory_build_peer_underreaction-e3c144",
+      "refines": 1,
+      "last_gen": 2
+    },
+    {
+      "genome_id": "g5-fundamental_profile_peer_impulse_gap-e86bcc",
+      "refines": 1,
+      "last_gen": 5
+    },
+    {
+      "genome_id": "g6-absorbed_excitation_cooling_impact_reversal-66178e",
+      "refines": 1,
+      "last_gen": 6
+    },
+    {
+      "genome_id": "g0-peer_manifold_tangent_signed_anomaly-b5e953",
+      "refines": 0,
+      "last_gen": -1
+    },
+    {
+      "genome_id": "g0-peer_shock_internalization_gradient-7aa1f3",
+      "refines": 0,
+      "last_gen": -1
+    },
+    {
+      "genome_id": "g4-absorbed_counterflow_peer_compensator_h6-3e6339",
+      "refines": 0,
+      "last_gen": -1
+    }
+  ],
+  "15": [
+    {
+      "genome_id": "g3-fundamental_cohort_relative_return_repair-8fa8cc",
+      "refines": 1,
+      "last_gen": 3
+    },
+    {
+      "genome_id": "g4-fast_halflife_peer_spread_repair-57dbcf",
+      "refines": 1,
+      "last_gen": 4
+    }
+  ],
+  "16": [
+    {
+      "genome_id": "g0-copula_asymmetric_peer_tail_mispricing_repair-b18b10",
+      "refines": 1,
+      "last_gen": 3
+    },
+    {
+      "genome_id": "g4-stable_peer_copula_rank_discordance-35996c",
+      "refines": 1,
+      "last_gen": 4
+    }
+  ],
+  "17": [
+    {
+      "genome_id": "g1-size_bucket_boundary_reversal-7acaae",
+      "refines": 1,
+      "last_gen": 1
+    },
+    {
+      "genome_id": "g2-sector_share_fresh_idio_snapback-d8f2eb",
+      "refines": 1,
+      "last_gen": 2
+    },
+    {
+      "genome_id": "g0-vol_scaled_relative_size_anchor_reversion-73783e",
+      "refines": 1,
+      "last_gen": 4
+    },
+    {
+      "genome_id": "g0-size_conditioned_beta_shock_residual-633954",
+      "refines": 1,
+      "last_gen": 5
+    },
+    {
+      "genome_id": "g6-verified_sector_cap_share_overshoot_fade-2997f5",
+      "refines": 1,
+      "last_gen": 6
+    },
+    {
+      "genome_id": "g0-size_scaled_return_entropy_release-40f34a",
+      "refines": 0,
+      "last_gen": -1
+    },
+    {
+      "genome_id": "g3-network_gated_size_beta_residual_fade-09773d",
+      "refines": 0,
+      "last_gen": -1
+    }
+  ],
+  "18": [
+    {
+      "genome_id": "g2-robust_close_extreme_flow_exhaustion_h6-fc00ac",
+      "refines": 1,
+      "last_gen": 2
+    },
+    {
+      "genome_id": "g3-partial_gap_rejection_replenishment_h6-9aed19",
+      "refines": 1,
+      "last_gen": 3
+    },
+    {
+      "genome_id": "g4-coherent_sqrt_impact_overshoot-0cd20e",
+      "refines": 1,
+      "last_gen": 4
+    },
+    {
+      "genome_id": "g5-revision_aligned_regular_flow_completion_reversa-d5ed19",
+      "refines": 1,
+      "last_gen": 5
+    },
+    {
+      "genome_id": "g6-persistent_asymmetric_impact_information_residua-27ab0e",
+      "refines": 1,
+      "last_gen": 6
+    },
+    {
+      "genome_id": "g1-revision_confirmed_barrier_vacuum_drift-1624bf",
+      "refines": 0,
+      "last_gen": -1
+    }
+  ],
+  "19": [
+    {
+      "genome_id": "g1-robust_rough_vol_memory_delayed_shock-e56706",
+      "refines": 1,
+      "last_gen": 1
+    },
+    {
+      "genome_id": "g2-downside_volatility_memory_resolution-b42f77",
+      "refines": 1,
+      "last_gen": 2
+    },
+    {
+      "genome_id": "g4-orthogonal_rough_volatility_beta_gate-50f33a",
+      "refines": 1,
+      "last_gen": 4
+    },
+    {
+      "genome_id": "g5-postreport_volatility_cluster_surprise_drift-90c6d8",
+      "refines": 1,
+      "last_gen": 5
+    },
+    {
+      "genome_id": "g6-lagged_robust_range_memory_overshoot_fade-545c24",
+      "refines": 1,
+      "last_gen": 6
+    },
+    {
+      "genome_id": "g3-rough_state_stable_peer_dislocation_repair-cf42e7",
+      "refines": 0,
+      "last_gen": -1
+    }
+  ],
+  "20": [
+    {
+      "genome_id": "g1-sector_value_distance_wick_revelation_reversal-4b1408",
+      "refines": 1,
+      "last_gen": 1
+    },
+    {
+      "genome_id": "g2-fresh_superlinear_impact_reversal-7282af",
+      "refines": 1,
+      "last_gen": 2
+    },
+    {
+      "genome_id": "g3-ridge_convex_impact_absorption_continuation-1ad756",
+      "refines": 1,
+      "last_gen": 3
+    },
+    {
+      "genome_id": "g4-adaptive_markov_execution_impact_drift-7fc99f",
+      "refines": 1,
+      "last_gen": 4
+    },
+    {
+      "genome_id": "g5-distance_scaled_sqrt_impact_barrier_drift-62a240",
+      "refines": 1,
+      "last_gen": 5
+    },
+    {
+      "genome_id": "g6-distance_anchor_release_reversal_h6-d21d02",
+      "refines": 1,
+      "last_gen": 6
+    }
+  ],
+  "21": [
+    {
+      "genome_id": "g1-refractory_flow_cluster_reversal_h6-a5e445",
+      "refines": 1,
+      "last_gen": 1
+    },
+    {
+      "genome_id": "g2-industry_flow_innovation_response_compensator-0b8e77",
+      "refines": 1,
+      "last_gen": 2
+    },
+    {
+      "genome_id": "g3-stable_peer_flow_unpaid_response_h6-9d296b",
+      "refines": 1,
+      "last_gen": 3
+    },
+    {
+      "genome_id": "g6-refractory_branching_activation_reserve-614bd7",
+      "refines": 1,
+      "last_gen": 6
+    },
+    {
+      "genome_id": "g0-refractory_flow_deficit_transient_impact_reversal-c2a391",
+      "refines": 0,
+      "last_gen": -1
+    },
+    {
+      "genome_id": "g0-impact_deficit_self_excitation_drift-734579",
+      "refines": 0,
+      "last_gen": -1
+    },
+    {
+      "genome_id": "g0-renewal_clock_regular_flow_persistence-d7a2b5",
+      "refines": 0,
+      "last_gen": -1
+    },
+    {
+      "genome_id": "g4-event_marked_peer_excitation_completion-2dce0d",
+      "refines": 0,
+      "last_gen": -1
+    },
+    {
+      "genome_id": "g5-noisy_cost_gated_branching_flip-23c58f",
+      "refines": 0,
+      "last_gen": -1
+    }
+  ],
+  "22": [
+    {
+      "genome_id": "g1-terminal_absorption_value_contradiction_reversal-4e2c46",
+      "refines": 1,
+      "last_gen": 1
+    },
+    {
+      "genome_id": "g2-fresh_fundamental_contrary_flow_resolution_h6-bb5575",
+      "refines": 1,
+      "last_gen": 2
+    },
+    {
+      "genome_id": "g3-clv_flow_absorption_deferred_impact-46d399",
+      "refines": 1,
+      "last_gen": 3
+    },
+    {
+      "genome_id": "g5-lagged_compensator_lowimpact_flow_drift-acfa70",
+      "refines": 1,
+      "last_gen": 5
+    },
+    {
+      "genome_id": "g6-entropy_program_anchor_snapback_h6-99186c",
+      "refines": 1,
+      "last_gen": 6
+    },
+    {
+      "genome_id": "g0-fundamental_anchor_orbit_area_reversal-7247a8",
+      "refines": 0,
+      "last_gen": -1
+    },
+    {
+      "genome_id": "g4-underwater_absorbed_sell_rebound-2fb442",
+      "refines": 0,
+      "last_gen": -1
+    }
+  ],
+  "23": [
+    {
+      "genome_id": "g1-delayed_variance_refinancing_downbeta-dc2363",
+      "refines": 1,
+      "last_gen": 1
+    },
+    {
+      "genome_id": "g2-industry_cost_pressure_margin_resilience-6eceeb",
+      "refines": 1,
+      "last_gen": 2
+    },
+    {
+      "genome_id": "g3-fresh_cost_pressure_passthrough_correction-68a5f2",
+      "refines": 1,
+      "last_gen": 3
+    },
+    {
+      "genome_id": "g4-conditional_transition_entropy_execution_drift_h-a579c4",
+      "refines": 1,
+      "last_gen": 4
+    },
+    {
+      "genome_id": "g6-persistent_stress_sector_relative_refinancing_la-29b24b",
+      "refines": 1,
+      "last_gen": 6
+    }
+  ],
+  "24": [
+    {
+      "genome_id": "g2-robust_roughness_leverage_fragility_risk-1d5979",
+      "refines": 1,
+      "last_gen": 2
+    },
+    {
+      "genome_id": "g3-robust_rough_leverage_unwind_pressure-41285e",
+      "refines": 1,
+      "last_gen": 3
+    },
+    {
+      "genome_id": "g4-leverage_vol_persistence_downshock_state-0a212f",
+      "refines": 1,
+      "last_gen": 4
+    },
+    {
+      "genome_id": "g5-rough_range_phase_lead_continuation_h6-738ad6",
+      "refines": 1,
+      "last_gen": 5
+    }
+  ],
+  "25": [
+    {
+      "genome_id": "g1-retail_riskon_void_attention_exhaustion-55f2db",
+      "refines": 1,
+      "last_gen": 1
+    },
+    {
+      "genome_id": "g2-retail_riskon_delayed_positive_report_drift-5fbedf",
+      "refines": 1,
+      "last_gen": 2
+    },
+    {
+      "genome_id": "g4-retail_participation_breadth_accessibility-6cd92b",
+      "refines": 1,
+      "last_gen": 4
+    },
+    {
+      "genome_id": "g5-retail_positive_news_reaction_lag-c52859",
+      "refines": 1,
+      "last_gen": 5
+    },
+    {
+      "genome_id": "g6-causal_report_novelty_assimilation-b93e93",
+      "refines": 1,
+      "last_gen": 6
+    },
+    {
+      "genome_id": "g0-retail_catalyst_entropy_directional_drift-b8b7f0",
+      "refines": 0,
+      "last_gen": -1
+    },
+    {
+      "genome_id": "g3-fragility_gated_positive_surprise_volatility_rel-5f898a",
+      "refines": 0,
+      "last_gen": -1
+    }
+  ],
+  "27": [
+    {
+      "genome_id": "g6-circular_turnover_price_discovery_failure-6b5546",
+      "refines": 0,
+      "last_gen": -1
+    }
+  ],
+  "28": [
+    {
+      "genome_id": "g0-orderly_drift_value_activation-f9f2cc",
+      "refines": 1,
+      "last_gen": 2
+    },
+    {
+      "genome_id": "g3-fresh_value_update_sector_assimilation_gap-05f467",
+      "refines": 1,
+      "last_gen": 3
+    },
+    {
+      "genome_id": "g4-valuation_congruent_drift_reversal-78456b",
+      "refines": 1,
+      "last_gen": 4
+    },
+    {
+      "genome_id": "g5-rolling_cost_basis_rejection_asymmetry-a01329",
+      "refines": 1,
+      "last_gen": 5
+    }
+  ],
+  "26": [],
+  "29": [
+    {
+      "genome_id": "g4-common_bounce_inventory_covariance_reversal-b0b265",
+      "refines": 1,
+      "last_gen": 5
+    },
+    {
+      "genome_id": "g6-sector_inventory_gated_terminal_sell_rebound-7f8edb",
+      "refines": 0,
+      "last_gen": -1
+    }
+  ],
+  "30": [],
+  "31": [],
+  "32": [],
+  "33": [
+    {
+      "genome_id": "g6-rogers_satchell_aliasing_terminal_fade-fbbdd9",
+      "refines": 1,
+      "last_gen": 6
+    },
+    {
+      "genome_id": "g5-common_noise_resolved_aliasing_polarity-662205",
+      "refines": 0,
+      "last_gen": -1
+    }
+  ],
+  "34": [],
+  "35": [],
+  "36": [],
+  "37": [],
+  "41": [],
+  "42": [],
+  "43": [
+    {
+      "genome_id": "g6-levered_range_rupture_overshoot_reversal-767a5b",
+      "refines": 1,
+      "last_gen": 6
+    }
+  ],
+  "45": [
+    {
+      "genome_id": "g6-robust_characteristic_residual_reversion_h6-d78f5e",
+      "refines": 1,
+      "last_gen": 6
+    }
+  ],
+  "46": [
+    {
+      "genome_id": "g3-seasoned_variance_swap_vanna_unwind-1e09f5",
+      "refines": 1,
+      "last_gen": 3
+    },
+    {
+      "genome_id": "g5-seasoned_semivariance_vanna_unwind-c6af88",
+      "refines": 1,
+      "last_gen": 5
+    },
+    {
+      "genome_id": "g6-seasoned_convexity_wedge_liquidity_residual_fade-ddd161",
+      "refines": 1,
+      "last_gen": 6
+    }
+  ],
+  "47": [
+    {
+      "genome_id": "g6-complexity_gated_margin_assimilation_residual-daa5f5",
+      "refines": 1,
+      "last_gen": 6
+    }
+  ],
+  "48": [],
+  "49": [],
+  "50": [],
+  "53": [],
+  "54": [
+    {
+      "genome_id": "g6-repair_anchored_unforecastable_volatility_fade-d97f79",
+      "refines": 1,
+      "last_gen": 6
+    },
+    {
+      "genome_id": "g5-disclosure_contradicted_thin_opinion_unwind-b2ce06",
+      "refines": 0,
+      "last_gen": -1
+    }
+  ],
+  "56": [],
+  "57": [],
+  "58": [],
+  "59": [],
+  "60": [
+    {
+      "genome_id": "g5-cross_type_cluster_unwind_residue-df1d9b",
+      "refines": 1,
+      "last_gen": 5
+    },
+    {
+      "genome_id": "g6-report_verified_cluster_polarity_switch-840b13",
+      "refines": 0,
+      "last_gen": -1
+    }
+  ],
+  "61": [],
+  "62": [],
+  "63": [
+    {
+      "genome_id": "g6-moderate_uncertainty_surprise_diffusion_h6-cb4599",
+      "refines": 1,
+      "last_gen": 6
+    }
+  ],
+  "38": [
+    {
+      "genome_id": "g6-event_time_multimeasure_ambiguity_completion-8091ae",
+      "refines": 1,
+      "last_gen": 6
+    }
+  ],
+  "40": [
+    {
+      "genome_id": "g5-estimate_update_tail_activity_elasticity-2b1f94",
+      "refines": 0,
+      "last_gen": -1
+    },
+    {
+      "genome_id": "g6-cap_leader_downshock_absorption_catchup-6b939e",
+      "refines": 0,
+      "last_gen": -1
+    }
+  ],
+  "44": [
+    {
+      "genome_id": "g5-two_regime_impact_kink_residual_propagation-48ca47",
+      "refines": 0,
+      "last_gen": -1
+    },
+    {
+      "genome_id": "g6-depth_state_switched_impact_backlog-58fd22",
+      "refines": 0,
+      "last_gen": -1
+    }
+  ],
+  "51": [
+    {
+      "genome_id": "g6-penultimate_tail_semibeta_freshness_reprice-755a4a",
+      "refines": 1,
+      "last_gen": 6
+    }
+  ],
+  "52": [
+    {
+      "genome_id": "g6-fresh_cash_debt_service_repair_assimilation-28abc6",
+      "refines": 1,
+      "last_gen": 6
+    }
+  ],
+  "55": [
+    {
+      "genome_id": "g6-idiosyncratic_auction_handoff_drift-8c8285",
+      "refines": 1,
+      "last_gen": 6
+    }
+  ],
+  "39": [
+    {
+      "genome_id": "g6-conditional_latent_value_spread_premium_tilt-617d58",
       "refines": 0,
       "last_gen": -1
     }

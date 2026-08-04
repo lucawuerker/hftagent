@@ -1,0 +1,65 @@
+{
+  "config": "fmp_archive_equity_nasdaq100pit",
+  "prerun": "L2WF_terra_s0",
+  "created_at": "2026-08-02T21:54:46+00:00",
+  "updated_at": "2026-08-02T21:54:46+00:00",
+  "llm_model": "gpt-5.6-terra",
+  "llm_provider": "openai",
+  "engine": "evolution",
+  "generations": 20,
+  "n_trials": 758,
+  "n_factors": 19,
+  "llm_roles": {
+    "hypothesis": {
+      "model": "gpt-5.6-terra",
+      "provider": "openai"
+    },
+    "debate": {
+      "model": "gpt-5.6-terra",
+      "provider": "openai"
+    },
+    "codegen": {
+      "model": "gpt-5.6-terra",
+      "provider": "openai"
+    }
+  },
+  "llm_usage": {
+    "by_role": {
+      "brainstorm": {
+        "calls": 2,
+        "input_tokens": 12881,
+        "output_tokens": 4909,
+        "cost_usd": 0.1058375,
+        "errors": 0
+      },
+      "codegen": {
+        "calls": 13,
+        "input_tokens": 78693,
+        "output_tokens": 31377,
+        "cost_usd": 0.6673875,
+        "errors": 0
+      },
+      "crossover": {
+        "calls": 336,
+        "input_tokens": 5147798,
+        "output_tokens": 915900,
+        "cost_usd": 26.607994999999995,
+        "errors": 0
+      },
+      "mutation": {
+        "calls": 857,
+        "input_tokens": 11985995,
+        "output_tokens": 2405488,
+        "cost_usd": 66.04730749999989,
+        "errors": 0
+      }
+    },
+    "total": {
+      "calls": 1208,
+      "input_tokens": 17225367,
+      "output_tokens": 3357674,
+      "cost_usd": 93.42852749999989,
+      "errors": 0
+    }
+  }
+}

@@ -575,6 +575,20 @@ def _make_synthetic_panel(
         "nbTrades": _df(rng.integers(0, 20, (n_bars, n_tickers)).astype(float)),
     }
 
+    # Per-level order-book columns (LOBSTER levels 1-10, the microstructure
+    # tier's full advertisement): without these, every factor reading e.g.
+    # ``askDepth3`` dies at the smoke test with a KeyError — the exact failure
+    # mode the fundamentals block below exists to prevent.
+    half_spread = _df(rng.uniform(0.005, 0.025, (n_bars, n_tickers)))
+    for lvl in range(1, 11):
+        step = 0.01 * lvl
+        panel[f"askPrice{lvl}"] = close + half_spread + step
+        panel[f"bidPrice{lvl}"] = close - half_spread - step
+        panel[f"askDepth{lvl}"] = _df(
+            rng.uniform(100, 2000, (n_bars, n_tickers)))
+        panel[f"bidDepth{lvl}"] = _df(
+            rng.uniform(100, 2000, (n_bars, n_tickers)))
+
     # Fundamental / estimate / event fields (the FMP-archive canonical
     # vocabulary): a factor reading any in-scope field must be smoke-testable —
     # without these, every fundamentals-based factor dies with a KeyError at

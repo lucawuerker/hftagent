@@ -1,0 +1,2445 @@
+{
+  "factors": [
+    {
+      "id": "cash_return_accrual_roic_residual",
+      "name": "Cash Return versus Accrual ROIC",
+      "class_name": "",
+      "description": "Ranks each firm's operating-cash-flow return on invested capital relative to its reported ROIC, then sector-neutralizes the discrepancy. High values identify firms with unusually strong cash realization relative to accrual profitability.",
+      "formula": "",
+      "trading_idea": "The child retains the parent's core insight that internally generated cash is more informative than headline accounting delivery, but removes sparse report-event gates, financing branches, and short-lived muted-price-response conditions. Firms whose operating-cash return on invested capital exceeds their reported accrual ROIC have earnings that are more cash-realized than the market's standard profitability screens imply; this should predict positive six-bar returns as investors gradually incorporate the higher-quality profitability. The mechanism is falsified if the cash-return-minus-ROIC residual has no positive forward-return spread after sector neutralization and conditioning on reported ROIC itself. The edge can persist because common quality and benchmark processes emphasize reported earnings and ROIC, whereas cash-flow realization is quarterly, less salient, and costly to arbitrage through shorting low-quality firms.",
+      "trading_idea_ids": [],
+      "category": "other",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.001262,
+        "ic_std": 0.121799,
+        "ic_ir": 0.010359,
+        "ic_hit_rate": 0.5004,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.000965,
+            "ic_std": 0.120706,
+            "ic_ir": 0.007994,
+            "ic_hit_rate": 0.493,
+            "n_timestamps": 4164
+          },
+          "6": {
+            "ic": 0.001262,
+            "ic_std": 0.121799,
+            "ic_ir": 0.010359,
+            "ic_hit_rate": 0.5004,
+            "n_timestamps": 4159
+          },
+          "60": {
+            "ic": 0.002863,
+            "ic_std": 0.11894,
+            "ic_ir": 0.024073,
+            "ic_hit_rate": 0.5157,
+            "n_timestamps": 4105
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4159,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L2WF_terra_s0",
+      "code_path": "/root/QuantFundAgent/quant_fund_agent/factors/researcher/cash_return_accrual_roic_residual.py",
+      "required_inputs": [
+        "close",
+        "sector",
+        "operatingCashFlow",
+        "investedCapital",
+        "roic"
+      ],
+      "required_tier": "fundamental",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-02T21:54:46.313371",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g1-cash_return_accrual_roic_residual-620080",
+          "generation": 1,
+          "operator": "llm_semantic",
+          "parent_ids": [
+            "g0-self_funded_delivery_assimilation_gap-03376a"
+          ],
+          "expected_sign": 1,
+          "objective": {
+            "marginal_value": 0.006017027172879823,
+            "independence": -0.006272353705470991,
+            "parsimony": -19.0,
+            "structural_novelty": 0.6404302395456322
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 721,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.04188718699754545,
+            "deflated": {
+              "best_ic": 0.041887,
+              "deflated_ic": 0.029405,
+              "deflated_t": 8.578895,
+              "luck_ic": 0.012482,
+              "n_obs": 85117,
+              "n_trials": 758
+            },
+            "n_trials": 758,
+            "dropped": [],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L2WF_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-02T21:54:46+00:00"
+        }
+      }
+    },
+    {
+      "id": "cash_collected_sales_acceleration_lag",
+      "name": "Cash-Collected Sales Acceleration",
+      "class_name": "",
+      "description": "On fresh revenue-growth disclosures, the signal ranks sales growth and operating-cash-flow growth positively and receivables and inventory growth negatively, then industry-neutralizes the continuous cash-collection quality score. It is active only at newly observed revenue-growth updates.",
+      "formula": "",
+      "trading_idea": "Revenue growth is more informative when it is accompanied by operating-cash-flow growth without disproportionate increases in receivables or inventory: this indicates demand converting into cash rather than channel stuffing, loose credit, or inventory accumulation. Investors often react to the sales-growth headline first and reconcile the cash-flow and working-capital components only after the filing is processed, creating a several-day assimilation lag. The edge should persist because this decomposition requires combining multiple financial-statement fields and comparing them against industry peers; falsifiably, fresh reports with high cash-collected sales scores should have higher six-day residual returns than equally high revenue-growth reports with receivable or inventory buildup.",
+      "trading_idea_ids": [],
+      "category": "other",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.005741,
+        "ic_std": 0.109643,
+        "ic_ir": 0.05236,
+        "ic_hit_rate": 0.518,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.008038,
+            "ic_std": 0.154017,
+            "ic_ir": 0.052192,
+            "ic_hit_rate": 0.5186,
+            "n_timestamps": 2260
+          },
+          "6": {
+            "ic": 0.005741,
+            "ic_std": 0.109643,
+            "ic_ir": 0.05236,
+            "ic_hit_rate": 0.518,
+            "n_timestamps": 2255
+          },
+          "60": {
+            "ic": 0.005396,
+            "ic_std": 0.100077,
+            "ic_ir": 0.053923,
+            "ic_hit_rate": 0.5201,
+            "n_timestamps": 2211
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 2255,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L2WF_terra_s0",
+      "code_path": "/root/QuantFundAgent/quant_fund_agent/factors/researcher/cash_collected_sales_acceleration_lag.py",
+      "required_inputs": [
+        "close",
+        "revenueGrowth",
+        "operatingCashFlowGrowth",
+        "receivablesGrowth",
+        "inventoryGrowth",
+        "industry"
+      ],
+      "required_tier": "fundamental",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-02T21:54:46.323373",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g5-cash_collected_sales_acceleration_lag-8b5ab3",
+          "generation": 5,
+          "operator": "llm_semantic",
+          "parent_ids": [
+            "g4-cashbacked_efficiency_workingcapital_concordance-93c9f7"
+          ],
+          "expected_sign": 1,
+          "objective": {
+            "marginal_value": -0.0010473649316845093,
+            "independence": 0.0064089348850685495,
+            "parsimony": -40.0,
+            "structural_novelty": 0.8852154475766978
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 721,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.04188718699754545,
+            "deflated": {
+              "best_ic": 0.041887,
+              "deflated_ic": 0.029405,
+              "deflated_t": 8.578895,
+              "luck_ic": 0.012482,
+              "n_obs": 85117,
+              "n_trials": 758
+            },
+            "n_trials": 758,
+            "dropped": [],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L2WF_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-02T21:54:46+00:00"
+        }
+      }
+    },
+    {
+      "id": "quiet_operating_leverage_delivery_drift",
+      "name": "Quiet Operating-Leverage Delivery Drift",
+      "class_name": "",
+      "description": "At fresh revenue-report updates, the signal identifies positive normalized revenue surprises with improving operating margin and falling SG&A-to-revenue. It weights those events by muted contemporaneous price reaction and sector-neutralizes the resulting cross-sectional score.",
+      "formula": "",
+      "trading_idea": "The parent\u2019s positive realized IC implies that positive revenue-and-margin delivery in expensive firms was generally confirmation rather than an exhausted narrative. This child changes the mechanism: a positive revenue surprise accompanied by both margin expansion and declining SG&A intensity reveals operational leverage, but only when the immediate stock reaction is muted, indicating that the market processed the headline without fully incorporating the cost-structure implication. The edge should persist because decomposing a filing into sustainable operating leverage is slower and more analyst-intensive than reacting to the revenue headline; it is falsified if these quiet, efficiency-confirmed delivery events do not outperform sector peers over the following six sessions.",
+      "trading_idea_ids": [],
+      "category": "sentiment",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.002031,
+        "ic_std": 0.154909,
+        "ic_ir": 0.013113,
+        "ic_hit_rate": 0.5143,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.006011,
+            "ic_std": 0.159334,
+            "ic_ir": 0.037724,
+            "ic_hit_rate": 0.504,
+            "n_timestamps": 1133
+          },
+          "6": {
+            "ic": 0.002031,
+            "ic_std": 0.154909,
+            "ic_ir": 0.013113,
+            "ic_hit_rate": 0.5143,
+            "n_timestamps": 1157
+          },
+          "60": {
+            "ic": -0.002949,
+            "ic_std": 0.150237,
+            "ic_ir": -0.019631,
+            "ic_hit_rate": 0.5141,
+            "n_timestamps": 1208
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 1157,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L2WF_terra_s0",
+      "code_path": "/root/QuantFundAgent/quant_fund_agent/factors/researcher/quiet_operating_leverage_delivery_drift.py",
+      "required_inputs": [
+        "close",
+        "sector",
+        "revenueActual",
+        "revenueEstimate",
+        "revenueSurprise",
+        "operatingMargin",
+        "sgaToRevenue"
+      ],
+      "required_tier": "events",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-02T21:54:46.323475",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g12-quiet_operating_leverage_delivery_drift-a7c3cb",
+          "generation": 12,
+          "operator": "llm_semantic",
+          "parent_ids": [
+            "g10-priced_delivery_extrapolation_reversal-8e47d4"
+          ],
+          "expected_sign": 1,
+          "objective": {
+            "marginal_value": -0.026383434285065135,
+            "independence": 0.015324103252325865,
+            "parsimony": -78.0,
+            "structural_novelty": 0.8519466053615443
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 721,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.04188718699754545,
+            "deflated": {
+              "best_ic": 0.041887,
+              "deflated_ic": 0.029405,
+              "deflated_t": 8.578895,
+              "luck_ic": 0.012482,
+              "n_obs": 85117,
+              "n_trials": 758
+            },
+            "n_trials": 758,
+            "dropped": [],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L2WF_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-02T21:54:46+00:00"
+        }
+      }
+    },
+    {
+      "id": "cash_confirmed_margin_step_diffusion_v2",
+      "name": "Cash-Confirmed Margin Step Diffusion",
+      "class_name": "",
+      "description": "The signal exponentially carries forward fresh point-in-time operating-margin changes, scaled by cross-sectional income-quality rank. Positive cash-confirmed margin upgrades receive high values and credible deteriorations receive low values.",
+      "formula": "",
+      "trading_idea": "Quarterly operating-margin step changes are slow to interpret because investors must distinguish durable operating leverage from transitory accounting noise. Margin improvements accompanied by strong operating-cash-flow conversion should receive a delayed repricing over the following week, while credible margin deterioration should continue to be discounted. The edge can persist because cash-flow confirmation requires reading and reconciling filing information rather than reacting to a single headline metric, and is therefore not fully arbitraged immediately.",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.009481,
+        "ic_std": 0.117,
+        "ic_ir": 0.081036,
+        "ic_hit_rate": 0.5275,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.005421,
+            "ic_std": 0.114927,
+            "ic_ir": 0.047172,
+            "ic_hit_rate": 0.5259,
+            "n_timestamps": 4162
+          },
+          "6": {
+            "ic": 0.009481,
+            "ic_std": 0.117,
+            "ic_ir": 0.081036,
+            "ic_hit_rate": 0.5275,
+            "n_timestamps": 4157
+          },
+          "60": {
+            "ic": 0.031636,
+            "ic_std": 0.122738,
+            "ic_ir": 0.257755,
+            "ic_hit_rate": 0.6254,
+            "n_timestamps": 4103
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4157,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L2WF_terra_s0",
+      "code_path": "/root/QuantFundAgent/quant_fund_agent/factors/researcher/cash_confirmed_margin_step_diffusion_v2.py",
+      "required_inputs": [
+        "close",
+        "operatingMargin",
+        "incomeQuality"
+      ],
+      "required_tier": "fundamental",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-02T21:54:46.323532",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g13-cash_confirmed_margin_step_diffusion_v2-333848",
+          "generation": 13,
+          "operator": "llm_semantic",
+          "parent_ids": [
+            "g10-novel_earnings_belief_residual_diffusion-5d77f7"
+          ],
+          "expected_sign": 1,
+          "objective": {
+            "marginal_value": 0.006938232066790895,
+            "independence": 0.013577523568339356,
+            "parsimony": -52.0,
+            "structural_novelty": 0.8662237936648416
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 721,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.04188718699754545,
+            "deflated": {
+              "best_ic": 0.041887,
+              "deflated_ic": 0.029405,
+              "deflated_t": 8.578895,
+              "luck_ic": 0.012482,
+              "n_obs": 85117,
+              "n_trials": 758
+            },
+            "n_trials": 758,
+            "dropped": [],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L2WF_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-02T21:54:46+00:00"
+        }
+      }
+    },
+    {
+      "id": "deleveraging_validated_earnings_attention_gap",
+      "name": "Deleveraging-Validated Earnings Attention Gap",
+      "class_name": "",
+      "description": "On fresh, jointly observed earnings and cash-flow updates, the factor ranks the signed EPS-surprise reaction deficit and weights it by cash debt-service capacity, debt retirement, and ownership stability. Scores are frozen for six bars after the report and inactive names receive a neutral value.",
+      "formula": "",
+      "trading_idea": "An earnings surprise whose idiosyncratic price response is too muted should drift only when the accompanying cash-flow disclosure establishes that the per-share earnings update is financially durable: operating cash covers debt and the firm is retiring rather than issuing debt. Stable or declining share count further makes the benefit belong to incumbent shareholders rather than being diluted away. The interaction has edge because a reaction deficit alone can reflect low-quality or externally financed earnings, while deleveraging alone is slow-moving; a muted reaction to a cash-funded, ownership-preserving report identifies detailed balance-sheet information that the headline-price response has not yet incorporated.",
+      "trading_idea_ids": [],
+      "category": "other",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.000683,
+        "ic_std": 0.098355,
+        "ic_ir": 0.006942,
+        "ic_hit_rate": 0.4994,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.002534,
+            "ic_std": 0.125101,
+            "ic_ir": 0.020253,
+            "ic_hit_rate": 0.4898,
+            "n_timestamps": 1813
+          },
+          "6": {
+            "ic": 0.000683,
+            "ic_std": 0.098355,
+            "ic_ir": 0.006942,
+            "ic_hit_rate": 0.4994,
+            "n_timestamps": 1802
+          },
+          "60": {
+            "ic": -0.004233,
+            "ic_std": 0.098025,
+            "ic_ir": -0.043179,
+            "ic_hit_rate": 0.4652,
+            "n_timestamps": 1752
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 1802,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L2WF_terra_s0",
+      "code_path": "/root/QuantFundAgent/quant_fund_agent/factors/researcher/deleveraging_validated_earnings_attention_gap.py",
+      "required_inputs": [
+        "close",
+        "epsSurprise",
+        "sharesGrowth",
+        "marketCap",
+        "operatingCashFlow",
+        "totalDebt",
+        "netDebtIssuance"
+      ],
+      "required_tier": "events",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-02T21:54:46.323588",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g14-deleveraging_validated_earnings_attention_gap-3e7b2d",
+          "generation": 14,
+          "operator": "crossover",
+          "parent_ids": [
+            "g12-financing_source_cash_deleveraging_state-0ab63b",
+            "g6-ownership_anchored_reaction_deficit_drift-a91cbe"
+          ],
+          "expected_sign": 1,
+          "objective": {
+            "marginal_value": -3.4612559861077474e-05,
+            "independence": 0.004924435379754301,
+            "parsimony": -87.0,
+            "structural_novelty": 0.9133820173048238
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 721,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.04188718699754545,
+            "deflated": {
+              "best_ic": 0.041887,
+              "deflated_ic": 0.029405,
+              "deflated_t": 8.578895,
+              "luck_ic": 0.012482,
+              "n_obs": 85117,
+              "n_trials": 758
+            },
+            "n_trials": 758,
+            "dropped": [],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L2WF_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-02T21:54:46+00:00"
+        }
+      }
+    },
+    {
+      "id": "silent_acceptance_credit_cash_audit_unwind",
+      "name": "Silent Acceptance Credit-Cash Audit Unwind",
+      "class_name": "",
+      "description": "Scores fresh positive revenue-surprise reports with an unusually large receivables-versus-sales growth wedge and weak cash-flow delivery, conditional on a positive but low-relative-volume event-day price response. The event impulse decays causally over several bars to express delayed audit of initially accepted accounting narratives.",
+      "formula": "",
+      "trading_idea": "A positive revenue surprise accompanied by receivables growing faster than sales and operating cash flow growing more slowly than sales is a potential credit-funded beat rather than durable demand. The child only acts when the market initially accepts that narrative through a positive price response but turnover is unusually subdued, indicating that the headline was incorporated before broad investors processed the cash-conversion details; the ensuing forensic reassessment should occur over the following week. This is falsifiable: the negative six-day return should be concentrated in initially accepted, low-attention credit-cash mismatches and should disappear for high-turnover events, where detailed information is more likely to be incorporated immediately. The edge can persist because quarterly accounting reconciliation is irregular, costly to process, and difficult to arbitrage quickly in names with limited immediate participation.",
+      "trading_idea_ids": [],
+      "category": "other",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.006347,
+        "ic_std": 0.111396,
+        "ic_ir": 0.056975,
+        "ic_hit_rate": 0.5161,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.003364,
+            "ic_std": 0.112716,
+            "ic_ir": 0.029843,
+            "ic_hit_rate": 0.5087,
+            "n_timestamps": 4142
+          },
+          "6": {
+            "ic": 0.006347,
+            "ic_std": 0.111396,
+            "ic_ir": 0.056975,
+            "ic_hit_rate": 0.5161,
+            "n_timestamps": 4137
+          },
+          "60": {
+            "ic": 0.019152,
+            "ic_std": 0.115148,
+            "ic_ir": 0.166321,
+            "ic_hit_rate": 0.554,
+            "n_timestamps": 4083
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4137,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L2WF_terra_s0",
+      "code_path": "/root/QuantFundAgent/quant_fund_agent/factors/researcher/silent_acceptance_credit_cash_audit_unwind.py",
+      "required_inputs": [
+        "close",
+        "volume",
+        "revenueGrowth",
+        "receivablesGrowth",
+        "operatingCashFlowGrowth",
+        "revenueSurprise"
+      ],
+      "required_tier": "events",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-02T21:54:46.323642",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g14-silent_acceptance_credit_cash_audit_unwind-e397b3",
+          "generation": 14,
+          "operator": "llm_semantic",
+          "parent_ids": [
+            "g10-receivable_buyback_narrative_fracture-4c29fa"
+          ],
+          "expected_sign": -1,
+          "objective": {
+            "marginal_value": -0.0009711645093567001,
+            "independence": 0.01382227641998878,
+            "parsimony": -109.0,
+            "structural_novelty": 0.8977076349653037
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 721,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.04188718699754545,
+            "deflated": {
+              "best_ic": 0.041887,
+              "deflated_ic": 0.029405,
+              "deflated_t": 8.578895,
+              "luck_ic": 0.012482,
+              "n_obs": 85117,
+              "n_trials": 758
+            },
+            "n_trials": 758,
+            "dropped": [],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L2WF_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-02T21:54:46+00:00"
+        }
+      }
+    },
+    {
+      "id": "orthogonal_volume_relaxation_displacement_revers",
+      "name": "Volume-Relaxation Displacement Reversal",
+      "class_name": "",
+      "description": "The signal measures a volatility-normalized idiosyncratic displacement and takes the opposite sign only when a recent relative-volume peak is fading and the trailing return path is unusually choppy relative to its net move. Cross-sectional ranking produces long exposure to likely completed downward execution shocks and short exposure to likely completed upward execution shocks.",
+      "formula": "",
+      "trading_idea": "A large idiosyncratic displacement is more likely to be temporary inventory pressure when it was accompanied by an abnormal participation burst that subsequently relaxes, while the intervening price path is inefficient rather than a clean information-driven trend. The child fades that signed displacement only in this volume-relaxation, high-path-inefficiency state, replacing the parent\u2019s unstable fitted AR(2) phase with directly observable evidence of execution completion. The edge persists because latent metaorder completion and dealer inventory are not observed in daily bars, while arbitrageurs face uncertainty over whether a shock was informational until the participation profile has already decayed. It is falsified if high positive signals do not predict positive six-day returns after downward idiosyncratic shocks with decaying abnormal volume, or if the effect is equally strong after efficient directional paths.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.011226,
+        "ic_std": 0.15223,
+        "ic_ir": 0.073747,
+        "ic_hit_rate": 0.5204,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.005112,
+            "ic_std": 0.163813,
+            "ic_ir": 0.031205,
+            "ic_hit_rate": 0.5137,
+            "n_timestamps": 4094
+          },
+          "6": {
+            "ic": 0.011226,
+            "ic_std": 0.15223,
+            "ic_ir": 0.073747,
+            "ic_hit_rate": 0.5204,
+            "n_timestamps": 4089
+          },
+          "60": {
+            "ic": -0.001512,
+            "ic_std": 0.142146,
+            "ic_ir": -0.01064,
+            "ic_hit_rate": 0.4803,
+            "n_timestamps": 4035
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4089,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L2WF_terra_s0",
+      "code_path": "/root/QuantFundAgent/quant_fund_agent/factors/researcher/orthogonal_volume_relaxation_displacement_revers.py",
+      "required_inputs": [
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-02T21:54:46.323715",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g15-orthogonal_volume_relaxation_displacement_revers-2bc7bb",
+          "generation": 15,
+          "operator": "llm_semantic",
+          "parent_ids": [
+            "g14-ridge_phase_inventory_cooling_projection-651b68"
+          ],
+          "expected_sign": 1,
+          "objective": {
+            "marginal_value": 0.012010793294288362,
+            "independence": 0.028797873819504795,
+            "parsimony": -102.0,
+            "structural_novelty": 0.8482986132587504
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 721,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.04188718699754545,
+            "deflated": {
+              "best_ic": 0.041887,
+              "deflated_ic": 0.029405,
+              "deflated_t": 8.578895,
+              "luck_ic": 0.012482,
+              "n_obs": 85117,
+              "n_trials": 758
+            },
+            "n_trials": 758,
+            "dropped": [],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L2WF_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-02T21:54:46+00:00"
+        }
+      }
+    },
+    {
+      "id": "estimate_revision_relative_reaction_gap",
+      "name": "Estimate Revision Reaction Gap",
+      "class_name": "",
+      "description": "Computes a five-day signed EPS-consensus revision, ranks it cross-sectionally, and subtracts the cross-sectional rank of the contemporaneous five-day sector-relative stock return. High values identify upward revisions that appear insufficiently incorporated into price.",
+      "formula": "",
+      "trading_idea": "Analyst-consensus changes are discrete information events, but heterogeneous investor attention and slow model updates can leave a gap between a fresh earnings-estimate revision and the stock's sector-relative price reaction. A positive revision with muted relative performance should drift upward over the next week, while a negative revision that has not been reflected in relative returns should drift downward. The edge can persist because consensus data are sparse, revisions require interpretation across firms with different estimate scales, and many arbitrageurs trade the headline price move rather than the revision-response mismatch; it is falsified if the signed revision-minus-relative-return gap has no positive six-bar cross-sectional IC after sector neutralization.",
+      "trading_idea_ids": [],
+      "category": "sentiment",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.016759,
+        "ic_std": 0.151816,
+        "ic_ir": 0.110392,
+        "ic_hit_rate": 0.5397,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.011112,
+            "ic_std": 0.159394,
+            "ic_ir": 0.069716,
+            "ic_hit_rate": 0.521,
+            "n_timestamps": 4159
+          },
+          "6": {
+            "ic": 0.016759,
+            "ic_std": 0.151816,
+            "ic_ir": 0.110392,
+            "ic_hit_rate": 0.5397,
+            "n_timestamps": 4154
+          },
+          "60": {
+            "ic": 0.013059,
+            "ic_std": 0.136834,
+            "ic_ir": 0.09544,
+            "ic_hit_rate": 0.5412,
+            "n_timestamps": 4100
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4154,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L2WF_terra_s0",
+      "code_path": "/root/QuantFundAgent/quant_fund_agent/factors/researcher/estimate_revision_relative_reaction_gap.py",
+      "required_inputs": [
+        "close",
+        "epsEstimate",
+        "sector"
+      ],
+      "required_tier": "estimates",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-02T21:54:46.323773",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g16-estimate_revision_relative_reaction_gap-0549a3",
+          "generation": 16,
+          "operator": "llm_semantic",
+          "parent_ids": [
+            "g9-workingcapital_harvest_cash_roic_correction-308e7a"
+          ],
+          "expected_sign": 1,
+          "objective": {
+            "marginal_value": 0.0012764284761452582,
+            "independence": 0.0009830435751569167,
+            "parsimony": -31.0,
+            "structural_novelty": 0.8271964345631271
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 721,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.04188718699754545,
+            "deflated": {
+              "best_ic": 0.041887,
+              "deflated_ic": 0.029405,
+              "deflated_t": 8.578895,
+              "luck_ic": 0.012482,
+              "n_obs": 85117,
+              "n_trials": 758
+            },
+            "n_trials": 758,
+            "dropped": [],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L2WF_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-02T21:54:46+00:00"
+        }
+      }
+    },
+    {
+      "id": "report_congestion_cash_conversion_resolution",
+      "name": "Report-Congestion Cash Conversion Resolution",
+      "class_name": "",
+      "description": "Ranks the fresh change in operating-cash-flow-to-sales against leave-one-out same-day industry reporters. Signals are active only for report updates with at least one reporting peer and receive greater weight when more peers report that day.",
+      "formula": "",
+      "trading_idea": "On days when several industry peers report simultaneously, investor and analyst attention is rationed across disclosures, making issuer-specific cash-conversion information slower to process than headline results. The child isolates the issuer's change in operating-cash-flow-to-sales relative to other same-day industry reporters and weights it by reporting congestion, rather than combining several accounting and tape branches. The edge should persist because normalizing cash conversion across peer disclosures requires issuer-specific model work that is difficult to automate immediately; it is falsified if positive relative cash-conversion changes during crowded reporting days do not outperform negative changes over the next six bars, or if the effect is equally strong for isolated reports.",
+      "trading_idea_ids": [],
+      "category": "other",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.002111,
+        "ic_std": 0.116346,
+        "ic_ir": 0.018142,
+        "ic_hit_rate": 0.4986,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.004341,
+            "ic_std": 0.165777,
+            "ic_ir": -0.026183,
+            "ic_hit_rate": 0.4898,
+            "n_timestamps": 735
+          },
+          "6": {
+            "ic": 0.002111,
+            "ic_std": 0.116346,
+            "ic_ir": 0.018142,
+            "ic_hit_rate": 0.4986,
+            "n_timestamps": 734
+          },
+          "60": {
+            "ic": -0.00246,
+            "ic_std": 0.111535,
+            "ic_ir": -0.022052,
+            "ic_hit_rate": 0.4826,
+            "n_timestamps": 717
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 734,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L2WF_terra_s0",
+      "code_path": "/root/QuantFundAgent/quant_fund_agent/factors/researcher/report_congestion_cash_conversion_resolution.py",
+      "required_inputs": [
+        "close",
+        "industry",
+        "revenue",
+        "operatingCashFlow"
+      ],
+      "required_tier": "fundamental",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-02T21:54:46.323822",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g16-report_congestion_cash_conversion_resolution-a9bbfe",
+          "generation": 16,
+          "operator": "llm_semantic",
+          "parent_ids": [
+            "g15-peer_relative_cash_conversion_model_gap-3de1ed"
+          ],
+          "expected_sign": 1,
+          "objective": {
+            "marginal_value": -0.0016870292212123866,
+            "independence": 0.00208890256863307,
+            "parsimony": -65.0,
+            "structural_novelty": 0.886183481866666
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 721,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.04188718699754545,
+            "deflated": {
+              "best_ic": 0.041887,
+              "deflated_ic": 0.029405,
+              "deflated_t": 8.578895,
+              "luck_ic": 0.012482,
+              "n_obs": 85117,
+              "n_trials": 758
+            },
+            "n_trials": 758,
+            "dropped": [],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L2WF_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-02T21:54:46+00:00"
+        }
+      }
+    },
+    {
+      "id": "incremental_roic_filing_diffusion",
+      "name": "Fresh Incremental ROIC Diffusion",
+      "class_name": "",
+      "description": "Ranks only freshly updated quarter-over-quarter ROIC changes cross-sectionally and carries the filing signal for six trading days. Non-event observations are neutral.",
+      "formula": "",
+      "trading_idea": "The parent\u2019s supply interpretation is rejected: disclosed equity issuance can finance positive-NPV investment rather than represent mechanically adverse dilution. This child instead isolates the newly disclosed change in return on invested capital, treating a positive ROIC inflection as evidence that the firm\u2019s capital base has become more productive and that investors may take several sessions to separate that operating improvement from the broader filing. The hypothesis is falsifiable: conditional on a fresh ROIC update, stocks with the largest positive ROIC change should outperform those with the largest negative change over the next six trading days; the effect should weaken if the filing information is already fully incorporated immediately.",
+      "trading_idea_ids": [],
+      "category": "other",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.004332,
+        "ic_std": 0.096099,
+        "ic_ir": 0.045079,
+        "ic_hit_rate": 0.5245,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.002342,
+            "ic_std": 0.109096,
+            "ic_ir": 0.021464,
+            "ic_hit_rate": 0.5014,
+            "n_timestamps": 3949
+          },
+          "6": {
+            "ic": 0.004332,
+            "ic_std": 0.096099,
+            "ic_ir": 0.045079,
+            "ic_hit_rate": 0.5245,
+            "n_timestamps": 3943
+          },
+          "60": {
+            "ic": 0.00617,
+            "ic_std": 0.107352,
+            "ic_ir": 0.057474,
+            "ic_hit_rate": 0.5035,
+            "n_timestamps": 3883
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 3943,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L2WF_terra_s0",
+      "code_path": "/root/QuantFundAgent/quant_fund_agent/factors/researcher/incremental_roic_filing_diffusion.py",
+      "required_inputs": [
+        "close",
+        "roic"
+      ],
+      "required_tier": "fundamental",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-02T21:54:46.323867",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g18-incremental_roic_filing_diffusion-812c5d",
+          "generation": 18,
+          "operator": "llm_semantic",
+          "parent_ids": [
+            "g4-filing_equity_supply_overhang-26a62c"
+          ],
+          "expected_sign": 1,
+          "objective": {
+            "marginal_value": -0.0026822910430694437,
+            "independence": 0.00039563797886151724,
+            "parsimony": -19.0,
+            "structural_novelty": 0.7504228923231393
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 721,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.04188718699754545,
+            "deflated": {
+              "best_ic": 0.041887,
+              "deflated_ic": 0.029405,
+              "deflated_t": 8.578895,
+              "luck_ic": 0.012482,
+              "n_obs": 85117,
+              "n_trials": 758
+            },
+            "n_trials": 758,
+            "dropped": [],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L2WF_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-02T21:54:46+00:00"
+        }
+      }
+    },
+    {
+      "id": "rolling_transfer_deficit_signal",
+      "name": "Rolling Transfer Deficit",
+      "class_name": "",
+      "description": "Estimates a causal trailing price-impact coefficient linking close-location-weighted abnormal volume to returns, then ranks the deficit between impact-implied and realized smoothed return. Long names have positive unpaid buying pressure; short names have negative unpaid selling pressure.",
+      "formula": "",
+      "trading_idea": "Persistent signed volume pressure should move prices in the direction implied by a stock's own trailing price-impact elasticity. When that expected impact is not yet reflected in the smoothed return, the gap represents temporarily absorbed inventory or delayed price discovery rather than a one-day momentum signal. The edge should persist because liquidity providers and institutional execution can transfer risk gradually, while arbitrageurs face uncertainty about whether observed volume is informed and cannot costlessly infer the latent order-flow direction from daily bars alone.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.005405,
+        "ic_std": 0.165956,
+        "ic_ir": 0.032567,
+        "ic_hit_rate": 0.5062,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.002487,
+            "ic_std": 0.176655,
+            "ic_ir": 0.014079,
+            "ic_hit_rate": 0.4995,
+            "n_timestamps": 4106
+          },
+          "6": {
+            "ic": 0.005405,
+            "ic_std": 0.165956,
+            "ic_ir": 0.032567,
+            "ic_hit_rate": 0.5062,
+            "n_timestamps": 4101
+          },
+          "60": {
+            "ic": -0.012163,
+            "ic_std": 0.150789,
+            "ic_ir": -0.080661,
+            "ic_hit_rate": 0.451,
+            "n_timestamps": 4047
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4101,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L2WF_terra_s0",
+      "code_path": "/root/QuantFundAgent/quant_fund_agent/factors/researcher/rolling_transfer_deficit_signal.py",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-02T21:54:46.323915",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g18-rolling_transfer_deficit_signal-787fb0",
+          "generation": 18,
+          "operator": "llm_semantic",
+          "parent_ids": [
+            "g13-cash_validated_efficiency_transfer_diffusion-27b1e2"
+          ],
+          "expected_sign": 1,
+          "objective": {
+            "marginal_value": 0.004025516517373999,
+            "independence": 0.011131294977485643,
+            "parsimony": -76.0,
+            "structural_novelty": 0.8984476391252251
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 721,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.04188718699754545,
+            "deflated": {
+              "best_ic": 0.041887,
+              "deflated_ic": 0.029405,
+              "deflated_t": 8.578895,
+              "luck_ic": 0.012482,
+              "n_obs": 85117,
+              "n_trials": 758
+            },
+            "n_trials": 758,
+            "dropped": [],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L2WF_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-02T21:54:46+00:00"
+        }
+      }
+    },
+    {
+      "id": "muted_productivity_innovation_assimilation",
+      "name": "Muted Productivity Innovation Assimilation",
+      "class_name": "",
+      "description": "Ranks fresh sector-relative ROIC innovations, weighted by how muted the stock's recent sector-neutral return is relative to its own trailing volatility. The signed event score is held for six bars to express delayed filing assimilation.",
+      "formula": "",
+      "trading_idea": "A fresh ROIC improvement is more informative when it is unusually strong relative to the firm's sector yet receives little immediate idiosyncratic price response. This identifies filings whose capital-productivity implication has not been fully processed, rather than broadly recognized sector or macro profitability changes. The edge can persist because extracting incremental operating efficiency from quarterly disclosures is attention-intensive, while a muted tape reveals that faster traders have not already incorporated it; falsifiably, the effect should disappear for equally large ROIC innovations accompanied by large same-day abnormal moves.",
+      "trading_idea_ids": [],
+      "category": "other",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.001738,
+        "ic_std": 0.09331,
+        "ic_ir": 0.018623,
+        "ic_hit_rate": 0.5103,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.003003,
+            "ic_std": 0.105891,
+            "ic_ir": 0.028362,
+            "ic_hit_rate": 0.5062,
+            "n_timestamps": 3937
+          },
+          "6": {
+            "ic": 0.001738,
+            "ic_std": 0.09331,
+            "ic_ir": 0.018623,
+            "ic_hit_rate": 0.5103,
+            "n_timestamps": 3931
+          },
+          "60": {
+            "ic": 0.001964,
+            "ic_std": 0.101784,
+            "ic_ir": 0.019293,
+            "ic_hit_rate": 0.5083,
+            "n_timestamps": 3872
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 3931,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L2WF_terra_s0",
+      "code_path": "/root/QuantFundAgent/quant_fund_agent/factors/researcher/muted_productivity_innovation_assimilation.py",
+      "required_inputs": [
+        "close",
+        "roic",
+        "sector"
+      ],
+      "required_tier": "fundamental",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-02T21:54:46.323963",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g19-muted_productivity_innovation_assimilation-454884",
+          "generation": 19,
+          "operator": "llm_semantic",
+          "parent_ids": [
+            "g18-incremental_roic_filing_diffusion-812c5d"
+          ],
+          "expected_sign": 1,
+          "objective": {
+            "marginal_value": 0.0024406194356296085,
+            "independence": -0.0008029872912086893,
+            "parsimony": -44.0,
+            "structural_novelty": 0.8770066867717139
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 721,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.04188718699754545,
+            "deflated": {
+              "best_ic": 0.041887,
+              "deflated_ic": 0.029405,
+              "deflated_t": 8.578895,
+              "luck_ic": 0.012482,
+              "n_obs": 85117,
+              "n_trials": 758
+            },
+            "n_trials": 758,
+            "dropped": [],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L2WF_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-02T21:54:46+00:00"
+        }
+      }
+    },
+    {
+      "id": "validated_trade_credit_capacity_diffusion",
+      "name": "Validated Trade-Credit Capacity Diffusion",
+      "class_name": "",
+      "description": "Ranks fresh cash-conversion deterioration and receivables-versus-sales growth only when both earnings surprise and operating-cash-flow growth validate that the working-capital investment is demand-supported. The disclosure event decays over a short window and is sector-neutralized.",
+      "formula": "",
+      "trading_idea": "A fresh increase in receivables and cash-conversion days is not uniformly an accounting warning: when it arrives with a positive earnings surprise and positive operating-cash-flow growth, it can represent deliberate customer-credit expansion supporting unusually strong demand. Investors may initially penalize the working-capital build as low-quality revenue, then revise upward as the combination of earnings delivery and cash generation makes the credit extension appear capacity-supported rather than distressed. The edge should persist because this distinction requires jointly processing several filing fields and is sparse around disclosure dates; it is falsified if high validated-credit-expansion events do not earn positive six-day sector-neutral returns after controlling for earnings surprise alone.",
+      "trading_idea_ids": [],
+      "category": "sentiment",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.003785,
+        "ic_std": 0.095604,
+        "ic_ir": 0.039595,
+        "ic_hit_rate": 0.4969,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.001413,
+            "ic_std": 0.101672,
+            "ic_ir": 0.013901,
+            "ic_hit_rate": 0.4911,
+            "n_timestamps": 2079
+          },
+          "6": {
+            "ic": 0.003785,
+            "ic_std": 0.095604,
+            "ic_ir": 0.039595,
+            "ic_hit_rate": 0.4969,
+            "n_timestamps": 2073
+          },
+          "60": {
+            "ic": 0.001042,
+            "ic_std": 0.105403,
+            "ic_ir": 0.009887,
+            "ic_hit_rate": 0.4587,
+            "n_timestamps": 2034
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 2073,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L2WF_terra_s0",
+      "code_path": "/root/QuantFundAgent/quant_fund_agent/factors/researcher/validated_trade_credit_capacity_diffusion.py",
+      "required_inputs": [
+        "close",
+        "sector",
+        "cashConversionCycle",
+        "receivablesGrowth",
+        "revenueGrowth",
+        "epsSurprise",
+        "operatingCashFlowGrowth"
+      ],
+      "required_tier": "events",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-02T21:54:46.324009",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g19-validated_trade_credit_capacity_diffusion-2dde6e",
+          "generation": 19,
+          "operator": "llm_semantic",
+          "parent_ids": [
+            "g8-fresh_cash_conversion_receivable_warning-eea53a"
+          ],
+          "expected_sign": 1,
+          "objective": {
+            "marginal_value": -0.003786235271046847,
+            "independence": 0.014270379686241662,
+            "parsimony": -57.0,
+            "structural_novelty": 0.8839276745967964
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 721,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.04188718699754545,
+            "deflated": {
+              "best_ic": 0.041887,
+              "deflated_ic": 0.029405,
+              "deflated_t": 8.578895,
+              "luck_ic": 0.012482,
+              "n_obs": 85117,
+              "n_trials": 758
+            },
+            "n_trials": 758,
+            "dropped": [],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L2WF_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-02T21:54:46+00:00"
+        }
+      }
+    },
+    {
+      "id": "liquidation_sourced_cash_roic_correction",
+      "name": "Liquidation-Sourced Cash ROIC Correction",
+      "class_name": "",
+      "description": "Ranks firms by an excess operating-cash return on invested capital, interacted with evidence that cash is being harvested through receivable and inventory contraction during weak revenue growth. The final signal is sector-neutralized; higher values identify likely non-recurring cash conversion.",
+      "formula": "",
+      "trading_idea": "The parent's negative realized sign suggests that a high operating-cash-return versus reported-ROIC wedge is often not hidden quality, but cash released by shrinking receivables and inventories while underlying sales growth is weak. Such firms can initially screen as cash-efficient, but investors subsequently recognize that the cash flow reflects working-capital harvest rather than durable operating profitability, producing negative six-bar returns. This is falsified if the high-wedge, high-harvest subgroup does not underperform sector peers over the fixed six-bar horizon. The effect can persist because standard quality screens reward current cash conversion without decomposing its source, while quarterly balance-sheet interpretation is slower and shorting apparent cash-quality names is costly.",
+      "trading_idea_ids": [],
+      "category": "other",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.006179,
+        "ic_std": 0.112055,
+        "ic_ir": 0.055143,
+        "ic_hit_rate": 0.523,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.003177,
+            "ic_std": 0.112819,
+            "ic_ir": 0.028163,
+            "ic_hit_rate": 0.5082,
+            "n_timestamps": 4164
+          },
+          "6": {
+            "ic": 0.006179,
+            "ic_std": 0.112055,
+            "ic_ir": 0.055143,
+            "ic_hit_rate": 0.523,
+            "n_timestamps": 4159
+          },
+          "60": {
+            "ic": 0.012617,
+            "ic_std": 0.109382,
+            "ic_ir": 0.115352,
+            "ic_hit_rate": 0.5269,
+            "n_timestamps": 4105
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4159,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L2WF_terra_s0",
+      "code_path": "/root/QuantFundAgent/quant_fund_agent/factors/researcher/liquidation_sourced_cash_roic_correction.py",
+      "required_inputs": [
+        "close",
+        "sector",
+        "operatingCashFlow",
+        "investedCapital",
+        "roic",
+        "receivablesGrowth",
+        "inventoryGrowth",
+        "revenueGrowth"
+      ],
+      "required_tier": "fundamental",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-02T21:54:46.324053",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g19-liquidation_sourced_cash_roic_correction-034587",
+          "generation": 19,
+          "operator": "llm_semantic",
+          "parent_ids": [
+            "g1-cash_return_accrual_roic_residual-620080"
+          ],
+          "expected_sign": -1,
+          "objective": {
+            "marginal_value": -0.0020503488466145116,
+            "independence": 0.008576561645373237,
+            "parsimony": -34.0,
+            "structural_novelty": 0.6404302395456322
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 721,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.04188718699754545,
+            "deflated": {
+              "best_ic": 0.041887,
+              "deflated_ic": 0.029405,
+              "deflated_t": 8.578895,
+              "luck_ic": 0.012482,
+              "n_obs": 85117,
+              "n_trials": 758
+            },
+            "n_trials": 758,
+            "dropped": [],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L2WF_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-02T21:54:46+00:00"
+        }
+      }
+    },
+    {
+      "id": "trade_credit_optionality_unpriced_response",
+      "name": "Unpriced Trade-Credit Optionality",
+      "class_name": "",
+      "description": "On fresh cash-conversion-cycle updates, the signal identifies jointly large cycle deterioration and receivables-over-revenue growth, validates the event with revenue surprise and liquidity capacity, and emphasizes cases with muted initial price reaction. It is sector-neutralized before ranking.",
+      "formula": "",
+      "trading_idea": "The parent\u2019s positive realized sign suggests that a fresh receivables-led extension of the cash-conversion cycle is often not a revenue-quality warning, but a deliberate trade-credit investment used to capture demand. This interpretation is credible only when the firm simultaneously reports a positive revenue surprise and has sufficient current-ratio capacity to fund the working-capital expansion. The child buys these validated expansions only when the initial two-day price response is muted, testing whether investors underweight the operational implication of customer-financing growth; the edge should persist because reconciling the filing\u2019s collection terms, surprise, and balance-sheet capacity is costly and disclosures are sparse. It is falsified if validated, initially underreacted trade-credit expansions do not have positive sector-neutral six-day forward returns.",
+      "trading_idea_ids": [],
+      "category": "sentiment",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.00246,
+        "ic_std": 0.1015,
+        "ic_ir": -0.024238,
+        "ic_hit_rate": 0.4846,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.006273,
+            "ic_std": 0.142734,
+            "ic_ir": -0.043951,
+            "ic_hit_rate": 0.4828,
+            "n_timestamps": 2212
+          },
+          "6": {
+            "ic": -0.00246,
+            "ic_std": 0.1015,
+            "ic_ir": -0.024238,
+            "ic_hit_rate": 0.4846,
+            "n_timestamps": 2206
+          },
+          "60": {
+            "ic": 2.9e-05,
+            "ic_std": 0.097727,
+            "ic_ir": 0.0003,
+            "ic_hit_rate": 0.4743,
+            "n_timestamps": 2163
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 2206,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L2WF_terra_s0",
+      "code_path": "/root/QuantFundAgent/quant_fund_agent/factors/researcher/trade_credit_optionality_unpriced_response.py",
+      "required_inputs": [
+        "close",
+        "sector",
+        "cashConversionCycle",
+        "receivablesGrowth",
+        "revenueGrowth",
+        "revenueSurprise",
+        "currentRatio"
+      ],
+      "required_tier": "events",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-02T21:54:46.324096",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g19-trade_credit_optionality_unpriced_response-527364",
+          "generation": 19,
+          "operator": "llm_semantic",
+          "parent_ids": [
+            "g8-fresh_cash_conversion_receivable_warning-eea53a"
+          ],
+          "expected_sign": 1,
+          "objective": {
+            "marginal_value": 0.0007152043805866877,
+            "independence": -0.004607452153814143,
+            "parsimony": -46.0,
+            "structural_novelty": 0.8839276745967964
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 721,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.04188718699754545,
+            "deflated": {
+              "best_ic": 0.041887,
+              "deflated_ic": 0.029405,
+              "deflated_t": 8.578895,
+              "luck_ic": 0.012482,
+              "n_obs": 85117,
+              "n_trials": 758
+            },
+            "n_trials": 758,
+            "dropped": [],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L2WF_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-02T21:54:46+00:00"
+        }
+      }
+    },
+    {
+      "id": "renewal_inventory_delayed_transfer_state",
+      "name": "Renewal Inventory Delayed Transfer State",
+      "class_name": "",
+      "description": "Computes signed abnormal close-location participation, smooths it through a one-bar delay into a latent inventory proxy, and scales it by a causal trailing estimate of its realized six-bar flow-to-return transfer. The signal is active only when abnormal participation events exhibit a stable renewal clock and one-sided directional persistence.",
+      "formula": "",
+      "trading_idea": "The parent's positive six-day effect likely reflects latent institutional inventory being worked over several sessions, while its negative one-day effect reflects the immediate adverse-selection or temporary-impact component of the latest endpoint print. This child therefore removes the contemporaneous endpoint impulse, estimates the historically realized six-bar transfer from earlier flow, and expresses only the slowly decaying signed inventory state when abnormal-participation arrivals are regular and directionally coherent. The edge should persist because public daily bars cannot directly observe the parent order, remaining inventory, or execution urgency; it is falsified if delayed, regular-program inventory does not have a more positive six-day return association than the latest-day endpoint flow.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.003022,
+        "ic_std": 0.106561,
+        "ic_ir": 0.028363,
+        "ic_hit_rate": 0.5166,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.002439,
+            "ic_std": 0.105832,
+            "ic_ir": 0.023042,
+            "ic_hit_rate": 0.5146,
+            "n_timestamps": 4120
+          },
+          "6": {
+            "ic": 0.003022,
+            "ic_std": 0.106561,
+            "ic_ir": 0.028363,
+            "ic_hit_rate": 0.5166,
+            "n_timestamps": 4115
+          },
+          "60": {
+            "ic": -0.004684,
+            "ic_std": 0.106466,
+            "ic_ir": -0.043997,
+            "ic_hit_rate": 0.4807,
+            "n_timestamps": 4061
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4115,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L2WF_terra_s0",
+      "code_path": "/root/QuantFundAgent/quant_fund_agent/factors/researcher/renewal_inventory_delayed_transfer_state.py",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-02T21:54:46.324137",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g20-renewal_inventory_delayed_transfer_state-5402ac",
+          "generation": 20,
+          "operator": "llm_semantic",
+          "parent_ids": [
+            "g16-renewal_clock_endpoint_transfer_conditioner-80e683"
+          ],
+          "expected_sign": 1,
+          "objective": {
+            "marginal_value": 0.005516005462271424,
+            "independence": 0.0037983900092656755,
+            "parsimony": -179.0,
+            "structural_novelty": 0.8895250568876363
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 722,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.04188718699754545,
+            "deflated": {
+              "best_ic": 0.041887,
+              "deflated_ic": 0.029405,
+              "deflated_t": 8.578895,
+              "luck_ic": 0.012482,
+              "n_obs": 85117,
+              "n_trials": 758
+            },
+            "n_trials": 758,
+            "dropped": [],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L2WF_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-02T21:54:46+00:00"
+        }
+      }
+    },
+    {
+      "id": "working_capital_harvest_disclosure_decay",
+      "name": "Working-Capital Harvest Disclosure Pressure",
+      "class_name": "",
+      "description": "Computes a positive cash-return-minus-ROIC residual, activates it only when working capital has recently contracted relative to assets, and exponentially decays the resulting disclosure pressure over subsequent daily bars. Higher sector-neutral scores indicate a more likely temporary cash-harvest episode.",
+      "formula": "",
+      "trading_idea": "A high operating-cash-return-versus-ROIC residual is not necessarily evidence of superior cash profitability: when it coincides with a newly reported contraction in working capital, it can represent temporary cash harvesting from receivables, inventory, or payables rather than durable operating improvement. Investors and standard quality screens may initially reward the elevated cash flow, but reassess its sustainability over the following week as the balance-sheet source becomes salient; the signal therefore predicts negative six-bar returns for high values. This is falsified if recent working-capital contractions do not make positive cash-return residuals significantly more negatively associated with sector-neutral forward returns than the residual alone; the edge can persist because decomposing quarterly cash generation into operating quality versus balance-sheet release is information-intensive and difficult to arbitrage immediately.",
+      "trading_idea_ids": [],
+      "category": "other",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.002681,
+        "ic_std": 0.128444,
+        "ic_ir": 0.020873,
+        "ic_hit_rate": 0.5106,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.00093,
+            "ic_std": 0.127295,
+            "ic_ir": 0.007308,
+            "ic_hit_rate": 0.5006,
+            "n_timestamps": 4163
+          },
+          "6": {
+            "ic": 0.002681,
+            "ic_std": 0.128444,
+            "ic_ir": 0.020873,
+            "ic_hit_rate": 0.5106,
+            "n_timestamps": 4158
+          },
+          "60": {
+            "ic": 0.007452,
+            "ic_std": 0.119509,
+            "ic_ir": 0.062355,
+            "ic_hit_rate": 0.519,
+            "n_timestamps": 4104
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4158,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L2WF_terra_s0",
+      "code_path": "/root/QuantFundAgent/quant_fund_agent/factors/researcher/working_capital_harvest_disclosure_decay.py",
+      "required_inputs": [
+        "close",
+        "sector",
+        "operatingCashFlow",
+        "investedCapital",
+        "roic",
+        "workingCapital",
+        "totalAssets"
+      ],
+      "required_tier": "fundamental",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-02T21:54:46.324194",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g20-working_capital_harvest_disclosure_decay-fd5ee7",
+          "generation": 20,
+          "operator": "llm_semantic",
+          "parent_ids": [
+            "g1-cash_return_accrual_roic_residual-620080"
+          ],
+          "expected_sign": -1,
+          "objective": {
+            "marginal_value": -0.006669179128593016,
+            "independence": 0.01455935385491639,
+            "parsimony": -45.0,
+            "structural_novelty": 0.8288625773532069
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 739,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.04188718699754545,
+            "deflated": {
+              "best_ic": 0.041887,
+              "deflated_ic": 0.029405,
+              "deflated_t": 8.578895,
+              "luck_ic": 0.012482,
+              "n_obs": 85117,
+              "n_trials": 758
+            },
+            "n_trials": 758,
+            "dropped": [],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L2WF_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-02T21:54:46+00:00"
+        }
+      }
+    },
+    {
+      "id": "surprise_credit_extension_trap_j_2",
+      "name": "Surprise Credit-Extension Trap (jitter)",
+      "class_name": "",
+      "description": "On fresh positive-surprise, positive-growth reports, the signal ranks the interaction of excess receivables growth over revenue growth and positive year-over-year DSO deterioration. It is carried for six bars and is signed negatively because jointly expanding receivables and collection days identify a credit-extension quality trap.",
+      "formula": "",
+      "trading_idea": "A positive revenue surprise with receivables growing faster than sales is ambiguous on its own: it can reflect productive onboarding or aggressive credit extension. The adverse interpretation becomes much more credible when year-over-year DSO also rises, because the additional receivables are not merely a billing-timing effect but are taking longer to collect. This interaction should carry edge because Parent B identifies the credit-supported growth state while Parent A supplies the collection-duration evidence that disambiguates productive ramping from low-quality revenue recognition; high trap scores are expected to precede lower six-bar returns.",
+      "trading_idea_ids": [],
+      "category": "other",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.000527,
+        "ic_std": 0.091793,
+        "ic_ir": -0.00574,
+        "ic_hit_rate": 0.4912,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.001559,
+            "ic_std": 0.100359,
+            "ic_ir": -0.015539,
+            "ic_hit_rate": 0.4975,
+            "n_timestamps": 3373
+          },
+          "6": {
+            "ic": -0.000527,
+            "ic_std": 0.091793,
+            "ic_ir": -0.00574,
+            "ic_hit_rate": 0.4912,
+            "n_timestamps": 3359
+          },
+          "60": {
+            "ic": 0.002285,
+            "ic_std": 0.097247,
+            "ic_ir": 0.023502,
+            "ic_hit_rate": 0.487,
+            "n_timestamps": 3304
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 3359,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L2WF_terra_s0",
+      "code_path": "/root/QuantFundAgent/quant_fund_agent/factors/researcher/surprise_credit_extension_trap_j_2.py",
+      "required_inputs": [
+        "close",
+        "revenueGrowth",
+        "receivablesGrowth",
+        "revenueSurprise",
+        "daysSalesOutstanding"
+      ],
+      "required_tier": "events",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-02T21:54:46.324273",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g20-surprise_credit_extension_trap_j_2-70e381",
+          "generation": 20,
+          "operator": "jitter",
+          "parent_ids": [
+            "g6-surprise_credit_extension_trap-ca8f89"
+          ],
+          "expected_sign": -1,
+          "objective": {
+            "marginal_value": 0.0058620473449239,
+            "independence": -0.011016341040229348,
+            "parsimony": -49.0,
+            "structural_novelty": 0.7657362022652879
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 748,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.04188718699754545,
+            "deflated": {
+              "best_ic": 0.041887,
+              "deflated_ic": 0.029405,
+              "deflated_t": 8.578895,
+              "luck_ic": 0.012482,
+              "n_obs": 85117,
+              "n_trials": 758
+            },
+            "n_trials": 758,
+            "dropped": [],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L2WF_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-02T21:54:46+00:00"
+        }
+      }
+    },
+    {
+      "id": "cash_validated_efficiency_transfer_diffusion_j",
+      "name": "Cash-Validated Efficiency Transfer Diffusion (jitter)",
+      "class_name": "",
+      "description": "Ranks fresh positive revenue surprises with concurrent operating, gross-margin, and asset-turnover upgrades, then weights them by a sector-relative cash-return-versus-ROIC state and a muted, high-turnover price response. The event score decays causally for several sessions to capture delayed assimilation.",
+      "formula": "",
+      "trading_idea": "A positive revenue delivery accompanied by margin, gross-margin, and asset-turnover improvement is more credible when operating-cash return is unusually high relative to reported ROIC within its sector: in this narrow state, the cash wedge is evidence that the efficiency upgrade is being realized rather than merely advertised. If this information arrives with abnormal turnover but little sector-relative price movement, the volume is more likely institutional accumulation or inventory transfer than completed price discovery. Parent A supplies the absorbed-tape diagnostic, while Parent B supplies the efficiency regime that reverses the ambiguous interpretation of the cash/ROIC gap; neither alone identifies cash-validated upgrades whose ownership transfer precedes delayed repricing.",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.00535,
+        "ic_std": 0.099039,
+        "ic_ir": -0.054022,
+        "ic_hit_rate": 0.4708,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.002458,
+            "ic_std": 0.102354,
+            "ic_ir": -0.02401,
+            "ic_hit_rate": 0.4862,
+            "n_timestamps": 3126
+          },
+          "6": {
+            "ic": -0.00535,
+            "ic_std": 0.099039,
+            "ic_ir": -0.054022,
+            "ic_hit_rate": 0.4708,
+            "n_timestamps": 3150
+          },
+          "60": {
+            "ic": -0.015979,
+            "ic_std": 0.096202,
+            "ic_ir": -0.1661,
+            "ic_hit_rate": 0.4628,
+            "n_timestamps": 3189
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 3150,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L2WF_terra_s0",
+      "code_path": "/root/QuantFundAgent/quant_fund_agent/factors/researcher/cash_validated_efficiency_transfer_diffusion_j.py",
+      "required_inputs": [
+        "close",
+        "volume",
+        "sector",
+        "revenueActual",
+        "revenueEstimate",
+        "revenueSurprise",
+        "operatingMargin",
+        "grossMargin",
+        "assetTurnover",
+        "operatingCashFlow",
+        "investedCapital",
+        "roic"
+      ],
+      "required_tier": "events",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-02T21:54:46.324336",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g20-cash_validated_efficiency_transfer_diffusion_j-6f27b0",
+          "generation": 20,
+          "operator": "jitter",
+          "parent_ids": [
+            "g13-cash_validated_efficiency_transfer_diffusion-27b1e2"
+          ],
+          "expected_sign": 1,
+          "objective": {
+            "marginal_value": -0.012913598310974753,
+            "independence": 0.009011269275193825,
+            "parsimony": -124.0,
+            "structural_novelty": 0.9103139518741574
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 754,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.04188718699754545,
+            "deflated": {
+              "best_ic": 0.041887,
+              "deflated_ic": 0.029405,
+              "deflated_t": 8.578895,
+              "luck_ic": 0.012482,
+              "n_obs": 85117,
+              "n_trials": 758
+            },
+            "n_trials": 758,
+            "dropped": [],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L2WF_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-02T21:54:46+00:00"
+        }
+      }
+    }
+  ],
+  "trading_ideas": []
+}

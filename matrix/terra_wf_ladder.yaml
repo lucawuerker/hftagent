@@ -1,0 +1,100 @@
+# WALK-FORWARD ablation ladder on GPT-5.6 Terra via the OpenAI API
+# (decisions 2026-08-01, replaces the Opus ladder for the ablation chapter).
+#
+# Design deltas vs matrix/opus_ladder.yaml:
+#   * model: gpt-5.6-terra (same $2,500 OpenAI pool as the L4 comparison runs)
+#   * panel: 2010-01 -> 2026-07-27, NO forward reserve, NO test tail
+#     (allow_no_forward_reserve; quant.config.nasdaq100_2010_wf.yaml).  The OOS
+#     evidence is the TWO-PHASE walk-forward schedule: generations 1-10 reveal
+#     2015-03 -> 2021-07-20 in ~7.6-month blocks (reveal-every 1; seed window
+#     2010 -> 2015-03 = 45% of phase 1), generations 11-20 each reveal one
+#     126-bar (~6-month) block of 2021-07-20 -> 2026-07-27, prequentially
+#     scored (traded) BEFORE the archive may adapt to it -> a 5-year live
+#     walk-forward record per arm (prequential.jsonl).
+#   * every evolution arm uses the Terra-L4 setup: seed-ideas-per-group 12,
+#     children-per-deme 2 (48 children/gen at 8x3), archive-cap 40.
+#   * graph-readonly: all arms resolve mechanism groups from the identical
+#     knowledge-graph snapshot (no factor-provenance write-back during the
+#     ladder; the group ranking is coverage-based and would drift otherwise).
+#   * no L0 (GP, deferred by user 2026-08-01) and no L3 (rag arm dropped —
+#     graphrag is the only retrieval ablation kept).
+#   * L1 oneshot researches on quant.config.nasdaq100_2010_to2021.yaml
+#     (2010 -> 2021-07-19 = exactly the evolution arms' pre-walk-forward data);
+#     its book is forward-deployed 2021-07-20 -> 2026-07-27 post-hoc.
+#
+# Budget: budget_usd is a HARD GLOBAL cap enforced by run_ablation_matrix.py
+# (cumulative spend from every arm's checkpointed llm_usage.json; per-launch
+# --max-cost-usd clamped to the remainder; sweep stops when exhausted, arms
+# stay resumable).  Full seed-0 ladder runs before any seed-1 arm.
+
+config_file: quant.config.nasdaq100_2010_wf.yaml
+allow_no_forward_reserve: true
+budget_usd: 2000
+
+defaults:
+  generations: 20
+  # 8 is a HARD UPPER LIMIT (mechanism-groups-mode max): the run uses however
+  # many usable mechanism communities the knowledge graph actually forms.
+  mechanism-groups: 8
+  mechanism-groups-mode: max
+  demes-per-group: 3
+  children-per-deme: 2
+  population: 16
+  seed-ideas-per-group: 12
+  progressive-reveal: true
+  reveal-every: 1
+  test-frac: 0.0
+  wf-blocks: 10
+  wf-block-bars: 126
+  graph-readonly: true
+  retrieval: graphrag
+  curation: archive
+  selection-deflation: "on"
+  archive-cap: 40
+  creative-frac: 0.1
+  marginal-model: lightgbm
+  fixed-book: data/prebooks/formulaic_101.json
+  reference-book: data/prebooks/formulaic_101.json
+  n-tickers: 0
+  horizon: 6
+  llm-workers: 8
+  # per-run runaway guard; the global clamp only ever lowers it further
+  max-cost-usd: 250
+
+oneshot_defaults:
+  n-tickers: 0
+  horizon: 6
+  prediction-horizon-mode: fixed
+  dedup-scope: prerun
+  max-cost-usd: 50
+
+providers:
+  terra: {model: "gpt-5.6-terra", llm-provider: openai}
+
+arms:
+  # ---- seed 0: the whole ladder first --------------------------------------
+  - {name: L1WF_oneshot_terra_s0, entrypoint: oneshot, provider: terra, seed: 0,
+     config: quant.config.nasdaq100_2010_to2021.yaml, flags: {}}
+  - {name: L2WF_terra_s0, provider: terra, seed: 0,
+     flags: {retrieval: none, mechanism-groups: 1, demes-per-group: 4, children-per-deme: 12}}
+  - {name: L4WF_terra_s0, provider: terra, seed: 0, flags: {}}
+  - {name: L5WF_terra_s0, provider: terra, seed: 0, flags: {debate: "on"}}
+  - {name: L6WF_terra_s0, provider: terra, seed: 0,
+     flags: {debate: "on", evolution-unit: set, set-size: 3}}
+  - {name: L7WF_terra_s0, provider: terra, seed: 0,
+     flags: {debate: "on", memory: true, memory-key: L7WF_terra}}
+
+  # ---- seed 1: second pass over the ladder ---------------------------------
+  - {name: L1WF_oneshot_terra_s1, entrypoint: oneshot, provider: terra, seed: 1,
+     config: quant.config.nasdaq100_2010_to2021.yaml, flags: {}}
+  - {name: L2WF_terra_s1, provider: terra, seed: 1,
+     flags: {retrieval: none, mechanism-groups: 1, demes-per-group: 4, children-per-deme: 12}}
+  - {name: L4WF_terra_s1, provider: terra, seed: 1, flags: {}}
+  - {name: L5WF_terra_s1, provider: terra, seed: 1, flags: {debate: "on"}}
+  - {name: L6WF_terra_s1, provider: terra, seed: 1,
+     flags: {debate: "on", evolution-unit: set, set-size: 3}}
+  # after: the memory ablation is cross-run — seed 1 must SEE seed 0's
+  # persisted experience (shared memory-key), so parallel lanes may not run
+  # them concurrently.
+  - {name: L7WF_terra_s1, provider: terra, seed: 1, after: L7WF_terra_s0,
+     flags: {debate: "on", memory: true, memory-key: L7WF_terra}}

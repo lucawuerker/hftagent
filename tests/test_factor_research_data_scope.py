@@ -60,8 +60,11 @@ def test_lobster_level_partition_is_disjoint_and_complete():
 
 # ── provider honors the level ────────────────────────────────────────────────
 
-def _lobster(level):
-    return LobsterProvider(Settings(data=DataSettings(provider="lobster", lobster_level=level)))
+def _lobster(level, data_dir="does_not_exist_dir"):
+    # A nonexistent data_dir keeps the header sniff inert so these tests see
+    # the static tier advertisement regardless of what CSVs the repo carries.
+    return LobsterProvider(Settings(data=DataSettings(
+        provider="lobster", lobster_level=level, data_dir=data_dir)))
 
 
 def test_provider_available_fields_track_level():
@@ -71,8 +74,27 @@ def test_provider_available_fields_track_level():
 
 def test_provider_defaults_to_full_level3():
     # A config with no lobster_level (legacy) behaves as before — full feed.
-    p = LobsterProvider(Settings(data=DataSettings(provider="lobster")))
+    p = LobsterProvider(Settings(data=DataSettings(
+        provider="lobster", data_dir="does_not_exist_dir")))
     assert p.available_fields() == lobster_fields_for_level(3)
+
+
+def test_provider_sniffs_on_disk_book_depth(tmp_path):
+    # A feed exporting only 2 book levels must not advertise levels 3-10:
+    # factors reading a phantom per-level column would be all-NaN.
+    d = tmp_path / "XYZ"
+    d.mkdir()
+    header = ("date,time,stock,mid,spread,depth,lobImb,"
+              "askPrice1,askDepth1,bidPrice1,bidDepth1,"
+              "askPrice2,askDepth2,bidPrice2,bidDepth2")
+    (d / "bin202401.csv").write_text(header + "\n")
+    fields = _lobster(3, data_dir=str(tmp_path)).available_fields()
+    assert "askPrice2" in fields and "bidDepth2" in fields
+    assert "askPrice3" not in fields and "bidDepth10" not in fields
+    # non-per-level advertisement is untouched
+    static = lobster_fields_for_level(3)
+    non_level = {f for f in static if not f.startswith(("ask", "bid"))}
+    assert non_level <= fields
 
 
 # ── usable_fields: provider caps + fundamentals opt-out ──────────────────────

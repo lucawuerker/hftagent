@@ -485,7 +485,10 @@ def backtest_factors(
 # re-used across every candidate of a generation, so this turns the LOCO
 # marginal-value axis from O(book) recomputes per candidate into O(1).
 _SIGNAL_CACHE: dict[tuple, Any] = {}
-_SIGNAL_CACHE_MAX = 512
+# Override with QF_SIGNAL_CACHE_MAX on memory-constrained hosts: each cached
+# signal is a full panel-shaped float frame (~12 MB on a 1.4M-bar HF panel),
+# so the default 512-entry cap can mean multiple GB.
+_SIGNAL_CACHE_MAX = int(os.environ.get("QF_SIGNAL_CACHE_MAX", "512") or 512)
 
 
 def _code_fingerprint(code: str) -> str:
@@ -551,7 +554,14 @@ def _cached_signal(program: dict[str, Any], panel: dict[str, Any],
 # Only the CURRENT window's inner dict is kept (a frontier advance drops the rest),
 # and the inner dict is size-bounded — memory stays O(one window).
 _FIT_CACHE: dict[tuple, "_FitCacheDict"] = {}
-_FIT_CACHE_MAX = 128          # max cached predictions within one window
+# Max cached entries within one window.  The dict now holds BOTH prediction frames
+# and per-signal standardised feature columns (harness namespaces the latter under
+# ("feat", …) keys); a full book is ~160 columns, so the bound must comfortably fit
+# columns + a rescore's predictions without evicting hot columns (each entry is a
+# few MB → worst case ~2 GB, freed on every frontier advance).  Override with
+# QF_FIT_CACHE_MAX on small-RAM hosts (a 1.4M-bar HF panel makes each entry
+# ~11 MB → the default bound alone can exceed the machine).
+_FIT_CACHE_MAX = int(os.environ.get("QF_FIT_CACHE_MAX", "384") or 384)
 _FIT_CACHE_STATS = {"hits": 0, "misses": 0}
 
 
