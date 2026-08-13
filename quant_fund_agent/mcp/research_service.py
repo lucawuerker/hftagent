@@ -681,6 +681,7 @@ def evaluate_fitness(
     cost_rate: float = 5e-4,
     perturbation_weight: float = 0.0,
     perturbation_sigma: float = 0.5,
+    objective_mode: str = "pareto",
 ) -> dict[str, Any]:
     """Deterministically score one candidate program against the current book.
 
@@ -781,6 +782,7 @@ def evaluate_fitness(
                         independence_metric=independence_metric,
                         regime_kind=regime_kind, regime_quantile=regime_quantile,
                         marginal_model=marginal_model,
+                        objective_mode=objective_mode,
                         gate_turnover=gate_turnover, cost_rate=cost_rate,
                         perturbation_weight=perturbation_weight,
                         perturbation_sigma=perturbation_sigma)

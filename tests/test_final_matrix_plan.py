@@ -26,7 +26,9 @@ PLAN_PATHS = [REPO / "matrix" / "final_matrix.yaml",
               REPO / "matrix" / "terra_l4.yaml",
               REPO / "matrix" / "terra_l4_refine.yaml",
               REPO / "matrix" / "terra_l4_refine_broad.yaml",
-              REPO / "matrix" / "terra_wf_ladder.yaml"]
+              REPO / "matrix" / "terra_wf_ladder.yaml",
+              REPO / "matrix" / "llm_comparison.yaml",
+              REPO / "matrix" / "ablation_qa.yaml"]
 
 run_ablation_matrix = importlib.import_module("run_ablation_matrix")
 
@@ -128,8 +130,11 @@ def test_evolution_defaults_do_not_leak_into_gp_or_oneshot(plan):
     evolution ``defaults`` block."""
     # NB --max-cost-usd is deliberately absent: oneshot accepts it too (per-run
     # LLM cost ceiling), and only GP (no LLM) must never receive it — covered
-    # by the argparse check above.
-    evolution_only = {"--retrieval", "--mechanism-groups", "--progressive-reveal",
+    # by the argparse check above.  --progressive-reveal left this set
+    # 2026-08-09: the GP entrypoint gained the ported reveal machinery and a
+    # gp_defaults block may legitimately enable it (still guarded against
+    # oneshot by the argparse check).
+    evolution_only = {"--retrieval", "--mechanism-groups",
                       "--archive-cap", "--creative-frac", "--fixed-book",
                       "--debate"}
     for arm in plan["arms"]:

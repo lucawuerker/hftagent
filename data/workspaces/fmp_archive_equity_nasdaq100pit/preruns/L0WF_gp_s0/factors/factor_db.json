@@ -1,0 +1,1728 @@
+{
+  "factors": [
+    {
+      "id": "gp_0187",
+      "name": "gp_0187",
+      "class_name": "",
+      "description": "log(data[\"high\"])",
+      "formula": "",
+      "trading_idea": "GP-evolved formulaic alpha (non-LLM benchmark)",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.017423,
+        "ic_std": 0.149036,
+        "ic_ir": -0.116903,
+        "ic_hit_rate": 0.4595,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.006139,
+            "ic_std": 0.151683,
+            "ic_ir": -0.040472,
+            "ic_hit_rate": 0.4921,
+            "n_timestamps": 4164
+          },
+          "6": {
+            "ic": -0.017423,
+            "ic_std": 0.149036,
+            "ic_ir": -0.116903,
+            "ic_hit_rate": 0.4595,
+            "n_timestamps": 4159
+          },
+          "60": {
+            "ic": -0.069401,
+            "ic_std": 0.152309,
+            "ic_ir": -0.455659,
+            "ic_hit_rate": 0.325,
+            "n_timestamps": 4105
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4159,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "gp:fmp_archive_equity_nasdaq100pit:L0WF_gp_s0",
+      "code_path": "/root/QuantFundAgent/quant_fund_agent/factors/researcher/gp_0187.py",
+      "required_inputs": [
+        "high"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [],
+      "created_at": "2026-08-09T12:49:55.710674",
+      "metadata": {
+        "llm_model": "gp",
+        "llm_provider": "none",
+        "engine": "gp",
+        "evolution": {
+          "genome_id": "g2-gp_0187-10ce61",
+          "generation": 2,
+          "operator": "gp_crossover",
+          "parent_ids": [
+            "gp_0042_1",
+            "gp_0023_1"
+          ],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": 0.10562981485903347,
+            "independence": -0.0462255568305751,
+            "parsimony": -2.0,
+            "structural_novelty": 0.9342811302215425
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 777,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.0722914208221772,
+            "deflated": {
+              "best_ic": 0.072291,
+              "deflated_ic": 0.059743,
+              "deflated_t": 17.42947,
+              "luck_ic": 0.012548,
+              "n_obs": 85112,
+              "n_trials": 813
+            },
+            "n_trials": 813,
+            "dropped": [],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L0WF_gp_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T12:49:55+00:00"
+        }
+      }
+    },
+    {
+      "id": "gp_0735",
+      "name": "gp_0735",
+      "class_name": "",
+      "description": "(data[\"operatingCashFlowPerShare\"] * data[\"netMargin\"])",
+      "formula": "",
+      "trading_idea": "GP-evolved formulaic alpha (non-LLM benchmark)",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.009575,
+        "ic_std": 0.146644,
+        "ic_ir": -0.065294,
+        "ic_hit_rate": 0.471,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.003843,
+            "ic_std": 0.144614,
+            "ic_ir": -0.026576,
+            "ic_hit_rate": 0.4803,
+            "n_timestamps": 4164
+          },
+          "6": {
+            "ic": -0.009575,
+            "ic_std": 0.146644,
+            "ic_ir": -0.065294,
+            "ic_hit_rate": 0.471,
+            "n_timestamps": 4159
+          },
+          "60": {
+            "ic": -0.031436,
+            "ic_std": 0.139926,
+            "ic_ir": -0.224659,
+            "ic_hit_rate": 0.3946,
+            "n_timestamps": 4105
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4159,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "gp:fmp_archive_equity_nasdaq100pit:L0WF_gp_s0",
+      "code_path": "/root/QuantFundAgent/quant_fund_agent/factors/researcher/gp_0735.py",
+      "required_inputs": [
+        "netMargin",
+        "operatingCashFlowPerShare"
+      ],
+      "required_tier": "fundamental",
+      "prediction_horizon": 6,
+      "suggested_horizons": [],
+      "created_at": "2026-08-09T12:49:55.711278",
+      "metadata": {
+        "llm_model": "gp",
+        "llm_provider": "none",
+        "engine": "gp",
+        "evolution": {
+          "genome_id": "g14-gp_0735-53b91d",
+          "generation": 14,
+          "operator": "gp_hoist",
+          "parent_ids": [
+            "gp_0701"
+          ],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": -0.011734393455487796,
+            "independence": 0.006630820367592406,
+            "parsimony": -2.0,
+            "structural_novelty": 0.9446775545865578
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 777,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.0722914208221772,
+            "deflated": {
+              "best_ic": 0.072291,
+              "deflated_ic": 0.059743,
+              "deflated_t": 17.42947,
+              "luck_ic": 0.012548,
+              "n_obs": 85112,
+              "n_trials": 813
+            },
+            "n_trials": 813,
+            "dropped": [],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L0WF_gp_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T12:49:55+00:00"
+        }
+      }
+    },
+    {
+      "id": "gp_0940",
+      "name": "gp_0940",
+      "class_name": "",
+      "description": "(correlation(data[\"high\"], data[\"revenueActual\"], 40) / ((data[\"totalCurrentLiabilities\"] / (data[\"evToOperatingCashFlow\"]).where((data[\"evToOperatingCashFlow\"]) != 0))).where(((data[\"totalCurrentLiabilities\"] / (data[\"evToOperatingCashFlow\"]).where((data[\"evToOperatingCashFlow\"]) != 0))) != 0))",
+      "formula": "",
+      "trading_idea": "GP-evolved formulaic alpha (non-LLM benchmark)",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.010446,
+        "ic_std": 0.149166,
+        "ic_ir": -0.070032,
+        "ic_hit_rate": 0.4583,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.015081,
+            "ic_std": 0.145286,
+            "ic_ir": 0.103799,
+            "ic_hit_rate": 0.5625,
+            "n_timestamps": 48
+          },
+          "6": {
+            "ic": -0.010446,
+            "ic_std": 0.149166,
+            "ic_ir": -0.070032,
+            "ic_hit_rate": 0.4583,
+            "n_timestamps": 48
+          },
+          "60": {
+            "ic": -0.001887,
+            "ic_std": 0.100252,
+            "ic_ir": -0.018819,
+            "ic_hit_rate": 0.5385,
+            "n_timestamps": 52
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 48,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "gp:fmp_archive_equity_nasdaq100pit:L0WF_gp_s0",
+      "code_path": "/root/QuantFundAgent/quant_fund_agent/factors/researcher/gp_0940.py",
+      "required_inputs": [
+        "evToOperatingCashFlow",
+        "high",
+        "revenueActual",
+        "totalCurrentLiabilities"
+      ],
+      "required_tier": "events",
+      "prediction_horizon": 6,
+      "suggested_horizons": [],
+      "created_at": "2026-08-09T12:49:55.711353",
+      "metadata": {
+        "llm_model": "gp",
+        "llm_provider": "none",
+        "engine": "gp",
+        "evolution": {
+          "genome_id": "g18-gp_0940-a9cb57",
+          "generation": 18,
+          "operator": "gp_crossover",
+          "parent_ids": [
+            "gp_0571",
+            "gp_0014_1"
+          ],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": 0.005529232248182719,
+            "independence": -0.00663605858020878,
+            "parsimony": -15.0,
+            "structural_novelty": 0.9379579086846552
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 777,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.0722914208221772,
+            "deflated": {
+              "best_ic": 0.072291,
+              "deflated_ic": 0.059743,
+              "deflated_t": 17.42947,
+              "luck_ic": 0.012548,
+              "n_obs": 85112,
+              "n_trials": 813
+            },
+            "n_trials": 813,
+            "dropped": [],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L0WF_gp_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T12:49:55+00:00"
+        }
+      }
+    },
+    {
+      "id": "gp_1002",
+      "name": "gp_1002",
+      "class_name": "",
+      "description": "ts_rank(abs_(ts_sum(stddev(ts_sum(data[\"dividendsPaid\"], 40), 40), 60)), 60)",
+      "formula": "",
+      "trading_idea": "GP-evolved formulaic alpha (non-LLM benchmark)",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.001838,
+        "ic_std": 0.103479,
+        "ic_ir": 0.017763,
+        "ic_hit_rate": 0.5087,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.000545,
+            "ic_std": 0.104292,
+            "ic_ir": -0.00523,
+            "ic_hit_rate": 0.4919,
+            "n_timestamps": 3968
+          },
+          "6": {
+            "ic": 0.001838,
+            "ic_std": 0.103479,
+            "ic_ir": 0.017763,
+            "ic_hit_rate": 0.5087,
+            "n_timestamps": 3963
+          },
+          "60": {
+            "ic": 0.018931,
+            "ic_std": 0.097977,
+            "ic_ir": 0.193218,
+            "ic_hit_rate": 0.5991,
+            "n_timestamps": 3909
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 3963,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "gp:fmp_archive_equity_nasdaq100pit:L0WF_gp_s0",
+      "code_path": "/root/QuantFundAgent/quant_fund_agent/factors/researcher/gp_1002.py",
+      "required_inputs": [
+        "dividendsPaid"
+      ],
+      "required_tier": "fundamental",
+      "prediction_horizon": 6,
+      "suggested_horizons": [],
+      "created_at": "2026-08-09T12:49:55.711405",
+      "metadata": {
+        "llm_model": "gp",
+        "llm_provider": "none",
+        "engine": "gp",
+        "evolution": {
+          "genome_id": "g19-gp_1002-ce3864",
+          "generation": 19,
+          "operator": "gp_crossover",
+          "parent_ids": [
+            "gp_0895",
+            "gp_0104"
+          ],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": -0.005524618177501481,
+            "independence": 0.0077667402555377,
+            "parsimony": -10.0,
+            "structural_novelty": 0.9425330616920208
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 777,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.0722914208221772,
+            "deflated": {
+              "best_ic": 0.072291,
+              "deflated_ic": 0.059743,
+              "deflated_t": 17.42947,
+              "luck_ic": 0.012548,
+              "n_obs": 85112,
+              "n_trials": 813
+            },
+            "n_trials": 813,
+            "dropped": [],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L0WF_gp_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T12:49:55+00:00"
+        }
+      }
+    },
+    {
+      "id": "gp_1008",
+      "name": "gp_1008",
+      "class_name": "",
+      "description": "signed_power(signed_power(data[\"evToOperatingCashFlow\"], 0.5), 0.5)",
+      "formula": "",
+      "trading_idea": "GP-evolved formulaic alpha (non-LLM benchmark)",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.007288,
+        "ic_std": 0.130649,
+        "ic_ir": 0.055784,
+        "ic_hit_rate": 0.5456,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.003979,
+            "ic_std": 0.127095,
+            "ic_ir": 0.031304,
+            "ic_hit_rate": 0.5219,
+            "n_timestamps": 4164
+          },
+          "6": {
+            "ic": 0.007288,
+            "ic_std": 0.130649,
+            "ic_ir": 0.055784,
+            "ic_hit_rate": 0.5456,
+            "n_timestamps": 4159
+          },
+          "60": {
+            "ic": 0.020434,
+            "ic_std": 0.136206,
+            "ic_ir": 0.150026,
+            "ic_hit_rate": 0.6058,
+            "n_timestamps": 4105
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4159,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "gp:fmp_archive_equity_nasdaq100pit:L0WF_gp_s0",
+      "code_path": "/root/QuantFundAgent/quant_fund_agent/factors/researcher/gp_1008.py",
+      "required_inputs": [
+        "evToOperatingCashFlow"
+      ],
+      "required_tier": "fundamental",
+      "prediction_horizon": 6,
+      "suggested_horizons": [],
+      "created_at": "2026-08-09T12:49:55.711476",
+      "metadata": {
+        "llm_model": "gp",
+        "llm_provider": "none",
+        "engine": "gp",
+        "evolution": {
+          "genome_id": "g19-gp_1008-4f55e6",
+          "generation": 19,
+          "operator": "gp_crossover",
+          "parent_ids": [
+            "gp_0655",
+            "gp_0655"
+          ],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": 0.003819863756908501,
+            "independence": 0.0048778958938891365,
+            "parsimony": -5.0,
+            "structural_novelty": 0.9518405520124165
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 777,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.0722914208221772,
+            "deflated": {
+              "best_ic": 0.072291,
+              "deflated_ic": 0.059743,
+              "deflated_t": 17.42947,
+              "luck_ic": 0.012548,
+              "n_obs": 85112,
+              "n_trials": 813
+            },
+            "n_trials": 813,
+            "dropped": [],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L0WF_gp_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T12:49:55+00:00"
+        }
+      }
+    },
+    {
+      "id": "gp_1016",
+      "name": "gp_1016",
+      "class_name": "",
+      "description": "ts_argmax(data[\"revenueActual\"], 40)",
+      "formula": "",
+      "trading_idea": "GP-evolved formulaic alpha (non-LLM benchmark)",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.001552,
+        "ic_std": 0.114603,
+        "ic_ir": 0.013543,
+        "ic_hit_rate": 0.5046,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.001004,
+            "ic_std": 0.131527,
+            "ic_ir": 0.00763,
+            "ic_hit_rate": 0.5001,
+            "n_timestamps": 4125
+          },
+          "6": {
+            "ic": 0.001552,
+            "ic_std": 0.114603,
+            "ic_ir": 0.013543,
+            "ic_hit_rate": 0.5046,
+            "n_timestamps": 4120
+          },
+          "60": {
+            "ic": 0.007554,
+            "ic_std": 0.116192,
+            "ic_ir": 0.065016,
+            "ic_hit_rate": 0.5202,
+            "n_timestamps": 4066
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4120,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "gp:fmp_archive_equity_nasdaq100pit:L0WF_gp_s0",
+      "code_path": "/root/QuantFundAgent/quant_fund_agent/factors/researcher/gp_1016.py",
+      "required_inputs": [
+        "revenueActual"
+      ],
+      "required_tier": "events",
+      "prediction_horizon": 6,
+      "suggested_horizons": [],
+      "created_at": "2026-08-09T12:49:55.711536",
+      "metadata": {
+        "llm_model": "gp",
+        "llm_provider": "none",
+        "engine": "gp",
+        "evolution": {
+          "genome_id": "g19-gp_1016-573080",
+          "generation": 19,
+          "operator": "gp_hoist",
+          "parent_ids": [
+            "gp_0989"
+          ],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": -0.0077776415880772415,
+            "independence": -0.0007974360875931901,
+            "parsimony": -3.0,
+            "structural_novelty": 0.9379579086846552
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 777,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.0722914208221772,
+            "deflated": {
+              "best_ic": 0.072291,
+              "deflated_ic": 0.059743,
+              "deflated_t": 17.42947,
+              "luck_ic": 0.012548,
+              "n_obs": 85112,
+              "n_trials": 813
+            },
+            "n_trials": 813,
+            "dropped": [],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L0WF_gp_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T12:49:55+00:00"
+        }
+      }
+    },
+    {
+      "id": "gp_1052",
+      "name": "gp_1052",
+      "class_name": "",
+      "description": "data[\"dividendYield\"]",
+      "formula": "",
+      "trading_idea": "GP-evolved formulaic alpha (non-LLM benchmark)",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.001533,
+        "ic_std": 0.14389,
+        "ic_ir": -0.010652,
+        "ic_hit_rate": 0.484,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.001048,
+            "ic_std": 0.145829,
+            "ic_ir": -0.007189,
+            "ic_hit_rate": 0.4844,
+            "n_timestamps": 4164
+          },
+          "6": {
+            "ic": -0.001533,
+            "ic_std": 0.14389,
+            "ic_ir": -0.010652,
+            "ic_hit_rate": 0.484,
+            "n_timestamps": 4159
+          },
+          "60": {
+            "ic": -0.009297,
+            "ic_std": 0.145219,
+            "ic_ir": -0.064024,
+            "ic_hit_rate": 0.4431,
+            "n_timestamps": 4105
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4159,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "gp:fmp_archive_equity_nasdaq100pit:L0WF_gp_s0",
+      "code_path": "/root/QuantFundAgent/quant_fund_agent/factors/researcher/gp_1052.py",
+      "required_inputs": [
+        "dividendYield"
+      ],
+      "required_tier": "fundamental",
+      "prediction_horizon": 6,
+      "suggested_horizons": [],
+      "created_at": "2026-08-09T12:49:55.711584",
+      "metadata": {
+        "llm_model": "gp",
+        "llm_provider": "none",
+        "engine": "gp",
+        "evolution": {
+          "genome_id": "g19-gp_1052-80efbf",
+          "generation": 19,
+          "operator": "gp_hoist",
+          "parent_ids": [
+            "gp_1042"
+          ],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": 0.00812333917120596,
+            "independence": 0.010139731743186498,
+            "parsimony": -1.0,
+            "structural_novelty": 0.918024966643873
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 777,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.0722914208221772,
+            "deflated": {
+              "best_ic": 0.072291,
+              "deflated_ic": 0.059743,
+              "deflated_t": 17.42947,
+              "luck_ic": 0.012548,
+              "n_obs": 85112,
+              "n_trials": 813
+            },
+            "n_trials": 813,
+            "dropped": [],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L0WF_gp_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T12:49:55+00:00"
+        }
+      }
+    },
+    {
+      "id": "gp_1053",
+      "name": "gp_1053",
+      "class_name": "",
+      "description": "data[\"eps\"]",
+      "formula": "",
+      "trading_idea": "GP-evolved formulaic alpha (non-LLM benchmark)",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.006678,
+        "ic_std": 0.134168,
+        "ic_ir": -0.049773,
+        "ic_hit_rate": 0.4758,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.002889,
+            "ic_std": 0.136374,
+            "ic_ir": -0.021181,
+            "ic_hit_rate": 0.4839,
+            "n_timestamps": 4164
+          },
+          "6": {
+            "ic": -0.006678,
+            "ic_std": 0.134168,
+            "ic_ir": -0.049773,
+            "ic_hit_rate": 0.4758,
+            "n_timestamps": 4159
+          },
+          "60": {
+            "ic": -0.022617,
+            "ic_std": 0.133361,
+            "ic_ir": -0.169596,
+            "ic_hit_rate": 0.3739,
+            "n_timestamps": 4105
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4159,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "gp:fmp_archive_equity_nasdaq100pit:L0WF_gp_s0",
+      "code_path": "/root/QuantFundAgent/quant_fund_agent/factors/researcher/gp_1053.py",
+      "required_inputs": [
+        "eps"
+      ],
+      "required_tier": "fundamental",
+      "prediction_horizon": 6,
+      "suggested_horizons": [],
+      "created_at": "2026-08-09T12:49:55.711653",
+      "metadata": {
+        "llm_model": "gp",
+        "llm_provider": "none",
+        "engine": "gp",
+        "evolution": {
+          "genome_id": "g19-gp_1053-0d708f",
+          "generation": 19,
+          "operator": "gp_point",
+          "parent_ids": [
+            "gp_0057"
+          ],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": 0.0012196167185854617,
+            "independence": 0.014728959385535438,
+            "parsimony": -1.0,
+            "structural_novelty": 0.918024966643873
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 777,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.0722914208221772,
+            "deflated": {
+              "best_ic": 0.072291,
+              "deflated_ic": 0.059743,
+              "deflated_t": 17.42947,
+              "luck_ic": 0.012548,
+              "n_obs": 85112,
+              "n_trials": 813
+            },
+            "n_trials": 813,
+            "dropped": [],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L0WF_gp_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T12:49:55+00:00"
+        }
+      }
+    },
+    {
+      "id": "gp_1067",
+      "name": "gp_1067",
+      "class_name": "",
+      "description": "ts_max(signed_power(data[\"epsDiluted\"], 0.5), 2)",
+      "formula": "",
+      "trading_idea": "GP-evolved formulaic alpha (non-LLM benchmark)",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.006154,
+        "ic_std": 0.141478,
+        "ic_ir": -0.043501,
+        "ic_hit_rate": 0.4784,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.002273,
+            "ic_std": 0.143221,
+            "ic_ir": -0.015873,
+            "ic_hit_rate": 0.4944,
+            "n_timestamps": 4163
+          },
+          "6": {
+            "ic": -0.006154,
+            "ic_std": 0.141478,
+            "ic_ir": -0.043501,
+            "ic_hit_rate": 0.4784,
+            "n_timestamps": 4158
+          },
+          "60": {
+            "ic": -0.019618,
+            "ic_std": 0.148257,
+            "ic_ir": -0.132326,
+            "ic_hit_rate": 0.4218,
+            "n_timestamps": 4104
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4158,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "gp:fmp_archive_equity_nasdaq100pit:L0WF_gp_s0",
+      "code_path": "/root/QuantFundAgent/quant_fund_agent/factors/researcher/gp_1067.py",
+      "required_inputs": [
+        "epsDiluted"
+      ],
+      "required_tier": "fundamental",
+      "prediction_horizon": 6,
+      "suggested_horizons": [],
+      "created_at": "2026-08-09T12:49:55.711721",
+      "metadata": {
+        "llm_model": "gp",
+        "llm_provider": "none",
+        "engine": "gp",
+        "evolution": {
+          "genome_id": "g20-gp_1067-05e216",
+          "generation": 20,
+          "operator": "gp_hoist",
+          "parent_ids": [
+            "gp_0572"
+          ],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": 0.009649470642391134,
+            "independence": -0.0010755531587295934,
+            "parsimony": -5.0,
+            "structural_novelty": 0.8902300301679127
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 780,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.0722914208221772,
+            "deflated": {
+              "best_ic": 0.072291,
+              "deflated_ic": 0.059743,
+              "deflated_t": 17.42947,
+              "luck_ic": 0.012548,
+              "n_obs": 85112,
+              "n_trials": 813
+            },
+            "n_trials": 813,
+            "dropped": [],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L0WF_gp_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T12:49:55+00:00"
+        }
+      }
+    },
+    {
+      "id": "gp_1068",
+      "name": "gp_1068",
+      "class_name": "",
+      "description": "stddev(ts_sum(log(data[\"high\"]), 40), 40)",
+      "formula": "",
+      "trading_idea": "GP-evolved formulaic alpha (non-LLM benchmark)",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.006307,
+        "ic_std": 0.199475,
+        "ic_ir": 0.031617,
+        "ic_hit_rate": 0.5229,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.00195,
+            "ic_std": 0.206699,
+            "ic_ir": 0.009433,
+            "ic_hit_rate": 0.5042,
+            "n_timestamps": 4086
+          },
+          "6": {
+            "ic": 0.006307,
+            "ic_std": 0.199475,
+            "ic_ir": 0.031617,
+            "ic_hit_rate": 0.5229,
+            "n_timestamps": 4081
+          },
+          "60": {
+            "ic": 0.017596,
+            "ic_std": 0.177116,
+            "ic_ir": 0.099345,
+            "ic_hit_rate": 0.5418,
+            "n_timestamps": 4027
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4081,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "gp:fmp_archive_equity_nasdaq100pit:L0WF_gp_s0",
+      "code_path": "/root/QuantFundAgent/quant_fund_agent/factors/researcher/gp_1068.py",
+      "required_inputs": [
+        "high"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [],
+      "created_at": "2026-08-09T12:49:55.711765",
+      "metadata": {
+        "llm_model": "gp",
+        "llm_provider": "none",
+        "engine": "gp",
+        "evolution": {
+          "genome_id": "g20-gp_1068-8f2a59",
+          "generation": 20,
+          "operator": "gp_crossover",
+          "parent_ids": [
+            "gp_0104",
+            "gp_0187"
+          ],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": -0.0007311630847532946,
+            "independence": 0.01481864740443342,
+            "parsimony": -6.0,
+            "structural_novelty": 0.7223319327013705
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 781,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.0722914208221772,
+            "deflated": {
+              "best_ic": 0.072291,
+              "deflated_ic": 0.059743,
+              "deflated_t": 17.42947,
+              "luck_ic": 0.012548,
+              "n_obs": 85112,
+              "n_trials": 813
+            },
+            "n_trials": 813,
+            "dropped": [],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L0WF_gp_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T12:49:55+00:00"
+        }
+      }
+    },
+    {
+      "id": "gp_1070",
+      "name": "gp_1070",
+      "class_name": "",
+      "description": "stddev(ts_sum(data[\"operatingCashFlowPerShare\"], 40), 40)",
+      "formula": "",
+      "trading_idea": "GP-evolved formulaic alpha (non-LLM benchmark)",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.009411,
+        "ic_std": 0.127835,
+        "ic_ir": -0.073617,
+        "ic_hit_rate": 0.4636,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.005361,
+            "ic_std": 0.132441,
+            "ic_ir": -0.040481,
+            "ic_hit_rate": 0.4814,
+            "n_timestamps": 4086
+          },
+          "6": {
+            "ic": -0.009411,
+            "ic_std": 0.127835,
+            "ic_ir": -0.073617,
+            "ic_hit_rate": 0.4636,
+            "n_timestamps": 4081
+          },
+          "60": {
+            "ic": -0.032118,
+            "ic_std": 0.134036,
+            "ic_ir": -0.239621,
+            "ic_hit_rate": 0.3504,
+            "n_timestamps": 4027
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4081,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "gp:fmp_archive_equity_nasdaq100pit:L0WF_gp_s0",
+      "code_path": "/root/QuantFundAgent/quant_fund_agent/factors/researcher/gp_1070.py",
+      "required_inputs": [
+        "operatingCashFlowPerShare"
+      ],
+      "required_tier": "fundamental",
+      "prediction_horizon": 6,
+      "suggested_horizons": [],
+      "created_at": "2026-08-09T12:49:55.711812",
+      "metadata": {
+        "llm_model": "gp",
+        "llm_provider": "none",
+        "engine": "gp",
+        "evolution": {
+          "genome_id": "g20-gp_1070-4f32c1",
+          "generation": 20,
+          "operator": "gp_subtree",
+          "parent_ids": [
+            "gp_0444"
+          ],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": -0.010649680147660379,
+            "independence": 0.016321908943610967,
+            "parsimony": -5.0,
+            "structural_novelty": 0.8240957713292888
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 782,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.0722914208221772,
+            "deflated": {
+              "best_ic": 0.072291,
+              "deflated_ic": 0.059743,
+              "deflated_t": 17.42947,
+              "luck_ic": 0.012548,
+              "n_obs": 85112,
+              "n_trials": 813
+            },
+            "n_trials": 813,
+            "dropped": [],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L0WF_gp_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T12:49:55+00:00"
+        }
+      }
+    },
+    {
+      "id": "gp_1077",
+      "name": "gp_1077",
+      "class_name": "",
+      "description": "signed_power((correlation(data[\"high\"], data[\"cashConversionCycle\"], 40) + (data[\"totalCurrentLiabilities\"] / (data[\"evToOperatingCashFlow\"]).where((data[\"evToOperatingCashFlow\"]) != 0))), 0.5)",
+      "formula": "",
+      "trading_idea": "GP-evolved formulaic alpha (non-LLM benchmark)",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.061368,
+        "ic_std": 0.082386,
+        "ic_ir": -0.744894,
+        "ic_hit_rate": 0.3571,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.015535,
+            "ic_std": 0.091206,
+            "ic_ir": -0.170328,
+            "ic_hit_rate": 0.3571,
+            "n_timestamps": 14
+          },
+          "6": {
+            "ic": -0.061368,
+            "ic_std": 0.082386,
+            "ic_ir": -0.744894,
+            "ic_hit_rate": 0.3571,
+            "n_timestamps": 14
+          },
+          "60": {
+            "ic": -0.009568,
+            "ic_std": 0.158958,
+            "ic_ir": -0.060191,
+            "ic_hit_rate": 0.5333,
+            "n_timestamps": 15
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 14,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "gp:fmp_archive_equity_nasdaq100pit:L0WF_gp_s0",
+      "code_path": "/root/QuantFundAgent/quant_fund_agent/factors/researcher/gp_1077.py",
+      "required_inputs": [
+        "cashConversionCycle",
+        "evToOperatingCashFlow",
+        "high",
+        "totalCurrentLiabilities"
+      ],
+      "required_tier": "fundamental",
+      "prediction_horizon": 6,
+      "suggested_horizons": [],
+      "created_at": "2026-08-09T12:49:55.711859",
+      "metadata": {
+        "llm_model": "gp",
+        "llm_provider": "none",
+        "engine": "gp",
+        "evolution": {
+          "genome_id": "g20-gp_1077-c3609e",
+          "generation": 20,
+          "operator": "gp_crossover",
+          "parent_ids": [
+            "gp_0104",
+            "gp_0897"
+          ],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": -0.006780828331124384,
+            "independence": 0.01599005816686238,
+            "parsimony": -10.0,
+            "structural_novelty": 0.69186640530359
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 784,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.0722914208221772,
+            "deflated": {
+              "best_ic": 0.072291,
+              "deflated_ic": 0.059743,
+              "deflated_t": 17.42947,
+              "luck_ic": 0.012548,
+              "n_obs": 85112,
+              "n_trials": 813
+            },
+            "n_trials": 813,
+            "dropped": [],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L0WF_gp_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T12:49:55+00:00"
+        }
+      }
+    },
+    {
+      "id": "gp_1093",
+      "name": "gp_1093",
+      "class_name": "",
+      "description": "(data[\"operatingCashFlowPerShare\"] - abs_(ts_sum(stddev(ts_sum(data[\"dividendsPaid\"], 40), 40), 60)))",
+      "formula": "",
+      "trading_idea": "GP-evolved formulaic alpha (non-LLM benchmark)",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.004539,
+        "ic_std": 0.097315,
+        "ic_ir": 0.046646,
+        "ic_hit_rate": 0.5214,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.001938,
+            "ic_std": 0.105607,
+            "ic_ir": 0.018347,
+            "ic_hit_rate": 0.5178,
+            "n_timestamps": 4027
+          },
+          "6": {
+            "ic": 0.004539,
+            "ic_std": 0.097315,
+            "ic_ir": 0.046646,
+            "ic_hit_rate": 0.5214,
+            "n_timestamps": 4022
+          },
+          "60": {
+            "ic": 0.009831,
+            "ic_std": 0.097263,
+            "ic_ir": 0.101074,
+            "ic_hit_rate": 0.5358,
+            "n_timestamps": 3968
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4022,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "gp:fmp_archive_equity_nasdaq100pit:L0WF_gp_s0",
+      "code_path": "/root/QuantFundAgent/quant_fund_agent/factors/researcher/gp_1093.py",
+      "required_inputs": [
+        "dividendsPaid",
+        "operatingCashFlowPerShare"
+      ],
+      "required_tier": "fundamental",
+      "prediction_horizon": 6,
+      "suggested_horizons": [],
+      "created_at": "2026-08-09T12:49:55.711899",
+      "metadata": {
+        "llm_model": "gp",
+        "llm_provider": "none",
+        "engine": "gp",
+        "evolution": {
+          "genome_id": "g20-gp_1093-86220e",
+          "generation": 20,
+          "operator": "gp_crossover",
+          "parent_ids": [
+            "gp_0498",
+            "gp_1002"
+          ],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": 0.01363482750717479,
+            "independence": -0.004768246222642175,
+            "parsimony": -9.0,
+            "structural_novelty": 0.5142545176135236
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 795,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.0722914208221772,
+            "deflated": {
+              "best_ic": 0.072291,
+              "deflated_ic": 0.059743,
+              "deflated_t": 17.42947,
+              "luck_ic": 0.012548,
+              "n_obs": 85112,
+              "n_trials": 813
+            },
+            "n_trials": 813,
+            "dropped": [],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L0WF_gp_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T12:49:55+00:00"
+        }
+      }
+    },
+    {
+      "id": "gp_1114",
+      "name": "gp_1114",
+      "class_name": "",
+      "description": "scale(data[\"receivablesTurnover\"])",
+      "formula": "",
+      "trading_idea": "GP-evolved formulaic alpha (non-LLM benchmark)",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.000658,
+        "ic_std": 0.113009,
+        "ic_ir": -0.005819,
+        "ic_hit_rate": 0.4934,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.000601,
+            "ic_std": 0.116052,
+            "ic_ir": -0.005181,
+            "ic_hit_rate": 0.5005,
+            "n_timestamps": 4164
+          },
+          "6": {
+            "ic": -0.000658,
+            "ic_std": 0.113009,
+            "ic_ir": -0.005819,
+            "ic_hit_rate": 0.4934,
+            "n_timestamps": 4159
+          },
+          "60": {
+            "ic": -0.006634,
+            "ic_std": 0.106468,
+            "ic_ir": -0.062312,
+            "ic_hit_rate": 0.4794,
+            "n_timestamps": 4105
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4159,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "gp:fmp_archive_equity_nasdaq100pit:L0WF_gp_s0",
+      "code_path": "/root/QuantFundAgent/quant_fund_agent/factors/researcher/gp_1114.py",
+      "required_inputs": [
+        "receivablesTurnover"
+      ],
+      "required_tier": "fundamental",
+      "prediction_horizon": 6,
+      "suggested_horizons": [],
+      "created_at": "2026-08-09T12:49:55.711936",
+      "metadata": {
+        "llm_model": "gp",
+        "llm_provider": "none",
+        "engine": "gp",
+        "evolution": {
+          "genome_id": "g20-gp_1114-593f3a",
+          "generation": 20,
+          "operator": "gp_point",
+          "parent_ids": [
+            "gp_0775"
+          ],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": 0.004944983078563017,
+            "independence": -0.0003990997914774428,
+            "parsimony": -2.0,
+            "structural_novelty": 0.9342811302215425
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 804,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.0722914208221772,
+            "deflated": {
+              "best_ic": 0.072291,
+              "deflated_ic": 0.059743,
+              "deflated_t": 17.42947,
+              "luck_ic": 0.012548,
+              "n_obs": 85112,
+              "n_trials": 813
+            },
+            "n_trials": 813,
+            "dropped": [],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L0WF_gp_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T12:49:55+00:00"
+        }
+      }
+    }
+  ],
+  "trading_ideas": []
+}

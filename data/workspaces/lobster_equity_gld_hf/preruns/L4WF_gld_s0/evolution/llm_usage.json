@@ -16,24 +16,24 @@
     },
     "crossover": {
       "calls": 16,
-      "input_tokens": 3641838,
-      "output_tokens": 852386,
-      "cost_usd": 21.890385,
+      "input_tokens": 4172574,
+      "output_tokens": 972881,
+      "cost_usd": 25.024649999999998,
       "errors": 0
     },
     "mutation": {
-      "calls": 44,
-      "input_tokens": 6666677,
-      "output_tokens": 1867747,
-      "cost_usd": 44.68289749999998,
+      "calls": 37,
+      "input_tokens": 7814307,
+      "output_tokens": 2195180,
+      "cost_usd": 52.463467499999965,
       "errors": 0
     }
   },
   "total": {
-    "calls": 62,
-    "input_tokens": 11125412,
-    "output_tokens": 3144141,
-    "cost_usd": 74.97564499999999,
+    "calls": 55,
+    "input_tokens": 12803778,
+    "output_tokens": 3592069,
+    "cost_usd": 85.89047999999997,
     "errors": 0
   }
 }

@@ -85,16 +85,19 @@ arms:
      flags: {debate: "on", memory: true, memory-key: L7WF_terra}}
 
   # ---- seed 1: second pass over the ladder ---------------------------------
+  # ON HOLD (user 2026-08-05): `after: HOLD_S1` references a non-existent arm,
+  # so every s1 arm stays [blocked] until the hold is lifted — only L7WF_terra_s0
+  # and the WF post-analysis may use the box. To RELEASE: remove the HOLD_S1
+  # keys below and restore `after: L7WF_terra_s0` on L7WF_terra_s1 (the memory
+  # ablation must still see seed 0's persisted experience first).
   - {name: L1WF_oneshot_terra_s1, entrypoint: oneshot, provider: terra, seed: 1,
+     after: HOLD_S1,
      config: quant.config.nasdaq100_2010_to2021.yaml, flags: {}}
-  - {name: L2WF_terra_s1, provider: terra, seed: 1,
+  - {name: L2WF_terra_s1, provider: terra, seed: 1, after: HOLD_S1,
      flags: {retrieval: none, mechanism-groups: 1, demes-per-group: 4, children-per-deme: 12}}
-  - {name: L4WF_terra_s1, provider: terra, seed: 1, flags: {}}
-  - {name: L5WF_terra_s1, provider: terra, seed: 1, flags: {debate: "on"}}
-  - {name: L6WF_terra_s1, provider: terra, seed: 1,
+  - {name: L4WF_terra_s1, provider: terra, seed: 1, after: HOLD_S1, flags: {}}
+  - {name: L5WF_terra_s1, provider: terra, seed: 1, after: HOLD_S1, flags: {debate: "on"}}
+  - {name: L6WF_terra_s1, provider: terra, seed: 1, after: HOLD_S1,
      flags: {debate: "on", evolution-unit: set, set-size: 3}}
-  # after: the memory ablation is cross-run — seed 1 must SEE seed 0's
-  # persisted experience (shared memory-key), so parallel lanes may not run
-  # them concurrently.
-  - {name: L7WF_terra_s1, provider: terra, seed: 1, after: L7WF_terra_s0,
+  - {name: L7WF_terra_s1, provider: terra, seed: 1, after: HOLD_S1,
      flags: {debate: "on", memory: true, memory-key: L7WF_terra}}

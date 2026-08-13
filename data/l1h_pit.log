@@ -1,0 +1,133 @@
+Traceback (most recent call last):
+  File "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/scripts/wf_pit_combiner_study.py", line 697, in <module>
+    main()
+    ~~~~^^
+  File "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/scripts/wf_pit_combiner_study.py", line 525, in main
+    codes, avail = load_arm(a)
+                   ~~~~~~~~^^^
+  File "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/scripts/wf_pit_combiner_study.py", line 108, in load_arm
+    snapshots = replay_snapshots(evo_dir, snap_gens=snap_gens)
+  File "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/scripts/prequential_deployment.py", line 129, in replay_snapshots
+    raise RuntimeError("lineage replay does not reproduce the final archive")
+RuntimeError: lineage replay does not reproduce the final archive
+14:16:02 INFO    Loading panel from ticker_data (fields=['accountsPayable', 'acquisitionsNet', 'assetGrowth', 'assetTurnover', 'bookValuePerShare', 'bookValuePerShareGrowth', 'capex', 'capexPerShare', 'capexToOperatingCashFlow', 'capexToRevenue', 'cash', 'cashConversionCycle', 'cashPerShare', 'cashRatio', 'changeInWorkingCapital', 'close', 'costOfRevenue', 'currentRatio', 'daysInventoryOutstanding', 'daysPayablesOutstanding', 'daysSalesOutstanding', 'debtGrowth', 'debtToAssets', 'debtToCapital', 'debtToEquity', 'depreciationAmortization', 'dividendPayoutRatio', 'dividendPerShareGrowth', 'dividendYield', 'dividendsPaid', 'earningsYield', 'ebit', 'ebitGrowth', 'ebitMargin', 'ebitda', 'ebitdaGrowth', 'ebitdaMargin', 'enterpriseValue', 'eps', 'epsActual', 'epsDiluted', 'epsDilutedGrowth', 'epsEstimate', 'epsGrowth', 'epsSurprise', 'evToEbitda', 'evToFreeCashFlow', 'evToOperatingCashFlow', 'evToSales', 'financialLeverage', 'freeCashFlow', 'freeCashFlowGrowth', 'freeCashFlowPerShare', 'freeCashFlowYield', 'goodwill', 'grahamNumber', 'grossMargin', 'grossProfit', 'grossProfitGrowth', 'high', 'incomeBeforeTax', 'incomeQuality', 'incomeTaxExpense', 'industry', 'intangibleAssets', 'intangiblesToAssets', 'interestCoverage', 'interestExpense', 'inventory', 'inventoryGrowth', 'inventoryTurnover', 'investedCapital', 'longTermDebt', 'low', 'marketCap', 'netDebtIssuance', 'netDebtToEbitda', 'netIncome', 'netIncomeGrowth', 'netIncomeGrowth3Y', 'netIncomeGrowth5Y', 'netIncomePerShare', 'netMargin', 'netStockIssuance', 'open', 'operatingCashFlow', 'operatingCashFlowGrowth', 'operatingCashFlowPerShare', 'operatingCycle', 'operatingExpenses', 'operatingIncome', 'operatingIncomeGrowth', 'operatingMargin', 'payablesTurnover', 'pbRatio', 'peRatio', 'pegRatio', 'pfcfRatio', 'pocfRatio', 'ppe', 'pretaxMargin', 'psRatio', 'quickRatio', 'rdExpense', 'rdExpenseGrowth', 'rdToRevenue', 'receivables', 'receivablesGrowth', 'receivablesTurnover', 'retainedEarnings', 'returns', 'revenue', 'revenueActual', 'revenueEstimate', 'revenueGrowth', 'revenueGrowth3Y', 'revenueGrowth5Y', 'revenuePerShare', 'revenueSurprise', 'roa', 'roce', 'roe', 'roic', 'sbcToRevenue', 'sector', 'sgaExpense', 'sgaExpenseGrowth', 'sgaToRevenue', 'shareRepurchase', 'sharesDiluted', 'sharesGrowth', 'sharesOutstanding', 'shortTermDebt', 'stockBasedCompensation', 'tangibleBookValuePerShare', 'totalAssets', 'totalCurrentAssets', 'totalCurrentLiabilities', 'totalDebt', 'totalEquity', 'totalLiabilities', 'volume', 'vwap', 'workingCapital'], n_tickers=all) …
+14:17:09 INFO    Panel loaded in 67.0s (232 tickers, 144 fields)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/pandas/core/internals/blocks.py:347: RuntimeWarning: divide by zero encountered in log
+  result = func(self.values, **kwargs)
+<factor:correlation_cluster_boundary_pressure>:36: RuntimeWarning: invalid value encountered in subtract
+<factor:entropy_gated_disclosure_impulse>:45: RuntimeWarning: divide by zero encountered in log
+<factor:entropy_gated_disclosure_impulse>:45: RuntimeWarning: invalid value encountered in multiply
+<factor:entropy_gated_disclosure_impulse>:59: RuntimeWarning: divide by zero encountered in log
+<factor:entropy_gated_disclosure_impulse>:59: RuntimeWarning: invalid value encountered in multiply
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/pandas/core/internals/blocks.py:347: RuntimeWarning: divide by zero encountered in log
+  result = func(self.values, **kwargs)
+14:23:41 INFO    [L1H_terra_s0] 80/80 signals; blocks=10; methods=['equal', 'ic', 'ridge', 'lasso', 'rf', 'autoalpha']
+14:23:43 INFO    [L1H_terra_s0] g11 equal: n=80 ic=0.0343
+14:23:43 INFO    [L1H_terra_s0] g11 ic: n=80 ic=0.0459
+14:23:46 INFO    [L1H_terra_s0] g11 ridge: n=80 ic=0.0351
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:1663: FutureWarning: 'n_alphas' was deprecated in 1.7 and will be removed in 1.9. 'alphas' now accepts an integer value which removes the need to pass 'n_alphas'. The default value of 'alphas' will change from None to 100 in 1.9. Pass an explicit value to 'alphas' and leave 'n_alphas' to its default value to silence this warning.
+  warnings.warn(
+14:23:47 INFO    [L1H_terra_s0] g11 lasso: n=80 ic=0.0413
+14:25:42 INFO    [L1H_terra_s0] g11 rf: n=80 ic=0.0165
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRanker was fitted with feature names
+  warnings.warn(
+14:26:12 INFO    [L1H_terra_s0] g11 autoalpha: n=80 ic=0.0585
+14:26:15 INFO    [L1H_terra_s0] g12 equal: n=80 ic=0.0852
+14:26:16 INFO    [L1H_terra_s0] g12 ic: n=80 ic=0.1188
+14:26:20 INFO    [L1H_terra_s0] g12 ridge: n=80 ic=0.1159
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:1663: FutureWarning: 'n_alphas' was deprecated in 1.7 and will be removed in 1.9. 'alphas' now accepts an integer value which removes the need to pass 'n_alphas'. The default value of 'alphas' will change from None to 100 in 1.9. Pass an explicit value to 'alphas' and leave 'n_alphas' to its default value to silence this warning.
+  warnings.warn(
+14:26:21 INFO    [L1H_terra_s0] g12 lasso: n=80 ic=0.1351
+14:28:37 INFO    [L1H_terra_s0] g12 rf: n=80 ic=0.1697
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRanker was fitted with feature names
+  warnings.warn(
+14:29:07 INFO    [L1H_terra_s0] g12 autoalpha: n=80 ic=0.0565
+14:29:10 INFO    [L1H_terra_s0] g13 equal: n=80 ic=0.0581
+14:29:10 INFO    [L1H_terra_s0] g13 ic: n=80 ic=0.0785
+14:29:13 INFO    [L1H_terra_s0] g13 ridge: n=80 ic=0.0573
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:1663: FutureWarning: 'n_alphas' was deprecated in 1.7 and will be removed in 1.9. 'alphas' now accepts an integer value which removes the need to pass 'n_alphas'. The default value of 'alphas' will change from None to 100 in 1.9. Pass an explicit value to 'alphas' and leave 'n_alphas' to its default value to silence this warning.
+  warnings.warn(
+14:29:14 INFO    [L1H_terra_s0] g13 lasso: n=80 ic=0.0856
+14:31:35 INFO    [L1H_terra_s0] g13 rf: n=80 ic=0.0534
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRanker was fitted with feature names
+  warnings.warn(
+14:32:05 INFO    [L1H_terra_s0] g13 autoalpha: n=80 ic=0.0367
+14:32:08 INFO    [L1H_terra_s0] g14 equal: n=80 ic=0.0704
+14:32:09 INFO    [L1H_terra_s0] g14 ic: n=80 ic=0.0814
+14:32:13 INFO    [L1H_terra_s0] g14 ridge: n=80 ic=0.0945
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:1663: FutureWarning: 'n_alphas' was deprecated in 1.7 and will be removed in 1.9. 'alphas' now accepts an integer value which removes the need to pass 'n_alphas'. The default value of 'alphas' will change from None to 100 in 1.9. Pass an explicit value to 'alphas' and leave 'n_alphas' to its default value to silence this warning.
+  warnings.warn(
+14:32:14 INFO    [L1H_terra_s0] g14 lasso: n=80 ic=0.0839
+14:34:41 INFO    [L1H_terra_s0] g14 rf: n=80 ic=0.0972
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRanker was fitted with feature names
+  warnings.warn(
+14:35:14 INFO    [L1H_terra_s0] g14 autoalpha: n=80 ic=0.0395
+14:35:17 INFO    [L1H_terra_s0] g15 equal: n=80 ic=0.0457
+14:35:17 INFO    [L1H_terra_s0] g15 ic: n=80 ic=0.0547
+14:35:22 INFO    [L1H_terra_s0] g15 ridge: n=80 ic=0.0100
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:1663: FutureWarning: 'n_alphas' was deprecated in 1.7 and will be removed in 1.9. 'alphas' now accepts an integer value which removes the need to pass 'n_alphas'. The default value of 'alphas' will change from None to 100 in 1.9. Pass an explicit value to 'alphas' and leave 'n_alphas' to its default value to silence this warning.
+  warnings.warn(
+14:35:23 INFO    [L1H_terra_s0] g15 lasso: n=80 ic=0.0378
+14:37:57 INFO    [L1H_terra_s0] g15 rf: n=80 ic=0.0010
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRanker was fitted with feature names
+  warnings.warn(
+14:38:30 INFO    [L1H_terra_s0] g15 autoalpha: n=80 ic=0.0170
+14:38:33 INFO    [L1H_terra_s0] g16 equal: n=80 ic=0.0690
+14:38:34 INFO    [L1H_terra_s0] g16 ic: n=80 ic=0.0870
+14:38:38 INFO    [L1H_terra_s0] g16 ridge: n=80 ic=0.0769
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:1663: FutureWarning: 'n_alphas' was deprecated in 1.7 and will be removed in 1.9. 'alphas' now accepts an integer value which removes the need to pass 'n_alphas'. The default value of 'alphas' will change from None to 100 in 1.9. Pass an explicit value to 'alphas' and leave 'n_alphas' to its default value to silence this warning.
+  warnings.warn(
+14:38:39 INFO    [L1H_terra_s0] g16 lasso: n=80 ic=0.0848
+14:41:11 INFO    [L1H_terra_s0] g16 rf: n=80 ic=0.0154
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRanker was fitted with feature names
+  warnings.warn(
+14:41:43 INFO    [L1H_terra_s0] g16 autoalpha: n=80 ic=0.0384
+14:41:46 INFO    [L1H_terra_s0] g17 equal: n=80 ic=0.0631
+14:41:46 INFO    [L1H_terra_s0] g17 ic: n=80 ic=0.0725
+14:41:50 INFO    [L1H_terra_s0] g17 ridge: n=80 ic=0.0599
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:1663: FutureWarning: 'n_alphas' was deprecated in 1.7 and will be removed in 1.9. 'alphas' now accepts an integer value which removes the need to pass 'n_alphas'. The default value of 'alphas' will change from None to 100 in 1.9. Pass an explicit value to 'alphas' and leave 'n_alphas' to its default value to silence this warning.
+  warnings.warn(
+14:41:51 INFO    [L1H_terra_s0] g17 lasso: n=80 ic=0.0847
+14:44:28 INFO    [L1H_terra_s0] g17 rf: n=80 ic=0.0378
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRanker was fitted with feature names
+  warnings.warn(
+14:45:01 INFO    [L1H_terra_s0] g17 autoalpha: n=80 ic=0.0176
+14:45:04 INFO    [L1H_terra_s0] g18 equal: n=80 ic=0.0819
+14:45:05 INFO    [L1H_terra_s0] g18 ic: n=80 ic=0.0834
+14:45:09 INFO    [L1H_terra_s0] g18 ridge: n=80 ic=0.0446
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:1663: FutureWarning: 'n_alphas' was deprecated in 1.7 and will be removed in 1.9. 'alphas' now accepts an integer value which removes the need to pass 'n_alphas'. The default value of 'alphas' will change from None to 100 in 1.9. Pass an explicit value to 'alphas' and leave 'n_alphas' to its default value to silence this warning.
+  warnings.warn(
+14:45:10 INFO    [L1H_terra_s0] g18 lasso: n=80 ic=0.0713
+14:47:44 INFO    [L1H_terra_s0] g18 rf: n=80 ic=0.0031
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRanker was fitted with feature names
+  warnings.warn(
+14:48:16 INFO    [L1H_terra_s0] g18 autoalpha: n=80 ic=0.0745
+14:48:19 INFO    [L1H_terra_s0] g19 equal: n=80 ic=0.0767
+14:48:20 INFO    [L1H_terra_s0] g19 ic: n=80 ic=0.0820
+14:48:25 INFO    [L1H_terra_s0] g19 ridge: n=80 ic=0.0796
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:1663: FutureWarning: 'n_alphas' was deprecated in 1.7 and will be removed in 1.9. 'alphas' now accepts an integer value which removes the need to pass 'n_alphas'. The default value of 'alphas' will change from None to 100 in 1.9. Pass an explicit value to 'alphas' and leave 'n_alphas' to its default value to silence this warning.
+  warnings.warn(
+14:48:26 INFO    [L1H_terra_s0] g19 lasso: n=80 ic=0.0926
+14:51:05 INFO    [L1H_terra_s0] g19 rf: n=80 ic=0.0943
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRanker was fitted with feature names
+  warnings.warn(
+14:51:41 INFO    [L1H_terra_s0] g19 autoalpha: n=80 ic=0.0622
+14:51:44 INFO    [L1H_terra_s0] g20 equal: n=80 ic=0.0475
+14:51:45 INFO    [L1H_terra_s0] g20 ic: n=80 ic=0.0450
+14:51:49 INFO    [L1H_terra_s0] g20 ridge: n=80 ic=0.0291
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:1663: FutureWarning: 'n_alphas' was deprecated in 1.7 and will be removed in 1.9. 'alphas' now accepts an integer value which removes the need to pass 'n_alphas'. The default value of 'alphas' will change from None to 100 in 1.9. Pass an explicit value to 'alphas' and leave 'n_alphas' to its default value to silence this warning.
+  warnings.warn(
+14:51:51 INFO    [L1H_terra_s0] g20 lasso: n=80 ic=0.0281
+14:54:44 INFO    [L1H_terra_s0] g20 rf: n=80 ic=0.0545
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRanker was fitted with feature names
+  warnings.warn(
+14:55:20 INFO    [L1H_terra_s0] g20 autoalpha: n=80 ic=0.0069
+14:55:20 INFO    [L1H_terra_s0] summary:
+       label    method  blockmean  blockstd  hit  n_blocks  mean_n_factors
+L1H_terra_s0 autoalpha   0.040774  0.022192  1.0        10            80.0
+L1H_terra_s0     equal   0.063208  0.016719  1.0        10            80.0
+L1H_terra_s0        ic   0.074910  0.022100  1.0        10            80.0
+L1H_terra_s0     lasso   0.074511  0.031690  1.0        10            80.0
+L1H_terra_s0        rf   0.054291  0.053164  1.0        10            80.0
+L1H_terra_s0     ridge   0.060297  0.032152  1.0        10            80.0
+ L1H PIT race done rc=1

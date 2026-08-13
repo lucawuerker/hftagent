@@ -1,0 +1,508 @@
+{
+  "config": {
+    "population_size": 4,
+    "n_mechanism_groups": 2,
+    "demes_per_group": 1,
+    "migration_every": 3,
+    "migration_k": 1,
+    "seed": 0,
+    "archive_cap_per_group": 40
+  },
+  "n_trials": 1,
+  "generation": 1,
+  "islands": [
+    [
+      {
+        "genome": {
+          "genome_id": "g0-investment_discipline_premium_state_loading-0e3d75",
+          "programs": [
+            {
+              "factor_id": "investment_discipline_premium_state_loading",
+              "code": "\"\"\"Firms with restrained asset expansion and internally funded investment tend to outperform aggressive expanders, but the short-run premium for this characteristic is regime-dependent rather than constant. Following the factor-timing logic in the source paper, estimate the recent realized return of a cross-sectional investment-discipline factor and use a heavily smoothed autoregressive state estimate to scale its stock-level exposures. The other side is investors and benchmarked managers persistently financing high-growth asset expansion or unwinding defensive quality exposures during risk-on episodes; the hypothesis fails if the investment-discipline factor's recent return contains no stable predictive information for its next-week payoff.\"\"\"\n\nfrom __future__ import annotations\n\nimport numpy as np\nimport pandas as pd\n\nfrom quant_fund_agent.factors.base import BaseFactor\nfrom quant_fund_agent.factors.registry import register_factor\n\n\ndef _fresh_accounting_mask(frame: pd.DataFrame, max_age: int) -> pd.DataFrame:\n    \"\"\"Mask observations whose last detectable accounting update is too old.\"\"\"\n    if frame.empty:\n        return frame.notna()\n\n    clean = frame.replace([np.inf, -np.inf], np.nan)\n    valid = clean.notna()\n    changed = valid & ~clean.eq(clean.shift(1))\n\n    positions = pd.DataFrame(\n        np.broadcast_to(\n            np.arange(len(clean), dtype=float)[:, None], clean.shape\n        ),\n        index=clean.index,\n        columns=clean.columns,\n    )\n    last_update = positions.where(changed).ffill()\n    age = positions - last_update\n    return valid & age.le(float(max_age))\n\n\ndef _sector_percentile_rank(\n    frame: pd.DataFrame, sector: pd.DataFrame\n) -> pd.DataFrame:\n    \"\"\"Compute per-date percentile ranks separately within static sectors.\"\"\"\n    if frame.empty:\n        return frame.astype(float)\n\n    labels = sector.ffill().bfill().iloc[-1].reindex(frame.columns)\n    labels = labels.fillna(\"Unknown\").astype(str)\n    result = pd.DataFrame(np.nan, index=frame.index, columns=frame.columns)\n\n    for label in pd.unique(labels):\n        columns = labels.index[labels.eq(label)]\n        if len(columns) > 0:\n            result.loc[:, columns] = frame.loc[:, columns].rank(\n                axis=1, pct=True\n            )\n    return result\n\n\ndef _sector_demean(\n    frame: pd.DataFrame, sector: pd.DataFrame\n) -> pd.DataFrame:\n    \"\"\"Remove each sector's contemporaneous mean without filling invalid names.\"\"\"\n    if frame.empty:\n        return frame.astype(float)\n\n    labels = sector.ffill().bfill().iloc[-1].reindex(frame.columns)\n    labels = labels.fillna(\"Unknown\").astype(str)\n    result = pd.DataFrame(np.nan, index=frame.index, columns=frame.columns)\n\n    for label in pd.unique(labels):\n        columns = labels.index[labels.eq(label)]\n        if len(columns) > 0:\n            subset = frame.loc[:, columns]\n            result.loc[:, columns] = subset.sub(subset.mean(axis=1), axis=0)\n    return result\n\n\ndef _autoregressive_state(factor_return: pd.Series) -> pd.Series:\n    \"\"\"Causal slow-EWMA AR(1) forecast, normalized by trailing EWMA volatility.\"\"\"\n    slow_mean = factor_return.ewm(\n        halflife=42, adjust=False, min_periods=20\n    ).mean()\n    innovation = factor_return - slow_mean\n    lagged_innovation = innovation.shift(1)\n\n    covariance = innovation.ewm(\n        halflife=42, adjust=False, min_periods=30\n    ).cov(lagged_innovation)\n    lag_variance = lagged_innovation.ewm(\n        halflife=42, adjust=False, min_periods=30\n    ).var()\n    phi = (covariance / lag_variance.replace(0.0, np.nan)).clip(-0.95, 0.95)\n\n    forecast = slow_mean + phi * innovation\n    volatility = factor_return.ewm(\n        halflife=21, adjust=False, min_periods=20\n    ).std()\n    return (forecast / volatility.replace(0.0, np.nan)).clip(-3.0, 3.0)\n\n\n@register_factor\nclass AutoregressiveInvestmentDisciplinePremiumStateLoading(BaseFactor):\n    \"\"\"State-scaled sector-relative investment-discipline exposure.\"\"\"\n\n    factor_id = \"investment_discipline_premium_state_loading\"\n    name = \"Autoregressive Investment-Discipline Premium Loading\"\n    category = \"other\"\n    description = (\n        \"Construct a sector-relative investment-discipline exposure from low \"\n        \"assetGrowth, low debtGrowth, and high operatingCashFlow relative to \"\n        \"capex, with stale or invalid accounting observations masked. Form a \"\n        \"daily factor-mimicking return from lagged exposures and close-to-close \"\n        \"returns; multiply each current exposure by a volatility-normalized, \"\n        \"slow EWMA/autoregressive forecast of that factor return, producing a \"\n        \"cross-sectional signal that can attenuate or reverse when the factor \"\n        \"premium regime changes.\"\n    )\n    window_length = 140\n    inputs = [\n        \"close\",\n        \"assetGrowth\",\n        \"debtGrowth\",\n        \"operatingCashFlow\",\n        \"capex\",\n        \"sector\",\n    ]\n    prediction_horizon = 6\n    suggested_horizons = [6]\n\n    def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:\n        close = data[\"close\"]\n        if close.empty:\n            return close.astype(float)\n\n        asset_growth = data[\"assetGrowth\"].replace([np.inf, -np.inf], np.nan)\n        debt_growth = data[\"debtGrowth\"].replace([np.inf, -np.inf], np.nan)\n        operating_cash_flow = data[\"operatingCashFlow\"].replace(\n            [np.inf, -np.inf], np.nan\n        )\n        capex = data[\"capex\"].replace([np.inf, -np.inf], np.nan)\n        sector = data[\"sector\"]\n\n        capex_spend = (-capex).where(capex < 0.0)\n        funding_ratio = operating_cash_flow.where(operating_cash_flow > 0.0) / capex_spend\n        funding_ratio = funding_ratio.where(funding_ratio > 0.0)\n\n        valid = (\n            _fresh_accounting_mask(asset_growth, 140)\n            & _fresh_accounting_mask(debt_growth, 140)\n            & _fresh_accounting_mask(operating_cash_flow, 140)\n            & _fresh_accounting_mask(capex, 140)\n            & funding_ratio.notna()\n        )\n\n        low_asset_growth = 1.0 - _sector_percentile_rank(asset_growth, sector)\n        low_debt_growth = 1.0 - _sector_percentile_rank(debt_growth, sector)\n        strong_internal_funding = _sector_percentile_rank(\n            np.log1p(funding_ratio), sector\n        )\n\n        raw_exposure = (\n            low_asset_growth + low_debt_growth + strong_internal_funding\n        ) / 3.0\n        exposure = _sector_demean(raw_exposure.where(valid), sector)\n\n        valid_close = close.where(close > 0.0)\n        stock_return = valid_close.pct_change(fill_method=None).replace(\n            [np.inf, -np.inf], np.nan\n        )\n        lagged_exposure = exposure.shift(1)\n        numerator = lagged_exposure.mul(stock_return).sum(axis=1, min_count=1)\n        denominator = lagged_exposure.abs().sum(axis=1, min_count=1)\n        factor_return = (numerator / denominator.replace(0.0, np.nan)).fillna(0.0)\n\n        state = _autoregressive_state(factor_return).fillna(0.0)\n        signal = exposure.mul(state, axis=0)\n        return signal.reindex(index=close.index, columns=close.columns).fillna(0.0)\n",
+              "name": "Autoregressive Investment-Discipline Premium Loading",
+              "category": "other",
+              "trading_idea": "Firms with restrained asset expansion and internally funded investment tend to outperform aggressive expanders, but the short-run premium for this characteristic is regime-dependent rather than constant. Following the factor-timing logic in the source paper, estimate the recent realized return of a cross-sectional investment-discipline factor and use a heavily smoothed autoregressive state estimate to scale its stock-level exposures. The other side is investors and benchmarked managers persistently financing high-growth asset expansion or unwinding defensive quality exposures during risk-on episodes; the hypothesis fails if the investment-discipline factor's recent return contains no stable predictive information for its next-week payoff.",
+              "description": "Construct a sector-relative investment-discipline exposure from low assetGrowth, low debtGrowth, and high operatingCashFlow relative to capex, with stale or invalid accounting observations masked. Form a daily factor-mimicking return from lagged exposures and close-to-close returns; multiply each current exposure by a volatility-normalized, slow EWMA/autoregressive forecast of that factor return, producing a cross-sectional signal that can attenuate or reverse when the factor premium regime changes.",
+              "prediction_horizon": 6,
+              "suggested_horizons": [
+                6
+              ],
+              "expected_sign": null,
+              "source_paper_ids": [
+                "application_of_deep_learning_for_factor_timing_in_asset_mana"
+              ],
+              "mechanism": "",
+              "mechanism_group_id": 0
+            }
+          ],
+          "unit": "single",
+          "generation": 0,
+          "island": 0,
+          "mechanism_group_id": 0,
+          "deme_id": 0,
+          "parent_ids": [],
+          "operator": "seed",
+          "metadata": {
+            "mechanism_group_id": 0,
+            "mechanism": ""
+          }
+        },
+        "fitness": {
+          "candidate_id": "investment_discipline_premium_state_loading",
+          "objective": {
+            "marginal_value": 0.01787176206733696,
+            "independence": 0.0,
+            "parsimony": 0.0,
+            "structural_novelty": 0.0
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "selectable": true,
+          "diagnostics": {
+            "standalone_ic": -0.01787176206733696,
+            "ic_decay": {
+              "1": -0.013035726938994567,
+              "3": -0.01078781517077227,
+              "6": -0.01787176206733696,
+              "12": -0.020185572821322606,
+              "24": -0.013192767934840335
+            },
+            "is_ic": 0.005262369410340003,
+            "val_ic": -0.01787176206733696,
+            "val_n_obs": 53992,
+            "residual_ic": 0.0010832774736308892,
+            "independence_metric": "residual_ic",
+            "with_ic": -0.005570629772984972,
+            "base_ic": 0.0,
+            "max_abs_corr": 0.0,
+            "delta_participation": 1.0,
+            "pr_before": 0.0,
+            "pr_after": 1.0,
+            "marginal_value_raw": -0.005570629772984972,
+            "sign_consistency": null,
+            "plateau_penalty": null,
+            "jitter_ics": [],
+            "perturbation_penalty": null,
+            "turnover": 0.08958691910499139,
+            "gross_ret": 1.9707948853774438e-05,
+            "net_ret": -6.528995490548404e-05,
+            "net_gross_ratio": -3.312874180357932,
+            "zoo_max_abs_corr": null,
+            "zoo_nearest": null,
+            "zoo_min_code_distance": null,
+            "structural_novelty": null,
+            "novelty_min_book_distance": null,
+            "novelty_min_zoo_distance": null,
+            "novelty_nearest_book_idx": null,
+            "novelty_metric": "canonical_ast_weighted_subtree_jaccard",
+            "novelty_nearest_book_similarity": null,
+            "novelty_candidate_ast_nodes": 270,
+            "novelty_candidate_unique_subtrees": 158,
+            "coverage": 1.0,
+            "level_rho": 0.4834324942907129,
+            "degradation_ratio": -3.396143575975648,
+            "deflation": {
+              "best_ic": 0.017872,
+              "deflated_ic": 0.017872,
+              "deflated_t": 4.152715,
+              "luck_ic": 0.0,
+              "n_obs": 53992,
+              "n_trials": 1
+            },
+            "n_trials": 1,
+            "complexity": 167
+          },
+          "behavior": {},
+          "raw": {
+            "split_sizes": {
+              "is": 1743,
+              "val": 581,
+              "test": 0
+            },
+            "heldout_test_split_sizes": {
+              "is": 1743,
+              "val": 581,
+              "test": 581
+            }
+          }
+        }
+      }
+    ],
+    []
+  ],
+  "group_archives": [
+    [
+      {
+        "genome": {
+          "genome_id": "g0-investment_discipline_premium_state_loading-0e3d75",
+          "programs": [
+            {
+              "factor_id": "investment_discipline_premium_state_loading",
+              "code": "\"\"\"Firms with restrained asset expansion and internally funded investment tend to outperform aggressive expanders, but the short-run premium for this characteristic is regime-dependent rather than constant. Following the factor-timing logic in the source paper, estimate the recent realized return of a cross-sectional investment-discipline factor and use a heavily smoothed autoregressive state estimate to scale its stock-level exposures. The other side is investors and benchmarked managers persistently financing high-growth asset expansion or unwinding defensive quality exposures during risk-on episodes; the hypothesis fails if the investment-discipline factor's recent return contains no stable predictive information for its next-week payoff.\"\"\"\n\nfrom __future__ import annotations\n\nimport numpy as np\nimport pandas as pd\n\nfrom quant_fund_agent.factors.base import BaseFactor\nfrom quant_fund_agent.factors.registry import register_factor\n\n\ndef _fresh_accounting_mask(frame: pd.DataFrame, max_age: int) -> pd.DataFrame:\n    \"\"\"Mask observations whose last detectable accounting update is too old.\"\"\"\n    if frame.empty:\n        return frame.notna()\n\n    clean = frame.replace([np.inf, -np.inf], np.nan)\n    valid = clean.notna()\n    changed = valid & ~clean.eq(clean.shift(1))\n\n    positions = pd.DataFrame(\n        np.broadcast_to(\n            np.arange(len(clean), dtype=float)[:, None], clean.shape\n        ),\n        index=clean.index,\n        columns=clean.columns,\n    )\n    last_update = positions.where(changed).ffill()\n    age = positions - last_update\n    return valid & age.le(float(max_age))\n\n\ndef _sector_percentile_rank(\n    frame: pd.DataFrame, sector: pd.DataFrame\n) -> pd.DataFrame:\n    \"\"\"Compute per-date percentile ranks separately within static sectors.\"\"\"\n    if frame.empty:\n        return frame.astype(float)\n\n    labels = sector.ffill().bfill().iloc[-1].reindex(frame.columns)\n    labels = labels.fillna(\"Unknown\").astype(str)\n    result = pd.DataFrame(np.nan, index=frame.index, columns=frame.columns)\n\n    for label in pd.unique(labels):\n        columns = labels.index[labels.eq(label)]\n        if len(columns) > 0:\n            result.loc[:, columns] = frame.loc[:, columns].rank(\n                axis=1, pct=True\n            )\n    return result\n\n\ndef _sector_demean(\n    frame: pd.DataFrame, sector: pd.DataFrame\n) -> pd.DataFrame:\n    \"\"\"Remove each sector's contemporaneous mean without filling invalid names.\"\"\"\n    if frame.empty:\n        return frame.astype(float)\n\n    labels = sector.ffill().bfill().iloc[-1].reindex(frame.columns)\n    labels = labels.fillna(\"Unknown\").astype(str)\n    result = pd.DataFrame(np.nan, index=frame.index, columns=frame.columns)\n\n    for label in pd.unique(labels):\n        columns = labels.index[labels.eq(label)]\n        if len(columns) > 0:\n            subset = frame.loc[:, columns]\n            result.loc[:, columns] = subset.sub(subset.mean(axis=1), axis=0)\n    return result\n\n\ndef _autoregressive_state(factor_return: pd.Series) -> pd.Series:\n    \"\"\"Causal slow-EWMA AR(1) forecast, normalized by trailing EWMA volatility.\"\"\"\n    slow_mean = factor_return.ewm(\n        halflife=42, adjust=False, min_periods=20\n    ).mean()\n    innovation = factor_return - slow_mean\n    lagged_innovation = innovation.shift(1)\n\n    covariance = innovation.ewm(\n        halflife=42, adjust=False, min_periods=30\n    ).cov(lagged_innovation)\n    lag_variance = lagged_innovation.ewm(\n        halflife=42, adjust=False, min_periods=30\n    ).var()\n    phi = (covariance / lag_variance.replace(0.0, np.nan)).clip(-0.95, 0.95)\n\n    forecast = slow_mean + phi * innovation\n    volatility = factor_return.ewm(\n        halflife=21, adjust=False, min_periods=20\n    ).std()\n    return (forecast / volatility.replace(0.0, np.nan)).clip(-3.0, 3.0)\n\n\n@register_factor\nclass AutoregressiveInvestmentDisciplinePremiumStateLoading(BaseFactor):\n    \"\"\"State-scaled sector-relative investment-discipline exposure.\"\"\"\n\n    factor_id = \"investment_discipline_premium_state_loading\"\n    name = \"Autoregressive Investment-Discipline Premium Loading\"\n    category = \"other\"\n    description = (\n        \"Construct a sector-relative investment-discipline exposure from low \"\n        \"assetGrowth, low debtGrowth, and high operatingCashFlow relative to \"\n        \"capex, with stale or invalid accounting observations masked. Form a \"\n        \"daily factor-mimicking return from lagged exposures and close-to-close \"\n        \"returns; multiply each current exposure by a volatility-normalized, \"\n        \"slow EWMA/autoregressive forecast of that factor return, producing a \"\n        \"cross-sectional signal that can attenuate or reverse when the factor \"\n        \"premium regime changes.\"\n    )\n    window_length = 140\n    inputs = [\n        \"close\",\n        \"assetGrowth\",\n        \"debtGrowth\",\n        \"operatingCashFlow\",\n        \"capex\",\n        \"sector\",\n    ]\n    prediction_horizon = 6\n    suggested_horizons = [6]\n\n    def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:\n        close = data[\"close\"]\n        if close.empty:\n            return close.astype(float)\n\n        asset_growth = data[\"assetGrowth\"].replace([np.inf, -np.inf], np.nan)\n        debt_growth = data[\"debtGrowth\"].replace([np.inf, -np.inf], np.nan)\n        operating_cash_flow = data[\"operatingCashFlow\"].replace(\n            [np.inf, -np.inf], np.nan\n        )\n        capex = data[\"capex\"].replace([np.inf, -np.inf], np.nan)\n        sector = data[\"sector\"]\n\n        capex_spend = (-capex).where(capex < 0.0)\n        funding_ratio = operating_cash_flow.where(operating_cash_flow > 0.0) / capex_spend\n        funding_ratio = funding_ratio.where(funding_ratio > 0.0)\n\n        valid = (\n            _fresh_accounting_mask(asset_growth, 140)\n            & _fresh_accounting_mask(debt_growth, 140)\n            & _fresh_accounting_mask(operating_cash_flow, 140)\n            & _fresh_accounting_mask(capex, 140)\n            & funding_ratio.notna()\n        )\n\n        low_asset_growth = 1.0 - _sector_percentile_rank(asset_growth, sector)\n        low_debt_growth = 1.0 - _sector_percentile_rank(debt_growth, sector)\n        strong_internal_funding = _sector_percentile_rank(\n            np.log1p(funding_ratio), sector\n        )\n\n        raw_exposure = (\n            low_asset_growth + low_debt_growth + strong_internal_funding\n        ) / 3.0\n        exposure = _sector_demean(raw_exposure.where(valid), sector)\n\n        valid_close = close.where(close > 0.0)\n        stock_return = valid_close.pct_change(fill_method=None).replace(\n            [np.inf, -np.inf], np.nan\n        )\n        lagged_exposure = exposure.shift(1)\n        numerator = lagged_exposure.mul(stock_return).sum(axis=1, min_count=1)\n        denominator = lagged_exposure.abs().sum(axis=1, min_count=1)\n        factor_return = (numerator / denominator.replace(0.0, np.nan)).fillna(0.0)\n\n        state = _autoregressive_state(factor_return).fillna(0.0)\n        signal = exposure.mul(state, axis=0)\n        return signal.reindex(index=close.index, columns=close.columns).fillna(0.0)\n",
+              "name": "Autoregressive Investment-Discipline Premium Loading",
+              "category": "other",
+              "trading_idea": "Firms with restrained asset expansion and internally funded investment tend to outperform aggressive expanders, but the short-run premium for this characteristic is regime-dependent rather than constant. Following the factor-timing logic in the source paper, estimate the recent realized return of a cross-sectional investment-discipline factor and use a heavily smoothed autoregressive state estimate to scale its stock-level exposures. The other side is investors and benchmarked managers persistently financing high-growth asset expansion or unwinding defensive quality exposures during risk-on episodes; the hypothesis fails if the investment-discipline factor's recent return contains no stable predictive information for its next-week payoff.",
+              "description": "Construct a sector-relative investment-discipline exposure from low assetGrowth, low debtGrowth, and high operatingCashFlow relative to capex, with stale or invalid accounting observations masked. Form a daily factor-mimicking return from lagged exposures and close-to-close returns; multiply each current exposure by a volatility-normalized, slow EWMA/autoregressive forecast of that factor return, producing a cross-sectional signal that can attenuate or reverse when the factor premium regime changes.",
+              "prediction_horizon": 6,
+              "suggested_horizons": [
+                6
+              ],
+              "expected_sign": null,
+              "source_paper_ids": [
+                "application_of_deep_learning_for_factor_timing_in_asset_mana"
+              ],
+              "mechanism": "",
+              "mechanism_group_id": 0
+            }
+          ],
+          "unit": "single",
+          "generation": 0,
+          "island": 0,
+          "mechanism_group_id": 0,
+          "deme_id": 0,
+          "parent_ids": [],
+          "operator": "seed",
+          "metadata": {
+            "mechanism_group_id": 0,
+            "mechanism": ""
+          }
+        },
+        "fitness": {
+          "candidate_id": "investment_discipline_premium_state_loading",
+          "objective": {
+            "marginal_value": 0.01787176206733696,
+            "independence": 0.0,
+            "parsimony": 0.0,
+            "structural_novelty": 0.0
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "selectable": true,
+          "diagnostics": {
+            "standalone_ic": -0.01787176206733696,
+            "ic_decay": {
+              "1": -0.013035726938994567,
+              "3": -0.01078781517077227,
+              "6": -0.01787176206733696,
+              "12": -0.020185572821322606,
+              "24": -0.013192767934840335
+            },
+            "is_ic": 0.005262369410340003,
+            "val_ic": -0.01787176206733696,
+            "val_n_obs": 53992,
+            "residual_ic": 0.0010832774736308892,
+            "independence_metric": "residual_ic",
+            "with_ic": -0.005570629772984972,
+            "base_ic": 0.0,
+            "max_abs_corr": 0.0,
+            "delta_participation": 1.0,
+            "pr_before": 0.0,
+            "pr_after": 1.0,
+            "marginal_value_raw": -0.005570629772984972,
+            "sign_consistency": null,
+            "plateau_penalty": null,
+            "jitter_ics": [],
+            "perturbation_penalty": null,
+            "turnover": 0.08958691910499139,
+            "gross_ret": 1.9707948853774438e-05,
+            "net_ret": -6.528995490548404e-05,
+            "net_gross_ratio": -3.312874180357932,
+            "zoo_max_abs_corr": null,
+            "zoo_nearest": null,
+            "zoo_min_code_distance": null,
+            "structural_novelty": null,
+            "novelty_min_book_distance": null,
+            "novelty_min_zoo_distance": null,
+            "novelty_nearest_book_idx": null,
+            "novelty_metric": "canonical_ast_weighted_subtree_jaccard",
+            "novelty_nearest_book_similarity": null,
+            "novelty_candidate_ast_nodes": 270,
+            "novelty_candidate_unique_subtrees": 158,
+            "coverage": 1.0,
+            "level_rho": 0.4834324942907129,
+            "degradation_ratio": -3.396143575975648,
+            "deflation": {
+              "best_ic": 0.017872,
+              "deflated_ic": 0.017872,
+              "deflated_t": 4.152715,
+              "luck_ic": 0.0,
+              "n_obs": 53992,
+              "n_trials": 1
+            },
+            "n_trials": 1,
+            "complexity": 167
+          },
+          "behavior": {},
+          "raw": {
+            "split_sizes": {
+              "is": 1743,
+              "val": 581,
+              "test": 0
+            },
+            "heldout_test_split_sizes": {
+              "is": 1743,
+              "val": 581,
+              "test": 581
+            }
+          }
+        }
+      }
+    ],
+    []
+  ],
+  "archive": [
+    {
+      "genome": {
+        "genome_id": "g0-investment_discipline_premium_state_loading-0e3d75",
+        "programs": [
+          {
+            "factor_id": "investment_discipline_premium_state_loading",
+            "code": "\"\"\"Firms with restrained asset expansion and internally funded investment tend to outperform aggressive expanders, but the short-run premium for this characteristic is regime-dependent rather than constant. Following the factor-timing logic in the source paper, estimate the recent realized return of a cross-sectional investment-discipline factor and use a heavily smoothed autoregressive state estimate to scale its stock-level exposures. The other side is investors and benchmarked managers persistently financing high-growth asset expansion or unwinding defensive quality exposures during risk-on episodes; the hypothesis fails if the investment-discipline factor's recent return contains no stable predictive information for its next-week payoff.\"\"\"\n\nfrom __future__ import annotations\n\nimport numpy as np\nimport pandas as pd\n\nfrom quant_fund_agent.factors.base import BaseFactor\nfrom quant_fund_agent.factors.registry import register_factor\n\n\ndef _fresh_accounting_mask(frame: pd.DataFrame, max_age: int) -> pd.DataFrame:\n    \"\"\"Mask observations whose last detectable accounting update is too old.\"\"\"\n    if frame.empty:\n        return frame.notna()\n\n    clean = frame.replace([np.inf, -np.inf], np.nan)\n    valid = clean.notna()\n    changed = valid & ~clean.eq(clean.shift(1))\n\n    positions = pd.DataFrame(\n        np.broadcast_to(\n            np.arange(len(clean), dtype=float)[:, None], clean.shape\n        ),\n        index=clean.index,\n        columns=clean.columns,\n    )\n    last_update = positions.where(changed).ffill()\n    age = positions - last_update\n    return valid & age.le(float(max_age))\n\n\ndef _sector_percentile_rank(\n    frame: pd.DataFrame, sector: pd.DataFrame\n) -> pd.DataFrame:\n    \"\"\"Compute per-date percentile ranks separately within static sectors.\"\"\"\n    if frame.empty:\n        return frame.astype(float)\n\n    labels = sector.ffill().bfill().iloc[-1].reindex(frame.columns)\n    labels = labels.fillna(\"Unknown\").astype(str)\n    result = pd.DataFrame(np.nan, index=frame.index, columns=frame.columns)\n\n    for label in pd.unique(labels):\n        columns = labels.index[labels.eq(label)]\n        if len(columns) > 0:\n            result.loc[:, columns] = frame.loc[:, columns].rank(\n                axis=1, pct=True\n            )\n    return result\n\n\ndef _sector_demean(\n    frame: pd.DataFrame, sector: pd.DataFrame\n) -> pd.DataFrame:\n    \"\"\"Remove each sector's contemporaneous mean without filling invalid names.\"\"\"\n    if frame.empty:\n        return frame.astype(float)\n\n    labels = sector.ffill().bfill().iloc[-1].reindex(frame.columns)\n    labels = labels.fillna(\"Unknown\").astype(str)\n    result = pd.DataFrame(np.nan, index=frame.index, columns=frame.columns)\n\n    for label in pd.unique(labels):\n        columns = labels.index[labels.eq(label)]\n        if len(columns) > 0:\n            subset = frame.loc[:, columns]\n            result.loc[:, columns] = subset.sub(subset.mean(axis=1), axis=0)\n    return result\n\n\ndef _autoregressive_state(factor_return: pd.Series) -> pd.Series:\n    \"\"\"Causal slow-EWMA AR(1) forecast, normalized by trailing EWMA volatility.\"\"\"\n    slow_mean = factor_return.ewm(\n        halflife=42, adjust=False, min_periods=20\n    ).mean()\n    innovation = factor_return - slow_mean\n    lagged_innovation = innovation.shift(1)\n\n    covariance = innovation.ewm(\n        halflife=42, adjust=False, min_periods=30\n    ).cov(lagged_innovation)\n    lag_variance = lagged_innovation.ewm(\n        halflife=42, adjust=False, min_periods=30\n    ).var()\n    phi = (covariance / lag_variance.replace(0.0, np.nan)).clip(-0.95, 0.95)\n\n    forecast = slow_mean + phi * innovation\n    volatility = factor_return.ewm(\n        halflife=21, adjust=False, min_periods=20\n    ).std()\n    return (forecast / volatility.replace(0.0, np.nan)).clip(-3.0, 3.0)\n\n\n@register_factor\nclass AutoregressiveInvestmentDisciplinePremiumStateLoading(BaseFactor):\n    \"\"\"State-scaled sector-relative investment-discipline exposure.\"\"\"\n\n    factor_id = \"investment_discipline_premium_state_loading\"\n    name = \"Autoregressive Investment-Discipline Premium Loading\"\n    category = \"other\"\n    description = (\n        \"Construct a sector-relative investment-discipline exposure from low \"\n        \"assetGrowth, low debtGrowth, and high operatingCashFlow relative to \"\n        \"capex, with stale or invalid accounting observations masked. Form a \"\n        \"daily factor-mimicking return from lagged exposures and close-to-close \"\n        \"returns; multiply each current exposure by a volatility-normalized, \"\n        \"slow EWMA/autoregressive forecast of that factor return, producing a \"\n        \"cross-sectional signal that can attenuate or reverse when the factor \"\n        \"premium regime changes.\"\n    )\n    window_length = 140\n    inputs = [\n        \"close\",\n        \"assetGrowth\",\n        \"debtGrowth\",\n        \"operatingCashFlow\",\n        \"capex\",\n        \"sector\",\n    ]\n    prediction_horizon = 6\n    suggested_horizons = [6]\n\n    def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:\n        close = data[\"close\"]\n        if close.empty:\n            return close.astype(float)\n\n        asset_growth = data[\"assetGrowth\"].replace([np.inf, -np.inf], np.nan)\n        debt_growth = data[\"debtGrowth\"].replace([np.inf, -np.inf], np.nan)\n        operating_cash_flow = data[\"operatingCashFlow\"].replace(\n            [np.inf, -np.inf], np.nan\n        )\n        capex = data[\"capex\"].replace([np.inf, -np.inf], np.nan)\n        sector = data[\"sector\"]\n\n        capex_spend = (-capex).where(capex < 0.0)\n        funding_ratio = operating_cash_flow.where(operating_cash_flow > 0.0) / capex_spend\n        funding_ratio = funding_ratio.where(funding_ratio > 0.0)\n\n        valid = (\n            _fresh_accounting_mask(asset_growth, 140)\n            & _fresh_accounting_mask(debt_growth, 140)\n            & _fresh_accounting_mask(operating_cash_flow, 140)\n            & _fresh_accounting_mask(capex, 140)\n            & funding_ratio.notna()\n        )\n\n        low_asset_growth = 1.0 - _sector_percentile_rank(asset_growth, sector)\n        low_debt_growth = 1.0 - _sector_percentile_rank(debt_growth, sector)\n        strong_internal_funding = _sector_percentile_rank(\n            np.log1p(funding_ratio), sector\n        )\n\n        raw_exposure = (\n            low_asset_growth + low_debt_growth + strong_internal_funding\n        ) / 3.0\n        exposure = _sector_demean(raw_exposure.where(valid), sector)\n\n        valid_close = close.where(close > 0.0)\n        stock_return = valid_close.pct_change(fill_method=None).replace(\n            [np.inf, -np.inf], np.nan\n        )\n        lagged_exposure = exposure.shift(1)\n        numerator = lagged_exposure.mul(stock_return).sum(axis=1, min_count=1)\n        denominator = lagged_exposure.abs().sum(axis=1, min_count=1)\n        factor_return = (numerator / denominator.replace(0.0, np.nan)).fillna(0.0)\n\n        state = _autoregressive_state(factor_return).fillna(0.0)\n        signal = exposure.mul(state, axis=0)\n        return signal.reindex(index=close.index, columns=close.columns).fillna(0.0)\n",
+            "name": "Autoregressive Investment-Discipline Premium Loading",
+            "category": "other",
+            "trading_idea": "Firms with restrained asset expansion and internally funded investment tend to outperform aggressive expanders, but the short-run premium for this characteristic is regime-dependent rather than constant. Following the factor-timing logic in the source paper, estimate the recent realized return of a cross-sectional investment-discipline factor and use a heavily smoothed autoregressive state estimate to scale its stock-level exposures. The other side is investors and benchmarked managers persistently financing high-growth asset expansion or unwinding defensive quality exposures during risk-on episodes; the hypothesis fails if the investment-discipline factor's recent return contains no stable predictive information for its next-week payoff.",
+            "description": "Construct a sector-relative investment-discipline exposure from low assetGrowth, low debtGrowth, and high operatingCashFlow relative to capex, with stale or invalid accounting observations masked. Form a daily factor-mimicking return from lagged exposures and close-to-close returns; multiply each current exposure by a volatility-normalized, slow EWMA/autoregressive forecast of that factor return, producing a cross-sectional signal that can attenuate or reverse when the factor premium regime changes.",
+            "prediction_horizon": 6,
+            "suggested_horizons": [
+              6
+            ],
+            "expected_sign": null,
+            "source_paper_ids": [
+              "application_of_deep_learning_for_factor_timing_in_asset_mana"
+            ],
+            "mechanism": "",
+            "mechanism_group_id": 0
+          }
+        ],
+        "unit": "single",
+        "generation": 0,
+        "island": 0,
+        "mechanism_group_id": 0,
+        "deme_id": 0,
+        "parent_ids": [],
+        "operator": "seed",
+        "metadata": {
+          "mechanism_group_id": 0,
+          "mechanism": ""
+        }
+      },
+      "fitness": {
+        "candidate_id": "investment_discipline_premium_state_loading",
+        "objective": {
+          "marginal_value": 0.01787176206733696,
+          "independence": 0.0,
+          "parsimony": 0.0,
+          "structural_novelty": 0.0
+        },
+        "gates": {
+          "coverage_ok": true,
+          "deflation_ok": null,
+          "cost_ok": null,
+          "passed": true
+        },
+        "selectable": true,
+        "diagnostics": {
+          "standalone_ic": -0.01787176206733696,
+          "ic_decay": {
+            "1": -0.013035726938994567,
+            "3": -0.01078781517077227,
+            "6": -0.01787176206733696,
+            "12": -0.020185572821322606,
+            "24": -0.013192767934840335
+          },
+          "is_ic": 0.005262369410340003,
+          "val_ic": -0.01787176206733696,
+          "val_n_obs": 53992,
+          "residual_ic": 0.0010832774736308892,
+          "independence_metric": "residual_ic",
+          "with_ic": -0.005570629772984972,
+          "base_ic": 0.0,
+          "max_abs_corr": 0.0,
+          "delta_participation": 1.0,
+          "pr_before": 0.0,
+          "pr_after": 1.0,
+          "marginal_value_raw": -0.005570629772984972,
+          "sign_consistency": null,
+          "plateau_penalty": null,
+          "jitter_ics": [],
+          "perturbation_penalty": null,
+          "turnover": 0.08958691910499139,
+          "gross_ret": 1.9707948853774438e-05,
+          "net_ret": -6.528995490548404e-05,
+          "net_gross_ratio": -3.312874180357932,
+          "zoo_max_abs_corr": null,
+          "zoo_nearest": null,
+          "zoo_min_code_distance": null,
+          "structural_novelty": null,
+          "novelty_min_book_distance": null,
+          "novelty_min_zoo_distance": null,
+          "novelty_nearest_book_idx": null,
+          "novelty_metric": "canonical_ast_weighted_subtree_jaccard",
+          "novelty_nearest_book_similarity": null,
+          "novelty_candidate_ast_nodes": 270,
+          "novelty_candidate_unique_subtrees": 158,
+          "coverage": 1.0,
+          "level_rho": 0.4834324942907129,
+          "degradation_ratio": -3.396143575975648,
+          "deflation": {
+            "best_ic": 0.017872,
+            "deflated_ic": 0.017872,
+            "deflated_t": 4.152715,
+            "luck_ic": 0.0,
+            "n_obs": 53992,
+            "n_trials": 1
+          },
+          "n_trials": 1,
+          "complexity": 167
+        },
+        "behavior": {},
+        "raw": {
+          "split_sizes": {
+            "is": 1743,
+            "val": 581,
+            "test": 0
+          },
+          "heldout_test_split_sizes": {
+            "is": 1743,
+            "val": 581,
+            "test": 581
+          }
+        }
+      }
+    }
+  ],
+  "kept_pool": [
+    {
+      "genome": {
+        "genome_id": "g0-investment_discipline_premium_state_loading-0e3d75",
+        "programs": [
+          {
+            "factor_id": "investment_discipline_premium_state_loading",
+            "code": "\"\"\"Firms with restrained asset expansion and internally funded investment tend to outperform aggressive expanders, but the short-run premium for this characteristic is regime-dependent rather than constant. Following the factor-timing logic in the source paper, estimate the recent realized return of a cross-sectional investment-discipline factor and use a heavily smoothed autoregressive state estimate to scale its stock-level exposures. The other side is investors and benchmarked managers persistently financing high-growth asset expansion or unwinding defensive quality exposures during risk-on episodes; the hypothesis fails if the investment-discipline factor's recent return contains no stable predictive information for its next-week payoff.\"\"\"\n\nfrom __future__ import annotations\n\nimport numpy as np\nimport pandas as pd\n\nfrom quant_fund_agent.factors.base import BaseFactor\nfrom quant_fund_agent.factors.registry import register_factor\n\n\ndef _fresh_accounting_mask(frame: pd.DataFrame, max_age: int) -> pd.DataFrame:\n    \"\"\"Mask observations whose last detectable accounting update is too old.\"\"\"\n    if frame.empty:\n        return frame.notna()\n\n    clean = frame.replace([np.inf, -np.inf], np.nan)\n    valid = clean.notna()\n    changed = valid & ~clean.eq(clean.shift(1))\n\n    positions = pd.DataFrame(\n        np.broadcast_to(\n            np.arange(len(clean), dtype=float)[:, None], clean.shape\n        ),\n        index=clean.index,\n        columns=clean.columns,\n    )\n    last_update = positions.where(changed).ffill()\n    age = positions - last_update\n    return valid & age.le(float(max_age))\n\n\ndef _sector_percentile_rank(\n    frame: pd.DataFrame, sector: pd.DataFrame\n) -> pd.DataFrame:\n    \"\"\"Compute per-date percentile ranks separately within static sectors.\"\"\"\n    if frame.empty:\n        return frame.astype(float)\n\n    labels = sector.ffill().bfill().iloc[-1].reindex(frame.columns)\n    labels = labels.fillna(\"Unknown\").astype(str)\n    result = pd.DataFrame(np.nan, index=frame.index, columns=frame.columns)\n\n    for label in pd.unique(labels):\n        columns = labels.index[labels.eq(label)]\n        if len(columns) > 0:\n            result.loc[:, columns] = frame.loc[:, columns].rank(\n                axis=1, pct=True\n            )\n    return result\n\n\ndef _sector_demean(\n    frame: pd.DataFrame, sector: pd.DataFrame\n) -> pd.DataFrame:\n    \"\"\"Remove each sector's contemporaneous mean without filling invalid names.\"\"\"\n    if frame.empty:\n        return frame.astype(float)\n\n    labels = sector.ffill().bfill().iloc[-1].reindex(frame.columns)\n    labels = labels.fillna(\"Unknown\").astype(str)\n    result = pd.DataFrame(np.nan, index=frame.index, columns=frame.columns)\n\n    for label in pd.unique(labels):\n        columns = labels.index[labels.eq(label)]\n        if len(columns) > 0:\n            subset = frame.loc[:, columns]\n            result.loc[:, columns] = subset.sub(subset.mean(axis=1), axis=0)\n    return result\n\n\ndef _autoregressive_state(factor_return: pd.Series) -> pd.Series:\n    \"\"\"Causal slow-EWMA AR(1) forecast, normalized by trailing EWMA volatility.\"\"\"\n    slow_mean = factor_return.ewm(\n        halflife=42, adjust=False, min_periods=20\n    ).mean()\n    innovation = factor_return - slow_mean\n    lagged_innovation = innovation.shift(1)\n\n    covariance = innovation.ewm(\n        halflife=42, adjust=False, min_periods=30\n    ).cov(lagged_innovation)\n    lag_variance = lagged_innovation.ewm(\n        halflife=42, adjust=False, min_periods=30\n    ).var()\n    phi = (covariance / lag_variance.replace(0.0, np.nan)).clip(-0.95, 0.95)\n\n    forecast = slow_mean + phi * innovation\n    volatility = factor_return.ewm(\n        halflife=21, adjust=False, min_periods=20\n    ).std()\n    return (forecast / volatility.replace(0.0, np.nan)).clip(-3.0, 3.0)\n\n\n@register_factor\nclass AutoregressiveInvestmentDisciplinePremiumStateLoading(BaseFactor):\n    \"\"\"State-scaled sector-relative investment-discipline exposure.\"\"\"\n\n    factor_id = \"investment_discipline_premium_state_loading\"\n    name = \"Autoregressive Investment-Discipline Premium Loading\"\n    category = \"other\"\n    description = (\n        \"Construct a sector-relative investment-discipline exposure from low \"\n        \"assetGrowth, low debtGrowth, and high operatingCashFlow relative to \"\n        \"capex, with stale or invalid accounting observations masked. Form a \"\n        \"daily factor-mimicking return from lagged exposures and close-to-close \"\n        \"returns; multiply each current exposure by a volatility-normalized, \"\n        \"slow EWMA/autoregressive forecast of that factor return, producing a \"\n        \"cross-sectional signal that can attenuate or reverse when the factor \"\n        \"premium regime changes.\"\n    )\n    window_length = 140\n    inputs = [\n        \"close\",\n        \"assetGrowth\",\n        \"debtGrowth\",\n        \"operatingCashFlow\",\n        \"capex\",\n        \"sector\",\n    ]\n    prediction_horizon = 6\n    suggested_horizons = [6]\n\n    def calc(self, data: dict[str, pd.DataFrame]) -> pd.DataFrame:\n        close = data[\"close\"]\n        if close.empty:\n            return close.astype(float)\n\n        asset_growth = data[\"assetGrowth\"].replace([np.inf, -np.inf], np.nan)\n        debt_growth = data[\"debtGrowth\"].replace([np.inf, -np.inf], np.nan)\n        operating_cash_flow = data[\"operatingCashFlow\"].replace(\n            [np.inf, -np.inf], np.nan\n        )\n        capex = data[\"capex\"].replace([np.inf, -np.inf], np.nan)\n        sector = data[\"sector\"]\n\n        capex_spend = (-capex).where(capex < 0.0)\n        funding_ratio = operating_cash_flow.where(operating_cash_flow > 0.0) / capex_spend\n        funding_ratio = funding_ratio.where(funding_ratio > 0.0)\n\n        valid = (\n            _fresh_accounting_mask(asset_growth, 140)\n            & _fresh_accounting_mask(debt_growth, 140)\n            & _fresh_accounting_mask(operating_cash_flow, 140)\n            & _fresh_accounting_mask(capex, 140)\n            & funding_ratio.notna()\n        )\n\n        low_asset_growth = 1.0 - _sector_percentile_rank(asset_growth, sector)\n        low_debt_growth = 1.0 - _sector_percentile_rank(debt_growth, sector)\n        strong_internal_funding = _sector_percentile_rank(\n            np.log1p(funding_ratio), sector\n        )\n\n        raw_exposure = (\n            low_asset_growth + low_debt_growth + strong_internal_funding\n        ) / 3.0\n        exposure = _sector_demean(raw_exposure.where(valid), sector)\n\n        valid_close = close.where(close > 0.0)\n        stock_return = valid_close.pct_change(fill_method=None).replace(\n            [np.inf, -np.inf], np.nan\n        )\n        lagged_exposure = exposure.shift(1)\n        numerator = lagged_exposure.mul(stock_return).sum(axis=1, min_count=1)\n        denominator = lagged_exposure.abs().sum(axis=1, min_count=1)\n        factor_return = (numerator / denominator.replace(0.0, np.nan)).fillna(0.0)\n\n        state = _autoregressive_state(factor_return).fillna(0.0)\n        signal = exposure.mul(state, axis=0)\n        return signal.reindex(index=close.index, columns=close.columns).fillna(0.0)\n",
+            "name": "Autoregressive Investment-Discipline Premium Loading",
+            "category": "other",
+            "trading_idea": "Firms with restrained asset expansion and internally funded investment tend to outperform aggressive expanders, but the short-run premium for this characteristic is regime-dependent rather than constant. Following the factor-timing logic in the source paper, estimate the recent realized return of a cross-sectional investment-discipline factor and use a heavily smoothed autoregressive state estimate to scale its stock-level exposures. The other side is investors and benchmarked managers persistently financing high-growth asset expansion or unwinding defensive quality exposures during risk-on episodes; the hypothesis fails if the investment-discipline factor's recent return contains no stable predictive information for its next-week payoff.",
+            "description": "Construct a sector-relative investment-discipline exposure from low assetGrowth, low debtGrowth, and high operatingCashFlow relative to capex, with stale or invalid accounting observations masked. Form a daily factor-mimicking return from lagged exposures and close-to-close returns; multiply each current exposure by a volatility-normalized, slow EWMA/autoregressive forecast of that factor return, producing a cross-sectional signal that can attenuate or reverse when the factor premium regime changes.",
+            "prediction_horizon": 6,
+            "suggested_horizons": [
+              6
+            ],
+            "expected_sign": null,
+            "source_paper_ids": [
+              "application_of_deep_learning_for_factor_timing_in_asset_mana"
+            ],
+            "mechanism": "",
+            "mechanism_group_id": 0
+          }
+        ],
+        "unit": "single",
+        "generation": 0,
+        "island": 0,
+        "mechanism_group_id": 0,
+        "deme_id": 0,
+        "parent_ids": [],
+        "operator": "seed",
+        "metadata": {
+          "mechanism_group_id": 0,
+          "mechanism": ""
+        }
+      },
+      "fitness": {
+        "candidate_id": "investment_discipline_premium_state_loading",
+        "objective": {
+          "marginal_value": 0.01787176206733696,
+          "independence": 0.0,
+          "parsimony": 0.0,
+          "structural_novelty": 0.0
+        },
+        "gates": {
+          "coverage_ok": true,
+          "deflation_ok": null,
+          "cost_ok": null,
+          "passed": true
+        },
+        "selectable": true,
+        "diagnostics": {
+          "standalone_ic": -0.01787176206733696,
+          "ic_decay": {
+            "1": -0.013035726938994567,
+            "3": -0.01078781517077227,
+            "6": -0.01787176206733696,
+            "12": -0.020185572821322606,
+            "24": -0.013192767934840335
+          },
+          "is_ic": 0.005262369410340003,
+          "val_ic": -0.01787176206733696,
+          "val_n_obs": 53992,
+          "residual_ic": 0.0010832774736308892,
+          "independence_metric": "residual_ic",
+          "with_ic": -0.005570629772984972,
+          "base_ic": 0.0,
+          "max_abs_corr": 0.0,
+          "delta_participation": 1.0,
+          "pr_before": 0.0,
+          "pr_after": 1.0,
+          "marginal_value_raw": -0.005570629772984972,
+          "sign_consistency": null,
+          "plateau_penalty": null,
+          "jitter_ics": [],
+          "perturbation_penalty": null,
+          "turnover": 0.08958691910499139,
+          "gross_ret": 1.9707948853774438e-05,
+          "net_ret": -6.528995490548404e-05,
+          "net_gross_ratio": -3.312874180357932,
+          "zoo_max_abs_corr": null,
+          "zoo_nearest": null,
+          "zoo_min_code_distance": null,
+          "structural_novelty": null,
+          "novelty_min_book_distance": null,
+          "novelty_min_zoo_distance": null,
+          "novelty_nearest_book_idx": null,
+          "novelty_metric": "canonical_ast_weighted_subtree_jaccard",
+          "novelty_nearest_book_similarity": null,
+          "novelty_candidate_ast_nodes": 270,
+          "novelty_candidate_unique_subtrees": 158,
+          "coverage": 1.0,
+          "level_rho": 0.4834324942907129,
+          "degradation_ratio": -3.396143575975648,
+          "deflation": {
+            "best_ic": 0.017872,
+            "deflated_ic": 0.017872,
+            "deflated_t": 4.152715,
+            "luck_ic": 0.0,
+            "n_obs": 53992,
+            "n_trials": 1
+          },
+          "n_trials": 1,
+          "complexity": 167
+        },
+        "behavior": {},
+        "raw": {
+          "split_sizes": {
+            "is": 1743,
+            "val": 581,
+            "test": 0
+          },
+          "heldout_test_split_sizes": {
+            "is": 1743,
+            "val": 581,
+            "test": 581
+          }
+        }
+      }
+    }
+  ],
+  "fingerprints": [
+    "0:0:d4bda3c571bde0b0"
+  ],
+  "failed_fingerprints": {},
+  "parent_reuse": {}
+}

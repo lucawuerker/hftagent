@@ -1,0 +1,138 @@
+01:19:31 INFO    Loading panel from ticker_data (fields=['accountsPayable', 'acquisitionsNet', 'assetGrowth', 'assetTurnover', 'bookValuePerShare', 'bookValuePerShareGrowth', 'capex', 'capexPerShare', 'capexToOperatingCashFlow', 'capexToRevenue', 'cash', 'cashConversionCycle', 'cashPerShare', 'cashRatio', 'changeInWorkingCapital', 'close', 'costOfRevenue', 'currentRatio', 'daysInventoryOutstanding', 'daysPayablesOutstanding', 'daysSalesOutstanding', 'debtGrowth', 'debtToAssets', 'debtToCapital', 'debtToEquity', 'depreciationAmortization', 'dividendPayoutRatio', 'dividendPerShareGrowth', 'dividendYield', 'dividendsPaid', 'earningsYield', 'ebit', 'ebitGrowth', 'ebitMargin', 'ebitda', 'ebitdaGrowth', 'ebitdaMargin', 'enterpriseValue', 'eps', 'epsActual', 'epsDiluted', 'epsDilutedGrowth', 'epsEstimate', 'epsGrowth', 'epsSurprise', 'evToEbitda', 'evToFreeCashFlow', 'evToOperatingCashFlow', 'evToSales', 'financialLeverage', 'freeCashFlow', 'freeCashFlowGrowth', 'freeCashFlowPerShare', 'freeCashFlowYield', 'goodwill', 'grahamNumber', 'grossMargin', 'grossProfit', 'grossProfitGrowth', 'high', 'incomeBeforeTax', 'incomeQuality', 'incomeTaxExpense', 'industry', 'intangibleAssets', 'intangiblesToAssets', 'interestCoverage', 'interestExpense', 'inventory', 'inventoryGrowth', 'inventoryTurnover', 'investedCapital', 'longTermDebt', 'low', 'marketCap', 'netDebtIssuance', 'netDebtToEbitda', 'netIncome', 'netIncomeGrowth', 'netIncomeGrowth3Y', 'netIncomeGrowth5Y', 'netIncomePerShare', 'netMargin', 'netStockIssuance', 'open', 'operatingCashFlow', 'operatingCashFlowGrowth', 'operatingCashFlowPerShare', 'operatingCycle', 'operatingExpenses', 'operatingIncome', 'operatingIncomeGrowth', 'operatingMargin', 'payablesTurnover', 'pbRatio', 'peRatio', 'pegRatio', 'pfcfRatio', 'pocfRatio', 'ppe', 'pretaxMargin', 'psRatio', 'quickRatio', 'rdExpense', 'rdExpenseGrowth', 'rdToRevenue', 'receivables', 'receivablesGrowth', 'receivablesTurnover', 'retainedEarnings', 'returns', 'revenue', 'revenueActual', 'revenueEstimate', 'revenueGrowth', 'revenueGrowth3Y', 'revenueGrowth5Y', 'revenuePerShare', 'revenueSurprise', 'roa', 'roce', 'roe', 'roic', 'sbcToRevenue', 'sector', 'sgaExpense', 'sgaExpenseGrowth', 'sgaToRevenue', 'shareRepurchase', 'sharesDiluted', 'sharesGrowth', 'sharesOutstanding', 'shortTermDebt', 'stockBasedCompensation', 'tangibleBookValuePerShare', 'totalAssets', 'totalCurrentAssets', 'totalCurrentLiabilities', 'totalDebt', 'totalEquity', 'totalLiabilities', 'volume', 'vwap', 'workingCapital'], n_tickers=all) …
+01:20:51 INFO    Panel loaded in 80.0s (232 tickers, 144 fields)
+01:20:51 INFO    panel wf: 4165 bars x 232 tickers 2010-01-04 -> 2026-07-27
+01:20:51 INFO    fit window: 2010-01-04 -> 2021-07-19 (2905 bars)
+01:20:56 INFO    [l2wf] 19/19 signals
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/pandas/core/internals/blocks.py:347: RuntimeWarning: divide by zero encountered in log
+  result = func(self.values, **kwargs)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/pandas/core/internals/blocks.py:347: RuntimeWarning: divide by zero encountered in log
+  result = func(self.values, **kwargs)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/pandas/core/internals/blocks.py:347: RuntimeWarning: divide by zero encountered in log
+  result = func(self.values, **kwargs)
+01:21:16 INFO    [l4wf] 57/57 signals
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/statistical_arbitrage/alpha_048.py:54: UserWarning: Alpha#48: data['subindustry'] not provided — skipping industry neutralisation.
+  warnings.warn(
+01:21:23 WARNING Alpha#67: data['subindustry'] missing/empty — falling back to 'industry' for IndNeutralize.
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/pandas/core/dtypes/astype.py:136: RuntimeWarning: overflow encountered in cast
+  return arr.astype(dtype, copy=copy)
+01:21:29 WARNING Alpha#90: data['subindustry'] missing/empty — falling back to 'industry' for IndNeutralize.
+01:21:33 WARNING Alpha#100: data['subindustry'] missing/empty — falling back to 'industry' for IndNeutralize.
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/numpy/_core/_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/numpy/_core/_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/numpy/_core/_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/numpy/_core/_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/numpy/_core/_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/numpy/_core/_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/numpy/_core/_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/numpy/_core/_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/numpy/_core/_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/numpy/_core/_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/numpy/_core/_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/numpy/_core/_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/numpy/_core/_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/numpy/_core/_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/numpy/_core/_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/numpy/_core/_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/numpy/_core/_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/numpy/_core/_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/numpy/_core/_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/numpy/_core/_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/numpy/_core/_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/numpy/_core/_methods.py:49: RuntimeWarning: invalid value encountered in reduce
+  return umr_sum(a, axis, dtype, out, keepdims, initial, where)
+01:21:33 INFO    [zoo] 101/101 signals
+01:21:35 INFO    wrote per_factor_wf.csv
+01:21:35 INFO    fit l2wf / ridge (19 signals)...
+01:21:37 INFO      l2wf/ridge: fit=0.0348 {'wf': 0.0246}
+01:21:37 INFO    fit l2wf / lasso (19 signals)...
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:1663: FutureWarning: 'n_alphas' was deprecated in 1.7 and will be removed in 1.9. 'alphas' now accepts an integer value which removes the need to pass 'n_alphas'. The default value of 'alphas' will change from None to 100 in 1.9. Pass an explicit value to 'alphas' and leave 'n_alphas' to its default value to silence this warning.
+  warnings.warn(
+01:21:37 INFO      l2wf/lasso: fit=0.0330 {'wf': 0.0277}
+01:21:37 INFO    fit l2wf / lightgbm (19 signals)...
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+01:21:40 INFO      l2wf/lightgbm: fit=0.1795 {'wf': 0.0137}
+01:21:40 INFO    fit l2wf / lgbm_l2n (19 signals)...
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+01:21:42 INFO      l2wf/lgbm_l2n: fit=0.1768 {'wf': 0.014}
+01:21:42 INFO    fit l2wf / lgbm_l2 (19 signals)...
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+01:21:45 INFO      l2wf/lgbm_l2: fit=0.1676 {'wf': 0.0165}
+01:21:45 INFO    fit l4wf / ridge (57 signals)...
+01:21:48 INFO      l4wf/ridge: fit=0.0569 {'wf': 0.0334}
+01:21:48 INFO    fit l4wf / lasso (57 signals)...
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:1663: FutureWarning: 'n_alphas' was deprecated in 1.7 and will be removed in 1.9. 'alphas' now accepts an integer value which removes the need to pass 'n_alphas'. The default value of 'alphas' will change from None to 100 in 1.9. Pass an explicit value to 'alphas' and leave 'n_alphas' to its default value to silence this warning.
+  warnings.warn(
+01:21:50 INFO      l4wf/lasso: fit=0.0517 {'wf': 0.0296}
+01:21:50 INFO    fit l4wf / lightgbm (57 signals)...
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+01:21:55 INFO      l4wf/lightgbm: fit=0.1987 {'wf': 0.0389}
+01:21:55 INFO    fit l4wf / lgbm_l2n (57 signals)...
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+01:22:00 INFO      l4wf/lgbm_l2n: fit=0.1919 {'wf': 0.0396}
+01:22:00 INFO    fit l4wf / lgbm_l2 (57 signals)...
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+01:22:06 INFO      l4wf/lgbm_l2: fit=0.1855 {'wf': 0.0368}
+01:22:07 INFO    fit zoo / ridge (101 signals)...
+01:22:12 INFO      zoo/ridge: fit=0.0885 {'wf': 0.0169}
+01:22:12 INFO    fit zoo / lasso (101 signals)...
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:1663: FutureWarning: 'n_alphas' was deprecated in 1.7 and will be removed in 1.9. 'alphas' now accepts an integer value which removes the need to pass 'n_alphas'. The default value of 'alphas' will change from None to 100 in 1.9. Pass an explicit value to 'alphas' and leave 'n_alphas' to its default value to silence this warning.
+  warnings.warn(
+01:22:15 INFO      zoo/lasso: fit=0.0574 {'wf': 0.0277}
+01:22:15 INFO    fit zoo / lightgbm (101 signals)...
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+01:22:22 INFO      zoo/lightgbm: fit=0.2078 {'wf': 0.0222}
+01:22:22 INFO    fit zoo / lgbm_l2n (101 signals)...
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+01:22:30 INFO      zoo/lgbm_l2n: fit=0.1939 {'wf': 0.025}
+01:22:30 INFO    fit zoo / lgbm_l2 (101 signals)...
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+01:22:39 INFO      zoo/lgbm_l2: fit=0.1711 {'wf': 0.0222}
+01:22:39 INFO    fit l2wf_plus_l4wf / ridge (76 signals)...
+01:22:42 INFO      l2wf_plus_l4wf/ridge: fit=0.0596 {'wf': 0.0361}
+01:22:42 INFO    fit l2wf_plus_l4wf / lasso (76 signals)...
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:1663: FutureWarning: 'n_alphas' was deprecated in 1.7 and will be removed in 1.9. 'alphas' now accepts an integer value which removes the need to pass 'n_alphas'. The default value of 'alphas' will change from None to 100 in 1.9. Pass an explicit value to 'alphas' and leave 'n_alphas' to its default value to silence this warning.
+  warnings.warn(
+01:22:45 INFO      l2wf_plus_l4wf/lasso: fit=0.0505 {'wf': 0.0321}
+01:22:45 INFO    fit l2wf_plus_l4wf / lightgbm (76 signals)...
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+01:22:51 INFO      l2wf_plus_l4wf/lightgbm: fit=0.2395 {'wf': 0.0266}
+01:22:51 INFO    fit l2wf_plus_l4wf / lgbm_l2n (76 signals)...
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+01:22:57 INFO      l2wf_plus_l4wf/lgbm_l2n: fit=0.2311 {'wf': 0.0351}
+01:22:57 INFO    fit l2wf_plus_l4wf / lgbm_l2 (76 signals)...
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+01:23:04 INFO      l2wf_plus_l4wf/lgbm_l2: fit=0.2140 {'wf': 0.0375}
+01:23:04 INFO    DONE wf -> /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/data/comparisons/combiner_models/combiner_wf.jsonl

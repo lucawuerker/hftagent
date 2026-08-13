@@ -91,3 +91,20 @@
 2026-08-05 00:11:50 evolution exited rc=143
 2026-08-05 00:12:10 launch #11
 2026-08-05 00:12:10 evolution pid 75800
+2026-08-05 00:58:44 planned recycle: 1 generation(s) completed this launch (RSS 1260MB) — restarting at checkpoint boundary
+2026-08-05 00:59:04 evolution exited rc=143
+2026-08-05 00:59:24 launch #12
+2026-08-05 00:59:24 evolution pid 81750
+2026-08-05 02:06:31 planned recycle: 1 generation(s) completed this launch (RSS 382MB) — restarting at checkpoint boundary
+2026-08-05 02:06:51 evolution exited rc=143
+2026-08-05 02:07:11 launch #13
+2026-08-05 02:07:11 evolution pid 86367
+2026-08-05 03:25:20 planned recycle: 1 generation(s) completed this launch (RSS 373MB) — restarting at checkpoint boundary
+2026-08-05 03:25:40 evolution exited rc=143
+2026-08-05 03:26:00 launch #14
+2026-08-05 03:26:00 evolution pid 89417
+2026-08-05 03:32:01 evolution exited rc=0
+2026-08-05 03:32:01 run COMPLETE
+2026-08-05 03:32:01 starting post-run comparison (IC forwards + per-underlying strategy backtest)
+2026-08-05 03:38:51 comparison rc=0
+2026-08-05 03:38:51 supervisor DONE (evolution rc=0)

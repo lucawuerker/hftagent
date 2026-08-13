@@ -1,0 +1,213 @@
+09:40:25 INFO book: 26 factors from data/workspaces/lobster_equity_gld_hf/preruns/L4WF_gld_s0
+09:40:29 INFO loaded 1 tickers, skipped 0
+09:40:29 INFO [GLD] panel 1409220 bars (4s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/pandas/core/internals/blocks.py:347: RuntimeWarning: divide by zero encountered in log
+  result = func(self.values, **kwargs)
+09:40:44 INFO [GLD] 26/26 factors computable
+09:40:47 INFO [GLD] block 1/10 linear_regression: IC +0.0142 sharpe +7.20 (1s)
+09:40:50 INFO [GLD] block 1/10 random_forest: IC -0.0290 sharpe +1.42 (4s)
+09:40:51 INFO [GLD] block 1/10 xgboost: IC -0.0182 sharpe -3.18 (1s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:40:53 INFO [GLD] block 1/10 lightgbm: IC -0.0262 sharpe -5.26 (2s)
+09:40:56 INFO [GLD] block 2/10 linear_regression: IC +0.0101 sharpe +2.94 (0s)
+09:41:00 INFO [GLD] block 2/10 random_forest: IC -0.0268 sharpe +0.04 (4s)
+09:41:01 INFO [GLD] block 2/10 xgboost: IC -0.0041 sharpe +0.44 (1s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:41:03 INFO [GLD] block 2/10 lightgbm: IC -0.0077 sharpe +0.21 (2s)
+09:41:05 INFO [GLD] block 3/10 linear_regression: IC +0.0153 sharpe +0.94 (0s)
+09:41:09 INFO [GLD] block 3/10 random_forest: IC +0.0145 sharpe +1.07 (4s)
+09:41:10 INFO [GLD] block 3/10 xgboost: IC +0.0142 sharpe +1.03 (1s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:41:12 INFO [GLD] block 3/10 lightgbm: IC +0.0095 sharpe +0.05 (2s)
+09:41:15 INFO [GLD] block 4/10 linear_regression: IC +0.0016 sharpe +2.42 (0s)
+09:41:19 INFO [GLD] block 4/10 random_forest: IC +0.0491 sharpe +4.28 (4s)
+09:41:19 INFO [GLD] block 4/10 xgboost: IC +0.0317 sharpe +6.26 (1s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:41:21 INFO [GLD] block 4/10 lightgbm: IC +0.0261 sharpe +6.63 (2s)
+09:41:24 INFO [GLD] block 5/10 linear_regression: IC +0.0015 sharpe +1.92 (0s)
+09:41:28 INFO [GLD] block 5/10 random_forest: IC +0.0196 sharpe +3.75 (4s)
+09:41:29 INFO [GLD] block 5/10 xgboost: IC +0.0186 sharpe +2.64 (1s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:41:31 INFO [GLD] block 5/10 lightgbm: IC +0.0145 sharpe +2.82 (2s)
+09:41:33 INFO [GLD] block 6/10 linear_regression: IC -0.0354 sharpe -3.01 (0s)
+09:41:37 INFO [GLD] block 6/10 random_forest: IC -0.0365 sharpe -2.73 (4s)
+09:41:38 INFO [GLD] block 6/10 xgboost: IC -0.0181 sharpe -0.77 (1s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:41:40 INFO [GLD] block 6/10 lightgbm: IC -0.0132 sharpe -0.41 (2s)
+09:41:43 INFO [GLD] block 7/10 linear_regression: IC -0.0147 sharpe -3.00 (0s)
+09:41:46 INFO [GLD] block 7/10 random_forest: IC +0.0120 sharpe +1.58 (4s)
+09:41:47 INFO [GLD] block 7/10 xgboost: IC +0.0083 sharpe +1.31 (1s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:41:49 INFO [GLD] block 7/10 lightgbm: IC -0.0056 sharpe +0.03 (2s)
+09:41:52 INFO [GLD] block 8/10 linear_regression: IC +0.0185 sharpe +1.73 (0s)
+09:41:55 INFO [GLD] block 8/10 random_forest: IC +0.0216 sharpe +1.37 (4s)
+09:41:56 INFO [GLD] block 8/10 xgboost: IC +0.0264 sharpe +2.05 (1s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:41:58 INFO [GLD] block 8/10 lightgbm: IC +0.0312 sharpe +4.21 (2s)
+09:42:01 INFO [GLD] block 9/10 linear_regression: IC +0.0106 sharpe +2.99 (0s)
+09:42:04 INFO [GLD] block 9/10 random_forest: IC +0.0149 sharpe -0.11 (4s)
+09:42:05 INFO [GLD] block 9/10 xgboost: IC +0.0196 sharpe +1.39 (1s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:42:07 INFO [GLD] block 9/10 lightgbm: IC +0.0149 sharpe +2.36 (2s)
+09:42:10 INFO [GLD] block 10/10 linear_regression: IC +0.0009 sharpe -0.71 (0s)
+09:42:14 INFO [GLD] block 10/10 random_forest: IC -0.0463 sharpe -3.05 (4s)
+09:42:14 INFO [GLD] block 10/10 xgboost: IC -0.0410 sharpe -4.07 (1s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:42:16 INFO [GLD] block 10/10 lightgbm: IC -0.0271 sharpe -3.99 (2s)
+09:42:19 INFO loaded 1 tickers, skipped 0
+09:42:20 INFO [SPY] panel 1409220 bars (3s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/pandas/core/internals/blocks.py:347: RuntimeWarning: divide by zero encountered in log
+  result = func(self.values, **kwargs)
+09:42:34 INFO [SPY] 26/26 factors computable
+09:42:36 INFO [SPY] block 1/10 linear_regression: IC +0.0434 sharpe +4.13 (0s)
+09:42:40 INFO [SPY] block 1/10 random_forest: IC +0.0473 sharpe +0.65 (4s)
+09:42:41 INFO [SPY] block 1/10 xgboost: IC +0.0325 sharpe -0.56 (1s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:42:43 INFO [SPY] block 1/10 lightgbm: IC +0.0247 sharpe +5.15 (2s)
+09:42:46 INFO [SPY] block 2/10 linear_regression: IC +0.0114 sharpe +2.31 (0s)
+09:42:50 INFO [SPY] block 2/10 random_forest: IC +0.0116 sharpe -0.68 (5s)
+09:42:51 INFO [SPY] block 2/10 xgboost: IC +0.0236 sharpe +1.13 (1s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:42:53 INFO [SPY] block 2/10 lightgbm: IC +0.0024 sharpe -4.70 (2s)
+09:42:57 INFO [SPY] block 3/10 linear_regression: IC -0.0385 sharpe -3.29 (0s)
+09:43:01 INFO [SPY] block 3/10 random_forest: IC -0.0386 sharpe -6.36 (4s)
+09:43:02 INFO [SPY] block 3/10 xgboost: IC -0.0334 sharpe -6.71 (1s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:43:04 INFO [SPY] block 3/10 lightgbm: IC -0.0196 sharpe -5.83 (2s)
+09:43:06 INFO [SPY] block 4/10 linear_regression: IC +0.0321 sharpe +3.90 (0s)
+09:43:10 INFO [SPY] block 4/10 random_forest: IC +0.0165 sharpe -1.77 (4s)
+09:43:11 INFO [SPY] block 4/10 xgboost: IC +0.0182 sharpe +0.42 (1s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:43:13 INFO [SPY] block 4/10 lightgbm: IC +0.0107 sharpe -0.63 (2s)
+09:43:15 INFO [SPY] block 5/10 linear_regression: IC +0.0699 sharpe +5.86 (0s)
+09:43:19 INFO [SPY] block 5/10 random_forest: IC +0.0325 sharpe +1.54 (4s)
+09:43:20 INFO [SPY] block 5/10 xgboost: IC +0.0158 sharpe +2.43 (1s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:43:21 INFO [SPY] block 5/10 lightgbm: IC +0.0145 sharpe +0.50 (2s)
+09:43:24 INFO [SPY] block 6/10 linear_regression: IC +0.0149 sharpe +0.61 (0s)
+09:43:28 INFO [SPY] block 6/10 random_forest: IC -0.0106 sharpe -0.25 (4s)
+09:43:29 INFO [SPY] block 6/10 xgboost: IC +0.0057 sharpe +1.88 (1s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:43:31 INFO [SPY] block 6/10 lightgbm: IC +0.0077 sharpe +2.93 (2s)
+09:43:33 INFO [SPY] block 7/10 linear_regression: IC +0.0402 sharpe +4.09 (0s)
+09:43:37 INFO [SPY] block 7/10 random_forest: IC +0.0355 sharpe +2.88 (4s)
+09:43:38 INFO [SPY] block 7/10 xgboost: IC +0.0595 sharpe -1.10 (1s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:43:40 INFO [SPY] block 7/10 lightgbm: IC +0.0347 sharpe -1.13 (2s)
+09:43:42 INFO [SPY] block 8/10 linear_regression: IC -0.0074 sharpe -0.69 (0s)
+09:43:46 INFO [SPY] block 8/10 random_forest: IC -0.0123 sharpe -1.14 (4s)
+09:43:47 INFO [SPY] block 8/10 xgboost: IC -0.0031 sharpe -1.31 (1s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:43:49 INFO [SPY] block 8/10 lightgbm: IC +0.0073 sharpe -2.84 (2s)
+09:43:52 INFO [SPY] block 9/10 linear_regression: IC +0.0216 sharpe +0.41 (0s)
+09:43:56 INFO [SPY] block 9/10 random_forest: IC +0.0389 sharpe +3.62 (4s)
+09:43:56 INFO [SPY] block 9/10 xgboost: IC +0.0517 sharpe +6.12 (1s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:43:58 INFO [SPY] block 9/10 lightgbm: IC +0.0625 sharpe +6.29 (2s)
+09:44:01 INFO [SPY] block 10/10 linear_regression: IC +0.0579 sharpe +7.45 (0s)
+09:44:05 INFO [SPY] block 10/10 random_forest: IC +0.0440 sharpe +2.29 (4s)
+09:44:06 INFO [SPY] block 10/10 xgboost: IC +0.0489 sharpe +6.05 (1s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:44:07 INFO [SPY] block 10/10 lightgbm: IC +0.0335 sharpe +6.18 (2s)
+09:44:10 INFO loaded 1 tickers, skipped 0
+09:44:10 INFO [CORN] panel 1406880 bars (3s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/pandas/core/internals/blocks.py:347: RuntimeWarning: divide by zero encountered in log
+  result = func(self.values, **kwargs)
+09:44:23 INFO [CORN] 26/26 factors computable
+09:44:25 INFO [CORN] block 1/10 linear_regression: IC +0.0024 sharpe +0.08 (0s)
+09:44:27 INFO [CORN] block 1/10 random_forest: IC -0.0197 sharpe -2.41 (3s)
+09:44:28 INFO [CORN] block 1/10 xgboost: IC -0.0074 sharpe +0.14 (1s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:44:30 INFO [CORN] block 1/10 lightgbm: IC -0.0064 sharpe -0.39 (2s)
+09:44:32 INFO [CORN] block 2/10 linear_regression: IC -0.0283 sharpe -1.22 (0s)
+09:44:35 INFO [CORN] block 2/10 random_forest: IC -0.0371 sharpe -3.91 (3s)
+09:44:36 INFO [CORN] block 2/10 xgboost: IC -0.0419 sharpe -4.91 (1s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:44:38 INFO [CORN] block 2/10 lightgbm: IC -0.0405 sharpe -4.15 (2s)
+09:44:40 INFO [CORN] block 3/10 linear_regression: IC -0.0006 sharpe +0.79 (0s)
+09:44:43 INFO [CORN] block 3/10 random_forest: IC +0.0264 sharpe +4.37 (3s)
+09:44:44 INFO [CORN] block 3/10 xgboost: IC +0.0335 sharpe +4.82 (1s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:44:46 INFO [CORN] block 3/10 lightgbm: IC +0.0205 sharpe +4.86 (2s)
+09:44:48 INFO [CORN] block 4/10 linear_regression: IC -0.0038 sharpe +1.96 (0s)
+09:44:51 INFO [CORN] block 4/10 random_forest: IC +0.0079 sharpe +0.30 (3s)
+09:44:52 INFO [CORN] block 4/10 xgboost: IC +0.0006 sharpe +0.22 (1s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:44:54 INFO [CORN] block 4/10 lightgbm: IC +0.0071 sharpe +0.85 (2s)
+09:44:56 INFO [CORN] block 5/10 linear_regression: IC -0.0042 sharpe -0.56 (0s)
+09:44:59 INFO [CORN] block 5/10 random_forest: IC -0.0047 sharpe -2.40 (3s)
+09:45:00 INFO [CORN] block 5/10 xgboost: IC +0.0024 sharpe -2.15 (1s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:45:02 INFO [CORN] block 5/10 lightgbm: IC -0.0102 sharpe -1.55 (2s)
+09:45:04 INFO [CORN] block 6/10 linear_regression: IC -0.0004 sharpe -0.80 (0s)
+09:45:07 INFO [CORN] block 6/10 random_forest: IC -0.0125 sharpe -0.43 (3s)
+09:45:08 INFO [CORN] block 6/10 xgboost: IC +0.0080 sharpe +0.04 (1s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:45:10 INFO [CORN] block 6/10 lightgbm: IC -0.0117 sharpe +2.23 (2s)
+09:45:12 INFO [CORN] block 7/10 linear_regression: IC -0.0425 sharpe -4.42 (0s)
+09:45:15 INFO [CORN] block 7/10 random_forest: IC -0.0158 sharpe -3.06 (3s)
+09:45:16 INFO [CORN] block 7/10 xgboost: IC -0.0275 sharpe -3.84 (1s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:45:18 INFO [CORN] block 7/10 lightgbm: IC -0.0180 sharpe -3.25 (2s)
+09:45:21 INFO [CORN] block 8/10 linear_regression: IC +0.0421 sharpe +8.09 (0s)
+09:45:24 INFO [CORN] block 8/10 random_forest: IC +0.0234 sharpe +5.32 (3s)
+09:45:24 INFO [CORN] block 8/10 xgboost: IC +0.0134 sharpe +3.79 (1s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:45:26 INFO [CORN] block 8/10 lightgbm: IC -0.0097 sharpe +0.14 (2s)
+09:45:29 INFO [CORN] block 9/10 linear_regression: IC +0.0112 sharpe +1.87 (0s)
+09:45:32 INFO [CORN] block 9/10 random_forest: IC +0.0096 sharpe -1.87 (3s)
+09:45:32 INFO [CORN] block 9/10 xgboost: IC -0.0033 sharpe -2.08 (1s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:45:34 INFO [CORN] block 9/10 lightgbm: IC -0.0094 sharpe -2.58 (2s)
+09:45:37 INFO [CORN] block 10/10 linear_regression: IC -0.0030 sharpe -3.65 (0s)
+09:45:40 INFO [CORN] block 10/10 random_forest: IC -0.0580 sharpe -6.79 (3s)
+09:45:41 INFO [CORN] block 10/10 xgboost: IC -0.0237 sharpe -2.87 (1s)
+/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/lib/python3.13/site-packages/sklearn/utils/validation.py:2691: UserWarning: X does not have valid feature names, but LGBMRegressor was fitted with feature names
+  warnings.warn(
+09:45:43 INFO [CORN] block 10/10 lightgbm: IC -0.0303 sharpe -2.82 (2s)
+
+==========================================================================================
+ticker             model  wf_sharpe  wf_ann_return  wf_max_drawdown  mean_oos_ic  median_oos_ic pos_blocks
+   GLD linear_regression   0.642656       0.053236        -0.101373     0.002270       0.005851       8/10
+   GLD     random_forest   0.650983       0.062069        -0.061841    -0.000699       0.013206       6/10
+   GLD           xgboost   0.875369       0.074314        -0.034826     0.003745       0.011265       6/10
+   GLD          lightgbm   0.902226       0.065483        -0.027737     0.001641       0.001950       5/10
+   SPY linear_regression   1.116272       0.054046        -0.038088     0.024555       0.026872       8/10
+   SPY     random_forest  -0.061700      -0.001483        -0.021156     0.016487       0.024469       7/10
+   SPY           xgboost   0.531553       0.011433        -0.014594     0.021941       0.020872       8/10
+   SPY          lightgbm  -0.430814      -0.007101        -0.018828     0.017851       0.012590       9/10
+  CORN linear_regression  -0.676524      -0.034527        -0.050362    -0.002713      -0.001822       3/10
+  CORN     random_forest  -1.306956      -0.058490        -0.053101    -0.008038      -0.008587       4/10
+  CORN           xgboost  -0.687905      -0.026146        -0.035560    -0.004573      -0.001344       5/10
+  CORN          lightgbm  -0.897300      -0.028419        -0.031621    -0.010853      -0.009963       2/10
+==========================================================================================
+written to data/comparisons/gld_hf_wf_deployment/

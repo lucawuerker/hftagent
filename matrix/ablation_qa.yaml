@@ -1,0 +1,94 @@
+# LLM-contribution ablation (user decisions 2026-08-09): decompose the WF
+# ladder's L4WF result along  ideation -> +deterministic scoring ->
+# +deterministic evolution -> +LLM evolution  with three new FULL walk-forward
+# arms on the identical two-phase schedule (20 generations, wf-blocks 10x126,
+# graph-readonly snapshot, same seeding budget 12 ideas x 8 groups = 96):
+#
+#   L1H_terra_s0  "ideation + deterministic scoring": children-per-deme 0 —
+#                 generation 0 seeds via the same graphrag path as L4WF, every
+#                 later generation runs ONLY the deterministic machinery
+#                 (prequential probe, frontier advance, archive rescore/prune,
+#                 final curation).  Answers: does selection alone explain the
+#                 evolved books' edge?
+#   L4D_terra_s0  "+ deterministic evolution": identical seeding, children
+#                 drawn ONLY from the deterministic AST window-jitter operator
+#                 (p-llm 0, p-crossover 0, p-cross-group 0, p-jitter 1) — no
+#                 LLM call after generation 0.  Answers: does LLM mutation add
+#                 anything over deterministic variation?
+#   L0WF_gp_s0    "no LLM anywhere": the GP miner on the SAME two-phase
+#                 progressive-reveal schedule (ported 2026-08-09; 2 depth
+#                 stages x 10 gens = 20 windows), seed_pop 96,
+#                 36 children/gen -> ~800 trials, matched to L4WF's trial
+#                 count for the deflation comparison.  Documented asymmetries
+#                 (as in the original L0): no knowledge graph -> 1 group of
+#                 flat islands, no fixed/reference book, base grammar only.
+#
+# Fairness: N_trials-aware deflation is REPORTED per book (user decision);
+# trials are matched only where free (GP).  Evaluation: each arm's own
+# prequential record + the PIT combiner race over its snapshots.
+config_file: quant.config.nasdaq100_2010_wf.yaml
+allow_no_forward_reserve: true
+budget_usd: 100
+
+defaults:
+  generations: 20
+  mechanism-groups: 8
+  mechanism-groups-mode: max
+  demes-per-group: 3
+  children-per-deme: 2
+  population: 16
+  seed-ideas-per-group: 12
+  progressive-reveal: true
+  reveal-every: 1
+  test-frac: 0.0
+  wf-blocks: 10
+  wf-block-bars: 126
+  graph-readonly: true
+  retrieval: graphrag
+  curation: archive
+  selection-deflation: "on"
+  archive-cap: 40
+  creative-frac: 0.1
+  marginal-model: lightgbm
+  fixed-book: data/prebooks/formulaic_101.json
+  reference-book: data/prebooks/formulaic_101.json
+  n-tickers: 0
+  horizon: 6
+  llm-workers: 8
+  max-cost-usd: 40
+
+gp_defaults:
+  n-tickers: 0
+  horizon: 6
+  # 2 stages x 10 generations = the ladder's 20 reveal windows
+  depth-schedule: "3,5"
+  generations: 10
+  islands: 3
+  population: 16
+  seed-pop: 96
+  children-per-generation: 36
+  marginal-model: lightgbm
+  curation: archive
+  selection-deflation: "on"
+  progressive-reveal: true
+  reveal-every: 1
+  test-frac: 0.0
+  wf-blocks: 10
+  wf-block-bars: 126
+
+providers:
+  terra: {model: "gpt-5.6-terra", llm-provider: openai}
+
+arms:
+  - {name: L1H_terra_s0, provider: terra, seed: 0,
+     flags: {children-per-deme: 0}}
+  # after: RUNS_LOCALLY = permanent block on the server — this arm executes on
+  # the local M2 (2026-08-09); results are rsynced back when done.
+  - {name: L4D_terra_s0, provider: terra, seed: 0, after: RUNS_LOCALLY,
+     flags: {p-llm: 0.0, p-crossover: 0.0, p-cross-group: 0.0, p-jitter: 1.0}}
+  - {name: L0WF_gp_s0, entrypoint: gp, seed: 0, flags: {}}
+  # Gated rerun (decision 2026-08-09, variant c): the ungated L0WF run stands
+  # as evidence of metric gaming (log(high) level artifact); this arm is the
+  # fair no-LLM baseline with the stationarity gate on.
+  - {name: L0WFG_gp_s0, entrypoint: gp, seed: 0,
+     flags: {level-rho-max: 0.995}}

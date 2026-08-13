@@ -940,3 +940,30 @@ def test_cost_executor_failure_falls_back_not_crashes():
     # fell back to the explicit construction; run completed; diagnostics stamped
     assert res.diagnostics["turnover"] is not None
     assert "net_capture_sota" in res.diagnostics
+
+
+def test_objective_mode_ic_collapses_to_standalone_val_ic():
+    """--objective ic: the vector is |VAL IC| on the marginal slot, constants
+    elsewhere; default 'pareto' is byte-identical to before."""
+    panel, rng = _panel()
+    close = panel["close"]
+    fwd = close.shift(-1) / close - 1
+    good = fwd + 0.05 * _noise(rng)
+    book = [_noise(rng)]
+    cfg = _cfg()
+
+    r_ic = evaluate_candidate(good, book, panel, cfg,
+                              params=EvalParams(objective_mode="ic"),
+                              candidate_id="good")
+    val_ic = r_ic.diagnostics["val_ic"]
+    assert val_ic is not None
+    assert r_ic.objective.marginal_value == pytest.approx(abs(val_ic))
+    assert r_ic.objective.independence == 0.0
+    assert r_ic.objective.parsimony == 0.0
+    assert r_ic.objective.structural_novelty == 0.0
+
+    r_default = evaluate_candidate(good, book, panel, cfg,
+                                   params=EvalParams(), candidate_id="good")
+    # default path unchanged: axes are the usual live quantities
+    assert r_default.objective.parsimony != 0.0 or r_default.objective.structural_novelty != 0.0
+    assert r_default.diagnostics["val_ic"] == pytest.approx(val_ic)

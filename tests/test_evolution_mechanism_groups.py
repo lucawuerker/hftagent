@@ -455,3 +455,17 @@ def test_graph_linkback_still_saves_when_writable(tmp_path, monkeypatch):
     prog = FactorProgram(factor_id="f1", code="def calc(data):\n    return 0\n")
     loop_mod.link_programs_into_graph(_G(), [prog], {"f1": "m"}, readonly=False)
     assert calls == {"link": 1, "save": 1}
+
+
+def test_children_per_deme_zero_is_selection_only(grouped_loop):
+    """children_per_deme=0 (the L1H ablation): generation 0 seeds, later
+    generations propose NO children — only the deterministic machinery runs."""
+    make, fake, _ = grouped_loop
+    loop = make(children_per_deme=0, generations=2)
+    loop.run(initial_programs=_seeds())
+
+    ops = {row.get("operator") for row in loop.controller.lineage
+           if row.get("event") is None}
+    assert ops == {"seed"}, f"non-seed children proposed: {ops - {'seed'}}"
+    assert loop.controller.generation == 2          # generations still advanced
+    assert loop.controller.archive                  # seeds survived selection

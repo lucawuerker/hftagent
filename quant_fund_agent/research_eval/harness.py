@@ -93,6 +93,12 @@ class EvalParams:
     # positive marginal value.  Override for an ablation (`ridge` reproduces the
     # additive-only behaviour); any `modeling.catalog` model id is accepted.
     marginal_model: str = "gradient_boosting"
+    # ── objective mode ──
+    # "pareto" (default): the CORE 4-axis vector.  "ic": harness-ablation
+    # baseline — the objective collapses to standalone |VAL IC| (other axes
+    # constant 0.0), turning NSGA-II into plain IC ranking.  Scoring-only knob;
+    # gates, diagnostics and the rest of the pipeline are unchanged.
+    objective_mode: str = "pareto"
     plateau_weight: float = 1.0       # weight of the window-jitter plateau penalty
     #                                   (in IC units — coherent with the marginal axis)
     # Retained for API/CLI compatibility only — unused.  The removed ``robustness``
@@ -685,6 +691,37 @@ def _apply_marginal_penalties(
     return axis
 
 
+def _level_rho(sig: pd.DataFrame, close: pd.DataFrame,
+               mask: np.ndarray) -> float | None:
+    """Median per-name lag-1 autocorrelation of the signal on ``mask`` rows.
+
+    Stationarity diagnostic (2026-08-09, motivated by the GP arm's
+    ``log(high)`` pathology): a (near-)unit-root "level" signal — raw price,
+    raw fundamental levels, quarterly-stepped ratios — shows rho ≈ 1 and its
+    per-underlying IC telescopes short-horizon mean reversion into a large
+    spurious statistic.  Measured empirically over the ladder books,
+    rho > 0.995 separates that class cleanly (101-alpha zoo: 0 hits).
+    Diagnostic for every arm; the GP loop additionally gates on it.
+    """
+    s = sig.reindex(index=close.index, columns=close.columns
+                    ).to_numpy(dtype=float)[mask]
+    rhos = []
+    for j in range(s.shape[1]):
+        v = s[:, j]
+        m = np.isfinite(v)
+        if m.sum() < 100:
+            continue
+        v = v[m]
+        if np.std(v) < 1e-12:
+            rhos.append(1.0)
+            continue
+        a, b = v[:-1] - v[:-1].mean(), v[1:] - v[1:].mean()
+        den = np.sqrt((a * a).sum() * (b * b).sum())
+        if den > 0:
+            rhos.append(float((a * b).sum() / den))
+    return float(np.median(rhos)) if rhos else None
+
+
 def _coverage(sig: pd.DataFrame, close: pd.DataFrame, mask: np.ndarray) -> float:
     """Fraction of DATA-BEARING cells on ``mask`` rows where the signal is finite.
 
@@ -982,12 +1019,27 @@ def evaluate_candidate(
     gates = GateResults(coverage_ok=coverage_ok,
                         deflation_ok=None, cost_ok=cost_ok, reasons=reasons)
 
-    objective = ObjectiveVector(
-        marginal_value=marginal_axis,
-        independence=independence_axis,
-        parsimony=parsimony,
-        structural_novelty=novelty["structural_novelty"],
-    )
+    if params.objective_mode == "ic":
+        # Harness-ablation mode: the naive single-objective baseline.  The
+        # candidate is scored by its standalone |VAL IC| alone — no marginal
+        # (LOCO) value, no independence, no parsimony, no novelty, no plateau /
+        # perturbation / sign adjustments.  The other three slots are held at a
+        # CONSTANT 0.0 so NSGA-II dominance degenerates to a total order on the
+        # one live axis (None would fail feasibility instead).  All diagnostics
+        # are still computed and recorded.
+        objective = ObjectiveVector(
+            marginal_value=abs(val_ic) if val_ic is not None else None,
+            independence=0.0,
+            parsimony=0.0,
+            structural_novelty=0.0,
+        )
+    else:
+        objective = ObjectiveVector(
+            marginal_value=marginal_axis,
+            independence=independence_axis,
+            parsimony=parsimony,
+            structural_novelty=novelty["structural_novelty"],
+        )
 
     diagnostics = {
         "standalone_ic": standalone_ic,
@@ -1020,6 +1072,7 @@ def evaluate_candidate(
         "novelty_candidate_ast_nodes": novelty["novelty_candidate_ast_nodes"],
         "novelty_candidate_unique_subtrees": novelty["novelty_candidate_unique_subtrees"],
         "coverage": coverage,
+        "level_rho": _level_rho(candidate_signal, close, split.is_val_mask),
         "degradation_ratio": (float(deg_ratio) if deg_ratio is not None else None),
         "deflation": defl,
         "n_trials": params.n_trials,

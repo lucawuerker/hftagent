@@ -266,6 +266,12 @@ def _parse_args() -> argparse.Namespace:
                         "persisted to the prerun's factor DB.")
 
     # ── fitness axes ──
+    p.add_argument("--objective", choices=["pareto", "ic"], default="pareto",
+                   help="Scoring objective. 'pareto' (default) = the CORE 4-axis "
+                        "vector. 'ic' = harness-ablation baseline: candidates are "
+                        "ranked by standalone |VAL IC| alone (no marginal value, "
+                        "independence, parsimony or novelty axis) — pair with a "
+                        "non-progressive run for the naive-evolution comparison.")
     p.add_argument("--independence-metric",
                    choices=["residual_ic", "delta_participation"],
                    default="residual_ic",
@@ -454,6 +460,7 @@ def main() -> None:
         graph_readonly=args.graph_readonly,
         force_prediction_horizon=(args.prediction_horizon_mode == "fixed"),
         independence_metric=args.independence_metric,
+        objective_mode=args.objective,
         marginal_model=args.marginal_model,
         gate_turnover=args.gate_turnover,
         cost_rate=args.cost_rate,

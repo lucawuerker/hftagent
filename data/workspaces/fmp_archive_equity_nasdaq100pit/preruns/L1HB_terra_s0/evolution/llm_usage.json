@@ -1,0 +1,25 @@
+{
+  "by_role": {
+    "brainstorm": {
+      "calls": 40,
+      "input_tokens": 493704,
+      "output_tokens": 96984,
+      "cost_usd": 2.6890200000000006,
+      "errors": 0
+    },
+    "codegen": {
+      "calls": 199,
+      "input_tokens": 1223547,
+      "output_tokens": 695657,
+      "cost_usd": 13.493722500000004,
+      "errors": 0
+    }
+  },
+  "total": {
+    "calls": 239,
+    "input_tokens": 1717251,
+    "output_tokens": 792641,
+    "cost_usd": 16.182742500000003,
+    "errors": 0
+  }
+}

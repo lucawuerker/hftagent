@@ -258,6 +258,217 @@ rise OOS). English editable report (no cs-IC columns, per user):
 `figures_en/` via `scripts/plot_l4_factor_books_en.py`; a `.docx` variant
 (`scripts/build_l4_report_docx.py`) also exists.
 
+**Combiner-model study (2026-08-05).** Follow-up on the factor-book analysis:
+the combined-book IS→OOS collapse is a COMBINING-MODEL property, reproduced on
+the two finished server WF arms (L2WF 19 F. / L4WF 57 F., pulled locally;
+per-factor mean |IC| holds 88–92 % OOS while combined LightGBM retains 8–20 %).
+`scripts/analyze_combiner_models.py --panel forward|wf` +
+`analyze_wf_block_metric.py` (+`plot_combiner_models.py`)
+→ `data/comparisons/combiner_models/` (REPORT.md links the artifact page).
+**Metric (user decision same day): the WF OOS statistic is the MEAN of the 10
+per-block ICs** (one IC per walk-forward step, the prequential convention),
+with the in-sample side measured the same way (fit window chunked into 126-bar
+blocks) — blockwise ICs run systematically HIGHER than long-window pooled ones,
+so both sides must use the same metric. Under it: **ridge is the best WF
+combiner for every book** (ø block-IC 0.053–0.067, 10/10 positive blocks,
+half GBM's block std; L2WF: ridge 0.053 / lasso 0.055 vs GBM 0.015 at 5/10)
+and beats the runs' own prequential refit record (L4WF 0.064 vs 0.035, L2WF
+0.053 vs 0.020 — partly book-maturity, the record traded the then-current
+archive). λ₂≈N…10N improves GBM where it's weak (union 0.045→0.058) but never
+reaches ridge on the WF panel; on the forward panel (window metric, 163-F.
+pool) GBM+λ₂=N stays best (TEST 0.0448 vs ridge 0.020). Lasso caveat: usually
+keeps only 1–8 factors (Opus book the exception: 16/18); RidgeCV picks α=10⁴ =
+the grid edge in EVERY fit (grid should extend 10⁵–10⁶). Server book code
+synced into the local researcher package (load_book remaps server code_paths
+by basename).
+
+**Knowledge-graph factor link-back + frozen thesis snapshots (2026-08-13).**
+The published books of ALL completed LLM arms (L1 oneshot Opus/Terra s0+s1,
+L1H/L1HB, L2/L2WF/L2WFB/L2WFP, L4/L4R/L4D/L4IC, L4WF–L7WF, GLD HF; GP and the
+incomplete L4RB excluded) are post-hoc linked into `data/knowledge/graph.json`
+via NEW `scripts/link_factors_into_graph.py`: 44→**859 factor nodes** (node
+attrs `preruns`/`engine`), +65 `realized_by` edges (mechanism from the
+program's own stamp or inherited up the genome parent chain — edge attr
+`provenance: seed|inherited`; stamps are sparse in the checkpoints, only
+seeds carry them), `uses` edges from `required_inputs` (fields 55→128, uses
+edges 4,162), coverage stats refreshed over 768 factor ICs; gap queries +
+`mechanism_group_specs` still resolve 8 groups. The script links ADDITIVELY —
+in-run `refresh_field_usage` drops every existing `uses` edge and had
+silently clobbered the ladder snapshot's 71 uses edges in the local graph
+(repaired via `--merge-uses-from`). Updated graph deployed to lagias
+(identical 5,118 nodes / 12,527 edges). **Frozen thesis snapshots** in
+`data/knowledge/frozen/` (local + mirrored on lagias, see its README):
+`graph_wf_ladder_snapshot_2026-08-01.json` = the exact `--graph-readonly`
+snapshot every WF-ladder arm resolved groups from, and
+`graph_local_pre_linkback_2026-08-13.json` = local pre-link-back state. Any
+future arm that must stay comparable to the s0 ladder should point at the
+frozen snapshot, NOT the live graph (factor coverage now shifts the group
+ranking).
+
+**LLM-comparison plan CREATED (2026-08-13, runs pending keys).**
+`matrix/llm_comparison.yaml` — the final experiment: 10 research LLMs × 2
+seeds on the L1HB shape (192 graph-grounded seeds, children-per-deme 0, full
+WF scoring, graph-readonly; seed-matched, cost reported; global cap $500,
+$40/arm). Providers: luna/terra/sol (OpenAI key, luna runnable NOW),
+fable5/opus5/sonnet5 (Bedrock via AWS credits — keys pending),
+grok-4.6 + deepseek (Azure AI Foundry OpenAI-compatible base-URL envs —
+pending; deepseek native fallback), muse (META_API_KEY pending), gemini
+(google_genai — pending; pin exact ids for grok/gemini/deepseek when keys
+arrive). Plan guarded in `tests/test_final_matrix_plan.py` (34 passed);
+`--preflight-only --no-probes` green. Target box lagias (SSH still down
+2026-08-13 — check before launch). BEFORE first launch: fix
+`_residual_ic` pairwise-coverage bug. Launch: `run_ablation_matrix.py --plan
+matrix/llm_comparison.yaml --only LC_luna_s0`.
+
+**L2WFP COMPLETE — retrieval cleanly priced (2026-08-12 late).** Seeded
+96/96 (chunked fix verified live), 20 gens, 27 F., 856 trials, $105.66:
+prequential **+0.0286** ≈ baseline +0.035 (within noise) — but the weakest
+per-factor quality of the family (median |IC| 0.0045 vs 0.0114; 44% sign
+flips vs 18%; eff N 14.5 vs 22.0; a max|ρ|=0.99 near-duplicate pair) and
+**PIT best only 0.038 (lasso) vs baseline 0.073** — retrieval grounding
+doesn't move the noisy headline record, it ~doubles the deployable combined
+IC. Full analysis in `wf_arm_analysis_local/L2WFP_terra_s0/` + PIT race;
+ladder (12 rungs), v2 PDF and artifact all final.
+
+**L4IC result + L2 seeding bug/fix + L2WFP relaunch — 2026-08-12.**
+**L4IC_terra_s0 COMPLETE** ($117, 849 cand., all 20 gens): per-factor =
+textbook winner's curse (archive collapsed to 1 factor/group — a
+single-objective front is one point; promised median |VAL IC| 0.040 → 0.025
+realised; 5/8 survivors' VAL sign disagrees with their own fit window); per
+book = surprising insurance (8 near-orthogonal survivors, static linear
+0.082 10/10; kept-pool 846 F. PIT ic 0.070 vs baseline 0.073). Reading in
+the v2 PDF: 4-axis+reveal make individual factors trustworthy; diversity
+structure+linear combining protect the book. **L2WFB_terra_s0 (parity rerun)
+FAILED ITS PURPOSE**: seeded 10/96 — with retrieval none the seeding made ONE
+86-idea brainstorm call which timed out and was skipped fail-open
+(`loop.py` `_safe_brainstorm` single-call path). Kept as a no-retrieval
+replicate (preq +0.012, 14 F., $99 — confirms L2's weakness but ALSO
+confounded). **FIX**: non-retrieval seeding now chunks into ≤12-idea calls
+with one retry each (loop.py); **L2WFP_terra_s0** (true parity, 96 seeds)
+launched via `scripts/l2wfp_chain.sh` (chained behind L2WFB book analysis).
+Per-factor stats switched to ABSOLUTE IC everywhere (user: negative IC is
+predictive) — under |IC| L5/L7 medians BEAT L4 (0.0146/0.0160 vs 0.0114) but
+with worst sign stability (31–33% flips vs 18%) and ~25% ρ=1.0 level-like
+members; L4 leads sign stability + combinability. Ladder/figures/PDF/artifact
+all updated. lagias SSH STILL down 2026-08-12.
+
+**Book-analysis v2 (baseline+ablation restructure) + L4IC harness-ablation arm
+— 2026-08-10.** User feedback on the 4-arm report: restructure around ONE
+baseline (L4WF) discussed in depth, then ablation stages showing where value
+comes from. Done: `scripts/wf_book_analysis_figures2.py` → `figures2/` +
+`wf_book_analysis_v2.tex→.pdf` (baseline deep-dive b1–b4, ablation-ladder
+chart l1 with prequential ±SE + PIT-best per arm, cross-arm l2) and
+`derived/ladder_summary.csv`; the ablation-QA arms (L1H/L1HB/L4D) got the full
+local book analysis (`wf_arm_analysis_local/<arm>/` + PIT races; L0WF factor
+code not mirrored locally → skipped, reported via its prequential record as
+metric-gaming evidence). **NEW seam `--objective ic`** (`EvalParams/
+EvolutionRunConfig.objective_mode`, threaded client→service→harness; test in
+`test_research_eval_harness.py`): candidate scored by standalone |VAL IC|
+ONLY — other axes constant 0.0 → NSGA-II degenerates to IC ranking; default
+byte-identical. **Arm `L4IC_terra_s0` LAUNCHED locally** (chain
+`scripts/ablation_analysis_then_l4ic.sh`, log `data/ablation_analysis_l4ic.log`,
+caffeinate-detached): L4 config but `--objective ic` AND no progressive reveal
+(classic IS/VAL/TEST on `quant.config.nasdaq100_2010_to2021.yaml`) so 2021-26
+stays an untouched holdout for the post-hoc block comparison — quantifies what
+the 4-axis + progressive-reveal harness itself contributes; max-cost $180.
+NOTE 2026-08-10: lagias SSH times out (HTTP still up) — everything ran
+locally; server data (L5/L7 usage, L1WF per-factor) unreachable this session.
+
+**WF-ladder factor-book analysis — DONE 2026-08-09.** The Opus-vs-Terra-style
+book analysis rerun for the four WF ladder arms L2/L4/L5/L7 (L0/L1/L6-set
+excluded, user request): `scripts/wf_book_analysis_{derive,figures}.py` →
+`data/comparisons/wf_book_analysis/` (raw/ pulled from lagias, derived/ CSVs,
+figures/, supervisor report `wf_book_analysis.tex→.pdf` — tectonic, clean
+metadata, English, figures + 1–2 sentences + key learnings; artifact page
+published same day). Covers per-factor fit-vs-WF block ICs, combined-book
+combiners (internal prequential LightGBM vs PIT-lasso/static ridge/lasso/GBM),
+final-archive Pareto-axis trajectories from lineage rescore rows, eigenvalue
+participation-ratio diversity, and PIT-lasso selection (per block + 3 phases).
+Headlines: per-factor |IC| fully retained OOS in every arm (IS→WF corr
+.83–.94; L5 .24); the internal LightGBM refit is the WEAKEST deployment
+combiner everywhere (L4 PIT-lasso 0.072 vs prequential 0.035); L4 best on
+every measure (57 F., eff. N 22, median +0.008); lasso churns hard (37–67%
+never selected) with stable ICs (37/38 blocks positive). **BUG found: the
+residual-IC independence axis was inactive for ~97% of candidates in L5/L7**
+— `harness._residual_ic` needs ≥30 rows where the candidate AND every book
+member are finite, so one sparse-coverage member (L5/L7 admitted 28–40%-
+coverage factors at gen 0–1) returns None for everyone; the debate arms
+effectively evolved on a 3-axis Pareto (ablation confound; fix = pairwise-
+complete orthogonalisation). Archive complexity also ratchets up ~2× over 20
+generations in every arm while novelty stays flat.
+
+**LLM-contribution ablation — RUNNING 2026-08-09 (see
+`docs/research-evolution/ABLATION_QA.md` — READ THAT for design, data
+inventory and results).** Decomposes L4WF's edge along ideation → +det.
+scoring (L1H, `children-per-deme 0` seam) → +det. evolution (L4D, jitter-only
+via `--p-llm 0 --p-crossover 0 --p-cross-group 0 --p-jitter 1`) → +LLM
+evolution (L4WF), plus L0WF = GP with progressive reveal **ported into
+`gp/loop.py`** (GP state under `prerun/gp/`, not `evolution/`). Plan
+`matrix/ablation_qa.yaml`. **First result: L1H (ideation + deterministic
+scoring, NO evolution) matches L4WF's honest walk-forward record — prequential
+mean IC +0.032 vs +0.035, 80% hit both — at $9.53 vs ~$250 and 81 vs ~800
+trials.** Heavy compute moved to the local M2 (Hostinger steal throttle
+re-engaged repeatedly; L0WF still on lagias); L1HB (seed 24/group → target
+40-50-factor archive) queued behind the L1H PIT race. s1 ladder arms on HOLD.
+
+**WF post-analysis campaign — COMPLETE 2026-08-08.** All 15 books (L1WF–L7WF
+±zoo, unions, zoo) carry the full 9-method × 10-block PIT matrix with saved
+weights/models/OOS-predictions + shared signal store; the driver exited
+cleanly. Final leaderboard (mean WF block IC across books): lasso 0.071 >
+ic 0.064 > ridge 0.063 > autoalpha 0.057 > rf 0.055 > lightgbm 0.050 ≫ kaku
+0.035/0.025; wins lasso 10/15, autoalpha 3 (zoo + both L7WF books — the
+memory arm is the one evolved book where the rank ensemble wins), ic 2.
+**L7WF_terra_s0 finished 2026-08-07** (20 gens, 42 factors, $205.62, full
+prequential record; the multi-day gen-5/6 stall was 50% hypervisor CPU-steal
+from the provider fair-use throttle — twice — plus box contention, not the
+arm). Strategy lab `scripts/wf_pit_strategy_lab.py` (tune 2021-23 / validate
+2023-26): frozen per-name construction (rolling-252 z → EWMA hl6 → |z|>0.5
+band → λ=0.15 partial adjust + no-trade band → 10% vol target) + EW-index
+hedge capitalises the LINEAR combiners' per-underlying IC: L4WF/lasso 1.19–
+1.39, L4WF/ic 0.99, union/ic 0.92 net Sharpe at 0.002–0.01/day turnover;
+cs-MN construction instead monetises rf (union 0.92, L4WF 0.69) and inverts
+the linear ranking; zoo/+zoo books need per-name beta-hedging (open). Report
+artifact (claude.ai, 15-book matrix + lasso sparsity/turnover/never-selected
+analysis) maintained from `scratchpad build_report.py`. s1 ladder arms on
+HOLD via `after: HOLD_S1` (L1WF s1 slipped through a stale in-memory
+orchestrator plan and completed; stale orchestrator killed, holds enforced).
+
+**WF post-analysis suite — launched on the server 2026-08-05 (autonomous).**
+Detailed analyses for every finished WF-ladder arm (L1WF oneshot s0, L2WF/
+L4WF/L5WF/L6WF s0; L7WF + s1 arms picked up automatically when they finish),
+running in tmux session `analysis` on lagias **inside `lagias-research.slice`**
+(so the CPU quota re-applies once L7WF s0 restores it), driver
+`scripts/run_wf_post_analysis.sh` → `data/comparisons/wf_arm_analysis/` (on the
+server; rescans every 30 min, exits after L7WF s0 is analysed). Two parts:
+**(1) `scripts/wf_arm_factor_analysis.py --arm <prerun|zoo>`** — per-factor
+pooled per-underlying IC on the fit window and each of the 10 prequential
+126-bar blocks (block mean/std/hit + sign-consistent retention vs a
+trailing-126-bar in-sample block metric), book diversity (mean |ρ|,
+participation-ratio effective N), static combined fits (ridge/lasso/lightgbm,
+fit < 2021-07-20, scored per block) and the run's own prequential record →
+`<arm>/{per_factor_blocks.csv,combined_static.csv,diversity.json,REPORT.md}`.
+**(2) `scripts/wf_pit_combiner_study.py --arm <a[+b…]>`** — the point-in-time
+WF combiner race (user protocol 2026-08-05): every 126-bar block from
+2021-07-20 the combiner is REFIT on all prior bars using ONLY the factors that
+existed then (evolution arms: `replay_snapshots` archive at gen g trades block
+g+1, SET genomes contribute all members; oneshot/zoo: full book) and scored on
+the block. Methods: equal / ic-weighted / RidgeCV (grid extended to 1e6) /
+LassoCV / LightGBM / **`kakushadze`** (Kakushadze & Yu *How to Combine a
+Billion Alphas*, arXiv:1603.05937 — NOT "million"; eq. (1) w∝C⁻¹E on daily
+long-short alpha-P&L streams with an eRank-capped PC factor-model covariance,
+SMW inverse — the paper's own prescription for N≪T) / **`kaku_reg`** (their
+verbatim Sec. 5.3 weighted-regression recipe incl. overall-mode removal;
+built for N≫T, lookback shrunk to N/2 and `regime_ok` flagged) /
+**`autoalpha`** (arXiv:2002.08245: top-150 by mean daily cs-IC, sign-flip,
+greedy first-PC PCA-similarity gate <0.9, LightGBM lambdarank + XGBoost
+rank:pairwise [xgboost 3.3.0 installed server-side] with daily query groups,
+5-bin labels, z-scored score-average ensemble; omitted hyperparams per
+docstring). Books: each arm alone, each arm+zoo, the 4-arm s0 union ±zoo.
+Resume-safe jsonl per label + `<label>_summary.csv`; cross-arm
+`SUMMARY.md`/`ALL_PIT_SUMMARY.csv` rebuilt each pass. Sources logged in
+`research_docs/SOURCES.md`. Local smoke (L2WF g11): PIT snapshot 15 factors,
+kaku_reg 0.038 / kakushadze 0.020 / ic 0.017 / autoalpha 0.005.
+
 **WALK-FORWARD TERRA LADDER — LAUNCHED 2026-08-01 on the Hostinger VPS
 (`ssh lagias`, 8 vCPU/31 GB, repo at `/root/QuantFundAgent`).** The ablation
 ladder now runs on **GPT-5.6 Terra** (OpenAI pool, global cap **$2,000**) from

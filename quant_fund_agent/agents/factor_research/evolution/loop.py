@@ -197,6 +197,9 @@ class EvolutionRunConfig:
 
     # ── fitness: four Pareto axes ──
     independence_metric: str = "residual_ic"   # "residual_ic" | "delta_participation"
+    # "pareto" (default) | "ic": harness-ablation baseline — candidates are
+    # scored by standalone |VAL IC| only (research_eval.harness EvalParams)
+    objective_mode: str = "pareto"
     # nonlinear LOCO combiner so conditioning/interaction value (e.g. a volatility
     # state variable) scores a positive marginal value; "ridge" = additive-only.
     marginal_model: str = "gradient_boosting"
@@ -515,8 +518,24 @@ def seed_programs(cfg: EvolutionRunConfig, data_context: str,
                     raw_ideas.extend(_safe_brainstorm(
                         paper, per_paper, known, session_id, data_context))
             elif n_regular > 0:
-                raw_ideas = _safe_brainstorm(
-                    None, n_regular, known, session_id, data_context)
+                # Chunked: one giant N-idea call times out on reasoning models
+                # (L2WFB 2026-08-12: a single 86-idea request timed out, was
+                # skipped fail-open, and the run seeded 10/96).  ≤12 ideas per
+                # call, one retry per chunk, ids accumulated so later chunks
+                # avoid collisions.
+                seen = set(known)
+                remaining = n_regular
+                while remaining > 0:
+                    ask = min(12, remaining)
+                    got = _safe_brainstorm(None, ask, seen, session_id,
+                                           data_context)
+                    if not got:
+                        got = _safe_brainstorm(None, ask, seen, session_id,
+                                               data_context)
+                    raw_ideas.extend(got)
+                    seen.update((i.get("factor_id") or "").strip().lower()
+                                for i in got if i.get("factor_id"))
+                    remaining -= ask
 
     if n_creative > 0:
         # Creative slice: knowledge-only brainstorm with the novelty section.
@@ -999,6 +1018,7 @@ class EvolutionLoop:
             fields=self.fields,
             independence_metric=self.cfg.independence_metric,
             marginal_model=self.cfg.marginal_model,
+            objective_mode=self.cfg.objective_mode,
             gate_turnover=self.cfg.gate_turnover,
             cost_rate=self.cfg.cost_rate,
             perturbation_weight=self.cfg.perturbation_weight,
@@ -2305,10 +2325,14 @@ class EvolutionLoop:
                 continue
             made = 0
             if cfg.children_per_deme is not None:
+                # children_per_deme == 0 is the selection-only ablation (L1H):
+                # generation 0 seeds, every later generation only runs the
+                # deterministic machinery — prequential probe, frontier
+                # advance, archive rescore/prune — and proposes NO children.
                 child_islands = [
                     island
                     for island in range(len(self.controller.islands))
-                    for _ in range(max(1, cfg.children_per_deme))
+                    for _ in range(max(0, cfg.children_per_deme))
                 ]
             else:
                 child_islands = [

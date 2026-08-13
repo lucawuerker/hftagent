@@ -119,6 +119,23 @@ def _parse_args() -> argparse.Namespace:
                    default="archive")
     p.add_argument("--n-keep", type=int, default=None)
     p.add_argument("--selection-deflation", choices=["off", "on"], default="off")
+    p.add_argument("--level-rho-max", type=float, default=None,
+                   help="Stationarity gate: reject candidates whose median "
+                        "per-name lag-1 autocorrelation exceeds this "
+                        "(0.995 recommended; default off).")
+    # ── progressive data reveal (ported from the LLM arm; default OFF) ──
+    p.add_argument("--progressive-reveal", action="store_true",
+                   help="Reveal the dev window block-by-block over the TOTAL "
+                        "generation count (len(depth-schedule) x generations).")
+    p.add_argument("--test-frac", type=float, default=0.2)
+    p.add_argument("--seed-frac", type=float, default=0.45)
+    p.add_argument("--reveal-every", type=int, default=1)
+    p.add_argument("--val-blocks", type=int, default=2)
+    p.add_argument("--wf-blocks", type=int, default=0,
+                   help="Two-phase walk-forward: the LAST wf-blocks generations "
+                        "each reveal one wf-block-bars block, prequentially "
+                        "scored before the archive may adapt to it.")
+    p.add_argument("--wf-block-bars", type=int, default=126)
     return p.parse_args()
 
 
@@ -188,6 +205,14 @@ def main() -> None:
         curation=args.curation,
         n_keep=args.n_keep,
         selection_deflation=args.selection_deflation,
+        level_rho_max=args.level_rho_max,
+        progressive=args.progressive_reveal,
+        test_frac=args.test_frac,
+        seed_frac=args.seed_frac,
+        reveal_every=args.reveal_every,
+        val_blocks=args.val_blocks,
+        wf_blocks=args.wf_blocks,
+        wf_block_bars=args.wf_block_bars,
         data_dir=args.data_dir,
         n_tickers=args.n_tickers,
         out_dir=str(scope.dir / "gp"),

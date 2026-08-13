@@ -135,3 +135,45 @@ def test_random_seeding_path_runs(wired, tmp_path):
     assert summary["engine"] == "gp"
     assert summary["n_trials"] >= 1
     assert summary["population"] >= 1
+
+
+def test_gp_progressive_walk_forward(ar1_panel, tmp_path, monkeypatch):
+    """The ported progressive reveal: schedule spans the TOTAL generation
+    count, reveal generations write prequential rows + rescore lineage rows,
+    and the frontier checkpoint lands in progressive.json."""
+    monkeypatch.setenv("QF_USE_MCP", "0")
+    from quant_fund_agent.mcp import research_service as svc
+
+    monkeypatch.setattr(svc, "_load_panel_cached",
+                        lambda data_dir, fields, n_tickers: ar1_panel)
+    monkeypatch.setattr(svc, "_panel_cache_key",
+                        lambda data_dir, fields, n_tickers: ("gp-prog-panel",))
+    svc._SIGNAL_CACHE.clear()
+
+    cfg = GPRunConfig(
+        generations=2, population_size=6, children_per_generation=3,
+        seed=7, depth_schedule=(3,), target_horizon=1,
+        stability_blocks=4, marginal_model="ridge", n_tickers=None,
+        progressive=True, test_frac=0.0, seed_frac=0.5, reveal_every=1,
+        val_blocks=2, wf_blocks=1, wf_block_bars=60,
+        out_dir=str(tmp_path / "gp"),
+    )
+    loop = GPLoop(cfg, allowed_fields=["close"])
+    loop._load_known_ids = lambda: None
+    summary = loop.run(initial_trees=_seed_trees(loop.grammar))
+
+    assert summary["archive"]
+    assert loop._schedule is not None and len(loop._schedule) >= 3
+    # every reveal generation recorded exactly one prequential row
+    prq = [json.loads(l) for l in
+           (tmp_path / "gp" / "prequential.jsonl").read_text().splitlines()]
+    reveal_gens = [w.generation for w in loop._schedule if w.reveal]
+    assert [r["generation"] for r in prq] == reveal_gens
+    # the last row is the walk-forward block (fixed 60-bar width)
+    assert prq[-1]["reveal_index"] == len(reveal_gens) - 1
+    # rescore rows were logged on reveal generations
+    events = [row for row in loop.controller.lineage if row.get("event") == "rescore"]
+    assert events, "archive rescore should log lineage rows"
+    # frontier checkpoint present and consistent with the final window
+    prog = json.loads((tmp_path / "gp" / "progressive.json").read_text())
+    assert prog["frontier_ts"] == loop._window.val_end_ts

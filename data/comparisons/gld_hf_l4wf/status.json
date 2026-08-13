@@ -1,0 +1,17 @@
+{
+  "comparison_id": "gld_hf_l4wf",
+  "tracks": {
+    "ic": {
+      "status": "ok",
+      "seconds": 4.8
+    },
+    "analytics": {
+      "status": "ok",
+      "seconds": 8.1
+    },
+    "bruteforce": {
+      "status": "ok",
+      "seconds": 349.1
+    }
+  }
+}

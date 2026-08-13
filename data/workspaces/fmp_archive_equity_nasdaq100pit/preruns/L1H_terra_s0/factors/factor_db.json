@@ -1,0 +1,2865 @@
+{
+  "factors": [
+    {
+      "id": "revision_confirmed_highwater_diffusion",
+      "name": "Revision-Confirmed Highwater Diffusion",
+      "class_name": "",
+      "description": "Compute a cross-sectional signal from the interaction of recent EPS-estimate acceleration, distance to the trailing 252-bar high, and low relative dollar-volume capacity. Favor stocks with upward estimate innovations that are already trading near their high, with the strongest scores where turnover implies slower information diffusion.",
+      "formula": "",
+      "trading_idea": "Positive price proximity to the rolling high is more informative when it coincides with a newly improving analyst EPS consensus, rather than reflecting a purely technical run-up. The source paper finds that price strength can validate the information content of a bullish event in slow-information environments; here, estimate improvement is the observable public-information analogue to an insider's informed action. The trade is against investors who either mechanically fade stocks near prior highs or wait for a full earnings-report confirmation, while limited attention and lower liquidity delay incorporation. The mechanism is falsified if names with simultaneous upward consensus changes and highwater proximity do not outperform comparable highwater names without revisions.",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.004888,
+        "ic_std": 0.111206,
+        "ic_ir": 0.043956,
+        "ic_hit_rate": 0.5109,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.000257,
+            "ic_std": 0.131759,
+            "ic_ir": 0.001952,
+            "ic_hit_rate": 0.4963,
+            "n_timestamps": 4034
+          },
+          "6": {
+            "ic": 0.004888,
+            "ic_std": 0.111206,
+            "ic_ir": 0.043956,
+            "ic_hit_rate": 0.5109,
+            "n_timestamps": 4028
+          },
+          "60": {
+            "ic": 0.019235,
+            "ic_std": 0.11389,
+            "ic_ir": 0.168893,
+            "ic_hit_rate": 0.5601,
+            "n_timestamps": 3974
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4028,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "insider_purchase_signals_in_microcap_equities_gradient_boost"
+      ],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L1H_terra_s0",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/revision_confirmed_highwater_diffusion.py",
+      "required_inputs": [
+        "close",
+        "volume",
+        "epsEstimate"
+      ],
+      "required_tier": "estimates",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-09T11:33:04.044934",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g0-revision_confirmed_highwater_diffusion-0abddc",
+          "generation": 0,
+          "operator": "seed",
+          "parent_ids": [],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": 0.02613226605337455,
+            "independence": null,
+            "parsimony": -68.0,
+            "structural_novelty": 0.8914092856790334
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 81,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.011948216972844677,
+            "deflated": {
+              "best_ic": 0.011948,
+              "deflated_ic": 0.001787,
+              "deflated_t": 0.521263,
+              "luck_ic": 0.010162,
+              "n_obs": 85117,
+              "n_trials": 81
+            },
+            "n_trials": 81,
+            "dropped": [
+              "asymmetric_fluctuation_dissipation_breakdown"
+            ],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L1H_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T11:33:04+00:00"
+        }
+      }
+    },
+    {
+      "id": "valuation_anchor_acceleration_residual",
+      "name": "Valuation Anchor Acceleration Residual",
+      "class_name": "",
+      "description": "Compute an industry-relative valuation-anchor residual from earningsYield, freeCashFlowYield, and evToEbitda, then interact it with the acceleration of 5-to-20 day price returns. Long fundamentally cheap names with a negative overshoot and short fundamentally expensive names with a positive overshoot, while requiring stable roe and incomeQuality to avoid distressed-value exposure.",
+      "formula": "",
+      "trading_idea": "The CAPE-style mechanism in Value matters: Predictability of Stock Index Returns implies that price can temporarily depart from a slower-moving fundamental return anchor when sentiment-driven momentum accelerates. The signal targets names whose recent price acceleration has made them unusually expensive or cheap relative to industry peers without a confirming change in earnings yield, profitability, or cash-flow yield. The expected counterparty is momentum and benchmark investors who mechanically extrapolate a recent price path while fundamental anchors update only at reporting frequency; the hypothesis fails if extreme unconfirmed valuation excursions continue rather than partially retrace over the next week.",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.000473,
+        "ic_std": 0.109334,
+        "ic_ir": -0.004328,
+        "ic_hit_rate": 0.5034,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.001112,
+            "ic_std": 0.110489,
+            "ic_ir": -0.010064,
+            "ic_hit_rate": 0.4923,
+            "n_timestamps": 4101
+          },
+          "6": {
+            "ic": -0.000473,
+            "ic_std": 0.109334,
+            "ic_ir": -0.004328,
+            "ic_hit_rate": 0.5034,
+            "n_timestamps": 4096
+          },
+          "60": {
+            "ic": -0.002746,
+            "ic_std": 0.111379,
+            "ic_ir": -0.024654,
+            "ic_hit_rate": 0.4869,
+            "n_timestamps": 4042
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4096,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "value_matters_predictability_of_stock_index_returns"
+      ],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L1H_terra_s0",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/valuation_anchor_acceleration_residual.py",
+      "required_inputs": [
+        "close",
+        "industry",
+        "earningsYield",
+        "freeCashFlowYield",
+        "evToEbitda",
+        "roe",
+        "incomeQuality"
+      ],
+      "required_tier": "fundamental",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-09T11:33:04.052040",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g0-valuation_anchor_acceleration_residual-12c0e9",
+          "generation": 0,
+          "operator": "seed",
+          "parent_ids": [],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": 0.0022932741672390365,
+            "independence": null,
+            "parsimony": -160.0,
+            "structural_novelty": 0.9135880139233457
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 81,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.011948216972844677,
+            "deflated": {
+              "best_ic": 0.011948,
+              "deflated_ic": 0.001787,
+              "deflated_t": 0.521263,
+              "luck_ic": 0.010162,
+              "n_obs": 85117,
+              "n_trials": 81
+            },
+            "n_trials": 81,
+            "dropped": [
+              "asymmetric_fluctuation_dissipation_breakdown"
+            ],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L1H_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T11:33:04+00:00"
+        }
+      }
+    },
+    {
+      "id": "covariance_targeting_correlation_acceleration",
+      "name": "Correlation-Targeting Deleveraging Pressure",
+      "class_name": "",
+      "description": "Compute short- and long-window correlations of each stock's daily return with its sector basket, then measure the short-minus-long correlation acceleration. Form a signed pressure score by interacting this acceleration with downside sector movement, own return direction, and volume relative to its recent baseline; higher deleveraging pressure maps to a more negative cross-sectional signal.",
+      "formula": "",
+      "trading_idea": "Volatility-targeting and covariance-aware portfolios mechanically reduce exposure when a name's correlation with its sector rises abruptly, since its incremental contribution to portfolio risk increases even when its standalone volatility changes little. When the correlation acceleration coincides with a negative sector shock, negative own return, and elevated volume, the selling can persist as risk models, margin constraints, and execution schedules update more slowly than prices. The mechanism is rejected if correlation-jump losers do not exhibit more negative six-day residual returns than matched names with similar volatility, return, and volume but stable correlations.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.001221,
+        "ic_std": 0.122565,
+        "ic_ir": -0.009959,
+        "ic_hit_rate": 0.5074,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.001514,
+            "ic_std": 0.130099,
+            "ic_ir": -0.011637,
+            "ic_hit_rate": 0.4976,
+            "n_timestamps": 4017
+          },
+          "6": {
+            "ic": -0.001221,
+            "ic_std": 0.122565,
+            "ic_ir": -0.009959,
+            "ic_hit_rate": 0.5074,
+            "n_timestamps": 4011
+          },
+          "60": {
+            "ic": -8.3e-05,
+            "ic_std": 0.121116,
+            "ic_ir": -0.000688,
+            "ic_hit_rate": 0.4959,
+            "n_timestamps": 3948
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4011,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "risk_management_and_return_prediction"
+      ],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L1H_terra_s0",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/covariance_targeting_correlation_acceleration.py",
+      "required_inputs": [
+        "close",
+        "volume",
+        "sector"
+      ],
+      "required_tier": "fundamental",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-09T11:33:04.052083",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g0-covariance_targeting_correlation_acceleration-a97289",
+          "generation": 0,
+          "operator": "seed",
+          "parent_ids": [],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": 0.0030917053587879127,
+            "independence": null,
+            "parsimony": -110.0,
+            "structural_novelty": 0.8271306231816755
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 81,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.011948216972844677,
+            "deflated": {
+              "best_ic": 0.011948,
+              "deflated_ic": 0.001787,
+              "deflated_t": 0.521263,
+              "luck_ic": 0.010162,
+              "n_obs": 85117,
+              "n_trials": 81
+            },
+            "n_trials": 81,
+            "dropped": [
+              "asymmetric_fluctuation_dissipation_breakdown"
+            ],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L1H_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T11:33:04+00:00"
+        }
+      }
+    },
+    {
+      "id": "operating_rigidity_common_shock_spread",
+      "name": "Operating-Rigidity Common-Shock Spread",
+      "class_name": "",
+      "description": "Estimate each firm's operating-rigidity proxy from (SG&A expense plus depreciation and amortization) divided by revenue, rank it within industry, and interact it with a leave-one-out industry return shock confirmed by elevated industry volume. Positive shocks load long high-rigidity firms, while negative shocks load short high-rigidity firms, with cross-sectional demeaning within industry.",
+      "formula": "",
+      "trading_idea": "Broad industry shocks are initially traded through liquid sector baskets and headline narratives, while the cross-sectional implication of fixed operating costs is incorporated more slowly. Firms with high SG&A plus depreciation intensity have greater earnings sensitivity to a common demand or pricing shock, so they should outperform low-rigidity peers after a positive high-participation industry impulse and underperform after a negative one. The mechanism is falsified if operating-rigidity ranks do not explain post-shock relative returns after controlling for industry beta and market capitalization; the other side is benchmarked capital that receives sector exposure through ETFs or baskets without immediately differentiating operating leverage.",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.001454,
+        "ic_std": 0.106077,
+        "ic_ir": -0.013704,
+        "ic_hit_rate": 0.4955,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.000105,
+            "ic_std": 0.11399,
+            "ic_ir": -0.000919,
+            "ic_hit_rate": 0.501,
+            "n_timestamps": 3822
+          },
+          "6": {
+            "ic": -0.001454,
+            "ic_std": 0.106077,
+            "ic_ir": -0.013704,
+            "ic_hit_rate": 0.4955,
+            "n_timestamps": 3818
+          },
+          "60": {
+            "ic": -0.002133,
+            "ic_std": 0.108088,
+            "ic_ir": -0.01973,
+            "ic_hit_rate": 0.4894,
+            "n_timestamps": 3764
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 3818,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "hidden_order_in_trades_predicts_the_size_of_price_moves"
+      ],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L1H_terra_s0",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/operating_rigidity_common_shock_spread.py",
+      "required_inputs": [
+        "close",
+        "volume",
+        "industry",
+        "sgaExpense",
+        "depreciationAmortization",
+        "revenue"
+      ],
+      "required_tier": "fundamental",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-09T11:33:04.052119",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g0-operating_rigidity_common_shock_spread-d1bf48",
+          "generation": 0,
+          "operator": "seed",
+          "parent_ids": [],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": 0.005154322483730417,
+            "independence": null,
+            "parsimony": -83.0,
+            "structural_novelty": 0.8114365832894836
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 81,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.011948216972844677,
+            "deflated": {
+              "best_ic": 0.011948,
+              "deflated_ic": 0.001787,
+              "deflated_t": 0.521263,
+              "luck_ic": 0.010162,
+              "n_obs": 85117,
+              "n_trials": 81
+            },
+            "n_trials": 81,
+            "dropped": [
+              "asymmetric_fluctuation_dissipation_breakdown"
+            ],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L1H_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T11:33:04+00:00"
+        }
+      }
+    },
+    {
+      "id": "reflexive_bubble_criticality_unwind",
+      "name": "Reflexive Bubble Criticality Unwind",
+      "class_name": "",
+      "description": "Fits a rolling quadratic acceleration to log close prices, measures contraction in the spacing of local high-water marks, and scales the resulting criticality score by abnormal volume and close-to-high positioning. The signal is negative for names with explosive, volume-confirmed, increasingly compressed up-paths and positive for their mirror-image downside capitulation states.",
+      "formula": "",
+      "trading_idea": "A price rise becomes fragile when returns accelerate nonlinearly while volume participation rises and the intervals between new highs compress, consistent with reflexive bubble dynamics approaching a phase transition. Late buyers, benchmarked momentum mandates, and short-covering flows can sustain the ascent temporarily, but their demand is increasingly exhausted; the expected six-day effect is a cross-sectional reversal among the most critical trajectories. The hypothesis is falsified if high criticality consistently predicts continued risk-adjusted returns rather than asymmetric drawdowns after controlling for ordinary momentum and volatility.",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.005694,
+        "ic_std": 0.146958,
+        "ic_ir": 0.038748,
+        "ic_hit_rate": 0.5146,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.006463,
+            "ic_std": 0.15256,
+            "ic_ir": 0.042362,
+            "ic_hit_rate": 0.5178,
+            "n_timestamps": 4125
+          },
+          "6": {
+            "ic": 0.005694,
+            "ic_std": 0.146958,
+            "ic_ir": 0.038748,
+            "ic_hit_rate": 0.5146,
+            "n_timestamps": 4120
+          },
+          "60": {
+            "ic": 0.001154,
+            "ic_std": 0.127133,
+            "ic_ir": 0.009075,
+            "ic_hit_rate": 0.4919,
+            "n_timestamps": 4066
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4120,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "application_of_deep_learning_for_factor_timing_in_asset_mana"
+      ],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L1H_terra_s0",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/reflexive_bubble_criticality_unwind.py",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-09T11:33:04.052146",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g0-reflexive_bubble_criticality_unwind-15952f",
+          "generation": 0,
+          "operator": "seed",
+          "parent_ids": [],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": 0.0033413495341289637,
+            "independence": null,
+            "parsimony": -127.0,
+            "structural_novelty": 0.8040509364303223
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 81,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.011948216972844677,
+            "deflated": {
+              "best_ic": 0.011948,
+              "deflated_ic": 0.001787,
+              "deflated_t": 0.521263,
+              "luck_ic": 0.010162,
+              "n_obs": 85117,
+              "n_trials": 81
+            },
+            "n_trials": 81,
+            "dropped": [
+              "asymmetric_fluctuation_dissipation_breakdown"
+            ],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L1H_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T11:33:04+00:00"
+        }
+      }
+    },
+    {
+      "id": "spectral_peer_heat_diffusion_deficit",
+      "name": "Spectral Peer Diffusion Deficit",
+      "class_name": "",
+      "description": "Construct a rolling signed similarity graph from sector-demeaned daily returns, retain reliable positive edges, and apply a normalized graph heat-diffusion operator to peers' current abnormal-volume-weighted returns. The score is the cross-sectional rank of propagated peer shock minus the stock's own recent return, with low-confidence graph neighborhoods masked.",
+      "formula": "",
+      "trading_idea": "Related equities transmit information gradually rather than instantaneously, especially when the initial move is concentrated in a liquid or high-attention peer. A signed correlation graph can identify economically connected peers more precisely than static sector labels; a stock whose return has lagged a volume-confirmed shock diffusing through that graph should catch up over the next week. The edge should disappear if graph-propagated shocks do not forecast receiver returns after controlling for the receiver's own contemporaneous move, which is a direct falsification test.",
+      "trading_idea_ids": [],
+      "category": "statistical_arbitrage",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.015121,
+        "ic_std": 0.161756,
+        "ic_ir": 0.093482,
+        "ic_hit_rate": 0.5261,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.010634,
+            "ic_std": 0.17,
+            "ic_ir": 0.062556,
+            "ic_hit_rate": 0.5179,
+            "n_timestamps": 4105
+          },
+          "6": {
+            "ic": 0.015121,
+            "ic_std": 0.161756,
+            "ic_ir": 0.093482,
+            "ic_hit_rate": 0.5261,
+            "n_timestamps": 4100
+          },
+          "60": {
+            "ic": -0.001241,
+            "ic_std": 0.150864,
+            "ic_ir": -0.008229,
+            "ic_hit_rate": 0.4928,
+            "n_timestamps": 4046
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4100,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "statistical_arbitrage_in_multi_pair_trading_strategy_based_o"
+      ],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L1H_terra_s0",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/spectral_peer_heat_diffusion_deficit.py",
+      "required_inputs": [
+        "close",
+        "volume",
+        "sector"
+      ],
+      "required_tier": "fundamental",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-09T11:33:04.052171",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g0-spectral_peer_heat_diffusion_deficit-8d5960",
+          "generation": 0,
+          "operator": "seed",
+          "parent_ids": [],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": 0.0058623312770922295,
+            "independence": null,
+            "parsimony": -137.0,
+            "structural_novelty": 0.8046171922323184
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 81,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.011948216972844677,
+            "deflated": {
+              "best_ic": 0.011948,
+              "deflated_ic": 0.001787,
+              "deflated_t": 0.521263,
+              "luck_ic": 0.010162,
+              "n_obs": 85117,
+              "n_trials": 81
+            },
+            "n_trials": 81,
+            "dropped": [
+              "asymmetric_fluctuation_dissipation_breakdown"
+            ],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L1H_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T11:33:04+00:00"
+        }
+      }
+    },
+    {
+      "id": "discrete_flow_branching_intensity_gap",
+      "name": "Discrete Flow Branching Intensity Gap",
+      "class_name": "",
+      "description": "Convert each bar into a signed flow proxy using close location within the high-low range multiplied by volume surprise, then estimate causal exponentially decayed own-name and leave-one-out industry excitation states. Rank the signed expected next-flow intensity after subtracting the contemporaneous return response, favoring persistent unsaturated excitation and penalizing extreme range expansion that suggests completion.",
+      "formula": "",
+      "trading_idea": "Order-flow contagion can be approximated even with daily bars: close-location-weighted abnormal volume is a noisy signed-flow mark, and clustered marks reveal self-exciting execution rather than isolated news response. When the estimated own-plus-industry excitation intensity is high but realized price displacement remains small, latent parent order flow is likely still being executed and should produce continuation. This mechanism is falsified if high compensator residuals systematically reverse rather than continue, or if their predictive content vanishes after conditioning on abnormal volume alone.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.000624,
+        "ic_std": 0.142118,
+        "ic_ir": 0.004391,
+        "ic_hit_rate": 0.4942,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.00255,
+            "ic_std": 0.150625,
+            "ic_ir": 0.016932,
+            "ic_hit_rate": 0.5076,
+            "n_timestamps": 4155
+          },
+          "6": {
+            "ic": 0.000624,
+            "ic_std": 0.142118,
+            "ic_ir": 0.004391,
+            "ic_hit_rate": 0.4942,
+            "n_timestamps": 4150
+          },
+          "60": {
+            "ic": -0.0004,
+            "ic_std": 0.133065,
+            "ic_ir": -0.003008,
+            "ic_hit_rate": 0.5005,
+            "n_timestamps": 4096
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4150,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "statistical_arbitrage_in_multi_pair_trading_strategy_based_o"
+      ],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L1H_terra_s0",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/discrete_flow_branching_intensity_gap.py",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume",
+        "industry"
+      ],
+      "required_tier": "fundamental",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-09T11:33:04.052194",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g0-discrete_flow_branching_intensity_gap-017486",
+          "generation": 0,
+          "operator": "seed",
+          "parent_ids": [],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": 0.006235833475640025,
+            "independence": null,
+            "parsimony": -161.0,
+            "structural_novelty": 0.8432545360496865
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 81,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.011948216972844677,
+            "deflated": {
+              "best_ic": 0.011948,
+              "deflated_ic": 0.001787,
+              "deflated_t": 0.521263,
+              "luck_ic": 0.010162,
+              "n_obs": 85117,
+              "n_trials": 81
+            },
+            "n_trials": 81,
+            "dropped": [
+              "asymmetric_fluctuation_dissipation_breakdown"
+            ],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L1H_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T11:33:04+00:00"
+        }
+      }
+    },
+    {
+      "id": "oriented_flow_price_hysteresis_completion",
+      "name": "Oriented Flow-Price Hysteresis Completion",
+      "class_name": "",
+      "description": "For each ticker, form signed volume pressure as return sign times standardized log-volume innovation, then estimate a rolling antisymmetric lag statistic, sum(pressure[t-1] * return[t] - return[t-1] * pressure[t]), normalized by rolling pressure-return energy. Multiply the current signed pressure by this flow-leading orientation, suppress unstable low-energy histories, and cross-sectionally rank the resulting signal each date.",
+      "formula": "",
+      "trading_idea": "A persistent trader executing a metaorder creates directional, abnormal-volume impulses that lead price adjustment, whereas reactive liquidity chasing produces volume after price movement. The signed area of the recent phase portrait between signed volume surprise and return is a causal lead-lag statistic: positive flow-leading orientation indicates that price has historically been responding with delay to pressure, so a fresh same-direction impulse should continue over the next week. This is falsifiable if phase orientation does not differentiate subsequent same-sign return after conditioning on recent return, volatility, and volume; it can persist because daily-bar investors cannot directly observe parent-order completion and because execution schedules are deliberately obscured.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.001327,
+        "ic_std": 0.107698,
+        "ic_ir": -0.012324,
+        "ic_hit_rate": 0.4873,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.00212,
+            "ic_std": 0.108297,
+            "ic_ir": -0.019577,
+            "ic_hit_rate": 0.4906,
+            "n_timestamps": 4107
+          },
+          "6": {
+            "ic": -0.001327,
+            "ic_std": 0.107698,
+            "ic_ir": -0.012324,
+            "ic_hit_rate": 0.4873,
+            "n_timestamps": 4102
+          },
+          "60": {
+            "ic": -0.001408,
+            "ic_std": 0.11081,
+            "ic_ir": -0.012705,
+            "ic_hit_rate": 0.4918,
+            "n_timestamps": 4048
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4102,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L1H_terra_s0",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/oriented_flow_price_hysteresis_completion.py",
+      "required_inputs": [
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-09T11:33:04.052215",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g0-oriented_flow_price_hysteresis_completion-484be9",
+          "generation": 0,
+          "operator": "seed",
+          "parent_ids": [],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": 0.01154647125865373,
+            "independence": null,
+            "parsimony": -82.0,
+            "structural_novelty": 0.7929389907471709
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 81,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.011948216972844677,
+            "deflated": {
+              "best_ic": 0.011948,
+              "deflated_ic": 0.001787,
+              "deflated_t": 0.521263,
+              "luck_ic": 0.010162,
+              "n_obs": 85117,
+              "n_trials": 81
+            },
+            "n_trials": 81,
+            "dropped": [
+              "asymmetric_fluctuation_dissipation_breakdown"
+            ],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L1H_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T11:33:04+00:00"
+        }
+      }
+    },
+    {
+      "id": "impact_arrival_concavity_residual",
+      "name": "Accelerating Flow Impact Concavity",
+      "class_name": "",
+      "description": "Construct a daily signed-flow proxy from volume times close-location value within the high-low range, estimate short-versus-long EWMA acceleration in that proxy, and compare realized return with a rolling fitted or normalized concave function of absolute signed flow. Rank stocks by positive directional flow acceleration multiplied by the negative impact residual, favoring flow that is strong but not yet fully reflected in price.",
+      "formula": "",
+      "trading_idea": "A sequence of increasingly frequent, same-direction high-volume closes is consistent with a latent metaorder or clustered information arrival rather than independent daily trading. When the signed-volume impulse is accelerating but the realized price impact remains below its own concave square-root-style impact expectation, liquidity providers appear to be absorbing flow without fully clearing the imbalance; the residual demand should continue to move price over the next week. The hypothesis is falsified if low-impact accelerating flow systematically reverses, which would indicate that the pattern is primarily contrarian liquidity provision rather than unfinished informed execution.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.004093,
+        "ic_std": 0.141486,
+        "ic_ir": 0.028926,
+        "ic_hit_rate": 0.5059,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.001827,
+            "ic_std": 0.149106,
+            "ic_ir": 0.012251,
+            "ic_hit_rate": 0.4994,
+            "n_timestamps": 4105
+          },
+          "6": {
+            "ic": 0.004093,
+            "ic_std": 0.141486,
+            "ic_ir": 0.028926,
+            "ic_hit_rate": 0.5059,
+            "n_timestamps": 4100
+          },
+          "60": {
+            "ic": 0.002001,
+            "ic_std": 0.133627,
+            "ic_ir": 0.014978,
+            "ic_hit_rate": 0.5037,
+            "n_timestamps": 4046
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4100,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "application_of_deep_learning_for_factor_timing_in_asset_mana"
+      ],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L1H_terra_s0",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/impact_arrival_concavity_residual.py",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-09T11:33:04.052238",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g0-impact_arrival_concavity_residual-45ce89",
+          "generation": 0,
+          "operator": "seed",
+          "parent_ids": [],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": 0.0034410401485919784,
+            "independence": null,
+            "parsimony": -86.0,
+            "structural_novelty": 0.8882306159193744
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 81,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.011948216972844677,
+            "deflated": {
+              "best_ic": 0.011948,
+              "deflated_ic": 0.001787,
+              "deflated_t": 0.521263,
+              "luck_ic": 0.010162,
+              "n_obs": 85117,
+              "n_trials": 81
+            },
+            "n_trials": 81,
+            "dropped": [
+              "asymmetric_fluctuation_dissipation_breakdown"
+            ],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L1H_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T11:33:04+00:00"
+        }
+      }
+    },
+    {
+      "id": "consensus_leverage_feasibility_gap",
+      "name": "Consensus Operating-Leverage Feasibility Gap",
+      "class_name": "",
+      "description": "Estimate the cross-sectional gap between implied EPS growth from epsEstimate versus reported eps and implied revenue growth from revenueEstimate versus reported revenue. Assign negative scores to firms whose implied EPS-versus-sales leverage is high but whose operatingMargin, incomeQuality, roic, and operatingCashFlowGrowth trends are weak, and positive scores to the converse cases; neutralize within industry.",
+      "formula": "",
+      "trading_idea": "Analysts and growth-oriented investors often extrapolate EPS growth more aggressively than revenue growth, implicitly assuming favorable operating leverage. This expectation is fragile when recent operating-margin, cash-conversion, and return-on-capital changes do not support such leverage; expensive firms with the largest unsupported implied margin expansion should underperform, while operationally improving firms with muted consensus leverage should outperform. The mechanism persists because consensus revisions, institutional mandates, and narrative anchoring adjust more slowly than the market's recognition of whether earnings growth is cash-backed and operationally feasible.",
+      "trading_idea_ids": [],
+      "category": "sentiment",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.001339,
+        "ic_std": 0.101909,
+        "ic_ir": -0.013136,
+        "ic_hit_rate": 0.4857,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.000354,
+            "ic_std": 0.101329,
+            "ic_ir": -0.003494,
+            "ic_hit_rate": 0.4969,
+            "n_timestamps": 4164
+          },
+          "6": {
+            "ic": -0.001339,
+            "ic_std": 0.101909,
+            "ic_ir": -0.013136,
+            "ic_hit_rate": 0.4857,
+            "n_timestamps": 4159
+          },
+          "60": {
+            "ic": -0.000155,
+            "ic_std": 0.106359,
+            "ic_ir": -0.001457,
+            "ic_hit_rate": 0.4753,
+            "n_timestamps": 4105
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4159,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "statistical_arbitrage_in_multi_pair_trading_strategy_based_o"
+      ],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L1H_terra_s0",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/consensus_leverage_feasibility_gap.py",
+      "required_inputs": [
+        "close",
+        "epsEstimate",
+        "eps",
+        "revenueEstimate",
+        "revenue",
+        "operatingMargin",
+        "incomeQuality",
+        "roic",
+        "operatingCashFlowGrowth",
+        "peRatio",
+        "industry"
+      ],
+      "required_tier": "estimates",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-09T11:33:04.052266",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g0-consensus_leverage_feasibility_gap-244d12",
+          "generation": 0,
+          "operator": "seed",
+          "parent_ids": [],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": 0.00656352991645294,
+            "independence": null,
+            "parsimony": -68.0,
+            "structural_novelty": 0.829210021885731
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 81,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.011948216972844677,
+            "deflated": {
+              "best_ic": 0.011948,
+              "deflated_ic": 0.001787,
+              "deflated_t": 0.521263,
+              "luck_ic": 0.010162,
+              "n_obs": 85117,
+              "n_trials": 81
+            },
+            "n_trials": 81,
+            "dropped": [
+              "asymmetric_fluctuation_dissipation_breakdown"
+            ],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L1H_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T11:33:04+00:00"
+        }
+      }
+    },
+    {
+      "id": "smooth_trend_estimate_nonconfirmation_fade",
+      "name": "Smooth Trend Estimate-Nonconfirmation Fade",
+      "class_name": "",
+      "description": "Compute a medium-window log-price trend slope multiplied by its rolling regression R-squared, residualized cross-sectionally within industry. Multiply the negative of this trend-clarity score by a standardized composite of recent point-in-time changes in epsEstimate and revenueEstimate, so the signal is strongest when price direction and estimate direction disagree.",
+      "formula": "",
+      "trading_idea": "Investors extrapolate visually clean price trends more readily than noisy moves, as motivated by the trended-momentum discussion in the source paper. A smooth upward trend unsupported by contemporaneous EPS and revenue-consensus improvement is more likely to reflect narrative extrapolation than information, and should fade once marginal trend followers are exhausted. The trade is long firms with smooth declines despite improving estimates and short firms with smooth advances despite stagnant or worsening estimates. The mechanism is falsified if estimate-nonconfirmed smooth trends continue as strongly as estimate-confirmed trends after controlling for sector-relative return.",
+      "trading_idea_ids": [],
+      "category": "mean_reversion",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": null,
+        "ic_std": null,
+        "ic_ir": null,
+        "ic_hit_rate": null,
+        "ic_by_horizon": {
+          "1": {
+            "ic": null,
+            "ic_std": null,
+            "ic_ir": null,
+            "ic_hit_rate": null,
+            "n_timestamps": 0
+          },
+          "6": {
+            "ic": null,
+            "ic_std": null,
+            "ic_ir": null,
+            "ic_hit_rate": null,
+            "n_timestamps": 0
+          },
+          "60": {
+            "ic": null,
+            "ic_std": null,
+            "ic_ir": null,
+            "ic_hit_rate": null,
+            "n_timestamps": 0
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 0,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "a_multi_factor_market_neutral_investment_strategy_for_new_yo"
+      ],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L1H_terra_s0",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/smooth_trend_estimate_nonconfirmation_fade.py",
+      "required_inputs": [
+        "close",
+        "epsEstimate",
+        "revenueEstimate",
+        "industry"
+      ],
+      "required_tier": "estimates",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-09T11:33:04.052291",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g0-smooth_trend_estimate_nonconfirmation_fade-63eec4",
+          "generation": 0,
+          "operator": "seed",
+          "parent_ids": [],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": 0.0,
+            "independence": null,
+            "parsimony": -108.0,
+            "structural_novelty": 0.844030332027113
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 81,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.011948216972844677,
+            "deflated": {
+              "best_ic": 0.011948,
+              "deflated_ic": 0.001787,
+              "deflated_t": 0.521263,
+              "luck_ic": 0.010162,
+              "n_obs": 85117,
+              "n_trials": 81
+            },
+            "n_trials": 81,
+            "dropped": [
+              "asymmetric_fluctuation_dissipation_breakdown"
+            ],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L1H_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T11:33:04+00:00"
+        }
+      }
+    },
+    {
+      "id": "relative_momentum_valuation_capacity_break",
+      "name": "Relative Momentum Valuation-Capacity Break",
+      "class_name": "",
+      "description": "Rank each stock's intermediate return within its industry, excluding the most recent few bars, then interact that rank with a slow point-in-time capacity composite from changes in roic, operatingMargin, incomeQuality, and freeCashFlowGrowth. Penalize high valuation-extrapolation states using industry-relative evToSales, peRatio, and price strength, producing a cross-sectional long-supported-momentum/short-fragile-momentum score.",
+      "formula": "",
+      "trading_idea": "Cross-sectional momentum is more durable when relative winners have both an improving operating capacity to justify the move and a valuation that has not already embedded an extreme extrapolation premium. Firms whose industry-relative price strength is accompanied by improving ROIC, operating margin, or free-cash-flow quality should attract gradual institutional re-ranking and continued flows. Conversely, relative winners with deteriorating cash conversion and highly stretched valuation are vulnerable to a six-day break as investors reassess whether price leadership is supported by deliverable economics. This is falsified if conditioning relative momentum on fundamental capacity and valuation does not improve the spread between supported and unsupported winners.",
+      "trading_idea_ids": [],
+      "category": "momentum",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.001314,
+        "ic_std": 0.109521,
+        "ic_ir": -0.011996,
+        "ic_hit_rate": 0.4928,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.000235,
+            "ic_std": 0.113415,
+            "ic_ir": 0.002072,
+            "ic_hit_rate": 0.499,
+            "n_timestamps": 4096
+          },
+          "6": {
+            "ic": -0.001314,
+            "ic_std": 0.109521,
+            "ic_ir": -0.011996,
+            "ic_hit_rate": 0.4928,
+            "n_timestamps": 4091
+          },
+          "60": {
+            "ic": -0.014421,
+            "ic_std": 0.108847,
+            "ic_ir": -0.13249,
+            "ic_hit_rate": 0.4288,
+            "n_timestamps": 4037
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4091,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "a_multi_factor_market_neutral_investment_strategy_for_new_yo"
+      ],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L1H_terra_s0",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/relative_momentum_valuation_capacity_break.py",
+      "required_inputs": [
+        "close",
+        "industry",
+        "roic",
+        "operatingMargin",
+        "incomeQuality",
+        "freeCashFlowGrowth",
+        "evToSales",
+        "peRatio"
+      ],
+      "required_tier": "fundamental",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-09T11:33:04.052314",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g0-relative_momentum_valuation_capacity_break-ee95a2",
+          "generation": 0,
+          "operator": "seed",
+          "parent_ids": [],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": -0.0025425188882347,
+            "independence": null,
+            "parsimony": -70.0,
+            "structural_novelty": 0.9045213773074074
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 81,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.011948216972844677,
+            "deflated": {
+              "best_ic": 0.011948,
+              "deflated_ic": 0.001787,
+              "deflated_t": 0.521263,
+              "luck_ic": 0.010162,
+              "n_obs": 85117,
+              "n_trials": 81
+            },
+            "n_trials": 81,
+            "dropped": [
+              "asymmetric_fluctuation_dissipation_breakdown"
+            ],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L1H_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T11:33:04+00:00"
+        }
+      }
+    },
+    {
+      "id": "financing_buffered_downside_propagation",
+      "name": "Financing-Buffered Downside Propagation",
+      "class_name": "",
+      "description": "Create a point-in-time financing-resilience composite from cash relative to total debt, interest coverage, current ratio, operating cash flow growth, and debt growth. Interact its cross-sectional rank with a fresh downside range/return innovation and abnormal volume, producing negative scores for fragile firms under stress and positive scores for financially buffered firms experiencing comparable forced-flow shocks.",
+      "formula": "",
+      "trading_idea": "The same market loss should have different persistence depending on whether the company can internally fund its obligations and withstand tighter financing conditions. A negative price shock in firms with weak cash-to-debt coverage, poor interest coverage, and deteriorating operating cash flow is more likely to trigger continued repricing by credit-sensitive and risk-constrained investors; resilient firms are more likely to experience a transitory liquidity shock. This is falsified if balance-sheet fragility does not increase the conditional continuation of downside volatility innovations after accounting for sector stress.",
+      "trading_idea_ids": [],
+      "category": "other",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.002868,
+        "ic_std": 0.125341,
+        "ic_ir": 0.022881,
+        "ic_hit_rate": 0.5077,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.002164,
+            "ic_std": 0.155897,
+            "ic_ir": 0.013882,
+            "ic_hit_rate": 0.512,
+            "n_timestamps": 4139
+          },
+          "6": {
+            "ic": 0.002868,
+            "ic_std": 0.125341,
+            "ic_ir": 0.022881,
+            "ic_hit_rate": 0.5077,
+            "n_timestamps": 4134
+          },
+          "60": {
+            "ic": 0.010526,
+            "ic_std": 0.117729,
+            "ic_ir": 0.089407,
+            "ic_hit_rate": 0.5352,
+            "n_timestamps": 4079
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4134,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "statistical_arbitrage_in_multi_pair_trading_strategy_based_o"
+      ],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L1H_terra_s0",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/financing_buffered_downside_propagation.py",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume",
+        "cash",
+        "totalDebt",
+        "interestCoverage",
+        "currentRatio",
+        "operatingCashFlowGrowth",
+        "debtGrowth"
+      ],
+      "required_tier": "fundamental",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-09T11:33:04.052337",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g0-financing_buffered_downside_propagation-41716b",
+          "generation": 0,
+          "operator": "seed",
+          "parent_ids": [],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": 0.0009627305490497468,
+            "independence": null,
+            "parsimony": -138.0,
+            "structural_novelty": 0.8828496345272138
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 81,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.011948216972844677,
+            "deflated": {
+              "best_ic": 0.011948,
+              "deflated_ic": 0.001787,
+              "deflated_t": 0.521263,
+              "luck_ic": 0.010162,
+              "n_obs": 85117,
+              "n_trials": 81
+            },
+            "n_trials": 81,
+            "dropped": [
+              "asymmetric_fluctuation_dissipation_breakdown"
+            ],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L1H_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T11:33:04+00:00"
+        }
+      }
+    },
+    {
+      "id": "asymmetric_range_innovation_kernel",
+      "name": "Downside Range-Innovation Kernel",
+      "class_name": "",
+      "description": "For each name, estimate exponentially weighted lagged sensitivities of today's range innovation, based on (high-low)/close, to yesterday's positive and negative standardized returns. The cross-sectional score is the negative-minus-positive response coefficient multiplied by a recent downside-shock indicator, with robust clipping of extreme ranges.",
+      "formula": "",
+      "trading_idea": "Estimate whether a stock's realized range innovations have historically responded more strongly to negative than positive standardized returns, then activate the signal after a fresh downside shock. A large negative-return-to-future-range asymmetry indicates a leverage-like feedback loop in which risk-targeting, margin constraints, and cautious liquidity provision amplify selling rather than absorb it. The trade is short high-asymmetry names following fresh negative shocks and long names with symmetric or positive-shock-dominated range responses; the hypothesis fails if this conditional asymmetry predicts only volatility but not negative six-day returns after controlling for current return and realized range.",
+      "trading_idea_ids": [],
+      "category": "volatility",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.001977,
+        "ic_std": 0.116203,
+        "ic_ir": -0.017013,
+        "ic_hit_rate": 0.4909,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.000998,
+            "ic_std": 0.125787,
+            "ic_ir": 0.007931,
+            "ic_hit_rate": 0.512,
+            "n_timestamps": 4049
+          },
+          "6": {
+            "ic": -0.001977,
+            "ic_std": 0.116203,
+            "ic_ir": -0.017013,
+            "ic_hit_rate": 0.4909,
+            "n_timestamps": 4044
+          },
+          "60": {
+            "ic": -0.004698,
+            "ic_std": 0.114301,
+            "ic_ir": -0.041101,
+            "ic_hit_rate": 0.4736,
+            "n_timestamps": 3976
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4044,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "risk_management_and_return_prediction"
+      ],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L1H_terra_s0",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/asymmetric_range_innovation_kernel.py",
+      "required_inputs": [
+        "close",
+        "high",
+        "low"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-09T11:33:04.052358",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g0-asymmetric_range_innovation_kernel-921a82",
+          "generation": 0,
+          "operator": "seed",
+          "parent_ids": [],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": 0.01096031240732002,
+            "independence": null,
+            "parsimony": -102.0,
+            "structural_novelty": 0.8003286733753114
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 81,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.011948216972844677,
+            "deflated": {
+              "best_ic": 0.011948,
+              "deflated_ic": 0.001787,
+              "deflated_t": 0.521263,
+              "luck_ic": 0.010162,
+              "n_obs": 85117,
+              "n_trials": 81
+            },
+            "n_trials": 81,
+            "dropped": [
+              "asymmetric_fluctuation_dissipation_breakdown"
+            ],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L1H_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T11:33:04+00:00"
+        }
+      }
+    },
+    {
+      "id": "quiet_sellside_liquidity_withdrawal",
+      "name": "Quiet Sell-Side Liquidity Withdrawal",
+      "class_name": "",
+      "description": "Compute a signed close-location measure, abnormal intraday range relative to a trailing robust range baseline, and relative volume versus a trailing volume baseline. The signal is strongly negative for wide, low-volume down bars closing near the low, and mildly positive for the symmetric upside configuration, with a short persistence filter requiring the pattern to recur recently.",
+      "formula": "",
+      "trading_idea": "A down day that closes near its low with an unusually wide range but below-normal volume is more consistent with thin displayed liquidity and cautious market-maker replenishment than with a fully transferred, high-participation liquidation. Such episodes can continue because observed volume understates the effective price impact and systematic traders reacting to volatility or drawdown measures subsequently reduce exposure. Short names exhibiting this range-volume divergence and buy names with the mirror-image quiet upside pattern; the mechanism is rejected if low-volume downside bars are followed by the same or stronger rebound than high-volume capitulation bars after conditioning on return magnitude.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.007997,
+        "ic_std": 0.09836,
+        "ic_ir": -0.081299,
+        "ic_hit_rate": 0.4698,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.006204,
+            "ic_std": 0.09262,
+            "ic_ir": -0.066981,
+            "ic_hit_rate": 0.4509,
+            "n_timestamps": 468
+          },
+          "6": {
+            "ic": -0.007997,
+            "ic_std": 0.09836,
+            "ic_ir": -0.081299,
+            "ic_hit_rate": 0.4698,
+            "n_timestamps": 464
+          },
+          "60": {
+            "ic": 0.002308,
+            "ic_std": 0.096318,
+            "ic_ir": 0.023963,
+            "ic_hit_rate": 0.4966,
+            "n_timestamps": 441
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 464,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "risk_management_and_return_prediction"
+      ],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L1H_terra_s0",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/quiet_sellside_liquidity_withdrawal.py",
+      "required_inputs": [
+        "open",
+        "high",
+        "low",
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-09T11:33:04.052380",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g0-quiet_sellside_liquidity_withdrawal-facd0f",
+          "generation": 0,
+          "operator": "seed",
+          "parent_ids": [],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": -0.008069616349221313,
+            "independence": null,
+            "parsimony": -137.0,
+            "structural_novelty": 0.8271306231816755
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 81,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.011948216972844677,
+            "deflated": {
+              "best_ic": 0.011948,
+              "deflated_ic": 0.001787,
+              "deflated_t": 0.521263,
+              "luck_ic": 0.010162,
+              "n_obs": 85117,
+              "n_trials": 81
+            },
+            "n_trials": 81,
+            "dropped": [
+              "asymmetric_fluctuation_dissipation_breakdown"
+            ],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L1H_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T11:33:04+00:00"
+        }
+      }
+    },
+    {
+      "id": "opening_shock_retention_elasticity",
+      "name": "Opening Shock Retention Elasticity",
+      "class_name": "",
+      "description": "For each stock, compute the signed overnight gap versus the prior close, multiply by signed open-to-close retention, and scale by inverse abnormal volume and inverse intraday range. Cross-sectionally rank the resulting score, favoring efficiently retained directional opening shocks rather than high-turnover auction overshoots.",
+      "formula": "",
+      "trading_idea": "An opening gap is informative when the opening-liquidity shock is not subsequently reversed by the continuous market. A gap that is retained through the close despite relatively modest abnormal volume suggests overnight information was incorporated by liquidity takers while passive liquidity did not fully replenish; this should produce short-horizon continuation. The hypothesis is falsified if retained gaps with low volume are predominantly stale-price jumps that reverse over the following week.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.010475,
+        "ic_std": 0.159794,
+        "ic_ir": -0.065553,
+        "ic_hit_rate": 0.4758,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.005804,
+            "ic_std": 0.16477,
+            "ic_ir": -0.035222,
+            "ic_hit_rate": 0.4788,
+            "n_timestamps": 4154
+          },
+          "6": {
+            "ic": -0.010475,
+            "ic_std": 0.159794,
+            "ic_ir": -0.065553,
+            "ic_hit_rate": 0.4758,
+            "n_timestamps": 4149
+          },
+          "60": {
+            "ic": 0.000334,
+            "ic_std": 0.15365,
+            "ic_ir": 0.002177,
+            "ic_hit_rate": 0.5104,
+            "n_timestamps": 4095
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4149,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "application_of_deep_learning_for_factor_timing_in_asset_mana"
+      ],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L1H_terra_s0",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/opening_shock_retention_elasticity.py",
+      "required_inputs": [
+        "open",
+        "high",
+        "low",
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-09T11:33:04.052402",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g0-opening_shock_retention_elasticity-262bae",
+          "generation": 0,
+          "operator": "seed",
+          "parent_ids": [],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": 0.00644951931177456,
+            "independence": null,
+            "parsimony": -64.0,
+            "structural_novelty": 0.7854809868818446
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 81,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.011948216972844677,
+            "deflated": {
+              "best_ic": 0.011948,
+              "deflated_ic": 0.001787,
+              "deflated_t": 0.521263,
+              "luck_ic": 0.010162,
+              "n_obs": 85117,
+              "n_trials": 81
+            },
+            "n_trials": 81,
+            "dropped": [
+              "asymmetric_fluctuation_dissipation_breakdown"
+            ],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L1H_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T11:33:04+00:00"
+        }
+      }
+    },
+    {
+      "id": "nonlinear_impact_absorption_information_split",
+      "name": "Nonlinear Impact Absorption Split",
+      "class_name": "",
+      "description": "Estimate each stock's rolling nonlinear relationship between log abnormal volume and log absolute close-to-close return or intraday range. Score the signed residual displacement of the latest volume shock, then condition it on whether recent shocks have been consistently under-absorbed or over-absorbed; rank the continuation-versus-reversal implication cross-sectionally.",
+      "formula": "",
+      "trading_idea": "Daily price-volume observations can distinguish informed flow from temporary liquidity pressure by estimating whether unusually large participation produces disproportionately large directional displacement. A high-impact directional volume innovation after a period of stable impact elasticity is more likely to reflect information or depleted displayed depth and should continue; the opposite case, large volume absorbed with little displacement, is more consistent with liquidity-provider inventory pressure and subsequent reversal. Limits to arbitrage arise because the latent depth and initiator identity are unobserved, so participants cannot immediately separate informed demand from transitory execution.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.000161,
+        "ic_std": 0.120251,
+        "ic_ir": -0.001343,
+        "ic_hit_rate": 0.4928,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.001184,
+            "ic_std": 0.130267,
+            "ic_ir": -0.009091,
+            "ic_hit_rate": 0.501,
+            "n_timestamps": 4084
+          },
+          "6": {
+            "ic": -0.000161,
+            "ic_std": 0.120251,
+            "ic_ir": -0.001343,
+            "ic_hit_rate": 0.4928,
+            "n_timestamps": 4079
+          },
+          "60": {
+            "ic": -0.002546,
+            "ic_std": 0.111465,
+            "ic_ir": -0.022845,
+            "ic_hit_rate": 0.4947,
+            "n_timestamps": 4025
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4079,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "application_of_deep_learning_for_factor_timing_in_asset_mana"
+      ],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L1H_terra_s0",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/nonlinear_impact_absorption_information_split.py",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-09T11:33:04.052426",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g0-nonlinear_impact_absorption_information_split-d33e9b",
+          "generation": 0,
+          "operator": "seed",
+          "parent_ids": [],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": 0.005535818419803525,
+            "independence": null,
+            "parsimony": -218.0,
+            "structural_novelty": 0.902212089072272
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 81,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.011948216972844677,
+            "deflated": {
+              "best_ic": 0.011948,
+              "deflated_ic": 0.001787,
+              "deflated_t": 0.521263,
+              "luck_ic": 0.010162,
+              "n_obs": 85117,
+              "n_trials": 81
+            },
+            "n_trials": 81,
+            "dropped": [
+              "asymmetric_fluctuation_dissipation_breakdown"
+            ],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L1H_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T11:33:04+00:00"
+        }
+      }
+    },
+    {
+      "id": "weekly_participation_phase_pressure",
+      "name": "Weekly Execution Phase Pressure",
+      "class_name": "",
+      "description": "Construct a signed participation proxy from daily return times relative volume, then compare the current weekday's trailing eight-week average signed pressure with the stock's nonmatching-day baseline. Rank stocks by persistent weekday-specific pressure, penalizing unstable or low-volume histories, and trade in the recurring pressure direction.",
+      "formula": "",
+      "trading_idea": "Institutional execution schedules often follow calendar-linked rebalance, benchmark, and participation constraints, producing recurring same-weekday signed volume pressure rather than independent daily flow. A stock whose recent signed volume-adjusted returns repeatedly align on the current weekday is more likely to face another installment of the latent program around the next weekly phase, which falls close to the six-bar horizon. The signal should fail when weekday-specific flow has no greater persistence than shuffled calendar labels, or when its apparent effect is fully explained by generic momentum.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.002569,
+        "ic_std": 0.138888,
+        "ic_ir": -0.018496,
+        "ic_hit_rate": 0.4972,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.004832,
+            "ic_std": 0.142224,
+            "ic_ir": -0.033976,
+            "ic_hit_rate": 0.4838,
+            "n_timestamps": 4130
+          },
+          "6": {
+            "ic": -0.002569,
+            "ic_std": 0.138888,
+            "ic_ir": -0.018496,
+            "ic_hit_rate": 0.4972,
+            "n_timestamps": 4125
+          },
+          "60": {
+            "ic": -0.008675,
+            "ic_std": 0.135522,
+            "ic_ir": -0.064011,
+            "ic_hit_rate": 0.4778,
+            "n_timestamps": 4071
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4125,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "a_multi_factor_market_neutral_investment_strategy_for_new_yo"
+      ],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L1H_terra_s0",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/weekly_participation_phase_pressure.py",
+      "required_inputs": [
+        "close",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-09T11:33:04.052447",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g0-weekly_participation_phase_pressure-f01b29",
+          "generation": 0,
+          "operator": "seed",
+          "parent_ids": [],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": 0.009033161335121088,
+            "independence": null,
+            "parsimony": -139.0,
+            "structural_novelty": 0.8282834104769579
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 81,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.011948216972844677,
+            "deflated": {
+              "best_ic": 0.011948,
+              "deflated_ic": 0.001787,
+              "deflated_t": 0.521263,
+              "luck_ic": 0.010162,
+              "n_obs": 85117,
+              "n_trials": 81
+            },
+            "n_trials": 81,
+            "dropped": [
+              "asymmetric_fluctuation_dissipation_breakdown"
+            ],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L1H_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T11:33:04+00:00"
+        }
+      }
+    },
+    {
+      "id": "transient_inventory_pressure_release",
+      "name": "Transient Inventory Pressure Release",
+      "class_name": "",
+      "description": "Infer signed daily flow from close-location-in-range times standardized volume, estimate separate rolling price-impact slopes for positive and negative flow, and form a multi-day inventory-pressure state. Rank stocks by the opposite of accumulated pressure when the latest flow intensity is decaying and realized displacement is high relative to the stock's estimated temporary-impact response.",
+      "formula": "",
+      "trading_idea": "Persistent directional volume can reflect a metaorder whose temporary price impact is carried by liquidity providers and other inventory-sensitive intermediaries. When the estimated signed-flow impulse decelerates after producing an unusually large price displacement, the execution schedule is likely nearing completion and the temporary component should unwind over the following week. This should fail when the apparent flow proxy is instead informed trading: specifically, reversal should disappear or turn into continuation when post-signal volume remains elevated and directional impact does not decay.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": 0.00243,
+        "ic_std": 0.114544,
+        "ic_ir": 0.021213,
+        "ic_hit_rate": 0.5068,
+        "ic_by_horizon": {
+          "1": {
+            "ic": 0.001944,
+            "ic_std": 0.115207,
+            "ic_ir": 0.016872,
+            "ic_hit_rate": 0.5006,
+            "n_timestamps": 4121
+          },
+          "6": {
+            "ic": 0.00243,
+            "ic_std": 0.114544,
+            "ic_ir": 0.021213,
+            "ic_hit_rate": 0.5068,
+            "n_timestamps": 4116
+          },
+          "60": {
+            "ic": -0.004154,
+            "ic_std": 0.1173,
+            "ic_ir": -0.035412,
+            "ic_hit_rate": 0.4776,
+            "n_timestamps": 4062
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4116,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "statistical_arbitrage_in_multi_pair_trading_strategy_based_o"
+      ],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L1H_terra_s0",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/transient_inventory_pressure_release.py",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-09T11:33:04.052468",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g0-transient_inventory_pressure_release-3466ab",
+          "generation": 0,
+          "operator": "seed",
+          "parent_ids": [],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": 0.001990564668281132,
+            "independence": null,
+            "parsimony": -160.0,
+            "structural_novelty": 0.8049474809713849
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 81,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.011948216972844677,
+            "deflated": {
+              "best_ic": 0.011948,
+              "deflated_ic": 0.001787,
+              "deflated_t": 0.521263,
+              "luck_ic": 0.010162,
+              "n_obs": 85117,
+              "n_trials": 81
+            },
+            "n_trials": 81,
+            "dropped": [
+              "asymmetric_fluctuation_dissipation_breakdown"
+            ],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L1H_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T11:33:04+00:00"
+        }
+      }
+    },
+    {
+      "id": "corporate_financing_footprint_persistence",
+      "name": "Corporate Financing Footprint Persistence",
+      "class_name": "",
+      "description": "At each point-in-time financing update, combine normalized netStockIssuance, sharesGrowth, and shareRepurchase into a signed corporate-demand state, with freshness based on changes in the quarterly step functions. Multiply this state by a recent persistent signed-volume footprint and downweight names whose intrabar ranges indicate that the flow was fully absorbed rather than still moving price.",
+      "formula": "",
+      "trading_idea": "Disclosed net issuance, dilution, and repurchase activity identify a slow-moving natural buyer or seller whose execution can be spread across many sessions. The market often treats a quarterly financing update as accounting information rather than as evidence about near-term order-flow supply, leaving aligned daily volume footprints underpriced; issuance aligned with sell pressure should continue downward, while repurchase capacity aligned with buy pressure should continue upward. The mechanism is falsified if the incremental predictive power of financing direction vanishes once the contemporaneous price-volume footprint is controlled for, or if the effect reverses immediately after the filing update.",
+      "trading_idea_ids": [],
+      "category": "other",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.006936,
+        "ic_std": 0.137774,
+        "ic_ir": -0.050341,
+        "ic_hit_rate": 0.4789,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.004573,
+            "ic_std": 0.142944,
+            "ic_ir": -0.031988,
+            "ic_hit_rate": 0.4887,
+            "n_timestamps": 4160
+          },
+          "6": {
+            "ic": -0.006936,
+            "ic_std": 0.137774,
+            "ic_ir": -0.050341,
+            "ic_hit_rate": 0.4789,
+            "n_timestamps": 4155
+          },
+          "60": {
+            "ic": 0.003141,
+            "ic_std": 0.131945,
+            "ic_ir": 0.023808,
+            "ic_hit_rate": 0.5213,
+            "n_timestamps": 4101
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4155,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "statistical_arbitrage_in_multi_pair_trading_strategy_based_o"
+      ],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L1H_terra_s0",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/corporate_financing_footprint_persistence.py",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume",
+        "marketCap",
+        "netStockIssuance",
+        "sharesGrowth",
+        "shareRepurchase"
+      ],
+      "required_tier": "fundamental",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-09T11:33:04.052490",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g0-corporate_financing_footprint_persistence-35997c",
+          "generation": 0,
+          "operator": "seed",
+          "parent_ids": [],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": 0.007877924089739911,
+            "independence": null,
+            "parsimony": -147.0,
+            "structural_novelty": 0.7929389907471709
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 81,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.011948216972844677,
+            "deflated": {
+              "best_ic": 0.011948,
+              "deflated_ic": 0.001787,
+              "deflated_t": 0.521263,
+              "luck_ic": 0.010162,
+              "n_obs": 85117,
+              "n_trials": 81
+            },
+            "n_trials": 81,
+            "dropped": [
+              "asymmetric_fluctuation_dissipation_breakdown"
+            ],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L1H_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T11:33:04+00:00"
+        }
+      }
+    },
+    {
+      "id": "corporate_supply_absorption_deficit",
+      "name": "Corporate Supply Absorption Deficit",
+      "class_name": "",
+      "description": "Construct a point-in-time corporate-equity-supply innovation from changes in sharesOutstanding, sharesGrowth, netStockIssuance, stockBasedCompensation, and shareRepurchase. Compare its direction with the subsequent rolling price response per unit abnormal volume; long names with absorbed negative supply and short names with unabsorbed positive supply.",
+      "formula": "",
+      "trading_idea": "Quarterly share issuance, stock-based compensation, and debt-financed buybacks create predictable changes in the marginal supply of equity, but portfolio mandates and gradual execution can prevent immediate full price adjustment. The signal distinguishes genuine absorption from superficial turnover: issuance accompanied by high volume but weak positive price accommodation is a persistent supply overhang, whereas buyback-related share contraction with resilient price accommodation is a demand tailwind. It should fail if price-volume accommodation fully incorporates changes in shares outstanding within a few sessions of disclosure.",
+      "trading_idea_ids": [],
+      "category": "other",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.007063,
+        "ic_std": 0.134373,
+        "ic_ir": -0.052563,
+        "ic_hit_rate": 0.4819,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.006443,
+            "ic_std": 0.140257,
+            "ic_ir": -0.045938,
+            "ic_hit_rate": 0.4823,
+            "n_timestamps": 4145
+          },
+          "6": {
+            "ic": -0.007063,
+            "ic_std": 0.134373,
+            "ic_ir": -0.052563,
+            "ic_hit_rate": 0.4819,
+            "n_timestamps": 4140
+          },
+          "60": {
+            "ic": 0.000598,
+            "ic_std": 0.132653,
+            "ic_ir": 0.004509,
+            "ic_hit_rate": 0.5049,
+            "n_timestamps": 4086
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4140,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "application_of_deep_learning_for_factor_timing_in_asset_mana"
+      ],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L1H_terra_s0",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/corporate_supply_absorption_deficit.py",
+      "required_inputs": [
+        "close",
+        "volume",
+        "sharesOutstanding",
+        "sharesGrowth",
+        "netStockIssuance",
+        "stockBasedCompensation",
+        "shareRepurchase"
+      ],
+      "required_tier": "fundamental",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-09T11:33:04.052511",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g0-corporate_supply_absorption_deficit-84cef8",
+          "generation": 0,
+          "operator": "seed",
+          "parent_ids": [],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": 0.0044112719520608065,
+            "independence": null,
+            "parsimony": -176.0,
+            "structural_novelty": 0.8914092856790334
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 81,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.011948216972844677,
+            "deflated": {
+              "best_ic": 0.011948,
+              "deflated_ic": 0.001787,
+              "deflated_t": 0.521263,
+              "luck_ic": 0.010162,
+              "n_obs": 85117,
+              "n_trials": 81
+            },
+            "n_trials": 81,
+            "dropped": [
+              "asymmetric_fluctuation_dissipation_breakdown"
+            ],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L1H_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T11:33:04+00:00"
+        }
+      }
+    },
+    {
+      "id": "latent_depth_adaptation_signed_pressure",
+      "name": "Latent Depth Adaptation Pressure",
+      "class_name": "",
+      "description": "Compute a signed pressure path from close-to-close returns and close-location values, then estimate a daily impact-elasticity proxy using absolute return or intrabar range divided by the square root of volume relative to its rolling median. Rank stocks on directional pressure multiplied by the short-versus-long impact-elasticity acceleration, while requiring persistent elevated impact across several bars.",
+      "formula": "",
+      "trading_idea": "Market depth is not directly observed in daily bars, but a rising amount of price displacement per unit of relative volume is a usable proxy for dealers withdrawing latent liquidity. A coherent directional sequence whose volume-normalized impact is rising faster than its own trailing baseline should continue while market makers, hedgers, and slow-moving arbitrage capital rebuild depth; the direction comes from the signed path, not from impact alone. This differs from ordinary momentum because a similarly sized return on normal or declining impact is not rewarded. It is rejected if the impact-acceleration component has no incremental signed-return forecast after conditioning on recent return, range, and volume.",
+      "trading_idea_ids": [],
+      "category": "microstructure",
+      "status": "backtested",
+      "backtest_metrics": {
+        "information_coefficient": -0.002237,
+        "ic_std": 0.133822,
+        "ic_ir": -0.016717,
+        "ic_hit_rate": 0.5092,
+        "ic_by_horizon": {
+          "1": {
+            "ic": -0.006407,
+            "ic_std": 0.140189,
+            "ic_ir": -0.045705,
+            "ic_hit_rate": 0.4878,
+            "n_timestamps": 4086
+          },
+          "6": {
+            "ic": -0.002237,
+            "ic_std": 0.133822,
+            "ic_ir": -0.016717,
+            "ic_hit_rate": 0.5092,
+            "n_timestamps": 4081
+          },
+          "60": {
+            "ic": -0.003369,
+            "ic_std": 0.131826,
+            "ic_ir": -0.025553,
+            "ic_hit_rate": 0.4914,
+            "n_timestamps": 4027
+          }
+        },
+        "sharpe_ratio": null,
+        "max_drawdown": null,
+        "turnover": null,
+        "annualised_return": null,
+        "hit_rate": null,
+        "extra": {
+          "n_timestamps": 4081,
+          "horizon_bars": 6,
+          "horizons_bars": [
+            1,
+            6,
+            60
+          ]
+        }
+      },
+      "source_paper_ids": [
+        "hidden_order_in_trades_predicts_the_size_of_price_moves"
+      ],
+      "source": "researcher",
+      "research_session_id": "evolution:fmp_archive_equity_nasdaq100pit:L1H_terra_s0",
+      "code_path": "/Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/quant_fund_agent/factors/researcher/latent_depth_adaptation_signed_pressure.py",
+      "required_inputs": [
+        "close",
+        "high",
+        "low",
+        "volume"
+      ],
+      "required_tier": "standard",
+      "prediction_horizon": 6,
+      "suggested_horizons": [
+        6
+      ],
+      "created_at": "2026-08-09T11:33:04.052533",
+      "metadata": {
+        "llm_model": "gpt-5.6-terra",
+        "llm_provider": "openai",
+        "engine": "evolution",
+        "evolution": {
+          "genome_id": "g0-latent_depth_adaptation_signed_pressure-8ca107",
+          "generation": 0,
+          "operator": "seed",
+          "parent_ids": [],
+          "expected_sign": null,
+          "objective": {
+            "marginal_value": 0.006116206068430885,
+            "independence": null,
+            "parsimony": -81.0,
+            "structural_novelty": 0.7572471078697826
+          },
+          "gates": {
+            "coverage_ok": true,
+            "deflation_ok": null,
+            "cost_ok": null,
+            "passed": true
+          },
+          "n_trials_at_eval": 81,
+          "curation": "archive",
+          "selection_deflation": "on",
+          "publish": {
+            "passed": true,
+            "combined_ic": 0.011948216972844677,
+            "deflated": {
+              "best_ic": 0.011948,
+              "deflated_ic": 0.001787,
+              "deflated_t": 0.521263,
+              "luck_ic": 0.010162,
+              "n_obs": 85117,
+              "n_trials": 81
+            },
+            "n_trials": 81,
+            "dropped": [
+              "asymmetric_fluctuation_dissipation_breakdown"
+            ],
+            "mode": "on"
+          }
+        },
+        "provenance": {
+          "scope": "fmp_archive_equity_nasdaq100pit/L1H_terra_s0",
+          "config_hash": "aba8620af01d",
+          "provider": "fmp_archive",
+          "asset_class": "equity",
+          "frequency": "1d",
+          "universe": null,
+          "timespan": [
+            "2010-01-01",
+            "2026-07-27"
+          ],
+          "stamped_at": "2026-08-09T11:33:04+00:00"
+        }
+      }
+    }
+  ],
+  "trading_ideas": []
+}

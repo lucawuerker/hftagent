@@ -1,0 +1,131 @@
+# FINAL EXPERIMENT — research-LLM comparison on ONE fixed configuration
+# (decision 2026-08-13, meeting brief in data/comparisons/wf_book_analysis/).
+#
+# Configuration = the ablation family's efficient frontier: GROUNDED IDEATION
+# + DETERMINISTIC SCORING (the L1HB shape).  192 graph-grounded seed ideas
+# (24 per mechanism community), children-per-deme 0 (NO evolutionary
+# children), the full two-phase walk-forward scoring machinery (progressive
+# reveal; generations 11-20 each trade one ~6-month block of 2021-26 BEFORE
+# the archive may adapt to it).  Rationale: isolates what varies between
+# models — idea + code quality — judged by a fixed deterministic harness;
+# ~$20/run allows 2 seeds per model; the standardised evaluation (prequential
+# record, PIT combiner race, per-factor |IC|/sign-stability/diversity)
+# applies unchanged.
+#
+# Fairness:
+#   * SEED-MATCHED (192 ideas each), not cost-matched; realised cost is a
+#     reported result (cost per validated factor).
+#   * graph-readonly: every model sees the IDENTICAL knowledge-graph
+#     snapshot; no factor-provenance write-back during the sweep.
+#   * identical prompts/panel/splits; only the research LLM changes
+#     (hypothesis + codegen roles both use the arm's model).
+#   * full s0 sweep completes before any s1 arm (arm order below).
+#
+# Routing (user 2026-08-13): AWS/Azure credits where possible for
+# non-OpenAI models; runs on lagias.
+#   * OpenAI (luna/terra/sol): user's OPENAI_API_KEY — luna runnable NOW.
+#   * Anthropic (fable5/opus5/sonnet5): Bedrock via AWS credits
+#     (bedrock_converse; needs AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY/
+#     AWS_DEFAULT_REGION in .env — pending).
+#   * grok / deepseek: Azure AI Foundry serves both as OpenAI-compatible
+#     endpoints (Azure credits) — base URL + key env pending; DeepSeek's
+#     native API (langchain-deepseek, DEEPSEEK_API_KEY) is the fallback.
+#   * muse: Meta Llama API endpoint (META_API_KEY pending; Azure alternative
+#     exists — swap the base URL if credits should cover it).
+#   * gemini: google_genai provider (GOOGLE_API_KEY pending).
+# EXACT model ids for grok/gemini/deepseek to be pinned when the keys arrive
+# (placeholders below; the preflight probe will refuse a wrong id cheaply).
+#
+# Before first launch (tracked in ABLATION_QA/notes):
+#   * fix research_eval/harness._residual_ic pairwise-coverage bug (the
+#     independence axis silently deactivated in the debate arms).
+#   * run --preflight-only on lagias: panel + graph + one probe per provider
+#     whose key is present; launch with --only for runnable arms, e.g.
+#       ./venv/bin/python run_ablation_matrix.py \
+#           --plan matrix/llm_comparison.yaml --only LC_luna_s0
+#
+# Budget: hard global cap; per-arm runaway guard 40.  10 models x 2 seeds
+# x ~$10-25 expected ≈ $250-400 all-in.
+
+config_file: quant.config.nasdaq100_2010_wf.yaml
+allow_no_forward_reserve: true
+budget_usd: 500
+
+defaults:
+  generations: 20
+  mechanism-groups: 8          # hard upper limit (mode max)
+  mechanism-groups-mode: max
+  demes-per-group: 3
+  children-per-deme: 0         # NO evolutionary children — scoring only
+  population: 16
+  seed-ideas-per-group: 24     # 24 x 8 = 192 ideas (the L1HB scale)
+  progressive-reveal: true
+  reveal-every: 1
+  test-frac: 0.0
+  wf-blocks: 10
+  wf-block-bars: 126
+  graph-readonly: true
+  retrieval: graphrag
+  curation: archive
+  selection-deflation: "on"
+  archive-cap: 40
+  creative-frac: 0.1
+  marginal-model: lightgbm
+  fixed-book: data/prebooks/formulaic_101.json
+  reference-book: data/prebooks/formulaic_101.json
+  n-tickers: 0
+  horizon: 6
+  llm-workers: 8
+  max-cost-usd: 40
+
+providers:
+  # ---- OpenAI (user's key; luna runnable today) ---------------------------
+  luna:    {model: "gpt-5.6-luna", llm-provider: openai}
+  terra:   {model: "gpt-5.6-terra", llm-provider: openai}
+  sol:     {model: "gpt-5.6-sol", llm-provider: openai}
+  # ---- Anthropic via Bedrock (AWS credits; keys pending) ------------------
+  fable5:  {model: "anthropic.claude-fable-5", llm-provider: bedrock_converse}
+  opus5:   {model: "anthropic.claude-opus-5", llm-provider: bedrock_converse}
+  sonnet5: {model: "anthropic.claude-sonnet-5", llm-provider: bedrock_converse}
+  # ---- xAI Grok via Azure AI Foundry (Azure credits; id + env pending) ----
+  grok:    {model: "grok-4.6",
+            env: {FACTOR_RESEARCH_LLM_BASE_URL: "${AZURE_GROK_BASE_URL}",
+                  OPENAI_API_KEY: "${AZURE_GROK_API_KEY}"}}
+  # ---- Meta Muse Spark (META_API_KEY pending; Azure swap possible) --------
+  muse:    {model: "muse-spark-1.1",
+            env: {FACTOR_RESEARCH_LLM_BASE_URL: "https://api.llama.meta.com/v1",
+                  OPENAI_API_KEY: "${META_API_KEY}"}}
+  # ---- Google Gemini (GOOGLE_API_KEY pending; pin exact id) ---------------
+  gemini:  {model: "gemini-3-pro", llm-provider: google_genai}
+  # ---- DeepSeek (Azure AI Foundry preferred for credits; native fallback
+  #      = drop the env block and use llm-provider: deepseek + DEEPSEEK_API_KEY)
+  deepseek: {model: "deepseek-v4",
+             env: {FACTOR_RESEARCH_LLM_BASE_URL: "${AZURE_DEEPSEEK_BASE_URL}",
+                   OPENAI_API_KEY: "${AZURE_DEEPSEEK_API_KEY}"}}
+
+arms:
+  # ---- seed 0: full sweep first (luna leads — runnable today; terra next as
+  #      the bridge to every existing Terra result) --------------------------
+  - {name: LC_luna_s0,     provider: luna,     seed: 0, flags: {}}
+  - {name: LC_terra_s0,    provider: terra,    seed: 0, flags: {}}
+  - {name: LC_sol_s0,      provider: sol,      seed: 0, flags: {}}
+  - {name: LC_fable5_s0,   provider: fable5,   seed: 0, flags: {}}
+  - {name: LC_opus5_s0,    provider: opus5,    seed: 0, flags: {}}
+  - {name: LC_sonnet5_s0,  provider: sonnet5,  seed: 0, flags: {}}
+  - {name: LC_grok_s0,     provider: grok,     seed: 0, flags: {}}
+  - {name: LC_muse_s0,     provider: muse,     seed: 0, flags: {}}
+  - {name: LC_gemini_s0,   provider: gemini,   seed: 0, flags: {}}
+  - {name: LC_deepseek_s0, provider: deepseek, seed: 0, flags: {}}
+
+  # ---- seed 1: replication pass (runs only after the s0 sweep by order;
+  #      keep 2 seeds minimum — the whole point vs the single-seed ablations)
+  - {name: LC_luna_s1,     provider: luna,     seed: 1, flags: {}}
+  - {name: LC_terra_s1,    provider: terra,    seed: 1, flags: {}}
+  - {name: LC_sol_s1,      provider: sol,      seed: 1, flags: {}}
+  - {name: LC_fable5_s1,   provider: fable5,   seed: 1, flags: {}}
+  - {name: LC_opus5_s1,    provider: opus5,    seed: 1, flags: {}}
+  - {name: LC_sonnet5_s1,  provider: sonnet5,  seed: 1, flags: {}}
+  - {name: LC_grok_s1,     provider: grok,     seed: 1, flags: {}}
+  - {name: LC_muse_s1,     provider: muse,     seed: 1, flags: {}}
+  - {name: LC_gemini_s1,   provider: gemini,   seed: 1, flags: {}}
+  - {name: LC_deepseek_s1, provider: deepseek, seed: 1, flags: {}}
