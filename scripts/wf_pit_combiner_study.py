@@ -33,7 +33,9 @@ Combination methods (registry below):
              learn-to-rank ensemble with daily query groups
 
 Books: --arm <prerun>|zoo, or a '+'-joined union (e.g. L4WF_terra_s0+zoo);
-PIT availability of a union is the union of the members' PIT sets.
+PIT availability of a union is the union of the members' PIT sets.  A member
+may override the global --availability with an '@mode' suffix
+(e.g. L4WF_terra_s0@snapshots+L1H_terra_s0b@full+zoo).
 
 Results append to <out-root>/pit_combiners/<label>.jsonl (resume-safe:
 (method, block) pairs already present are skipped).
@@ -108,13 +110,34 @@ def load_arm(arm: str, availability: str = "snapshots"):
                 code_by_fid.setdefault(prog["factor_id"], prog["code"])
         return code_by_fid, None
 
+    rc = json.loads((evo_dir / "run_config.json").read_text())
+    wf_blocks = rc.get("wf_blocks", 0)
+    if not wf_blocks:
+        raise SystemExit(f"{arm} is not a WF run")
+    # run_config["generations"] can be stale (the GP arm records the 10 it was
+    # launched with although it ran 20); the lineage is the source of truth.
+    gens = rc["generations"]
+    with (evo_dir / "lineage.jsonl").open() as f:
+        gens = max(gens, max(json.loads(l)["generation"] for l in f))
+
+    if availability == "pool_pit":
+        # Whole kept pool, each member revealed one block after the generation
+        # that created it: block g (=11..20) sees everything born at gen <= g-1.
+        st = json.loads((evo_dir / "state.json").read_text())
+        born: dict[str, int] = {}
+        for eg in st.get("kept_pool", []) + st.get("archive", []):
+            g0 = int(eg["genome"].get("generation") or 0)
+            for prog in eg["genome"]["programs"]:
+                code_by_fid.setdefault(prog["factor_id"], prog["code"])
+                fid = prog["factor_id"]
+                born[fid] = min(born.get(fid, g0), g0)
+        avail_by_gen = {g: {f for f, b in born.items() if b <= g - 1}
+                        for g in range(gens - wf_blocks + 1, gens + 1)}
+        return code_by_fid, avail_by_gen
+
     sys.path.insert(0, str(REPO / "scripts"))
     from prequential_deployment import replay_snapshots
 
-    rc = json.loads((evo_dir / "run_config.json").read_text())
-    gens, wf_blocks = rc["generations"], rc.get("wf_blocks", 0)
-    if not wf_blocks:
-        raise SystemExit(f"{arm} is not a WF run")
     snap_gens = tuple(range(gens - wf_blocks, gens))  # 10..19
     snapshots = replay_snapshots(evo_dir, snap_gens=snap_gens)
 
@@ -213,7 +236,19 @@ def method_sklearn(model):
     def fit(X_fit, y_fit, extras):
         import numpy as np
         est = _catalog(model)
-        est.fit(X_fit, y_fit)
+        try:
+            est.fit(X_fit, y_fit)
+        except ValueError as e:
+            # LassoCV precomputes its Gram matrix; on a float32 feature matrix
+            # sklearn's own validation of that Gram can fail on rounding
+            # ("did not pass validation ... we computed X but the user-supplied
+            # value was Y").  Retry once in float64 rather than losing the block.
+            if "Gram matrix" not in str(e):
+                raise
+            log.warning("%s: Gram validation failed on float32, refitting "
+                        "in float64", model)
+            est = _catalog(model)
+            est.fit(np.asarray(X_fit, dtype=np.float64), y_fit)
         diag = {"_save": {"model": est}}
         try:
             from quant_fund_agent.modeling.catalog import unwrap_estimator
@@ -502,11 +537,19 @@ def main():
                    default=str(REPO / "data/comparisons/wf_arm_analysis"))
     p.add_argument("--max-blocks", type=int, default=None,
                    help="smoke-test cap on the number of blocks")
-    p.add_argument("--availability", choices=["snapshots", "full"],
+    p.add_argument("--availability",
+                   choices=["snapshots", "full", "pool_pit"],
                    default="snapshots",
                    help="'full' = whole kept book available from block 1 "
                         "(selection-only arms whose factors all predate the "
-                        "reveals)")
+                        "reveals); 'pool_pit' = the whole KEPT POOL, but each "
+                        "member only from the block after the generation that "
+                        "created it (honest PIT pool race for arms that "
+                        "actually evolved across the reveals)")
+    p.add_argument("--keep-fids", default=None,
+                   help="JSON list of factor ids: restrict the race to these "
+                        "(PIT availability is unchanged, just intersected) — "
+                        "used to re-race an arm on its non-degenerate subset")
     args = p.parse_args()
 
     import numpy as np
@@ -521,7 +564,7 @@ def main():
     from quant_fund_agent.research_eval.harness import (_label_available_mask,
                                                         _pooled_ic)
 
-    label = args.label or args.arm.replace("+", "_plus_")
+    label = args.label or args.arm.replace("+", "_plus_").replace("@", "_")
     methods = [m for m in args.methods.split(",") if m]
     out_dir = Path(args.out_root) / "pit_combiners"
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -534,17 +577,32 @@ def main():
         log.info("[%s] resume: %d results present", label, len(done))
 
     # books + PIT availability
-    arms = args.arm.split("+")
+    # a member may carry its own availability mode as 'arm@mode' (a union of
+    # evolution arms under 'snapshots' and seeding-only arms under 'full');
+    # without a suffix the global --availability applies (byte-identical).
+    arm_specs = []
+    for tok in args.arm.split("+"):
+        a, _, mode = tok.partition("@")
+        arm_specs.append((a, mode or args.availability))
+    arms = [a for a, _ in arm_specs]
     code_by_fid, avail_by_gen = {}, {}
     always_avail = set()
-    for a in arms:
-        codes, avail = load_arm(a, availability=args.availability)
+    for a, mode in arm_specs:
+        codes, avail = load_arm(a, availability=mode)
         code_by_fid.update(codes)
         if avail is None:
             always_avail.update(codes)
         else:
             for g, fids in avail.items():
                 avail_by_gen.setdefault(g, set()).update(fids)
+
+    if args.keep_fids:
+        keep = set(json.loads(Path(args.keep_fids).read_text()))
+        code_by_fid = {f: c for f, c in code_by_fid.items() if f in keep}
+        always_avail &= keep
+        avail_by_gen = {g: (f & keep) for g, f in avail_by_gen.items()}
+        log.info("[%s] restricted to %d/%d kept factor ids",
+                 label, len(code_by_fid), len(keep))
 
     # blocks (dates from the first evolution member, else the reference)
     src = next((WS / a / "evolution/prequential.jsonl" for a in arms
@@ -601,16 +659,22 @@ def main():
         block_mask = np.asarray((idx >= start) & (idx < end))
         fit_idx = idx[fit_mask]
 
-        # feature matrix (z per underlying, fit-window stats)
-        cols, zsigs = [], {}
-        for f in fids:
+        # feature matrix (z per underlying, fit-window stats).  Filled column
+        # by column into a preallocated float32 buffer: a list of float64
+        # ravels + column_stack costs ~3x the memory and OOMs the 8 GB box on
+        # big pools (557 factors x 966k rows).  The per-name z frames are only
+        # retained when a method actually needs them (the kaku pair).
+        need_zsigs = any(m in ("kakushadze", "kaku_reg") for m in todo)
+        X = np.empty((len(idx) * n_cols, len(fids)), dtype=np.float32)
+        zsigs = {}
+        for jj, f in enumerate(fids):
             z = per_underlying_zscore(signals[f].astype(float), fit_idx)
             z = np.nan_to_num(z.to_numpy(dtype=float),
                               nan=0.0, posinf=0.0, neginf=0.0)
-            zsigs[f] = z
-            cols.append(z.ravel())
-        X = np.column_stack(cols).astype(np.float32)
-        del cols
+            if need_zsigs:
+                zsigs[f] = z
+            X[:, jj] = z.ravel()
+            del z
         lab_ok = _label_available_mask(fit_mask, H)
         fit_rows = np.repeat(np.asarray(fit_mask) & lab_ok, n_cols)
         train = np.flatnonzero(fit_rows & np.isfinite(y_all))

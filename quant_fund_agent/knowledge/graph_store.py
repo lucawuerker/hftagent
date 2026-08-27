@@ -33,6 +33,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -40,7 +41,10 @@ import networkx as nx
 
 log = logging.getLogger("knowledge.graph_store")
 
-DEFAULT_GRAPH_PATH = Path("data/knowledge/graph.json")
+# QF_GRAPH_PATH pins a frozen snapshot (e.g. data/knowledge/frozen/…) so
+# ablation arms resolve mechanism groups from the exact graph state their
+# comparators saw; default unchanged.
+DEFAULT_GRAPH_PATH = Path(os.getenv("QF_GRAPH_PATH", "data/knowledge/graph.json"))
 
 SEMANTIC_RELATIONS = ("proposes", "realized_by", "related_to", "documents", "needs")
 EMPIRICAL_RELATIONS = ("corr", "uses")

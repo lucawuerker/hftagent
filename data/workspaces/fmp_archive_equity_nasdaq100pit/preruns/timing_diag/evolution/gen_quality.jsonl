@@ -1,3 +1,0 @@
-{"generation": 0, "archive_size_total": 0, "archive_size_per_group": [0], "kept_pool_size": 0, "n_trials": 1, "mean_marginal_value": null, "max_marginal_value": null, "mean_structural_novelty": null}
-{"generation": 1, "archive_size_total": 0, "archive_size_per_group": [0], "kept_pool_size": 0, "n_trials": 4, "mean_marginal_value": null, "max_marginal_value": null, "mean_structural_novelty": null}
-{"generation": 2, "archive_size_total": 0, "archive_size_per_group": [0], "kept_pool_size": 0, "n_trials": 8, "mean_marginal_value": null, "max_marginal_value": null, "mean_structural_novelty": null}

@@ -1,0 +1,33 @@
+# TRANSFER-EVALUATION config — S&P/TSX 60, 2010-01-01 → 2026-07-27.
+#
+# Diagnostic companion to quant.config.ftse100.yaml: the published factor books
+# of the ablation ladder are scored on a Canadian universe without any new
+# research.  NEVER use this as a research config.
+#
+# The universe is the CURRENT S&P/TSX 60 membership (preset tsx60), so it is
+# SURVIVORSHIP-BIASED by construction — FMP serves no historical TSX 60
+# constituent table on this subscription.  Accepted deliberately: the study
+# measures rank correlations of a fixed factor set, not a tradable record.
+#
+# Isolated archive (data/vendor/fmp_ca) so the thesis archive under
+# data/vendor/fmp is never touched.  Any job on this panel MUST also export
+# QF_SIGNAL_STORE_DIR — the signal cache is keyed by (factor_id, code hash)
+# only, so a shared store would silently serve signals from another universe.
+#
+# NOTE on point-in-time fundamentals: outside the US, FMP reports filingDate
+# equal to the fiscal period end, so fmp_archive._filed_on rejects it and the
+# conservative period_end + reporting_lag_days stamp applies instead.  No
+# look-ahead, but a coarser availability date than on the US panel.
+data:
+  provider: fmp_archive
+  asset_class: equity
+  frequency: 1d
+  start: '2010-01-01'
+  end: '2026-07-27'
+  archive_dir: data/vendor/fmp_ca
+  universe_preset: tsx60
+  fundamentals: true
+  fundamentals_period: quarter
+  fundamentals_staleness_days: 400
+  reporting_lag_days: 60
+  dtype: float32

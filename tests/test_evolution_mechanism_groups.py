@@ -469,3 +469,130 @@ def test_children_per_deme_zero_is_selection_only(grouped_loop):
     assert ops == {"seed"}, f"non-seed children proposed: {ops - {'seed'}}"
     assert loop.controller.generation == 2          # generations still advanced
     assert loop.controller.archive                  # seeds survived selection
+
+
+def test_seed_paperless_uses_briefs_without_retrieval(monkeypatch):
+    """--seed-paperless: graphrag groups + focus briefs, own-knowledge ideas,
+    and the paper-retrieval path is never touched."""
+    from quant_fund_agent.agents.factor_research.evolution import loop as loop_mod
+    from quant_fund_agent.agents.factor_research.evolution.loop import (
+        EvolutionRunConfig, seed_programs,
+    )
+
+    calls = {}
+
+    def fake_brainstorm(llm, paper, n_ideas, known_ids, session_id, ctx):
+        assert paper is None
+        calls.setdefault("ctx", ctx)
+        calls["n"] = calls.get("n", 0) + n_ideas
+        return [{"factor_id": f"idea_{calls['n']}_{i}", "name": "x",
+                 "description": "d", "mechanism": "m1"} for i in range(n_ideas)]
+
+    def boom(*a, **k):  # retrieval must never be called
+        raise AssertionError("retrieve_and_brainstorm called despite paperless")
+
+    monkeypatch.setattr(
+        "quant_fund_agent.agents.factor_research.graph._brainstorm_one",
+        fake_brainstorm)
+    monkeypatch.setattr(
+        "quant_fund_agent.knowledge.retrieval.retrieve_and_brainstorm", boom)
+    monkeypatch.setattr(loop_mod, "_get_llm", lambda **k: object())
+    monkeypatch.setattr(loop_mod, "_validate_ideas",
+                        lambda cfg, ideas, fields, mech=None: [],
+                        raising=False)
+
+    cfg = EvolutionRunConfig(retrieval="graphrag", seed_paperless=True,
+                             n_seed_ideas=20, creative_frac=0.0)
+    group = {"mechanism_group_id": 1, "focus": "FOCUS_BRIEF_TEXT"}
+    try:
+        seed_programs(cfg, "DATA_CTX", set(), fields=None,
+                      mechanism_group=group)
+    except Exception:
+        pass  # downstream validation/persist is out of scope here
+    assert calls.get("n", 0) >= 20
+    assert "FOCUS_BRIEF_TEXT" in calls["ctx"]
+    assert "DATA_CTX" in calls["ctx"]
+
+
+def test_neutral_groups_give_structure_without_briefs(grouped_loop):
+    """--neutral-groups: N unlabelled groups WITHOUT graphrag — same island/
+    archive structure as a graph run, but no mechanism brief in the context.
+    mechanism_groups_mode="max" forces init-time resolution (the real path)."""
+    make, _, _ = grouped_loop
+    loop = make(generations=0, retrieval="none", neutral_groups=True,
+                mechanism_groups_mode="max")
+    assert len(loop._resolved_groups) == 2
+    assert all(not s.get("focus") for s in loop._resolved_groups)
+    loop.run(initial_programs=_seeds())
+    ctrl = loop.controller
+    assert len(ctrl.islands) == 4                      # 2 groups x 2 demes
+    assert "KNOWLEDGE-GRAPH MECHANISM GROUP" not in loop._group_context(0)
+    placed = {eg.genome.mechanism_group_id
+              for isl in ctrl.islands for eg in isl}
+    assert placed == {0, 1}
+
+
+def test_multiple_groups_without_graph_still_raise_by_default(grouped_loop):
+    make, _, _ = grouped_loop
+    import pytest as _pytest
+    with _pytest.raises(ValueError, match="graphrag"):
+        make(generations=0, retrieval="none", mechanism_groups_mode="max")
+
+
+# ── explicit mechanism-group file (formulaic-alpha arms, 2026-08-19) ──────────
+
+def _write_groups(tmp_path, n, *, blank_last=False):
+    specs = [{"mechanism_group_id": 99 - k, "community_id": 10 + k,
+              "focus": f"mechanism {k}: description",
+              "mechanisms": [f"mech_{k}"]} for k in range(n)]
+    if blank_last:
+        specs[-1]["focus"] = "  "
+    p = tmp_path / "groups.json"
+    p.write_text(json.dumps(specs))
+    return p
+
+
+def test_group_file_replaces_the_graph_ranking(tmp_path, monkeypatch):
+    """With --mechanism-groups-file the graph community ranking is not consulted."""
+    import quant_fund_agent.knowledge.graph_query as gq
+
+    def _boom(*a, **k):                      # pragma: no cover - must not run
+        raise AssertionError("graph ranking must not be consulted")
+
+    monkeypatch.setattr(gq, "mechanism_group_specs", _boom)
+    cfg = EvolutionRunConfig(n_mechanism_groups=3, retrieval="graphrag",
+                             mechanism_groups_file=str(_write_groups(tmp_path, 3)))
+    specs = resolve_mechanism_groups(cfg, ["close"])
+    assert [s["mechanism_group_id"] for s in specs] == [0, 1, 2]
+    assert [s["community_id"] for s in specs] == [10, 11, 12]
+    assert specs[0]["mechanisms"] == ["mech_0"]
+
+
+def test_group_file_is_capped_by_mechanism_groups(tmp_path):
+    cfg = EvolutionRunConfig(n_mechanism_groups=2, retrieval="graphrag",
+                             mechanism_groups_file=str(_write_groups(tmp_path, 5)))
+    assert len(resolve_mechanism_groups(cfg, ["close"])) == 2
+
+
+def test_group_file_short_of_the_request_fails_in_exact_mode(tmp_path):
+    cfg = EvolutionRunConfig(n_mechanism_groups=8, retrieval="graphrag",
+                             mechanism_groups_file=str(_write_groups(tmp_path, 3)))
+    with pytest.raises(ValueError, match="carries 3 usable groups"):
+        resolve_mechanism_groups(cfg, ["close"])
+
+
+def test_group_file_short_of_the_request_is_fine_in_max_mode(tmp_path):
+    cfg = EvolutionRunConfig(n_mechanism_groups=8, retrieval="graphrag",
+                             mechanism_groups_mode="max",
+                             mechanism_groups_file=str(_write_groups(tmp_path, 3)))
+    assert len(resolve_mechanism_groups(cfg, ["close"])) == 3
+
+
+def test_group_file_with_only_blank_focus_fails_loudly(tmp_path):
+    p = tmp_path / "g.json"
+    p.write_text(json.dumps([{"mechanism_group_id": 0, "focus": " ",
+                              "mechanisms": []}]))
+    cfg = EvolutionRunConfig(n_mechanism_groups=1, retrieval="graphrag",
+                             mechanism_groups_file=str(p))
+    with pytest.raises(ValueError, match="no usable"):
+        resolve_mechanism_groups(cfg, ["close"])

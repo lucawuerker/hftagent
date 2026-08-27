@@ -1,0 +1,99 @@
+[
+  {
+    "mechanism_group_id": 0,
+    "community_id": 135,
+    "focus": "price mean-reversion via latent order replenishment: After a large trade moves prices away from fundamental value, agents reassess their limit order placements and drift back toward the reference price. This mean-reverting behavior provides resistance to sustained price moves and limits long-term impact, with strength determined by the mean-reversion intensity parameter \u03ba.\ntarget mechanisms: price mean-reversion via latent order replenishment",
+    "mechanisms": [
+      "price mean-reversion via latent order replenishment"
+    ],
+    "source": "formulaic_101",
+    "seed_mechanism_id": "mechanism:price_mean_reversion_via_latent_order_replenishment",
+    "seed_alphas": "alpha_041,alpha_042",
+    "max_abs_ic": 0.0537125307139537
+  },
+  {
+    "mechanism_group_id": 1,
+    "community_id": 144,
+    "focus": "adaptive momentum-reversal regime switching: Recent price momentum (captured as discretized directional sequences) signals whether the spread is in a continuation or reversal regime. The RL agent learns to exploit momentum continuation when weak and reversal when strong, dynamically adapting entry and exit decisions without fixed deviation thresholds.\ntarget mechanisms: adaptive momentum-reversal regime switching",
+    "mechanisms": [
+      "adaptive momentum-reversal regime switching"
+    ],
+    "source": "formulaic_101",
+    "seed_mechanism_id": "mechanism:adaptive_momentum_reversal_regime_switching",
+    "seed_alphas": "alpha_009,alpha_010,alpha_046,alpha_049,alpha_051",
+    "max_abs_ic": 0.0470251204221422
+  },
+  {
+    "mechanism_group_id": 2,
+    "community_id": 31,
+    "focus": "short-term reversal in cross-section: Recent losers outperform recent winners over short horizons (10-day reversal signal), generating exploitable returns when applied selectively during drift regimes where cross-sectional valuation dispersions widen.\ntarget mechanisms: short-term reversal in cross-section",
+    "mechanisms": [
+      "short-term reversal in cross-section"
+    ],
+    "source": "formulaic_101",
+    "seed_mechanism_id": "mechanism:short_term_reversal_in_cross_section",
+    "seed_alphas": "alpha_008,alpha_014,alpha_019,alpha_025,alpha_029,alpha_031,alpha_038,alpha_056,alpha_073,alpha_076,alpha_080,alpha_082,alpha_090",
+    "max_abs_ic": 0.0429948749710385
+  },
+  {
+    "mechanism_group_id": 3,
+    "community_id": 387,
+    "focus": "short-term momentum reversal: Recent price movements (1-60 day returns) contain predictive information about future 5-day returns, suggesting that short-term momentum patterns are exploitable through machine learning models that capture their nonlinear structure.\ntarget mechanisms: short-term momentum reversal",
+    "mechanisms": [
+      "short-term momentum reversal"
+    ],
+    "source": "formulaic_101",
+    "seed_mechanism_id": "mechanism:short_term_momentum_reversal",
+    "seed_alphas": "alpha_048",
+    "max_abs_ic": 0.0409027747601907
+  },
+  {
+    "mechanism_group_id": 4,
+    "community_id": 60,
+    "focus": "price mean reversion: High-frequency price movements exhibit mean reversion at microstructural timescales; prices that move away from their recent level tend to revert, allowing prediction of short-term reversals and optimal trade execution timing.\ntarget mechanisms: price mean reversion",
+    "mechanisms": [
+      "price mean reversion"
+    ],
+    "source": "formulaic_101",
+    "seed_mechanism_id": "mechanism:price_mean_reversion",
+    "seed_alphas": "alpha_005,alpha_028,alpha_053,alpha_054,alpha_057,alpha_086,alpha_088,alpha_092",
+    "max_abs_ic": 0.0369201905420284
+  },
+  {
+    "mechanism_group_id": 5,
+    "community_id": 338,
+    "focus": "mean reversion harvesting: Traders profit by taking positions proportional to deviations from long-term mean, buying when assets are below mean and selling when above. Position sizing increases with mean reversion speed and decreases as terminal time approaches for risk-averse agents.\ntarget mechanisms: mean reversion harvesting",
+    "mechanisms": [
+      "mean reversion harvesting"
+    ],
+    "source": "formulaic_101",
+    "seed_mechanism_id": "mechanism:mean_reversion_harvesting",
+    "seed_alphas": "alpha_094",
+    "max_abs_ic": 0.034668828978679
+  },
+  {
+    "mechanism_group_id": 6,
+    "community_id": 16,
+    "focus": "market trend-dependent reversal profitability: Contrarian strategy profitability varies with market trend direction; upward market trends create conditions where mean reversion is more profitable, suggesting that investor overreaction and subsequent correction intensity depend on whether the market is in an uptrend or downtrend.\ntarget mechanisms: market trend-dependent reversal profitability, short-term momentum underreaction",
+    "mechanisms": [
+      "market trend-dependent reversal profitability",
+      "short-term momentum underreaction"
+    ],
+    "source": "formulaic_101",
+    "seed_mechanism_id": "mechanism:market_trend_dependent_reversal_profitability",
+    "seed_alphas": "alpha_024,alpha_039",
+    "max_abs_ic": 0.0339771810753206
+  },
+  {
+    "mechanism_group_id": 7,
+    "community_id": 34,
+    "focus": "intraday range volatility: The daily high-low range of prices contains information about intraday volatility that is independent of drift and can be extracted via the expected range of an arithmetic Brownian motion, providing a more efficient volatility estimator than close-to-close returns alone.\ntarget mechanisms: intraday range volatility",
+    "mechanisms": [
+      "intraday range volatility"
+    ],
+    "source": "formulaic_101",
+    "seed_mechanism_id": "mechanism:intraday_range_volatility",
+    "seed_alphas": "alpha_083",
+    "max_abs_ic": 0.0337360921316469
+  }
+]

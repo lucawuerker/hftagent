@@ -100,9 +100,16 @@ def main():
         "combiner_lib", REPO / "scripts/analyze_combiner_models.py")
     saved = sys.argv
     sys.argv = ["x", "--panel", "wf"]
+    # analyze_combiner_models hard-SETS QF_CONFIG_FILE at import; restore the
+    # ambient value so an exported config (e.g. a transfer panel) still governs
+    # the panel load below.  Unset/default env: value before == value after
+    # (both the nasdaq WF config via the setdefault at module top) — identical.
+    saved_cfg = os.environ.get("QF_CONFIG_FILE")
     combiner = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(combiner)
     sys.argv = saved
+    if saved_cfg is not None:
+        os.environ["QF_CONFIG_FILE"] = saved_cfg
 
     # version-tolerant estimators: extend the RidgeCV grid past its 1e4 edge
     # (known saturation) and survive newer sklearn dropping LassoCV(n_alphas=)

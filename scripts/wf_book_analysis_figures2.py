@@ -278,6 +278,196 @@ for ax in (axes[0, 0], axes[0, 1]):
     ax.set_xlabel("generation")
 save(fig, "l3_learning")
 
+# ------------------------- brief variants (supervisor meeting, slim set)
+BRIEF = [a for a in LADDER if a[0] not in
+         ("L1H_terra_s0", "L2WF_terra_s0", "L2WFB_terra_s0")]
+fig, ax = plt.subplots(figsize=(6.3, 3.2))
+ys = np.arange(len(BRIEF))[::-1]
+for y, (arm, lab) in zip(ys, BRIEF):
+    if arm not in ladder.index:
+        continue
+    row = ladder.loc[arm]
+    gamed = arm.startswith("L0WF")
+    col = "#b3b2a8" if gamed else (ORANGE if arm == BL else BLUE)
+    if not pd.isna(row.get("preq_mean_ic")):
+        x, se = row["preq_mean_ic"], row["preq_se"]
+        if gamed:
+            x = 0.088
+            ax.scatter([x], [y], s=46, color=col, marker=">", zorder=5,
+                       clip_on=False)
+            ax.annotate("0.144 (metric-gamed)", (x, y), xytext=(-4, -11),
+                        textcoords="offset points", fontsize=6.8, color=GRAY,
+                        ha="right")
+        else:
+            ax.errorbar([x], [y], xerr=[se], fmt="o", color=col, ms=6.5,
+                        capsize=2.5, lw=1.4, zorder=5)
+    if not pd.isna(row.get("pit_best")):
+        ax.scatter([row["pit_best"]], [y], s=52, facecolors="none",
+                   edgecolors=AQUA, marker="D", lw=1.5, zorder=4)
+    note = []
+    if not pd.isna(row.get("n_book")):
+        note.append(f"{int(row['n_book'])} F.")
+    if not pd.isna(row.get("cost_usd")):
+        note.append(f"${row['cost_usd']:.0f}")
+    ax.text(0.1, y, "   ".join(note), fontsize=7, color=GRAY, va="center")
+ax.set_yticks(ys, [lab for _, lab in BRIEF])
+ax.axvline(0, color=GRAY, lw=0.8)
+ax.set_xlim(-0.005, 0.118)
+ax.set_ylim(-1.6, len(BRIEF) - 0.6)
+ax.set_xlabel("walk-forward IC (2021–2026)")
+ax.legend(handles=[
+    Line2D([], [], marker="o", ls="", color=BLUE, label="honest prequential record ± SE"),
+    Line2D([], [], marker="D", ls="", markerfacecolor="none", color=AQUA,
+           label="best PIT combiner on the final book"),
+], fontsize=7.5, ncol=2, loc="lower center", bbox_to_anchor=(0.5, -0.02))
+save(fig, "l1_ladder_brief")
+
+# what evolution buys: strong factors + effective dimension
+ADV = [("L1HB_terra_s0", "scoring only"),
+       ("L2WFP_terra_s0", "no retrieval"),
+       ("L4D_terra_s0", "det. evolution"),
+       ("L4WF_terra_s0", "LLM evolution"),
+       ("L5WF_terra_s0", "+ debate"),
+       ("L7WF_terra_s0", "+ memory")]
+rows_adv = []
+for a, lab in ADV:
+    src = LOCAL / a / "per_factor_blocks.csv"
+    if not src.exists():
+        src = RAW / a / "analysis/per_factor_blocks.csv"
+    pfa = pd.read_csv(src)
+    dj = LOCAL / a / "diversity.json"
+    if not dj.exists():
+        dj = RAW / a / "analysis/diversity.json"
+    dv = json.load(dj.open())
+    rows_adv.append({"lab": lab, "n": len(pfa),
+                     "good": int((pfa.ic_wf_blockmean.abs() > 0.02).sum()),
+                     "effn": dv["effective_n_participation_ratio"],
+                     "evolved": a in ("L4D_terra_s0", "L4WF_terra_s0",
+                                      "L5WF_terra_s0", "L7WF_terra_s0")})
+adv = pd.DataFrame(rows_adv)
+fig, axes = plt.subplots(1, 2, figsize=(6.3, 2.9))
+fig.subplots_adjust(wspace=0.3)
+cols_adv = [ORANGE if e else BLUE for e in adv.evolved]
+ax = axes[0]
+ax.bar(range(len(adv)), adv["good"], color=cols_adv, width=0.6)
+ax.set_xticks(range(len(adv)), adv.lab, fontsize=6.8, rotation=22)
+ax.set_ylabel("factors with |WF IC| > 0.02")
+ax.set_title("Strong factors (blue: no evolution)", fontsize=9)
+ax = axes[1]
+ax.bar(np.arange(len(adv)) - 0.18, adv["n"], color="#d9d8d0", width=0.32,
+       label="book size")
+ax.bar(np.arange(len(adv)) + 0.18, adv["effn"], color=AQUA, width=0.32,
+       label="effective N")
+ax.set_xticks(range(len(adv)), adv.lab, fontsize=6.8, rotation=22)
+ax.set_ylabel("factors")
+ax.set_title("Breadth and effective dimension", fontsize=9)
+ax.legend(fontsize=6.5)
+save(fig, "l4_advantage")
+
+# --------------------- IC-only arm: promised vs delivered (winner's curse)
+WSDIR = REPO / "data/workspaces/fmp_archive_equity_nasdaq100pit/preruns"
+st_ic = json.load((WSDIR / "L4IC_terra_s0/evolution/state.json").open())
+promised = {}
+for e in st_ic["archive"]:
+    fid = e["genome"]["programs"][0]["factor_id"]
+    d = e["fitness"].get("diagnostics") or {}
+    promised[fid] = d.get("val_ic")          # signed VAL IC at selection
+pf_ic = pd.read_csv(LOCAL / "L4IC_terra_s0/per_factor_blocks.csv")
+pf_ic["promised"] = pf_ic.factor_id.map(promised)
+pf_ic = pf_ic.dropna(subset=["promised"]).copy()
+# delivered in the promised direction: positive = kept its promise
+pf_ic["delivered"] = pf_ic.ic_wf_blockmean * np.sign(pf_ic.promised)
+pf_ic = pf_ic.sort_values("promised", key=np.abs, ascending=False)
+fig, ax = plt.subplots(figsize=(6.3, 2.9))
+x = np.arange(len(pf_ic))
+ax.bar(x - 0.19, pf_ic.promised.abs(), width=0.36, color="#c8c7c0",
+       label="promised: |validation IC| at selection")
+cols_d = [ORANGE if v > 0 else BLUE for v in pf_ic.delivered]
+ax.bar(x + 0.19, pf_ic.delivered, width=0.36, color=cols_d,
+       label="delivered: walk-forward IC, promised direction")
+ax.axhline(0, color=GRAY, lw=0.8)
+ax.set_xticks(x, [f"F{i+1}" for i in range(len(pf_ic))])
+ax.set_ylabel("IC")
+ax.set_title("IC-only objective, fixed split: what was promised vs. "
+             "what arrived (blue: wrong direction)", fontsize=8.5)
+ax.legend(fontsize=7, loc="upper right")
+save(fig, "l5_ic_only")
+
+# ---------------- brief v3: ideation evidence, axis evidence, deflation
+# f_ideation: deployable PIT IC with and without grounding
+fig, ax = plt.subplots(figsize=(4.6, 2.6))
+bars = [("grounded,\nseeding only", 0.075, BLUE),
+        ("grounded,\nevolved", 0.073, ORANGE),
+        ("ungrounded,\nseeds matched", 0.038, GRAY)]
+ax.bar(range(3), [b[1] for b in bars], color=[b[2] for b in bars], width=0.55)
+for i, (_, v, _c) in enumerate(bars):
+    ax.text(i, v + 0.002, f"{v:.3f}", ha="center", fontsize=8)
+ax.set_xticks(range(3), [b[0] for b in bars], fontsize=7.5)
+ax.set_ylabel("deployable combined WF IC\n(best PIT combiner)")
+ax.set_ylim(0, 0.09)
+save(fig, "f_ideation")
+
+# f_axes: independence-axis natural experiment + re-scoring survival filter
+fig, axes = plt.subplots(1, 2, figsize=(6.3, 2.7))
+fig.subplots_adjust(wspace=0.36)
+ax = axes[0]
+lv = [("baseline\n(axis active)", 4/57, ORANGE),
+      ("+ debate\n(axis inactive)", 9/35, GRAY),
+      ("+ memory\n(axis inactive)", 11/42, GRAY)]
+ax.bar(range(3), [x[1] for x in lv], color=[x[2] for x in lv], width=0.55)
+for i, (_, v, _c) in enumerate(lv):
+    ax.text(i, v + 0.008, f"{v:.0%}", ha="center", fontsize=8)
+ax.set_xticks(range(3), [x[0] for x in lv], fontsize=7.5)
+ax.set_ylabel("share of degenerate\nlevel-like members (ρ = 1.0)")
+ax.set_ylim(0, 0.33)
+ax.set_title("Independence axis off: books degrade", fontsize=8.5)
+ax = axes[1]
+mem = pd.read_csv(DER / "archive_members.csv").query("arm==@BL")
+jj = mem.merge(pf[pf.arm == BL], on="factor_id")
+jj["cohort"] = pd.cut(jj.admit_generation, [-1, 5, 10, 15, 20],
+                      labels=["0–5", "6–10", "11–15", "16–20"])
+coh = jj.groupby("cohort", observed=True)["ic_wf_blockmean"].apply(
+    lambda s: s.abs().mean())
+ax.bar(range(len(coh)), coh.values, color=ORANGE, width=0.6)
+ax.set_xticks(range(len(coh)), coh.index)
+ax.set_xlabel("admission generation of survivors")
+ax.set_ylabel("mean |WF IC|")
+ax.set_title("Re-scoring: long survival ⇒ quality", fontsize=8.5)
+save(fig, "f_axes")
+
+# f_defl: strong factors surviving trial deflation
+import math
+TRIALS = {"L1HB_terra_s0": 172, "L2WFP_terra_s0": 856, "L4D_terra_s0": 621,
+          "L4WF_terra_s0": 890, "L5WF_terra_s0": 732, "L7WF_terra_s0": 663}
+BLKCOLS = [f"ic_g{b}" for b in range(11, 21)]
+rows_d = []
+for (a, lab) in ADV:
+    src = LOCAL / a / "per_factor_blocks.csv"
+    if not src.exists():
+        src = RAW / a / "analysis/per_factor_blocks.csv"
+    pfa = pd.read_csv(src)
+    B = pfa[BLKCOLS].to_numpy(dtype=float)
+    nb = np.sum(np.isfinite(B), axis=1)
+    with np.errstate(invalid="ignore", divide="ignore"):
+        t = np.abs(np.nanmean(B, axis=1)) / (np.nanstd(B, axis=1, ddof=1)
+                                             / np.sqrt(np.maximum(nb, 1)))
+    luck = math.sqrt(2 * math.log(TRIALS[a]))
+    rows_d.append({"lab": lab, "raw": int((t > 2.0).sum()),
+                   "defl": int((t - luck > 0).sum()),
+                   "evolved": a in ("L4D_terra_s0", "L4WF_terra_s0",
+                                    "L5WF_terra_s0", "L7WF_terra_s0")})
+dd = pd.DataFrame(rows_d)
+fig, ax = plt.subplots(figsize=(6.3, 2.7))
+ax.bar(np.arange(len(dd)) - 0.18, dd["raw"], color="#d9d8d0", width=0.32,
+       label="t > 2 (undeflated)")
+ax.bar(np.arange(len(dd)) + 0.18, dd["defl"],
+       color=[ORANGE if e else BLUE for e in dd.evolved], width=0.32,
+       label="t beats selection luck (deflated for the arm's own trials)")
+ax.set_xticks(range(len(dd)), dd.lab, fontsize=6.8, rotation=22)
+ax.set_ylabel("factors")
+ax.legend(fontsize=7)
+save(fig, "f_defl")
+
 # ------------------------------------- L2/L3 cross-arm compacts (need phase 1)
 have_new = all((LOCAL / a / "per_factor_blocks.csv").exists()
                for a in ["L1H_terra_s0", "L1HB_terra_s0", "L4D_terra_s0"])

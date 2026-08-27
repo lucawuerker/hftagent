@@ -133,6 +133,12 @@ def _parse_args() -> argparse.Namespace:
                         "--mechanism-groups usable groups or the run aborts. "
                         "'max': --mechanism-groups is a hard UPPER limit — the "
                         "run uses however many usable groups the graph forms.")
+    p.add_argument("--mechanism-groups-file", default=None,
+                   help="Path to a JSON list of explicit mechanism-group specs "
+                        "({mechanism_group_id, community_id, focus, mechanisms}). "
+                        "Replaces the graph-community ranking entirely (the "
+                        "formulaic-alpha arms use the mechanisms the 101 alphas "
+                        "occupy); --mechanism-groups still caps the count.")
     p.add_argument("--demes-per-group", type=int, default=3,
                    help="Classic independently evolving islands within each group.")
     p.add_argument("--children-per-deme", type=int, default=4,
@@ -159,6 +165,16 @@ def _parse_args() -> argparse.Namespace:
     # ── seeding ──
     p.add_argument("--seed-ideas-per-group", type=int, default=6,
                    help="Generation-0 brainstorm budget for every mechanism group.")
+    p.add_argument("--neutral-groups", action="store_true",
+                   help="Allow --mechanism-groups N without graphrag: N "
+                        "UNLABELLED groups (same reserved archives/demes, no "
+                        "mechanism briefs) — structural parity for no-graph "
+                        "ablation arms.")
+    p.add_argument("--seed-paperless", action="store_true",
+                   help="With --retrieval graphrag: keep the knowledge graph's "
+                        "mechanism groups and focus briefs, but generate seed "
+                        "ideas from the model's own knowledge (no paper "
+                        "retrieval). Ideation-decomposition ablation seam.")
     p.add_argument("--seed-papers", type=int, default=0,
                    help="Papers pulled for the seed brainstorm (0 = knowledge-only).")
 
@@ -427,6 +443,7 @@ def main() -> None:
         llm_workers=args.llm_workers,
         n_mechanism_groups=args.mechanism_groups,
         mechanism_groups_mode=args.mechanism_groups_mode,
+        mechanism_groups_file=args.mechanism_groups_file,
         demes_per_group=(args.islands if args.islands is not None
                          else args.demes_per_group),
         migration_every=args.migration_every,
@@ -440,6 +457,8 @@ def main() -> None:
         n_seed_ideas=args.seed_ideas_per_group,
         seed_ideas_per_group=args.seed_ideas_per_group,
         seed_papers=args.seed_papers,
+        seed_paperless=args.seed_paperless,
+        neutral_groups=args.neutral_groups,
         retrieval=args.retrieval,
         retrieval_cardinality=args.retrieval_cardinality,
         rag_k=args.rag_k,

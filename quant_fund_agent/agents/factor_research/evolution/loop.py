@@ -32,6 +32,7 @@ Structure (all deterministic given the seed, except the LLM calls themselves):
 from __future__ import annotations
 
 import json
+import os
 import logging
 import threading
 import time
@@ -200,6 +201,21 @@ class EvolutionRunConfig:
     # "pareto" (default) | "ic": harness-ablation baseline — candidates are
     # scored by standalone |VAL IC| only (research_eval.harness EvalParams)
     objective_mode: str = "pareto"
+    # Ideation-decomposition seam: with --retrieval graphrag, keep the graph's
+    # mechanism groups + focus briefs but generate seed ideas from the model's
+    # own knowledge instead of paper retrieval (default False = unchanged)
+    seed_paperless: bool = False
+    # Structural-parity seam: allow n_mechanism_groups > 1 WITHOUT graphrag by
+    # creating unlabelled groups (empty focus) — same reserved archives/demes
+    # as a graph run, no semantic steering (2026-08-15, E0b/E2b reruns).
+    neutral_groups: bool = False
+    # Explicit mechanism-group seam (2026-08-19): path to a JSON list of group
+    # specs ({mechanism_group_id, community_id, focus, mechanisms}) that REPLACES
+    # the graph-community ranking in resolve_mechanism_groups.  Used by the
+    # formulaic-alpha arms, whose groups are the mechanisms the 101 alphas
+    # occupy rather than the graph's under-covered communities.  None (default)
+    # keeps the ordinary resolution byte-identical.
+    mechanism_groups_file: str | None = None
     # nonlinear LOCO combiner so conditioning/interaction value (e.g. a volatility
     # state variable) scores a positive marginal value; "ridge" = additive-only.
     marginal_model: str = "gradient_boosting"
@@ -266,13 +282,44 @@ def resolve_mechanism_groups(
 ) -> list[dict[str, Any]]:
     """Resolve the upper knowledge-graph layer once, before any seed generation."""
     n_groups = max(1, cfg.n_mechanism_groups)
+    if getattr(cfg, "mechanism_groups_file", None):
+        import json as _json
+        from pathlib import Path as _Path
+
+        raw = _json.loads(_Path(cfg.mechanism_groups_file).read_text())
+        specs = [dict(s) for s in raw if str(s.get("focus") or "").strip()]
+        if not specs:
+            raise ValueError(
+                f"mechanism-groups file {cfg.mechanism_groups_file} carries no "
+                "usable (focused) group")
+        if (getattr(cfg, "mechanism_groups_mode", "exact") != "max"
+                and len(specs) < n_groups):
+            raise ValueError(
+                f"mechanism-groups file carries {len(specs)} usable groups for "
+                f"requested n_mechanism_groups={n_groups}")
+        specs = specs[:n_groups]
+        for k, spec in enumerate(specs):
+            spec["mechanism_group_id"] = k
+        log.info("mechanism groups read from %s (%d group(s))",
+                 cfg.mechanism_groups_file, len(specs))
+        return specs
     if n_groups == 1 and cfg.retrieval != "graphrag":
         return [{"mechanism_group_id": 0, "community_id": None,
                  "focus": "", "mechanisms": []}]
     if cfg.retrieval != "graphrag":
+        if getattr(cfg, "neutral_groups", False):
+            # Structural-parity seam (2026-08-15): N UNLABELLED groups — same
+            # reserved per-group Pareto archives / demes / caps as a graphrag
+            # run, but NO mechanism briefs (the ideation prompt is untouched;
+            # _group_context returns the plain data context for an empty
+            # focus).  Lets the no-graph 2x2 corners match the graph arms'
+            # archive capacity without smuggling in semantic steering.
+            return [{"mechanism_group_id": k, "community_id": None,
+                     "focus": "", "mechanisms": []} for k in range(n_groups)]
         raise ValueError(
             "multiple mechanism groups require retrieval='graphrag'; the upper "
-            "layer must be grounded in the knowledge graph")
+            "layer must be grounded in the knowledge graph "
+            "(or pass --neutral-groups for unlabelled structural parity)")
 
     from quant_fund_agent.knowledge.graph_query import mechanism_group_specs
     from quant_fund_agent.knowledge.graph_store import KnowledgeGraph
@@ -389,9 +436,17 @@ def seed_programs(cfg: EvolutionRunConfig, data_context: str,
                   existing_ids: set[str],
                   fields: Sequence[str] | None = None,
                   mechanism_group: dict[str, Any] | None = None,
+                  prompt_ids: set[str] | None = None,
                   ) -> list[FactorProgram]:
     """Generation 0: brainstorm ideas (GraphRAG / RAG / papers / knowledge-only)
-    → validated programs."""
+    → validated programs.
+
+    ``existing_ids`` is the full collision set (every id the run must not
+    reuse); ``prompt_ids`` is the subset actually LISTED in the brainstorm
+    prompt (default: all of ``existing_ids``).  Keeping the two apart matters:
+    the shared researcher package now holds ~7k factors from every arm, and
+    listing all of them cost ~60k input tokens per call (2026-08-22 finding,
+    5x the prompt size of the original ladder runs)."""
     from quant_fund_agent.agents.factor_research.graph import _brainstorm_one
     from quant_fund_agent.agents.factor_research.state import FactorIdea, PaperSnippet
     from quant_fund_agent.mcp import research_client
@@ -400,6 +455,7 @@ def seed_programs(cfg: EvolutionRunConfig, data_context: str,
     session_id = f"evo-seed-{cfg.seed}-group-{group_id}"
     brainstorm_llm = _get_llm(temperature=0.7, role="hypothesis")
     known = set(existing_ids)
+    prompt_known = set(prompt_ids) if prompt_ids is not None else set(known)
     raw_ideas: list[dict] = []
     graph = None           # GraphRAG: set when the knowledge graph is in play
     mech_by_fid: dict[str, str] = {}
@@ -445,6 +501,41 @@ def seed_programs(cfg: EvolutionRunConfig, data_context: str,
                             "scripts/build_knowledge_graph.py first; falling "
                             "back to flat RAG", DEFAULT_GRAPH_PATH)
                 graph = None
+
+        if cfg.seed_paperless and n_regular > 0:
+            # Ideation-decomposition seam: keep the graph's mechanism groups
+            # and focus briefs, but generate the ideas from the model's own
+            # knowledge — NO paper retrieval at all.  Chunked like the
+            # knowledge-only path (≤12 ideas per call, one retry per chunk).
+            focus_ctx = data_context
+            if focus:
+                focus_ctx += ("\n\nMECHANISM FOCUS — invent factor ideas for "
+                              "this mechanism community from your own "
+                              "knowledge; no papers are provided:\n" + focus)
+            if gap_names:
+                focus_ctx += "\nCandidate mechanisms: " + ", ".join(gap_names)
+
+            def _safe_paperless(ask: int, seen_ids: set[str]) -> list[dict]:
+                try:
+                    return _brainstorm_one(brainstorm_llm, None, ask, seen_ids,
+                                           session_id, focus_ctx)
+                except Exception as e:  # noqa: BLE001 — one bad reply must
+                    log.warning("paperless seed brainstorm failed (%s) — "
+                                "skipping chunk", e)
+                    return []
+
+            seen = set(prompt_known)
+            remaining = n_regular
+            with set_llm_role("brainstorm"):
+                while remaining > 0:
+                    ask = min(12, remaining)
+                    got = (_safe_paperless(ask, seen)
+                           or _safe_paperless(ask, seen))
+                    raw_ideas.extend(got)
+                    seen.update((i.get("factor_id") or "").strip().lower()
+                                for i in got if i.get("factor_id"))
+                    remaining -= ask
+            n_regular = 0          # retrieval below becomes a no-op
 
         store = EmbedStore()
         # Scope-filtered retrieval: when the run's field scope carries no
@@ -516,14 +607,14 @@ def seed_programs(cfg: EvolutionRunConfig, data_context: str,
                     if len(raw_ideas) >= n_regular:
                         break
                     raw_ideas.extend(_safe_brainstorm(
-                        paper, per_paper, known, session_id, data_context))
+                        paper, per_paper, prompt_known, session_id, data_context))
             elif n_regular > 0:
                 # Chunked: one giant N-idea call times out on reasoning models
                 # (L2WFB 2026-08-12: a single 86-idea request timed out, was
                 # skipped fail-open, and the run seeded 10/96).  ≤12 ideas per
                 # call, one retry per chunk, ids accumulated so later chunks
                 # avoid collisions.
-                seen = set(known)
+                seen = set(prompt_known)
                 remaining = n_regular
                 while remaining > 0:
                     ask = min(12, remaining)
@@ -547,7 +638,7 @@ def seed_programs(cfg: EvolutionRunConfig, data_context: str,
         with set_llm_role("brainstorm"):
             try:
                 creative_ideas = _brainstorm_one(
-                    brainstorm_llm, None, n_creative, known,
+                    brainstorm_llm, None, n_creative, prompt_known,
                     f"{session_id}-creative", creative_context)
             except Exception as e:  # noqa: BLE001
                 log.warning("creative seed brainstorm failed (%s) — skipping", e)
@@ -565,6 +656,7 @@ def seed_programs(cfg: EvolutionRunConfig, data_context: str,
             continue
         seen.add(idea.factor_id)
         known.add(idea.factor_id)
+        prompt_known.add(idea.factor_id)
         ideas.append(idea)
 
     # Debate (P3): weak seed hypotheses are challenged BEFORE codegen spends
@@ -911,7 +1003,27 @@ class EvolutionLoop:
         except Exception as e:  # noqa: BLE001
             log.warning("could not load existing factor ids (%s)", e)
             self.known_ids = set()
+        # ids inherited from the shared package: still reserved for collision
+        # checks (_unique_id), but NOT listed in prompts unless
+        # QF_PROMPT_KNOWN_IDS=package (see prompt_known_ids).
+        self._package_ids = set(self.known_ids)
         self.known_ids.update(b["factor_id"] for b in self.fixed_book)
+        if os.environ.get("QF_PROMPT_KNOWN_IDS", "run") != "package":
+            log.info("prompt id list: run-scope + fixed book (%d package ids "
+                     "reserved but not listed; QF_PROMPT_KNOWN_IDS=package "
+                     "restores the full list)", len(self._package_ids))
+
+    @property
+    def prompt_known_ids(self) -> set[str]:
+        """Ids LISTED in LLM prompts as 'existing'.  The shared researcher
+        package grew to ~7k factors across arms (KG campaign + book syncs), and
+        listing all of them cost ~60k input tokens per brainstorm / mutation /
+        crossover call — 5x the original ladder prompts (2026-08-22).  Default
+        'run': this run's own ids + the fixed book; the full package set stays
+        reserved for collision checks."""
+        if os.environ.get("QF_PROMPT_KNOWN_IDS", "run") == "package":
+            return set(self.known_ids)
+        return self.known_ids - getattr(self, "_package_ids", set())
 
     def _unique_id(self, base: str) -> str:
         base = (base or "factor").strip().lower()[:48] or "factor"
@@ -1463,7 +1575,7 @@ class EvolutionLoop:
         else:
             prompt = build_mutation_prompt(
                 parent.genome.program, self._brief_for(parent),
-                context, sorted(self.known_ids), creative=creative)
+                context, sorted(self.prompt_known_ids), creative=creative)
             with set_llm_role("mutation"):
                 child = self._parse_and_validate_child(llm, prompt, [parent])
         return (child, [parent.genome.genome_id]) if child is not None else None
@@ -1483,7 +1595,7 @@ class EvolutionLoop:
 
         prompt = build_hypothesis_prompt(
             parent.genome.program, self._brief_for(parent),
-            data_context, sorted(self.known_ids), creative=creative)
+            data_context, sorted(self.prompt_known_ids), creative=creative)
         try:
             with set_llm_role("hypothesis"):
                 raw = parse_hypothesis_response(_invoke(hyp_llm, prompt))
@@ -1538,7 +1650,7 @@ class EvolutionLoop:
         prompt = build_crossover_prompt(
             a.genome.program, self._brief_for(a),
             b.genome.program, self._brief_for(b),
-            context, sorted(self.known_ids))
+            context, sorted(self.prompt_known_ids))
         with set_llm_role("crossover"):
             child = self._parse_and_validate_child(llm, prompt, [a, b])
         if child is None:
@@ -1593,7 +1705,7 @@ class EvolutionLoop:
         prompt = build_crossover_prompt(
             a.genome.program, self._brief_for(a),
             b.genome.program, self._brief_for(b),
-            context, sorted(self.known_ids))
+            context, sorted(self.prompt_known_ids))
         with set_llm_role("crossover"):
             child = self._parse_and_validate_child(llm, prompt, [a, b])
         if child is None:
@@ -1797,7 +1909,7 @@ class EvolutionLoop:
         group_id, _ = self.controller.coordinates(island)
         prompt = build_refine_prompt(
             parent.genome.program, self._brief_for(parent),
-            self._group_context(group_id), sorted(self.known_ids))
+            self._group_context(group_id), sorted(self.prompt_known_ids))
         with set_llm_role("mutation"):
             child = self._parse_and_validate_child(llm, prompt, [parent])
         return (child, [parent.genome.genome_id]) if child is not None else None
@@ -1863,7 +1975,8 @@ class EvolutionLoop:
             try:
                 programs = seed_programs(
                     per_cfg, self._group_context(group_id), self.known_ids,
-                    self.fields, mechanism_group=spec)
+                    self.fields, mechanism_group=spec,
+                    prompt_ids=self.prompt_known_ids)
             except Exception as e:  # noqa: BLE001 — a bad seeding batch must
                 from quant_fund_agent.llm import LLMBudgetExceeded
                 if isinstance(e, LLMBudgetExceeded):
@@ -2259,7 +2372,8 @@ class EvolutionLoop:
                         continue
                     programs_for_group = seed_programs(
                         per_group_cfg, self._group_context(group_id),
-                        self.known_ids, self.fields, mechanism_group=spec)
+                        self.known_ids, self.fields, mechanism_group=spec,
+                        prompt_ids=self.prompt_known_ids)
                     self.known_ids.update(
                         p.factor_id for p in programs_for_group)
                     for prog in programs_for_group:

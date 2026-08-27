@@ -200,6 +200,15 @@ def _check_imports(tree: ast.Module) -> None:
 def _is_negative_literal(node: ast.AST) -> bool:
     if isinstance(node, ast.Constant) and isinstance(node.value, (int, float)):
         return node.value < 0
+    # ANY unary minus counts — `shift(-self.prediction_horizon)` slipped this
+    # net as a non-literal and delivered a verbatim future-return factor
+    # (gpt-4o-mini, 2026-08-15).  There is no legitimate negated period for
+    # shift/diff/pct_change in factor code, so the operand need not be a
+    # constant.
+    if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.USub):
+        return not (isinstance(node.operand, ast.Constant)
+                    and isinstance(node.operand.value, (int, float))
+                    and node.operand.value <= 0)
     return (
         isinstance(node, ast.UnaryOp)
         and isinstance(node.op, ast.USub)

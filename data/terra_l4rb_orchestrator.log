@@ -1,5 +1,0 @@
-[preflight] config=quant.config.nasdaq100_2010.yaml provider=fmp_archive membership=nasdaq100 2010-01-01->2024-07-27
-[preflight] panel 3665 bars x 209 tickers, density 0.463
-[preflight] all checks passed
-[budget] spent $10.80 of $200.00 ($189.20 remaining)
-[run] L4RB_terra_s0: /Users/lucawurker/Desktop/Imperial/Master Thesis/QuantFundAgent/venv/bin/python run_factor_evolution.py --name L4RB_terra_s0 --config quant.config.nasdaq100_2010.yaml --seed 0 --model gpt-5.6-terra --variant refine --refine-rounds 2 --generations 10 --mechanism-groups 64 --mechanism-groups-mode max --demes-per-group 1 --children-per-deme 1 --population 32 --seed-ideas-per-group 8 --p-cross-group 0.1 --progressive-reveal --reveal-every 1 --test-frac 0.2 --retrieval graphrag --curation archive --selection-deflation on --archive-cap 40 --creative-frac 0.1 --marginal-model lightgbm --fixed-book data/prebooks/formulaic_101.json --reference-book data/prebooks/formulaic_101.json --n-tickers 0 --horizon 6 --llm-workers 8 --max-cost-usd 189.2 --llm-provider openai

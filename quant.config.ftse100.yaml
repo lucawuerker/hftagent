@@ -1,0 +1,31 @@
+# FTSE 100 TRANSFER-EVALUATION config — current constituents, 2010 → 2026-07-27.
+#
+# PURPOSE: transfer evaluation ONLY.  Already-published Nasdaq-100 factor books
+# (LDU8/L1H/L4WF/the 101-alpha zoo) are re-scored on this panel; NO research,
+# seeding, evolution or factor selection may ever run against this config.
+#
+# SURVIVORSHIP CAVEAT (accepted, user decision 2026-08-23): FMP serves no
+# historical FTSE constituent table on this subscription, so the universe is the
+# CURRENT FTSE 100 membership (quant_fund_agent/data/universes/ftse100.txt,
+# Wikipedia snapshot 2026-08-23) held static over 2010-2026 — survivorship-
+# biased by construction.  Acceptable because the experiment measures
+# correlations (ICs), not a tradable strategy; state it in any write-up.
+# Hence NO membership: key — universe_preset drives a static list.
+#
+# PIT caveat: outside the US FMP's filingDate equals the fiscal period end, so
+# fmp_archive's _filed_on guard falls back to period_end + reporting_lag_days
+# (60) — no look-ahead, but the availability stamp is a 60-day convention, not
+# an observed filing date.  UK non-financials also report semi-annually.
+data:
+  provider: fmp_archive
+  asset_class: equity
+  frequency: 1d
+  start: '2010-01-01'
+  end: '2026-07-27'
+  archive_dir: data/vendor/fmp_uk
+  universe_preset: ftse100
+  fundamentals: true
+  fundamentals_period: quarter
+  fundamentals_staleness_days: 400
+  reporting_lag_days: 60
+  dtype: float32

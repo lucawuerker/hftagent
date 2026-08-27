@@ -1,0 +1,595 @@
+{
+  "101_alphas": {
+    "n_members": 101,
+    "k": 8,
+    "selection": [
+      {
+        "rank": 1,
+        "factor_id": "alpha_001",
+        "source": "101"
+      },
+      {
+        "rank": 2,
+        "factor_id": "alpha_085",
+        "source": "101"
+      },
+      {
+        "rank": 3,
+        "factor_id": "alpha_084",
+        "source": "101"
+      },
+      {
+        "rank": 4,
+        "factor_id": "alpha_052",
+        "source": "101"
+      },
+      {
+        "rank": 5,
+        "factor_id": "alpha_053",
+        "source": "101"
+      },
+      {
+        "rank": 6,
+        "factor_id": "alpha_091",
+        "source": "101"
+      },
+      {
+        "rank": 7,
+        "factor_id": "alpha_097",
+        "source": "101"
+      },
+      {
+        "rank": 8,
+        "factor_id": "alpha_045",
+        "source": "101"
+      }
+    ],
+    "dropped": [],
+    "k_note": "pinned to ceil(published N_eff 7.6); recomputed N_eff 8.18",
+    "n_eff_recomputed": 8.18,
+    "n_eff": 7.6
+  },
+  "arm4": {
+    "n_members": 21,
+    "k": 13,
+    "selection": [
+      {
+        "rank": 1,
+        "factor_id": "cashbacked_revision_absorption_gap",
+        "source": "arm4"
+      },
+      {
+        "rank": 2,
+        "factor_id": "transient_inventory_restocking_impact_gap_v2",
+        "source": "arm4"
+      },
+      {
+        "rank": 3,
+        "factor_id": "liquidity_buffered_downside_branching_spread",
+        "source": "arm4"
+      },
+      {
+        "rank": 4,
+        "factor_id": "liquidity_recovery_beta_rebound",
+        "source": "arm4"
+      },
+      {
+        "rank": 5,
+        "factor_id": "downside_flow_price_circulation_asymmetry",
+        "source": "arm4"
+      },
+      {
+        "rank": 6,
+        "factor_id": "leaveoneout_industry_estimate_impulse_deficit",
+        "source": "arm4"
+      },
+      {
+        "rank": 7,
+        "factor_id": "entropy_disambiguated_surprise_impact_reserve",
+        "source": "arm4"
+      },
+      {
+        "rank": 8,
+        "factor_id": "samuelson_eigenmode_receiver_slippage",
+        "source": "arm4"
+      },
+      {
+        "rank": 9,
+        "factor_id": "entropy_gated_cash_surprise_followthrough",
+        "source": "arm4"
+      },
+      {
+        "rank": 10,
+        "factor_id": "latent_liquidity_escape_vector",
+        "source": "arm4"
+      },
+      {
+        "rank": 11,
+        "factor_id": "cash_vetoed_logperiodic_phase_exit",
+        "source": "arm4"
+      },
+      {
+        "rank": 12,
+        "factor_id": "downside_variance_innovation_refinancing_spiral",
+        "source": "arm4"
+      },
+      {
+        "rank": 13,
+        "factor_id": "bar_markov_entropy_close_location_reserve",
+        "source": "arm4"
+      }
+    ],
+    "dropped": [
+      "sector_synchronous_volshock_muted_receiver (arm4)"
+    ],
+    "n_eff_recomputed": 12.23,
+    "n_eff": 12.2
+  },
+  "arm6": {
+    "n_members": 57,
+    "k": 22,
+    "selection": [
+      {
+        "rank": 1,
+        "factor_id": "forecast_channel_margin_rotation",
+        "source": "arm6"
+      },
+      {
+        "rank": 2,
+        "factor_id": "distributed_sector_inventory_relaxation_h6",
+        "source": "arm6"
+      },
+      {
+        "rank": 3,
+        "factor_id": "headline_margin_conflict_repricing_h6",
+        "source": "arm6"
+      },
+      {
+        "rank": 4,
+        "factor_id": "salient_accrual_growth_extrapolation_short",
+        "source": "arm6"
+      },
+      {
+        "rank": 5,
+        "factor_id": "industry_revision_adoption_gap_v2",
+        "source": "arm6"
+      },
+      {
+        "rank": 6,
+        "factor_id": "quadrature_participation_diffusion",
+        "source": "arm6"
+      },
+      {
+        "rank": 7,
+        "factor_id": "cash_validated_auction_rejection_continuation",
+        "source": "arm6"
+      },
+      {
+        "rank": 8,
+        "factor_id": "sector_commonality_inventory_debt_release",
+        "source": "arm6"
+      },
+      {
+        "rank": 9,
+        "factor_id": "idio_impact_cluster_cooling_clock",
+        "source": "arm6"
+      },
+      {
+        "rank": 10,
+        "factor_id": "dual_disclosure_attention_gap_drift",
+        "source": "arm6"
+      },
+      {
+        "rank": 11,
+        "factor_id": "clustered_participation_inventory_release_j",
+        "source": "arm6"
+      },
+      {
+        "rank": 12,
+        "factor_id": "private_placement_capacity_diffusion_h6",
+        "source": "arm6"
+      },
+      {
+        "rank": 13,
+        "factor_id": "issuance_cadence_unpaid_pressure_h6",
+        "source": "arm6"
+      },
+      {
+        "rank": 14,
+        "factor_id": "fresh_revision_reaction_inertia",
+        "source": "arm6"
+      },
+      {
+        "rank": 15,
+        "factor_id": "silent_confirmation_valuation_regime_drift",
+        "source": "arm6"
+      },
+      {
+        "rank": 16,
+        "factor_id": "fast_replenishment_completion_reversal",
+        "source": "arm6"
+      },
+      {
+        "rank": 17,
+        "factor_id": "industry_residual_estimate_persistence",
+        "source": "arm6"
+      },
+      {
+        "rank": 18,
+        "factor_id": "fundamental_anchor_asymmetric_extrapolation",
+        "source": "arm6"
+      },
+      {
+        "rank": 19,
+        "factor_id": "covariance_relieved_downside_exhaustion",
+        "source": "arm6"
+      },
+      {
+        "rank": 20,
+        "factor_id": "balance_sheet_buffered_market_stress_rebound",
+        "source": "arm6"
+      },
+      {
+        "rank": 21,
+        "factor_id": "latent_flow_extinction_inventory_reversal",
+        "source": "arm6"
+      },
+      {
+        "rank": 22,
+        "factor_id": "cadenced_endpoint_idiosyncratic_absorption_rever",
+        "source": "arm6"
+      }
+    ],
+    "dropped": [],
+    "n_eff_recomputed": 22.04,
+    "n_eff": 22.0,
+    "k_note": "pinned to ceil(published N_eff 22.0); recomputed 22.04"
+  },
+  "arm4_arm6": {
+    "n_members": 78,
+    "k": 24,
+    "selection": [
+      {
+        "rank": 1,
+        "factor_id": "cashbacked_revision_absorption_gap",
+        "source": "arm4"
+      },
+      {
+        "rank": 2,
+        "factor_id": "headline_margin_conflict_repricing_h6",
+        "source": "arm6"
+      },
+      {
+        "rank": 3,
+        "factor_id": "transient_inventory_restocking_impact_gap_v2",
+        "source": "arm4"
+      },
+      {
+        "rank": 4,
+        "factor_id": "private_placement_capacity_diffusion_h6",
+        "source": "arm6"
+      },
+      {
+        "rank": 5,
+        "factor_id": "industry_revision_adoption_gap_v2",
+        "source": "arm6"
+      },
+      {
+        "rank": 6,
+        "factor_id": "quadrature_participation_diffusion",
+        "source": "arm6"
+      },
+      {
+        "rank": 7,
+        "factor_id": "silent_confirmation_valuation_regime_drift",
+        "source": "arm6"
+      },
+      {
+        "rank": 8,
+        "factor_id": "liquidity_buffered_downside_branching_spread",
+        "source": "arm4"
+      },
+      {
+        "rank": 9,
+        "factor_id": "liquidity_recovery_beta_rebound",
+        "source": "arm4"
+      },
+      {
+        "rank": 10,
+        "factor_id": "cash_validated_auction_rejection_continuation",
+        "source": "arm6"
+      },
+      {
+        "rank": 11,
+        "factor_id": "downside_flow_price_circulation_asymmetry",
+        "source": "arm4"
+      },
+      {
+        "rank": 12,
+        "factor_id": "dual_disclosure_attention_gap_drift",
+        "source": "arm6"
+      },
+      {
+        "rank": 13,
+        "factor_id": "salient_accrual_growth_extrapolation_short",
+        "source": "arm6"
+      },
+      {
+        "rank": 14,
+        "factor_id": "common_shock_covariance_capacity_overhang",
+        "source": "arm6"
+      },
+      {
+        "rank": 15,
+        "factor_id": "issuance_cadence_unpaid_pressure_h6",
+        "source": "arm6"
+      },
+      {
+        "rank": 16,
+        "factor_id": "idio_impact_cluster_cooling_clock",
+        "source": "arm6"
+      },
+      {
+        "rank": 17,
+        "factor_id": "fresh_revision_reaction_inertia",
+        "source": "arm6"
+      },
+      {
+        "rank": 18,
+        "factor_id": "compressed_depth_acceptance_drift",
+        "source": "arm6"
+      },
+      {
+        "rank": 19,
+        "factor_id": "sector_commonality_inventory_debt_release",
+        "source": "arm6"
+      },
+      {
+        "rank": 20,
+        "factor_id": "distributed_sector_inventory_relaxation_h6",
+        "source": "arm6"
+      },
+      {
+        "rank": 21,
+        "factor_id": "balance_sheet_buffered_market_stress_rebound",
+        "source": "arm6"
+      },
+      {
+        "rank": 22,
+        "factor_id": "entropy_gated_cash_surprise_followthrough",
+        "source": "arm4"
+      },
+      {
+        "rank": 23,
+        "factor_id": "fast_replenishment_completion_reversal",
+        "source": "arm6"
+      },
+      {
+        "rank": 24,
+        "factor_id": "industry_residual_estimate_persistence",
+        "source": "arm6"
+      }
+    ],
+    "dropped": [
+      "sector_synchronous_volshock_muted_receiver (arm4)"
+    ],
+    "n_eff_recomputed": 23.07,
+    "n_eff": 23.1
+  },
+  "101_arm4": {
+    "n_members": 122,
+    "k": 10,
+    "selection": [
+      {
+        "rank": 1,
+        "factor_id": "alpha_001",
+        "source": "101"
+      },
+      {
+        "rank": 2,
+        "factor_id": "alpha_085",
+        "source": "101"
+      },
+      {
+        "rank": 3,
+        "factor_id": "downside_variance_innovation_refinancing_spiral",
+        "source": "arm4"
+      },
+      {
+        "rank": 4,
+        "factor_id": "alpha_084",
+        "source": "101"
+      },
+      {
+        "rank": 5,
+        "factor_id": "entropy_disambiguated_surprise_impact_reserve",
+        "source": "arm4"
+      },
+      {
+        "rank": 6,
+        "factor_id": "leaveoneout_industry_estimate_impulse_deficit",
+        "source": "arm4"
+      },
+      {
+        "rank": 7,
+        "factor_id": "alpha_053",
+        "source": "101"
+      },
+      {
+        "rank": 8,
+        "factor_id": "alpha_052",
+        "source": "101"
+      },
+      {
+        "rank": 9,
+        "factor_id": "downside_flow_price_circulation_asymmetry",
+        "source": "arm4"
+      },
+      {
+        "rank": 10,
+        "factor_id": "alpha_091",
+        "source": "101"
+      }
+    ],
+    "dropped": [
+      "sector_synchronous_volshock_muted_receiver (arm4)"
+    ],
+    "n_eff_recomputed": 9.55,
+    "n_eff": 9.6
+  },
+  "101_arm6": {
+    "n_members": 158,
+    "k": 13,
+    "selection": [
+      {
+        "rank": 1,
+        "factor_id": "alpha_001",
+        "source": "101"
+      },
+      {
+        "rank": 2,
+        "factor_id": "private_placement_capacity_diffusion_h6",
+        "source": "arm6"
+      },
+      {
+        "rank": 3,
+        "factor_id": "headline_margin_conflict_repricing_h6",
+        "source": "arm6"
+      },
+      {
+        "rank": 4,
+        "factor_id": "alpha_098",
+        "source": "101"
+      },
+      {
+        "rank": 5,
+        "factor_id": "industry_revision_adoption_gap_v2",
+        "source": "arm6"
+      },
+      {
+        "rank": 6,
+        "factor_id": "silent_confirmation_valuation_regime_drift",
+        "source": "arm6"
+      },
+      {
+        "rank": 7,
+        "factor_id": "alpha_084",
+        "source": "101"
+      },
+      {
+        "rank": 8,
+        "factor_id": "covariance_relieved_downside_exhaustion",
+        "source": "arm6"
+      },
+      {
+        "rank": 9,
+        "factor_id": "alpha_097",
+        "source": "101"
+      },
+      {
+        "rank": 10,
+        "factor_id": "cash_validated_auction_rejection_continuation",
+        "source": "arm6"
+      },
+      {
+        "rank": 11,
+        "factor_id": "issuance_cadence_unpaid_pressure_h6",
+        "source": "arm6"
+      },
+      {
+        "rank": 12,
+        "factor_id": "dual_disclosure_attention_gap_drift",
+        "source": "arm6"
+      },
+      {
+        "rank": 13,
+        "factor_id": "salient_accrual_growth_extrapolation_short",
+        "source": "arm6"
+      }
+    ],
+    "dropped": [],
+    "n_eff_recomputed": 12.43,
+    "n_eff": 12.4
+  },
+  "101_arm4_arm6": {
+    "n_members": 179,
+    "k": 14,
+    "selection": [
+      {
+        "rank": 1,
+        "factor_id": "alpha_001",
+        "source": "101"
+      },
+      {
+        "rank": 2,
+        "factor_id": "private_placement_capacity_diffusion_h6",
+        "source": "arm6"
+      },
+      {
+        "rank": 3,
+        "factor_id": "headline_margin_conflict_repricing_h6",
+        "source": "arm6"
+      },
+      {
+        "rank": 4,
+        "factor_id": "alpha_098",
+        "source": "101"
+      },
+      {
+        "rank": 5,
+        "factor_id": "industry_revision_adoption_gap_v2",
+        "source": "arm6"
+      },
+      {
+        "rank": 6,
+        "factor_id": "silent_confirmation_valuation_regime_drift",
+        "source": "arm6"
+      },
+      {
+        "rank": 7,
+        "factor_id": "alpha_084",
+        "source": "101"
+      },
+      {
+        "rank": 8,
+        "factor_id": "covariance_relieved_downside_exhaustion",
+        "source": "arm6"
+      },
+      {
+        "rank": 9,
+        "factor_id": "alpha_097",
+        "source": "101"
+      },
+      {
+        "rank": 10,
+        "factor_id": "downside_variance_innovation_refinancing_spiral",
+        "source": "arm4"
+      },
+      {
+        "rank": 11,
+        "factor_id": "entropy_gated_cash_surprise_followthrough",
+        "source": "arm4"
+      },
+      {
+        "rank": 12,
+        "factor_id": "downside_flow_price_circulation_asymmetry",
+        "source": "arm4"
+      },
+      {
+        "rank": 13,
+        "factor_id": "cash_validated_auction_rejection_continuation",
+        "source": "arm6"
+      },
+      {
+        "rank": 14,
+        "factor_id": "salient_accrual_growth_extrapolation_short",
+        "source": "arm6"
+      }
+    ],
+    "dropped": [
+      "sector_synchronous_volshock_muted_receiver (arm4)"
+    ],
+    "n_eff_recomputed": 13.35,
+    "n_eff": 13.3
+  }
+}

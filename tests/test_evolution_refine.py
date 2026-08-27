@@ -201,7 +201,7 @@ def test_fresh_seeding_fills_exhausted_demes(synthetic_panel, tmp_path, monkeypa
     counter = {"n": 0}
 
     def _fake_seed_programs(cfg, data_context, existing_ids, fields=None,
-                            mechanism_group=None):
+                            mechanism_group=None, prompt_ids=None):
         counter["n"] += 1
         fid = f"fresh_seed_{counter['n']}"
         body = f'ts_rank(close, {5 + counter["n"]}).fillna(0.0)'
@@ -301,7 +301,7 @@ def test_mid_seeding_kill_resumes_without_reseeding_done_groups(
     seeded_groups: list[int] = []
 
     def _seed_programs(cfg, data_context, existing_ids, fields=None,
-                       mechanism_group=None, *, die_on=None):
+                       mechanism_group=None, *, die_on=None, prompt_ids=None):
         gid = int((mechanism_group or {}).get("mechanism_group_id", 0))
         if die_on is not None and gid == die_on:
             raise KeyboardInterrupt("simulated 30-min kill")

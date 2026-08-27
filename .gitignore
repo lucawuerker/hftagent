@@ -69,3 +69,22 @@ notes.txt
 # reports, deep-research syntheses). Working documents, not part of the shipped
 # codebase, so left untracked.
 research_docs/
+
+# ---------------------------------------------------------------------------
+# Local-only thesis material: result artifacts, reports and working documents
+# stay on disk but are never pushed. Under data/ only factors, prebooks,
+# knowledge and papers (framework inputs, used by the walkthrough notebook)
+# remain tracked.
+.DS_Store
+*.tex
+*.tex.bak
+*.docx
+/*.pdf
+important_files.md
+docs/
+prelim_files/
+data/*
+!data/factors/
+!data/prebooks/
+!data/knowledge/
+!data/papers/

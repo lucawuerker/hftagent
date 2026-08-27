@@ -15,7 +15,12 @@ import os
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
-SIGNAL_STORE = REPO / "data/comparisons/wf_arm_analysis/signal_store"
+# QF_SIGNAL_STORE_DIR overrides the store location (the cache is keyed by
+# (factor_id, sha1(code)) ONLY — not by panel — so any job on a different
+# panel/universe MUST point this at its own store or it will silently reuse
+# signals computed on another universe).  Unset -> original path, byte-identical.
+SIGNAL_STORE = Path(os.environ.get("QF_SIGNAL_STORE_DIR")
+                    or (REPO / "data/comparisons/wf_arm_analysis/signal_store"))
 
 
 def signal_key(fid: str, code: str) -> str:
