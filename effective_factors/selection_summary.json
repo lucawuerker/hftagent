@@ -44,10 +44,7 @@
         "source": "101"
       }
     ],
-    "dropped": [],
-    "k_note": "pinned to ceil(published N_eff 7.6); recomputed N_eff 8.18",
-    "n_eff_recomputed": 8.18,
-    "n_eff": 7.6
+    "dropped": []
   },
   "arm4": {
     "n_members": 21,
@@ -121,9 +118,7 @@
     ],
     "dropped": [
       "sector_synchronous_volshock_muted_receiver (arm4)"
-    ],
-    "n_eff_recomputed": 12.23,
-    "n_eff": 12.2
+    ]
   },
   "arm6": {
     "n_members": 57,
@@ -240,10 +235,7 @@
         "source": "arm6"
       }
     ],
-    "dropped": [],
-    "n_eff_recomputed": 22.04,
-    "n_eff": 22.0,
-    "k_note": "pinned to ceil(published N_eff 22.0); recomputed 22.04"
+    "dropped": []
   },
   "arm4_arm6": {
     "n_members": 78,
@@ -370,11 +362,7 @@
         "source": "arm6"
       }
     ],
-    "dropped": [
-      "sector_synchronous_volshock_muted_receiver (arm4)"
-    ],
-    "n_eff_recomputed": 23.07,
-    "n_eff": 23.1
+    "dropped": []
   },
   "101_arm4": {
     "n_members": 122,
@@ -431,11 +419,7 @@
         "source": "101"
       }
     ],
-    "dropped": [
-      "sector_synchronous_volshock_muted_receiver (arm4)"
-    ],
-    "n_eff_recomputed": 9.55,
-    "n_eff": 9.6
+    "dropped": []
   },
   "101_arm6": {
     "n_members": 158,
@@ -507,9 +491,7 @@
         "source": "arm6"
       }
     ],
-    "dropped": [],
-    "n_eff_recomputed": 12.43,
-    "n_eff": 12.4
+    "dropped": []
   },
   "101_arm4_arm6": {
     "n_members": 179,
@@ -586,10 +568,6 @@
         "source": "arm6"
       }
     ],
-    "dropped": [
-      "sector_synchronous_volshock_muted_receiver (arm4)"
-    ],
-    "n_eff_recomputed": 13.35,
-    "n_eff": 13.3
+    "dropped": []
   }
 }
